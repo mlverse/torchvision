@@ -1,9 +1,9 @@
 is_tensor_image <- function(x) {
-  x$ndim() >= 2
+  x$dim() >= 2
 }
 
 check_img <- function(x) {
-  if (is_tensor_image(x))
+  if (!is_tensor_image(x))
     type_error("tensor is not a torch image.")
 }
 
@@ -113,7 +113,7 @@ tft_hflip <- function(img) {
 tft_crop <- function(img, top, left, height, width) {
   check_img(img)
 
-  img[.., top:(top + height), left:(left + width)]
+  img[.., top:(top + height - 1), left:(left + width - 1)]
 }
 
 #' Convert the given RGB Image Tensor to Grayscale.
