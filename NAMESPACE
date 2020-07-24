@@ -2,4 +2,9 @@
 
 export(kmnist_dataset)
 export(mnist_dataset)
+export(tft_adjust_brightness)
+export(tft_adjust_contrast)
+export(tft_hflip)
+export(tft_rgb_to_grayscale)
+export(tft_vflip)
 export(vision_make_grid)
