@@ -1,0 +1,18 @@
+Package: torchvision
+Title: R interface to torchvision
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Daniel",
+           family = "Falbel",
+           role = c("aut", "cre"),
+           email = "daniel@rstudio.com"
+           ),
+    person(family = "RStudio", role = c("cph"))
+    )
+Description: Provides access to datasets, models and pre-processing
+    facilities for deep learning in images.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
