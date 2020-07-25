@@ -5,3 +5,21 @@ test_that("crop", {
 
   expect_equal(o$shape, c(3, 5, 5))
 })
+
+test_that("hflip", {
+
+  img <- torch_randn(3, 32, 32)
+
+  expect_true(
+    torch::torch_allclose(img, tft_hflip(tft_hflip(img)))
+  )
+})
+
+test_that("vflip", {
+
+  img <- torch_randn(3, 32, 32)
+
+  expect_true(
+    torch::torch_allclose(img, tft_vflip(tft_vflip(img)))
+  )
+})
