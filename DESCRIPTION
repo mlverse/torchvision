@@ -21,6 +21,7 @@ Suggests:
 Imports: 
     torch,
     fs,
-    magick
+    magick,
+    rlang
 Remotes:
     mlverse/torch 

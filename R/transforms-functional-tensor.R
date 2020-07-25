@@ -74,12 +74,12 @@ hsv2rgb <- function(img) {
   a3 <- torch::torch_stack(list(p, p, t, hsv[[3]], hsv[[3]], q))
   a4 <- torch::torch_stack(list(a1, a2, a3))
 
-  torch::torch_einsum("ijk, xijk -> xjk", mask$to(dtype == img$dtype()), a4)
+  torch::torch_einsum("ijk, xijk -> xjk", mask$to(dtype = img$dtype()), a4)
 }
 
 #' Vertically flip the given the Image Tensor.
 #'
-#' @param img (Tensor): Image Tensor to be flipped in the form [C, H, W].
+#' @param img (Tensor): Image Tensor to be flipped in the form `[C, H, W]`.
 #'
 #' @return Vertically flipped image Tensor.
 #'
@@ -91,7 +91,7 @@ tft_vflip <- function(img) {
 
 #' Horizontally flip the given the Image Tensor.
 #'
-#' @param img (Tensor): Image Tensor to be flipped in the form [C, H, W].
+#' @param img (Tensor): Image Tensor to be flipped in the form `[C, H, W]`.
 #'
 #' @return Horizontally flipped image Tensor.
 #'
@@ -103,7 +103,7 @@ tft_hflip <- function(img) {
 
 #' Crop the given Image Tensor.
 #'
-#' @param img (Tensor): Image to be cropped in the form [..., H, W]. (0,0) denotes the top left corner of the image.
+#' @param img (Tensor): Image to be cropped in the form `[..., H, W]`. (0,0) denotes the top left corner of the image.
 #' @param top (int): Vertical component of the top left corner of the crop box.
 #' @param left (int): Horizontal component of the top left corner of the crop box.
 #' @param height (int): Height of the crop box.
@@ -184,7 +184,7 @@ tft_adjust_contrast <- function(img, contrast_factor) {
 #'
 #' @param img (Tensor): Image to be adjusted. Image type is either uint8 or float.
 #' @param hue_factor (float):  How much to shift the hue channel. Should be in
-#'   [-0.5, 0.5]. 0.5 and -0.5 give complete reversal of hue channel in
+#'   `[-0.5, 0.5]`. 0.5 and -0.5 give complete reversal of hue channel in
 #'   HSV space in positive and negative direction respectively.
 #'   0 means no shift. Therefore, both -0.5 and 0.5 will give an image
 #'   with complementary colors while 0 gives the original image.
