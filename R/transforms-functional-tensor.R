@@ -36,13 +36,14 @@ rgb2hsv <- function(img) {
   eqc <- maxc == minc
 
   cr <- maxc - minc
+
   # Since `eqc => cr = 0`, replacing denominator with 1 when `eqc` is fine.
-  s <- cr / torch::torch_where(eqc, maxc$new_ones(list()), maxc)
+  s <- cr / torch::torch_where(eqc, maxc$new_full(list(), 1), maxc)
   # Note that `eqc => maxc = minc = r = g = b`. So the following calculation
   # of `h` would reduce to `bc - gc + 2 + rc - bc + 4 + rc - bc = 6` so it
   # would not matter what values `rc`, `gc`, and `bc` have here, and thus
   # replacing denominator with 1 when `eqc` is fine.
-  cr_divisor <- torch::torch_where(eqc, maxc$new_ones(list()), cr)
+  cr_divisor <- torch::torch_where(eqc, maxc$new_full(list(), 1), cr)
   rc <- (maxc - r) / cr_divisor
   gc <- (maxc - g) / cr_divisor
   bc <- (maxc - b) / cr_divisor
@@ -74,7 +75,7 @@ hsv2rgb <- function(img) {
   a3 <- torch::torch_stack(list(p, p, t, hsv[[3]], hsv[[3]], q))
   a4 <- torch::torch_stack(list(a1, a2, a3))
 
-  torch::torch_einsum("ijk, xijk -> xjk", mask$to(dtype = img$dtype()), a4)
+  torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype()), a4))
 }
 
 #' Vertically flip the given the Image Tensor.
@@ -204,9 +205,9 @@ tft_adjust_hue <- function(img, hue_factor) {
     img <- img$to(dtype = torch::torch_float32())/255
 
   img <-rgb2hsv(img)
-  hsv <- img$unbind(0)
+  hsv <- img$unbind(1)
   hsv[[1]] <- hsv[[1]] + hue_factor
-  h <- h %% 1
+  hsv[[1]] <- hsv[[1]] %% 1
   img <- torch::torch_stack(hsv)
   img_hue_adj <- hsv2rgb(img)
 

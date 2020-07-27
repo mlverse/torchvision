@@ -23,3 +23,37 @@ test_that("vflip", {
     torch::torch_allclose(img, tft_vflip(tft_vflip(img)))
   )
 })
+
+test_that("rgb_to_grayscale", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_rgb_to_grayscale(img)
+
+  expect_equal(dim(im), c(32, 32))
+
+})
+
+test_that("adjust_brightness", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_adjust_brightness(img, 0.5)
+
+  expect_tensor_shape(im, c(3,32,32))
+
+})
+
+test_that("adjust_contrast", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_adjust_contrast(img, 0.5)
+
+  expect_tensor_shape(im, c(3,32,32))
+})
+
+test_that("adjust_hue", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_adjust_hue(img, 0.5)
+
+  expect_tensor_shape(im, c(3,32,32))
+})
