@@ -167,7 +167,7 @@ tft_adjust_contrast <- function(img, contrast_factor) {
 
   check_img(img)
 
-  mean <- torch::torch_mean(tft_rgb_to_grayscale(img)$to(torch_float()))
+  mean <- torch::torch_mean(tft_rgb_to_grayscale(img)$to(torch::torch_float()))
 
   blend(img, mean, contrast_factor)
 }

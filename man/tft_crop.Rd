@@ -7,7 +7,7 @@
 tft_crop(img, top, left, height, width)
 }
 \arguments{
-\item{img}{(Tensor): Image to be cropped in the form \link{..., H, W}. (0,0) denotes the top left corner of the image.}
+\item{img}{(Tensor): Image to be cropped in the form \verb{[..., H, W]}. (0,0) denotes the top left corner of the image.}
 
 \item{top}{(int): Vertical component of the top left corner of the crop box.}
 

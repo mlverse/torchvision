@@ -25,3 +25,11 @@ Imports:
     rlang
 Remotes:
     mlverse/torch 
+Collate: 
+    'conditions.R'
+    'dataset-mnist.R'
+    'folder-dataset.R'
+    'globals.R'
+    'tiny-imagenet-dataset.R'
+    'transforms-functional-tensor.R'
+    'vision_utils.R'

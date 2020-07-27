@@ -106,6 +106,11 @@ folder_dataset <- torch::dataset(
   }
 )
 
+#' Loads an image from a path using imagemagick
+#'
+#' @param path path to the image to load from.
+#'
+#' @export
 magick_loader <- function(path) {
 
   if (!requireNamespace("magick"))
@@ -114,11 +119,15 @@ magick_loader <- function(path) {
   magick::image_read(path)
 }
 
-image_folder_dataset <- torch::dataset(
+#' @importFrom torch dataset
+image_folder_dataset <- dataset(
   "image_folder",
   inherit = folder_dataset,
   initialize = function(root, transform=NULL, target_transform=NULL,
-                        loader=magick_loader, is_valid_file=NULL) {
+                        loader=NULL, is_valid_file=NULL) {
+
+    if (is.null(loader))
+      loader <- magick_loader
 
     if (!is.null(is_valid_file))
       extensions <- NULL

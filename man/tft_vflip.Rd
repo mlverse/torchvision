@@ -7,7 +7,7 @@
 tft_vflip(img)
 }
 \arguments{
-\item{img}{(Tensor): Image Tensor to be flipped in the form \link{C, H, W}.}
+\item{img}{(Tensor): Image Tensor to be flipped in the form \verb{[C, H, W]}.}
 }
 \value{
 Vertically flipped image Tensor.

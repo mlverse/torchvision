@@ -10,7 +10,7 @@ tft_adjust_hue(img, hue_factor)
 \item{img}{(Tensor): Image to be adjusted. Image type is either uint8 or float.}
 
 \item{hue_factor}{(float):  How much to shift the hue channel. Should be in
-\link{-0.5, 0.5}. 0.5 and -0.5 give complete reversal of hue channel in
+\verb{[-0.5, 0.5]}. 0.5 and -0.5 give complete reversal of hue channel in
 HSV space in positive and negative direction respectively.
 0 means no shift. Therefore, both -0.5 and 0.5 will give an image
 with complementary colors while 0 gives the original image.}
