@@ -57,3 +57,19 @@ test_that("adjust_hue", {
 
   expect_tensor_shape(im, c(3,32,32))
 })
+
+test_that("adjust_saturation", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_adjust_saturation(img, 0.5)
+
+  expect_tensor_shape(im, c(3,32,32))
+})
+
+test_that("adjust_gamma", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_adjust_gamma(img, 0.5)
+
+  expect_tensor_shape(im, c(3,32,32))
+})

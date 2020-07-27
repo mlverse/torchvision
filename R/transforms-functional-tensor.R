@@ -216,3 +216,68 @@ tft_adjust_hue <- function(img, hue_factor) {
 
   img_hue_adj
 }
+
+#' Adjust color saturation of an RGB image.
+#'
+#' @param img (Tensor): Image to be adjusted.
+#' @param saturation_factor (float):  How much to adjust the saturation. Can be any
+#'   non negative number. 0 gives a black and white image, 1 gives the
+#'   original image while 2 enhances the saturation by a factor of 2.
+#'
+#' @return Tensor: Saturation adjusted image.
+#'
+#' @export
+tft_adjust_saturation <- function(img, saturation_factor) {
+
+  if (saturation_factor < 0)
+    value_error("saturation factor must be positive.")
+
+  check_img(img)
+
+
+  blend(img, tft_rgb_to_grayscale(img), saturation_factor)
+}
+
+#' Adjust gamma of an RGB image.
+#'
+#' Also known as Power Law Transform. Intensities in RGB mode are adjusted
+#' based on the following equation:
+#'
+#' \deqn{
+#'   I_{\mbox{out}} = 255 \times \mbox{gain} \times \left(\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
+#' }
+#'
+#' See [Gamma Correction](https://en.wikipedia.org/wiki/Gamma_correction)
+#' for more details.
+#'
+#' @param img (Tensor): Tensor of RBG values to be adjusted.
+#' @param gamma (float): Non negative real number, same as \eqn{\gamma} in the equation.
+#'   gamma larger than 1 make the shadows darker,
+#'   while gamma smaller than 1 make dark regions lighter.
+#' @param gain (float): The constant multiplier.
+#'
+#' @export
+tft_adjust_gamma <- function(img, gamma, gain = 1) {
+
+  check_img(img)
+
+  if (gamma < 0)
+    value_error("gamma must be non-negative")
+
+  result <- img
+  dtype <- img$dtype()
+
+  if (!torch::torch_is_floating_point(img))
+    result <- result/255.0
+
+  result <- (gain * result ^ gamma)$clamp(0, 1)
+
+  if (!result$dtype() == dtype) {
+    eps <- 1e-3
+    result <- (255 + 1.0 - eps) * result
+  }
+
+  result <- result$to(dtype = dtype)
+  result
+}
+
