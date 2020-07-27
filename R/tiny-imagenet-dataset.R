@@ -5,12 +5,12 @@ tiny_imagenet_dataset <- torch::dataset(
   url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip",
   initialize = function(root, split='train', download = FALSE, ...) {
 
-    root <- normalizePath(root)
+    root <- normalizePath(root, mustWork = FALSE)
 
     if (!fs::dir_exists(root))
       fs::dir_create(root)
 
-    self$root <- root
+    self$root_path <- root
 
     if (download)
       self$download()
@@ -20,17 +20,37 @@ tiny_imagenet_dataset <- torch::dataset(
   },
   download = function() {
 
-    p <- fs::path_join(c(self$root, self$tar_name))
+    p <- fs::path_join(c(self$root_path, self$tar_name))
 
     if (fs::dir_exists(p))
       return(NULL)
 
-    raw_path <- fs::path_join(c(self$root, "tiny-imagenet-200.zip"))
+    raw_path <- fs::path_join(c(self$root_path, "tiny-imagenet-200.zip"))
 
     rlang::inform("Downloding tiny imagenet dataset!")
 
     download.file(self$url, raw_path)
-    unzip(raw_path, exdir = self$root)
+
+    rlang::inform("Download complete. Now unzipping.")
+
+    unzip(raw_path, exdir = self$root_path)
+
+    # organize validation images
+    val_path <- fs::path_join(c(self$root_path, self$tar_name, "val"))
+    val_images <- read.table(fs::path_join(c(val_path, "val_annotations.txt")))
+
+    fs::dir_create(
+      fs::path(val_path, unique(val_images$V2))
+    )
+
+    fs::file_move(
+      fs::path(val_path, "images", val_images$V1),
+      fs::path(val_path, val_images$V2, val_images$V1)
+    )
+
+    fs::dir_delete(fs::path(val_path, "images"))
+
+    rlang::inform("Done!")
 
   }
 )
