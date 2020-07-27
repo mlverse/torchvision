@@ -27,7 +27,7 @@ tiny_imagenet_dataset <- torch::dataset(
 
     raw_path <- fs::path_join(c(self$root, "tiny-imagenet-200.zip"))
 
-    inform("Downloding tiny imagenet dataset!")
+    rlang::inform("Downloding tiny imagenet dataset!")
 
     download.file(self$url, raw_path)
     unzip(raw_path, exdir = self$root)

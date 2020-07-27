@@ -15,7 +15,7 @@
 #'   target and transforms it.
 #'
 #' @export
-mnist_dataset <- torch::dataset(
+mnist_dataset <- dataset(
   name = "mnist",
   resources = list(
     c("http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
@@ -30,7 +30,7 @@ mnist_dataset <- torch::dataset(
   initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
                         download = FALSE) {
 
-    self$root <- root
+    self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
 
@@ -69,7 +69,7 @@ mnist_dataset <- torch::dataset(
 
     }
 
-    inform("Processing...")
+    rlang::inform("Processing...")
 
     training_set <- list(
       read_sn3_pascalvincent(file.path(self$raw_folder, 'train-images-idx3-ubyte.gz')),
@@ -84,7 +84,7 @@ mnist_dataset <- torch::dataset(
     saveRDS(training_set, file.path(self$processed_folder, self$training_file))
     saveRDS(test_set, file.path(self$processed_folder, self$test_file))
 
-    inform("Done!")
+    rlang::inform("Done!")
 
   },
   check_exists = function() {
@@ -108,10 +108,10 @@ mnist_dataset <- torch::dataset(
   },
   active = list(
     raw_folder = function() {
-      file.path(self$root, "mnist", "raw")
+      file.path(self$root_path, "mnist", "raw")
     },
     processed_folder = function() {
-      file.path(self$root, "mnist", "processed")
+      file.path(self$root_path, "mnist", "processed")
     }
   )
 )
@@ -133,7 +133,7 @@ mnist_dataset <- torch::dataset(
 #'   target and transforms it.
 #'
 #' @export
-kmnist_dataset <- torch::dataset(
+kmnist_dataset <- dataset(
   name = "kminst_dataset",
   inherit = mnist_dataset,
   resources = list(
