@@ -3,7 +3,7 @@ context("dataset-mnist")
 test_that("tests for the mnist dataset", {
 
   # skipped on mac because I use mac and I don't want too download mnist evrytime
-  skip_on_os("mac")
+  #skip_on_os("mac")
 
   dir <- tempfile(fileext = "/")
 
