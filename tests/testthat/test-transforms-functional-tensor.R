@@ -73,3 +73,21 @@ test_that("adjust_gamma", {
 
   expect_tensor_shape(im, c(3,32,32))
 })
+
+test_that("center_crop", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_center_crop(img, c(25, 25))
+
+  expect_tensor_shape(im, c(3, 25, 25))
+
+})
+
+test_that("five_crop", {
+
+  img <- torch_randn(3, 32, 32)
+  r <- tft_five_crop(img, size = c(10, 10))
+
+  lapply(r, function(x) expect_tensor_shape(x, c(3, 10, 10)))
+
+})

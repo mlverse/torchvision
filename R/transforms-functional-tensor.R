@@ -281,3 +281,69 @@ tft_adjust_gamma <- function(img, gamma, gain = 1) {
   result
 }
 
+#' Crop the Image Tensor and resize it to desired size.
+#'
+#' @param img (Tensor): Image to be cropped.
+#' @param output_size (sequence or int): (height, width) of the crop box. If int,
+#'   it is used for both directions
+#'
+#' @return Tensor: Cropped image.
+#'
+#' @export
+tft_center_crop <- function(img, output_size) {
+
+  check_img(img)
+
+  image_width <- img$size(2)
+  image_height <- img$size(3)
+
+  crop_height <- output_size[1]
+  crop_width <- output_size[2]
+
+  crop_top <- as.integer((image_height - crop_height + 1) * 0.5)
+  crop_left <- as.integer((image_width - crop_width + 1) * 0.5)
+
+  tft_crop(img, crop_top, crop_left, crop_height, crop_width)
+}
+
+
+#' Crop the given Image Tensor into four corners and the central crop.
+#'
+#' @note
+#' This transform returns a List of Tensors and there may be a
+#' mismatch in the number of inputs and targets your ``Dataset`` returns.
+#'
+#' @param img (Tensor): Image to be cropped.
+#' @param size (sequence or int): Desired output size of the crop. If size is an
+#'   int instead of sequence like (h, w), a square crop (size, size) is
+#'   made.
+#'
+#' @return
+#' List: List (tl, tr, bl, br, center)
+#' Corresponding top left, top right, bottom left, bottom right and center crop.
+#'
+#' @export
+tft_five_crop <- function(img, size) {
+
+  check_img(img)
+
+  if (!length(size) == 2)
+    value_error("Please provide only 2 dimensions (h, w) for size.")
+
+  image_width <- img$size(2)
+  image_height <- img$size(3)
+
+  crop_height <- size[1]
+  crop_width <- size[2]
+
+  if (crop_width > image_width || crop_height > image_height)
+    value_error("Requested crop size is bigger than input size.")
+
+  tl <- tft_crop(img, 1, 1, crop_width, crop_height)
+  tr <- tft_crop(img, image_width - crop_width + 1, 1, image_width, crop_height)
+  bl <- tft_crop(img, 1, image_height - crop_height + 1, crop_width, image_height)
+  br <- tft_crop(img, image_width - crop_width + 1, image_height - crop_height + 1, image_width, image_height)
+  center <- tft_center_crop(img, c(crop_height, crop_width))
+
+  list(tl, tr, bl, br, center)
+}
