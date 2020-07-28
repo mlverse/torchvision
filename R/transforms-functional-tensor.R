@@ -347,3 +347,40 @@ tft_five_crop <- function(img, size) {
 
   list(tl, tr, bl, br, center)
 }
+
+#' Crop the given Image Tensor into four corners and the central crop plus the
+#' flipped version of these (horizontal flipping is used by default).
+#'
+#' @note
+#' This transform returns a List of images and there may be a
+#' mismatch in the number of inputs and targets your `Dataset` returns.
+#'
+#' @param img (Tensor): Image to be cropped.
+#' @param size (sequence or int): Desired output size of the crop. If size is an
+#'   int instead of sequence like (h, w), a square crop (size, size) is
+#'   made.
+#' @param vertical_flip (bool): Use vertical flipping instead of horizontal
+#'
+#' @return List: List (tl, tr, bl, br, center, tl_flip, tr_flip, bl_flip, br_flip, center_flip)
+#'  Corresponding top left, top right, bottom left, bottom right and center crop
+#'  and same for the flipped image's tensor.
+#'
+#' @export
+tft_ten_crop <- function(img, size, vertical_flip = FALSE) {
+
+  check_img(img)
+
+  if (!length(size) == 2)
+    value_error("Please provide only 2 dimensions (h, w) for size.")
+
+  first_five <- tft_five_crop(img, size)
+
+  if (vertical_flip)
+    img <- tft_vflip(img)
+  else
+    img <- tft_hflip(img)
+
+  second_five <- tft_five_crop(img, size)
+
+  c(first_five, second_five)
+}

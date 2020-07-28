@@ -91,3 +91,13 @@ test_that("five_crop", {
   lapply(r, function(x) expect_tensor_shape(x, c(3, 10, 10)))
 
 })
+
+test_that("ten_crop", {
+
+  img <- torch_randn(3, 32, 32)
+  r <- tft_ten_crop(img, size = c(10, 10))
+
+  lapply(r, function(x) expect_tensor_shape(x, c(3, 10, 10)))
+
+})
+
