@@ -384,3 +384,117 @@ tft_ten_crop <- function(img, size, vertical_flip = FALSE) {
 
   c(first_five, second_five)
 }
+
+pad_symmetric <- function(img, padding) {
+
+  in_sizes <- img$size()
+
+  x_indices <- seq_len(tail(in_sizes, 1))
+  left_indices <- rev(seq_len(padding[1]))
+  right_indices <- -seq_len(padding[2])
+  x_indices <- torch::tensor(c(left_indices, x_indices, right_indices),
+                             dtype = torch::torch_long())
+
+
+  y_indices <- seq_len(rev(in_sizes)[2])
+  top_indices <- rev(seq_len(padding[3]))
+  bottom_indices <- -seq_len(padding[4])
+  y_indices <- torch::torch_tensor(c(top_indices, y_indices, bottom_indices),
+                                   dtype = torch::torch_long())
+
+
+  ndim <- length(dim(img))
+  if (ndim == 3)
+    img[, y_indices[, NULL], x_indices[, NULL]]
+  else if (ndim == 4)
+    img[,,y_indices[, NULL], x_indices[, NULL]]
+  else
+    runtime_error("Symmetric padding of N-D tensors are not supported yet")
+}
+
+#' Pad the given Tensor Image on all sides with specified
+#' padding mode and fill value.
+#'
+#' @param img (Tensor): Image to be padded.
+#' @param padding (int or tuple or list): Padding on each border. If a single int is provided this
+#'   is used to pad all borders. If a tuple or list of length 2 is provided this is the padding
+#'   on left/right and top/bottom respectively. If a tuple or list of length 4 is provided
+#'   this is the padding for the left, top, right and bottom borders
+#'   respectively. In torchscript mode padding as single int is not supported, use a tuple or
+#'   list of length 1: `[padding, ]`.
+#' @param fill (int): Pixel fill value for constant fill. Default is 0.
+#'   This value is only used when the padding_mode is constant
+#' @param padding_mode (str): Type of padding. Should be: constant, edge or reflect. Default is constant.
+#'   Mode symmetric is not yet supported for Tensor inputs.
+#'   - constant: pads with a constant value, this value is specified with fill
+#'   - edge: pads with the last value on the edge of the image
+#'   - reflect: pads with reflection of image (without repeating the last value on the edge)
+#'     padding `[1, 2, 3, 4]` with 2 elements on both sides in reflect mode
+#'     will result in `[3, 2, 1, 2, 3, 4, 3, 2]`
+#'   - symmetric: pads with reflection of image (repeating the last value on the edge)
+#'     padding `[1, 2, 3, 4]` with 2 elements on both sides in symmetric mode
+#'     will result in `[2, 1, 1, 2, 3, 4, 4, 3]`
+#'
+#' @return Tensor: Padded image.
+#'
+#' @export
+tft_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
+
+  check_img(img)
+
+  if (!length(padding) %in% c(1,2,4) || !is.numeric(padding))
+    value_error("Padding must be an int or a 1, 2, or 4 element numeric vector")
+
+  if (!padding_mode %in% c("constant", "edge", "reflect", "symmetric"))
+    value_error("Padding mode should be either constant, edge, reflect or symmetric")
+
+
+  if (length(padding) == 1)
+    pad_left <- pad_right <- pad_top <- pad_bottom <- padding
+  else if (length(padding) == 2) {
+    pad_left <- pad_right <- padding[1]
+    pad_top <- pad_bottom <- padding[2]
+  } else if (length(padding == 4)) {
+    pad_left <- padding[1]
+    pad_right <- padding[2]
+    pad_top <- padding[3]
+    pad_bottom <- padding[4]
+  }
+
+  p <- c(pad_left, pad_right, pad_top, pad_bottom)
+
+  if (padding_mode == "edge")
+    padding_mode <- "replicate"
+  else if (padding_mode == "symmetric") {
+    if (any(p < 0))
+      value_error("Padding can not be negative for symmetric padding_mode")
+
+    return(pad_symmetric(img, p))
+  }
+
+  need_squeeze <- FALSE
+
+  if (img$dim() < 4) {
+    img <- img$unsqueeze(1)
+    need_squeeze <- TRUE
+  }
+
+  out_dtype <- img$dtype()
+  need_cast <- FALSE
+
+  if (padding_mode != "constant" &&
+      (img$dtype() == torch::torch_float32() || img$dtype() == torch::torch_float64())) {
+    need_cast <- TRUE
+    img <- img$to(torch::torch_float32())
+  }
+
+  img <- nnf_pad(img, p, mode = padding_mode, value = as.numeric(fill))
+
+  if (need_squeeze)
+    img <- img$squeeze(dim = 1)
+
+  if (need_cast)
+    img <- img$to(dtype = out_dtype)
+
+  img
+}

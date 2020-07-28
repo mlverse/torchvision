@@ -101,3 +101,13 @@ test_that("ten_crop", {
 
 })
 
+test_that("pad", {
+
+  img <- torch_randn(3, 32, 32)
+  im <- tft_pad(img, c(2))
+
+  expect_tensor_shape(im, c(3, 36, 36))
+  expect_equal_to_r(im[,1,1], c(0,0,0))
+
+})
+
