@@ -121,3 +121,10 @@ test_that("resize", {
 
 })
 
+test_that("affine", {
+
+  img <- torch_rand(3,32,32)
+  im <- tft_affine(img, c(1,2,3,4,5,6))
+  expect_tensor_shape(im, c(3, 32, 32))
+
+})

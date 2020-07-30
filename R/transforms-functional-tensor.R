@@ -597,3 +597,63 @@ tft_resize <- function(img, size, interpolation = 2) {
 
   img
 }
+
+#' Apply affine transformation on the Tensor image keeping image center invariant.
+#'
+#' @param img (Tensor): image to be rotated.
+#' @param matrix (list of floats): list of 6 float values representing inverse matrix for affine transformation.
+#' @param resample (int, optional): An optional resampling filter. Default is nearest (=2). Other supported values:
+#'   bilinear(=2).
+#' @param fillcolor (int, optional): this option is not supported for Tensor input. Fill value for the area outside the
+#'   transform in the output image is always 0.
+#'
+#' @return Tensor: Transformed image.
+tft_affine <- function(img, matrix, resample = 0, fillcolor = NULL) {
+
+  check_img(img)
+
+  if (!is.null(fillcolor))
+    rlang::warn("Argument fillcolor is not supported for Tensor input")
+
+  interpolation_modes <- c(
+    "0" = "nearest",
+    "2" = "bilinear"
+  )
+
+  if (!resample %in% names(interpolation_modes))
+    value_error("This resampling is unsupported with Tensor inputs")
+
+  theta <- torch::torch_tensor(matrix, dtype = torch::torch_float())$reshape(c(1,2,3))
+  shape <- img$shape
+  grid <- torch::nnf_affine_grid(theta, size = c(1, tail(shape, 3)),
+                                 align_corners = FALSE)
+
+  need_squeeze <- FALSE
+  if (img$dim() < 4) {
+    img <- img$unsqueeze(1)
+    need_squeeze <- TRUE
+  }
+
+  mode <- interpolation_modes[resample == names(interpolation_modes)]
+
+  out_dtype <- img$dtype()
+  need_cast <- FALSE
+  if (!img$dtype() == torch::torch_float32() &&
+      !img$dtype() == torch::torch_float64()) {
+    need_cast <- TRUE
+    img <- img$to(dtype = torch::torch_float32())
+  }
+
+  img <- torch::nnf_grid_sample(img, grid, mode = mode, padding_mode = "zeros",
+                                align_corners = FALSE)
+
+
+  if (need_squeeze)
+    img <- img$squeeze(1)
+
+  if (need_cast) {
+    img <- torch::torch_round(img)$to(out_dtype)
+  }
+
+  img
+}
