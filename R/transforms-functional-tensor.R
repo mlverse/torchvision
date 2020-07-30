@@ -498,3 +498,102 @@ tft_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
 
   img
 }
+
+get_image_size <- function(img) {
+  check_img(img)
+
+  tail(img$size(), 2)
+}
+
+#' Resize the input Tensor to the given size.
+#'
+#' @param img (Tensor): Image to be resized.
+#' @param size (int or tuple or list): Desired output size. If size is a sequence like
+#'   (h, w), the output size will be matched to this. If size is an int,
+#'   the smaller edge of the image will be matched to this number maintaining
+#'   the aspect ratio. i.e, if height > width, then image will be rescaled to
+#'   \eqn{\left(\text{size} \times \frac{\text{height}}{\text{width}}, \text{size}\right)}.
+#' @param interpolation (int, optional): Desired interpolation. Default is bilinear (=2). Other supported values:
+#'   nearest(=0) and bicubic(=3).
+#'
+#' @return Tensor: Resized image.
+#'
+#' @export
+tft_resize <- function(img, size, interpolation = 2) {
+
+  check_img(img)
+
+  interpolation_modes <- c(
+    "0" = "nearest",
+    "2" = "bilinear",
+    "3" = "bicubic"
+  )
+
+  if (!interpolation %in% names(interpolation_modes))
+    value_error("This interpolation mode is unsupported with Tensor input")
+
+  if (!length(size) %in% c(1,2) || !is.numeric(size))
+    value_error("Size must be a numeric vector of length 1 or 2.")
+
+  wh <- get_image_size(img)
+  w <- wh[1]
+  h <- wh[2]
+
+  if (length(size) == 1)
+    size_w <- size_h <- size
+  else if (length(size) == 2) {
+    size_w <- size[2]
+    size_h <- size[1]
+  }
+
+  if (length(size) == 1) {
+
+    if (w < h)
+      size_h <- as.integer(size_w * h / w)
+    else
+      size_w <- as.integer(size_h * w / h)
+
+  }
+
+  if ((w <= h  && w == size_w) || (h <= w && h == size_h))
+    return(img)
+
+  # make NCHW
+  need_squeeze <- FALSE
+  if (img$dim() < 4) {
+    img <- img$unsqueeze(1)
+    need_squeeze <- TRUE
+  }
+
+  mode <- interpolation_modes[interpolation == names(interpolation_modes)]
+  mode <- unname(mode)
+
+  out_dtype <- img$dtype()
+  need_cast <- FALSE
+  if (!img$dtype() == torch::torch_float32() &&
+      !img$dtype() == torch::torch_float64()) {
+    need_cast <- TRUE
+    img <- img$to(dtype = torch::torch_float32())
+  }
+
+  if (mode %in% c("bilinear", "bicubic"))
+    align_corners <- FALSE
+  else
+    align_corners <- NULL
+
+
+  img <- torch::nnf_interpolate(img, size = c(size_h, size_w), mode = mode,
+                                align_corners = align_corners)
+
+  if (need_squeeze)
+    img <- img$squeeze(1)
+
+  if (need_cast) {
+    if (mode == "bicubic")
+      img <- img$clamp(min = 0, max = 255)
+
+    img <- img$to(out_dtype)
+  }
+
+  img
+}

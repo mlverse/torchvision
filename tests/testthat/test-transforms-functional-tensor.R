@@ -111,3 +111,13 @@ test_that("pad", {
 
 })
 
+test_that("resize", {
+
+  img <- torch_rand(3, 32, 32)
+  im <- tft_resize(img, c(40, 40))
+
+  expect_tensor_shape(im, c(3, 40, 40))
+  expect_true(!any(torch::as_array(torch_isnan(im)))) # no nans
+
+})
+
