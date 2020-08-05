@@ -84,8 +84,7 @@ transform_convert_image_dtype <- function(image, dtype = torch::torch_float()) {
         (dtype == torch::torch_float32() || dtype == torch::torch_float64())) ||
         (image$dtype() == torch::torch_float64() && dtype == torch::torch_int64())
         )
-      runtime_error("The cast from {image$dtype()} to {dtype} cannot be performed",
-                    "safely.")
+      runtime_error("The cast from {image$dtype()} to {dtype} cannot be performed safely.")
 
     # For data in the range 0-1, (float * 255).to(uint) is only 255
     # when float is exactly 1.0.

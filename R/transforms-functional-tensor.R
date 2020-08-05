@@ -392,7 +392,7 @@ pad_symmetric <- function(img, padding) {
   x_indices <- seq_len(tail(in_sizes, 1))
   left_indices <- rev(seq_len(padding[1]))
   right_indices <- -seq_len(padding[2])
-  x_indices <- torch::tensor(c(left_indices, x_indices, right_indices),
+  x_indices <- torch::torch_tensor(c(left_indices, x_indices, right_indices),
                              dtype = torch::torch_long())
 
 
@@ -488,7 +488,7 @@ tft_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
     img <- img$to(torch::torch_float32())
   }
 
-  img <- nnf_pad(img, p, mode = padding_mode, value = as.numeric(fill))
+  img <- torch::nnf_pad(img, p, mode = padding_mode, value = as.numeric(fill))
 
   if (need_squeeze)
     img <- img$squeeze(dim = 1)
@@ -499,6 +499,7 @@ tft_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
   img
 }
 
+#' @importFrom utils tail
 get_image_size <- function(img) {
   check_img(img)
 
