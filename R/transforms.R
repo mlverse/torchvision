@@ -3,6 +3,8 @@
 #' @param pic (`Magick Image` or `array`): Image to be converted to tensor.
 #'
 #' @return Tensor: Converted image.
+#'
+#' @export
 transform_to_tensor <- function(pic) {
 
   if (!(is_magick_image(pic) || is_array_image(pic)))
@@ -133,9 +135,11 @@ transform_convert_image_dtype <- function(image, dtype = torch::torch_float()) {
 #' @param tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
 #' @param mean (sequence): Sequence of means for each channel.
 #' @param std (sequence): Sequence of standard deviations for each channel.
-#' @param inplace(bool,optional): Bool to make this operation inplace.
+#' @param inplace (bool,optional): Bool to make this operation inplace.
 #'
 #' @return Tensor: Normalized Tensor image.
+#'
+#' @export
 transform_normalize <- function(tensor, mean, std, inplace = FALSE) {
 
   check_img(tensor)

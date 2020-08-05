@@ -13,7 +13,7 @@ transform_normalize(tensor, mean, std, inplace = FALSE)
 
 \item{std}{(sequence): Sequence of standard deviations for each channel.}
 
-\item{inplace(bool, optional):}{Bool to make this operation inplace.}
+\item{inplace}{(bool,optional): Bool to make this operation inplace.}
 }
 \value{
 Tensor: Normalized Tensor image.

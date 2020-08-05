@@ -9,3 +9,8 @@ value_error <- function(msg) {
 runtime_error <- function(msg) {
   rlang::abort(msg, class = "runtime_error")
 }
+
+not_implemented_error <- function(msg) {
+  rlang::abort(msg, class = "not_implemented_error")
+}
+
