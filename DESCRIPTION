@@ -33,3 +33,4 @@ Collate:
     'tiny-imagenet-dataset.R'
     'transforms-functional-tensor.R'
     'vision_utils.R'
+    'transforms.R'
