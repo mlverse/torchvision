@@ -7,3 +7,12 @@ test_that("convert_image_dtype", {
   expect_equal(round(as_array(x),1), round(as_array(y),1))
 
 })
+
+test_that("normalize", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_normalize(x, 1, 2)
+
+  expect_equal_to_r(o, as_array((x - 1)/2))
+
+})

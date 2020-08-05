@@ -124,6 +124,45 @@ transform_convert_image_dtype <- function(image, dtype = torch::torch_float()) {
   }
 }
 
+#' Normalize a tensor image with mean and standard deviation.
+#'
+#' @note
+#' This transform acts out of place by default, i.e., it does not mutates the
+#' input tensor.
+#'
+#' @param tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+#' @param mean (sequence): Sequence of means for each channel.
+#' @param std (sequence): Sequence of standard deviations for each channel.
+#' @param inplace(bool,optional): Bool to make this operation inplace.
+#'
+#' @return Tensor: Normalized Tensor image.
+transform_normalize <- function(tensor, mean, std, inplace = FALSE) {
+
+  check_img(tensor)
+
+  if (!inplace)
+    tensor <- tensor$clone()
+
+  dtype <- tensor$dtype()
+  mean <- torch::torch_tensor(mean, dtype=dtype, device=tensor$device())
+  std <- torch::torch_tensor(std, dtype=dtype, device=tensor$device())
+
+  if (torch::as_array((std == 0)$any())) {
+    value_error("std evaluated to zero after conversion to {dtype}, leading to division by zero.")
+  }
+
+  if (mean$dim() == 1)
+    mean <- mean[,NULL,NULL]
+
+  if (std$dim() == 1)
+    std <- std[,NULL,NULL]
+
+  tensor$sub_(mean)$div_(std)
+
+  tensor
+}
+
+
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
 }
