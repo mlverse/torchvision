@@ -24,3 +24,11 @@ test_that("resize", {
 
   expect_tensor_shape(o, c(3, 20, 20))
 })
+
+test_that("pad", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_pad(x, c(1,2))
+
+  expect_tensor_shape(o, c(3, 14, 12))
+})

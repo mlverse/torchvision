@@ -190,6 +190,42 @@ transform_resize <- function(img, size, interpolation = 2) {
     tft_resize(img, size, interpolation)
 }
 
+#' Pad the given image on all sides with the given "pad" value.
+#'
+#' The image can be a Magick Image or a torch Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading dimensions
+#'
+#' @param img (Magick Image or Tensor): Image to be padded.
+#' @param padding (int or tuple or list): Padding on each border. If a single int is provided this
+#'   is used to pad all borders. If tuple of length 2 is provided this is the padding
+#'   on left/right and top/bottom respectively. If a tuple of length 4 is provided
+#'   this is the padding for the left, top, right and bottom borders respectively.
+#' @param fill (int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
+#'   length 3, it is used to fill R, G, B channels respectively.
+#'   This value is only used when the padding_mode is constant. Only int value is
+#'   supported for Tensors.
+#' @param padding_mode Type of padding. Should be: constant, edge, reflect or symmetric.
+#'   Default is constant.
+#'   Mode symmetric is not yet supported for Tensor inputs.
+#'     - constant: pads with a constant value, this value is specified with fill
+#'     - edge: pads with the last value on the edge of the image
+#'     - reflect: pads with reflection of image (without repeating the last value on the edge)
+#'                padding `[1, 2, 3, 4]` with 2 elements on both sides in reflect mode
+#'                will result in `[3, 2, 1, 2, 3, 4, 3, 2]`
+#'     - symmetric: pads with reflection of image (repeating the last value on the edge)
+#'                  padding `[1, 2, 3, 4]` with 2 elements on both sides in symmetric mode
+#'                  will result in `[2, 1, 1, 2, 3, 4, 4, 3]`
+#' @return Magick Image or Tensor: Padded image.
+#'
+#' @return
+transform_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
+
+  if (is_magick_image(img))
+    not_implemented_error("pad is not implemented for magick images yet.")
+
+  tft_pad(img, padding = padding, fill = fill, padding_mode = padding_mode)
+}
+
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
 }
