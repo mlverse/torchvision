@@ -4,7 +4,7 @@
 \alias{tfm_resize}
 \title{Resize the input Magick Image to the given size.}
 \usage{
-tfm_resize(img, size, interpolation)
+tfm_resize(img, size, interpolation = 2)
 }
 \arguments{
 \item{img}{(Magick Image): Image to be resized.}
@@ -17,8 +17,8 @@ the aspect ratio. i.e, if height > width, then image will be rescaled to
 For compatibility reasons with \code{tft_resize}, if a tuple or list
 of length 1 is provided, it is interpreted as a single int.}
 
-\item{interpolation}{(int, optional): Desired interpolation. Not currently
-implemented.}
+\item{interpolation}{(int, optional): Desired interpolation. An integer \code{0 = nearest},
+\code{2 = bilinear} and \code{3 = bicubic} or a name from \code{\link[magick:options]{magick::filter_types()}}.}
 }
 \value{
 Magick Image: Resized image.

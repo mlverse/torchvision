@@ -9,16 +9,22 @@
 #'   \eqn{\left(\text{size} \times \frac{\text{height}}{\text{width}}, \text{size}\right)}.
 #'   For compatibility reasons with `tft_resize`, if a tuple or list
 #'   of length 1 is provided, it is interpreted as a single int.
-#' @param interpolation (int, optional): Desired interpolation. Not currently
-#'   implemented.
+#' @param interpolation (int, optional): Desired interpolation. An integer `0 = nearest`,
+#'   `2 = bilinear` and `3 = bicubic` or a name from [magick::filter_types()].
 #'
 #' @return Magick Image: Resized image.
 #'
 #' @export
-tfm_resize <- function(img, size, interpolation) {
+tfm_resize <- function(img, size, interpolation = 2) {
 
-  if (!missing(interpolation))
-    not_implemented_error("interpolation is not implemented")
+  interpolation_modes <- c(
+    "0" = "Pint", # nearest,
+    "2" = "Triangle", # bilinear
+    "3" = "Catrom" # bicubic
+  )
+
+  if (is.numeric(interpolation))
+    interpolation <- interpolation_modes[names(interpolation_modes) == interpolation]
 
   if (length(size) == 1) {
 
@@ -34,5 +40,5 @@ tfm_resize <- function(img, size, interpolation) {
     size <- paste0(paste0(size, collapse = "x"), "!")
   }
 
-  magick::image_resize(img, geometry = size)
+  magick::image_resize(img, geometry = size, filter = interpolation)
 }
