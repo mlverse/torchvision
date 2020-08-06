@@ -16,3 +16,11 @@ test_that("normalize", {
   expect_equal_to_r(o, as_array((x - 1)/2))
 
 })
+
+test_that("resize", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_resize(x, c(20, 20))
+
+  expect_tensor_shape(o, c(3, 20, 20))
+})

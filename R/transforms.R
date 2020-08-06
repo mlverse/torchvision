@@ -166,6 +166,29 @@ transform_normalize <- function(tensor, mean, std, inplace = FALSE) {
   tensor
 }
 
+#' Resize the input image to the given size.
+#' The image can be a Magick Image or a torch Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading dimensions
+#'
+#' @param img (Magick Image or Tensor): Image to be resized.
+#' @param size (sequence or int): Desired output size. If size is a sequence
+#'   like (h, w), the output size will be matched to this. If size is an int,
+#'   the smaller edge of the image will be matched to this number maintaining
+#'   the aspect ratio. i.e, if height > width, then image will be rescaled to
+#'   \eqn{\left(\text{size} \times \frac{\text{height}}{\text{width}}, \text{size}\right)}.
+#' @param interpolation (int, optional): Desired interpolation enum defined by `filters`.
+#'   Default is `2 = BILINEAR`. If input is Tensor, only `0 = NEAREST`, `2 = BILINEAR`
+#'   and `3 = BICUBIC` are supported.
+#'
+#' @return Magick Image or Tensor: Resized image.
+#'
+#' @export
+transform_resize <- function(img, size, interpolation = 2) {
+  if (is_magick_image(img))
+    tfm_resize(img, size, interpolation)
+  else
+    tft_resize(img, size, interpolation)
+}
 
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
