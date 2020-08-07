@@ -226,6 +226,87 @@ transform_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
   tft_pad(img, padding = padding, fill = fill, padding_mode = padding_mode)
 }
 
+#' Crop the given image at specified location and output size.
+#'
+#' The image can be a Magick Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions
+#'
+#' @param img (Magick Image or Tensor): Image to be cropped. (0,0) denotes the top left corner of the image.
+#' @param top (int): Vertical component of the top left corner of the crop box.
+#' @param left (int): Horizontal component of the top left corner of the crop box.
+#' @param height (int): Height of the crop box.
+#' @param width (int): Width of the crop box.
+#'
+#' @return Magick Image or Tensor: Cropped image.
+#'
+#' @export
+transform_crop <- function(img, top, left, height, width) {
+
+  if (is_magick_image(img))
+    not_implemented_error("crop is not implemented for magick images yet.")
+
+  tft_crop(img, top = top, left = left, height = height, width = width)
+}
+
+#' Crops the given image at the center.
+#'
+#' The image can be a PIL Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions
+#'
+#' @param img (Magick Image or Tensor): Image to be cropped.
+#' @param output_size (sequence or int): (height, width) of the crop box. If int
+#'   or sequence with single int it is used for both directions.
+#'
+#' @return Magick Image or Tensor: Cropped image.
+#'
+#' @export
+transform_center_crop <- function(img, output_size) {
+
+  if (length(output_size) == 1)
+    output_size <- rep(output_size, 2)
+
+  output_size <- as.integer(output_size)
+
+  size <- get_image_size(img)
+
+  image_width <- size[1]
+  image_height <- size[2]
+
+  crop_height <- output_size[1]
+  crop_width <- output_size[2]
+
+  crop_top <- as.integer((image_height - crop_height) / 2)
+  crop_left <- as.integer((image_width - crop_width) / 2)
+
+  transform_crop(img, crop_top, crop_left, crop_height, crop_width)
+}
+
+#' Crop the given image and resize it to desired size.
+#'
+#' The image can be a Magick Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions
+#'
+#' @param img (Magick Image or Tensor): Image to be cropped. (1,1) denotes the
+#'   top left corner of the image.
+#' @param top (int): Vertical component of the top left corner of the crop box.
+#' @param left (int): Horizontal component of the top left corner of the crop box.
+#' @param height (int): Height of the crop box.
+#' @param width (int): Width of the crop box.
+#' @inheritParams transform_resize
+#'
+#' @return Magick Image or Tensor: Cropped image.
+#'
+#' @export
+transform_resized_crop <- function(img, top, left, height, width, size,
+                                   interpolation = 2) {
+  img <- transform_crop(img, top, left, height, width)
+  img <- transform_resize(img, size, interpolation)
+  img
+}
+
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
 }

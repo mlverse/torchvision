@@ -32,3 +32,31 @@ test_that("pad", {
 
   expect_tensor_shape(o, c(3, 14, 12))
 })
+
+test_that("crop", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_crop(x, 1, 1, 2, 2)
+
+  expect_tensor_shape(o, c(3,2,2))
+  expect_equal(as_array(x[,1,1]), as_array(o[,1,1]))
+
+})
+
+test_that("center_crop", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_center_crop(x, c(2,2))
+
+  expect_tensor_shape(o, c(3,2,2))
+
+})
+
+test_that("resized_crop", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_resized_crop(x, 1, 1, 2, 2, size = c(6, 6))
+
+  expect_tensor_shape(o, c(3,6,6))
+
+})
