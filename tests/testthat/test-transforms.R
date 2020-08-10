@@ -60,3 +60,31 @@ test_that("resized_crop", {
   expect_tensor_shape(o, c(3,6,6))
 
 })
+
+test_that("hflip", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_hflip(x)
+
+  expect_equal_to_r(o[,,1], as_array(x[,,10]))
+
+})
+
+test_that("perspective", {
+
+  skip("not implemented")
+
+  x <- torch_randn(3, 50, 50)
+  o <- transform_perspective(x, startpoints = list(c(2,2), c(2,3), c(3,2), c(3,3)),
+                             endpoints = list(c(4,4), c(4,5), c(5,4), c(5,5)))
+
+})
+
+test_that("vflip", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_vflip(x)
+
+  expect_equal_to_r(o[,1,], as_array(x[,10,]))
+
+})

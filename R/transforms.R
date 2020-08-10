@@ -83,9 +83,9 @@ transform_convert_image_dtype <- function(image, dtype = torch::torch_float()) {
 
     # float to int
     if ((image$dtype() == torch::torch_float32() &&
-        (dtype == torch::torch_float32() || dtype == torch::torch_float64())) ||
+         (dtype == torch::torch_float32() || dtype == torch::torch_float64())) ||
         (image$dtype() == torch::torch_float64() && dtype == torch::torch_int64())
-        )
+    )
       runtime_error("The cast from {image$dtype()} to {dtype} cannot be performed safely.")
 
     # For data in the range 0-1, (float * 255).to(uint) is only 255
@@ -305,6 +305,91 @@ transform_resized_crop <- function(img, top, left, height, width, size,
   img <- transform_crop(img, top, left, height, width)
   img <- transform_resize(img, size, interpolation)
   img
+}
+
+#' Horizontally flip the given PIL Image or Tensor.
+#'
+#' @param img (Magick Image or Tensor): Image to be flipped. If img
+#'   is a Tensor, it is expected to be in `[..., H, W]` format,
+#'   where ... means it can have an arbitrary number of trailing
+#'   dimensions.
+#'
+#' @return Magick Image or Tensor:  Horizontally flipped image.
+#'
+#' @export
+transform_hflip <- function(img) {
+
+  if (is_magick_image(img))
+    not_implemented_error("crop is not implemented for magick images yet.")
+
+  tft_hflip(img)
+}
+
+get_perspective_coeffs <- function(startpoints, endpoints) {
+
+  a_matrix <- torch::torch_zeros(2 * length(startpoints), 8,
+                                 dtype = torch::torch_float())
+
+  for (i in seq_along(startpoints)) {
+
+    p1 <- endpoints[[i]]
+    p2 <- startpoints[[i]]
+
+    a_matrix[1 + 2*(i-1), ] <- torch::torch_tensor(c(p1[1], p1[2], 2, 1, 1, 1, -p2[1] * p1[1], -p2[1] * p1[2]))
+    a_matrix[2*i,] <- torch::torch_tensor(c(1, 1, 1, p1[1], p1[2], 2, -p2[2] * p1[1], -p2[2] * p1[1]))
+
+  }
+
+  b_matrix <- torch::torch_tensor(unlist(startpoints), dtype = torch::torch_float())$view(8)
+  res <- torch::torch_lstsq(b_matrix, a_matrix)[[1]]
+
+  output <- torch::as_array(res$squeeze(1))
+
+  output
+}
+
+#' Perform perspective transform of the given image.
+#'
+#' The image can be a PIL Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions.
+#'
+#' @param img (PIL Image or Tensor): Image to be transformed.
+#' @param startpoints (list of list of ints): List containing four lists of two integers corresponding to four corners
+#'   `[top-left, top-right, bottom-right, bottom-left]` of the original image.
+#' @param endpoints (list of list of ints): List containing four lists of two integers corresponding to four corners
+#'   `[top-left, top-right, bottom-right, bottom-left]` of the transformed image.
+#' @inheritParams transform_resize
+#' @inheritParams transform_pad
+#'
+#' @return Magick Image or Tensor: transformed Image.
+transform_perspective <- function(img, startpoints, endpoints, interpolation = 2,
+                                  fill = NULL) {
+
+  coeffs <- get_perspective_coeffs(startpoints, endpoints)
+
+  if (is_magick_image(img))
+    not_implemented_error("perspective is not implemented for magick images yet.")
+
+  tft_perspective(img, coeffs, interpolation = interpolation, fill = fill)
+}
+
+#' Vertically flip the given PIL Image or torch Tensor.
+#'
+#' @param img (Magick Image or Tensor): Image to be flipped. If img
+#'   is a Tensor, it is expected to be in `[..., H, W]` format,
+#'   where ... means it can have an arbitrary number of trailing
+#'   dimensions.
+#'
+#' @return Magick Image:  Vertically flipped image.
+#'
+#' @export
+transform_vflip <- function(img) {
+
+  if (is_magick_image(img))
+    not_implemented_error("vflip is not implemented for magick images yet.")
+
+  tft_vflip(img)
 }
 
 is_magick_image <- function(x) {

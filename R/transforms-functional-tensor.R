@@ -658,3 +658,9 @@ tft_affine <- function(img, matrix, resample = 0, fillcolor = NULL) {
 
   img
 }
+
+tft_perspective <- function(img, perspective_coeffs, interpolation = 2,
+                            fill = NULL) {
+
+  not_implemented_error("tft perspective is not implemented yet.")
+}
