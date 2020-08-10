@@ -453,6 +453,118 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   tft_ten_crop(img, size, vertical_flip)
 }
 
+#' Adjust brightness of an Image.
+#'
+#' @param img (Magick Image or Tensor): Image to be adjusted.
+#' @param brightness_factor (float):  How much to adjust the brightness. Can be
+#'   any non negative number. 0 gives a black image, 1 gives the
+#'   original image while 2 increases the brightness by a factor of 2.
+#'
+#' @return Magick Image or Tensor: Brightness adjusted image.
+#'
+#' @export
+transform_adjust_brightness <- function(img, brightness_factor) {
+
+  if (is_magick_image(img))
+    not_implemented_error("adjust_brightness is not implemented for magick images yet.")
+
+  tft_adjust_brightness(img, brightness_factor)
+}
+
+#' Adjust contrast of an Image.
+#'
+#' @param img (Magick Image or Tensor): Image to be adjusted.
+#' @param contrast_factor (float): How much to adjust the contrast. Can be any
+#'   non negative number. 0 gives a solid gray image, 1 gives the
+#'   original image while 2 increases the contrast by a factor of 2.
+#'
+#' @return Magick Image or Tensor: Contrast adjusted image.
+#'
+#' @export
+transform_adjust_contrast <- function(img, contrast_factor) {
+
+  if (is_magick_image(img))
+    not_implemented_error("adjust_contrast is not implemented for magick images yet.")
+
+  tft_adjust_contrast(img, contrast_factor)
+}
+
+#' Adjust color saturation of an image.
+#'
+#' @param img (Magick Image or Tensor): Image to be adjusted.
+#' @param saturation_factor (float):  How much to adjust the saturation. 0 will
+#'   give a black and white image, 1 will give the original image while
+#'   2 will enhance the saturation by a factor of 2.
+#'
+#' @return Magick Image or Tensor: Saturation adjusted image.
+#'
+#' @export
+transform_adjust_saturation <- function(img, saturation_factor) {
+
+  if (is_magick_image(img))
+    not_implemented_error("adjust_contrast is not implemented for magick images yet.")
+
+  tft_adjust_saturation(img, saturation_factor)
+}
+
+#' Adjust hue of an image.
+#'
+#' The image hue is adjusted by converting the image to HSV and
+#' cyclically shifting the intensities in the hue channel (H).
+#' The image is then converted back to original image mode.
+#'
+#' `hue_factor` is the amount of shift in H channel and must be in the
+#' interval `[-0.5, 0.5]`.
+#'
+#' See [Hue](https://en.wikipedia.org/wiki/Hue) for more details.
+#'
+#' @param img (Magick Image): PIL Image to be adjusted.
+#' @param hue_factor (float):  How much to shift the hue channel. Should be in
+#'   `[-0.5, 0.5]`. 0.5 and -0.5 give complete reversal of hue channel in
+#'   HSV space in positive and negative direction respectively.
+#'   0 means no shift. Therefore, both -0.5 and 0.5 will give an image
+#'   with complementary colors while 0 gives the original image.
+#'
+#' @return Magick Image: Hue adjusted image.
+#'
+#' @export
+transform_adjust_hue <- function(img, hue_factor) {
+
+  if (is_magick_image(img))
+    not_implemented_error("adjust_hue is not implemented for magick images yet.")
+
+  tft_adjust_hue(img, hue_factor)
+}
+
+#' Perform gamma correction on an image.
+#'
+#' Also known as Power Law Transform. Intensities in RGB mode are adjusted
+#' based on the following equation:
+#'
+#' \eqn{
+#'  I_{\text{out}} = 255 \times \text{gain} \times \left(\frac{I_{\text{in}}}{255}\right)^{\gamma}
+#' }
+#'
+#' See [Gamma Correction](https://en.wikipedia.org/wiki/Gamma_correction) for
+#' more details.
+#'
+#' @param img (Magick Image or Tensor): PIL Image to be adjusted.
+#' @param gamma (float): Non negative real number, same as \eqn{\gamma} in the equation.
+#'   gamma larger than 1 make the shadows darker,
+#'   while gamma smaller than 1 make dark regions lighter.
+#' @param gain (float): The constant multiplier.
+#'
+#' @return Magick Image or Tensor: Gamma correction adjusted image.
+#'
+#' @export
+transform_adjust_gamma <- function(img, gamma, gain = 1) {
+
+  if (is_magick_image(img))
+    not_implemented_error("adjust_gamma is not implemented for magick images yet.")
+
+  tft_adjust_gamma(img, gamma, gain)
+}
+
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
 }
