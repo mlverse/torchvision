@@ -88,3 +88,21 @@ test_that("vflip", {
   expect_equal_to_r(o[,1,], as_array(x[,10,]))
 
 })
+
+test_that("five_crop", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_five_crop(x, c(3, 3))
+
+  expect_length(o, 5)
+
+})
+
+test_that("ten_crop", {
+
+  x <- torch_randn(3, 10, 10)
+  o <- transform_ten_crop(x, c(3, 3))
+
+  expect_length(o, 10)
+
+})

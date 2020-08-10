@@ -392,6 +392,67 @@ transform_vflip <- function(img) {
   tft_vflip(img)
 }
 
+#' Crop the given image into four corners and the central crop.
+#'
+#' The image can be a Magick Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions.
+#'
+#' @note
+#' This transform returns a tuple of images and there may be a
+#' mismatch in the number of inputs and targets your `Dataset` returns.
+#'
+#' @param img (Magick Image or Tensor): Image to be cropped.
+#' @param size (sequence or int): Desired output size of the crop. If size is an
+#'   int instead of sequence like (h, w), a square crop (size, size) is
+#'   made. If provided a tuple or list of length 1, it will be interpreted as
+#'   `(size[1], size[2])`.
+#'
+#' @return
+#' tuple: tuple (tl, tr, bl, br, center)
+#' Corresponding top left, top right, bottom left, bottom right and center crop.
+#'
+#' @export
+transform_five_crop <- function(img, size) {
+
+  if (is_magick_image(img))
+    not_implemented_error("five_crop is not implemented for magick images yet.")
+
+  tft_five_crop(img, size)
+}
+
+#' Generate ten cropped images from the given image.
+#'
+#' Crop the given image into four corners and the central crop plus the
+#' flipped version of these (horizontal flipping is used by default).
+#' The image can be a PIL Image or a Tensor, in which case it is expected
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
+#' dimensions
+#'
+#' @note
+#' This transform returns a tuple of images and there may be a
+#' mismatch in the number of inputs and targets your `Dataset` returns.
+#'
+#' @param img (Magick Image or Tensor): Image to be cropped.
+#' @param size (sequence or int): Desired output size of the crop. If size is an
+#'   int instead of sequence like (h, w), a square crop (size, size) is
+#'   made. If provided a tuple or list of length 1, it will be interpreted as `(size[1], size[2])`.
+#' @param vertical_flip (bool): Use vertical flipping instead of horizontal
+#'
+#' @return
+#' tuple: tuple (tl, tr, bl, br, center, tl_flip, tr_flip, bl_flip, br_flip, center_flip)
+#' Corresponding top left, top right, bottom left, bottom right and
+#' center crop and same for the flipped image.
+#'
+#' @export
+transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
+
+  if (is_magick_image(img))
+    not_implemented_error("ten_crop is not implemented for magick images yet.")
+
+  tft_ten_crop(img, size, vertical_flip)
+}
+
 is_magick_image <- function(x) {
   inherits(x, "magick-image")
 }
