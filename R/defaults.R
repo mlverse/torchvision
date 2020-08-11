@@ -206,45 +206,53 @@ transform_random_resized_crop.default <- function(img, size, scale=c(0.08, 1.0),
 
 #' @export
 transform_five_crop.default <- function(img) {
-
+  not_implemented_for_class(img)
 }
+
 #' @export
 transform_ten_crop.default <- function(img) {
-
+  not_implemented_for_class(img)
 }
+
 #' @export
 transform_linear_transformation.default <- function(img) {
 
 }
+
 #' @export
 transform_color_jitter.default <- function(img) {
 
 }
+
 #' @export
 transform_random_rotation.default <- function(img) {
 
 }
+
 #' @export
 transform_random_affine.default <- function(img) {
 
 }
+
 #' @export
 transform_grayscale.default <- function(img) {
 
 }
+
 #' @export
 transform_random_grayscale.default <- function(img) {
 
 }
+
 #' @export
 transform_random_perspective.default <- function(img) {
 
 }
+
 #' @export
 transform_random_erasing.default <- function(img) {
 
 }
-
 
 # Other methods -----------------------------------------------------------
 

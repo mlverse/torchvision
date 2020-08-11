@@ -225,6 +225,52 @@ transform_pad.torch_tensor <- function(img, padding, fill = 0, padding_mode = "c
   img
 }
 
+#' @export
+transform_five_crop.torch_tensor <- function(img, size) {
+
+  check_img(img)
+
+  if (!length(size) == 2)
+    value_error("Please provide only 2 dimensions (h, w) for size.")
+
+  image_width <- img$size(2)
+  image_height <- img$size(3)
+
+  crop_height <- size[1]
+  crop_width <- size[2]
+
+  if (crop_width > image_width || crop_height > image_height)
+    value_error("Requested crop size is bigger than input size.")
+
+  tl <- transform_crop(img, 1, 1, crop_width, crop_height)
+  tr <- transform_crop(img, image_width - crop_width + 1, 1, image_width, crop_height)
+  bl <- transform_crop(img, 1, image_height - crop_height + 1, crop_width, image_height)
+  br <- transform_crop(img, image_width - crop_width + 1, image_height - crop_height + 1, image_width, image_height)
+  center <- transform_center_crop(img, c(crop_height, crop_width))
+
+  list(tl, tr, bl, br, center)
+}
+
+#' @export
+transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
+
+  check_img(img)
+
+  if (!length(size) == 2)
+    value_error("Please provide only 2 dimensions (h, w) for size.")
+
+  first_five <- transform_five_crop(img, size)
+
+  if (vertical_flip)
+    img <- transform_vflip(img)
+  else
+    img <- transform_hflip(img)
+
+  second_five <- transform_five_crop(img, size)
+
+  c(first_five, second_five)
+}
+
 
 # Other methods -----------------------------------------------------------
 
