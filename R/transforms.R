@@ -1,28 +1,4 @@
 
-#' Crop the given image and resize it to desired size.
-#'
-#' The image can be a Magick Image or a Tensor, in which case it is expected
-#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
-#' dimensions
-#'
-#' @param img (Magick Image or Tensor): Image to be cropped. (1,1) denotes the
-#'   top left corner of the image.
-#' @param top (int): Vertical component of the top left corner of the crop box.
-#' @param left (int): Horizontal component of the top left corner of the crop box.
-#' @param height (int): Height of the crop box.
-#' @param width (int): Width of the crop box.
-#' @inheritParams transform_resize
-#'
-#' @return Magick Image or Tensor: Cropped image.
-#'
-#' @export
-transform_resized_crop <- function(img, top, left, height, width, size,
-                                   interpolation = 2) {
-  img <- transform_crop(img, top, left, height, width)
-  img <- transform_resize(img, size, interpolation)
-  img
-}
-
 
 get_perspective_coeffs <- function(startpoints, endpoints) {
 
@@ -73,23 +49,7 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
   tft_perspective(img, coeffs, interpolation = interpolation, fill = fill)
 }
 
-#' Vertically flip the given PIL Image or torch Tensor.
-#'
-#' @param img (Magick Image or Tensor): Image to be flipped. If img
-#'   is a Tensor, it is expected to be in `[..., H, W]` format,
-#'   where ... means it can have an arbitrary number of trailing
-#'   dimensions.
-#'
-#' @return Magick Image:  Vertically flipped image.
-#'
-#' @export
-transform_vflip <- function(img) {
 
-  if (is_magick_image(img))
-    not_implemented_error("vflip is not implemented for magick images yet.")
-
-  tft_vflip(img)
-}
 
 #' Crop the given image into four corners and the central crop.
 #'

@@ -49,11 +49,6 @@ transform_pad.default <- function(img, padding, fill = 0, padding_mode = "consta
 }
 
 #' @export
-transform_lambda.default <- function(img) {
-  not_implemented_for_class(img)
-}
-
-#' @export
 transform_random_apply.default <- function(img, transforms, p = 0.5) {
 
   if (p < runif(1))
@@ -144,15 +139,71 @@ transform_random_horizontal_flip.default <- function(img, p = 0.5) {
 #' @export
 transform_random_vertical_flip.default <- function(img) {
 
-}
-#' @export
-transform_random_resized_crop.default <- function(img) {
+  if (runif(1) < p)
+    img <- transform_vflip(img)
+
+  img
 
 }
-#' @export
-transform_random_sized_crop.default <- function(img) {
 
+get_random_resized_crop_params <- function(img, scale, ratio) {
+
+  image_size <- get_image_size(img)
+  width <- img_size[1]; height <- img_size[2]
+
+  area <- height * width
+
+  for (i in 1:10) {
+    target_area <- as.numeric(area * torch::torch_empty(1)$uniform_(scale[1], scale[2]))
+    log_ratio <- torch::torch_log(torch::torch_tensor(ratio))
+    aspect_ratio <-  as.numeric(torch::torch_exp(
+      torch::torch_empty(1)$uniform_(log_ratio[1], log_ratio[2])
+    ))
+
+    w <- as.integer(round(sqrt(target_area * aspect_ratio)))
+    h <- as.integer(round(sqrt(target_area / aspect_ratio)))
+
+
+    if (0 < w && w <= width && 0 < h && h <= height) {
+
+      i = as.integer(torch::torch_randint(1, height - h + 1, size=1))
+      j = as.integer(torch::torch_randint(0, width - w + 1, size=1))
+
+      return(c(i, j, h, w))
+    }
+
+  }
+
+  # Fallback to central crop
+  in_ratio <- width / height
+  if (in_ratio < min(ratio)) {
+    w <- width
+    h <- as.integer(round(w / min(ratio)))
+  } else if (in_ratio > max(ratio)) {
+    h <-  height
+    w <- as.integer(round(h * max(ratio)))
+  } else {
+    w <- width
+    h <- height
+    i <- (height - h) %/% 2
+    j <- (width - w) %/% 2
+  }
+
+  c(i, j, h, w)
 }
+
+#' @export
+transform_random_resized_crop.default <- function(img, size, scale=c(0.08, 1.0),
+                                                  ratio=c(3. / 4., 4. / 3.),
+                                                  interpolation=2) {
+
+
+  params <- get_random_resized_crop_params(img, scale, ratio)
+
+  transform_resized_crop(img, params[1], params[2], params[3], params[4], size,
+                        interpolation)
+}
+
 #' @export
 transform_five_crop.default <- function(img) {
 
@@ -205,6 +256,19 @@ transform_crop.default <- function(img, top, left, height, width) {
 #' @export
 transform_hflip.default <- function(img) {
   not_implemented_for_class(img)
+}
+
+#' @export
+transform_vflip.default <- function(img) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_resized_crop.default <- function(img, top, left, height, width, size,
+                                   interpolation = 2) {
+  img <- transform_crop(img, top, left, height, width)
+  img <- transform_resize(img, size, interpolation)
+  img
 }
 
 # Helpers -----------------------------------------------------------------

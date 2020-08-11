@@ -241,6 +241,11 @@ transform_hflip.torch_tensor <- function(img) {
   img$flip(-1)
 }
 
+#' @export
+transform_vflip.torch_tensor <- function(img) {
+  check_img(img)
+  img$flip(-2)
+}
 
 # Helpers -----------------------------------------------------------------
 

@@ -71,17 +71,7 @@ hsv2rgb <- function(img) {
   torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype()), a4))
 }
 
-#' Vertically flip the given the Image Tensor.
-#'
-#' @param img (Tensor): Image Tensor to be flipped in the form `[C, H, W]`.
-#'
-#' @return Vertically flipped image Tensor.
-#'
-#' @export
-tft_vflip <- function(img) {
-  check_img(img)
-  img$flip(-2)
-}
+
 
 
 
