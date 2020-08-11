@@ -271,6 +271,15 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
   c(first_five, second_five)
 }
 
+#' @export
+transform_linear_transformation.torch_tensor <- function(img, transformation_matrix,
+                                                         mean_vector) {
+  flat_tensor <- img$view(1, -1) - mean_vector
+  transformed_tensor <- torch::torch_mm(flat_tensor, transformation_matrix)
+
+  transformed_tensor$view(img$size())
+}
+
 
 # Other methods -----------------------------------------------------------
 
@@ -293,6 +302,66 @@ transform_vflip.torch_tensor <- function(img) {
   img$flip(-2)
 }
 
+#' @export
+transform_adjust_brightness.torch_tensor <- function(img, brightness_factor) {
+  if (brightness_factor < 0)
+    value_error("brightness factor is negative")
+
+  check_img(img)
+
+  blend(img, torch::torch_zeros_like(img), brightness_factor)
+}
+
+#' @export
+transform_adjust_contrast.torch_tensor <- function(img, contrast_factor) {
+
+  if (contrast_factor < 0)
+    value_error("contrast must be positive")
+
+  check_img(img)
+
+  mean <- torch::torch_mean(tft_rgb_to_grayscale(img)$to(torch::torch_float()))
+
+  blend(img, mean, contrast_factor)
+}
+
+#' @export
+transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
+
+  if (hue_factor < 0.5 || hue_factor > 0.5)
+    value_error("hue_factor must be between -0.5 and 0.5.")
+
+  check_img(img)
+
+  orig_dtype <- img$dtype()
+  if (img$dtype() == torch::torch_uint8())
+    img <- img$to(dtype = torch::torch_float32())/255
+
+  img <-rgb2hsv(img)
+  hsv <- img$unbind(1)
+  hsv[[1]] <- hsv[[1]] + hue_factor
+  hsv[[1]] <- hsv[[1]] %% 1
+  img <- torch::torch_stack(hsv)
+  img_hue_adj <- hsv2rgb(img)
+
+  if (orig_dtype == torch::torch_uint8())
+    img_hue_adj <- (img_hue_adj * 255.0)$to(dtype=orig_dtype)
+
+  img_hue_adj
+}
+
+#' @export
+transform_adjust_saturation.torch_tensor <- function(img, saturation_factor) {
+
+  if (saturation_factor < 0)
+    value_error("saturation factor must be positive.")
+
+  check_img(img)
+
+
+  blend(img, tft_rgb_to_grayscale(img), saturation_factor)
+}
+
 # Helpers -----------------------------------------------------------------
 
 is_tensor_image <- function(x) {
@@ -309,4 +378,75 @@ get_image_size <- function(img) {
   check_img(img)
 
   tail(img$size(), 2)
+}
+
+blend <- function(img1, img2, ratio) {
+
+  if (img1$is_floating_point())
+    bound <- 1
+  else
+    bound <- 255
+
+  (ratio * img1 + (1 - ratio) * img2)$clamp(0, bound)$to(img1$dtype())
+}
+
+rgb2hsv <- function(img) {
+
+  rgb <- img$unbind(1)
+  r <- rgb[[1]]; g <- rgb[[2]]; b <- rgb[[3]]
+
+  maxc <- torch::torch_max(img, dim=1)[[1]]
+  minc <- torch::torch_min(img, dim=1)[[1]]
+
+  # The algorithm erases S and H channel where `maxc = minc`. This avoids NaN
+  # from happening in the results, because
+  #   + S channel has division by `maxc`, which is zero only if `maxc = minc`
+  #   + H channel has division by `(maxc - minc)`.
+  #
+  # Instead of overwriting NaN afterwards, we just prevent it from occuring so
+  # we don't need to deal with it in case we save the NaN in a buffer in
+  # backprop, if it is ever supported, but it doesn't hurt to do so.
+  eqc <- maxc == minc
+
+  cr <- maxc - minc
+
+  # Since `eqc => cr = 0`, replacing denominator with 1 when `eqc` is fine.
+  s <- cr / torch::torch_where(eqc, maxc$new_full(list(), 1), maxc)
+  # Note that `eqc => maxc = minc = r = g = b`. So the following calculation
+  # of `h` would reduce to `bc - gc + 2 + rc - bc + 4 + rc - bc = 6` so it
+  # would not matter what values `rc`, `gc`, and `bc` have here, and thus
+  # replacing denominator with 1 when `eqc` is fine.
+  cr_divisor <- torch::torch_where(eqc, maxc$new_full(list(), 1), cr)
+  rc <- (maxc - r) / cr_divisor
+  gc <- (maxc - g) / cr_divisor
+  bc <- (maxc - b) / cr_divisor
+
+  hr <- (maxc == r) * (bc - gc)
+  hg <- ((maxc == g) & (maxc != r)) * (2.0 + rc - bc)
+  hb <- ((maxc != g) & (maxc != r)) * (4.0 + gc - rc)
+  h <- (hr + hg + hb)
+  h <- torch::torch_fmod((h / 6.0 + 1.0), 1.0)
+  torch::torch_stack(list(h, s, maxc))
+}
+
+hsv2rgb <- function(img) {
+
+  hsv <- img$unbind(1)
+  i <- torch::torch_floor(hsv[[1]] * 6)
+  f <- (hsv[[1]] * 6) - 1
+  i <- i$to(dtype = torch::torch_int32())
+
+  p <- torch::torch_clamp((hsv[[3]] * (1 - hsv[[2]])), 0, 1)
+  q <- torch::torch_clamp((hsv[[3]] * (1 - hsv[[2]] * f)), 0, 1)
+  t <- torch::torch_clamp((hsv[[3]] * (1 - f)), 0, 1)
+  i <- i %% 6
+
+  mask <- i == torch::torch_arange(start= 0, end = 6)[,NULL,NULL]
+
+  a1 <- torch::torch_stack(list(hsv[[3]], q, p, p, t, hsv[[3]]))
+  a2 <- torch::torch_stack(list(t, hsv[[3]], hsv[[3]], q, p, p))
+  a3 <- torch::torch_stack(list(p, p, t, hsv[[3]], hsv[[3]], q))
+  a4 <- torch::torch_stack(list(a1, a2, a3))
+
+  torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype()), a4))
 }

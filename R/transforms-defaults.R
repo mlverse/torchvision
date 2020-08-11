@@ -215,13 +215,100 @@ transform_ten_crop.default <- function(img) {
 }
 
 #' @export
-transform_linear_transformation.default <- function(img) {
+transform_linear_transformation.default <- function(img, transformation_matrix,
+                                                    mean_vector) {
+  not_implemented_for_class(img)
+}
 
+get_color_jitter_params <- function(brightness, contrast, saturation, hue) {
+
+  transforms <- list()
+
+  if (!is.null(brightness)) {
+    brightness_factor <- runif(1, min = brightness[1], max = brightness[2])
+    transforms <- append(
+      transforms,
+      list(function(img) transform_adjust_brightness(img, brightness_factor))
+    )
+  }
+
+  if (!is.null(contrast)) {
+    contrast_factor <- runif(1, contrast[1], contrast[2])
+    transforms <- append(
+      transforms,
+      list(function(img) transform_adjust_contrast(img, contrast_factor))
+    )
+  }
+
+  if (!is.null(saturation)) {
+    saturation_factor <- runif(1, saturation[1], saturation[2])
+    transforms <- append(
+      transforms,
+      list(function(img) transform_adjust_saturation(img, saturation_factor))
+    )
+  }
+
+  if (!is.null(hue)) {
+    hue_factor <- runif(1, hue[1], hue[2])
+    transforms <- append(
+      transforms,
+      list(function(img) transform_adjust_hue(img, hue_factor))
+    )
+  }
+
+  # shuffle
+  i <- sample.int(length(transforms), length(transforms))
+  transforms <- transforms[i]
+
+  function(img) {
+    for (tf in transforms) {
+      img <- tf(img)
+    }
+    img
+  }
+}
+
+check_color_jitter_input <- function(value, center = 1, bound = c(0, Inf),
+                                     clip_first_on_zero = TRUE) {
+
+  if (length(value) == 1) {
+
+    if (value < 0)
+      value_error("must be positive if a single number")
+
+    value <- c(center - value, center + value)
+
+    if (clip_first_on_zero)
+      value[1] <- max(value[1], 0.0)
+
+  } else if (length(value == 2)) {
+
+    if (value[1] < bound[1] || value[2] > bound[2])
+      value_error("out of bounds.")
+
+  }
+
+  # if value is 0 or (1., 1.) for brightness/contrast/saturation
+  # or (0., 0.) for hue, do nothing
+  if (value[1] == value[2] && value[2] == center) {
+    value <- NULL
+  }
+
+  value
 }
 
 #' @export
-transform_color_jitter.default <- function(img) {
+transform_color_jitter.default <- function(img, brightness=0, contrast=0,
+                                           saturation=0, hue=0) {
 
+  brightness <- check_color_jitter_input(brightness)
+  contrast <- check_color_jitter_input(contrast)
+  saturation <- check_color_jitter_input(saturation)
+  hue <- check_color_jitter_input(hue, center=0, bound=c(-0.5, 0.5),
+                               clip_first_on_zero=FALSE)
+
+  tf <- get_color_jitter_params(brightness, contrast, saturation, hue)
+  tf(img)
 }
 
 #' @export
@@ -277,6 +364,26 @@ transform_resized_crop.default <- function(img, top, left, height, width, size,
   img <- transform_crop(img, top, left, height, width)
   img <- transform_resize(img, size, interpolation)
   img
+}
+
+#' @export
+transform_adjust_brightness.default <- function(img, brightness_factor) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_adjust_contrast.default <- function(img, contrast_factor) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_adjust_hue.default <- function(img, hue_factor) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_adjust_saturation.default <- function(img, saturation_factor) {
+  not_implemented_for_class(img)
 }
 
 # Helpers -----------------------------------------------------------------

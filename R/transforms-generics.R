@@ -471,3 +471,70 @@ transform_resized_crop <- function(img, top, left, height, width, size,
   UseMethod("transform_resized_crop", img)
 }
 
+
+#' Adjust brightness of an Image.
+#'
+#' @param brightness_factor (float):  How much to adjust the brightness. Can be
+#'   any non negative number. 0 gives a black image, 1 gives the
+#'   original image while 2 increases the brightness by a factor of 2.
+#' @inheritParams transform_resize
+#'
+#' @family transforms
+#' @export
+transform_adjust_brightness <- function(img, brightness_factor) {
+  UseMethod("transform_adjust_brightness", img)
+}
+
+#' Adjust contrast of an Image.
+#'
+#' @param contrast_factor (float): How much to adjust the contrast. Can be any
+#'   non negative number. 0 gives a solid gray image, 1 gives the
+#'   original image while 2 increases the contrast by a factor of 2.
+#'
+#' @inheritParams transform_resize
+#'
+#' @family transforms
+#' @export
+transform_adjust_contrast <- function(img, contrast_factor) {
+  UseMethod("transform_adjust_contrast", img)
+}
+
+#' Adjust color saturation of an image.
+#'
+#' @param saturation_factor (float):  How much to adjust the saturation. 0 will
+#'   give a black and white image, 1 will give the original image while
+#'   2 will enhance the saturation by a factor of 2.
+#'
+#'
+#' @inheritParams transform_resize
+#'
+#' @family transforms
+#' @export
+transform_adjust_saturation <- function(img, saturation_factor) {
+  UseMethod("transform_adjust_saturation", img)
+}
+
+#' Adjust hue of an image.
+#'
+#' The image hue is adjusted by converting the image to HSV and
+#' cyclically shifting the intensities in the hue channel (H).
+#' The image is then converted back to original image mode.
+#'
+#' `hue_factor` is the amount of shift in H channel and must be in the
+#' interval `[-0.5, 0.5]`.
+#'
+#' See [Hue](https://en.wikipedia.org/wiki/Hue) for more details.
+#'
+#' @param hue_factor (float):  How much to shift the hue channel. Should be in
+#'   `[-0.5, 0.5]`. 0.5 and -0.5 give complete reversal of hue channel in
+#'   HSV space in positive and negative direction respectively.
+#'   0 means no shift. Therefore, both -0.5 and 0.5 will give an image
+#'   with complementary colors while 0 gives the original image.
+#'
+#' @inheritParams transform_resize
+#'
+#' @family transforms
+#' @export
+transform_adjust_hue <- function(img, hue_factor) {
+  UseMethod("transform_adjust_hue", img)
+}
