@@ -419,3 +419,30 @@ transform_random_erasing <- function(img, p=0.5, scale=c(0.02, 0.33), ratio=c(0.
                                      value=0, inplace=FALSE) {
   UseMethod("transform_random_erasing", img)
 }
+
+# Other generics ----------------------------------------------------------
+
+#' Crop the given image at specified location and output size.
+#'
+#' @inheritParams transform_to_tensor
+#' @param top (int): Vertical component of the top left corner of the crop box.
+#' @param left (int): Horizontal component of the top left corner of the crop box.
+#' @param height (int): Height of the crop box.
+#' @param width (int): Width of the crop box.
+#'
+#' @family transforms
+#' @export
+transform_crop <- function(img, top, left, height, width) {
+  UseMethod("transform_crop", img)
+}
+
+#' Horizontally flip the given PIL Image or Tensor.
+#'
+#' @inheritParams transform_to_tensor
+#'
+#' @family transforms
+#' @export
+transform_hflip <- function(img) {
+  UseMethod("transform_hflip", img)
+}
+

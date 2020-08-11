@@ -83,32 +83,7 @@ tft_vflip <- function(img) {
   img$flip(-2)
 }
 
-#' Horizontally flip the given the Image Tensor.
-#'
-#' @param img (Tensor): Image Tensor to be flipped in the form `[C, H, W]`.
-#'
-#' @return Horizontally flipped image Tensor.
-#'
-#' @export
-tft_hflip <- function(img) {
-  check_img(img)
-  img$flip(-1)
-}
 
-#' Crop the given Image Tensor.
-#'
-#' @param img (Tensor): Image to be cropped in the form `[..., H, W]`. (0,0) denotes the top left corner of the image.
-#' @param top (int): Vertical component of the top left corner of the crop box.
-#' @param left (int): Horizontal component of the top left corner of the crop box.
-#' @param height (int): Height of the crop box.
-#' @param width (int): Width of the crop box.
-#'
-#' @return Cropped image.
-tft_crop <- function(img, top, left, height, width) {
-  check_img(img)
-
-  img[.., top:(top + height - 1), left:(left + width - 1)]
-}
 
 #' Convert the given RGB Image Tensor to Grayscale.
 #' For RGB to Grayscale conversion, ITU-R 601-2 luma transform is performed which

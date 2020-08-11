@@ -163,9 +163,86 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
   img
 }
 
+#' @export
+transform_pad.torch_tensor <- function(img, padding, fill = 0, padding_mode = "constant") {
+
+  check_img(img)
+
+  if (!length(padding) %in% c(1,2,4) || !is.numeric(padding))
+    value_error("Padding must be an int or a 1, 2, or 4 element numeric vector")
+
+  if (!padding_mode %in% c("constant", "edge", "reflect", "symmetric"))
+    value_error("Padding mode should be either constant, edge, reflect or symmetric")
+
+
+  if (length(padding) == 1)
+    pad_left <- pad_right <- pad_top <- pad_bottom <- padding
+  else if (length(padding) == 2) {
+    pad_left <- pad_right <- padding[1]
+    pad_top <- pad_bottom <- padding[2]
+  } else if (length(padding == 4)) {
+    pad_left <- padding[1]
+    pad_right <- padding[2]
+    pad_top <- padding[3]
+    pad_bottom <- padding[4]
+  }
+
+  p <- c(pad_left, pad_right, pad_top, pad_bottom)
+
+  if (padding_mode == "edge")
+    padding_mode <- "replicate"
+  else if (padding_mode == "symmetric") {
+    if (any(p < 0))
+      value_error("Padding can not be negative for symmetric padding_mode")
+
+    return(pad_symmetric(img, p))
+  }
+
+  need_squeeze <- FALSE
+
+  if (img$dim() < 4) {
+    img <- img$unsqueeze(1)
+    need_squeeze <- TRUE
+  }
+
+  out_dtype <- img$dtype()
+  need_cast <- FALSE
+
+  if (padding_mode != "constant" &&
+      (img$dtype() == torch::torch_float32() || img$dtype() == torch::torch_float64())) {
+    need_cast <- TRUE
+    img <- img$to(torch::torch_float32())
+  }
+
+  img <- torch::nnf_pad(img, p, mode = padding_mode, value = as.numeric(fill))
+
+  if (need_squeeze)
+    img <- img$squeeze(dim = 1)
+
+  if (need_cast)
+    img <- img$to(dtype = out_dtype)
+
+  img
+}
+
+
+# Other methods -----------------------------------------------------------
+
+#' @export
+transform_crop.torch_tensor <- function(img, top, left, height, width) {
+  check_img(img)
+
+  img[.., top:(top + height - 1), left:(left + width - 1)]
+}
+
+#' @export
+transform_hflip.torch_tensor <- function(img) {
+  check_img(img)
+  img$flip(-1)
+}
+
 
 # Helpers -----------------------------------------------------------------
-
 
 is_tensor_image <- function(x) {
   x$dim() >= 2
