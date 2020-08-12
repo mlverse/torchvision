@@ -334,9 +334,101 @@ transform_random_rotation.default <- function(img, degrees, resample=FALSE,
   transform_rotate(img, angle, resample, expand, center, fill)
 }
 
-#' @export
-transform_random_affine.default <- function(img) {
 
+get_random_affine_params <- function(degrees,
+                                     translate,
+                                     scale_ranges,
+                                     shears,
+                                     img_size) {
+
+  angle <- as.numeric(torch::torch_empty(1)$uniform_(degrees[1], degrees[2]))
+  if (!is.null(translate)) {
+    max_dx = as.numeric(translate[1] * img_size[1])
+    max_dy = as.numeric(translate[2] * img_size[2])
+    tx = as.integer(round(torch::torch_empty(1)$uniform_(-max_dx, max_dx)))
+    ty = as.integer(round(torch::torch_empty(1)$uniform_(-max_dy, max_dy)))
+    translations <- c(tx, ty)
+  } else {
+    translations <- c(0,0)
+  }
+
+  if (!is.null(scale_ranges)) {
+    scale <- as.numeric(torch::torch_empty(1)$uniform_(scale_ranges[1], scale_ranges[2]))
+  } else {
+    scale <- 1
+  }
+
+  shear_x <- shear_y <- 0.0
+
+  if (!is.null(shears))  {
+    shear_x <- as.numeric(torch::torch_empty(1)$uniform_(shears[1], shears[2]))
+    if (length(shears) == 4)
+      shear_y <- as.numeric(torch::torch_empty(1)$uniform_(shears[3], shears[4]))
+  }
+
+  shear <- c(shear_x, shear_y)
+
+  list(angle, translations, scale, shear)
+}
+
+#' @export
+transform_random_affine.default <- function(img, degrees, translate=NULL, scale=NULL,
+                                            shear=NULL, resample=0, fillcolor=0) {
+
+  if (length(degrees) == 1) {
+
+    if (degrees < 0)
+      value_error("degrees must be positive if it's a single value")
+
+    degrees <- c(-degrees, degrees)
+
+  } else if (length(degrees) != 2) {
+    value_error("degrees must be length 1 or 2")
+  }
+
+
+  if (!is.null(translate)) {
+
+    if (length(translate) != 2)
+      value_error("translate must be length 2")
+
+    if (any(translate > 1) || any(translate < 0))
+      value_error("translate must be between 0 and 1")
+
+  }
+
+  if (!is.null(scale)) {
+
+    if (length(scale) != 2)
+      value_error("scale must be length 2")
+
+    if (any(scale > 0))
+      value_error("scale must be positive")
+
+  }
+
+  if (!is.null(shear)) {
+
+    if (length(shear) == 1) {
+
+      if (shear < 0)
+        value_error("shear must be positive if it's a single value")
+
+      degrees <- c(-degrees, degrees)
+
+    } else if (!length(shear) %in% c(2, 4)) {
+      value_error("shear's length must be 1, 2, or 4")
+    }
+
+  }
+
+
+  img_size <- get_image_size(img)
+
+  ret = get_random_affine_params(degrees, translate, scale, shear, img_size)
+
+  transform_affine(img, ret[[1]], ret[[2]], ret[[3]], ret[[4]],
+                   resample=resample, fillcolor=fillcolor)
 }
 
 #' @export
@@ -407,6 +499,11 @@ transform_adjust_saturation.default <- function(img, saturation_factor) {
 #' @export
 transform_rotate.default <- function(img, angle, resample = 0, expand = FALSE,
                                      center = NULL, fill = NULL) {
+  not_implemented_for_class(img)
+}
+
+transform_affine.default <- function(img, angle, translate, scale, shear,
+                                     resample = 0, fillcolor = NULL) {
   not_implemented_for_class(img)
 }
 

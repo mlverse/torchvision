@@ -551,3 +551,14 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
                              center = NULL, fill = NULL) {
   UseMethod("transform_rotate", img)
 }
+
+#' Apply affine transformation on the image keeping image center invariant
+#'
+#' @inheritParams transform_random_affine
+#'
+#' @family transforms
+#' @export
+transform_affine <- function(img, angle, translate, scale, shear,
+                             resample = 0, fillcolor = NULL) {
+  UseMethod("transform_affine", img)
+}
