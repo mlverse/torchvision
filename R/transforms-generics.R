@@ -538,3 +538,16 @@ transform_adjust_saturation <- function(img, saturation_factor) {
 transform_adjust_hue <- function(img, hue_factor) {
   UseMethod("transform_adjust_hue", img)
 }
+
+
+#' Rotate the image by angle.
+#'
+#' @inheritParams transform_to_tensor
+#' @inheritParams transform_random_rotation
+#'
+#' @family transforms
+#' @export
+transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
+                             center = NULL, fill = NULL) {
+  UseMethod("transform_rotate", img)
+}

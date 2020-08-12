@@ -362,6 +362,25 @@ transform_adjust_saturation.torch_tensor <- function(img, saturation_factor) {
   blend(img, tft_rgb_to_grayscale(img), saturation_factor)
 }
 
+#' @export
+transform_rotate.torch_tensor <- function(img, angle, resample = 0, expand = FALSE,
+                                          center = NULL, fill = NULL) {
+
+  center_f <- c(0.0, 0.0)
+  if (!is.null(center)) {
+    img_size <- get_image_size(img)
+    # Center values should be in pixel coordinates but translated such that (0, 0) corresponds to image center.
+    center_f <- mapply(function(c, s) 1 * (c - s * 0.5), center, img_size)
+  }
+
+
+  # due to current incoherence of rotation angle direction between affine and rotate implementations
+  # we need to set -angle.
+  matrix <- get_inverse_affine_matrix(center_f, -angle, c(0.0, 0.0), 1.0, c(0.0, 0.0))
+
+  rotate_impl(img, matrix=matrix, resample=resample, expand=expand, fill=fill)
+}
+
 # Helpers -----------------------------------------------------------------
 
 is_tensor_image <- function(x) {
@@ -450,3 +469,171 @@ hsv2rgb <- function(img) {
 
   torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype()), a4))
 }
+
+# https://stackoverflow.com/questions/32370485/convert-radians-to-degree-degree-to-radians
+rad2deg <- function(rad) {(rad * 180) / (pi)}
+deg2rad <- function(deg) {(deg * pi) / (180)}
+
+# Helper method to compute inverse matrix for affine transformation
+# As it is explained in PIL.Image.rotate
+# We need compute INVERSE of affine transformation matrix: M = T * C * RSS * C^-1
+# where T is translation matrix: [1, 0, tx | 0, 1, ty | 0, 0, 1]
+#       C is translation matrix to keep center: [1, 0, cx | 0, 1, cy | 0, 0, 1]
+#       RSS is rotation with scale and shear matrix
+#       RSS(a, s, (sx, sy)) =
+#       = R(a) * S(s) * SHy(sy) * SHx(sx)
+#       = [ s*cos(a - sy)/cos(sy), s*(-cos(a - sy)*tan(x)/cos(y) - sin(a)), 0 ]
+#         [ s*sin(a + sy)/cos(sy), s*(-sin(a - sy)*tan(x)/cos(y) + cos(a)), 0 ]
+#         [ 0                    , 0                                      , 1 ]
+#
+# where R is a rotation matrix, S is a scaling matrix, and SHx and SHy are the shears:
+# SHx(s) = [1, -tan(s)] and SHy(s) = [1      , 0]
+#          [0, 1      ]              [-tan(s), 1]
+#
+# Thus, the inverse is M^-1 = C * RSS^-1 * C^-1 * T^-1
+get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
+
+  rot = deg2rad(angle)
+  sx <- deg2rad(shear[1])
+  sy <- deg2rad(shear[2])
+
+  cx <- center[1]
+  cy <- center[2]
+
+  tx <- translate[1]
+  ty <- translate[2]
+
+  # RSS without scaling
+  a <- cos(rot - sy) / cos(sy)
+  b = -cos(rot - sy) * tan(sx) / cos(sy) - sin(rot)
+  c = sin(rot - sy) / cos(sy)
+  d = -sin(rot - sy) * tan(sx) / cos(sy) + cos(rot)
+
+  # Inverted rotation matrix with scale and shear
+  # det([[a, b], [c, d]]) == 1, since det(rotation) = 1 and det(shear) = 1
+  matrix <- c(d, -b, 0.0, -c, a, 0.0) / scale
+
+
+  # Apply inverse of translation and of center translation: RSS^-1 * C^-1 * T^-1
+  matrix[3] = matrix[3] + matrix[1] * (-cx - tx) + matrix[2] * (-cy - ty)
+  matrix[5] = matrix[5] + matrix[4] * (-cx - tx) + matrix[5] * (-cy - ty)
+
+  # Apply center translation: C * RSS^-1 * C^-1 * T^-1
+  matrix[3] = matrix[3] + cx
+  matrix[6] = matrix[6] + cy
+
+  matrix
+}
+
+assert_grid_transform_inputs <- function(img, matrix, resample, fillcolor,
+                                         interpolation_modes, coeffs) {
+  check_img(img)
+}
+
+apply_grid_transform <- function(img, grid, mode) {
+
+  need_squeeze <- FALSE
+  if (img$dim() < 4) {
+    img <- img$unsqueeze(dim=1)
+    need_squeeze <- TRUE
+  }
+
+  out_dtype <- img$dtype()
+  need_cast <- FALSE
+  if (!img$dtype() == torch::torch_float32() && !img$dtype() == torch::torch_float64()) {
+    need_cast <- TRUE
+    img <- img$to(dtype = torch::torch_float32())
+  }
+
+  img <- torch::nnf_grid_sample(img, grid, mode=mode, padding_mode="zeros",
+                                align_corners=FALSE)
+
+  if (need_squeeze)
+    img <- img$squeeze(dim=1)
+
+  if (need_cast) {
+    # it is better to round before cast
+    img <- torch::torch_round(img)$to(dtype = out_dtype)
+  }
+
+  img
+}
+
+# https://github.com/pytorch/pytorch/blob/74b65c32be68b15dc7c9e8bb62459efbfbde33d8/aten/src/ATen/native/
+# AffineGridGenerator.cpp#L18
+# Difference with AffineGridGenerator is that:
+# 1) we normalize grid values after applying theta
+# 2) we can normalize by other image size, such that it covers "extend" option like in PIL.Image.rotate
+gen_affine_grid <- function(theta, w, h, ow, oh) {
+
+  d = 0.5
+  base_grid = torch::torch_empty(1, oh, ow, 3)
+  base_grid[.., 1]$copy_(torch::torch_linspace(start = -ow * 0.5 + d, end = ow * 0.5 + d - 1,
+                                               steps=ow))
+
+  base_grid[.., 2]$copy_(torch::torch_linspace(start = -oh * 0.5 + d, end = oh * 0.5 + d - 1,
+                                               steps=oh)$unsqueeze_(-1))
+  base_grid[.., 3]$fill_(1)
+
+  output_grid = base_grid$view(1, oh * ow, 3)$bmm(
+    theta$transpose(2, 3) / torch::torch_tensor(c(0.5 * w, 0.5 * h))
+  )
+
+  output_grid$view(1, oh, ow, 2)
+}
+
+rotate_compute_output_size <- function(theta, w, h) {
+  # Inspired of PIL implementation:
+  # https://github.com/python-pillow/Pillow/blob/11de3318867e4398057373ee9f12dcb33db7335c/src/PIL/Image.py#L2054
+
+  # pts are Top-Left, Top-Right, Bottom-Left, Bottom-Right points.
+  pts <- torch::torch_tensor(rbind(
+    c(-0.5 * w, -0.5 * h, 1.0),
+    c(-0.5 * w, 0.5 * h, 1.0),
+    c(0.5 * w, 0.5 * h, 1.0),
+    c(0.5 * w, -0.5 * h, 1.0),
+  ))
+  new_pts <- pts$view(1, 4, 3)$bmm(theta$transpose(2, 3))$view(4, 2)
+  min_vals <- new_pts$min(dim=1)[[1]]
+  max_vals <- new_pt$.max(dim=1)[[1]]
+
+  # Truncate precision to 1e-4 to avoid ceil of Xe-15 to 1.0
+  tol = 1e-4
+  cmax = torch::torch_ceil((max_vals / tol)$trunc_() * tol)
+  cmin = torch::torch_floor((min_vals / tol)$trunc_() * tol)
+  size = cmax - cmin
+
+  as.integer(c(size[1], size[2]))
+}
+
+rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
+
+  interpolation_modes <- c(
+    "0" =  "nearest",
+    "2" = "bilinear"
+  )
+
+  assert_grid_transform_inputs(img, matrix, resample, fill, interpolation_modes)
+  theta <- torch::torch_tensor(matrix)$reshape(1, 2, 3)
+  w <- img$shape(-1)
+  h <- img$shape(-2)
+
+  if (expand) {
+    o_shape <- rotate_compute_output_size(theta, w, h)
+    ow <- o_shape[1]
+    oh <- o_shape[2]
+  } else {
+    ow <- w
+    oh <- h
+  }
+
+  grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
+  mode <- interpolation_modes[as.character(resample)]
+
+  apply_grid_transform(img, grid, mode)
+}
+
+
+
+
+

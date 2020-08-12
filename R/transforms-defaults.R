@@ -311,9 +311,27 @@ transform_color_jitter.default <- function(img, brightness=0, contrast=0,
   tf(img)
 }
 
-#' @export
-transform_random_rotation.default <- function(img) {
+get_random_rotation_params <- function(degrees) {
+  as.numeric(torch::torch_empty(1)$uniform_(degrees[1], degrees[2]))
+}
 
+#' @export
+transform_random_rotation.default <- function(img, degrees, resample=FALSE,
+                                              expand=FALSE, center=NULL, fill=NULL) {
+
+  if (length(degrees) == 1) {
+
+    if (degrees < 0)
+      value_error("degrees must be positive if it's a single value")
+
+    degrees <- c(-degrees, degrees)
+
+  } else if (length(degrees) != 2) {
+    value_error("degrees must be length 1 or 2")
+  }
+
+  angle <- get_random_rotation_params(degrees)
+  transform_rotate(img, angle, resample, expand, center, fill)
 }
 
 #' @export
@@ -383,6 +401,12 @@ transform_adjust_hue.default <- function(img, hue_factor) {
 
 #' @export
 transform_adjust_saturation.default <- function(img, saturation_factor) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_rotate.default <- function(img, angle, resample = 0, expand = FALSE,
+                                     center = NULL, fill = NULL) {
   not_implemented_for_class(img)
 }
 
