@@ -205,12 +205,12 @@ transform_random_resized_crop.default <- function(img, size, scale=c(0.08, 1.0),
 }
 
 #' @export
-transform_five_crop.default <- function(img) {
+transform_five_crop.default <- function(img, size) {
   not_implemented_for_class(img)
 }
 
 #' @export
-transform_ten_crop.default <- function(img) {
+transform_ten_crop.default <- function(img, size, vertical_flip = FALSE) {
   not_implemented_for_class(img)
 }
 

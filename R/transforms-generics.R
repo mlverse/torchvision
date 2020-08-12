@@ -259,7 +259,7 @@ transform_five_crop <- function(img, size) {
 #'
 #' @family transforms
 #' @export
-transform_ten_crop <- function(img) {
+transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   UseMethod("transform_ten_crop", img)
 }
 
