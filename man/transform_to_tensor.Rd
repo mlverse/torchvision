@@ -17,7 +17,7 @@ Converts a Magick Image or array (H x W x C) in the range
 In the other cases, tensors are returned without scaling.
 }
 \note{
-Because the input image is scaled to \link{0.0, 1.0}, this transformation should not be used when
+Because the input image is scaled to \verb{[0.0, 1.0]}, this transformation should not be used when
 transforming target image masks.
 }
 \seealso{

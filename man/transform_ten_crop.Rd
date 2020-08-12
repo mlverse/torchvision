@@ -5,10 +5,16 @@
 \title{Crop the given image into four corners and the central crop plus the flipped version of
 these (horizontal flipping is used by default).}
 \usage{
-transform_ten_crop(img)
+transform_ten_crop(img, size, vertical_flip = FALSE)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
+
+\item{size}{(sequence or int): Desired output size. If size is a sequence like
+(h, w), output size will be matched to this. If size is an int,
+smaller edge of the image will be matched to this number.
+i.e, if height > width, then image will be rescaled to
+(size * height / width, size).}
 
 \item{vertical_flip}{(bool): Use vertical flipping instead of horizontal}
 }

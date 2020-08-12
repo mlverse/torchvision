@@ -6,7 +6,7 @@
 #' In the other cases, tensors are returned without scaling.
 #'
 #' @note
-#' Because the input image is scaled to [0.0, 1.0], this transformation should not be used when
+#' Because the input image is scaled to `[0.0, 1.0]`, this transformation should not be used when
 #' transforming target image masks.
 #'
 #' @param img A `magick-image`, `array` or `torch_tensor`.
@@ -60,7 +60,7 @@ transform_normalize <- function(img, mean, std, inplace = FALSE) {
 #' Resize the input image to the given size.
 #'
 #' The image can be a Magic Image or a torch Tensor, in which case it is expected
-#' to have [..., H, W] shape, where ... means an arbitrary number of leading
+#' to have `[..., H, W]` shape, where ... means an arbitrary number of leading
 #' dimensions
 #'
 #' @inheritParams transform_to_tensor
@@ -160,7 +160,7 @@ transform_random_choice <- function(img, transforms) {
 #' @inheritParams transform_random_apply
 #' @family transforms
 #' @export
-transform_random_order <- function(img) {
+transform_random_order <- function(img, transforms) {
   UseMethod("transform_random_order", img)
 }
 
@@ -273,11 +273,11 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #'
 #' @section Applications:
 #' whitening transformation: Suppose X is a column vector zero-centered data.
-#' Then compute the data covariance matrix [D x D] with torch.mm(X.t(), X),
+#' Then compute the data covariance matrix `[D x D]` with torch.mm(X.t(), X),
 #' perform SVD on this matrix and pass it as transformation_matrix.
 #'
 #' @inheritParams transform_to_tensor
-#' @param transformation_matrix (Tensor): tensor [D x D], D = C x H x W
+#' @param transformation_matrix (Tensor): tensor `[D x D]`, D = C x H x W
 #' @param mean_vector (Tensor): tensor [D], D = C x H x W
 #'
 #' @family transforms
@@ -292,7 +292,7 @@ transform_linear_transformation <- function(img, transformation_matrix, mean_vec
 #'   brightness_factor is chosen uniformly from `[max(0, 1 - brightness), 1 + brightness]`
 #'   or the given `[min, max]`. Should be non negative numbers.
 #' @param contrast (float or tuple of float (min, max)): How much to jitter contrast.
-#'   contrast_factor is chosen uniformly from [max(0, 1 - contrast), 1 + contrast]
+#'   contrast_factor is chosen uniformly from `[max(0, 1 - contrast), 1 + contrast]`
 #'   or the given `[min, max]`. Should be non negative numbers.
 #' @param saturation (float or tuple of float (min, max)): How much to jitter saturation.
 #'   saturation_factor is chosen uniformly from `[max(0, 1 - saturation), 1 + saturation]`

@@ -4,10 +4,12 @@
 \alias{transform_random_order}
 \title{Apply a list of transformations in a random order}
 \usage{
-transform_random_order(img)
+transform_random_order(img, transforms)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
+
+\item{transforms}{(list or tuple): list of transformations}
 }
 \description{
 Apply a list of transformations in a random order

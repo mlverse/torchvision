@@ -664,7 +664,7 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
   apply_grid_transform(img, grid, mode)
 }
 
-affine_impl <- function() {
+affine_impl <- function(img, matrix, resample = 0, fillcolor = NULL) {
 
   interpolation_modes <- c(
     "0"= "nearest",

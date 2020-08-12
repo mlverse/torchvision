@@ -20,7 +20,7 @@ brightness_factor is chosen uniformly from \verb{[max(0, 1 - brightness), 1 + br
 or the given \verb{[min, max]}. Should be non negative numbers.}
 
 \item{contrast}{(float or tuple of float (min, max)): How much to jitter contrast.
-contrast_factor is chosen uniformly from \link{max(0, 1 - contrast), 1 + contrast}
+contrast_factor is chosen uniformly from \verb{[max(0, 1 - contrast), 1 + contrast]}
 or the given \verb{[min, max]}. Should be non negative numbers.}
 
 \item{saturation}{(float or tuple of float (min, max)): How much to jitter saturation.

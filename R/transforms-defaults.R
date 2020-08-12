@@ -15,7 +15,7 @@ transform_normalize.default <- function(img, mean, std, inplace = FALSE) {
 }
 
 #' @export
-transform_resize.default <- function(img, size) {
+transform_resize.default <- function(img, size, interpolation) {
   not_implemented_for_class(img)
 }
 
@@ -51,7 +51,7 @@ transform_pad.default <- function(img, padding, fill = 0, padding_mode = "consta
 #' @export
 transform_random_apply.default <- function(img, transforms, p = 0.5) {
 
-  if (p < runif(1))
+  if (p < stats::runif(1))
     return(img)
 
   for (tf in transforms) {
@@ -121,7 +121,7 @@ transform_random_crop.default <- function(img, size, padding=NULL, pad_if_needed
     img <- transform_pad(img, padding, fill, padding_mode)
   }
 
-  params <- get_random_crop_params(img, self.size)
+  params <- get_random_crop_params(img, size)
 
   transform_crop(img, params[1], params[2], params[3], params[4])
 }
@@ -129,7 +129,7 @@ transform_random_crop.default <- function(img, size, padding=NULL, pad_if_needed
 #' @export
 transform_random_horizontal_flip.default <- function(img, p = 0.5) {
 
-  if (runif(1) < p)
+  if (stats::runif(1) < p)
     img <- transform_hflip(img)
 
   img
@@ -137,9 +137,9 @@ transform_random_horizontal_flip.default <- function(img, p = 0.5) {
 
 
 #' @export
-transform_random_vertical_flip.default <- function(img) {
+transform_random_vertical_flip.default <- function(img, p) {
 
-  if (runif(1) < p)
+  if (stats::runif(1) < p)
     img <- transform_vflip(img)
 
   img
@@ -225,7 +225,7 @@ get_color_jitter_params <- function(brightness, contrast, saturation, hue) {
   transforms <- list()
 
   if (!is.null(brightness)) {
-    brightness_factor <- runif(1, min = brightness[1], max = brightness[2])
+    brightness_factor <- stats::runif(1, min = brightness[1], max = brightness[2])
     transforms <- append(
       transforms,
       list(function(img) transform_adjust_brightness(img, brightness_factor))
@@ -233,7 +233,7 @@ get_color_jitter_params <- function(brightness, contrast, saturation, hue) {
   }
 
   if (!is.null(contrast)) {
-    contrast_factor <- runif(1, contrast[1], contrast[2])
+    contrast_factor <- stats::runif(1, contrast[1], contrast[2])
     transforms <- append(
       transforms,
       list(function(img) transform_adjust_contrast(img, contrast_factor))
@@ -241,7 +241,7 @@ get_color_jitter_params <- function(brightness, contrast, saturation, hue) {
   }
 
   if (!is.null(saturation)) {
-    saturation_factor <- runif(1, saturation[1], saturation[2])
+    saturation_factor <- stats::runif(1, saturation[1], saturation[2])
     transforms <- append(
       transforms,
       list(function(img) transform_adjust_saturation(img, saturation_factor))
@@ -249,7 +249,7 @@ get_color_jitter_params <- function(brightness, contrast, saturation, hue) {
   }
 
   if (!is.null(hue)) {
-    hue_factor <- runif(1, hue[1], hue[2])
+    hue_factor <- stats::runif(1, hue[1], hue[2])
     transforms <- append(
       transforms,
       list(function(img) transform_adjust_hue(img, hue_factor))
@@ -432,7 +432,7 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
 }
 
 #' @export
-transform_grayscale.default <- function(img) {
+transform_grayscale.default <- function(img, num_output_channels) {
   not_implemented_for_class(img)
 }
 
@@ -468,7 +468,7 @@ get_random_perspective_params <- function(width, height, distortion_scale) {
 #' @export
 transform_random_perspective.default <- function(img, distortion_scale=0.5, p=0.5,
                                                  interpolation=2, fill=0) {
-  if (runif(1) < p) {
+  if (stats::runif(1) < p) {
     img_size <- get_image_size(img)
     params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
     img <- transform_perspective(img, params[[1]], params[[2]], interpolation, fill)
@@ -554,6 +554,6 @@ transform_adjust_gamma.default <- function(img, gamma, gain = 1) {
 # Helpers -----------------------------------------------------------------
 
 not_implemented_for_class <- function(x) {
-  not_implemented_error("not implemented for ", class(x))
+  not_implemented_error(paste0("not implemented for ", class(x)))
 }
 

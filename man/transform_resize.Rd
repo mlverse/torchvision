@@ -20,7 +20,7 @@ i.e, if height > width, then image will be rescaled to
 }
 \description{
 The image can be a Magic Image or a torch Tensor, in which case it is expected
-to have \link{..., H, W} shape, where ... means an arbitrary number of leading
+to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading
 dimensions
 }
 \seealso{
