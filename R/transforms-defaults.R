@@ -540,8 +540,13 @@ transform_affine.default <- function(img, angle, translate, scale, shear,
 }
 
 #' @export
-transform_perspective <- function(img, startpoints, endpoints, interpolation = 2,
+transform_perspective.default <- function(img, startpoints, endpoints, interpolation = 2,
                                   fill = NULL) {
+  not_implemented_for_class(img)
+}
+
+#' @export
+transform_adjust_gamma.default <- function(img, gamma, gain = 1) {
   not_implemented_for_class(img)
 }
 

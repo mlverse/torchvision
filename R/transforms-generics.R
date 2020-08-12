@@ -578,3 +578,27 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
                                   fill = NULL) {
   UseMethod("transform_perspective", img)
 }
+
+#' Adjust gamma of an RGB image.
+#'
+#' Also known as Power Law Transform. Intensities in RGB mode are adjusted
+#' based on the following equation:
+#'
+#' \deqn{
+#'   I_{\mbox{out}} = 255 \times \mbox{gain} \times \left(\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
+#' }
+#'
+#' See [Gamma Correction](https://en.wikipedia.org/wiki/Gamma_correction)
+#' for more details.
+#'
+#' @param gamma (float): Non negative real number, same as \eqn{\gamma} in the equation.
+#'   gamma larger than 1 make the shadows darker,
+#'   while gamma smaller than 1 make dark regions lighter.
+#' @param gain (float): The constant multiplier.
+#' @inheritParams transform_to_tensor
+#'
+#' @family transforms
+#' @export
+transform_adjust_gamma <- function(img, gamma, gain = 1) {
+  UseMethod("transform_adjust_gamma", img)
+}

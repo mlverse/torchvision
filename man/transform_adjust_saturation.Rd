@@ -20,6 +20,7 @@ Adjust color saturation of an image.
 Other transforms: 
 \code{\link{transform_adjust_brightness}()},
 \code{\link{transform_adjust_contrast}()},
+\code{\link{transform_adjust_gamma}()},
 \code{\link{transform_adjust_hue}()},
 \code{\link{transform_affine}()},
 \code{\link{transform_center_crop}()},

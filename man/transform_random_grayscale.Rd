@@ -18,6 +18,7 @@ Randomly convert image to grayscale with a probability of p (default 0.1).
 Other transforms: 
 \code{\link{transform_adjust_brightness}()},
 \code{\link{transform_adjust_contrast}()},
+\code{\link{transform_adjust_gamma}()},
 \code{\link{transform_adjust_hue}()},
 \code{\link{transform_adjust_saturation}()},
 \code{\link{transform_affine}()},

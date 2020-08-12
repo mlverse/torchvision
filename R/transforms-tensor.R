@@ -681,3 +681,78 @@ affine_impl <- function() {
   apply_grid_transform(img, grid, mode)
 }
 
+pad_symmetric <- function(img, padding) {
+
+  in_sizes <- img$size()
+
+  x_indices <- seq_len(tail(in_sizes, 1))
+  left_indices <- rev(seq_len(padding[1]))
+  right_indices <- -seq_len(padding[2])
+  x_indices <- torch::torch_tensor(c(left_indices, x_indices, right_indices),
+                                   dtype = torch::torch_long())
+
+
+  y_indices <- seq_len(rev(in_sizes)[2])
+  top_indices <- rev(seq_len(padding[3]))
+  bottom_indices <- -seq_len(padding[4])
+  y_indices <- torch::torch_tensor(c(top_indices, y_indices, bottom_indices),
+                                   dtype = torch::torch_long())
+
+
+  ndim <- length(dim(img))
+  if (ndim == 3)
+    img[, y_indices[, NULL], x_indices[, NULL]]
+  else if (ndim == 4)
+    img[,,y_indices[, NULL], x_indices[, NULL]]
+  else
+    runtime_error("Symmetric padding of N-D tensors are not supported yet")
+}
+
+#' @export
+transform_adjust_gamma.torch_tensor <- function(img, gamma, gain = 1) {
+
+  check_img(img)
+
+  if (gamma < 0)
+    value_error("gamma must be non-negative")
+
+  result <- img
+  dtype <- img$dtype()
+
+  if (!torch::torch_is_floating_point(img))
+    result <- result/255.0
+
+  result <- (gain * result ^ gamma)$clamp(0, 1)
+
+  if (!result$dtype() == dtype) {
+    eps <- 1e-3
+    result <- (255 + 1.0 - eps) * result
+  }
+
+  result <- result$to(dtype = dtype)
+  result
+}
+
+get_perspective_coeffs <- function(startpoints, endpoints) {
+
+  a_matrix <- torch::torch_zeros(2 * length(startpoints), 8,
+                                 dtype = torch::torch_float())
+
+  for (i in seq_along(startpoints)) {
+
+    p1 <- endpoints[[i]]
+    p2 <- startpoints[[i]]
+
+    a_matrix[1 + 2*(i-1), ] <- torch::torch_tensor(c(p1[1], p1[2], 2, 1, 1, 1, -p2[1] * p1[1], -p2[1] * p1[2]))
+    a_matrix[2*i,] <- torch::torch_tensor(c(1, 1, 1, p1[1], p1[2], 2, -p2[2] * p1[1], -p2[2] * p1[1]))
+
+  }
+
+  b_matrix <- torch::torch_tensor(unlist(startpoints), dtype = torch::torch_float())$view(8)
+  res <- torch::torch_lstsq(b_matrix, a_matrix)[[1]]
+
+  output <- torch::as_array(res$squeeze(1))
+
+  output
+}
+
