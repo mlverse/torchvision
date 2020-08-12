@@ -433,22 +433,54 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
 
 #' @export
 transform_grayscale.default <- function(img) {
-
+  not_implemented_for_class(img)
 }
 
 #' @export
-transform_random_grayscale.default <- function(img) {
+transform_random_grayscale.default <- function(img, p = 0.1) {
+  not_implemented_for_class(img)
+}
 
+get_random_perspective_params <- function(width, height, distortion_scale) {
+  half_height = height %/% 2
+  half_width = width %/% 2
+  topleft = c(
+    as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_width) + 1, size=1)),
+    as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_height) + 1, size=1))
+  )
+  topright = c(
+    as.integer(torch::torch_randint(1 + width -as.integer(distortion_scale * half_width) - 1, width, size=1)),
+    as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_height) + 1, size=1))
+  )
+  botright = c(
+    as.integer(torch::torch_randint(1 + width -as.integer(distortion_scale * half_width) - 1, width, size=1)),
+    as.integer(torch::torch_randint(1 + height -as.integer(distortion_scale * half_height) - 1, height, size=1))
+  )
+  botleft = c(
+    as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_width) + 1, size=1)),
+    as.integer(torch::torch_randint(1 + height -as.integer(distortion_scale * half_height) - 1, height, size=1))
+  )
+  startpoints = list(c(1 + 0, 1 + 0), c(1 + width - 1, 1 + 0), c(1 + width - 1, 1 + height - 1), c(1 + 0, 1 + height - 1))
+  endpoints = list(topleft, topright, botright, botleft)
+  list(startpoints, endpoints)
 }
 
 #' @export
-transform_random_perspective.default <- function(img) {
+transform_random_perspective.default <- function(img, distortion_scale=0.5, p=0.5,
+                                                 interpolation=2, fill=0) {
+  if (runif(1) < p) {
+    img_size <- get_image_size(img)
+    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
+    img <- transform_perspective(img, params[[1]], params[[2]], interpolation, fill)
+  }
 
+  img
 }
 
 #' @export
-transform_random_erasing.default <- function(img) {
-
+transform_random_erasing.default <- function(img, p=0.5, scale=c(0.02, 0.33),
+                                             ratio=c(0.3, 3.3), value=0, inplace=FALSE) {
+  not_implemented_for_class(img)
 }
 
 # Other methods -----------------------------------------------------------
@@ -506,6 +538,13 @@ transform_affine.default <- function(img, angle, translate, scale, shear,
                                      resample = 0, fillcolor = NULL) {
   not_implemented_for_class(img)
 }
+
+#' @export
+transform_perspective <- function(img, startpoints, endpoints, interpolation = 2,
+                                  fill = NULL) {
+  not_implemented_for_class(img)
+}
+
 
 # Helpers -----------------------------------------------------------------
 

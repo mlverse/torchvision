@@ -562,3 +562,19 @@ transform_affine <- function(img, angle, translate, scale, shear,
                              resample = 0, fillcolor = NULL) {
   UseMethod("transform_affine", img)
 }
+
+#' Perform perspective transform of the given image.
+#'
+#' @param startpoints (list of list of ints): List containing four lists of two integers corresponding to four corners
+#'   `[top-left, top-right, bottom-right, bottom-left]` of the original image.
+#' @param endpoints (list of list of ints): List containing four lists of two integers corresponding to four corners
+#'   `[top-left, top-right, bottom-right, bottom-left]` of the transformed image.
+#' @inheritParams transform_resize
+#' @inheritParams transform_pad
+#'
+#' @family transforms
+#' @export
+transform_perspective <- function(img, startpoints, endpoints, interpolation = 2,
+                                  fill = NULL) {
+  UseMethod("transform_perspective", img)
+}

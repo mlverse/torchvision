@@ -406,6 +406,11 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
   affine_impl(img, matrix=matrix, resample=resample, fillcolor=fillcolor)
 }
 
+#' @export
+transform_perspective.torch_tensor <- function(img, startpoints, endpoints, interpolation = 2,
+                                               fill = NULL) {
+  not_implemented_error("transform perspective is not implemented yet.")
+}
 
 # Helpers -----------------------------------------------------------------
 
