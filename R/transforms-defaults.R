@@ -148,7 +148,7 @@ transform_random_vertical_flip.default <- function(img, p) {
 
 get_random_resized_crop_params <- function(img, scale, ratio) {
 
-  image_size <- get_image_size(img)
+  img_size <- get_image_size(img)
   width <- img_size[1]; height <- img_size[2]
 
   area <- height * width

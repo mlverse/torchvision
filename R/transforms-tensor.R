@@ -320,7 +320,7 @@ transform_adjust_contrast.torch_tensor <- function(img, contrast_factor) {
 
   check_img(img)
 
-  mean <- torch::torch_mean(tft_rgb_to_grayscale(img)$to(torch::torch_float()))
+  mean <- torch::torch_mean(transform_rgb_to_grayscale(img)$to(torch::torch_float()))
 
   blend(img, mean, contrast_factor)
 }
@@ -359,7 +359,7 @@ transform_adjust_saturation.torch_tensor <- function(img, saturation_factor) {
   check_img(img)
 
 
-  blend(img, tft_rgb_to_grayscale(img), saturation_factor)
+  blend(img, transform_rgb_to_grayscale(img), saturation_factor)
 }
 
 #' @export
@@ -410,6 +410,12 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
 transform_perspective.torch_tensor <- function(img, startpoints, endpoints, interpolation = 2,
                                                fill = NULL) {
   not_implemented_error("transform perspective is not implemented yet.")
+}
+
+#' @export
+transform_rgb_to_grayscale.torch_tensor <- function(img) {
+  check_img(img)
+  (0.2989 * img[1] + 0.5870 * img[2] + 0.1140 * img[3])$to(img$dtype())
 }
 
 # Helpers -----------------------------------------------------------------
@@ -626,7 +632,7 @@ rotate_compute_output_size <- function(theta, w, h) {
   ))
   new_pts <- pts$view(1, 4, 3)$bmm(theta$transpose(2, 3))$view(4, 2)
   min_vals <- new_pts$min(dim=1)[[1]]
-  max_vals <- new_pt$.max(dim=1)[[1]]
+  max_vals <- new_pts$max(dim=1)[[1]]
 
   # Truncate precision to 1e-4 to avoid ceil of Xe-15 to 1.0
   tol = 1e-4

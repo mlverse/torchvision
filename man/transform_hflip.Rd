@@ -44,6 +44,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

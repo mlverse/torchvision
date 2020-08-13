@@ -17,6 +17,8 @@ transform_affine(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
+\item{angle}{(float or int): rotation angle value in degrees, counter-clockwise.}
+
 \item{translate}{(tuple, optional): tuple of maximum absolute fraction for horizontal
 and vertical translations. For example translate=(a, b), then horizontal shift
 is randomly sampled in the range -img_width * a < dx < img_width * a and vertical shift is
@@ -73,6 +75,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

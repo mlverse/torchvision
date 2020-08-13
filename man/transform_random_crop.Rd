@@ -7,8 +7,8 @@
 transform_random_crop(
   img,
   size,
-  padding = None,
-  pad_if_needed = False,
+  padding = NULL,
+  pad_if_needed = FALSE,
   fill = 0,
   padding_mode = "constant"
 )
@@ -26,6 +26,10 @@ i.e, if height > width, then image will be rescaled to
 is used to pad all borders. If tuple of length 2 is provided this is the padding
 on left/right and top/bottom respectively. If a tuple of length 4 is provided
 this is the padding for the left, top, right and bottom borders respectively.}
+
+\item{pad_if_needed}{(boolean): It will pad the image if smaller than the
+desired size to avoid raising an exception. Since cropping is done
+after padding, the padding seems to be done at a random offset.}
 
 \item{fill}{(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
 length 3, it is used to fill R, G, B channels respectively.
@@ -81,6 +85,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

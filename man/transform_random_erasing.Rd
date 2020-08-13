@@ -27,7 +27,7 @@ erase all pixels. If a tuple of length 3, it is used to erase
 R, G, B channels respectively.
 If a str of 'random', erasing each pixel with random values.}
 
-\item{inplace:}{boolean to make this transform inplace. Default set to FALSE.}
+\item{inplace}{boolean to make this transform inplace. Default set to FALSE.}
 }
 \description{
 'Random Erasing Data Augmentation' by Zhong et al. See https://arxiv.org/pdf/1708.04896.pdf
@@ -64,6 +64,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

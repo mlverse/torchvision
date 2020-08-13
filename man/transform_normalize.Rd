@@ -13,7 +13,7 @@ transform_normalize(img, mean, std, inplace = FALSE)
 
 \item{std}{(sequence): Sequence of standard deviations for each channel.}
 
-\item{inplace(bool, optional):}{Bool to make this operation in-place.}
+\item{inplace}{(bool,optional): Bool to make this operation in-place.}
 }
 \description{
 Given mean: \verb{(mean[1],...,mean[n])} and std: \verb{(std[1],..,std[n])} for \code{n}
@@ -56,6 +56,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

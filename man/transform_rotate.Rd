@@ -16,6 +16,8 @@ transform_rotate(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
+\item{angle}{(float or int): rotation angle value in degrees, counter-clockwise.}
+
 \item{resample}{(int, optional): An optional resampling filter.}
 
 \item{expand}{(bool, optional): Optional expansion flag.
@@ -68,6 +70,7 @@ Other transforms:
 \code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},
 \code{\link{transform_vflip}()}

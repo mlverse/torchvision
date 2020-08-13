@@ -48,7 +48,7 @@ transform_convert_image_dtype <- function(img, dtype = torch::torch_float()) {
 #' @inheritParams transform_to_tensor
 #' @param mean (sequence): Sequence of means for each channel.
 #' @param std (sequence): Sequence of standard deviations for each channel.
-#' @param inplace(bool,optional): Bool to make this operation in-place.
+#' @param inplace (bool,optional): Bool to make this operation in-place.
 #'
 #' @family transforms
 #'
@@ -172,11 +172,14 @@ transform_random_order <- function(img, transforms) {
 #'
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
+#' @param pad_if_needed (boolean): It will pad the image if smaller than the
+#'   desired size to avoid raising an exception. Since cropping is done
+#'   after padding, the padding seems to be done at a random offset.
 #'
 #' @family transforms
 #'
 #' @export
-transform_random_crop <- function(img, size, padding=None, pad_if_needed=False,
+transform_random_crop <- function(img, size, padding=NULL, pad_if_needed=FALSE,
                                   fill=0, padding_mode="constant") {
   UseMethod("transform_random_crop", img)
 }
@@ -411,7 +414,7 @@ transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
 #'   erase all pixels. If a tuple of length 3, it is used to erase
 #'   R, G, B channels respectively.
 #'   If a str of 'random', erasing each pixel with random values.
-#' @param inplace: boolean to make this transform inplace. Default set to FALSE.
+#' @param inplace boolean to make this transform inplace. Default set to FALSE.
 #'
 #' @family transforms
 #' @export
@@ -544,6 +547,7 @@ transform_adjust_hue <- function(img, hue_factor) {
 #'
 #' @inheritParams transform_to_tensor
 #' @inheritParams transform_random_rotation
+#' @param angle (float or int): rotation angle value in degrees, counter-clockwise.
 #'
 #' @family transforms
 #' @export
@@ -555,6 +559,7 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
 #' Apply affine transformation on the image keeping image center invariant
 #'
 #' @inheritParams transform_random_affine
+#' @inheritParams transform_rotate
 #'
 #' @family transforms
 #' @export
@@ -601,4 +606,16 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
 #' @export
 transform_adjust_gamma <- function(img, gamma, gain = 1) {
   UseMethod("transform_adjust_gamma", img)
+}
+
+#' Convert the given RGB Image Tensor to Grayscale.
+#' For RGB to Grayscale conversion, ITU-R 601-2 luma transform is performed which
+#' is L = R * 0.2989 + G * 0.5870 + B * 0.1140
+#'
+#' @inheritParams transform_to_tensor
+#'
+#' @family transforms
+#' @export
+transform_rgb_to_grayscale <- function(img) {
+  UseMethod("transform_rgb_to_grayscale")
 }
