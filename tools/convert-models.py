@@ -28,7 +28,7 @@ models = {
 os.mkdir("models/")
 
 for name, url in models.items():
-  m = torchvision.models.utils.load_state_dict_from_url(url)
+  m = torchvision.models.utils.load_state_dict_from_url(url, progress=False)
   converted = {}
   for nm, par in m.items():
     converted.update([(nm, par.clone())])
