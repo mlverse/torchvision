@@ -22,7 +22,11 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     )
 
 models = {
-  'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth'
+  'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+  'densenet121': 'https://download.pytorch.org/models/densenet121-a639ec97.pth',
+  'densenet169': 'https://download.pytorch.org/models/densenet169-b2777c0a.pth',
+  'densenet201': 'https://download.pytorch.org/models/densenet201-c1103571.pth',
+  'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth'
 }
 
 os.mkdir("models/")
