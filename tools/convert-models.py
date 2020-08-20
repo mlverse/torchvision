@@ -1,6 +1,7 @@
 import torchvision
 import torch
 from google.cloud import storage
+import os
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -23,6 +24,8 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 models = {
   'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth'
 }
+
+os.mkdir("models/")
 
 for name, url in models.items():
   m = torchvision.models.utils.load_state_dict_from_url(url)
