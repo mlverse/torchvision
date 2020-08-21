@@ -11,6 +11,9 @@ model_alexnet(pretrained = FALSE, progress = TRUE, ...)
 \item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet}
 
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to stderr}
+
+\item{...}{other parameters passed to the model intializer. currently only
+\code{num_classes} is used.}
 }
 \description{
 AlexNet model architecture from the
