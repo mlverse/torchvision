@@ -12,13 +12,13 @@ resnet_model_urls <- c(
 )
 
 conv_3x3 <- function(in_planes, out_planes, stride = 1, groups = 1, dilation = 1) {
-  nn_conv2d(in_planes, out_planes, kernel_size = 3, stride = stride,
+  torch::nn_conv2d(in_planes, out_planes, kernel_size = 3, stride = stride,
             padding = dilation, groups = groups, bias = FALSE,
             dilation = dilation)
 }
 
 conv_1x1 <- function(in_planes, out_planes, stride=1) {
-  nn_conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=FALSE)
+  torch::nn_conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=FALSE)
 }
 
 basic_block <- torch::nn_module(
@@ -257,6 +257,7 @@ resnet <- torch::nn_module(
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet
 #' @param progress (bool): If TRUE, displays a progress bar of the download to
 #'   stderr
+#' @param ... Other parameters passed to the resnet model.
 #'
 #' @family models
 #'
