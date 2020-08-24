@@ -22,6 +22,7 @@ Imports:
     torch,
     fs,
     magick,
-    rlang
+    rlang,
+    rappdirs
 Remotes:
     mlverse/torch
