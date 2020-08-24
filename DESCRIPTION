@@ -22,7 +22,6 @@ Imports:
     torch,
     fs,
     magick,
-    rlang,
-    pins
+    rlang
 Remotes:
     mlverse/torch
