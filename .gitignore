@@ -1,3 +1,6 @@
 .Rproj.user
 models/
 env/
+test.pth
+testing.pth
+x.pth
