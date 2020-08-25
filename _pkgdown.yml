@@ -1,0 +1,21 @@
+template:
+  params:
+    bootswatch: united
+
+reference:
+- title: Transforms
+  desc: Image transformation functions
+  contents:
+    - starts_with("transform_")
+- title: Models
+  desc: Model architectures
+  contents:
+   - starts_with("model_")
+- title: Datasets
+  desc: Datasets readily available
+  contents:
+   - ends_with("_dataset")
+- title: Misc
+  contents:
+   - magick_loader
+   - vision_make_grid
