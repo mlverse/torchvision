@@ -7,7 +7,7 @@ download_and_cache <- function(url, redownload = FALSE) {
   path <- file.path(cache_path, fs::path_file(url))
 
   if (!file.exists(path) || redownload)
-    utils::download.file(url, path)
+    utils::download.file(url, path, mode = "wb")
 
   path
 }
