@@ -1,16 +1,14 @@
-test_that("alexnet", {
+test_that("resnet18", {
 
-  m <- model_alexnet()
+  model <- model_resnet18()
   input <- torch::torch_randn(1, 3, 256, 256)
-
-  out <- m(input)
+  out <- model(input)
 
   expect_tensor_shape(out, c(1, 1000))
 
-  m <- model_alexnet(pretrained = TRUE)
+  model <- model_resnet18(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 256, 256)
-
-  out <- m(input)
+  out <- model(input)
 
   expect_tensor_shape(out, c(1, 1000))
 

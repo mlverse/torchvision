@@ -52,7 +52,11 @@ model_alexnet <- function(pretrained = FALSE, progress = TRUE, ...) {
   model <- alexnet(...)
 
   if (pretrained) {
-    not_implemented_error("Pre-trained models are not yet implemented.")
+    state_dict_path <- download_and_cache(
+      "https://storage.googleapis.com/torchvision-models/v1/models/alexnet.pth"
+    )
+    state_dict <- torch::load_state_dict(state_dict_path)
+    model$load_state_dict(state_dict)
   }
 
   model

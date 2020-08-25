@@ -19,4 +19,8 @@ model_alexnet(pretrained = FALSE, progress = TRUE, ...)
 AlexNet model architecture from the
 \href{https://arxiv.org/abs/1404.5997>}{One weird trick...} paper.
 }
+\seealso{
+Other models: 
+\code{\link{model_resnet18}()}
+}
 \concept{models}
