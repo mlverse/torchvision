@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Randomly selects a rectangle region in an image and erases its pixels. — transform_random_erasing • torchvision</title>
+<title>Tiny imagenet dataset — tiny_imagenet_dataset • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Randomly selects a rectangle region in an image and erases its pixels. — transform_random_erasing" />
-<meta property="og:description" content="'Random Erasing Data Augmentation' by Zhong et al. See https://arxiv.org/pdf/1708.04896.pdf" />
+<meta property="og:title" content="Tiny imagenet dataset — tiny_imagenet_dataset" />
+<meta property="og:description" content="Tiny imagenet dataset" />
 
 
 
@@ -121,94 +121,38 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Randomly selects a rectangle region in an image and erases its pixels.</h1>
+    <h1>Tiny imagenet dataset</h1>
     
-    <div class="hidden name"><code>transform_random_erasing.Rd</code></div>
+    <div class="hidden name"><code>tiny_imagenet_dataset.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>'Random Erasing Data Augmentation' by Zhong et al. See https://arxiv.org/pdf/1708.04896.pdf</p>
+    <p>Tiny imagenet dataset</p>
     </div>
 
-    <pre class="usage"><span class='fu'>transform_random_erasing</span>(
-  <span class='no'>img</span>,
-  <span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
-  <span class='kw'>scale</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.02</span>, <span class='fl'>0.33</span>),
-  <span class='kw'>ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.3</span>, <span class='fl'>3.3</span>),
-  <span class='kw'>value</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>inplace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
-)</pre>
+    <pre class="usage"><span class='fu'>tiny_imagenet_dataset</span>(<span class='no'>root</span>, <span class='kw'>split</span> <span class='kw'>=</span> <span class='st'>"train"</span>, <span class='kw'>download</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>img</th>
-      <td><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></td>
+      <th>root</th>
+      <td><p>directory path to download the dataset</p></td>
     </tr>
     <tr>
-      <th>p</th>
-      <td><p>probability that the random erasing operation will be performed.</p></td>
+      <th>split</th>
+      <td><p>dataset split, <code>train</code>, <code>validation</code> or <code>test</code></p></td>
     </tr>
     <tr>
-      <th>scale</th>
-      <td><p>range of proportion of erased area against input image.</p></td>
+      <th>download</th>
+      <td><p>wether to download or not the dataset.</p></td>
     </tr>
     <tr>
-      <th>ratio</th>
-      <td><p>range of aspect ratio of erased area.</p></td>
-    </tr>
-    <tr>
-      <th>value</th>
-      <td><p>erasing value. Default is 0. If a single int, it is used to
-erase all pixels. If a tuple of length 3, it is used to erase
-R, G, B channels respectively.
-If a str of 'random', erasing each pixel with random values.</p></td>
-    </tr>
-    <tr>
-      <th>inplace</th>
-      <td><p>boolean to make this transform inplace. Default set to FALSE.</p></td>
+      <th>...</th>
+      <td><p>other arguments passed to <code>image_folder_dataset()</code></p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>Other transforms: 
-<code><a href='transform_adjust_brightness.html'>transform_adjust_brightness</a>()</code>,
-<code><a href='transform_adjust_contrast.html'>transform_adjust_contrast</a>()</code>,
-<code><a href='transform_adjust_gamma.html'>transform_adjust_gamma</a>()</code>,
-<code><a href='transform_adjust_hue.html'>transform_adjust_hue</a>()</code>,
-<code><a href='transform_adjust_saturation.html'>transform_adjust_saturation</a>()</code>,
-<code><a href='transform_affine.html'>transform_affine</a>()</code>,
-<code><a href='transform_center_crop.html'>transform_center_crop</a>()</code>,
-<code><a href='transform_color_jitter.html'>transform_color_jitter</a>()</code>,
-<code><a href='transform_convert_image_dtype.html'>transform_convert_image_dtype</a>()</code>,
-<code><a href='transform_crop.html'>transform_crop</a>()</code>,
-<code><a href='transform_five_crop.html'>transform_five_crop</a>()</code>,
-<code><a href='transform_grayscale.html'>transform_grayscale</a>()</code>,
-<code><a href='transform_hflip.html'>transform_hflip</a>()</code>,
-<code><a href='transform_linear_transformation.html'>transform_linear_transformation</a>()</code>,
-<code><a href='transform_normalize.html'>transform_normalize</a>()</code>,
-<code><a href='transform_pad.html'>transform_pad</a>()</code>,
-<code><a href='transform_perspective.html'>transform_perspective</a>()</code>,
-<code><a href='transform_random_affine.html'>transform_random_affine</a>()</code>,
-<code><a href='transform_random_apply.html'>transform_random_apply</a>()</code>,
-<code><a href='transform_random_choice.html'>transform_random_choice</a>()</code>,
-<code><a href='transform_random_crop.html'>transform_random_crop</a>()</code>,
-<code><a href='transform_random_grayscale.html'>transform_random_grayscale</a>()</code>,
-<code><a href='transform_random_horizontal_flip.html'>transform_random_horizontal_flip</a>()</code>,
-<code><a href='transform_random_order.html'>transform_random_order</a>()</code>,
-<code><a href='transform_random_perspective.html'>transform_random_perspective</a>()</code>,
-<code><a href='transform_random_resized_crop.html'>transform_random_resized_crop</a>()</code>,
-<code><a href='transform_random_rotation.html'>transform_random_rotation</a>()</code>,
-<code><a href='transform_random_vertical_flip.html'>transform_random_vertical_flip</a>()</code>,
-<code><a href='transform_resized_crop.html'>transform_resized_crop</a>()</code>,
-<code><a href='transform_resize.html'>transform_resize</a>()</code>,
-<code><a href='transform_rgb_to_grayscale.html'>transform_rgb_to_grayscale</a>()</code>,
-<code><a href='transform_rotate.html'>transform_rotate</a>()</code>,
-<code><a href='transform_ten_crop.html'>transform_ten_crop</a>()</code>,
-<code><a href='transform_to_tensor.html'>transform_to_tensor</a>()</code>,
-<code><a href='transform_vflip.html'>transform_vflip</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
