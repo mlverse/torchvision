@@ -1,6 +1,6 @@
 #' @export
 `transform_to_tensor.magick-image` <- function(img) {
-  img <- as.integer(magick::image_data(img))
+  img <- as.integer(magick::image_data(img, channels = "rgb"))
   img <- torch::torch_tensor(img)$permute(c(3,1,2))
   img <- img$to(dtype = torch::torch_float32())
   img <- img$contiguous()

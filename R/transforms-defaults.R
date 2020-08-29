@@ -157,17 +157,16 @@ get_random_resized_crop_params <- function(img, scale, ratio) {
     target_area <- as.numeric(area * torch::torch_empty(1)$uniform_(scale[1], scale[2]))
     log_ratio <- torch::torch_log(torch::torch_tensor(ratio))
     aspect_ratio <-  as.numeric(torch::torch_exp(
-      torch::torch_empty(1)$uniform_(log_ratio[1], log_ratio[2])
+      torch::torch_empty(1)$uniform_(as.numeric(log_ratio[1]), as.numeric(log_ratio[2]))
     ))
 
     w <- as.integer(round(sqrt(target_area * aspect_ratio)))
     h <- as.integer(round(sqrt(target_area / aspect_ratio)))
 
+    if (1 < w && w <= width && 1 < h && h <= height) {
 
-    if (0 < w && w <= width && 0 < h && h <= height) {
-
-      i = as.integer(torch::torch_randint(1, height - h + 1, size=1))
-      j = as.integer(torch::torch_randint(0, width - w + 1, size=1))
+      i <- sample.int(height - h + 1, size=1)
+      j <- sample.int(width - w + 1, size=1)
 
       return(c(i, j, h, w))
     }

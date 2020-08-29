@@ -1,3 +1,13 @@
+#' Tiny imagenet dataset
+#'
+#' @param root directory path to download the dataset
+#' @param split dataset split, `train`, `validation` or `test`
+#' @param download wether to download or not the dataset.
+#' @param ... other arguments passed to [image_folder_dataset()]
+#'
+#' @family dataset
+#'
+#' @export
 tiny_imagenet_dataset <- torch::dataset(
   "tiny_imagenet",
   inherit = image_folder_dataset,
