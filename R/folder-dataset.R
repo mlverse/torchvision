@@ -119,7 +119,33 @@ magick_loader <- function(path) {
   magick::image_read(path)
 }
 
+#' Folder dataset
+#'
+#' A generic data loader where the images are arranged in this way:
+#'
+#' ```
+#' root/dog/xxx.png
+#' root/dog/xxy.png
+#' root/dog/xxz.png
+#'
+#' root/cat/123.png
+#' root/cat/nsdf3.png
+#' root/cat/asd932_.png
+#' ```
+#'
+#' @param root Root directory path.
+#' @param loader A function to load an image given its path.
+#' @param transform  A function/transform that takes in an PIL image and returns
+#'   a transformed version. E.g, [transform_random_crop()].
+#' @param target_transform A function/transform that takes in the target and
+#'   transforms it.
+#' @param is_valid_file A function that takes path of an Image file and check if
+#'   the file is a valid file (used to check of corrupt files)
+#'
+#' @family datasets
+#'
 #' @importFrom torch dataset
+#' @export
 image_folder_dataset <- dataset(
   "image_folder",
   inherit = folder_dataset,
