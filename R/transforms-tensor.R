@@ -1,7 +1,7 @@
 #' @export
 transform_convert_image_dtype.torch_tensor <- function(img, dtype = torch::torch_float()) {
 
-  if (img$dtype() == dtype)
+  if (img$dtype == dtype)
     return(img)
 
   if (img$is_floating_point()) {
@@ -11,11 +11,11 @@ transform_convert_image_dtype.torch_tensor <- function(img, dtype = torch::torch
       return(img$to(dtype = dtype))
 
     # float to int
-    if ((img$dtype() == torch::torch_float32() &&
+    if ((img$dtype == torch::torch_float32() &&
          (dtype == torch::torch_float32() || dtype == torch::torch_float64())) ||
-        (img$dtype() == torch::torch_float64() && dtype == torch::torch_int64())
+        (img$dtype == torch::torch_float64() && dtype == torch::torch_int64())
     )
-      runtime_error("The cast from {img$dtype()} to {dtype} cannot be performed safely.")
+      runtime_error("The cast from {img$dtype} to {dtype} cannot be performed safely.")
 
     # For data in the range 0-1, (float * 255).to(uint) is only 255
     # when float is exactly 1.0.
@@ -30,7 +30,7 @@ transform_convert_image_dtype.torch_tensor <- function(img, dtype = torch::torch
     # int to float
 
     if (dtype$is_floating_point) {
-      max <- torch::torch_iinfo(img$dtype())$max
+      max <- torch::torch_iinfo(img$dtype)$max
       img <- img$to(dtype)
 
       return(img/max)
@@ -38,7 +38,7 @@ transform_convert_image_dtype.torch_tensor <- function(img, dtype = torch::torch
 
 
     # int to int
-    input_max <- torch::torch_iinfo(img$dtype())$max
+    input_max <- torch::torch_iinfo(img$dtype)$max
     output_max <- torch::torch_iinfo(dtype)$max
 
     if (input_max > output_max) {
@@ -64,9 +64,9 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
   if (!inplace)
     img <- img$clone()
 
-  dtype <- img$dtype()
-  mean <- torch::torch_tensor(mean, dtype=dtype, device=img$device())
-  std <- torch::torch_tensor(std, dtype=dtype, device=img$device())
+  dtype <- img$dtype
+  mean <- torch::torch_tensor(mean, dtype=dtype, device=img$device)
+  std <- torch::torch_tensor(std, dtype=dtype, device=img$device)
 
   if (torch::as_array((std == 0)$any())) {
     value_error("std evaluated to zero after conversion to {dtype}, leading to division by zero.")
@@ -133,10 +133,10 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
   mode <- interpolation_modes[interpolation == names(interpolation_modes)]
   mode <- unname(mode)
 
-  out_dtype <- img$dtype()
+  out_dtype <- img$dtype
   need_cast <- FALSE
-  if (!img$dtype() == torch::torch_float32() &&
-      !img$dtype() == torch::torch_float64()) {
+  if (!img$dtype == torch::torch_float32() &&
+      !img$dtype == torch::torch_float64()) {
     need_cast <- TRUE
     img <- img$to(dtype = torch::torch_float32())
   }
@@ -205,11 +205,11 @@ transform_pad.torch_tensor <- function(img, padding, fill = 0, padding_mode = "c
     need_squeeze <- TRUE
   }
 
-  out_dtype <- img$dtype()
+  out_dtype <- img$dtype
   need_cast <- FALSE
 
   if (padding_mode != "constant" &&
-      (img$dtype() == torch::torch_float32() || img$dtype() == torch::torch_float64())) {
+      (img$dtype == torch::torch_float32() || img$dtype == torch::torch_float64())) {
     need_cast <- TRUE
     img <- img$to(torch::torch_float32())
   }
@@ -333,8 +333,8 @@ transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
 
   check_img(img)
 
-  orig_dtype <- img$dtype()
-  if (img$dtype() == torch::torch_uint8())
+  orig_dtype <- img$dtype
+  if (img$dtype == torch::torch_uint8())
     img <- img$to(dtype = torch::torch_float32())/255
 
   img <-rgb2hsv(img)
@@ -415,7 +415,7 @@ transform_perspective.torch_tensor <- function(img, startpoints, endpoints, inte
 #' @export
 transform_rgb_to_grayscale.torch_tensor <- function(img) {
   check_img(img)
-  (0.2989 * img[1] + 0.5870 * img[2] + 0.1140 * img[3])$to(img$dtype())
+  (0.2989 * img[1] + 0.5870 * img[2] + 0.1140 * img[3])$to(img$dtype)
 }
 
 # Helpers -----------------------------------------------------------------
@@ -443,7 +443,7 @@ blend <- function(img1, img2, ratio) {
   else
     bound <- 255
 
-  (ratio * img1 + (1 - ratio) * img2)$clamp(0, bound)$to(img1$dtype())
+  (ratio * img1 + (1 - ratio) * img2)$clamp(0, bound)$to(img1$dtype)
 }
 
 rgb2hsv <- function(img) {
@@ -504,7 +504,7 @@ hsv2rgb <- function(img) {
   a3 <- torch::torch_stack(list(p, p, t, hsv[[3]], hsv[[3]], q))
   a4 <- torch::torch_stack(list(a1, a2, a3))
 
-  torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype()), a4))
+  torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype), a4))
 }
 
 # https://stackoverflow.com/questions/32370485/convert-radians-to-degree-degree-to-radians
@@ -575,9 +575,9 @@ apply_grid_transform <- function(img, grid, mode) {
     need_squeeze <- TRUE
   }
 
-  out_dtype <- img$dtype()
+  out_dtype <- img$dtype
   need_cast <- FALSE
-  if (!img$dtype() == torch::torch_float32() && !img$dtype() == torch::torch_float64()) {
+  if (!img$dtype == torch::torch_float32() && !img$dtype == torch::torch_float64()) {
     need_cast <- TRUE
     img <- img$to(dtype = torch::torch_float32())
   }
@@ -723,14 +723,14 @@ transform_adjust_gamma.torch_tensor <- function(img, gamma, gain = 1) {
     value_error("gamma must be non-negative")
 
   result <- img
-  dtype <- img$dtype()
+  dtype <- img$dtype
 
   if (!torch::torch_is_floating_point(img))
     result <- result/255.0
 
   result <- (gain * result ^ gamma)$clamp(0, 1)
 
-  if (!result$dtype() == dtype) {
+  if (!result$dtype == dtype) {
     eps <- 1e-3
     result <- (255 + 1.0 - eps) * result
   }
