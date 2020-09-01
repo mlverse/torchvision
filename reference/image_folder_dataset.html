@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tiny imagenet dataset — tiny_imagenet_dataset • torchvision</title>
+<title>Folder dataset — image_folder_dataset • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Tiny imagenet dataset — tiny_imagenet_dataset" />
-<meta property="og:description" content="Tiny imagenet dataset" />
+<meta property="og:title" content="Folder dataset — image_folder_dataset" />
+<meta property="og:description" content="A generic data loader where the images are arranged in this way:" />
 
 
 
@@ -121,37 +121,62 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Tiny imagenet dataset</h1>
+    <h1>Folder dataset</h1>
     
-    <div class="hidden name"><code>tiny_imagenet_dataset.Rd</code></div>
+    <div class="hidden name"><code>image_folder_dataset.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Tiny imagenet dataset</p>
+    <p>A generic data loader where the images are arranged in this way:</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tiny_imagenet_dataset</span>(<span class='no'>root</span>, <span class='kw'>split</span> <span class='kw'>=</span> <span class='st'>"train"</span>, <span class='kw'>download</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>image_folder_dataset</span>(
+  <span class='no'>root</span>,
+  <span class='kw'>transform</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>target_transform</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>loader</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>is_valid_file</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>root</th>
-      <td><p>directory path to download the dataset</p></td>
+      <td><p>Root directory path.</p></td>
     </tr>
     <tr>
-      <th>split</th>
-      <td><p>dataset split, <code>train</code>, <code>validation</code> or <code>test</code></p></td>
+      <th>transform</th>
+      <td><p>A function/transform that takes in an PIL image and returns
+a transformed version. E.g, <code><a href='transform_random_crop.html'>transform_random_crop()</a></code>.</p></td>
     </tr>
     <tr>
-      <th>download</th>
-      <td><p>wether to download or not the dataset.</p></td>
+      <th>target_transform</th>
+      <td><p>A function/transform that takes in the target and
+transforms it.</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>other arguments passed to <code><a href='image_folder_dataset.html'>image_folder_dataset()</a></code></p></td>
+      <th>loader</th>
+      <td><p>A function to load an image given its path.</p></td>
+    </tr>
+    <tr>
+      <th>is_valid_file</th>
+      <td><p>A function that takes path of an Image file and check if
+the file is a valid file (used to check of corrupt files)</p></td>
     </tr>
     </table>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    
+<pre>root/dog/xxx.png
+root/dog/xxy.png
+root/dog/xxz.png
+
+root/cat/123.png
+root/cat/nsdf3.png
+root/cat/asd932_.png
+</pre>
 
 
   </div>
