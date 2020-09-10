@@ -11,14 +11,17 @@ test_that("tests for the mnist dataset", {
     ds <- mnist_dataset(dir)
   )
 
-  ds <- mnist_dataset(dir, download = TRUE)
+  ds <- mnist_dataset(dir, download = TRUE, transform = function(x) {
+    torch::torch_tensor(x)
+  })
+
   i <- ds[1]
 
   expect_tensor(i[[1]])
   expect_tensor(i[[2]]$to(dtype = torch_int()))
 
-  expect_tensor_shape(ds$data, c(60000, 28, 28))
-  expect_tensor_shape(ds$targets$to(dtype = torch_int()), c(60000))
+  expect_tensor_shape(torch::torch_tensor(ds$data), c(60000, 28, 28))
+  expect_tensor_shape(torch::torch_tensor(ds$targets)$to(dtype = torch_int()), c(60000))
 })
 
 

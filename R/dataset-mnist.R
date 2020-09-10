@@ -48,8 +48,8 @@ mnist_dataset <- dataset(
       data_file <- self$test_file
 
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$data <- torch_tensor(data[[1]])
-    self$targets <- torch_tensor(data[[2]] + 1L, dtype = torch_long())
+    self$data <- data[[1]]
+    self$targets <- data[[2]] + 1L
   },
   download = function() {
 
@@ -93,7 +93,8 @@ mnist_dataset <- dataset(
   },
   .getitem = function(index) {
     img <- self$data[index, ,]
-    target <- self$targets[index]
+    target <- torch::torch_tensor(self$targets[index],
+                                  dtype = torch::torch_long())
 
     if (!is.null(self$transform))
       img <- self$transform(img)
