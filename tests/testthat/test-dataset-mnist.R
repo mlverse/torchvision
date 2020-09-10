@@ -22,6 +22,9 @@ test_that("tests for the mnist dataset", {
 
   expect_tensor_shape(torch::torch_tensor(ds$data), c(60000, 28, 28))
   expect_tensor_shape(torch::torch_tensor(ds$targets)$to(dtype = torch_int()), c(60000))
+
+  expect_equal(length(ds), 60000)
+
 })
 
 

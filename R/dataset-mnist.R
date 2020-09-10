@@ -105,7 +105,7 @@ mnist_dataset <- dataset(
     list(img, target)
   },
   .length = function() {
-    self$data$shape[1]
+    dim(self$data)[1]
   },
   active = list(
     raw_folder = function() {
