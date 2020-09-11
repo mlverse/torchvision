@@ -45,7 +45,8 @@ test_that("tests for the kmnist dataset", {
   i <- ds[1]
 
   expect_tensor(i[[1]])
-  expect_tensor(i[[2]]$to(dtype = torch_int()))
+  expect_tensor(i[[2]])
+  expect_equal(length(i[[2]]$shape), 0)
 
   expect_tensor_shape(torch::torch_tensor(ds$data), c(60000, 28, 28))
   expect_tensor_shape(torch::torch_tensor(ds$targets)$to(dtype = torch_int()), c(60000))
