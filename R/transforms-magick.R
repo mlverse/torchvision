@@ -37,3 +37,19 @@
 
   magick::image_resize(img, geometry = size, filter = interpolation)
 }
+
+#' @export
+`transform_crop.magick-image` <- function(img, top, left, height, width) {
+  magick::image_crop(
+    img,
+    paste0(height, "x", width, "+", left, "+", top)
+  )
+}
+
+# Utils -------------------------------------------------------------------
+
+`get_image_size.magick-image` <- function(img) {
+  info <- magick::image_info(im)
+  c(info$width, info$height)
+}
+

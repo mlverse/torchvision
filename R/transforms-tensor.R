@@ -430,7 +430,7 @@ check_img <- function(x) {
 }
 
 #' @importFrom utils tail
-get_image_size <- function(img) {
+get_image_size.torch_tensor <- function(img) {
   check_img(img)
 
   tail(img$size(), 2)

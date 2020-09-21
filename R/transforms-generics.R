@@ -619,3 +619,11 @@ transform_adjust_gamma <- function(img, gamma, gain = 1) {
 transform_rgb_to_grayscale <- function(img) {
   UseMethod("transform_rgb_to_grayscale")
 }
+
+
+# Utils -------------------------------------------------------------------
+
+get_image_size <- function(img) {
+  UseMethod("get_image_size")
+}
+
