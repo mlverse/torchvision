@@ -46,6 +46,11 @@
   )
 }
 
+#' @export
+`transform_hflip.magick-image` <- function(img) {
+  magick::image_flip(img)
+}
+
 # Utils -------------------------------------------------------------------
 
 `get_image_size.magick-image` <- function(img) {
