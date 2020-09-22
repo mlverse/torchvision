@@ -49,7 +49,7 @@
 # Utils -------------------------------------------------------------------
 
 `get_image_size.magick-image` <- function(img) {
-  info <- magick::image_info(im)
+  info <- magick::image_info(img)
   c(info$width, info$height)
 }
 
