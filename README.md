@@ -1,26 +1,18 @@
 
-# torchvision
+torchvision <a href='https://torchvision.mlverse.org'><img src='https://torch.mlverse.org/css/images/hex/torchvision.png' align="right" height="139" /></a>
+============================================================================================================
 
 <!-- badges: start -->
 [![R build status](https://github.com/mlverse/torchvision/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/torchvision/actions)
 <!-- badges: end -->
 
-The goal of torchvision is to ...
+torchvision is an extension for [torch](https://github.com/mlverse/torch) providing image loading, transformations, common architectures for computer vision, pre-trained weights and access to commonly used datasets. 
 
 ## Installation
 
-You can install the released version of torchvision from [CRAN](https://CRAN.R-project.org) with:
+torchvision is not currently on CRAN. You can install it from GitHub with:
 
 ``` r
-install.packages("torchvision")
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(torchvision)
-## basic example code
+remotes::install_github("mlverse/torchvision")
 ```
 
