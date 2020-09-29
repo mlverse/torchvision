@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_hflip}
 \alias{transform_hflip}
-\title{Horizontally flip the given PIL Image or Tensor.}
+\title{Horizontally flip a PIL Image or Tensor}
 \usage{
 transform_hflip(img)
 }
@@ -10,7 +10,7 @@ transform_hflip(img)
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 }
 \description{
-Horizontally flip the given PIL Image or Tensor.
+Horizontally flip a PIL Image or Tensor
 }
 \seealso{
 Other transforms: 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_normalize}
 \alias{transform_normalize}
-\title{Normalize a tensor image with mean and standard deviation.}
+\title{Normalize a tensor image with mean and standard deviation}
 \usage{
 transform_normalize(img, mean, std, inplace = FALSE)
 }

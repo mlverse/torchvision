@@ -36,13 +36,16 @@ alexnet <- torch::nn_module(
   }
 )
 
-#' AlexNet model architecture from the
-#' [One weird trick...](https://arxiv.org/abs/1404.5997>) paper.
+#' AlexNet Model Architecture
 #'
-#' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet
-#' @param progress (bool): If TRUE, displays a progress bar of the download to stderr
+#' AlexNet model architecture from the
+#'   [One weird trick...](https://arxiv.org/abs/1404.5997) paper.
+#'
+#' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet.
+#' @param progress (bool): If TRUE, displays a progress bar of the download to
+#'   stderr.
 #' @param ... other parameters passed to the model intializer. currently only
-#' `num_classes` is used.
+#'   `num_classes` is used.
 #'
 #' @family models
 #'

@@ -2,9 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_rgb_to_grayscale}
 \alias{transform_rgb_to_grayscale}
-\title{Convert the given RGB Image Tensor to Grayscale.
-For RGB to Grayscale conversion, ITU-R 601-2 luma transform is performed which
-is L = R * 0.2989 + G * 0.5870 + B * 0.1140}
+\title{Convert RGB Image Tensor to Grayscale}
 \usage{
 transform_rgb_to_grayscale(img)
 }
@@ -12,9 +10,8 @@ transform_rgb_to_grayscale(img)
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 }
 \description{
-Convert the given RGB Image Tensor to Grayscale.
-For RGB to Grayscale conversion, ITU-R 601-2 luma transform is performed which
-is L = R * 0.2989 + G * 0.5870 + B * 0.1140
+For RGB to Grayscale conversion, ITU-R 601-2 luma transform is performed
+which is L = R * 0.2989 + G * 0.5870 + B * 0.1140
 }
 \seealso{
 Other transforms: 

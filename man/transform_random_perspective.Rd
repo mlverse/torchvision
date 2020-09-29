@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_perspective}
 \alias{transform_random_perspective}
-\title{Performs a random perspective transformation of the given image with a given probability.}
+\title{Random perspective transformation of an image with a given probability}
 \usage{
 transform_random_perspective(
   img,
@@ -16,21 +16,22 @@ transform_random_perspective(
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
 \item{distortion_scale}{(float): argument to control the degree of distortion
-and ranges from 0 to 1.
-Default is 0.5.}
+and ranges from 0 to 1. Default is 0.5.}
 
 \item{p}{(float): probability of the image being transformed. Default is 0.5.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer \code{0 = nearest},
-\code{2 = bilinear} and \code{3 = bicubic} or a name from \code{\link[magick:options]{magick::filter_types()}}.}
+\item{interpolation}{(int, optional) Desired interpolation. An integer
+\code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
+\code{\link[magick:options]{magick::filter_types()}}.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.}
+\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.}
 }
 \description{
-Performs a random perspective transformation of the given image with a given probability.
+Performs a random perspective transformation of the given image with a given
+probability
 }
 \seealso{
 Other transforms: 

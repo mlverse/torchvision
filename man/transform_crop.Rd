@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_crop}
 \alias{transform_crop}
-\title{Crop the given image at specified location and output size.}
+\title{Crop the given image at specified location and output size}
 \usage{
 transform_crop(img, top, left, height, width)
 }
@@ -11,14 +11,15 @@ transform_crop(img, top, left, height, width)
 
 \item{top}{(int): Vertical component of the top left corner of the crop box.}
 
-\item{left}{(int): Horizontal component of the top left corner of the crop box.}
+\item{left}{(int): Horizontal component of the top left corner of the crop
+box.}
 
 \item{height}{(int): Height of the crop box.}
 
 \item{width}{(int): Width of the crop box.}
 }
 \description{
-Crop the given image at specified location and output size.
+Crop the given image at specified location and output size
 }
 \seealso{
 Other transforms: 

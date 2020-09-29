@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_adjust_saturation}
 \alias{transform_adjust_saturation}
-\title{Adjust color saturation of an image.}
+\title{Adjust the color saturation of an image}
 \usage{
 transform_adjust_saturation(img, saturation_factor)
 }
@@ -14,7 +14,7 @@ give a black and white image, 1 will give the original image while
 2 will enhance the saturation by a factor of 2.}
 }
 \description{
-Adjust color saturation of an image.
+Adjust the color saturation of an image
 }
 \seealso{
 Other transforms: 

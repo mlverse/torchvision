@@ -9,15 +9,15 @@ transform_convert_image_dtype(img, dtype = torch::torch_float())
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{dtype}{(torch.dtype): Desired data type of the output}
+\item{dtype}{(torch.dtype): Desired data type of the output.}
 }
 \description{
 Convert a tensor image to the given \code{dtype} and scale the values accordingly
 }
 \note{
-When converting from a smaller to a larger integer \code{dtype} the maximum values
-are \strong{not} mapped exactly. If converted back and forth, this mismatch has
-no effect.
+When converting from a smaller to a larger integer \code{dtype} the maximum
+values are \strong{not} mapped exactly. If converted back and forth, this
+mismatch has no effect.
 }
 \seealso{
 Other transforms: 

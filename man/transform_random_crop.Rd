@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_crop}
 \alias{transform_random_crop}
-\title{Crop the given image at a random location.}
+\title{Crop the given image at a random location}
 \usage{
 transform_random_crop(
   img,
@@ -16,37 +16,40 @@ transform_random_crop(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+\item{size}{(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
 
-\item{padding}{(int or tuple or list): Padding on each border. If a single int is provided this
-is used to pad all borders. If tuple of length 2 is provided this is the padding
-on left/right and top/bottom respectively. If a tuple of length 4 is provided
-this is the padding for the left, top, right and bottom borders respectively.}
+\item{padding}{(int or tuple or list): Padding on each border. If a single
+int is provided this is used to pad all borders. If tuple of length 2 is
+provided this is the padding on left/right and top/bottom respectively.
+If a tuple of length 4 is provided this is the padding for the left, top,
+right and bottom borders respectively.}
 
 \item{pad_if_needed}{(boolean): It will pad the image if smaller than the
 desired size to avoid raising an exception. Since cropping is done
 after padding, the padding seems to be done at a random offset.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.}
+\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.}
 
-\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or symmetric.
-Default is constant.
-Mode symmetric is not yet supported for Tensor inputs.
-- constant: pads with a constant value, this value is specified with fill
-- edge: pads with the last value on the edge of the image
-- reflect: pads with reflection of image (without repeating the last value on the edge)
-padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in reflect mode
-will result in \verb{[3, 2, 1, 2, 3, 4, 3, 2]}
-- symmetric: pads with reflection of image (repeating the last value on the edge)
-padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in symmetric mode
-will result in \verb{[2, 1, 1, 2, 3, 4, 4, 3]}}
+\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or
+symmetric. Default is constant. Mode symmetric is not yet supported for
+Tensor inputs.
+\itemize{
+\item constant: pads with a constant value, this value is specified with fill
+\item edge: pads with the last value on the edge of the image
+\item reflect: pads with reflection of image (without repeating the last
+value on the edge) padding \verb{[1, 2, 3, 4]} with 2 elements on both sides
+in reflect mode will result in \verb{[3, 2, 1, 2, 3, 4, 3, 2]}
+\item symmetric: pads with reflection of image (repeating the last value on
+the edge) padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in
+symmetric mode will result in \verb{[2, 1, 1, 2, 3, 4, 4, 3]}
+}}
 }
 \description{
 The image can be a Magick Image or a Tensor, in which case it is expected

@@ -249,14 +249,14 @@ resnet <- torch::nn_module(
   model
 }
 
-#' ResNet-18 model from
+#' ResNet-18 Model Architecture
 #'
+#' ResNet-18 model architecture from
+#'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf)
 #'
-#' [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf)
-#'
-#' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet
+#' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet.
 #' @param progress (bool): If TRUE, displays a progress bar of the download to
-#'   stderr
+#'   stderr.
 #' @param ... Other parameters passed to the resnet model.
 #'
 #' @family models

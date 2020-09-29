@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_affine}
 \alias{transform_affine}
-\title{Apply affine transformation on the image keeping image center invariant}
+\title{Apply affine transformation on an image keeping image center invariant}
 \usage{
 transform_affine(
   img,
@@ -17,31 +17,37 @@ transform_affine(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{angle}{(float or int): rotation angle value in degrees, counter-clockwise.}
+\item{angle}{(float or int): rotation angle value in degrees,
+counter-clockwise.}
 
-\item{translate}{(tuple, optional): tuple of maximum absolute fraction for horizontal
-and vertical translations. For example translate=(a, b), then horizontal shift
-is randomly sampled in the range -img_width * a < dx < img_width * a and vertical shift is
-randomly sampled in the range -img_height * b < dy < img_height * b. Will not translate by default.}
+\item{translate}{(tuple, optional): tuple of maximum absolute fraction for
+horizontal and vertical translations. For example translate=(a, b), then
+horizontal shift is randomly sampled in the range
+-img_width * a < dx < img_width * a and vertical shift is randomly sampled
+in the range -img_height * b < dy < img_height * b. Will not translate by
+default.}
 
-\item{scale}{(tuple, optional): scaling factor interval, e.g (a, b), then scale is
-randomly sampled from the range a <= scale <= b. Will keep original scale by default.}
+\item{scale}{(tuple, optional): scaling factor interval, e.g (a, b), then
+scale is randomly sampled from the range a <= scale <= b. Will keep
+original scale by default.}
 
-\item{shear}{(sequence or float or int, optional): Range of degrees to select from.
-If shear is a number, a shear parallel to the x axis in the range (-shear, +shear)
-will be applied. Else if shear is a tuple or list of 2 values a shear parallel to the x axis in the
-range \verb{(shear[1], shear[2])} will be applied. Else if shear is a tuple or list of 4 values,
-a x-axis shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])} will be applied.
-Will not apply shear by default.}
+\item{shear}{(sequence or float or int, optional): Range of degrees to select
+from. If shear is a number, a shear parallel to the x axis in the range
+(-shear, +shear) will be applied. Else if shear is a tuple or list of 2
+values a shear parallel to the x axis in the range \verb{(shear[1], shear[2])}
+will be applied. Else if shear is a tuple or list of 4 values, a x-axis
+shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
+will be applied. Will not apply shear by default.}
 
 \item{resample}{(int, optional): An optional resampling filter.}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and int for grayscale) for the area
-outside the transform in the output image (Pillow>=5.0.0). This option is not supported for Tensor
-input. Fill value for the area outside the transform in the output image is always 0.}
+\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
+int for grayscale) for the area outside the transform in the output image
+(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
+for the area outside the transform in the output image is always 0.}
 }
 \description{
-Apply affine transformation on the image keeping image center invariant
+Apply affine transformation on an image keeping image center invariant
 }
 \seealso{
 Other transforms: 

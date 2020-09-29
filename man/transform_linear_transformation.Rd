@@ -2,29 +2,29 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_linear_transformation}
 \alias{transform_linear_transformation}
-\title{Transform a tensor image with a square transformation matrix and a mean_vector
-computed offline.}
+\title{Transform a tensor image with a square transformation matrix and a
+mean_vector computed offline}
 \usage{
 transform_linear_transformation(img, transformation_matrix, mean_vector)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transformation_matrix}{(Tensor): tensor \verb{[D x D]}, D = C x H x W}
+\item{transformation_matrix}{(Tensor): tensor \verb{[D x D]}, D = C x H x W.}
 
-\item{mean_vector}{(Tensor): tensor \link{D}, D = C x H x W}
+\item{mean_vector}{(Tensor): tensor \link{D}, D = C x H x W.}
 }
 \description{
-Given transformation_matrix and mean_vector, will flatten the \code{torch_tensor} and
-subtract mean_vector from it which is then followed by computing the dot
-product with the transformation matrix and then reshaping the tensor to its
-original shape.
+Given \code{transformation_matrix} and \code{mean_vector}, will flatten the
+\code{torch_tensor} and subtract \code{mean_vector} from it which is then followed by
+computing the dot product with the transformation matrix and then reshaping
+the tensor to its original shape.
 }
 \section{Applications}{
 
 whitening transformation: Suppose X is a column vector zero-centered data.
 Then compute the data covariance matrix \verb{[D x D]} with torch.mm(X.t(), X),
-perform SVD on this matrix and pass it as transformation_matrix.
+perform SVD on this matrix and pass it as \code{transformation_matrix}.
 }
 
 \seealso{
