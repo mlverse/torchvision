@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Randomly change the brightness, contrast and saturation of an image. — transform_color_jitter • torchvision</title>
+<title>Randomly change the brightness, contrast and saturation of an image — transform_color_jitter • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Randomly change the brightness, contrast and saturation of an image. — transform_color_jitter" />
-<meta property="og:description" content="Randomly change the brightness, contrast and saturation of an image." />
+<meta property="og:title" content="Randomly change the brightness, contrast and saturation of an image — transform_color_jitter" />
+<meta property="og:description" content="Randomly change the brightness, contrast and saturation of an image" />
 
 
 
@@ -121,13 +121,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Randomly change the brightness, contrast and saturation of an image.</h1>
+    <h1>Randomly change the brightness, contrast and saturation of an image</h1>
     
     <div class="hidden name"><code>transform_color_jitter.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Randomly change the brightness, contrast and saturation of an image.</p>
+    <p>Randomly change the brightness, contrast and saturation of an image</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_color_jitter</span><span class='op'>(</span>
@@ -147,27 +147,30 @@
     </tr>
     <tr>
       <th>brightness</th>
-      <td><p>(float or tuple of float (min, max)): How much to jitter brightness.
-brightness_factor is chosen uniformly from <code>[max(0, 1 - brightness), 1 + brightness]</code>
-or the given <code>[min, max]</code>. Should be non negative numbers.</p></td>
+      <td><p>(float or tuple of float (min, max)): How much to jitter
+brightness. <code>brightness_factor</code> is chosen uniformly from
+<code>[max(0, 1 - brightness), 1 + brightness]</code> or the given <code>[min, max]</code>.
+Should be non negative numbers.</p></td>
     </tr>
     <tr>
       <th>contrast</th>
-      <td><p>(float or tuple of float (min, max)): How much to jitter contrast.
-contrast_factor is chosen uniformly from <code>[max(0, 1 - contrast), 1 + contrast]</code>
-or the given <code>[min, max]</code>. Should be non negative numbers.</p></td>
+      <td><p>(float or tuple of float (min, max)): How much to jitter
+contrast. <code>contrast_factor</code> is chosen uniformly from
+<code>[max(0, 1 - contrast), 1 + contrast]</code> or the given <code>[min, max]</code>. Should
+be non negative numbers.</p></td>
     </tr>
     <tr>
       <th>saturation</th>
-      <td><p>(float or tuple of float (min, max)): How much to jitter saturation.
-saturation_factor is chosen uniformly from <code>[max(0, 1 - saturation), 1 + saturation]</code>
-or the given <code>[min, max]</code>. Should be non negative numbers.</p></td>
+      <td><p>(float or tuple of float (min, max)): How much to jitter
+saturation. <code>saturation_factor</code> is chosen uniformly from
+<code>[max(0, 1 - saturation), 1 + saturation]</code> or the given <code>[min, max]</code>.
+Should be non negative numbers.</p></td>
     </tr>
     <tr>
       <th>hue</th>
       <td><p>(float or tuple of float (min, max)): How much to jitter hue.
-hue_factor is chosen uniformly from <code>[-hue, hue]</code> or the given <code>[min, max]</code>.
-Should have 0&lt;= hue &lt;= 0.5 or -0.5 &lt;= min &lt;= max &lt;= 0.5.</p></td>
+<code>hue_factor</code> is chosen uniformly from <code>[-hue, hue]</code> or the given
+<code>[min, max]</code>. Should have 0&lt;= hue &lt;= 0.5 or -0.5 &lt;= min &lt;= max &lt;= 0.5.</p></td>
     </tr>
     </table>
 

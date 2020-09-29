@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Transform a tensor image with a square transformation matrix and a mean_vector
-computed offline. — transform_linear_transformation • torchvision</title>
+<title>Transform a tensor image with a square transformation matrix and a
+mean_vector computed offline — transform_linear_transformation • torchvision</title>
 
 
 <!-- jquery -->
@@ -40,12 +40,12 @@ computed offline. — transform_linear_transformation • torchvision</title>
 
 
 
-<meta property="og:title" content="Transform a tensor image with a square transformation matrix and a mean_vector
-computed offline. — transform_linear_transformation" />
-<meta property="og:description" content="Given transformation_matrix and mean_vector, will flatten the torch_tensor and
-subtract mean_vector from it which is then followed by computing the dot
-product with the transformation matrix and then reshaping the tensor to its
-original shape." />
+<meta property="og:title" content="Transform a tensor image with a square transformation matrix and a
+mean_vector computed offline — transform_linear_transformation" />
+<meta property="og:description" content="Given transformation_matrix and mean_vector, will flatten the
+torch_tensor and subtract mean_vector from it which is then followed by
+computing the dot product with the transformation matrix and then reshaping
+the tensor to its original shape." />
 
 
 
@@ -126,17 +126,17 @@ original shape." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Transform a tensor image with a square transformation matrix and a mean_vector
-computed offline.</h1>
+    <h1>Transform a tensor image with a square transformation matrix and a
+mean_vector computed offline</h1>
     
     <div class="hidden name"><code>transform_linear_transformation.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given transformation_matrix and mean_vector, will flatten the <code>torch_tensor</code> and
-subtract mean_vector from it which is then followed by computing the dot
-product with the transformation matrix and then reshaping the tensor to its
-original shape.</p>
+    <p>Given <code>transformation_matrix</code> and <code>mean_vector</code>, will flatten the
+<code>torch_tensor</code> and subtract <code>mean_vector</code> from it which is then followed by
+computing the dot product with the transformation matrix and then reshaping
+the tensor to its original shape.</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_linear_transformation</span><span class='op'>(</span><span class='va'>img</span>, <span class='va'>transformation_matrix</span>, <span class='va'>mean_vector</span><span class='op'>)</span></pre>
@@ -150,11 +150,11 @@ original shape.</p>
     </tr>
     <tr>
       <th>transformation_matrix</th>
-      <td><p>(Tensor): tensor <code>[D x D]</code>, D = C x H x W</p></td>
+      <td><p>(Tensor): tensor <code>[D x D]</code>, D = C x H x W.</p></td>
     </tr>
     <tr>
       <th>mean_vector</th>
-      <td><p>(Tensor): tensor <a href='https://rdrr.io/r/stats/deriv.html'>D</a>, D = C x H x W</p></td>
+      <td><p>(Tensor): tensor <a href='https://rdrr.io/r/stats/deriv.html'>D</a>, D = C x H x W.</p></td>
     </tr>
     </table>
 
@@ -164,7 +164,7 @@ original shape.</p>
 
 <p>whitening transformation: Suppose X is a column vector zero-centered data.
 Then compute the data covariance matrix <code>[D x D]</code> with torch.mm(X.t(), X),
-perform SVD on this matrix and pass it as transformation_matrix.</p>
+perform SVD on this matrix and pass it as <code>transformation_matrix</code>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other transforms: 

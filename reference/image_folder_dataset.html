@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Folder dataset — image_folder_dataset • torchvision</title>
+<title>Create an image folder dataset — image_folder_dataset • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Folder dataset — image_folder_dataset" />
-<meta property="og:description" content="A generic data loader where the images are arranged in this way:" />
+<meta property="og:title" content="Create an image folder dataset — image_folder_dataset" />
+<meta property="og:description" content="A generic data loader for images stored in folders.
+See Details for more information." />
 
 
 
@@ -121,13 +122,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Folder dataset</h1>
+    <h1>Create an image folder dataset</h1>
     
     <div class="hidden name"><code>image_folder_dataset.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A generic data loader where the images are arranged in this way:</p>
+    <p>A generic data loader for images stored in folders.
+See <code>Details</code> for more information.</p>
     </div>
 
     <pre class="usage"><span class='fu'>image_folder_dataset</span><span class='op'>(</span>
@@ -168,8 +170,10 @@ the file is a valid file (used to check of corrupt files)</p></td>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    
-<pre>root/dog/xxx.png
+    <p>This function assumes that the images for each class are contained
+in subdirectories of <code>root</code>. The names of these subdirectories are stored
+in the <code>classes</code> attribute of the returned object.</p>
+<p>An example folder structure might look as follows:</p><pre>root/dog/xxx.png
 root/dog/xxy.png
 root/dog/xxz.png
 

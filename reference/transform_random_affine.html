@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Random affine transformation of the image keeping center invariant. — transform_random_affine • torchvision</title>
+<title>Random affine transformation of the image keeping center invariant — transform_random_affine • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Random affine transformation of the image keeping center invariant. — transform_random_affine" />
-<meta property="og:description" content="Random affine transformation of the image keeping center invariant." />
+<meta property="og:title" content="Random affine transformation of the image keeping center invariant — transform_random_affine" />
+<meta property="og:description" content="Random affine transformation of the image keeping center invariant" />
 
 
 
@@ -121,13 +121,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Random affine transformation of the image keeping center invariant.</h1>
+    <h1>Random affine transformation of the image keeping center invariant</h1>
     
     <div class="hidden name"><code>transform_random_affine.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Random affine transformation of the image keeping center invariant.</p>
+    <p>Random affine transformation of the image keeping center invariant</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_random_affine</span><span class='op'>(</span>
@@ -150,29 +150,33 @@
     <tr>
       <th>degrees</th>
       <td><p>(sequence or float or int): Range of degrees to select from.
-If degrees is a number instead of sequence like (min, max), the range of degrees
-will be (-degrees, +degrees).</p></td>
+If degrees is a number instead of sequence like (min, max), the range of
+degrees will be (-degrees, +degrees).</p></td>
     </tr>
     <tr>
       <th>translate</th>
-      <td><p>(tuple, optional): tuple of maximum absolute fraction for horizontal
-and vertical translations. For example translate=(a, b), then horizontal shift
-is randomly sampled in the range -img_width * a &lt; dx &lt; img_width * a and vertical shift is
-randomly sampled in the range -img_height * b &lt; dy &lt; img_height * b. Will not translate by default.</p></td>
+      <td><p>(tuple, optional): tuple of maximum absolute fraction for
+horizontal and vertical translations. For example translate=(a, b), then
+horizontal shift is randomly sampled in the range
+-img_width * a &lt; dx &lt; img_width * a and vertical shift is randomly sampled
+in the range -img_height * b &lt; dy &lt; img_height * b. Will not translate by
+default.</p></td>
     </tr>
     <tr>
       <th>scale</th>
-      <td><p>(tuple, optional): scaling factor interval, e.g (a, b), then scale is
-randomly sampled from the range a &lt;= scale &lt;= b. Will keep original scale by default.</p></td>
+      <td><p>(tuple, optional): scaling factor interval, e.g (a, b), then
+scale is randomly sampled from the range a &lt;= scale &lt;= b. Will keep
+original scale by default.</p></td>
     </tr>
     <tr>
       <th>shear</th>
-      <td><p>(sequence or float or int, optional): Range of degrees to select from.
-If shear is a number, a shear parallel to the x axis in the range (-shear, +shear)
-will be applied. Else if shear is a tuple or list of 2 values a shear parallel to the x axis in the
-range <code>(shear[1], shear[2])</code> will be applied. Else if shear is a tuple or list of 4 values,
-a x-axis shear in <code>(shear[1], shear[2])</code> and y-axis shear in <code>(shear[3], shear[4])</code> will be applied.
-Will not apply shear by default.</p></td>
+      <td><p>(sequence or float or int, optional): Range of degrees to select
+from. If shear is a number, a shear parallel to the x axis in the range
+(-shear, +shear) will be applied. Else if shear is a tuple or list of 2
+values a shear parallel to the x axis in the range <code>(shear[1], shear[2])</code>
+will be applied. Else if shear is a tuple or list of 4 values, a x-axis
+shear in <code>(shear[1], shear[2])</code> and y-axis shear in <code>(shear[3], shear[4])</code>
+will be applied. Will not apply shear by default.</p></td>
     </tr>
     <tr>
       <th>resample</th>
@@ -180,9 +184,10 @@ Will not apply shear by default.</p></td>
     </tr>
     <tr>
       <th>fillcolor</th>
-      <td><p>(tuple or int): Optional fill color (Tuple for RGB Image and int for grayscale) for the area
-outside the transform in the output image (Pillow&gt;=5.0.0). This option is not supported for Tensor
-input. Fill value for the area outside the transform in the output image is always 0.</p></td>
+      <td><p>(tuple or int): Optional fill color (Tuple for RGB Image and
+int for grayscale) for the area outside the transform in the output image
+(Pillow&gt;=5.0.0). This option is not supported for Tensor input. Fill value
+for the area outside the transform in the output image is always 0.</p></td>
     </tr>
     </table>
 

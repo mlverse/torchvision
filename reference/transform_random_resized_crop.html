@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Crop the given image to random size and aspect ratio. — transform_random_resized_crop • torchvision</title>
+<title>Crop image to random size and aspect ratio — transform_random_resized_crop • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,10 @@
 
 
 
-<meta property="og:title" content="Crop the given image to random size and aspect ratio. — transform_random_resized_crop" />
-<meta property="og:description" content="The image can be a Magick Image or a Tensor, in which case it is expected
-to have [..., H, W] shape, where ... means an arbitrary number of leading
+<meta property="og:title" content="Crop image to random size and aspect ratio — transform_random_resized_crop" />
+<meta property="og:description" content="Crop the given image to a random size and aspect ratio. The image can be a
+Magick Image or a Tensor, in which case it is expected to have
+[..., H, W] shape, where ... means an arbitrary number of leading
 dimensions" />
 
 
@@ -123,14 +124,15 @@ dimensions" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Crop the given image to random size and aspect ratio.</h1>
+    <h1>Crop image to random size and aspect ratio</h1>
     
     <div class="hidden name"><code>transform_random_resized_crop.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The image can be a Magick Image or a Tensor, in which case it is expected
-to have <code>[..., H, W]</code> shape, where ... means an arbitrary number of leading
+    <p>Crop the given image to a random size and aspect ratio. The image can be a
+Magick Image or a Tensor, in which case it is expected to have
+<code>[..., H, W]</code> shape, where ... means an arbitrary number of leading
 dimensions</p>
     </div>
 
@@ -151,8 +153,8 @@ dimensions</p>
     </tr>
     <tr>
       <th>size</th>
-      <td><p>(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+      <td><p>(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height &gt; width, then image will be rescaled to
 (size * height / width, size).</p></td>
@@ -163,21 +165,23 @@ i.e, if height &gt; width, then image will be rescaled to
     </tr>
     <tr>
       <th>ratio</th>
-      <td><p>(tuple of float): range of aspect ratio of the origin aspect ratio cropped.</p></td>
+      <td><p>(tuple of float): range of aspect ratio of the origin aspect
+ratio cropped.</p></td>
     </tr>
     <tr>
       <th>interpolation</th>
-      <td><p>(int, optional) Desired interpolation. An integer <code>0 = nearest</code>,
-<code>2 = bilinear</code> and <code>3 = bicubic</code> or a name from <code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
+      <td><p>(int, optional) Desired interpolation. An integer
+<code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
+<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>A crop of random size (default: of 0.08 to 1.0) of the original size and a random
-aspect ratio (default: of 3/4 to 4/3) of the original aspect ratio is made.
-This crop is finally resized to given size.</p>
-<p>This is popularly used to train the Inception networks.</p>
+    <p>A crop of random size (default: of 0.08 to 1.0) of the original size
+and a random aspect ratio (default: of 3/4 to 4/3) of the original aspect
+ratio is made. This crop is finally resized to given size. This is
+popularly used to train the Inception networks.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other transforms: 

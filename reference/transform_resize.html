@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Resize the input image to the given size. — transform_resize • torchvision</title>
+<title>Resize the input image to the given size — transform_resize • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,10 @@
 
 
 
-<meta property="og:title" content="Resize the input image to the given size. — transform_resize" />
-<meta property="og:description" content="The image can be a Magic Image or a torch Tensor, in which case it is expected
-to have [..., H, W] shape, where ... means an arbitrary number of leading
-dimensions" />
+<meta property="og:title" content="Resize the input image to the given size — transform_resize" />
+<meta property="og:description" content="The image can be a Magic Image or a torch Tensor, in which case it is
+expected to have [..., H, W] shape, where ... means an arbitrary number
+of leading dimensions" />
 
 
 
@@ -123,15 +123,15 @@ dimensions" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Resize the input image to the given size.</h1>
+    <h1>Resize the input image to the given size</h1>
     
     <div class="hidden name"><code>transform_resize.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The image can be a Magic Image or a torch Tensor, in which case it is expected
-to have <code>[..., H, W]</code> shape, where ... means an arbitrary number of leading
-dimensions</p>
+    <p>The image can be a Magic Image or a torch Tensor, in which case it is
+expected to have <code>[..., H, W]</code> shape, where ... means an arbitrary number
+of leading dimensions</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_resize</span><span class='op'>(</span><span class='va'>img</span>, <span class='va'>size</span>, interpolation <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></pre>
@@ -145,16 +145,17 @@ dimensions</p>
     </tr>
     <tr>
       <th>size</th>
-      <td><p>(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+      <td><p>(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height &gt; width, then image will be rescaled to
 (size * height / width, size).</p></td>
     </tr>
     <tr>
       <th>interpolation</th>
-      <td><p>(int, optional) Desired interpolation. An integer <code>0 = nearest</code>,
-<code>2 = bilinear</code> and <code>3 = bicubic</code> or a name from <code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
+      <td><p>(int, optional) Desired interpolation. An integer
+<code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
+<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
     </tr>
     </table>
 

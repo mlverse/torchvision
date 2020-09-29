@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rotate the image by angle. — transform_random_rotation • torchvision</title>
+<title>Rotate the image by angle — transform_random_rotation • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Rotate the image by angle. — transform_random_rotation" />
-<meta property="og:description" content="Rotate the image by angle." />
+<meta property="og:title" content="Rotate the image by angle — transform_random_rotation" />
+<meta property="og:description" content="Rotate the image by angle" />
 
 
 
@@ -121,13 +121,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Rotate the image by angle.</h1>
+    <h1>Rotate the image by angle</h1>
     
     <div class="hidden name"><code>transform_random_rotation.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Rotate the image by angle.</p>
+    <p>Rotate the image by angle</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_random_rotation</span><span class='op'>(</span>
@@ -149,8 +149,8 @@
     <tr>
       <th>degrees</th>
       <td><p>(sequence or float or int): Range of degrees to select from.
-If degrees is a number instead of sequence like (min, max), the range of degrees
-will be (-degrees, +degrees).</p></td>
+If degrees is a number instead of sequence like (min, max), the range of
+degrees will be (-degrees, +degrees).</p></td>
     </tr>
     <tr>
       <th>resample</th>
@@ -158,23 +158,23 @@ will be (-degrees, +degrees).</p></td>
     </tr>
     <tr>
       <th>expand</th>
-      <td><p>(bool, optional): Optional expansion flag.
-If true, expands the output to make it large enough to hold the entire rotated image.
-If false or omitted, make the output image the same size as the input image.
-Note that the expand flag assumes rotation around the center and no translation.</p></td>
+      <td><p>(bool, optional): Optional expansion flag. If true, expands the
+output to make it large enough to hold the entire rotated image. If false
+or omitted, make the output image the same size as the input image. Note
+that the expand flag assumes rotation around the center and no translation.</p></td>
     </tr>
     <tr>
       <th>center</th>
-      <td><p>(list or tuple, optional): Optional center of rotation, (x, y). Origin is the upper left corner.
-Default is the center of the image.</p></td>
+      <td><p>(list or tuple, optional): Optional center of rotation, (x, y).
+Origin is the upper left corner. Default is the center of the image.</p></td>
     </tr>
     <tr>
       <th>fill</th>
-      <td><p>(n-tuple or int or float): Pixel fill value for area outside the rotated
-image. If int or float, the value is used for all bands respectively.
-Defaults to 0 for all bands. This option is only available for Pillow&gt;=5.2.0.
-This option is not supported for Tensor input. Fill value for the area outside
-the transform in the output image is always 0.</p></td>
+      <td><p>(n-tuple or int or float): Pixel fill value for area outside the
+rotated image. If int or float, the value is used for all bands
+respectively. Defaults to 0 for all bands. This option is only available
+for Pillow&gt;=5.2.0. This option is not supported for Tensor input. Fill
+value for the area outside the transform in the output image is always 0.</p></td>
     </tr>
     </table>
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Adjust gamma of an RGB image. — transform_adjust_gamma • torchvision</title>
+<title>Adjust the gamma of an RGB image — transform_adjust_gamma • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,13 @@
 
 
 
-<meta property="og:title" content="Adjust gamma of an RGB image. — transform_adjust_gamma" />
+<meta property="og:title" content="Adjust the gamma of an RGB image — transform_adjust_gamma" />
 <meta property="og:description" content="Also known as Power Law Transform. Intensities in RGB mode are adjusted
-based on the following equation:" />
+based on the following equation:
+$$
+    I_{\mbox{out}} = 255 \times \mbox{gain} \times \left
+    (\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
+    $$" />
 
 
 
@@ -122,14 +126,18 @@ based on the following equation:" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Adjust gamma of an RGB image.</h1>
+    <h1>Adjust the gamma of an RGB image</h1>
     
     <div class="hidden name"><code>transform_adjust_gamma.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Also known as Power Law Transform. Intensities in RGB mode are adjusted
-based on the following equation:</p>
+based on the following equation:
+$$
+    I_{\mbox{out}} = 255 \times \mbox{gain} \times \left
+    (\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
+    $$</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_adjust_gamma</span><span class='op'>(</span><span class='va'>img</span>, <span class='va'>gamma</span>, gain <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></pre>
@@ -143,9 +151,9 @@ based on the following equation:</p>
     </tr>
     <tr>
       <th>gamma</th>
-      <td><p>(float): Non negative real number, same as \(\gamma\) in the equation.
-gamma larger than 1 make the shadows darker,
-while gamma smaller than 1 make dark regions lighter.</p></td>
+      <td><p>(float): Non negative real number, same as \(\gamma\) in the
+equation. gamma larger than 1 make the shadows darker, while gamma smaller
+than 1 make dark regions lighter.</p></td>
     </tr>
     <tr>
       <th>gain</th>
@@ -155,11 +163,7 @@ while gamma smaller than 1 make dark regions lighter.</p></td>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>$$
-  I_{\mbox{out}} = 255 \times \mbox{gain} \times \left(\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
-$$</p>
-<p>See <a href='https://en.wikipedia.org/wiki/Gamma_correction'>Gamma Correction</a>
-for more details.</p>
+    <p>See <a href='https://en.wikipedia.org/wiki/Gamma_correction'>Gamma Correction</a> for more details.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other transforms: 

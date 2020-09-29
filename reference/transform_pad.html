@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pad the given image on all sides with the given "pad" value. — transform_pad • torchvision</title>
+<title>Pad the given image on all sides with the given "pad" value — transform_pad • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,10 @@
 
 
 
-<meta property="og:title" content="Pad the given image on all sides with the given "pad" value. — transform_pad" />
-<meta property="og:description" content="The image can be a Magick Image or a torch Tensor, in which case it is expected
-to have [..., H, W] shape, where ... means an arbitrary number of leading dimensions" />
+<meta property="og:title" content="Pad the given image on all sides with the given "pad" value — transform_pad" />
+<meta property="og:description" content="The image can be a Magick Image or a torch Tensor, in which case it is
+expected to have [..., H, W] shape, where ... means an arbitrary number
+of leading dimensions." />
 
 
 
@@ -122,14 +123,15 @@ to have [..., H, W] shape, where ... means an arbitrary number of leading dimens
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Pad the given image on all sides with the given "pad" value.</h1>
+    <h1>Pad the given image on all sides with the given "pad" value</h1>
     
     <div class="hidden name"><code>transform_pad.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The image can be a Magick Image or a torch Tensor, in which case it is expected
-to have <code>[..., H, W]</code> shape, where ... means an arbitrary number of leading dimensions</p>
+    <p>The image can be a Magick Image or a torch Tensor, in which case it is
+expected to have <code>[..., H, W]</code> shape, where ... means an arbitrary number
+of leading dimensions.</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_pad</span><span class='op'>(</span><span class='va'>img</span>, <span class='va'>padding</span>, fill <span class='op'>=</span> <span class='fl'>0</span>, padding_mode <span class='op'>=</span> <span class='st'>"constant"</span><span class='op'>)</span></pre>
@@ -143,31 +145,33 @@ to have <code>[..., H, W]</code> shape, where ... means an arbitrary number of l
     </tr>
     <tr>
       <th>padding</th>
-      <td><p>(int or tuple or list): Padding on each border. If a single int is provided this
-is used to pad all borders. If tuple of length 2 is provided this is the padding
-on left/right and top/bottom respectively. If a tuple of length 4 is provided
-this is the padding for the left, top, right and bottom borders respectively.</p></td>
+      <td><p>(int or tuple or list): Padding on each border. If a single
+int is provided this is used to pad all borders. If tuple of length 2 is
+provided this is the padding on left/right and top/bottom respectively.
+If a tuple of length 4 is provided this is the padding for the left, top,
+right and bottom borders respectively.</p></td>
     </tr>
     <tr>
       <th>fill</th>
-      <td><p>(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.</p></td>
+      <td><p>(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.</p></td>
     </tr>
     <tr>
       <th>padding_mode</th>
-      <td><p>Type of padding. Should be: constant, edge, reflect or symmetric.
-Default is constant.
-Mode symmetric is not yet supported for Tensor inputs.
-- constant: pads with a constant value, this value is specified with fill
-- edge: pads with the last value on the edge of the image
-- reflect: pads with reflection of image (without repeating the last value on the edge)
-padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides in reflect mode
-will result in <code>[3, 2, 1, 2, 3, 4, 3, 2]</code>
-- symmetric: pads with reflection of image (repeating the last value on the edge)
-padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides in symmetric mode
-will result in <code>[2, 1, 1, 2, 3, 4, 4, 3]</code></p></td>
+      <td><p>Type of padding. Should be: constant, edge, reflect or
+symmetric. Default is constant. Mode symmetric is not yet supported for
+Tensor inputs.</p><ul>
+<li><p>constant: pads with a constant value, this value is specified with fill</p></li>
+<li><p>edge: pads with the last value on the edge of the image</p></li>
+<li><p>reflect: pads with reflection of image (without repeating the last
+value on the edge) padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides
+in reflect mode will result in <code>[3, 2, 1, 2, 3, 4, 3, 2]</code></p></li>
+<li><p>symmetric: pads with reflection of image (repeating the last value on
+the edge) padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides in
+symmetric mode will result in <code>[2, 1, 1, 2, 3, 4, 4, 3]</code></p></li>
+</ul></td>
     </tr>
     </table>
 

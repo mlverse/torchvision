@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Convert an image to tensor — transform_to_tensor • torchvision</title>
+<title>Convert an image to a tensor — transform_to_tensor • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,10 @@
 
 
 
-<meta property="og:title" content="Convert an image to tensor — transform_to_tensor" />
-<meta property="og:description" content="Converts a Magick Image or array (H x W x C) in the range
-[0, 255] to a torch_tensor of shape (C x H x W) in the range [0.0, 1.0]" />
+<meta property="og:title" content="Convert an image to a tensor — transform_to_tensor" />
+<meta property="og:description" content="Converts a Magick Image or array (H x W x C) in the range [0, 255] to a
+torch_tensor of shape (C x H x W) in the range [0.0, 1.0]. In the
+other cases, tensors are returned without scaling." />
 
 
 
@@ -122,14 +123,15 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Convert an image to tensor</h1>
+    <h1>Convert an image to a tensor</h1>
     
     <div class="hidden name"><code>transform_to_tensor.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Converts a Magick Image or array (H x W x C) in the range
-<code>[0, 255]</code> to a <code>torch_tensor</code> of shape (C x H x W) in the range <code>[0.0, 1.0]</code></p>
+    <p>Converts a Magick Image or array (H x W x C) in the range <code>[0, 255]</code> to a
+<code>torch_tensor</code> of shape (C x H x W) in the range <code>[0.0, 1.0]</code>. In the
+other cases, tensors are returned without scaling.</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_to_tensor</span><span class='op'>(</span><span class='va'>img</span><span class='op'>)</span></pre>
@@ -143,13 +145,10 @@
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>In the other cases, tensors are returned without scaling.</p>
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
-    <p>Because the input image is scaled to <code>[0.0, 1.0]</code>, this transformation should not be used when
-transforming target image masks.</p>
+    <p>Because the input image is scaled to <code>[0.0, 1.0]</code>, this transformation
+should not be used when transforming target image masks.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other transforms: 

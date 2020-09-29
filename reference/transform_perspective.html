@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Perform perspective transform of the given image. — transform_perspective • torchvision</title>
+<title>Perspective transformation of an image — transform_perspective • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Perform perspective transform of the given image. — transform_perspective" />
-<meta property="og:description" content="Perform perspective transform of the given image." />
+<meta property="og:title" content="Perspective transformation of an image — transform_perspective" />
+<meta property="og:description" content="Perspective transformation of an image" />
 
 
 
@@ -121,13 +121,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Perform perspective transform of the given image.</h1>
+    <h1>Perspective transformation of an image</h1>
     
     <div class="hidden name"><code>transform_perspective.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Perform perspective transform of the given image.</p>
+    <p>Perspective transformation of an image</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_perspective</span><span class='op'>(</span>
@@ -147,25 +147,29 @@
     </tr>
     <tr>
       <th>startpoints</th>
-      <td><p>(list of list of ints): List containing four lists of two integers corresponding to four corners
+      <td><p>(list of list of ints): List containing four lists of two
+integers corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the original image.</p></td>
     </tr>
     <tr>
       <th>endpoints</th>
-      <td><p>(list of list of ints): List containing four lists of two integers corresponding to four corners
-<code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed image.</p></td>
+      <td><p>(list of list of ints): List containing four lists of two
+integers corresponding to four corners
+<code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed
+image.</p></td>
     </tr>
     <tr>
       <th>interpolation</th>
-      <td><p>(int, optional) Desired interpolation. An integer <code>0 = nearest</code>,
-<code>2 = bilinear</code> and <code>3 = bicubic</code> or a name from <code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
+      <td><p>(int, optional) Desired interpolation. An integer
+<code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
+<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
     </tr>
     <tr>
       <th>fill</th>
-      <td><p>(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.</p></td>
+      <td><p>(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.</p></td>
     </tr>
     </table>
 

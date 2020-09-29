@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Performs a random perspective transformation of the given image with a given probability. — transform_random_perspective • torchvision</title>
+<title>Random perspective transformation of an image with a given probability — transform_random_perspective • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Performs a random perspective transformation of the given image with a given probability. — transform_random_perspective" />
-<meta property="og:description" content="Performs a random perspective transformation of the given image with a given probability." />
+<meta property="og:title" content="Random perspective transformation of an image with a given probability — transform_random_perspective" />
+<meta property="og:description" content="Performs a random perspective transformation of the given image with a given
+probability" />
 
 
 
@@ -121,13 +122,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Performs a random perspective transformation of the given image with a given probability.</h1>
+    <h1>Random perspective transformation of an image with a given probability</h1>
     
     <div class="hidden name"><code>transform_random_perspective.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Performs a random perspective transformation of the given image with a given probability.</p>
+    <p>Performs a random perspective transformation of the given image with a given
+probability</p>
     </div>
 
     <pre class="usage"><span class='fu'>transform_random_perspective</span><span class='op'>(</span>
@@ -148,8 +150,7 @@
     <tr>
       <th>distortion_scale</th>
       <td><p>(float): argument to control the degree of distortion
-and ranges from 0 to 1.
-Default is 0.5.</p></td>
+and ranges from 0 to 1. Default is 0.5.</p></td>
     </tr>
     <tr>
       <th>p</th>
@@ -157,15 +158,16 @@ Default is 0.5.</p></td>
     </tr>
     <tr>
       <th>interpolation</th>
-      <td><p>(int, optional) Desired interpolation. An integer <code>0 = nearest</code>,
-<code>2 = bilinear</code> and <code>3 = bicubic</code> or a name from <code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
+      <td><p>(int, optional) Desired interpolation. An integer
+<code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
+<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
     </tr>
     <tr>
       <th>fill</th>
-      <td><p>(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.</p></td>
+      <td><p>(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.</p></td>
     </tr>
     </table>
 
