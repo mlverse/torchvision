@@ -2,30 +2,29 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_adjust_gamma}
 \alias{transform_adjust_gamma}
-\title{Adjust gamma of an RGB image.}
+\title{Adjust the gamma of an RGB image}
 \usage{
 transform_adjust_gamma(img, gamma, gain = 1)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{gamma}{(float): Non negative real number, same as \eqn{\gamma} in the equation.
-gamma larger than 1 make the shadows darker,
-while gamma smaller than 1 make dark regions lighter.}
+\item{gamma}{(float): Non negative real number, same as \eqn{\gamma} in the
+equation. gamma larger than 1 make the shadows darker, while gamma smaller
+than 1 make dark regions lighter.}
 
 \item{gain}{(float): The constant multiplier.}
 }
 \description{
 Also known as Power Law Transform. Intensities in RGB mode are adjusted
 based on the following equation:
+\deqn{
+    I_{\mbox{out}} = 255 \times \mbox{gain} \times \left
+    (\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
+    }
 }
 \details{
-\deqn{
-  I_{\mbox{out}} = 255 \times \mbox{gain} \times \left(\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
-}
-
-See \href{https://en.wikipedia.org/wiki/Gamma_correction}{Gamma Correction}
-for more details.
+See \href{https://en.wikipedia.org/wiki/Gamma_correction}{Gamma Correction} for more details.
 }
 \seealso{
 Other transforms: 

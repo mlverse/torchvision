@@ -2,38 +2,42 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_pad}
 \alias{transform_pad}
-\title{Pad the given image on all sides with the given "pad" value.}
+\title{Pad the given image on all sides with the given "pad" value}
 \usage{
 transform_pad(img, padding, fill = 0, padding_mode = "constant")
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{padding}{(int or tuple or list): Padding on each border. If a single int is provided this
-is used to pad all borders. If tuple of length 2 is provided this is the padding
-on left/right and top/bottom respectively. If a tuple of length 4 is provided
-this is the padding for the left, top, right and bottom borders respectively.}
+\item{padding}{(int or tuple or list): Padding on each border. If a single
+int is provided this is used to pad all borders. If tuple of length 2 is
+provided this is the padding on left/right and top/bottom respectively.
+If a tuple of length 4 is provided this is the padding for the left, top,
+right and bottom borders respectively.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.}
+\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.}
 
-\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or symmetric.
-Default is constant.
-Mode symmetric is not yet supported for Tensor inputs.
-- constant: pads with a constant value, this value is specified with fill
-- edge: pads with the last value on the edge of the image
-- reflect: pads with reflection of image (without repeating the last value on the edge)
-padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in reflect mode
-will result in \verb{[3, 2, 1, 2, 3, 4, 3, 2]}
-- symmetric: pads with reflection of image (repeating the last value on the edge)
-padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in symmetric mode
-will result in \verb{[2, 1, 1, 2, 3, 4, 4, 3]}}
+\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or
+symmetric. Default is constant. Mode symmetric is not yet supported for
+Tensor inputs.
+\itemize{
+\item constant: pads with a constant value, this value is specified with fill
+\item edge: pads with the last value on the edge of the image
+\item reflect: pads with reflection of image (without repeating the last
+value on the edge) padding \verb{[1, 2, 3, 4]} with 2 elements on both sides
+in reflect mode will result in \verb{[3, 2, 1, 2, 3, 4, 3, 2]}
+\item symmetric: pads with reflection of image (repeating the last value on
+the edge) padding \verb{[1, 2, 3, 4]} with 2 elements on both sides in
+symmetric mode will result in \verb{[2, 1, 1, 2, 3, 4, 4, 3]}
+}}
 }
 \description{
-The image can be a Magick Image or a torch Tensor, in which case it is expected
-to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading dimensions
+The image can be a Magick Image or a torch Tensor, in which case it is
+expected to have \verb{[..., H, W]} shape, where ... means an arbitrary number
+of leading dimensions.
 }
 \seealso{
 Other transforms: 

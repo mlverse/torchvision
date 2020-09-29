@@ -2,22 +2,22 @@
 % Please edit documentation in R/models-alexnet.R
 \name{model_alexnet}
 \alias{model_alexnet}
-\title{AlexNet model architecture from the
-\href{https://arxiv.org/abs/1404.5997>}{One weird trick...} paper.}
+\title{AlexNet Model Architecture}
 \usage{
 model_alexnet(pretrained = FALSE, progress = TRUE, ...)
 }
 \arguments{
-\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet}
+\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
 
-\item{progress}{(bool): If TRUE, displays a progress bar of the download to stderr}
+\item{progress}{(bool): If TRUE, displays a progress bar of the download to
+stderr.}
 
 \item{...}{other parameters passed to the model intializer. currently only
 \code{num_classes} is used.}
 }
 \description{
 AlexNet model architecture from the
-\href{https://arxiv.org/abs/1404.5997>}{One weird trick...} paper.
+\href{https://arxiv.org/abs/1404.5997}{One weird trick...} paper.
 }
 \seealso{
 Other models: 

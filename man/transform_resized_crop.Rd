@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_resized_crop}
 \alias{transform_resized_crop}
-\title{Crop the given image and resize it to desired size.}
+\title{Crop an image and resize it to a desired size}
 \usage{
 transform_resized_crop(img, top, left, height, width, size, interpolation = 2)
 }
@@ -11,23 +11,25 @@ transform_resized_crop(img, top, left, height, width, size, interpolation = 2)
 
 \item{top}{(int): Vertical component of the top left corner of the crop box.}
 
-\item{left}{(int): Horizontal component of the top left corner of the crop box.}
+\item{left}{(int): Horizontal component of the top left corner of the crop
+box.}
 
 \item{height}{(int): Height of the crop box.}
 
 \item{width}{(int): Width of the crop box.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+\item{size}{(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer \code{0 = nearest},
-\code{2 = bilinear} and \code{3 = bicubic} or a name from \code{\link[magick:options]{magick::filter_types()}}.}
+\item{interpolation}{(int, optional) Desired interpolation. An integer
+\code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
+\code{\link[magick:options]{magick::filter_types()}}.}
 }
 \description{
-Crop the given image and resize it to desired size.
+Crop an image and resize it to a desired size
 }
 \seealso{
 Other transforms: 

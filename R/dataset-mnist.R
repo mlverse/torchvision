@@ -2,17 +2,18 @@
 #'
 #' Prepares the MNIST dataset and optionally downloads it.
 #'
-#' @param root (string): Root directory of dataset where ``MNIST/processed/training.pt``
-#'   and  ``MNIST/processed/test.pt`` exist.
-#' @param train (bool, optional): If True, creates dataset from ``training.pt``,
-#'   otherwise from ``test.pt``.
-#' @param download (bool, optional): If true, downloads the dataset from the internet and
-#'   puts it in root directory. If dataset is already downloaded, it is not
-#'   downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an PIL image
-#'   and returns a transformed version. E.g, ``transforms.RandomCrop``
-#' @param target_transform (callable, optional): A function/transform that takes in the
-#'   target and transforms it.
+#' @param root (string): Root directory of dataset where
+#'   `MNIST/processed/training.pt` and  `MNIST/processed/test.pt` exist.
+#' @param train (bool, optional): If True, creates dataset from
+#'   `training.pt`, otherwise from `test.pt`.
+#' @param download (bool, optional): If true, downloads the dataset from the
+#'   internet and puts it in root directory. If dataset is already downloaded,
+#'   it is not downloaded again.
+#' @param transform (callable, optional): A function/transform that  takes in an
+#'   PIL image and returns a transformed version. E.g,
+#'   `transforms.RandomCrop`.
+#' @param target_transform (callable, optional): A function/transform that takes
+#'   in the target and transforms it.
 #'
 #' @export
 mnist_dataset <- dataset(
@@ -120,19 +121,20 @@ mnist_dataset <- dataset(
 
 #' Kuzushiji-MNIST
 #'
-#' The [Kuzushiji-MNIST dataset](https://github.com/rois-codh/kmnist).
+#' Prepares the [Kuzushiji-MNIST](https://github.com/rois-codh/kmnist) dataset
+#'   and optionally downloads it.
 #'
-#' @param root (string): Root directory of dataset where `KMNIST/processed/training.pt`
-#'   and  `KMNIST/processed/test.pt` exist.
+#' @param root (string): Root directory of dataset where
+#'   `KMNIST/processed/training.pt` and  `KMNIST/processed/test.pt` exist.
 #' @param train (bool, optional): If TRUE, creates dataset from `training.pt`,
 #'   otherwise from `test.pt`.
-#' @param download (bool, optional): If true, downloads the dataset from the internet and
-#'   puts it in root directory. If dataset is already downloaded, it is not
-#'   downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an PIL image
-#'   and returns a transformed version. E.g, `transforms.RandomCrop`
-#' @param target_transform (callable, optional): A function/transform that takes in the
-#'   target and transforms it.
+#' @param download (bool, optional): If true, downloads the dataset from the
+#'   internet and puts it in root directory. If dataset is already downloaded,
+#'   it is not downloaded again.
+#' @param transform (callable, optional): A function/transform that  takes in an
+#'   PIL image and returns a transformed version. E.g, `transforms.RandomCrop`.
+#' @param target_transform (callable, optional): A function/transform that takes
+#'   in the target and transforms it.
 #'
 #' @export
 kmnist_dataset <- dataset(

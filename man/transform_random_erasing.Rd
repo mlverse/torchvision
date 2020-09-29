@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_erasing}
 \alias{transform_random_erasing}
-\title{Randomly selects a rectangle region in an image and erases its pixels.}
+\title{Randomly selects a rectangular region in an image and erases its pixel values}
 \usage{
 transform_random_erasing(
   img,
@@ -30,7 +30,8 @@ If a str of 'random', erasing each pixel with random values.}
 \item{inplace}{boolean to make this transform inplace. Default set to FALSE.}
 }
 \description{
-'Random Erasing Data Augmentation' by Zhong et al. See https://arxiv.org/pdf/1708.04896.pdf
+'Random Erasing Data Augmentation' by Zhong \emph{et al.}
+See \url{https://arxiv.org/pdf/1708.04896.pdf}
 }
 \seealso{
 Other transforms: 

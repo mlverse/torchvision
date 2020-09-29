@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_rotate}
 \alias{transform_rotate}
-\title{Rotate the image by angle.}
+\title{Angular rotation of an image}
 \usage{
 transform_rotate(
   img,
@@ -16,26 +16,27 @@ transform_rotate(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{angle}{(float or int): rotation angle value in degrees, counter-clockwise.}
+\item{angle}{(float or int): rotation angle value in degrees,
+counter-clockwise.}
 
 \item{resample}{(int, optional): An optional resampling filter.}
 
-\item{expand}{(bool, optional): Optional expansion flag.
-If true, expands the output to make it large enough to hold the entire rotated image.
-If false or omitted, make the output image the same size as the input image.
-Note that the expand flag assumes rotation around the center and no translation.}
+\item{expand}{(bool, optional): Optional expansion flag. If true, expands the
+output to make it large enough to hold the entire rotated image. If false
+or omitted, make the output image the same size as the input image. Note
+that the expand flag assumes rotation around the center and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, (x, y). Origin is the upper left corner.
-Default is the center of the image.}
+\item{center}{(list or tuple, optional): Optional center of rotation, (x, y).
+Origin is the upper left corner. Default is the center of the image.}
 
-\item{fill}{(n-tuple or int or float): Pixel fill value for area outside the rotated
-image. If int or float, the value is used for all bands respectively.
-Defaults to 0 for all bands. This option is only available for Pillow>=5.2.0.
-This option is not supported for Tensor input. Fill value for the area outside
-the transform in the output image is always 0.}
+\item{fill}{(n-tuple or int or float): Pixel fill value for area outside the
+rotated image. If int or float, the value is used for all bands
+respectively. Defaults to 0 for all bands. This option is only available
+for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+value for the area outside the transform in the output image is always 0.}
 }
 \description{
-Rotate the image by angle.
+Angular rotation of an image
 }
 \seealso{
 Other transforms: 

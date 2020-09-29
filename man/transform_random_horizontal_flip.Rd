@@ -2,18 +2,20 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_horizontal_flip}
 \alias{transform_random_horizontal_flip}
-\title{Horizontally flip the given image randomly with a given probability.}
+\title{Horizontally flip an image randomly with a given probability}
 \usage{
 transform_random_horizontal_flip(img, p = 0.5)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{(float): probability of the image being flipped. Default value is 0.5}
+\item{p}{(float): probability of the image being flipped.
+Default value is 0.5}
 }
 \description{
-The image can be a Magick Image or a torch Tensor, in which case it is expected
-to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading
+Horizontally flip an image randomly with a given probability. The image can
+be a Magick Image or a torch Tensor, in which case it is expected to have
+\verb{[..., H, W]} shape, where ... means an arbitrary number of leading
 dimensions
 }
 \seealso{

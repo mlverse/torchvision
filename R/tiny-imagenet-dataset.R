@@ -1,9 +1,11 @@
-#' Tiny imagenet dataset
+#' Tiny ImageNet dataset
 #'
-#' @param root directory path to download the dataset
-#' @param split dataset split, `train`, `validation` or `test`
-#' @param download wether to download or not the dataset.
-#' @param ... other arguments passed to [image_folder_dataset()]
+#' Prepares the Tiny ImageNet dataset and optionally downloads it.
+#'
+#' @param root directory path to download the dataset.
+#' @param split dataset split, `train`, `validation` or `test`.
+#' @param download whether to download or not the dataset.
+#' @param ... other arguments passed to [image_folder_dataset()].
 #'
 #' @family dataset
 #'
