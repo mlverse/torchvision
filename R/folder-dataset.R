@@ -112,12 +112,37 @@ folder_dataset <- torch::dataset(
 #'
 #' @export
 magick_loader <- function(path) {
-
-  if (!requireNamespace("magick"))
-    runtime_error("The `magick` package must be installed to load images.")
-
   magick::image_read(path)
 }
+
+
+#' Base loader
+#'
+#' Loads an image using `jpeg`, or `png` packages depending on the
+#' file extension.
+#'
+#' @param path path to the image to load from
+#'
+#' @export
+base_loader <- function(path) {
+
+  ext <- tolower(fs::path_ext(path))
+
+  if (ext %in% c("jpg", "jpeg"))
+    img <- jpeg::readJPEG(path)
+  else if (ext %in% c("png"))
+    img <- png::readPNG(path)
+  else
+    runtime_error(sprintf("unknown extension '%s' in path '%s'", ext, path))
+
+  if (length(dim(img)) == 2)
+    img <- abind::abind(img, img, img, along = 0)
+  else if (length(dim(img)) == 3 && dim(img)[1] == 1)
+    img <- abind::abind(img, img, img, along = 1)
+
+  img
+}
+
 
 #' Folder dataset
 #'
@@ -153,7 +178,7 @@ image_folder_dataset <- dataset(
                         loader=NULL, is_valid_file=NULL) {
 
     if (is.null(loader))
-      loader <- magick_loader
+      loader <- base_loader
 
     if (!is.null(is_valid_file))
       extensions <- NULL
