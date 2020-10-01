@@ -2,19 +2,19 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_apply}
 \alias{transform_random_apply}
-\title{Apply randomly a list of transformations with a given probability}
+\title{Apply a list of transformations randomly with a given probability}
 \usage{
 transform_random_apply(img, transforms, p = 0.5)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transforms}{(list or tuple): list of transformations}
+\item{transforms}{(list or tuple): list of transformations.}
 
-\item{p}{(float): probability}
+\item{p}{(float): probability.}
 }
 \description{
-Apply randomly a list of transformations with a given probability
+Apply a list of transformations randomly with a given probability
 }
 \seealso{
 Other transforms: 

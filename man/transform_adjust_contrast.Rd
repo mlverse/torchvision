@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_adjust_contrast}
 \alias{transform_adjust_contrast}
-\title{Adjust contrast of an Image.}
+\title{Adjust the contrast of an image}
 \usage{
 transform_adjust_contrast(img, contrast_factor)
 }
@@ -14,7 +14,7 @@ non negative number. 0 gives a solid gray image, 1 gives the
 original image while 2 increases the contrast by a factor of 2.}
 }
 \description{
-Adjust contrast of an Image.
+Adjust the contrast of an image
 }
 \seealso{
 Other transforms: 

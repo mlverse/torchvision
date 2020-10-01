@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_resized_crop}
 \alias{transform_random_resized_crop}
-\title{Crop the given image to random size and aspect ratio.}
+\title{Crop image to random size and aspect ratio}
 \usage{
 transform_random_resized_crop(
   img,
@@ -15,30 +15,32 @@ transform_random_resized_crop(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+\item{size}{(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
 
 \item{scale}{(tuple of float): range of size of the origin size cropped}
 
-\item{ratio}{(tuple of float): range of aspect ratio of the origin aspect ratio cropped.}
+\item{ratio}{(tuple of float): range of aspect ratio of the origin aspect
+ratio cropped.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer \code{0 = nearest},
-\code{2 = bilinear} and \code{3 = bicubic} or a name from \code{\link[magick:options]{magick::filter_types()}}.}
+\item{interpolation}{(int, optional) Desired interpolation. An integer
+\code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
+\code{\link[magick:options]{magick::filter_types()}}.}
 }
 \description{
-The image can be a Magick Image or a Tensor, in which case it is expected
-to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading
+Crop the given image to a random size and aspect ratio. The image can be a
+Magick Image or a Tensor, in which case it is expected to have
+\verb{[..., H, W]} shape, where ... means an arbitrary number of leading
 dimensions
 }
 \details{
-A crop of random size (default: of 0.08 to 1.0) of the original size and a random
-aspect ratio (default: of 3/4 to 4/3) of the original aspect ratio is made.
-This crop is finally resized to given size.
-
-This is popularly used to train the Inception networks.
+A crop of random size (default: of 0.08 to 1.0) of the original size
+and a random aspect ratio (default: of 3/4 to 4/3) of the original aspect
+ratio is made. This crop is finally resized to given size. This is
+popularly used to train the Inception networks.
 }
 \seealso{
 Other transforms: 

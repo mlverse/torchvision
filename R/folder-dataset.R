@@ -106,7 +106,9 @@ folder_dataset <- torch::dataset(
   }
 )
 
-#' Loads an image from a path using imagemagick
+#' Load an Image using ImageMagick
+#'
+#' Load an image located at `path` using the `{magick}` package.
 #'
 #' @param path path to the image to load from.
 #'
@@ -144,9 +146,16 @@ base_loader <- function(path) {
 }
 
 
-#' Folder dataset
+#' Create an image folder dataset
 #'
-#' A generic data loader where the images are arranged in this way:
+#' A generic data loader for images stored in folders.
+#'   See `Details` for more information.
+#'
+#' @details This function assumes that the images for each class are contained
+#'   in subdirectories of `root`. The names of these subdirectories are stored
+#'   in the `classes` attribute of the returned object.
+#'
+#' An example folder structure might look as follows:
 #'
 #' ```
 #' root/dog/xxx.png

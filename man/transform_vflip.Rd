@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_vflip}
 \alias{transform_vflip}
-\title{Vertically flip the given PIL Image or torch Tensor.}
+\title{Vertically flip a PIL Image or Tensor}
 \usage{
 transform_vflip(img)
 }
@@ -10,7 +10,7 @@ transform_vflip(img)
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 }
 \description{
-Vertically flip the given PIL Image or torch Tensor.
+Vertically flip a PIL Image or Tensor
 }
 \seealso{
 Other transforms: 

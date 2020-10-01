@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_perspective}
 \alias{transform_perspective}
-\title{Perform perspective transform of the given image.}
+\title{Perspective transformation of an image}
 \usage{
 transform_perspective(
   img,
@@ -15,22 +15,26 @@ transform_perspective(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{startpoints}{(list of list of ints): List containing four lists of two integers corresponding to four corners
+\item{startpoints}{(list of list of ints): List containing four lists of two
+integers corresponding to four corners
 \verb{[top-left, top-right, bottom-right, bottom-left]} of the original image.}
 
-\item{endpoints}{(list of list of ints): List containing four lists of two integers corresponding to four corners
-\verb{[top-left, top-right, bottom-right, bottom-left]} of the transformed image.}
+\item{endpoints}{(list of list of ints): List containing four lists of two
+integers corresponding to four corners
+\verb{[top-left, top-right, bottom-right, bottom-left]} of the transformed
+image.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer \code{0 = nearest},
-\code{2 = bilinear} and \code{3 = bicubic} or a name from \code{\link[magick:options]{magick::filter_types()}}.}
+\item{interpolation}{(int, optional) Desired interpolation. An integer
+\code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
+\code{\link[magick:options]{magick::filter_types()}}.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill. Default is 0. If a tuple of
-length 3, it is used to fill R, G, B channels respectively.
-This value is only used when the padding_mode is constant. Only int value is
-supported for Tensors.}
+\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
+Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
+respectively. This value is only used when the padding_mode is constant.
+Only int value is supported for Tensors.}
 }
 \description{
-Perform perspective transform of the given image.
+Perspective transformation of an image
 }
 \seealso{
 Other transforms: 

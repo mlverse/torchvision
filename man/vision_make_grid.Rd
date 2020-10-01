@@ -2,7 +2,7 @@
 % Please edit documentation in R/vision_utils.R
 \name{vision_make_grid}
 \alias{vision_make_grid}
-\title{A simplified version of torchvision.utils.make_grid.}
+\title{A simplified version of torchvision.utils.make_grid}
 \usage{
 vision_make_grid(
   tensor,
@@ -13,17 +13,17 @@ vision_make_grid(
 )
 }
 \arguments{
-\item{tensor}{tensor to arrange in grid}
+\item{tensor}{tensor to arrange in grid.}
 
-\item{scale}{whether to normalize (min-max-scale) the input tensor}
+\item{scale}{whether to normalize (min-max-scale) the input tensor.}
 
-\item{num_rows}{number of rows making up the grid (default 8)}
+\item{num_rows}{number of rows making up the grid (default 8).}
 
-\item{padding}{amount of padding between batch images (default 2)}
+\item{padding}{amount of padding between batch images (default 2).}
 
-\item{pad_value}{pixel value to use for padding}
+\item{pad_value}{pixel value to use for padding.}
 }
 \description{
-Arranges a batch of (image) tensors in a grid, with optional padding between images.
-Expects a 4d mini-batch tensor of shape (B x C x H x W).
+Arranges a batch of (image) tensors in a grid, with optional padding between
+images. Expects a 4d mini-batch tensor of shape (B x C x H x W).
 }

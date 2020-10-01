@@ -2,7 +2,7 @@
 % Please edit documentation in R/folder-dataset.R
 \name{image_folder_dataset}
 \alias{image_folder_dataset}
-\title{Folder dataset}
+\title{Create an image folder dataset}
 \usage{
 image_folder_dataset(
   root,
@@ -27,10 +27,15 @@ transforms it.}
 the file is a valid file (used to check of corrupt files)}
 }
 \description{
-A generic data loader where the images are arranged in this way:
+A generic data loader for images stored in folders.
+See \code{Details} for more information.
 }
 \details{
-\preformatted{root/dog/xxx.png
+This function assumes that the images for each class are contained
+in subdirectories of \code{root}. The names of these subdirectories are stored
+in the \code{classes} attribute of the returned object.
+
+An example folder structure might look as follows:\preformatted{root/dog/xxx.png
 root/dog/xxy.png
 root/dog/xxz.png
 

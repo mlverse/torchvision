@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_adjust_brightness}
 \alias{transform_adjust_brightness}
-\title{Adjust brightness of an Image.}
+\title{Adjust the brightness of an image}
 \usage{
 transform_adjust_brightness(img, brightness_factor)
 }
@@ -14,7 +14,7 @@ any non negative number. 0 gives a black image, 1 gives the
 original image while 2 increases the brightness by a factor of 2.}
 }
 \description{
-Adjust brightness of an Image.
+Adjust the brightness of an image
 }
 \seealso{
 Other transforms: 

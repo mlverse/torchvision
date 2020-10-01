@@ -2,22 +2,22 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_center_crop}
 \alias{transform_center_crop}
-\title{Crops the given image at the center.}
+\title{Crops the given image at the center}
 \usage{
 transform_center_crop(img, size)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size of the crop. If size is an
-int instead of sequence like (h, w), a square crop (size, size) is
+\item{size}{(sequence or int): Desired output size of the crop. If size is
+an int instead of sequence like (h, w), a square crop (size, size) is
 made. If provided a tuple or list of length 1, it will be interpreted as
 \verb{(size, size)}.}
 }
 \description{
-The image can be a Magick Image or a torch Tensor, in which case it is expected
-to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading
-dimensions
+The image can be a Magick Image or a torch Tensor, in which case it is
+expected to have \verb{[..., H, W]} shape, where ... means an arbitrary number
+of leading dimensions.
 }
 \seealso{
 Other transforms: 

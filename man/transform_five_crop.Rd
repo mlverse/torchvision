@@ -2,22 +2,23 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_five_crop}
 \alias{transform_five_crop}
-\title{Crop the given image into four corners and the central crop.}
+\title{Crop image into four corners and a central crop}
 \usage{
 transform_five_crop(img, size)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+\item{size}{(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
 }
 \description{
-This transform returns a tuple of images and there may be a mismatch in the
-number of inputs and targets your Dataset returns.
+Crop the given image into four corners and the central crop. This transform
+returns a tuple of images and there may be a mismatch in the number of
+inputs and targets your Dataset returns.
 }
 \seealso{
 Other transforms: 

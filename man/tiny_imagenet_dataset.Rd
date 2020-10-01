@@ -2,20 +2,20 @@
 % Please edit documentation in R/tiny-imagenet-dataset.R
 \name{tiny_imagenet_dataset}
 \alias{tiny_imagenet_dataset}
-\title{Tiny imagenet dataset}
+\title{Tiny ImageNet dataset}
 \usage{
 tiny_imagenet_dataset(root, split = "train", download = FALSE, ...)
 }
 \arguments{
-\item{root}{directory path to download the dataset}
+\item{root}{directory path to download the dataset.}
 
-\item{split}{dataset split, \code{train}, \code{validation} or \code{test}}
+\item{split}{dataset split, \code{train}, \code{validation} or \code{test}.}
 
-\item{download}{wether to download or not the dataset.}
+\item{download}{whether to download or not the dataset.}
 
-\item{...}{other arguments passed to \code{\link[=image_folder_dataset]{image_folder_dataset()}}}
+\item{...}{other arguments passed to \code{\link[=image_folder_dataset]{image_folder_dataset()}}.}
 }
 \description{
-Tiny imagenet dataset
+Prepares the Tiny ImageNet dataset and optionally downloads it.
 }
 \concept{dataset}

@@ -2,19 +2,20 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_random_vertical_flip}
 \alias{transform_random_vertical_flip}
-\title{Vertically flip the given image randomly with a given probability.}
+\title{Vertically flip an image randomly with a given probability}
 \usage{
 transform_random_vertical_flip(img, p = 0.5)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{(float): probability of the image being flipped. Default value is 0.5}
+\item{p}{(float): probability of the image being flipped.
+Default value is 0.5}
 }
 \description{
 The image can be a PIL Image or a torch Tensor, in which case it is expected
-to have \verb{[..., H, W]} shape, where \code{...} means an arbitrary number of leading
-dimensions
+to have \verb{[..., H, W]} shape, where \code{...} means an arbitrary number of
+leading dimensions
 }
 \seealso{
 Other transforms: 

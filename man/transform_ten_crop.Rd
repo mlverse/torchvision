@@ -2,16 +2,15 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_ten_crop}
 \alias{transform_ten_crop}
-\title{Crop the given image into four corners and the central crop plus the flipped version of
-these (horizontal flipping is used by default).}
+\title{Crop an image and the flipped image each into four corners and a central crop}
 \usage{
 transform_ten_crop(img, size, vertical_flip = FALSE)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence like
-(h, w), output size will be matched to this. If size is an int,
+\item{size}{(sequence or int): Desired output size. If size is a sequence
+like (h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
@@ -19,7 +18,9 @@ i.e, if height > width, then image will be rescaled to
 \item{vertical_flip}{(bool): Use vertical flipping instead of horizontal}
 }
 \description{
-This transform returns a tuple of images and there may be a mismatch in the number of
+Crop the given image into four corners and the central crop, plus the flipped
+version of these (horizontal flipping is used by default). This transform
+returns a tuple of images and there may be a mismatch in the number of
 inputs and targets your Dataset returns.
 }
 \seealso{

@@ -9,7 +9,7 @@ transform_random_choice(img, transforms)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transforms}{(list or tuple): list of transformations}
+\item{transforms}{(list or tuple): list of transformations.}
 }
 \description{
 Apply single transformation randomly picked from a list

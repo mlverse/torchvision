@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_adjust_hue}
 \alias{transform_adjust_hue}
-\title{Adjust hue of an image.}
+\title{Adjust the hue of an image}
 \usage{
 transform_adjust_hue(img, hue_factor)
 }

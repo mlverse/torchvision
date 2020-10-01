@@ -2,17 +2,18 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_grayscale}
 \alias{transform_grayscale}
-\title{Convert image to grayscale.}
+\title{Convert image to grayscale}
 \usage{
 transform_grayscale(img, num_output_channels)
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{num_output_channels}{(int): (1 or 3) number of channels desired for output image}
+\item{num_output_channels}{(int): (1 or 3) number of channels desired for
+output image}
 }
 \description{
-Convert image to grayscale.
+Convert image to grayscale
 }
 \seealso{
 Other transforms: 

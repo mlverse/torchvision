@@ -2,7 +2,7 @@
 % Please edit documentation in R/folder-dataset.R
 \name{magick_loader}
 \alias{magick_loader}
-\title{Loads an image from a path using imagemagick}
+\title{Load an Image using ImageMagick}
 \usage{
 magick_loader(path)
 }
@@ -10,5 +10,5 @@ magick_loader(path)
 \item{path}{path to the image to load from.}
 }
 \description{
-Loads an image from a path using imagemagick
+Load an image located at \code{path} using the \code{{magick}} package.
 }

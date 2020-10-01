@@ -2,7 +2,7 @@
 % Please edit documentation in R/transforms-generics.R
 \name{transform_to_tensor}
 \alias{transform_to_tensor}
-\title{Convert an image to tensor}
+\title{Convert an image to a tensor}
 \usage{
 transform_to_tensor(img)
 }
@@ -10,15 +10,13 @@ transform_to_tensor(img)
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 }
 \description{
-Converts a Magick Image or array (H x W x C) in the range
-\verb{[0, 255]} to a \code{torch_tensor} of shape (C x H x W) in the range \verb{[0.0, 1.0]}
-}
-\details{
-In the other cases, tensors are returned without scaling.
+Converts a Magick Image or array (H x W x C) in the range \verb{[0, 255]} to a
+\code{torch_tensor} of shape (C x H x W) in the range \verb{[0.0, 1.0]}. In the
+other cases, tensors are returned without scaling.
 }
 \note{
-Because the input image is scaled to \verb{[0.0, 1.0]}, this transformation should not be used when
-transforming target image masks.
+Because the input image is scaled to \verb{[0.0, 1.0]}, this transformation
+should not be used when transforming target image masks.
 }
 \seealso{
 Other transforms: 
