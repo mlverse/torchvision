@@ -1,5 +1,5 @@
 
-IMG_EXTENSIONS <-  c('jpg', 'jpeg', 'png', 'ppm', 'bmp', 'pgm', 'tif', 'tiff', 'webp')
+IMG_EXTENSIONS <-  c('jpg', 'jpeg', 'png') # 'ppm', 'bmp', 'pgm', 'tif', 'tiff', 'webp'
 
 has_file_allowed_extension <- function(filename, extensions) {
   tolower(fs::path_ext(filename)) %in% tolower(extensions )
