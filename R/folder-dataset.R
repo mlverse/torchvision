@@ -138,7 +138,7 @@ base_loader <- function(path) {
     runtime_error(sprintf("unknown extension '%s' in path '%s'", ext, path))
 
   if (length(dim(img)) == 2)
-    img <- abind::abind(img, img, img, along = 0)
+    img <- abind::abind(img, img, img, along = 3)
   else if (length(dim(img)) == 3 && dim(img)[1] == 1)
     img <- abind::abind(img, img, img, along = 1)
 
