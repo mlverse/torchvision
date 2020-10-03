@@ -26,6 +26,7 @@ Imports:
     rappdirs,
     utils,
     jpeg,
-    png
+    png,
+    abind
 Remotes:
     mlverse/torch
