@@ -184,9 +184,9 @@ get_random_resized_crop_params <- function(img, scale, ratio) {
   } else {
     w <- width
     h <- height
-    i <- (height - h) %/% 2
-    j <- (width - w) %/% 2
   }
+  i <- (height - h) %/% 2
+  j <- (width - w) %/% 2
 
   c(i, j, h, w)
 }

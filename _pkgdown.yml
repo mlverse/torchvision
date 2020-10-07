@@ -5,6 +5,23 @@ template:
 development:
   mode: auto
 
+navbar:
+ structure:
+  left:  [home, examples, reference, news]
+  right: [github]
+ components:
+  examples:
+    text: Examples
+    menu:
+      - text: mnist-mlp
+        href: articles/examples/mnist-mlp.html
+      - text: mnist-cnn
+        href: articles/examples/mnist-cnn.html
+      - text: mnist-dcgan
+        href: articles/examples/mnist-dcgan.html
+      - text: tinyimagenet-alexnet
+        href: articles/examples/tinyimagenet-alexnet.html
+
 reference:
 - title: Transforms
   desc: Image transformation functions

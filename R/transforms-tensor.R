@@ -68,7 +68,7 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
   mean <- torch::torch_tensor(mean, dtype=dtype, device=img$device)
   std <- torch::torch_tensor(std, dtype=dtype, device=img$device)
 
-  if (torch::as_array((std == 0)$any())) {
+  if ((std == 0)$any()$item()) {
     value_error("std evaluated to zero after conversion to {dtype}, leading to division by zero.")
   }
 

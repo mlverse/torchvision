@@ -94,9 +94,7 @@ mnist_dataset <- dataset(
   },
   .getitem = function(index) {
     img <- self$data[index, ,]
-    target <- torch::torch_tensor(self$targets[index],
-                                  dtype = torch::torch_long())
-    target$squeeze_(1)
+    target <- self$targets[index]
 
     if (!is.null(self$transform))
       img <- self$transform(img)
