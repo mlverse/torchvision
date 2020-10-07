@@ -1,62 +1,97 @@
+# Packages ----------------------------------------------------------------
+
 library(torch)
 library(torchvision)
-library(magrittr)
+
+
+# Datasets ----------------------------------------------------------------
 
 dir <- "~/Downloads/tiny-imagenet"
 
-ds <- tiny_imagenet_dataset(
+device <- if(cuda_is_available()) "cuda" else "cpu"
+
+to_device <- function(x, device) {
+  x$to(device = device)
+}
+
+train_ds <- tiny_imagenet_dataset(
   dir,
   download = TRUE,
   transform = function(x) {
     x %>%
       transform_to_tensor() %>%
-      transform_random_resized_crop(size = c(224, 224)) %>%
-      transform_random_horizontal_flip() %>%
-      transform_normalize(
-        mean = c(0.485, 0.456, 0.406),
-        std = c(0.229, 0.224, 0.225)
-      )
-  },
-  target_transform = function(x) {
-    x <- torch_tensor(x, dtype = torch_long())
-    x$squeeze(1)
+      to_device(device) %>%
+      transform_resize(c(64, 64))
   }
 )
 
-dl <- dataloader(ds, batch_size = 128, shuffle = TRUE)
+valid_ds <- tiny_imagenet_dataset(
+  dir,
+  download = TRUE,
+  split = "val",
+  transform = function(x) {
+    x %>%
+      transform_to_tensor() %>%
+      to_device(device) %>%
+      transform_resize(c(64,64))
+  }
+)
 
-if (cuda_is_available()) {
-  device <- torch_device("cuda")
-} else {
-  device <- torch_device("cpu")
-}
+train_dl <- dataloader(train_ds, batch_size = 32, shuffle = TRUE, drop_last = TRUE)
+valid_dl <- dataloader(valid_ds, batch_size = 32, shuffle = FALSE, drop_last = TRUE)
 
-model <- model_alexnet()
+
+# Model -------------------------------------------------------------------
+
+model <- model_alexnet(pretrained = FALSE, num_classes = length(train_ds$classes))
 model$to(device = device)
 
 optimizer <- optim_adam(model$parameters)
-loss_fun <- nn_cross_entropy_loss()
+scheduler <- lr_step(optimizer, step_size = 1, 0.95)
+loss_fn <- nn_cross_entropy_loss()
 
-epochs <- 10
+
+# Training loop -----------------------------------------------------------
+
+train_step <- function(batch) {
+  optimizer$zero_grad()
+  output <- model(batch[[1]]$to(device = device))
+  loss <- loss_fn(output, batch[[2]]$to(device = device))
+  loss$backward()
+  optimizer$step()
+  loss
+}
+
+valid_step <- function(batch) {
+  model$eval()
+  pred <- model(batch[[1]]$to(device = device))
+  pred <- torch_topk(pred, k = 5, dim = 2, TRUE, TRUE)[[2]]$add(1L)
+  pred <- pred$to(device = torch_device("cpu"))
+  correct <- batch[[2]]$view(c(-1, 1))$eq(pred)$any(dim = 2)
+  model$train()
+  correct$to(dtype = torch_float32())$mean()$item()
+}
 
 for (epoch in 1:50) {
 
   pb <- progress::progress_bar$new(
-    total = length(dl),
+    total = length(train_dl),
     format = "[:bar] :eta Loss: :loss"
   )
-  l <- c()
 
-  for (b in enumerate(dl)) {
-    optimizer$zero_grad()
-    output <- model(b[[1]]$to(device = device))
-    loss <- loss_fun(output, b[[2]]$to(device = device))
-    loss$backward()
-    optimizer$step()
+  l <- c()
+  for (b in enumerate(train_dl)) {
+    loss <- train_step(b)
     l <- c(l, loss$item())
     pb$tick(tokens = list(loss = mean(l)))
   }
 
-  cat(sprintf("Loss at epoch %d: %3f\n", epoch, mean(l)))
-}
+  acc <- c()
+  for (b in enumerate(valid_dl)) {
+    accuracy <- valid_step(b)
+    acc <- c(acc, accuracy)
+  }
 
+  scheduler$step()
+  cat(sprintf("[epoch %d]: Loss = %3f, Acc= %3f \n", epoch, mean(l), mean(acc)))
+}
