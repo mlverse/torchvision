@@ -99,7 +99,7 @@ folder_dataset <- torch::dataset(
     if (!is.null(self$target_transform))
       target <- self$target_transform(target)
 
-    list(sample, target)
+    list(x = sample, y = target)
   },
   .length = function() {
     length(self$samples[[1]])

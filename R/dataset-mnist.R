@@ -102,7 +102,7 @@ mnist_dataset <- dataset(
     if (!is.null(self$target_transform))
       target <- self$target_transform(target)
 
-    list(img, target)
+    list(x = img, y = target)
   },
   .length = function() {
     dim(self$data)[1]

@@ -11,6 +11,8 @@ test_that("image_folder dataset", {
   for(batch in torch::enumerate(dl)) {
     expect_tensor_shape(batch[[1]], c(2, 3, 32, 32))
     expect_tensor_shape(batch[[2]], 2)
+    expect_tensor_shape(batch$x, c(2, 3, 32, 32))
+    expect_tensor_shape(batch$y, 2)
   }
 
   expect_length(ds, 12)
