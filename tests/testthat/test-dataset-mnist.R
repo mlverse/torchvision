@@ -23,6 +23,7 @@ test_that("tests for the mnist dataset", {
   expect_tensor_shape(i[[1]], c(32, 1, 28, 28))
   expect_tensor_shape(i[[2]], 32)
   expect_true((torch_max(i[[1]]) <= 1)$item())
+  expect_named(i, c("x", "y"))
 
 })
 
@@ -50,4 +51,5 @@ test_that("tests for the kmnist dataset", {
   expect_tensor_shape(i[[1]], c(32, 1, 28, 28))
   expect_tensor_shape(i[[2]], 32)
   expect_true((torch_max(i[[1]]) <= 1)$item())
+  expect_named(i, c("x", "y"))
 })
