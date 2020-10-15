@@ -42,11 +42,11 @@ vision_make_grid <- function(tensor,
           break
         grid$narrow(
           dim = 2,
-          start = torch::torch_tensor(y * height + padding, dtype = torch::torch_int64())$sum(dim = 1),
+          start =  1 + torch::torch_tensor(y * height + padding, dtype = torch::torch_int64())$sum(dim = 1),
           length = height - padding
         )$narrow(
           dim = 3,
-          start = torch::torch_tensor(x * width + padding, dtype = torch::torch_int64())$sum(dim = 1),
+          start = 1 + torch::torch_tensor(x * width + padding, dtype = torch::torch_int64())$sum(dim = 1),
           length = width - padding
         )$copy_(tensor[k + 1, , ,])
         k <- k + 1
