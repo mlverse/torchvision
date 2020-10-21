@@ -1,6 +1,6 @@
 Package: torchvision
-Title: R interface to TorchVision
-Version: 0.0.0.9000
+Title: Models, Datasets and Transformations for Images
+Version: 0.1.0
 Authors@R: c(
     person(given = "Daniel",
            family = "Falbel",
@@ -9,8 +9,10 @@ Authors@R: c(
            ),
     person(family = "RStudio", role = c("cph"))
     )
-Description: Provides access to datasets, models and pre-processing
-    facilities for deep learning in images.
+Description: Provides access to datasets, models and preprocessing
+    facilities for deep learning with images. Integrates seamlessly
+    with the 'torch' package and it's 'API' borrows heavily from 
+    'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -20,7 +22,7 @@ Suggests:
     testthat,
     magick
 Imports: 
-    torch,
+    torch (>= 0.1.0),
     fs,
     rlang,
     rappdirs,
@@ -28,5 +30,3 @@ Imports:
     jpeg,
     png,
     abind
-Remotes:
-    mlverse/torch
