@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Convert a tensor image to the given dtype and scale the values accordingly — transform_convert_image_dtype • torchvision</title>
+<title>Cifar datasets — cifar10_dataset • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Convert a tensor image to the given dtype and scale the values accordingly — transform_convert_image_dtype" />
-<meta property="og:description" content="Convert a tensor image to the given dtype and scale the values accordingly" />
+<meta property="og:title" content="Cifar datasets — cifar10_dataset" />
+<meta property="og:description" content="CIFAR10 Dataset.
+Downloads and prepares the CIFAR100 dataset." />
 
 
 
@@ -145,73 +146,63 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Convert a tensor image to the given <code>dtype</code> and scale the values accordingly</h1>
+    <h1>Cifar datasets</h1>
     
-    <div class="hidden name"><code>transform_convert_image_dtype.Rd</code></div>
+    <div class="hidden name"><code>cifar10_dataset.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Convert a tensor image to the given <code>dtype</code> and scale the values accordingly</p>
+    <p><a href='https://www.cs.toronto.edu/~kriz/cifar.html'>CIFAR10</a> Dataset.</p>
+<p>Downloads and prepares the CIFAR100 dataset.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>transform_convert_image_dtype</span><span class='op'>(</span><span class='va'>img</span>, dtype <span class='op'>=</span> <span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/torch_dtype.html'>torch_float</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>cifar10_dataset</span><span class='op'>(</span>
+  <span class='va'>root</span>,
+  train <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  transform <span class='op'>=</span> <span class='cn'>NULL</span>,
+  target_transform <span class='op'>=</span> <span class='cn'>NULL</span>,
+  download <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span>
+
+<span class='fu'>cifar100_dataset</span><span class='op'>(</span>
+  <span class='va'>root</span>,
+  train <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  transform <span class='op'>=</span> <span class='cn'>NULL</span>,
+  target_transform <span class='op'>=</span> <span class='cn'>NULL</span>,
+  download <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>img</th>
-      <td><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></td>
+      <th>root</th>
+      <td><p>(string): Root directory of dataset where directory
+<code>cifar-10-batches-bin</code> exists or will be saved to if download is set to TRUE.</p></td>
     </tr>
     <tr>
-      <th>dtype</th>
-      <td><p>(torch.dtype): Desired data type of the output.</p></td>
+      <th>train</th>
+      <td><p>(bool, optional): If TRUE, creates dataset from training set, otherwise
+creates from test set.</p></td>
+    </tr>
+    <tr>
+      <th>transform</th>
+      <td><p>(callable, optional): A function/transform that takes in an PIL image
+and returns a transformed version. E.g, <code>transforms.RandomCrop</code></p></td>
+    </tr>
+    <tr>
+      <th>target_transform</th>
+      <td><p>(callable, optional): A function/transform that takes in the
+target and transforms it.</p></td>
+    </tr>
+    <tr>
+      <th>download</th>
+      <td><p>(bool, optional): If true, downloads the dataset from the internet and
+puts it in root directory. If dataset is already downloaded, it is not
+downloaded again.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
-
-    <p>When converting from a smaller to a larger integer <code>dtype</code> the maximum
-values are <strong>not</strong> mapped exactly. If converted back and forth, this
-mismatch has no effect.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>Other transforms: 
-<code><a href='transform_adjust_brightness.html'>transform_adjust_brightness</a>()</code>,
-<code><a href='transform_adjust_contrast.html'>transform_adjust_contrast</a>()</code>,
-<code><a href='transform_adjust_gamma.html'>transform_adjust_gamma</a>()</code>,
-<code><a href='transform_adjust_hue.html'>transform_adjust_hue</a>()</code>,
-<code><a href='transform_adjust_saturation.html'>transform_adjust_saturation</a>()</code>,
-<code><a href='transform_affine.html'>transform_affine</a>()</code>,
-<code><a href='transform_center_crop.html'>transform_center_crop</a>()</code>,
-<code><a href='transform_color_jitter.html'>transform_color_jitter</a>()</code>,
-<code><a href='transform_crop.html'>transform_crop</a>()</code>,
-<code><a href='transform_five_crop.html'>transform_five_crop</a>()</code>,
-<code><a href='transform_grayscale.html'>transform_grayscale</a>()</code>,
-<code><a href='transform_hflip.html'>transform_hflip</a>()</code>,
-<code><a href='transform_linear_transformation.html'>transform_linear_transformation</a>()</code>,
-<code><a href='transform_normalize.html'>transform_normalize</a>()</code>,
-<code><a href='transform_pad.html'>transform_pad</a>()</code>,
-<code><a href='transform_perspective.html'>transform_perspective</a>()</code>,
-<code><a href='transform_random_affine.html'>transform_random_affine</a>()</code>,
-<code><a href='transform_random_apply.html'>transform_random_apply</a>()</code>,
-<code><a href='transform_random_choice.html'>transform_random_choice</a>()</code>,
-<code><a href='transform_random_crop.html'>transform_random_crop</a>()</code>,
-<code><a href='transform_random_erasing.html'>transform_random_erasing</a>()</code>,
-<code><a href='transform_random_grayscale.html'>transform_random_grayscale</a>()</code>,
-<code><a href='transform_random_horizontal_flip.html'>transform_random_horizontal_flip</a>()</code>,
-<code><a href='transform_random_order.html'>transform_random_order</a>()</code>,
-<code><a href='transform_random_perspective.html'>transform_random_perspective</a>()</code>,
-<code><a href='transform_random_resized_crop.html'>transform_random_resized_crop</a>()</code>,
-<code><a href='transform_random_rotation.html'>transform_random_rotation</a>()</code>,
-<code><a href='transform_random_vertical_flip.html'>transform_random_vertical_flip</a>()</code>,
-<code><a href='transform_resized_crop.html'>transform_resized_crop</a>()</code>,
-<code><a href='transform_resize.html'>transform_resize</a>()</code>,
-<code><a href='transform_rgb_to_grayscale.html'>transform_rgb_to_grayscale</a>()</code>,
-<code><a href='transform_rotate.html'>transform_rotate</a>()</code>,
-<code><a href='transform_ten_crop.html'>transform_ten_crop</a>()</code>,
-<code><a href='transform_to_tensor.html'>transform_to_tensor</a>()</code>,
-<code><a href='transform_vflip.html'>transform_vflip</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
