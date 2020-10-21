@@ -1,3 +1,21 @@
+
+#' Cifar datasets
+#'
+#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) Dataset.
+#'
+#' @param root (string): Root directory of dataset where directory
+#'   `cifar-10-batches-bin` exists or will be saved to if download is set to TRUE.
+#' @param train (bool, optional): If TRUE, creates dataset from training set, otherwise
+#'   creates from test set.
+#' @param transform (callable, optional): A function/transform that takes in an PIL image
+#'   and returns a transformed version. E.g, `transforms.RandomCrop`
+#' @param target_transform (callable, optional): A function/transform that takes in the
+#'   target and transforms it.
+#' @param download (bool, optional): If true, downloads the dataset from the internet and
+#'   puts it in root directory. If dataset is already downloaded, it is not
+#'   downloaded again.
+#'
+#' @export
 cifar10_dataset <- torch::dataset(
   name = "cifar10_dataset",
   url = "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
@@ -5,7 +23,7 @@ cifar10_dataset <- torch::dataset(
   fname = "cifar-10-batches-bin",
   type = 10,
   label_fname = "batches.meta.txt",
-  initialize = function(root, train = TRUE, transform = NULL, taregt_transform = NULL,
+  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
                         download = FALSE) {
     self$root <- root
 
@@ -106,6 +124,12 @@ cifar10_dataset <- torch::dataset(
   }
 )
 
+#' Cifar 100 dataset
+#'
+#' Downloads and prepares the CIFAR100 dataset.
+#'
+#' @rdname cifar10_dataset
+#' @export
 cifar100_dataset <- torch::dataset(
   name = "cifar100_dataset",
   inherit = cifar10_dataset,

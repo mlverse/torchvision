@@ -6,3 +6,9 @@
 ^docs$
 ^pkgdown$
 ^vignettes/examples/.*
+^env$
+^models$
+^test.pth$
+^testing.pth$
+^x.pth$
+^cran-comments\.md$

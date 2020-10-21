@@ -38,4 +38,5 @@ reference:
 - title: Misc
   contents:
    - magick_loader
+   - base_loader
    - vision_make_grid
