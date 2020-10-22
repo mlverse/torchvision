@@ -26,6 +26,8 @@ cifar10_dataset <- torch::dataset(
   initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
                         download = FALSE) {
     self$root <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
 
     if (download)
       self$download()
