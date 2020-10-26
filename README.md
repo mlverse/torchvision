@@ -13,6 +13,6 @@ torchvision is an extension for [torch](https://github.com/mlverse/torch) provid
 torchvision is not currently on CRAN. You can install it from GitHub with:
 
 ``` r
-remotes::install_github("mlverse/torchvision")
+remotes::install_github("mlverse/torchvision@main")
 ```
 
