@@ -4,6 +4,7 @@ torchvision <a href='https://torchvision.mlverse.org'><img src='https://torch.ml
 
 <!-- badges: start -->
 [![R build status](https://github.com/mlverse/torchvision/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/torchvision/actions)
+[![CRAN status](https://www.r-pkg.org/badges/version/torchvision)](https://CRAN.R-project.org/package=torchvision)
 <!-- badges: end -->
 
 torchvision is an extension for [torch](https://github.com/mlverse/torch) providing image loading, transformations, common architectures for computer vision, pre-trained weights and access to commonly used datasets. 
