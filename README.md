@@ -10,7 +10,13 @@ torchvision is an extension for [torch](https://github.com/mlverse/torch) provid
 
 ## Installation
 
-torchvision is not currently on CRAN. You can install it from GitHub with:
+The CRAN release can be installed with:
+
+```r
+install.packages("torchvision")
+```
+
+You can install the development version from GitHub with:
 
 ``` r
 remotes::install_github("mlverse/torchvision@main")
