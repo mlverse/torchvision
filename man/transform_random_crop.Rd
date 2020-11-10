@@ -25,8 +25,8 @@ i.e, if height > width, then image will be rescaled to
 \item{padding}{(int or tuple or list): Padding on each border. If a single
 int is provided this is used to pad all borders. If tuple of length 2 is
 provided this is the padding on left/right and top/bottom respectively.
-If a tuple of length 4 is provided this is the padding for the left, top,
-right and bottom borders respectively.}
+If a tuple of length 4 is provided this is the padding for the left, right,
+top and bottom borders respectively.}
 
 \item{pad_if_needed}{(boolean): It will pad the image if smaller than the
 desired size to avoid raising an exception. Since cropping is done

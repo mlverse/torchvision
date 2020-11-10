@@ -12,8 +12,8 @@ transform_pad(img, padding, fill = 0, padding_mode = "constant")
 \item{padding}{(int or tuple or list): Padding on each border. If a single
 int is provided this is used to pad all borders. If tuple of length 2 is
 provided this is the padding on left/right and top/bottom respectively.
-If a tuple of length 4 is provided this is the padding for the left, top,
-right and bottom borders respectively.}
+If a tuple of length 4 is provided this is the padding for the left, right,
+top and bottom borders respectively.}
 
 \item{fill}{(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
