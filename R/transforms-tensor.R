@@ -374,8 +374,8 @@ transform_rotate.torch_tensor <- function(img, angle, resample = 0, expand = FAL
   }
 
 
-  # due to current incoherence of rotation angle direction between affine and rotate implementations
-  # we need to set -angle.
+  # due to current incoherence of rotation angle direction between affine and
+  # rotate implementations we need to set -angle.
   matrix <- get_inverse_affine_matrix(center_f, -angle, c(0.0, 0.0), 1.0, c(0.0, 0.0))
 
   rotate_impl(img, matrix=matrix, resample=resample, expand=expand, fill=fill)
@@ -628,9 +628,9 @@ rotate_compute_output_size <- function(theta, w, h) {
     c(-0.5 * w, -0.5 * h, 1.0),
     c(-0.5 * w, 0.5 * h, 1.0),
     c(0.5 * w, 0.5 * h, 1.0),
-    c(0.5 * w, -0.5 * h, 1.0),
+    c(0.5 * w, -0.5 * h, 1.0)
   ))
-  new_pts <- pts$view(1, 4, 3)$bmm(theta$transpose(2, 3))$view(4, 2)
+  new_pts <- pts$view(c(1, 4, 3))$bmm(theta$transpose(2, 3))$view(c(4, 2))
   min_vals <- new_pts$min(dim=1)[[1]]
   max_vals <- new_pts$max(dim=1)[[1]]
 
@@ -640,7 +640,7 @@ rotate_compute_output_size <- function(theta, w, h) {
   cmin = torch::torch_floor((min_vals / tol)$trunc_() * tol)
   size = cmax - cmin
 
-  as.integer(c(size[1], size[2]))
+  as.integer(c(size[1]$item(), size[2]$item()))
 }
 
 rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
@@ -652,8 +652,8 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
 
   assert_grid_transform_inputs(img, matrix, resample, fill, interpolation_modes)
   theta <- torch::torch_tensor(matrix)$reshape(c(1, 2, 3))
-  w <- img$shape[-1]
-  h <- img$shape[-2]
+  w <- tail(img$shape, 2)[2]
+  h <- tail(img$shape, 1)[1]
 
   if (expand) {
     o_shape <- rotate_compute_output_size(theta, w, h)
