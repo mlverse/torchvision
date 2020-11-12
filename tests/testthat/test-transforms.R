@@ -106,3 +106,19 @@ test_that("ten_crop", {
   expect_length(o, 10)
 
 })
+
+test_that("rotate works", {
+
+  img <- torch::torch_tensor(matrix(1:16))$view(c(1, 4, 4))
+  output <- transform_rotate(img, 90)
+
+  expect_tensor_shape(img, c(1,4,4))
+  expect_equal_to_r(output[1,,1], c(4,3,2,1))
+
+  output <- transform_rotate(img, 45, expand = TRUE)
+  expect_equal_to_r(output[1,,2], c(0,0, 2, 5, 0, 0))
+  expect_equal_to_r(output[1,,3], c(0,3, 7, 10, 9, 0))
+
+
+
+})
