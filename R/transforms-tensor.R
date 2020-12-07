@@ -680,7 +680,7 @@ affine_impl <- function(img, matrix, resample = 0, fillcolor = NULL) {
   assert_grid_transform_inputs(img, matrix, resample, fillcolor, interpolation_modes)
 
   theta = torch::torch_tensor(matrix, dtype=torch::torch_float())$reshape(c(1, 2, 3))
-  shape = img$shape()
+  shape = img$shape
   grid = gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
                          ow=rev(shape)[1], oh=rev(shape)[2])
   mode = interpolation_modes[as.character(resample)]

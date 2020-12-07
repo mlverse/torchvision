@@ -344,8 +344,8 @@ get_random_affine_params <- function(degrees,
   if (!is.null(translate)) {
     max_dx = as.numeric(translate[1] * img_size[1])
     max_dy = as.numeric(translate[2] * img_size[2])
-    tx = as.integer(round(torch::torch_empty(1)$uniform_(-max_dx, max_dx)))
-    ty = as.integer(round(torch::torch_empty(1)$uniform_(-max_dy, max_dy)))
+    tx = as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dx, max_dx))))
+    ty = as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dy, max_dy))))
     translations <- c(tx, ty)
   } else {
     translations <- c(0,0)
