@@ -107,7 +107,7 @@ test_that("ten_crop", {
 
 })
 
-test_that("rotate works", {
+test_that("rotate", {
 
   img <- torch::torch_tensor(matrix(1:16))$view(c(1, 4, 4))
   output <- transform_rotate(img, 90)
@@ -119,6 +119,37 @@ test_that("rotate works", {
   expect_equal_to_r(output[1,,2], c(0,0, 2, 5, 0, 0))
   expect_equal_to_r(output[1,,3], c(0,3, 7, 10, 9, 0))
 
+})
 
+test_that("random_affine", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+
+  # no translation
+  o <- transform_random_affine(x, 0, c(0, 0))
+  expect_equal(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
+
+  # probabilistic transformation with p = 0.1 should not result in sum deviating by > 1
+  o <- transform_random_affine(x, 0, c(0.1, 0.1))
+  expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
+  expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
 
 })
+
+test_that("affine", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+
+  # translate by 1 pixel horizontally
+  # should result in sum smaller by 1
+  o <- transform_affine(x, 0, c(0, 1), 1, 0)
+  expect_equal(as.numeric(torch_sum(x)) - 1, as.numeric(torch_sum(o)))
+
+  # translate by 1 pixel vertically
+  # should result in sum smaller by 1
+  o <- transform_affine(x, 0, c(1, 0), 1, 0)
+  expect_equal(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
+
+})
+
+
