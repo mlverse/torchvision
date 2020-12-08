@@ -386,7 +386,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
                                           resample = 0, fillcolor = NULL) {
 
   if (!is.numeric(angle))
-    value_error("Argument anfle should be int or float")
+    value_error("Argument angle should be int or float")
 
   if (!length(translate) == 2)
     value_error("translate should be length 2")
@@ -402,7 +402,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
 
   img_size <- get_image_size(img)
 
-  matrix <- get_inverse_affine_matrix(c(0.0, 0.0), angle, translate, scale, shear)
+  matrix <- get_inverse_affine_matrix(c(1, 1), angle, translate, scale, shear)
   affine_impl(img, matrix=matrix, resample=resample, fillcolor=fillcolor)
 }
 
@@ -550,10 +550,9 @@ get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
   # det([[a, b], [c, d]]) == 1, since det(rotation) = 1 and det(shear) = 1
   matrix <- c(d, -b, 0.0, -c, a, 0.0) / scale
 
-
   # Apply inverse of translation and of center translation: RSS^-1 * C^-1 * T^-1
   matrix[3] = matrix[3] + matrix[1] * (-cx - tx) + matrix[2] * (-cy - ty)
-  matrix[5] = matrix[5] + matrix[4] * (-cx - tx) + matrix[5] * (-cy - ty)
+  matrix[6] = matrix[6] + matrix[4] * (-cx - tx) + matrix[5] * (-cy - ty)
 
   # Apply center translation: C * RSS^-1 * C^-1 * T^-1
   matrix[3] = matrix[3] + cx
@@ -679,11 +678,11 @@ affine_impl <- function(img, matrix, resample = 0, fillcolor = NULL) {
 
   assert_grid_transform_inputs(img, matrix, resample, fillcolor, interpolation_modes)
 
-  theta = torch::torch_tensor(matrix, dtype=torch::torch_float())$reshape(c(1, 2, 3))
-  shape = img$shape
-  grid = gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
+  theta <- torch::torch_tensor(matrix, dtype=torch::torch_float())$reshape(c(1, 2, 3))
+  shape <- img$shape
+  grid <- gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
                          ow=rev(shape)[1], oh=rev(shape)[2])
-  mode = interpolation_modes[as.character(resample)]
+  mode <- interpolation_modes[as.character(resample)]
   apply_grid_transform(img, grid, mode)
 }
 
