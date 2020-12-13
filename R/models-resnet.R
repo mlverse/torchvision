@@ -128,7 +128,7 @@ resnet <- torch::nn_module(
                         norm_layer=NULL) {
 
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
 
     self$.norm_layer <- norm_layer
 
