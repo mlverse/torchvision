@@ -19,6 +19,7 @@ test_that("vgg models works", {
   }
 
   skip_on_os(os = "mac") # not downloading a bunch of files locally.
+  skip_on_os(os = "windows") # not downloading a bunch of files locally.
 
   for (m in vggs) {
     model <- m(pretrained = TRUE)
