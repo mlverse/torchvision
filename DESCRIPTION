@@ -31,3 +31,5 @@ Imports:
     jpeg,
     png,
     abind
+Remotes:
+    mlverse/torch
