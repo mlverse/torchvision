@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Changelog • torchvision</title>
+<title>VGG implementation — model_vgg • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Changelog" />
+<meta property="og:title" content="VGG implementation — model_vgg" />
+<meta property="og:description" content="VGG models implementations based on
+Very Deep Convolutional Networks For Large-Scale Image Recognition" />
 
 
 <meta name="robots" content="noindex">
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-news">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -152,36 +154,70 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href='https://github.com/mlverse/torchvision/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
+    <h1>VGG implementation</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mlverse/torchvision/blob/master/R/models-vgg.R'><code>R/models-vgg.R</code></a></small>
+    <div class="hidden name"><code>model_vgg.Rd</code></div>
     </div>
 
-    <div id="torchvision-development-version" class="section level1">
-<h1 class="page-header" data-toc-text="development version">
-<a href="#torchvision-development-version" class="anchor"></a>torchvision (development version)<small> Unreleased </small>
-</h1>
-<ul>
-<li>Fixed bugs in <code>transform_rotate</code>. (<a href='https://github.com/mlverse/torchvision/issues/31'>#31</a>)</li>
-<li>Fixed bugs in <code>transform_random_affine</code> and <code>transform_affine</code> (<a href='https://github.com/mlverse/torchvision/issues/32'>#32</a>)</li>
-<li>Added VGG model (<a href='https://github.com/mlverse/torchvision/issues/35'>#35</a>)</li>
-</ul>
-</div>
-    <div id="torchvision-010" class="section level1">
-<h1 class="page-header" data-toc-text="0.1.0">
-<a href="#torchvision-010" class="anchor"></a>torchvision 0.1.0<small> 2020-10-29 </small>
-</h1>
-<ul>
-<li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
-</ul>
-</div>
-  </div>
+    <div class="ref-description">
+    <p>VGG models implementations based on
+<a href='https://arxiv.org/pdf/1409.1556.pdf'>Very Deep Convolutional Networks For Large-Scale Image Recognition</a></p>
+    </div>
 
+    <pre class="usage"><span class='fu'>model_vgg11</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg11_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg13</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg13_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg16</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg16_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg19</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg19_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>pretrained</th>
+      <td><p>(bool): If TRUE, returns a model pre-trained on ImageNet</p></td>
+    </tr>
+    <tr>
+      <th>progress</th>
+      <td><p>(bool): If TRUE, displays a progress bar of the download
+to stderr</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>other parameters passed to the VGG model implementation.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
+
+    
+<ul>
+<li><p><code>model_vgg11</code>: VGG 11-layer model (configuration "A")</p></li>
+<li><p><code>model_vgg11_bn</code>: VGG 11-layer model (configuration "A") with batch normalization</p></li>
+<li><p><code>model_vgg13</code>: VGG 13-layer model (configuration "B")</p></li>
+<li><p><code>model_vgg13_bn</code>: VGG 13-layer model (configuration "B") with batch normalization</p></li>
+<li><p><code>model_vgg16</code>: VGG 13-layer model (configuration "D")</p></li>
+<li><p><code>model_vgg16_bn</code>: VGG 13-layer model (configuration "D") with batch normalization</p></li>
+<li><p><code>model_vgg19</code>: VGG 19-layer model (configuration "E")</p></li>
+<li><p><code>model_vgg19_bn</code>: VGG 19-layer model (configuration "E") with batch normalization</p></li>
+</ul>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
-
 </div>
 
 
