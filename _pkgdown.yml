@@ -21,6 +21,8 @@ navbar:
         href: articles/examples/mnist-dcgan.html
       - text: tinyimagenet-alexnet
         href: articles/examples/tinyimagenet-alexnet.html
+      - text: style-transfer
+        href: articles/examples/style-transfer.html
 
 reference:
 - title: Transforms
