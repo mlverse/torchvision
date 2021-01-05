@@ -23,7 +23,7 @@ Suggests:
     testthat,
     magick
 Imports: 
-    torch (>= 0.1.0),
+    torch (>= 0.2.0),
     fs,
     rlang,
     rappdirs,
