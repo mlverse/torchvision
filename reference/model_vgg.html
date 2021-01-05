@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Perspective transformation of an image — transform_perspective • torchvision</title>
+<title>VGG implementation — model_vgg • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Perspective transformation of an image — transform_perspective" />
-<meta property="og:description" content="Perspective transformation of an image" />
+<meta property="og:title" content="VGG implementation — model_vgg" />
+<meta property="og:description" content="VGG models implementations based on
+Very Deep Convolutional Networks For Large-Scale Image Recognition" />
 
 
 
@@ -135,96 +136,63 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Perspective transformation of an image</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mlverse/torchvision/blob/master/R/transforms-generics.R'><code>R/transforms-generics.R</code></a></small>
-    <div class="hidden name"><code>transform_perspective.Rd</code></div>
+    <h1>VGG implementation</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mlverse/torchvision/blob/master/R/models-vgg.R'><code>R/models-vgg.R</code></a></small>
+    <div class="hidden name"><code>model_vgg.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Perspective transformation of an image</p>
+    <p>VGG models implementations based on
+<a href='https://arxiv.org/pdf/1409.1556.pdf'>Very Deep Convolutional Networks For Large-Scale Image Recognition</a></p>
     </div>
 
-    <pre class="usage"><span class='fu'>transform_perspective</span><span class='op'>(</span>
-  <span class='va'>img</span>,
-  <span class='va'>startpoints</span>,
-  <span class='va'>endpoints</span>,
-  interpolation <span class='op'>=</span> <span class='fl'>2</span>,
-  fill <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>model_vgg11</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg11_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg13</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg13_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg16</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg16_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg19</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>model_vgg19_bn</span><span class='op'>(</span>pretrained <span class='op'>=</span> <span class='cn'>FALSE</span>, progress <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>img</th>
-      <td><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></td>
+      <th>pretrained</th>
+      <td><p>(bool): If TRUE, returns a model pre-trained on ImageNet</p></td>
     </tr>
     <tr>
-      <th>startpoints</th>
-      <td><p>(list of list of ints): List containing four lists of two
-integers corresponding to four corners
-<code>[top-left, top-right, bottom-right, bottom-left]</code> of the original image.</p></td>
+      <th>progress</th>
+      <td><p>(bool): If TRUE, displays a progress bar of the download
+to stderr</p></td>
     </tr>
     <tr>
-      <th>endpoints</th>
-      <td><p>(list of list of ints): List containing four lists of two
-integers corresponding to four corners
-<code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed
-image.</p></td>
-    </tr>
-    <tr>
-      <th>interpolation</th>
-      <td><p>(int, optional) Desired interpolation. An integer
-<code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
-<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>fill</th>
-      <td><p>(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.</p></td>
+      <th>...</th>
+      <td><p>other parameters passed to the VGG model implementation.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
 
-    <div class='dont-index'><p>Other transforms: 
-<code><a href='transform_adjust_brightness.html'>transform_adjust_brightness</a>()</code>,
-<code><a href='transform_adjust_contrast.html'>transform_adjust_contrast</a>()</code>,
-<code><a href='transform_adjust_gamma.html'>transform_adjust_gamma</a>()</code>,
-<code><a href='transform_adjust_hue.html'>transform_adjust_hue</a>()</code>,
-<code><a href='transform_adjust_saturation.html'>transform_adjust_saturation</a>()</code>,
-<code><a href='transform_affine.html'>transform_affine</a>()</code>,
-<code><a href='transform_center_crop.html'>transform_center_crop</a>()</code>,
-<code><a href='transform_color_jitter.html'>transform_color_jitter</a>()</code>,
-<code><a href='transform_convert_image_dtype.html'>transform_convert_image_dtype</a>()</code>,
-<code><a href='transform_crop.html'>transform_crop</a>()</code>,
-<code><a href='transform_five_crop.html'>transform_five_crop</a>()</code>,
-<code><a href='transform_grayscale.html'>transform_grayscale</a>()</code>,
-<code><a href='transform_hflip.html'>transform_hflip</a>()</code>,
-<code><a href='transform_linear_transformation.html'>transform_linear_transformation</a>()</code>,
-<code><a href='transform_normalize.html'>transform_normalize</a>()</code>,
-<code><a href='transform_pad.html'>transform_pad</a>()</code>,
-<code><a href='transform_random_affine.html'>transform_random_affine</a>()</code>,
-<code><a href='transform_random_apply.html'>transform_random_apply</a>()</code>,
-<code><a href='transform_random_choice.html'>transform_random_choice</a>()</code>,
-<code><a href='transform_random_crop.html'>transform_random_crop</a>()</code>,
-<code><a href='transform_random_erasing.html'>transform_random_erasing</a>()</code>,
-<code><a href='transform_random_grayscale.html'>transform_random_grayscale</a>()</code>,
-<code><a href='transform_random_horizontal_flip.html'>transform_random_horizontal_flip</a>()</code>,
-<code><a href='transform_random_order.html'>transform_random_order</a>()</code>,
-<code><a href='transform_random_perspective.html'>transform_random_perspective</a>()</code>,
-<code><a href='transform_random_resized_crop.html'>transform_random_resized_crop</a>()</code>,
-<code><a href='transform_random_rotation.html'>transform_random_rotation</a>()</code>,
-<code><a href='transform_random_vertical_flip.html'>transform_random_vertical_flip</a>()</code>,
-<code><a href='transform_resized_crop.html'>transform_resized_crop</a>()</code>,
-<code><a href='transform_resize.html'>transform_resize</a>()</code>,
-<code><a href='transform_rgb_to_grayscale.html'>transform_rgb_to_grayscale</a>()</code>,
-<code><a href='transform_rotate.html'>transform_rotate</a>()</code>,
-<code><a href='transform_ten_crop.html'>transform_ten_crop</a>()</code>,
-<code><a href='transform_to_tensor.html'>transform_to_tensor</a>()</code>,
-<code><a href='transform_vflip.html'>transform_vflip</a>()</code></p></div>
+    
+<ul>
+<li><p><code>model_vgg11</code>: VGG 11-layer model (configuration "A")</p></li>
+<li><p><code>model_vgg11_bn</code>: VGG 11-layer model (configuration "A") with batch normalization</p></li>
+<li><p><code>model_vgg13</code>: VGG 13-layer model (configuration "B")</p></li>
+<li><p><code>model_vgg13_bn</code>: VGG 13-layer model (configuration "B") with batch normalization</p></li>
+<li><p><code>model_vgg16</code>: VGG 13-layer model (configuration "D")</p></li>
+<li><p><code>model_vgg16_bn</code>: VGG 13-layer model (configuration "D") with batch normalization</p></li>
+<li><p><code>model_vgg19</code>: VGG 19-layer model (configuration "E")</p></li>
+<li><p><code>model_vgg19_bn</code>: VGG 19-layer model (configuration "E") with batch normalization</p></li>
+</ul>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

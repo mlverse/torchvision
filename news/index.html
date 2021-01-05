@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Convert a tensor image to the given dtype and scale the values accordingly — transform_convert_image_dtype • torchvision</title>
+<title>Changelog • torchvision</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,7 @@
 
 
 
-<meta property="og:title" content="Convert a tensor image to the given dtype and scale the values accordingly — transform_convert_image_dtype" />
-<meta property="og:description" content="Convert a tensor image to the given dtype and scale the values accordingly" />
+<meta property="og:title" content="Changelog" />
 
 
 
@@ -59,7 +58,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-news">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -135,80 +134,36 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Convert a tensor image to the given <code>dtype</code> and scale the values accordingly</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mlverse/torchvision/blob/master/R/transforms-generics.R'><code>R/transforms-generics.R</code></a></small>
-    <div class="hidden name"><code>transform_convert_image_dtype.Rd</code></div>
+      <h1 data-toc-skip>Changelog <small></small></h1>
+      <small>Source: <a href='https://github.com/mlverse/torchvision/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div class="ref-description">
-    <p>Convert a tensor image to the given <code>dtype</code> and scale the values accordingly</p>
-    </div>
-
-    <pre class="usage"><span class='fu'>transform_convert_image_dtype</span><span class='op'>(</span><span class='va'>img</span>, dtype <span class='op'>=</span> <span class='fu'>torch</span><span class='fu'>::</span><span class='fu'><a href='https://torch.mlverse.org/docs/reference/torch_dtype.html'>torch_float</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>img</th>
-      <td><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></td>
-    </tr>
-    <tr>
-      <th>dtype</th>
-      <td><p>(torch.dtype): Desired data type of the output.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
-
-    <p>When converting from a smaller to a larger integer <code>dtype</code> the maximum
-values are <strong>not</strong> mapped exactly. If converted back and forth, this
-mismatch has no effect.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>Other transforms: 
-<code><a href='transform_adjust_brightness.html'>transform_adjust_brightness</a>()</code>,
-<code><a href='transform_adjust_contrast.html'>transform_adjust_contrast</a>()</code>,
-<code><a href='transform_adjust_gamma.html'>transform_adjust_gamma</a>()</code>,
-<code><a href='transform_adjust_hue.html'>transform_adjust_hue</a>()</code>,
-<code><a href='transform_adjust_saturation.html'>transform_adjust_saturation</a>()</code>,
-<code><a href='transform_affine.html'>transform_affine</a>()</code>,
-<code><a href='transform_center_crop.html'>transform_center_crop</a>()</code>,
-<code><a href='transform_color_jitter.html'>transform_color_jitter</a>()</code>,
-<code><a href='transform_crop.html'>transform_crop</a>()</code>,
-<code><a href='transform_five_crop.html'>transform_five_crop</a>()</code>,
-<code><a href='transform_grayscale.html'>transform_grayscale</a>()</code>,
-<code><a href='transform_hflip.html'>transform_hflip</a>()</code>,
-<code><a href='transform_linear_transformation.html'>transform_linear_transformation</a>()</code>,
-<code><a href='transform_normalize.html'>transform_normalize</a>()</code>,
-<code><a href='transform_pad.html'>transform_pad</a>()</code>,
-<code><a href='transform_perspective.html'>transform_perspective</a>()</code>,
-<code><a href='transform_random_affine.html'>transform_random_affine</a>()</code>,
-<code><a href='transform_random_apply.html'>transform_random_apply</a>()</code>,
-<code><a href='transform_random_choice.html'>transform_random_choice</a>()</code>,
-<code><a href='transform_random_crop.html'>transform_random_crop</a>()</code>,
-<code><a href='transform_random_erasing.html'>transform_random_erasing</a>()</code>,
-<code><a href='transform_random_grayscale.html'>transform_random_grayscale</a>()</code>,
-<code><a href='transform_random_horizontal_flip.html'>transform_random_horizontal_flip</a>()</code>,
-<code><a href='transform_random_order.html'>transform_random_order</a>()</code>,
-<code><a href='transform_random_perspective.html'>transform_random_perspective</a>()</code>,
-<code><a href='transform_random_resized_crop.html'>transform_random_resized_crop</a>()</code>,
-<code><a href='transform_random_rotation.html'>transform_random_rotation</a>()</code>,
-<code><a href='transform_random_vertical_flip.html'>transform_random_vertical_flip</a>()</code>,
-<code><a href='transform_resized_crop.html'>transform_resized_crop</a>()</code>,
-<code><a href='transform_resize.html'>transform_resize</a>()</code>,
-<code><a href='transform_rgb_to_grayscale.html'>transform_rgb_to_grayscale</a>()</code>,
-<code><a href='transform_rotate.html'>transform_rotate</a>()</code>,
-<code><a href='transform_ten_crop.html'>transform_ten_crop</a>()</code>,
-<code><a href='transform_to_tensor.html'>transform_to_tensor</a>()</code>,
-<code><a href='transform_vflip.html'>transform_vflip</a>()</code></p></div>
-
+    <div id="torchvision-020" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.0">
+<a href="#torchvision-020" class="anchor"></a>torchvision 0.2.0<small> Unreleased </small>
+</h1>
+<ul>
+<li>Fixed bugs in <code>transform_rotate</code>. (<a href='https://github.com/mlverse/torchvision/issues/31'>#31</a>)</li>
+<li>Fixed bugs in <code>transform_random_affine</code> and <code>transform_affine</code> (<a href='https://github.com/mlverse/torchvision/issues/32'>#32</a>)</li>
+<li>Added VGG model (<a href='https://github.com/mlverse/torchvision/issues/35'>#35</a>)</li>
+</ul>
+</div>
+    <div id="torchvision-010" class="section level1">
+<h1 class="page-header" data-toc-text="0.1.0">
+<a href="#torchvision-010" class="anchor"></a>torchvision 0.1.0<small> 2020-10-29 </small>
+</h1>
+<ul>
+<li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
+</ul>
+</div>
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
+
 </div>
 
 

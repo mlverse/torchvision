@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -62,34 +62,26 @@
     <li>
       <a href="../../articles/examples/tinyimagenet-alexnet.html">tinyimagenet-alexnet</a>
     </li>
+    <li>
+      <a href="../../articles/examples/style-transfer.html">style-transfer</a>
+    </li>
   </ul>
 </li>
 <li>
   <a href="../../reference/index.html">Reference</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../../articles/examples/mnist-cnn.html">mnist-cnn</a>
-    </li>
-    <li>
-      <a href="../../articles/examples/mnist-dcgan.html">mnist-dcgan</a>
-    </li>
-    <li>
-      <a href="../../articles/examples/mnist-mlp.html">mnist-mlp</a>
-    </li>
-    <li>
-      <a href="../../articles/examples/tinyimagenet-alexnet.html">tinyimagenet-alexnet</a>
-    </li>
-  </ul>
+  <a href="../../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/mlverse/torchvision/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -99,25 +91,24 @@
 
       
 
-      </header><script src="mnist-dcgan_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="mnist-dcgan_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="mnist-dcgan_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="mnist-dcgan_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>mnist-dcgan</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/master/vignettes/examples/mnist-dcgan.Rmd"><code>vignettes/examples/mnist-dcgan.Rmd</code></a></small>
       <div class="hidden name"><code>mnist-dcgan.Rmd</code></div>
 
     </div>
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="co"># Packages ----------------------------------------------------------------</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Packages ----------------------------------------------------------------</span>
 
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://torch.mlverse.org/docs">torch</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">torchvision</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://torchvision.mlverse.org">torchvision</a></span><span class="op">)</span>
 
 <span class="co"># Utils -------------------------------------------------------------------</span>
 
@@ -271,7 +262,7 @@
 
   <span class="fu">plot_gen</span><span class="op">(</span><span class="va">fixed_noise</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"Epoch %d - Loss D: %3f Loss G: %3f\n"</span>, <span class="va">epoch</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">lossd</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">lossg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span></pre></div>
+<span class="op">}</span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
