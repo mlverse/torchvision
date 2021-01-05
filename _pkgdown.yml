@@ -10,6 +10,7 @@ navbar:
   left:  [home, examples, reference, news]
   right: [github]
  components:
+  articles: ~
   examples:
     text: Examples
     menu:
