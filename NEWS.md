@@ -1,4 +1,4 @@
-# torchvision (development version)
+# torchvision 0.2.0
 
 * Fixed bugs in `transform_rotate`. (#31)
 * Fixed bugs in `transform_random_affine` and `transform_affine` (#32)
