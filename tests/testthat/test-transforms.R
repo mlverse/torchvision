@@ -130,7 +130,11 @@ test_that("random_affine", {
   expect_equal(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
 
   # probabilistic transformation with p = 0.1 should not result in sum deviating by > 1
-  o <- transform_random_affine(x, 0, c(0.1, 0.1))
+  o <- transform_random_affine(x, 0, c(0.1, 0))
+  expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
+  expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
+
+  o <- transform_random_affine(x, 0, c(0, 0.1))
   expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
   expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
 
