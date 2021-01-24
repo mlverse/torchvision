@@ -127,37 +127,37 @@
   transform <span class="op">=</span> <span class="va">transform_to_tensor</span>
 <span class="op">)</span>
 
-<span class="va">train_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html">dataloader</a></span><span class="op">(</span><span class="va">train_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">test_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html">dataloader</a></span><span class="op">(</span><span class="va">test_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span><span class="op">)</span>
+<span class="va">train_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/dataloader.html">dataloader</a></span><span class="op">(</span><span class="va">train_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">test_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/dataloader.html">dataloader</a></span><span class="op">(</span><span class="va">test_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span><span class="op">)</span>
 
 
 <span class="co"># Buildifng the network ---------------------------------------------------</span>
 
-<span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nn_module.html">nn_module</a></span><span class="op">(</span>
+<span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nn_module.html">nn_module</a></span><span class="op">(</span>
   <span class="st">"Net"</span>,
   initialize <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
-    <span class="va">self</span><span class="op">$</span><span class="va">fc1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nn_linear.html">nn_linear</a></span><span class="op">(</span><span class="fl">784</span>, <span class="fl">128</span><span class="op">)</span>
-    <span class="va">self</span><span class="op">$</span><span class="va">fc2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nn_linear.html">nn_linear</a></span><span class="op">(</span><span class="fl">128</span>, <span class="fl">10</span><span class="op">)</span>
+    <span class="va">self</span><span class="op">$</span><span class="va">fc1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nn_linear.html">nn_linear</a></span><span class="op">(</span><span class="fl">784</span>, <span class="fl">128</span><span class="op">)</span>
+    <span class="va">self</span><span class="op">$</span><span class="va">fc2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nn_linear.html">nn_linear</a></span><span class="op">(</span><span class="fl">128</span>, <span class="fl">10</span><span class="op">)</span>
   <span class="op">}</span>,
   forward <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">x</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_flatten.html">torch_flatten</a></span><span class="op">(</span>start_dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">%&gt;%</span>
+      <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_flatten.html">torch_flatten</a></span><span class="op">(</span>start_dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">%&gt;%</span>
       <span class="va">self</span><span class="op">$</span><span class="fu">fc1</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_relu.html">nnf_relu</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+      <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_relu.html">nnf_relu</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
       <span class="va">self</span><span class="op">$</span><span class="fu">fc2</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_log_softmax.html">nnf_log_softmax</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+      <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_log_softmax.html">nnf_log_softmax</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
   <span class="op">}</span>
 <span class="op">)</span>
 
 <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">net</span><span class="op">(</span><span class="op">)</span>
 
 <span class="co"># ove model to cuda if it's available</span>
-<span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/cuda_is_available.html">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span>
+<span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/cuda_is_available.html">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span>
 <span class="va">model</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span>
 
 <span class="co"># Training loop -----------------------------------------------------------</span>
 
-<span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/optim_sgd.html">optim_sgd</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">parameters</span>, lr <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>
+<span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/optim_sgd.html">optim_sgd</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">parameters</span>, lr <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>
 
 <span class="va">epochs</span> <span class="op">&lt;-</span> <span class="fl">10</span>
 <span class="kw">for</span> <span class="op">(</span><span class="va">epoch</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
@@ -170,20 +170,20 @@
   <span class="va">train_losses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">)</span>
   <span class="va">test_losses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">)</span>
 
-  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/enumerate.html">enumerate</a></span><span class="op">(</span><span class="va">train_dl</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/enumerate.html">enumerate</a></span><span class="op">(</span><span class="va">train_dl</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">optimizer</span><span class="op">$</span><span class="fu">zero_grad</span><span class="op">(</span><span class="op">)</span>
     <span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">b</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">loss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_nll_loss.html">nnf_nll_loss</a></span><span class="op">(</span><span class="va">output</span>, <span class="va">b</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
+    <span class="va">loss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_nll_loss.html">nnf_nll_loss</a></span><span class="op">(</span><span class="va">output</span>, <span class="va">b</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
     <span class="va">loss</span><span class="op">$</span><span class="fu">backward</span><span class="op">(</span><span class="op">)</span>
     <span class="va">optimizer</span><span class="op">$</span><span class="fu">step</span><span class="op">(</span><span class="op">)</span>
     <span class="va">train_losses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">train_losses</span>, <span class="va">loss</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
     <span class="va">pb</span><span class="op">$</span><span class="fu">tick</span><span class="op">(</span>tokens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>loss <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">train_losses</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span>
 
-  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/enumerate.html">enumerate</a></span><span class="op">(</span><span class="va">test_dl</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/enumerate.html">enumerate</a></span><span class="op">(</span><span class="va">test_dl</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span>
     <span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">b</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">loss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_nll_loss.html">nnf_nll_loss</a></span><span class="op">(</span><span class="va">output</span>, <span class="va">b</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
+    <span class="va">loss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_nll_loss.html">nnf_nll_loss</a></span><span class="op">(</span><span class="va">output</span>, <span class="va">b</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span>
     <span class="va">test_losses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">test_losses</span>, <span class="va">loss</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
     <span class="va">model</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span>
