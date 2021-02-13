@@ -6,6 +6,7 @@ articles:
   examples/mnist-dcgan: mnist-dcgan.html
   examples/mnist-mlp: mnist-mlp.html
   examples/style-transfer: style-transfer.html
+  examples/texture-nca: texture-nca.html
   examples/tinyimagenet-alexnet: tinyimagenet-alexnet.html
-last_built: 2021-01-24T18:29Z
+last_built: 2021-02-13T11:54Z
 
