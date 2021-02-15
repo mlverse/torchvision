@@ -1,6 +1,7 @@
 template:
   params:
     bootswatch: united
+    ganalytics: 'G-HD24T4Z9Z3'
 
 development:
   mode: auto
