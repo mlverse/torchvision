@@ -23,7 +23,7 @@
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
   assert_has_ops()
-  return(torch_nms(boxes, scores, iou_threshold))
+  return(torch::torch_nms(boxes, scores, iou_threshold))
 }
 
 #' Batched Non-maximum Suppression (NMS)
