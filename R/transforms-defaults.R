@@ -31,14 +31,36 @@ transform_center_crop.default <- function(img, size) {
 
   size <- get_image_size(img)
 
-  image_width <- size[2]
   image_height <- size[1]
+  image_width <- size[2]
 
   crop_height <- output_size[1]
   crop_width <- output_size[2]
 
+  if (crop_width > image_width || crop_height > image_height) {
+
+    padding_ltrb <- c(
+      if (crop_width > image_width) (crop_width - image_width) %/% 2  else 0,
+      if (crop_width > image_width) (crop_width - image_width + 1) %/% 2  else 0,
+      if (crop_height > image_height) (crop_height - image_height) %/% 2  else 0,
+      if (crop_height > image_height) (crop_height - image_height + 1) %/% 2  else 0
+    )
+
+    img <- transform_pad(img, padding_ltrb, fill = 0)  # PIL uses fill value 0
+
+    size <- get_image_size(img)
+    image_height <- size[1]
+    image_width <- size[2]
+
+    if (crop_width == image_width && crop_height == image_height) return(img)
+  }
+
   crop_top <- as.integer((image_height - crop_height) / 2)
   crop_left <- as.integer((image_width - crop_width) / 2)
+
+  # if either of these is 0, we will lose a pixel in transform_crop
+  if (crop_top == 0) crop_top <- 1
+  if (crop_left == 0) crop_left <- 1
 
   transform_crop(img, crop_top, crop_left, crop_height, crop_width)
 }
