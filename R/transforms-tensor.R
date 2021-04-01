@@ -497,7 +497,7 @@ hsv2rgb <- function(img) {
   t <- torch::torch_clamp((hsv[[3]] * (1 - f)), 0, 1)
   i <- i %% 6
 
-  mask <- i == torch::torch_arange(start= 0, end = 6)[,NULL,NULL]
+  mask <- i == torch::torch_arange(start= 0, end = 5)[,NULL,NULL]
 
   a1 <- torch::torch_stack(list(hsv[[3]], q, p, p, t, hsv[[3]]))
   a2 <- torch::torch_stack(list(t, hsv[[3]], hsv[[3]], q, p, p))
