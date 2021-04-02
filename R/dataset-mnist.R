@@ -65,7 +65,7 @@ mnist_dataset <- dataset(
       destpath <- file.path(self$raw_folder, filename)
 
       withr::with_options(
-        list(timeout = 180),
+        list(timeout = 600),
         utils::download.file(r[1], destfile = destpath)
       )
 
