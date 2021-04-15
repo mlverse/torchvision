@@ -1,5 +1,8 @@
 # torchvision (development version)
 
+- Use a self hosted version of the MNIST dataset to avoid frequent download failures. (#48)
+- Fix `torch_arange` calls after breaking change in `torch`. (#47)
+
 # torchvision 0.2.0
 
 * Fixed bugs in `transform_rotate`. (#31)
