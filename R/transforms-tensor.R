@@ -84,7 +84,7 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
 }
 
 #' @export
-transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
+transform_resize.torch_tensor <- function(img, size, interpolation = 2, max_size = NULL) {
 
   check_img(img)
 
@@ -104,24 +104,39 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
   w <- wh[1]
   h <- wh[2]
 
-  if (length(size) == 1)
-    size_w <- size_h <- size
-  else if (length(size) == 2) {
-    size_w <- size[2]
-    size_h <- size[1]
-  }
-
   if (length(size) == 1) {
 
-    if (w < h)
-      size_h <- as.integer(size_w * h / w)
-    else
-      size_w <- as.integer(size_h * w / h)
+    if (w <= h) {
+      short <- w
+      long <- h
+    } else {
+      short <- h
+      long <- w
+    }
 
+    requested_new_short <- size
+
+    if (short == requested_new_short)
+      return(img)
+
+    new_short <- requested_new_short
+    new_long <- as.integer(requested_new_short * long / short)
+
+    if (!is.null(max_size))
+      rlang::abort("Not implemented.")
+
+    if (w <= h) {
+      new_w <- new_short
+      new_h <- new_long
+    } else {
+      new_w <- new_long
+      new_h <- new_short
+    }
+
+  } else {
+    new_w <- size[2]
+    new_h <- size[1]
   }
-
-  if ((w <= h  && w == size_w) || (h <= w && h == size_h))
-    return(img)
 
   # make NCHW
   need_squeeze <- FALSE
@@ -147,7 +162,7 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
     align_corners <- NULL
 
 
-  img <- torch::nnf_interpolate(img, size = c(size_h, size_w), mode = mode,
+  img <- torch::nnf_interpolate(img, size = c(new_h, new_w), mode = mode,
                                 align_corners = align_corners)
 
   if (need_squeeze)
@@ -433,7 +448,7 @@ check_img <- function(x) {
 get_image_size.torch_tensor <- function(img) {
   check_img(img)
 
-  tail(img$size(), 2)
+  rev(tail(img$size(), 2))
 }
 
 blend <- function(img1, img2, ratio) {

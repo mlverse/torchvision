@@ -18,11 +18,25 @@ test_that("normalize", {
 })
 
 test_that("resize", {
-
   x <- torch_randn(3, 10, 10)
   o <- transform_resize(x, c(20, 20))
-
   expect_tensor_shape(o, c(3, 20, 20))
+
+  x <- torch_randn(3, 10, 20)
+  o <- transform_resize(x, c(10, 10))
+  expect_tensor_shape(o, c(3, 10, 10))
+
+  x <- torch_randn(3, 10, 20)
+  o <- transform_resize(x, c(10))
+  expect_tensor_shape(o, c(3, 10, 20))
+
+  x <- torch_randn(3, 20, 10)
+  o <- transform_resize(x, c(10))
+  expect_tensor_shape(o, c(3, 20, 10))
+
+  x <- torch_randn(3, 10, 5)
+  o <- transform_resize(x, 10)
+  expect_tensor_shape(o, c(3, 20, 10))
 })
 
 test_that("pad", {
