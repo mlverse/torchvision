@@ -84,7 +84,7 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
 }
 
 #' @export
-transform_resize.torch_tensor <- function(img, size, interpolation = 2, max_size = NULL) {
+transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
 
   check_img(img)
 
@@ -121,9 +121,6 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2, max_size
 
     new_short <- requested_new_short
     new_long <- as.integer(requested_new_short * long / short)
-
-    if (!is.null(max_size))
-      rlang::abort("Not implemented.")
 
     if (w <= h) {
       new_w <- new_short
