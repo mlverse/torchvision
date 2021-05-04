@@ -55,6 +55,16 @@
 <![endif]-->
 
 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HD24T4Z9Z3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HD24T4Z9Z3');
+</script>
+
 
   </head>
 
@@ -72,7 +82,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
       </span>
     </div>
 
@@ -105,6 +115,9 @@
     </li>
     <li>
       <a href="../articles/examples/style-transfer.html">style-transfer</a>
+    </li>
+    <li>
+      <a href="../articles/examples/texture-nca.html">texture-nca</a>
     </li>
   </ul>
 </li>
@@ -176,7 +189,7 @@ image.</p></td>
       <th>interpolation</th>
       <td><p>(int, optional) Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
-<code><a href='https://docs.ropensci.org/magick/reference/options.html'>magick::filter_types()</a></code>.</p></td>
+<code>magick::filter_types()</code>.</p></td>
     </tr>
     <tr>
       <th>fill</th>

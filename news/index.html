@@ -54,6 +54,16 @@
 <![endif]-->
 
 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HD24T4Z9Z3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HD24T4Z9Z3');
+</script>
+
 
   </head>
 
@@ -71,7 +81,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
       </span>
     </div>
 
@@ -104,6 +114,9 @@
     </li>
     <li>
       <a href="../articles/examples/style-transfer.html">style-transfer</a>
+    </li>
+    <li>
+      <a href="../articles/examples/texture-nca.html">texture-nca</a>
     </li>
   </ul>
 </li>
@@ -138,9 +151,19 @@
       <small>Source: <a href='https://github.com/mlverse/torchvision/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="torchvision-030" class="section level1">
+<h1 class="page-header" data-toc-text="0.3.0">
+<a href="#torchvision-030" class="anchor"></a>torchvision 0.3.0<small> Unreleased </small>
+</h1>
+<ul>
+<li>Use a self hosted version of the MNIST dataset to avoid frequent download failures. (<a href='https://github.com/mlverse/torchvision/issues/48'>#48</a>)</li>
+<li>Fix <code>torch_arange</code> calls after breaking change in <code>torch</code>. (<a href='https://github.com/mlverse/torchvision/issues/47'>#47</a>)</li>
+<li>Fix bug in <code>transform_resize</code> when passing <code>size</code> with length 1. (<a href='https://github.com/mlverse/torchvision/issues/49'>#49</a>)</li>
+</ul>
+</div>
     <div id="torchvision-020" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.0">
-<a href="#torchvision-020" class="anchor"></a>torchvision 0.2.0<small> Unreleased </small>
+<a href="#torchvision-020" class="anchor"></a>torchvision 0.2.0<small> 2021-01-05 </small>
 </h1>
 <ul>
 <li>Fixed bugs in <code>transform_rotate</code>. (<a href='https://github.com/mlverse/torchvision/issues/31'>#31</a>)</li>
