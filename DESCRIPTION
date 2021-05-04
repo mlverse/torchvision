@@ -15,7 +15,6 @@ Description: Provides access to datasets, models and preprocessing
     'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
 RoxygenNote: 7.1.1
@@ -23,7 +22,7 @@ Suggests:
     testthat,
     magick
 Imports: 
-    torch (>= 0.2.0),
+    torch (>= 0.3.0),
     fs,
     rlang,
     rappdirs,
@@ -31,5 +30,3 @@ Imports:
     jpeg,
     png,
     abind
-Remotes:
-    mlverse/torch
