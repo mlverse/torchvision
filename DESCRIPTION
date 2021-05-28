@@ -29,4 +29,5 @@ Imports:
     utils,
     jpeg,
     png,
-    abind
+    abind,
+    zip
