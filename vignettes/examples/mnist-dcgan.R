@@ -123,7 +123,7 @@ for (epoch in 1:10) {
   lossg <- c()
   lossd <- c()
 
-  for (b in enumerate(dl)) {
+  coro::loop(for (b in dl) {
 
     y_real <- torch_ones(32, device = device)
     y_fake <- torch_zeros(32, device = device)
@@ -151,8 +151,11 @@ for (epoch in 1:10) {
     lossd <- c(lossd, D_loss$item())
     lossg <- c(lossg, G_loss$item())
     pb$tick(tokens = list(lossd = mean(lossd), lossg = mean(lossg)))
-  }
+  })
 
-  plot_gen(fixed_noise)
+  with_no_grad({
+    plot_gen(fixed_noise)
+  })
+
   cat(sprintf("Epoch %d - Loss D: %3f Loss G: %3f\n", epoch, mean(lossd), mean(lossg)))
 }

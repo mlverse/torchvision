@@ -80,17 +80,19 @@ for (epoch in 1:50) {
   )
 
   l <- c()
-  for (b in enumerate(train_dl)) {
+  coro::loop(for (b in train_dl) {
     loss <- train_step(b)
     l <- c(l, loss$item())
     pb$tick(tokens = list(loss = mean(l)))
-  }
+  })
 
   acc <- c()
-  for (b in enumerate(valid_dl)) {
-    accuracy <- valid_step(b)
-    acc <- c(acc, accuracy)
-  }
+  with_no_grad({
+    coro::loop(for (b in valid_dl) {
+      accuracy <- valid_step(b)
+      acc <- c(acc, accuracy)
+    })
+  })
 
   scheduler$step()
   cat(sprintf("[epoch %d]: Loss = %3f, Acc= %3f \n", epoch, mean(l), mean(acc)))

@@ -29,6 +29,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
       TORCH_INSTALL: 1
       TORCH_TEST: 1
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v2

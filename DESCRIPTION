@@ -20,7 +20,8 @@ URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
-    magick
+    magick,
+    coro
 Imports: 
     torch (>= 0.3.0),
     fs,
