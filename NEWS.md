@@ -2,6 +2,7 @@
 
 - Added a dependency on `zip` to `zip::unzip` the tinyimagenet dataset.
 - Removed all usages of `torch::enumerate()` from docs and tests in favor of `coro::loop()` (#57)
+- Fixed non-namespaced calls to `torch`. (#58)
 
 # torchvision 0.3.0
 
