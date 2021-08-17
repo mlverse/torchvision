@@ -1,4 +1,4 @@
-# torchvision (development version)
+# torchvision 0.4.0
 
 - Added a dependency on `zip` to `zip::unzip` the tinyimagenet dataset.
 - Removed all usages of `torch::enumerate()` from docs and tests in favor of `coro::loop()` (#57)
