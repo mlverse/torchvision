@@ -81,7 +81,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.3.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.0.9000</span>
       </span>
     </div>
 
@@ -155,9 +155,15 @@
 <h1 class="page-header" data-toc-text="development version">
 <a href="#torchvision-development-version" class="anchor"></a>torchvision (development version)<small> Unreleased </small>
 </h1>
+</div>
+    <div id="torchvision-040" class="section level1">
+<h1 class="page-header" data-toc-text="0.4.0">
+<a href="#torchvision-040" class="anchor"></a>torchvision 0.4.0<small> Unreleased </small>
+</h1>
 <ul>
 <li>Added a dependency on <code>zip</code> to <code><a href="https://rdrr.io/pkg/zip/man/unzip.html">zip::unzip</a></code> the tinyimagenet dataset.</li>
 <li>Removed all usages of <code><a href="https://torch.mlverse.org/docs/reference/enumerate.html">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html">coro::loop()</a></code> (<a href='https://github.com/mlverse/torchvision/issues/57'>#57</a>)</li>
+<li>Fixed non-namespaced calls to <code>torch</code>. (<a href='https://github.com/mlverse/torchvision/issues/58'>#58</a>)</li>
 </ul>
 </div>
     <div id="torchvision-030" class="section level1">
