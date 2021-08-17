@@ -28,7 +28,7 @@ basic_block <- torch::nn_module(
                         base_width=64, dilation=1, norm_layer=NULL) {
 
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
 
     if (groups != 1 || base_width != 64)
       value_error("basic_block only supports groups=1 and base_width=64")
@@ -38,7 +38,7 @@ basic_block <- torch::nn_module(
 
     self$conv1 <- conv_3x3(inplanes, planes, stride)
     self$bn1 <- norm_layer(planes)
-    self$relu <- nn_relu(inplace = TRUE)
+    self$relu <- torch::nn_relu(inplace = TRUE)
     self$conv2 <- conv_3x3(planes, planes)
     self$bn2 <- norm_layer(planes)
     self$downsample <- downsample
@@ -78,7 +78,7 @@ bottleneck <- torch::nn_module(
                         base_width=64, dilation=1, norm_layer=NULL) {
 
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
 
     width <- as.integer(planes * (base_width / 64)) * groups
 
@@ -91,7 +91,7 @@ bottleneck <- torch::nn_module(
     self$conv3 <- conv_1x1(width, planes * self$expansion)
     self$bn3 <- norm_layer(planes * self$expansion)
 
-    self$relu <- nn_relu(inplace = TRUE)
+    self$relu <- torch::nn_relu(inplace = TRUE)
     self$downsample <- downsample
     self$stride <- stride
 
@@ -148,11 +148,11 @@ resnet <- torch::nn_module(
 
     self$groups <- groups
     self$base_width <- width_per_group
-    self$conv1 <- nn_conv2d(3, self$inplanes, kernel_size=7, stride=2, padding=3,
+    self$conv1 <- torch::nn_conv2d(3, self$inplanes, kernel_size=7, stride=2, padding=3,
                            bias=FALSE)
     self$bn1 <- norm_layer(self$inplanes)
-    self$relu <- nn_relu(inplace=TRUE)
-    self$maxpool <- nn_max_pool2d(kernel_size=3, stride=2, padding=1)
+    self$relu <- torch::nn_relu(inplace=TRUE)
+    self$maxpool <- torch::nn_max_pool2d(kernel_size=3, stride=2, padding=1)
     self$layer1 <- self$.make_layer(block, 64, layers[1])
     self$layer2 <- self$.make_layer(block, 128, layers[2], stride=2,
                                    dilate=replace_stride_with_dilation[1])
@@ -160,8 +160,8 @@ resnet <- torch::nn_module(
                                    dilate=replace_stride_with_dilation[2])
     self$layer4 <- self$.make_layer(block, 512, layers[4], stride=2,
                                    dilate=replace_stride_with_dilation[3])
-    self$avgpool <- nn_adaptive_avg_pool2d(c(1, 1))
-    self$fc <- nn_linear(512 * block$public_fields$expansion, num_classes)
+    self$avgpool <- torch::nn_adaptive_avg_pool2d(c(1, 1))
+    self$fc <- torch::nn_linear(512 * block$public_fields$expansion, num_classes)
 
     for (m in private$modules_) {
       if (inherits(m, "nn_conv2d")) {
@@ -180,9 +180,9 @@ resnet <- torch::nn_module(
       for (m in private$modules_) {
 
         if (inherits(m, "bottleneck"))
-          nn_init_constant_(m$bn3$weight, 0)
+          torch::nn_init_constant_(m$bn3$weight, 0)
         else if (inherits(m, "basic_block"))
-          nn_init_constant_(m$bn2$weight, 0)
+          torch::nn_init_constant_(m$bn2$weight, 0)
 
       }
     }
@@ -200,7 +200,7 @@ resnet <- torch::nn_module(
     }
 
     if (stride != 1 || self$inplanes != planes * block$public_fields$expansion) {
-      downsample <- nn_sequential(
+      downsample <- torch::nn_sequential(
         conv_1x1(self$inplanes, planes * block$public_fields$expansion, stride),
         norm_layer(planes * block$public_fields$expansion)
       )
