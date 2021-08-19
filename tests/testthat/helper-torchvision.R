@@ -18,6 +18,6 @@ expect_tensor <- function(object) {
   expect_no_error(torch::as_array(object))
 }
 
-expect_equal_to_r <- function(object, expected) {
-  expect_equal(torch::as_array(object), expected)
+expect_equal_to_r <- function(object, expected, ...) {
+  expect_equal(torch::as_array(object), expected, ...)
 }
