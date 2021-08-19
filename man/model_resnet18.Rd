@@ -20,6 +20,7 @@ ResNet-18 model architecture from
 }
 \seealso{
 Other models: 
-\code{\link{model_alexnet}()}
+\code{\link{model_alexnet}()},
+\code{\link{model_mobilenet_v2}()}
 }
 \concept{models}
