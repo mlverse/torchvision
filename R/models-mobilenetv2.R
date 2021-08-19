@@ -1,3 +1,11 @@
+#' Constructs a MobileNetV2 architecture from
+#' [MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381).
+#'
+#' @inheritParams model_resnet18
+#' @param ... Other parameters passed to the model implementation.
+#'
+#' @family models
+#' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model <- mobilenet_v2(...)
 
