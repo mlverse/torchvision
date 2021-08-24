@@ -36,8 +36,7 @@ net <- nn_module(
       torch_flatten(start_dim = 2) %>%
       self$fc1() %>%
       nnf_relu() %>%
-      self$fc2() %>%
-      nnf_log_softmax(dim = 1)
+      self$fc2()
   }
 )
 
@@ -65,7 +64,7 @@ for (epoch in 1:10) {
   coro::loop(for (b in train_dl) {
     optimizer$zero_grad()
     output <- model(b[[1]]$to(device = device))
-    loss <- nnf_nll_loss(output, b[[2]]$to(device = device))
+    loss <- nnf_cross_entropy(output, b[[2]]$to(device = device))
     loss$backward()
     optimizer$step()
     train_losses <- c(train_losses, loss$item())
@@ -76,7 +75,7 @@ for (epoch in 1:10) {
     coro::loop(for (b in test_dl) {
       model$eval()
       output <- model(b[[1]]$to(device = device))
-      loss <- nnf_nll_loss(output, b[[2]]$to(device = device))
+      loss <- nnf_cross_entropy(output, b[[2]]$to(device = device))
       test_losses <- c(test_losses, loss$item())
       model$train()
     })
