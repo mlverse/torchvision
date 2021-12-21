@@ -22,6 +22,6 @@ AlexNet model architecture from the
 \seealso{
 Other models: 
 \code{\link{model_mobilenet_v2}()},
-\code{\link{model_resnet18}()}
+\code{\link{model_resnet}}
 }
 \concept{models}

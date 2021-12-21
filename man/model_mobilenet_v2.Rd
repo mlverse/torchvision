@@ -22,6 +22,6 @@ Constructs a MobileNetV2 architecture from
 \seealso{
 Other models: 
 \code{\link{model_alexnet}()},
-\code{\link{model_resnet18}()}
+\code{\link{model_resnet}}
 }
 \concept{models}
