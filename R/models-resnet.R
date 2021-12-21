@@ -249,9 +249,9 @@ resnet <- torch::nn_module(
   model
 }
 
-#' ResNet-18 Model Architecture
+#' ResNet Model Architecture
 #'
-#' ResNet-18 model architecture from
+#' ResNet model architecture from
 #'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf)
 #'
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet.
@@ -266,4 +266,50 @@ model_resnet18 <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("resnet18", basic_block, c(2,2,2,2), pretrained, progress, ...)
 }
 
+#' @export
+#' @rdname model_resnet18
+model_resnet34 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet34", basic_block, c(3,4,6,3), pretrained, progress, ...)
+}
 
+#' @export
+#' @rdname model_resnet18
+model_resnet50 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet50", bottleneck, c(3,4,6,3), pretrained, progress, ...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_resnet101 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet101", bottleneck, c(3,4,23,3), pretrained, progress, ...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_resnet152 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet152", bottleneck, c(3,8,36,3), pretrained, progress, ...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_resnext50_32x4d <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnext50_32x4d", bottleneck, c(3,4,6,3), pretrained, progress, groups=32, width_per_group=4,...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_resnext101_32x8d <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnext101_32x8d", bottleneck, c(3,4,23,3), pretrained, progress, groups=32, width_per_group=8,...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_wide_resnet50_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("wide_resnet50_2", bottleneck, c(3,4,6,3), pretrained, progress, width_per_group=64*2,...)
+}
+
+#' @export
+#' @rdname model_resnet18
+model_wide_resnet101_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("wide_resnet101_2", bottleneck, c(3,4,23,3), pretrained, progress, width_per_group=64*2,...)
+}

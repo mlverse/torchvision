@@ -2,9 +2,33 @@
 % Please edit documentation in R/models-resnet.R
 \name{model_resnet18}
 \alias{model_resnet18}
-\title{ResNet-18 Model Architecture}
+\alias{model_resnet34}
+\alias{model_resnet50}
+\alias{model_resnet101}
+\alias{model_resnet152}
+\alias{model_resnext50_32x4d}
+\alias{model_resnext101_32x8d}
+\alias{model_wide_resnet50_2}
+\alias{model_wide_resnet101_2}
+\title{ResNet Model Architecture}
 \usage{
 model_resnet18(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnet34(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnet50(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnet101(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnet152(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnext50_32x4d(pretrained = FALSE, progress = TRUE, ...)
+
+model_resnext101_32x8d(pretrained = FALSE, progress = TRUE, ...)
+
+model_wide_resnet50_2(pretrained = FALSE, progress = TRUE, ...)
+
+model_wide_resnet101_2(pretrained = FALSE, progress = TRUE, ...)
 }
 \arguments{
 \item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
@@ -15,7 +39,7 @@ stderr.}
 \item{...}{Other parameters passed to the resnet model.}
 }
 \description{
-ResNet-18 model architecture from
+ResNet model architecture from
 \href{https://arxiv.org/pdf/1512.03385.pdf}{Deep Residual Learning for Image Recognition}
 }
 \seealso{
