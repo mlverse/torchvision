@@ -57,7 +57,8 @@ test_that("resnet101", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_resnet101(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_resnet101(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -74,7 +75,8 @@ test_that("resnet152", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_resnet152(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_resnet152(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -91,7 +93,8 @@ test_that("resnext50_32x4d", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_resnext50_32x4d(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_resnext50_32x4d(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -108,7 +111,8 @@ test_that("resnext50_32x4d", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_resnext50_32x4d(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_resnext50_32x4d(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -125,7 +129,8 @@ test_that("resnext101_32x8d", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_resnext101_32x8d(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_resnext101_32x8d(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -142,7 +147,8 @@ test_that("wide_resnet50_2", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_wide_resnet50_2(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_wide_resnet50_2(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 
@@ -159,7 +165,8 @@ test_that("wide_resnet101_2", {
 
   expect_tensor_shape(out, c(1, 1000))
 
-  model <- model_wide_resnet101_2(pretrained = TRUE)
+  withr::with_options(list(timeout = 360),
+                      model <- model_wide_resnet101_2(pretrained = TRUE))
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- model(input)
 

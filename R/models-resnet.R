@@ -1,14 +1,14 @@
 
 resnet_model_urls <- c(
   'resnet18' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet18.pth',
-  'resnet34' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet34.pth',
-  'resnet50' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet50.pth',
-  'resnet101' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet101.pth',
-  'resnet152' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet152.pth',
-  'resnext50_32x4d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext50_32x4d.pth',
-  'resnext101_32x8d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext101_32x8d.pth',
-  'wide_resnet50_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet50_2.pth',
-  'wide_resnet101_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet101_2.pth'
+  'resnet34' = 'https://download.pytorch.org/models/resnet34-b627a593.pth',
+  'resnet50' = 'https://download.pytorch.org/models/resnet50-0676ba61.pth',
+  'resnet101' = 'https://download.pytorch.org/models/resnet101-63fe2227.pth',
+  'resnet152' = 'https://download.pytorch.org/models/resnet152-394f9c45.pth',
+  'resnext50_32x4d' = 'https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth',
+  'resnext101_32x8d' = 'https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth',
+  'wide_resnet50_2' = 'https://download.pytorch.org/models/wide_resnet50_2-95faca4d.pth',
+  'wide_resnet101_2' = 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth'
 )
 
 conv_3x3 <- function(in_planes, out_planes, stride = 1, groups = 1, dilation = 1) {
