@@ -2,6 +2,7 @@
 
 - Implemented MobileNetV2 (#60)
 - Improved vignettes so they use `nnf_cross_entropy` for numerical stability. (#61)
+- Implement the full list of ResNet model family (#66, @cregouby)
 
 # torchvision 0.4.0
 
