@@ -29,6 +29,8 @@
 </script>
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -47,12 +49,6 @@
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Examples
@@ -89,7 +85,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/mlverse/torchvision/">
+  <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -106,69 +102,80 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="torchvision-" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#torchvision-" class="anchor"></a>torchvision <a href="https://torchvision.mlverse.org"><img src="https://torch.mlverse.org/css/images/hex/torchvision.png" align="right" height="139"></a>
+<div class="section level1">
+<div class="page-header"><h1 id="torchvision-">torchvision <a href="https://torchvision.mlverse.org" class="external-link"><img src="https://torch.mlverse.org/css/images/hex/torchvision.png" align="right" height="139"></a>
+<a class="anchor" aria-label="anchor" href="#torchvision-"></a>
 </h1></div>
 <!-- badges: start -->
 
-<p>torchvision is an extension for <a href="https://github.com/mlverse/torch">torch</a> providing image loading, transformations, common architectures for computer vision, pre-trained weights and access to commonly used datasets.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<p>torchvision is an extension for <a href="https://github.com/mlverse/torch" class="external-link">torch</a> providing image loading, transformations, common architectures for computer vision, pre-trained weights and access to commonly used datasets.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <p>The CRAN release can be installed with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"torchvision"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"torchvision"</span><span class="op">)</span></code></pre></div>
 <p>You can install the development version from GitHub with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mlverse/torchvision@main"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"mlverse/torchvision@main"</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=torchvision">https://​cloud.r-project.org/​package=torchvision</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/mlverse/torchvision/">https://​github.com/​mlverse/​torchvision/​</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Daniel Falbel <br><small class="roles"> Author, maintainer </small>  </li>
-<li><a href="authors.html">All authors...</a></li>
+<li><a href="https://cloud.r-project.org/package=torchvision" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/mlverse/torchvision/" class="external-link">Browse source code</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/mlverse/torchvision/actions"><img src="https://github.com/mlverse/torchvision/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
-<li><a href="https://CRAN.R-project.org/package=torchvision"><img src="https://www.r-pkg.org/badges/version/torchvision" alt="CRAN status"></a></li>
-<li><a href="https://cran.r-project.org/package=torchvision"><img src="https://cranlogs.r-pkg.org/badges/torchvision"></a></li>
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing torchvision</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Daniel Falbel <br><small class="roles"> Author, maintainer </small>  </li>
+<li><a href="authors.html">More about authors...</a></li>
+</ul>
+</div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/mlverse/torchvision/actions" class="external-link"><img src="https://github.com/mlverse/torchvision/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
+<li><a href="https://CRAN.R-project.org/package=torchvision" class="external-link"><img src="https://www.r-pkg.org/badges/version/torchvision" alt="CRAN status"></a></li>
+<li><a href="https://cran.r-project.org/package=torchvision" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/torchvision"></a></li>
+</ul>
+</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Daniel Falbel.</p>
+  <p></p>
+<p>Developed by Daniel Falbel.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -176,6 +183,8 @@
 
   
 
+
+  
 
   </body>
 </html>
