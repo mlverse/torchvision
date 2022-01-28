@@ -1,4 +1,4 @@
-# torchvision (development version)
+# torchvision 0.4.1
 
 - Implemented MobileNetV2 (#60)
 - Improved vignettes so they use `nnf_cross_entropy` for numerical stability. (#61)
