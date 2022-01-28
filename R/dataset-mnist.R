@@ -64,13 +64,11 @@ mnist_dataset <- dataset(
       filename <- tail(strsplit(r[1], "/")[[1]], 1)
       destpath <- file.path(self$raw_folder, filename)
 
-      withr::with_options(
-        list(timeout = 600),
-        utils::download.file(r[1], destfile = destpath)
-      )
+      p <- download_and_cache(r[1], prefix = class(self)[1])
+      fs::file_copy(p, destpath)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error("MD5 sums are not identical for file: {r[1}.")
+        runtime_error("MD5 sums are not identical for file: {r[1]}.")
 
     }
 
