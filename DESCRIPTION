@@ -1,6 +1,6 @@
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
-Version: 0.4.0.9000
+Version: 0.4.0.9001
 Authors@R: c(
     person(given = "Daniel",
            family = "Falbel",
@@ -26,7 +26,8 @@ RoxygenNote: 7.1.2
 Suggests: 
     testthat,
     magick,
-    coro
+    coro,
+    withr
 Imports: 
     torch (>= 0.3.0),
     fs,
