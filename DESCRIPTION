@@ -27,7 +27,7 @@ Suggests:
     testthat,
     magick,
     coro,
-    withr
+    zip
 Imports: 
     torch (>= 0.3.0),
     fs,
@@ -37,4 +37,4 @@ Imports:
     jpeg,
     png,
     abind,
-    zip
+    withr
