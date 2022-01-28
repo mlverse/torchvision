@@ -83,7 +83,7 @@ cifar10_dataset <- torch::dataset(
     p <- download_and_cache(self$url)
 
     if (!tools::md5sum(p) == self$md5)
-      runtime_error("Corrupt file!")
+      runtime_error(sprintf("Corrupt file! Delete the file in '%s' and try again.", p))
 
     utils::untar(p, exdir = self$root)
   },
