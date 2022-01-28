@@ -26,7 +26,8 @@ RoxygenNote: 7.1.2
 Suggests: 
     testthat,
     magick,
-    coro
+    coro,
+    withr
 Imports: 
     torch (>= 0.3.0),
     fs,
