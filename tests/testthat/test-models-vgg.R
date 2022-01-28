@@ -23,7 +23,7 @@ test_that("vgg models works", {
 
   for (m in vggs) {
     model <- m(pretrained = TRUE)
-    expect_tensor_shape(model(torch_ones(5, 3, 224, 224)), c(5, 1000))
+    expect_tensor_shape(model(torch_ones(1, 3, 224, 224)), c(1, 1000))
 
     rm(model)
     gc()
