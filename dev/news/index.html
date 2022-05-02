@@ -29,7 +29,7 @@
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
      
     <span class="caret"></span>
@@ -80,9 +80,9 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
-</div>
+<ul><li>Bugs fixed in <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code><a href="../reference/transform_linear_transformation.html">transform_linear_transformation()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/72" class="external-link">#72</a>, <a href="https://github.com/mlverse/torchvision/issues/73" class="external-link">#73</a>, <a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>)</li></ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
+<h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<small>2022-01-28</small><a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
 <ul><li>Implemented MobileNetV2 (<a href="https://github.com/mlverse/torchvision/issues/60" class="external-link">#60</a>)</li>
 <li>Improved vignettes so they use <code>nnf_cross_entropy</code> for numerical stability. (<a href="https://github.com/mlverse/torchvision/issues/61" class="external-link">#61</a>)</li>
 <li>Implement the full list of ResNet model family (<a href="https://github.com/mlverse/torchvision/issues/66" class="external-link">#66</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
@@ -91,7 +91,7 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.0" id="torchvision-040">torchvision 0.4.0<small>2021-08-17</small><a class="anchor" aria-label="anchor" href="#torchvision-040"></a></h2>
 <ul><li>Added a dependency on <code>zip</code> to <code><a href="https://rdrr.io/pkg/zip/man/unzip.html" class="external-link">zip::unzip</a></code> the tinyimagenet dataset.</li>
-<li>Removed all usages of <code><a href="https://torch.mlverse.org/docs/reference/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
+<li>Removed all usages of <code><a href="https://rdrr.io/pkg/torch/man/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
 <li>Fixed non-namespaced calls to <code>torch</code>. (<a href="https://github.com/mlverse/torchvision/issues/58" class="external-link">#58</a>)</li>
 </ul></div>
     <div class="section level2">
@@ -108,8 +108,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.0" id="torchvision-010">torchvision 0.1.0<small>2020-10-29</small><a class="anchor" aria-label="anchor" href="#torchvision-010"></a></h2>
-<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
-</ul></div>
+<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li></ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -124,7 +123,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>
