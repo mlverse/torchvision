@@ -286,7 +286,7 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
 #' @export
 transform_linear_transformation.torch_tensor <- function(img, transformation_matrix,
                                                          mean_vector) {
-  flat_tensor <- img$view(1, -1) - mean_vector
+  flat_tensor <- img$view(c(1, -1)) - mean_vector
   transformed_tensor <- torch::torch_mm(flat_tensor, transformation_matrix)
 
   transformed_tensor$view(img$size())
