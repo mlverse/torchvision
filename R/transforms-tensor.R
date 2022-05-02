@@ -340,7 +340,7 @@ transform_adjust_contrast.torch_tensor <- function(img, contrast_factor) {
 #' @export
 transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
 
-  if (hue_factor < 0.5 || hue_factor > 0.5)
+  if (hue_factor < -0.5 || hue_factor > 0.5)
     value_error("hue_factor must be between -0.5 and 0.5.")
 
   check_img(img)

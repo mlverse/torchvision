@@ -185,3 +185,15 @@ test_that("linear transformation", {
   expect_equal(dim(out), c(3, 24, 32))
 })
 
+test_that("adjust hue", {
+
+  hue_factor <- c(-0.45, -0.25, 0.0, 0.25, 0.45)
+  x <- torch::torch_rand(3, 24, 32)
+
+  for (f in hue_factor) {
+    out <- transform_adjust_hue(x, f)
+    expect_equal(dim(out), dim(x))
+  }
+
+})
+
