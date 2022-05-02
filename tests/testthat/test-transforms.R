@@ -170,4 +170,18 @@ test_that("affine", {
 
 })
 
+test_that("linear transformation", {
+
+  c <- 3
+  h <- 24
+  w <- 32
+
+  tensor <- torch::torch_randn(c, h, w)
+  matrix <- torch::torch_rand(c * h * w, c * h * w)
+  mean_vector <- torch::torch_rand(c * h * w)
+
+  out <- transform_linear_transformation(tensor, matrix, mean_vector)
+
+  expect_equal(dim(out), c(3, 24, 32))
+})
 
