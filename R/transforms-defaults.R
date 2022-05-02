@@ -159,7 +159,7 @@ transform_random_horizontal_flip.default <- function(img, p = 0.5) {
 
 
 #' @export
-transform_random_vertical_flip.default <- function(img, p) {
+transform_random_vertical_flip.default <- function(img, p = 0.5) {
 
   if (stats::runif(1) < p)
     img <- transform_vflip(img)
