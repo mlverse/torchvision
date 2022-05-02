@@ -1,5 +1,7 @@
 # torchvision (development version)
 
+- Bugs fixed in `transform_adjust_hue()` and `transform_linear_transformation()` (#72, #73, @sebffischer)
+
 # torchvision 0.4.1
 
 - Implemented MobileNetV2 (#60)
