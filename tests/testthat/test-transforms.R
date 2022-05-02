@@ -197,3 +197,18 @@ test_that("adjust hue", {
 
 })
 
+test_that("random vertical flip", {
+
+  tensor <- torch::torch_randn(3, 24, 32)
+
+  for (i in 1:10) {
+    out <- transform_random_vertical_flip(tensor)
+  }
+  for (p in seq(0, 1, length.out=10)) {
+    out <- transform_random_vertical_flip(tensor, p)
+  }
+
+  expect_equal(dim(out), dim(tensor))
+
+})
+
