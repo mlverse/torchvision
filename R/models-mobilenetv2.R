@@ -121,8 +121,8 @@ mobilenet_v2 <- torch::nn_module(
   forward = function(x) {
     x <- self$features(x)
     # Cannot use "squeeze" as batch-size can be 1
-    x <- nnf_adaptive_avg_pool2d(x, c(1, 1))
-    x <- torch_flatten(x, start_dim = 2L)
+    x <- torch::nnf_adaptive_avg_pool2d(x, c(1, 1))
+    x <- torch::torch_flatten(x, start_dim = 2L)
     x <- self$classifier(x)
     x
   }

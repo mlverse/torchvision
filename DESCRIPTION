@@ -16,19 +16,14 @@ Authors@R: c(
     )
 Description: Provides access to datasets, models and preprocessing
     facilities for deep learning with images. Integrates seamlessly
-    with the 'torch' package and it's 'API' borrows heavily from 
+    with the 'torch' package and it's 'API' borrows heavily from
     'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
 RoxygenNote: 7.1.2
-Suggests: 
-    testthat,
-    magick,
-    coro,
-    zip
-Imports: 
+Imports:
     torch (>= 0.3.0),
     fs,
     rlang,
@@ -38,3 +33,8 @@ Imports:
     png,
     abind,
     withr
+Suggests:
+    testthat,
+    magick,
+    coro,
+    zip

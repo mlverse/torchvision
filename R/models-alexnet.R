@@ -31,7 +31,7 @@ alexnet <- torch::nn_module(
   forward = function(x) {
     x <- self$features(x)
     x <- self$avgpool(x)
-    x <- torch_flatten(x, start_dim = 2)
+    x <- torch::torch_flatten(x, start_dim = 2)
     x <- self$classifier(x)
   }
 )
