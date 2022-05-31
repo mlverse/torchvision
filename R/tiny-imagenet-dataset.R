@@ -1,3 +1,4 @@
+
 #' Tiny ImageNet dataset
 #'
 #' Prepares the Tiny ImageNet dataset and optionally downloads it.
@@ -46,7 +47,7 @@ tiny_imagenet_dataset <- torch::dataset(
 
     rlang::inform("Download complete. Now unzipping.")
 
-    if (rlang::check_installed("zip")) {
+    if (is.null(rlang::check_installed("zip"))) {
       zip::unzip(raw_path, exdir = self$root_path)
     }
 
