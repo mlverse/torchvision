@@ -95,7 +95,7 @@ draw_bounding_boxes <- function(image,
                                font_size = 10) {
   stopifnot("Image is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
   stopifnot("Image is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
-  stopifnot("Pass individual images, not batches" = image$dim() == 3)
+  stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
   stopifnot(
     "Boxes need to be in (xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them" = (boxes[, 1] < boxes[, 3])$all() %>% as.logical() &&
@@ -177,81 +177,64 @@ draw_bounding_boxes <- function(image,
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
-#' draw_segmentation_masks = function(
-    #'     image: torch::torch_Tensor,
-#'     masks: torch::torch_Tensor,
-#'     alpha: float <- 0.8,
-#'     colors: Optionalc(Union[List[Union[str, Tuple[int, int, int]]], str, Tuple[int, int, int]]) <- NULL,
-#' ) -> torch::torch_Tensor:
+#' Draw segmentation masks
 #'
-#'     """
-#'     Draws segmentation masks on given RGB image.
-#'     The values of the input image should be uint8 between 0 and 255.
-#'     Args:
-#'         image (Tensor): Tensor of shape (3, H, W) and dtype uint8.
-#'         masks (Tensor): Tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
-#'         alpha (float): Float number between 0 and 1 denoting the transparency of the masks.
-#'             0 means full transparency, 1 means no transparency.
-#'         colors (color or list of colors, optional): List containing the colors
-#'             of the masks or single color for all masks. The color can be represented as
-#'             PIL strings e$g. "red" or "#FF00FF", or as RGB tuples e$g. ``(240, 10, 157)``.
-#'             By default, random colors are generated for each mask.
-#'     Returns:
-#'         img (Tensorc(C, H, W)): Image Tensor, with segmentation masks drawn on top.
-#'     """
+#' Draw segmentation masks with their respective colors on top of a given RGB tensor image
 #'
-#'     if not torch::torch_jit$is_scripting() and not torch::torch_jit$is_tracing() {
-#'         _log_api_usage_once(draw_segmentation_masks)
-#'     if not isinstance(image, torch::torch_Tensor) {
-#'         raise TypeError(f"The image must be a tensor, got list(type(image))")
-#'     elif (image$dtype  = torch::torch_uint8) {
-#'         raise ValueError(f"The image dtype must be uint8, got list(image$dtype)")
-#'     elif (image$dim()  = 3) {
-#'         raise ValueError("Pass individual images, not batches")
-#'     elif (image$size()[0]  = 3) {
-#'         raise ValueError("Pass an RGB image. Other Image formats are not supported")
-#'     if (masks$ndim == 2) {
-#'         masks <- masks[NULL, :, :]
-#'     if (masks$ndim  = 3) {
-#'         raise ValueError("masks must be of shape (H, W) or (batch_size, H, W)")
-#'     if (masks$dtype  = torch::torch_bool) {
-#'         raise ValueError(f"The masks must be of dtype bool. Got list(masks$dtype)")
-#'     if (masks$shape[-2:]  = image$shape[-2:]) {
-#'         raise ValueError("The image and the masks must have the same height and width")
+#' @param image : torch_tensor of shape (3, H, W) and dtype uint8.
+#' @param masks : torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
+#' @param alpha : number between 0 and 1 denoting the transparency of the masks.
+#   0 means full transparency, 1 means no transparency.
+#' @param colors : (optional): a viridisMap() dataframe or equivalent with either one row or
+#   the same number of rows as the number of masks.
 #'
-#'     num_masks <- masks$size()[0]
-#'     if !is.null(colors) and num_masks > len(colors) {
-#'         raise ValueError(f"There are more masks (list(num_masks}) than colors ({len(colors)))")
+#' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
+#' @export
 #'
-#'     if (num_masks == 0) {
-#'         warnings$warn("masks doesn't contain any mask. No mask was drawn")
-#'         return(image)
-#'
-#'     if (colors is NULL) {
-#'         colors <- _generate_color_palette(num_masks)
-#'
-#'     if not isinstance(colors, list) {
-#'         colors <- [colors]
-#'     if not isinstance(colors[0], (tuple, str)) {
-#'         raise ValueError("colors must be a tuple or a string, or a list thereof")
-#'     if (isinstance(colors[0], tuple) and len(colors[0])  = 3) {
-#'         raise ValueError("It seems that you passed a tuple of colors instead of a list of colors")
-#'
-#'     out_dtype <- torch::torch_uint8
-#'
-#'     colors_ <- []
-#'     for color in colors:
-#'         if isinstance(color, str) {
-#'             color <- ImageColor$getrgb(color)
-#'         colors_.append(torch::torch_tensor(color, dtyp = out_dtype))
-#'
-#'     img_to_draw <- image$detach()$clone()
-#'     # TODO: There might be a way to vectorize this
-#'     for mask, color in zip(masks, colors_) {
-#'         img_to_draw[:, mask] <- color[:, NULL]
-#'
-#'     out <- image * (1 - alpha) + img_to_draw * alpha
-#'     return(out$to(out_dtype))
+#' @examples
+draw_segmentation_masks  <-  function(image,
+                                      masks,
+                                      alpha = 0.8,
+                                      colors = NULL) {
+  stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
+  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
+  stopifnot("Pass individual images, not batches" = image$ndim == 3)
+  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+  if (masks$ndim == 2) {
+    masks <- masks$unsqueeze(1)
+  }
+  stopifnot("`masks` must be of shape (H, W) or (num_masks, H, W)" = masks$ndim == 3)
+  stopifnot("`masks` is expected to be of dtype torch_bool" = masks$dtype == torch::torch_bool())
+  stopifnot("`masks` and `image` must have the same height and width" = masks$shape[2:3] == image$shape[2:3])
+  num_masks <- masks$size(1)
+  stopifnot("There are more masks than colors" = (is.null(colors) ||
+                                                    num_masks == nrow(colors)))
+  if (num_masks == 0) {
+    rlang::warn("masks doesn't contain any mask. No mask was drawn")
+    return(image)
+  }
+  if (is.null(colors)) {
+    colors <-
+      round(viridisLite::viridisMap(num_masks)[, c("R", "G", "B")] * 255)
+  }
+  stopifnot("colors must be a dataframe with `R`, `G` and `B` columns" = (c("R", "G", "B") %in% names(colors)))
+
+  out_dtype <- torch::torch_uint8()
+
+  color_tt <-
+    colors[, c("R", "G", "B")] %>% as.matrix %>% torch::torch_tensor(dtype = out_dtype)
+
+  img_to_draw <- image$detach()$clone()
+
+  colored_mask_stack <- torch::torch_stack(purrr::map(
+     seq(masks$size(1)),
+     ~color_tt[.x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[.x:.x, , ]$tile(c(4, 2, 2)))),
+    dim = 1
+  )
+  out <- image * (1 - alpha) + torch::torch_sum(colored_mask_stack, dim = 1) * alpha
+  return(out$to(out_dtype))
+}
+
 #'
 #'
 #' @torch::torch_no_grad()

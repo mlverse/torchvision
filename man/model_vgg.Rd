@@ -42,20 +42,20 @@ VGG models implementations based on
 }
 \section{Functions}{
 \itemize{
-\item \code{model_vgg11}: VGG 11-layer model (configuration "A")
+\item \code{model_vgg11()}: VGG 11-layer model (configuration "A")
 
-\item \code{model_vgg11_bn}: VGG 11-layer model (configuration "A") with batch normalization
+\item \code{model_vgg11_bn()}: VGG 11-layer model (configuration "A") with batch normalization
 
-\item \code{model_vgg13}: VGG 13-layer model (configuration "B")
+\item \code{model_vgg13()}: VGG 13-layer model (configuration "B")
 
-\item \code{model_vgg13_bn}: VGG 13-layer model (configuration "B") with batch normalization
+\item \code{model_vgg13_bn()}: VGG 13-layer model (configuration "B") with batch normalization
 
-\item \code{model_vgg16}: VGG 13-layer model (configuration "D")
+\item \code{model_vgg16()}: VGG 13-layer model (configuration "D")
 
-\item \code{model_vgg16_bn}: VGG 13-layer model (configuration "D") with batch normalization
+\item \code{model_vgg16_bn()}: VGG 13-layer model (configuration "D") with batch normalization
 
-\item \code{model_vgg19}: VGG 19-layer model (configuration "E")
+\item \code{model_vgg19()}: VGG 19-layer model (configuration "E")
 
-\item \code{model_vgg19_bn}: VGG 19-layer model (configuration "E") with batch normalization
+\item \code{model_vgg19_bn()}: VGG 19-layer model (configuration "E") with batch normalization
+
 }}
-
