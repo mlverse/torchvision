@@ -61,21 +61,21 @@ vision_make_grid <- function(tensor,
 #'
 #' Draws bounding boxes on top of one image tensor
 #'
-#' @param image: Tensor of shape (C x H x W) and dtype uint8.
-#' @param boxes: Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
+#' @param image : Tensor of shape (C x H x W) and dtype uint8.
+#' @param boxes : Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
 #'            the boxes are absolute coordinates with respect to the image. In other words: `0  = xmin < xmax < W` and
 #'            `0  = ymin < ymax < H`.
-#' @param labels: character vector containing the labels of bounding boxes.
-#' @param colors: character vector containing the colors
+#' @param labels : character vector containing the labels of bounding boxes.
+#' @param colors : character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
-#' @param fill: If `TRUE` fills the bounding box with specified color.
-#' @param width: Width of text shift to the bounding box.
-#' @param font: NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
+#' @param fill : If `TRUE` fills the bounding box with specified color.
+#' @param width : Width of text shift to the bounding box.
+#' @param font : NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 # ' The first element of the vector selects a typeface and the second element selects a style.
-#' @param font_size: The requested font size in points.
+#' @param font_size : The requested font size in points.
 #'
-#' @return  torch_tensorc(C, H, W)): Image Tensor of dtype uint8 with bounding boxes plotted.
+#' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
 #' @examples
 #'   image <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
@@ -189,9 +189,9 @@ draw_bounding_boxes <- function(image,
 #   the same number of rows as the number of masks.
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
-#' @export
 #'
 #' @examples
+#' @export
 draw_segmentation_masks  <-  function(image,
                                       masks,
                                       alpha = 0.8,
@@ -235,75 +235,70 @@ draw_segmentation_masks  <-  function(image,
   return(out$to(out_dtype))
 }
 
+
+#' Draws Keypoints
 #'
+#' Draws Keypoints on given RGB tensor image.
+#' @param image : Tensor of shape (3, H, W) and dtype uint8
+#' @param keypoints : Tensor of shape (num_instances, K, 2) the K keypoints location for each of the N instances,
+#         in the format c(x, y).
+#' @param connectivity : Vector of pair of keypoints to be connected
+#' @param colors : (optional): a viridisMap() dataframe or equivalent with either one row or
+#   the same number of rows as the number of keypoints
+#' @param radius : radius of the plotted keypoint.
+#' @param width : width of line connecting keypoints.
 #'
-#' @torch::torch_no_grad()
-#' }
-#' draw_keypoints = function(
-    #'     image: torch::torch_Tensor,
-#'     keypoints: torch::torch_Tensor,
-#'     connectivity: Optionalc(List[Tuple[int, int]]) <- NULL,
-#'     colors: Optionalc(Union[str, Tuple[int, int, int]]) <- NULL,
-#'     radius: int <- 2,
-#'     width: int <- 3,
-#' ) -> torch::torch_Tensor:
+#' @return Image Tensor of dtype uint8 with keypoints drawn.
 #'
-#'     """
-#'     Draws Keypoints on given RGB image.
-#'     The values of the input image should be uint8 between 0 and 255.
-#'     Args:
-#'         image (Tensor): Tensor of shape (3, H, W) and dtype uint8.
-#'         keypoints (Tensor): Tensor of shape (num_instances, K, 2) the K keypoints location for each of the N instances,
-#'             in the format c(x, y).
-#'         connectivity (Listc(Tuple[int, int]])): A List of tuple where,
-#'             each tuple contains pair of keypoints to be connected.
-#'         colors (str, Tuple): The color can be represented as
-#'             PIL strings e$g. "red" or "#FF00FF", or as RGB tuples e$g. ``(240, 10, 157)``.
-#'         radius (int): Integer denoting radius of keypoint.
-#'         width (int): Integer denoting width of line connecting keypoints.
-#'     Returns:
-#'         img (Tensorc(C, H, W)): Image Tensor of dtype uint8 with keypoints drawn.
-#'     """
-#'
-#'     if not torch::torch_jit$is_scripting() and not torch::torch_jit$is_tracing() {
-#'         _log_api_usage_once(draw_keypoints)
-#'     if not isinstance(image, torch::torch_Tensor) {
-#'         raise TypeError(f"The image must be a tensor, got list(type(image))")
-#'     elif (image$dtype  = torch::torch_uint8) {
-#'         raise ValueError(f"The image dtype must be uint8, got list(image$dtype)")
-#'     elif (image$dim()  = 3) {
-#'         raise ValueError("Pass individual images, not batches")
-#'     elif (image$size()[0]  = 3) {
-#'         raise ValueError("Pass an RGB image. Other Image formats are not supported")
-#'
-#'     if (keypoints$ndim  = 3) {
-#'         raise ValueError("keypoints must be of shape (num_instances, K, 2)")
-#'
-#'     ndarr <- image$permute(1, 2, 0)$cpu()$numpy()
-#'     img_to_draw <- Image$fromarray(ndarr)
-#'     draw <- ImageDraw$Draw(img_to_draw)
-#'     img_kpts <- keypoints$to(torch::torch_int64)$tolist()
-#'
-#'     for kpt_id, kpt_inst in enumerate(img_kpts) {
-#'         for inst_id, kpt in enumerate(kpt_inst) {
-#'             x1 <- kpt[0] - radius
-#'             x2 <- kpt[0] + radius
-#'             y1 <- kpt[1] - radius
-#'             y2 <- kpt[1] + radius
-#'             draw$ellipse([x1, y1, x2, y2], fil = colors, outlin = NULL, widt = 0)
-#'
-#'         if (connectivity) {
-#'             for connection in connectivity:
-#'                 start_pt_x <- kpt_inst[connection[0]][0]
-#'                 start_pt_y <- kpt_inst[connection[0]][1]
-#'
-#'                 end_pt_x <- kpt_inst[connection[1]][0]
-#'                 end_pt_y <- kpt_inst[connection[1]][1]
-#'
-#'                 draw$line(
-#'                     ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
-#'                     widt = width,
-#'                 )
-#'
-#'     return(torch::torch_from_numpy(np$array(img_to_draw))$permute(2, 0, 1)$to(dtyp = torch::torch_uint8))
-#'
+#' @examples
+#' @export
+draw_keypoints = function(    image,
+    keypoints,
+    connectivity = NULL,
+    colors = NULL,
+    radius = 2,
+    width = 3) {
+  stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
+  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
+  stopifnot("Pass individual images, not batches" = image$ndim == 3)
+  stopifnot("Only RGB images are supported" = image$size(1) == 3)
+  stopifnot("keypoints must be of shape (num_instances, K, 2)" = keypoints$ndim == 3)
+
+  img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
+  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+  draw <- png::writePNG(img_to_draw / 255) %>%
+    magick::image_read() %>%
+    magick::image_draw()
+
+  # TODO need R-isation and vectorisation
+    # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
+    #     for (inst_id, kpt in enumerate(kpt_inst)) {
+    #         x1 <- kpt[0] - radius
+    #         x2 <- kpt[0] + radius
+    #         y1 <- kpt[1] - radius
+    #         y2 <- kpt[1] + radius
+    #         draw$ellipse([x1, y1, x2, y2], fil = colors, outlin = NULL, widt = 0)
+    #     }
+    #
+    #     if (connectivity) {
+    #         for (connection in connectivity) {
+    #             start_pt_x <- kpt_inst[connection[0]][0]
+    #             start_pt_y <- kpt_inst[connection[0]][1]
+    #
+    #             end_pt_x <- kpt_inst[connection[1]][0]
+    #             end_pt_y <- kpt_inst[connection[1]][1]
+    #
+    #             draw$line(
+    #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
+    #                 widt = width,
+    #             )
+    #         }
+    #     }
+    # }
+  dev.off()
+  draw_tt <-
+    draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
+
+    return(draw_tt$permute(c(3, 1, 2)))
+}
+

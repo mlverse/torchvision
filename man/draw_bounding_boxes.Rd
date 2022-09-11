@@ -16,28 +16,28 @@ draw_bounding_boxes(
 )
 }
 \arguments{
-\item{image:}{Tensor of shape (C x H x W) and dtype uint8.}
+\item{image}{: Tensor of shape (C x H x W) and dtype uint8.}
 
-\item{boxes:}{Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
+\item{boxes}{: Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
 the boxes are absolute coordinates with respect to the image. In other words: \verb{0  = xmin < xmax < W} and
 \verb{0  = ymin < ymax < H}.}
 
-\item{labels:}{character vector containing the labels of bounding boxes.}
+\item{labels}{: character vector containing the labels of bounding boxes.}
 
-\item{colors:}{character vector containing the colors
+\item{colors}{: character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
 
-\item{fill:}{If \code{TRUE} fills the bounding box with specified color.}
+\item{fill}{: If \code{TRUE} fills the bounding box with specified color.}
 
-\item{width:}{Width of text shift to the bounding box.}
+\item{width}{: Width of text shift to the bounding box.}
 
-\item{font:}{NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
+\item{font}{: NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
 
-\item{font_size:}{The requested font size in points.}
+\item{font_size}{: The requested font size in points.}
 }
 \value{
-torch_tensorc(C, H, W)): Image Tensor of dtype uint8 with bounding boxes plotted.
+torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 }
 \description{
 Draws bounding boxes on top of one image tensor
