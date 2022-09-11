@@ -238,11 +238,11 @@ draw_segmentation_masks  <-  function(image,
 
 #' Draws Keypoints
 #'
-#' Draws Keypoints on given RGB tensor image.
+#' Draws Keypoints, an object describing a body part (like rightArm or leftShoulder), on given RGB tensor image.
 #' @param image : Tensor of shape (3, H, W) and dtype uint8
-#' @param keypoints : Tensor of shape (num_instances, K, 2) the K keypoints location for each of the N instances,
+#' @param keypoints : Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
-#' @param connectivity : Vector of pair of keypoints to be connected
+#' @param connectivity : Vector of pair of keypoints to be connected (currently unavailable)
 #' @param colors : (optional): a viridisMap() dataframe or equivalent with either one row or
 #   the same number of rows as the number of keypoints
 #' @param radius : radius of the plotted keypoint.
@@ -270,16 +270,12 @@ draw_keypoints = function(    image,
     magick::image_read() %>%
     magick::image_draw()
 
+  for (pose in img_kpts$size(1)) {
+    points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+
+  }
   # TODO need R-isation and vectorisation
     # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
-    #     for (inst_id, kpt in enumerate(kpt_inst)) {
-    #         x1 <- kpt[0] - radius
-    #         x2 <- kpt[0] + radius
-    #         y1 <- kpt[1] - radius
-    #         y2 <- kpt[1] + radius
-    #         draw$ellipse([x1, y1, x2, y2], fil = colors, outlin = NULL, widt = 0)
-    #     }
-    #
     #     if (connectivity) {
     #         for (connection in connectivity) {
     #             start_pt_x <- kpt_inst[connection[0]][0]
@@ -302,3 +298,18 @@ draw_keypoints = function(    image,
     return(draw_tt$permute(c(3, 1, 2)))
 }
 
+
+#' @export
+plot.torch_tensor = function(image) {
+  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
+  stopifnot("Pass individual images, not batches" = image$ndim == 3)
+  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+
+  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+
+  png::writePNG(img_to_draw / 255) %>%
+    magick::image_read() %>%
+    magick::image_display()
+
+  return(invisible(NULL))
+}

@@ -53,3 +53,10 @@ test_that("draw_segmentation_masks works", {
   color <-  data.frame("R" = runif(2,1,255), "G" = runif(2,1,255), "B" = runif(2,1,255))
   expect_no_error(masked_image <- draw_segmentation_masks(image, masks, color = color, alpha = 0.5))
 })
+
+test_that("plot works", {
+
+  image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(3, 360, 360))))$to(torch::torch_uint8())
+  expect_no_error(plot(image))
+})
+

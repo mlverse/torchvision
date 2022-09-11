@@ -16,9 +16,9 @@ draw_keypoints(
 \arguments{
 \item{image}{: Tensor of shape (3, H, W) and dtype uint8}
 
-\item{keypoints}{: Tensor of shape (num_instances, K, 2) the K keypoints location for each of the N instances,}
+\item{keypoints}{: Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,}
 
-\item{connectivity}{: Vector of pair of keypoints to be connected}
+\item{connectivity}{: Vector of pair of keypoints to be connected (currently unavailable)}
 
 \item{colors}{: (optional): a viridisMap() dataframe or equivalent with either one row or}
 
@@ -30,5 +30,5 @@ draw_keypoints(
 Image Tensor of dtype uint8 with keypoints drawn.
 }
 \description{
-Draws Keypoints on given RGB tensor image.
+Draws Keypoints, an object describing a body part (like rightArm or leftShoulder), on given RGB tensor image.
 }
