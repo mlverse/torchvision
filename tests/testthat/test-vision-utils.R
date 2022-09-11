@@ -55,8 +55,20 @@ test_that("draw_segmentation_masks works", {
 })
 
 test_that("plot works", {
-
+  # color image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(3, 360, 360))))$to(torch::torch_uint8())
   expect_no_error(plot(image))
+  # grayscale image
+  image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(1, 360, 360))))$to(torch::torch_uint8())
+  expect_no_error(plot(image))
+  # error cases : dtype
+  image_int16 <- image$to(torch::torch_int16())
+  expect_error(plot(image_int16), "dtype torch_uint8")
+  # error cases : shape
+  image <- torch::torch_randint(low = 1, high = 200, size = c(4, 3, 360, 360))$to(torch::torch_uint8())
+  expect_error(plot(image), "individual images")
+  image <- torch::torch_randint(low = 1, high = 200, size = c(4, 360, 360))$to(torch::torch_uint8())
+  expect_error(plot(image), "Only grayscale and RGB")
+
 })
 
