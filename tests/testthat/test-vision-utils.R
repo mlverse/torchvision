@@ -22,7 +22,7 @@ test_that("draw_bounding_boxes works", {
 
   expect_error(bboxed_image <- draw_bounding_boxes(image1, boxes), "uint8")
 
-  expect_no_error(bboxed_image <- draw_bounding_boxes(image2, boxes))
+  expect_no_error(bboxed_image <- draw_bounding_boxes(image2, boxes, labels = "dog"))
   expect_tensor_dtype(bboxed_image, torch::torch_uint8())
   expect_tensor_shape(bboxed_image, c(3, 360, 360))
 
@@ -55,6 +55,8 @@ test_that("draw_segmentation_masks works", {
 })
 
 test_that("plot works", {
+  skip_on_cran()
+  skip_on_ci()
   # color image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(3, 360, 360))))$to(torch::torch_uint8())
   expect_no_error(plot(image))

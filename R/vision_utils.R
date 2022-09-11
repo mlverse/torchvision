@@ -107,14 +107,13 @@ draw_bounding_boxes <- function(image,
     rlang::warn("boxes doesn't contain any box. No box was drawn")
     return(image)
   }
-  if (!is.null(labels) && (lenght(labels) != num_boxes)) {
+  if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     rlang::abort(
       paste0(
-        "Number of boxes ",
-        num_boxes,
-        " and labels ",
+        "Number of labels ",
         length(labels),
-        " mismatch. Please specify one label for each box."
+        "cannot be broadcasted on number of boxes",
+        num_boxes
       )
     )
   }
