@@ -1,3 +1,6 @@
+#' @importFrom magrittr %>%
+NULL
+
 #' A simplified version of torchvision.utils.make_grid
 #'
 #' Arranges a batch of (image) tensors in a grid, with optional padding between
@@ -154,14 +157,14 @@ draw_bounding_boxes <- function(image,
   draw <- png::writePNG(img_to_draw / 255) %>%
     magick::image_read() %>%
     magick::image_draw()
-  rect(img_bb[, 1],
+  graphics::rect(img_bb[, 1],
        img_bb[, 2],
        img_bb[, 3],
        img_bb[, 4],
        col = fill_col,
        border = colors)
   if (!is.null(labels)) {
-    text(
+    graphics::text(
       img_bb[, 1] + width,
       img_bb[, 2] + width,
       labels = labels,
@@ -170,7 +173,7 @@ draw_bounding_boxes <- function(image,
       cex = font_size / 10
     )
   }
-  dev.off()
+  grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
   return(draw_tt$permute(c(3, 1, 2)))
@@ -251,7 +254,7 @@ draw_segmentation_masks  <-  function(image,
 #'
 #' @examples
 #' @export
-draw_keypoints = function(    image,
+draw_keypoints <- function(image,
     keypoints,
     connectivity = NULL,
     colors = NULL,
@@ -270,7 +273,7 @@ draw_keypoints = function(    image,
     magick::image_draw()
 
   for (pose in img_kpts$size(1)) {
-    points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+    graphics::points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
 
   }
   # TODO need R-isation and vectorisation
@@ -290,7 +293,7 @@ draw_keypoints = function(    image,
     #         }
     #     }
     # }
-  dev.off()
+  grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
 

@@ -1,7 +1,8 @@
 # torchvision (development version)
 
 - Bugs fixed in `transform_adjust_hue()` and `transform_linear_transformation()` (#72, #73, @sebffischer)
-- add `draw_bounding_boxes()` and `draw_segmentation_masks()` on top of image tensors  (#80, @cregouby)
+- add `draw_bounding_boxes()` , `draw_segmentation_masks()` and `draw_keypoints()` on top of image tensors, 
+and add a convenience `plot()` function for image tensors (#80, @cregouby)
 
 # torchvision 0.4.1
 

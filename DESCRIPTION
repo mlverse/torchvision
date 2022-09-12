@@ -33,6 +33,7 @@ Imports:
     magick,
     png,
     abind,
+    viridisLite,
     withr
 Suggests:
     testthat,
