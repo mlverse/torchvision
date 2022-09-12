@@ -13,11 +13,20 @@ draw_segmentation_masks(image, masks, alpha = 0.8, colors = NULL)
 
 \item{alpha}{: number between 0 and 1 denoting the transparency of the masks.}
 
-\item{colors}{: (optional): a viridisMap() dataframe or equivalent with either one row or}
+\item{colors}{: character vector containing the colors
+of the boxes or single color for all boxes. The color can be represented as
+strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks}
 }
 \value{
 torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 }
 \description{
 Draw segmentation masks with their respective colors on top of a given RGB tensor image
+}
+\examples{
+  image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+  mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+  masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
+  torch_browse(masked_image)
+
 }

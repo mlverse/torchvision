@@ -81,11 +81,12 @@ vision_make_grid <- function(tensor,
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
 #' @examples
-#'   image <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
+#'   image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #'   x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 #'   y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #'   boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
 #'   bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
+#'   torch_browse(bboxed)
 #'
 #' @export
 draw_bounding_boxes <- function(image,
@@ -104,7 +105,6 @@ draw_bounding_boxes <- function(image,
     "Boxes need to be in (xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them" = (boxes[, 1] < boxes[, 3])$all() %>% as.logical() &&
       (boxes[, 2] < boxes[, 4])$all() %>% as.logical()
   )
-
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
     rlang::warn("boxes doesn't contain any box. No box was drawn")
@@ -121,17 +121,10 @@ draw_bounding_boxes <- function(image,
     )
   }
   if (is.null(colors)) {
-    colors <- viridisLite::viridis(num_boxes)
-  } else if (is.list(colors)) {
-    if (length(colors) < num_boxes) {
-      rlang::abort(paste0(
-        "Number of colors ",
-        length(colors),
-        " is less than number of boxes ",
-        num_boxes
-      ))
-    }
+    colors <- grDevices::hcl.colors(n = num_boxes)
   }
+  stopifnot("colors vector cannot be broadcasted on boxes" = num_boxes %% length(colors) == 0)
+
   if (!fill) {
     fill_col <- NA
   } else {
@@ -187,12 +180,18 @@ draw_bounding_boxes <- function(image,
 #' @param masks : torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
 #' @param alpha : number between 0 and 1 denoting the transparency of the masks.
 #   0 means full transparency, 1 means no transparency.
-#' @param colors : (optional): a viridisMap() dataframe or equivalent with either one row or
-#   the same number of rows as the number of masks.
+#' @param colors : character vector containing the colors
+#'            of the boxes or single color for all boxes. The color can be represented as
+#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
 #' @examples
+#'   image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+#'   mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+#'   masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
+#'   torch_browse(masked_image)
+#'
 #' @export
 draw_segmentation_masks  <-  function(image,
                                       masks,
@@ -209,22 +208,19 @@ draw_segmentation_masks  <-  function(image,
   stopifnot("`masks` is expected to be of dtype torch_bool" = masks$dtype == torch::torch_bool())
   stopifnot("`masks` and `image` must have the same height and width" = masks$shape[2:3] == image$shape[2:3])
   num_masks <- masks$size(1)
-  stopifnot("There are more masks than colors" = (is.null(colors) ||
-                                                    num_masks == nrow(colors)))
   if (num_masks == 0) {
     rlang::warn("masks doesn't contain any mask. No mask was drawn")
     return(image)
   }
   if (is.null(colors)) {
-    colors <-
-      round(viridisLite::viridisMap(num_masks)[, c("R", "G", "B")] * 255)
+    colors <- grDevices::hcl.colors(n = num_masks)
   }
-  stopifnot("colors must be a dataframe with `R`, `G` and `B` columns" = (c("R", "G", "B") %in% names(colors)))
+  stopifnot("colors vector cannot be broadcasted on masks" = num_masks %% length(colors) == 0)
 
   out_dtype <- torch::torch_uint8()
 
   color_tt <-
-    colors[, c("R", "G", "B")] %>% as.matrix %>% torch::torch_tensor(dtype = out_dtype)
+    colors %>% grDevices::col2rgb() %>% t %>% torch::torch_tensor(dtype = out_dtype)
 
   img_to_draw <- image$detach()$clone()
 
@@ -245,14 +241,20 @@ draw_segmentation_masks  <-  function(image,
 #' @param keypoints : Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
 #' @param connectivity : Vector of pair of keypoints to be connected (currently unavailable)
-#' @param colors : (optional): a viridisMap() dataframe or equivalent with either one row or
-#   the same number of rows as the number of keypoints
+#' @param colors : character vector containing the colors
+#'            of the boxes or single color for all boxes. The color can be represented as
+#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints
 #' @param radius : radius of the plotted keypoint.
 #' @param width : width of line connecting keypoints.
 #'
 #' @return Image Tensor of dtype uint8 with keypoints drawn.
 #'
 #' @examples
+#'    image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
+#'    keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
+#'    keypoint_image <- draw_keypoints(image, keypoints)
+#'    torch_browse(keypoint_image)
+#'
 #' @export
 draw_keypoints <- function(image,
     keypoints,
@@ -272,7 +274,7 @@ draw_keypoints <- function(image,
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in img_kpts$size(1)) {
+  for (pose in dim(img_kpts)[[1]]) {
     graphics::points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
 
   }
@@ -301,17 +303,43 @@ draw_keypoints <- function(image,
 }
 
 
+#' Display image tensor
+#'
+#' Display image tensor onto the X11 device
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
+#'   of type `torch_uint8()` to display
+#' @param animate support animations in the X11 display
+#'
 #' @export
-plot.torch_tensor = function(image) {
+torch_display <- function(image, animate = TRUE) {
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
 
   img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
 
-  png::writePNG(img_to_draw / 255) %>%
-    magick::image_read() %>%
-    magick::image_display()
+  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_display(animate = animate)
 
-  return(invisible(NULL))
-}
+  invisible(NULL)
+  }
+
+
+#' Display image tensor
+#'
+#' Display image tensor into browser
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
+#'   of type `torch_uint8()` to display
+#' @param browser argument passed to [browseURL]
+#'
+#' @export
+torch_browse <- function(image, browser = getOption("browser")) {
+  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
+  stopifnot("Pass individual images, not batches" = image$ndim == 3)
+  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+
+  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+
+  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_browse(browser = browser)
+
+  invisible(NULL)
+  }

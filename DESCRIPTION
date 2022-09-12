@@ -31,9 +31,10 @@ Imports:
     utils,
     jpeg,
     magick,
+    magrittr,
     png,
     abind,
-    viridisLite,
+    purrr,
     withr
 Suggests:
     testthat,

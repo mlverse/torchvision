@@ -20,7 +20,9 @@ draw_keypoints(
 
 \item{connectivity}{: Vector of pair of keypoints to be connected (currently unavailable)}
 
-\item{colors}{: (optional): a viridisMap() dataframe or equivalent with either one row or}
+\item{colors}{: character vector containing the colors
+of the boxes or single color for all boxes. The color can be represented as
+strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints}
 
 \item{radius}{: radius of the plotted keypoint.}
 
@@ -31,4 +33,11 @@ Image Tensor of dtype uint8 with keypoints drawn.
 }
 \description{
 Draws Keypoints, an object describing a body part (like rightArm or leftShoulder), on given RGB tensor image.
+}
+\examples{
+   image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
+   keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
+   keypoint_image <- draw_keypoints(image, keypoints)
+   torch_browse(keypoint_image)
+
 }
