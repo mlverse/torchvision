@@ -34,7 +34,6 @@ Imports:
     magrittr,
     png,
     abind,
-    purrr,
     withr
 Suggests:
     testthat,

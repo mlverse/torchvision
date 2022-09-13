@@ -225,12 +225,13 @@ draw_segmentation_masks  <-  function(image,
 
   img_to_draw <- image$detach()$clone()
 
-  colored_mask_stack <- torch::torch_stack(purrr::map(
+  colored_mask_stack <- torch::torch_stack(lapply(
      seq(masks$size(1)),
-     ~color_tt[.x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[.x:.x, , ]$tile(c(4, 2, 2)))),
+     function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ]$tile(c(4, 2, 2)))
+     ),
     dim = 1
   )
-  out <- image * (1 - alpha) + torch::torch_sum(colored_mask_stack, dim = 1) * alpha
+  out <- img_to_draw * (1 - alpha) + torch::torch_sum(colored_mask_stack, dim = 1) * alpha
   return(out$to(out_dtype))
 }
 
