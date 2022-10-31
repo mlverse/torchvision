@@ -87,7 +87,7 @@ vision_make_grid <- function(tensor,
 #'   y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #'   boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
 #'   bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
-#'   torch_browse(bboxed)
+#'   tensor_image_browse(bboxed)
 #' }
 #' @export
 draw_bounding_boxes <- function(image,
@@ -193,7 +193,7 @@ draw_bounding_boxes <- function(image,
 #'   image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #'   mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
 #'   masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
-#'   torch_browse(masked_image)
+#'   tensor_image_browse(masked_image)
 #'
 #' @export
 draw_segmentation_masks  <-  function(image,
@@ -258,7 +258,7 @@ draw_segmentation_masks  <-  function(image,
 #'    image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
 #'    keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
 #'    keypoint_image <- draw_keypoints(image, keypoints)
-#'    torch_browse(keypoint_image)
+#'    tensor_image_browse(keypoint_image)
 #'
 #' @export
 draw_keypoints <- function(image,
@@ -318,7 +318,7 @@ draw_keypoints <- function(image,
 #' @param animate support animations in the X11 display
 #'
 #' @export
-torch_display <- function(image, animate = TRUE) {
+tensor_image_display <- function(image, animate = TRUE) {
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
@@ -339,7 +339,7 @@ torch_display <- function(image, animate = TRUE) {
 #' @param browser argument passed to [browseURL]
 #'
 #' @export
-torch_browse <- function(image, browser = getOption("browser")) {
+tensor_image_browse <- function(image, browser = getOption("browser")) {
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))

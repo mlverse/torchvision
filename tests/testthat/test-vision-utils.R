@@ -66,23 +66,23 @@ test_that("draw_keypoints works", {
   expect_no_error(keypoint_image <- draw_keypoints(image, keypoints, colors = colors, radius = 7))
 })
 
-test_that("torch_browse works", {
+test_that("tensor_image_browse works", {
   skip_on_cran()
   skip_on_ci()
   # color image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(3, 360, 360))))$to(torch::torch_uint8())
-  expect_no_error(torch_browse(image))
+  expect_no_error(tensor_image_browse(image))
   # grayscale image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(1, 360, 360))))$to(torch::torch_uint8())
-  expect_no_error(torch_browse(image))
+  expect_no_error(tensor_image_browse(image))
   # error cases : dtype
   image_int16 <- image$to(torch::torch_int16())
-  expect_error(torch_browse(image_int16), "dtype torch_uint8")
+  expect_error(tensor_image_browse(image_int16), "dtype torch_uint8")
   # error cases : shape
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 3, 360, 360))$to(torch::torch_uint8())
-  expect_error(torch_browse(image), "individual images")
+  expect_error(tensor_image_browse(image), "individual images")
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 360, 360))$to(torch::torch_uint8())
-  expect_error(torch_browse(image), "Only grayscale and RGB")
+  expect_error(tensor_image_browse(image), "Only grayscale and RGB")
 
 })
 

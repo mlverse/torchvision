@@ -49,6 +49,6 @@ Draws bounding boxes on top of one image tensor
   y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
   boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
   bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
-  torch_browse(bboxed)
+  tensor_image_browse(bboxed)
 }
 }
