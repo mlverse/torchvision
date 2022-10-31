@@ -224,13 +224,13 @@ draw_segmentation_masks  <-  function(image,
   out_dtype <- torch::torch_uint8()
 
   color_tt <-
-    colors %>% grDevices::col2rgb() %>% t %>% torch::torch_tensor(dtype = out_dtype)
+    colors %>% grDevices::col2rgb() %>% t() %>% torch::torch_tensor(dtype = out_dtype)
 
   img_to_draw <- image$detach()$clone()
 
   colored_mask_stack <- torch::torch_stack(lapply(
      seq(masks$size(1)),
-     function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ]$tile(c(4, 2, 2)))
+     function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ])
      ),
     dim = 1
   )
