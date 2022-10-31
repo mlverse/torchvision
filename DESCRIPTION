@@ -30,12 +30,12 @@ Imports:
     rappdirs,
     utils,
     jpeg,
-    magick,
     magrittr,
     png,
     abind,
     withr
 Suggests:
+    magick,
     testthat,
     coro,
     zip

@@ -98,6 +98,8 @@ draw_bounding_boxes <- function(image,
                                width = 1,
                                font = c("serif", "plain"),
                                font_size = 10) {
+  rlang::check_installed("magick")
+
   stopifnot("Image is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
   stopifnot("Image is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
@@ -198,6 +200,7 @@ draw_segmentation_masks  <-  function(image,
                                       masks,
                                       alpha = 0.8,
                                       colors = NULL) {
+  rlang::check_installed("magick")
   stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
@@ -264,6 +267,8 @@ draw_keypoints <- function(image,
     colors = NULL,
     radius = 2,
     width = 3) {
+
+  rlang::check_installed("magick")
   stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
@@ -323,7 +328,7 @@ torch_display <- function(image, animate = TRUE) {
   png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_display(animate = animate)
 
   invisible(NULL)
-  }
+}
 
 
 #' Display image tensor
@@ -344,4 +349,4 @@ torch_browse <- function(image, browser = getOption("browser")) {
   png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_browse(browser = browser)
 
   invisible(NULL)
-  }
+}
