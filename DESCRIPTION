@@ -22,7 +22,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Imports:
     torch (>= 0.3.0),
     fs,
@@ -30,11 +30,12 @@ Imports:
     rappdirs,
     utils,
     jpeg,
+    magrittr,
     png,
     abind,
     withr
 Suggests:
-    testthat,
     magick,
+    testthat,
     coro,
     zip

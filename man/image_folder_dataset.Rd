@@ -35,13 +35,15 @@ This function assumes that the images for each class are contained
 in subdirectories of \code{root}. The names of these subdirectories are stored
 in the \code{classes} attribute of the returned object.
 
-An example folder structure might look as follows:\preformatted{root/dog/xxx.png
+An example folder structure might look as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{root/dog/xxx.png
 root/dog/xxy.png
 root/dog/xxz.png
 
 root/cat/123.png
 root/cat/nsdf3.png
 root/cat/asd932_.png
-}
+}\if{html}{\out{</div>}}
 }
 \concept{datasets}
