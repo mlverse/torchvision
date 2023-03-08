@@ -77,9 +77,9 @@ Inception3 <- torch::nn_module(
   },
   .transform_input = function(x) {
     if (self$transform_input) {
-      x_ch0 <- torch::torch_unsqueeze(x[,1], 1) * (0.229 / 0.5) + (0.485 - 0.5) / 0.5
-      x_ch1 <- torch::torch_unsqueeze(x[,2], 1) * (0.224 / 0.5) + (0.456 - 0.5) / 0.5
-      x_ch2 <- torch::torch_unsqueeze(x[,3], 1) * (0.225 / 0.5) + (0.406 - 0.5) / 0.5
+      x_ch0 <- torch::torch_unsqueeze(x[,1], 2) * (0.229 / 0.5) + (0.485 - 0.5) / 0.5
+      x_ch1 <- torch::torch_unsqueeze(x[,2], 2) * (0.224 / 0.5) + (0.456 - 0.5) / 0.5
+      x_ch2 <- torch::torch_unsqueeze(x[,3], 2) * (0.225 / 0.5) + (0.406 - 0.5) / 0.5
       x <- torch_cat(list(x_ch0, x_ch1, x_ch2), 2)
     }
     x
