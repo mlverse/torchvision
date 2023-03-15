@@ -20,7 +20,7 @@ was trained on ImageNet. Default: \emph{False}
 }}
 }
 \description{
-Aarchitecture from \href{http://arxiv.org/abs/1512.00567}{Rethinking the Inception Architecture for Computer Vision}
+Architecture from \href{https://arxiv.org/abs/1512.00567}{Rethinking the Inception Architecture for Computer Vision}
 The required minimum input size of the model is 75x75.
 }
 \note{

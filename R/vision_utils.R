@@ -81,13 +81,13 @@ vision_make_grid <- function(tensor,
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
 #' @examples
-#' \donttest{
-#'   image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-#'   x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
-#'   y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
-#'   boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-#'   bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
-#'   tensor_image_browse(bboxed)
+#' if (torch::torch_is_installed()) {
+#' image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+#' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
+#' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
+#' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
+#' bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
+#' tensor_image_browse(bboxed)
 #' }
 #' @export
 draw_bounding_boxes <- function(image,
@@ -190,11 +190,12 @@ draw_bounding_boxes <- function(image,
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
 #' @examples
-#'   image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-#'   mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
-#'   masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
-#'   tensor_image_browse(masked_image)
-#'
+#' if (torch::torch_is_installed()) {
+#' image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+#' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+#' masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
+#' tensor_image_browse(masked_image)
+#' }
 #' @export
 draw_segmentation_masks  <-  function(image,
                                       masks,
@@ -255,11 +256,12 @@ draw_segmentation_masks  <-  function(image,
 #' @return Image Tensor of dtype uint8 with keypoints drawn.
 #'
 #' @examples
-#'    image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
-#'    keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
-#'    keypoint_image <- draw_keypoints(image, keypoints)
-#'    tensor_image_browse(keypoint_image)
-#'
+#' if (torch::torch_is_installed()) {
+#' image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
+#' keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
+#' keypoint_image <- draw_keypoints(image, keypoints)
+#' tensor_image_browse(keypoint_image)
+#' }
 #' @export
 draw_keypoints <- function(image,
     keypoints,

@@ -24,9 +24,10 @@ torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation m
 Draw segmentation masks with their respective colors on top of a given RGB tensor image
 }
 \examples{
-  image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-  mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
-  masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
-  tensor_image_browse(masked_image)
-
+if (torch::torch_is_installed()) {
+image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
+tensor_image_browse(masked_image)
+}
 }
