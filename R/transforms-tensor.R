@@ -769,7 +769,6 @@ get_perspective_coeffs <- function(startpoints, endpoints) {
   res <- torch::linalg_lstsq(b_matrix, a_matrix)[[1]]
 
   output <- torch::as_array(res$squeeze(1))
-
   output
 }
 
