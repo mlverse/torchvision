@@ -24,7 +24,7 @@ probability"><meta name="robots" content="noindex"><!-- mathjax --><script src="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -86,33 +86,42 @@ probability</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_random_perspective</span><span class="op">(</span>
-  <span class="va">img</span>,
-  distortion_scale <span class="op">=</span> <span class="fl">0.5</span>,
-  p <span class="op">=</span> <span class="fl">0.5</span>,
-  interpolation <span class="op">=</span> <span class="fl">2</span>,
-  fill <span class="op">=</span> <span class="fl">0</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_random_perspective</span><span class="op">(</span></span>
+<span>  <span class="va">img</span>,</span>
+<span>  distortion_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  p <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  interpolation <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  fill <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>distortion_scale</dt>
 <dd><p>(float): argument to control the degree of distortion
 and ranges from 0 to 1. Default is 0.5.</p></dd>
+
+
 <dt>p</dt>
 <dd><p>(float): probability of the image being transformed. Default is 0.5.</p></dd>
+
+
 <dt>interpolation</dt>
 <dd><p>(int, optional) Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
+
+
 <dt>fill</dt>
 <dd><p>(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.
 Only int value is supported for Tensors.</p></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -166,7 +175,7 @@ Only int value is supported for Tensors.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

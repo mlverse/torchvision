@@ -1,5 +1,5 @@
-pandoc: 2.7.3
-pkgdown: 2.0.3
+pandoc: 2.19.2
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   mnist-cnn: examples/mnist-cnn.html
@@ -8,5 +8,5 @@ articles:
   style-transfer: examples/style-transfer.html
   texture-nca: examples/texture-nca.html
   tinyimagenet-alexnet: examples/tinyimagenet-alexnet.html
-last_built: 2022-05-31T17:11Z
+last_built: 2023-04-14T11:09Z
 

@@ -25,7 +25,7 @@ The image is then converted back to original image mode."><meta name="robots" co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -88,19 +88,22 @@ The image is then converted back to original image mode.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_adjust_hue</span><span class="op">(</span><span class="va">img</span>, <span class="va">hue_factor</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_adjust_hue</span><span class="op">(</span><span class="va">img</span>, <span class="va">hue_factor</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>hue_factor</dt>
 <dd><p>(float):  How much to shift the hue channel. Should be in
 <code>[-0.5, 0.5]</code>. 0.5 and -0.5 give complete reversal of hue channel in
 HSV space in positive and negative direction respectively.
 0 means no shift. Therefore, both -0.5 and 0.5 will give an image
 with complementary colors while 0 gives the original image.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -160,7 +163,7 @@ interval <code>[-0.5, 0.5]</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

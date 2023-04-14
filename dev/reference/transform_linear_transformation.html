@@ -28,7 +28,7 @@ the tensor to its original shape."><meta name="robots" content="noindex"><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -93,17 +93,22 @@ the tensor to its original shape.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_linear_transformation</span><span class="op">(</span><span class="va">img</span>, <span class="va">transformation_matrix</span>, <span class="va">mean_vector</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_linear_transformation</span><span class="op">(</span><span class="va">img</span>, <span class="va">transformation_matrix</span>, <span class="va">mean_vector</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>transformation_matrix</dt>
 <dd><p>(Tensor): tensor <code>[D x D]</code>, D = C x H x W.</p></dd>
+
+
 <dt>mean_vector</dt>
 <dd><p>(Tensor): tensor <a href="https://rdrr.io/r/stats/deriv.html" class="external-link">D</a>, D = C x H x W.</p></dd>
+
 </dl></div>
     <div id="applications">
     <h2>Applications</h2>
@@ -165,7 +170,7 @@ perform SVD on this matrix and pass it as <code>transformation_matrix</code>.</p
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

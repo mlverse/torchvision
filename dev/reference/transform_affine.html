@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -84,24 +84,28 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_affine</span><span class="op">(</span>
-  <span class="va">img</span>,
-  <span class="va">angle</span>,
-  <span class="va">translate</span>,
-  <span class="va">scale</span>,
-  <span class="va">shear</span>,
-  resample <span class="op">=</span> <span class="fl">0</span>,
-  fillcolor <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_affine</span><span class="op">(</span></span>
+<span>  <span class="va">img</span>,</span>
+<span>  <span class="va">angle</span>,</span>
+<span>  <span class="va">translate</span>,</span>
+<span>  <span class="va">scale</span>,</span>
+<span>  <span class="va">shear</span>,</span>
+<span>  resample <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  fillcolor <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>angle</dt>
 <dd><p>(float or int): rotation angle value in degrees,
 counter-clockwise.</p></dd>
+
+
 <dt>translate</dt>
 <dd><p>(tuple, optional): tuple of maximum absolute fraction for
 horizontal and vertical translations. For example translate=(a, b), then
@@ -109,10 +113,14 @@ horizontal shift is randomly sampled in the range
 -img_width * a &lt; dx &lt; img_width * a and vertical shift is randomly sampled
 in the range -img_height * b &lt; dy &lt; img_height * b. Will not translate by
 default.</p></dd>
+
+
 <dt>scale</dt>
 <dd><p>(tuple, optional): scaling factor interval, e.g (a, b), then
 scale is randomly sampled from the range a &lt;= scale &lt;= b. Will keep
 original scale by default.</p></dd>
+
+
 <dt>shear</dt>
 <dd><p>(sequence or float or int, optional): Range of degrees to select
 from. If shear is a number, a shear parallel to the x axis in the range
@@ -121,13 +129,18 @@ values a shear parallel to the x axis in the range <code>(shear[1], shear[2])</c
 will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 shear in <code>(shear[1], shear[2])</code> and y-axis shear in <code>(shear[3], shear[4])</code>
 will be applied. Will not apply shear by default.</p></dd>
+
+
 <dt>resample</dt>
 <dd><p>(int, optional): An optional resampling filter.</p></dd>
+
+
 <dt>fillcolor</dt>
 <dd><p>(tuple or int): Optional fill color (Tuple for RGB Image and
 int for grayscale) for the area outside the transform in the output image
 (Pillow&gt;=5.0.0). This option is not supported for Tensor input. Fill value
 for the area outside the transform in the output image is always 0.</p></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -181,7 +194,7 @@ for the area outside the transform in the output image is always 0.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

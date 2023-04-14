@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -84,38 +84,47 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_color_jitter</span><span class="op">(</span>
-  <span class="va">img</span>,
-  brightness <span class="op">=</span> <span class="fl">0</span>,
-  contrast <span class="op">=</span> <span class="fl">0</span>,
-  saturation <span class="op">=</span> <span class="fl">0</span>,
-  hue <span class="op">=</span> <span class="fl">0</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_color_jitter</span><span class="op">(</span></span>
+<span>  <span class="va">img</span>,</span>
+<span>  brightness <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  contrast <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  saturation <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  hue <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>brightness</dt>
 <dd><p>(float or tuple of float (min, max)): How much to jitter
 brightness. <code>brightness_factor</code> is chosen uniformly from
 <code>[max(0, 1 - brightness), 1 + brightness]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
+
+
 <dt>contrast</dt>
 <dd><p>(float or tuple of float (min, max)): How much to jitter
 contrast. <code>contrast_factor</code> is chosen uniformly from
 <code>[max(0, 1 - contrast), 1 + contrast]</code> or the given <code>[min, max]</code>. Should
 be non negative numbers.</p></dd>
+
+
 <dt>saturation</dt>
 <dd><p>(float or tuple of float (min, max)): How much to jitter
 saturation. <code>saturation_factor</code> is chosen uniformly from
 <code>[max(0, 1 - saturation), 1 + saturation]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
+
+
 <dt>hue</dt>
 <dd><p>(float or tuple of float (min, max)): How much to jitter hue.
 <code>hue_factor</code> is chosen uniformly from <code>[-hue, hue]</code> or the given
 <code>[min, max]</code>. Should have 0&lt;= hue &lt;= 0.5 or -0.5 &lt;= min &lt;= max &lt;= 0.5.</p></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -169,7 +178,7 @@ Should be non negative numbers.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

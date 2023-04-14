@@ -24,7 +24,7 @@ See Details for more information."><meta name="robots" content="noindex"><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -86,45 +86,53 @@ See <code>Details</code> for more information.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">image_folder_dataset</span><span class="op">(</span>
-  <span class="va">root</span>,
-  transform <span class="op">=</span> <span class="cn">NULL</span>,
-  target_transform <span class="op">=</span> <span class="cn">NULL</span>,
-  loader <span class="op">=</span> <span class="cn">NULL</span>,
-  is_valid_file <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">image_folder_dataset</span><span class="op">(</span></span>
+<span>  <span class="va">root</span>,</span>
+<span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  is_valid_file <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>root</dt>
 <dd><p>Root directory path.</p></dd>
+
+
 <dt>transform</dt>
 <dd><p>A function/transform that takes in an PIL image and returns
 a transformed version. E.g, <code><a href="transform_random_crop.html">transform_random_crop()</a></code>.</p></dd>
+
+
 <dt>target_transform</dt>
 <dd><p>A function/transform that takes in the target and
 transforms it.</p></dd>
+
+
 <dt>loader</dt>
 <dd><p>A function to load an image given its path.</p></dd>
+
+
 <dt>is_valid_file</dt>
 <dd><p>A function that takes path of an Image file and check if
 the file is a valid file (used to check of corrupt files)</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
     <p>This function assumes that the images for each class are contained
 in subdirectories of <code>root</code>. The names of these subdirectories are stored
 in the <code>classes</code> attribute of the returned object.</p>
-<p>An example folder structure might look as follows:</p><div class="sourceCode"><pre><code>root/dog/xxx.png
-root/dog/xxy.png
-root/dog/xxz.png
-
-root/cat/123.png
-root/cat/nsdf3.png
-root/cat/asd932_.png
-</code></pre></div>
-
+<p>An example folder structure might look as follows:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>dog<span class="sc">/</span>xxx.png</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>dog<span class="sc">/</span>xxy.png</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>dog<span class="sc">/</span>xxz.png</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>cat<span class="sc">/</span><span class="fl">123.</span>png</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>cat<span class="sc">/</span>nsdf3.png</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>root<span class="sc">/</span>cat<span class="sc">/</span>asd932_.png</span></code></pre><p></p></div>
     </div>
 
   </div>
@@ -139,7 +147,7 @@ root/cat/asd932_.png
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

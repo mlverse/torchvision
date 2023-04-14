@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -80,7 +80,17 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
-<ul><li>Bugs fixed in <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code><a href="../reference/transform_linear_transformation.html">transform_linear_transformation()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/72" class="external-link">#72</a>, <a href="https://github.com/mlverse/torchvision/issues/73" class="external-link">#73</a>, <a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>)</li></ul></div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.5.1" id="torchvision-051">torchvision 0.5.1<a class="anchor" aria-label="anchor" href="#torchvision-051"></a></h2>
+<ul><li>Remove usage of <code>torch_lstsq</code> that was removed in torch v0.10.0</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.5.0" id="torchvision-050">torchvision 0.5.0<small>2023-03-15</small><a class="anchor" aria-label="anchor" href="#torchvision-050"></a></h2>
+<ul><li>Bugs fixed in <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code><a href="../reference/transform_linear_transformation.html">transform_linear_transformation()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/72" class="external-link">#72</a>, <a href="https://github.com/mlverse/torchvision/issues/73" class="external-link">#73</a>, <a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>)</li>
+<li>add <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> , <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> on top of image tensors, and add a convenience <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> and <code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> functions to visualize image tensors respectively in browser or in X11 device (<a href="https://github.com/mlverse/torchvision/issues/80" class="external-link">#80</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
+<li>Added the InceptionV3 model. (<a href="https://github.com/mlverse/torchvision/issues/82" class="external-link">#82</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<small>2022-01-28</small><a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
 <ul><li>Implemented MobileNetV2 (<a href="https://github.com/mlverse/torchvision/issues/60" class="external-link">#60</a>)</li>
@@ -108,7 +118,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.0" id="torchvision-010">torchvision 0.1.0<small>2020-10-29</small><a class="anchor" aria-label="anchor" href="#torchvision-010"></a></h2>
-<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li></ul></div>
+<ul><li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
+</ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -123,7 +134,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

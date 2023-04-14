@@ -24,7 +24,7 @@ images. Expects a 4d mini-batch tensor of shape (B x C x H x W)."><meta name="ro
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -86,27 +86,36 @@ images. Expects a 4d mini-batch tensor of shape (B x C x H x W).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">vision_make_grid</span><span class="op">(</span>
-  <span class="va">tensor</span>,
-  scale <span class="op">=</span> <span class="cn">TRUE</span>,
-  num_rows <span class="op">=</span> <span class="fl">8</span>,
-  padding <span class="op">=</span> <span class="fl">2</span>,
-  pad_value <span class="op">=</span> <span class="fl">0</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vision_make_grid</span><span class="op">(</span></span>
+<span>  <span class="va">tensor</span>,</span>
+<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  num_rows <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>  padding <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  pad_value <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>tensor</dt>
 <dd><p>tensor to arrange in grid.</p></dd>
+
+
 <dt>scale</dt>
 <dd><p>whether to normalize (min-max-scale) the input tensor.</p></dd>
+
+
 <dt>num_rows</dt>
 <dd><p>number of rows making up the grid (default 8).</p></dd>
+
+
 <dt>padding</dt>
 <dd><p>amount of padding between batch images (default 2).</p></dd>
+
+
 <dt>pad_value</dt>
 <dd><p>pixel value to use for padding.</p></dd>
+
 </dl></div>
 
   </div>
@@ -121,7 +130,7 @@ images. Expects a 4d mini-batch tensor of shape (B x C x H x W).</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

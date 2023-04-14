@@ -24,7 +24,7 @@ and optionally downloads it."><meta name="robots" content="noindex"><!-- mathjax
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.4.1.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -86,13 +86,13 @@ and optionally downloads it.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">kmnist_dataset</span><span class="op">(</span>
-  <span class="va">root</span>,
-  train <span class="op">=</span> <span class="cn">TRUE</span>,
-  transform <span class="op">=</span> <span class="cn">NULL</span>,
-  target_transform <span class="op">=</span> <span class="cn">NULL</span>,
-  download <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">kmnist_dataset</span><span class="op">(</span></span>
+<span>  <span class="va">root</span>,</span>
+<span>  train <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -100,19 +100,28 @@ and optionally downloads it.</p>
     <dl><dt>root</dt>
 <dd><p>(string): Root directory of dataset where
 <code>KMNIST/processed/training.pt</code> and  <code>KMNIST/processed/test.pt</code> exist.</p></dd>
+
+
 <dt>train</dt>
 <dd><p>(bool, optional): If TRUE, creates dataset from <code>training.pt</code>,
 otherwise from <code>test.pt</code>.</p></dd>
+
+
 <dt>transform</dt>
 <dd><p>(callable, optional): A function/transform that  takes in an
 PIL image and returns a transformed version. E.g, <code>transforms.RandomCrop</code>.</p></dd>
+
+
 <dt>target_transform</dt>
 <dd><p>(callable, optional): A function/transform that takes
 in the target and transforms it.</p></dd>
+
+
 <dt>download</dt>
 <dd><p>(bool, optional): If true, downloads the dataset from the
 internet and puts it in root directory. If dataset is already downloaded,
 it is not downloaded again.</p></dd>
+
 </dl></div>
 
   </div>
@@ -127,7 +136,7 @@ it is not downloaded again.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
