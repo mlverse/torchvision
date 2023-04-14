@@ -25,13 +25,13 @@ of leading dimensions."><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
      
     <span class="caret"></span>
@@ -88,24 +88,30 @@ of leading dimensions.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_pad</span><span class="op">(</span><span class="va">img</span>, <span class="va">padding</span>, fill <span class="op">=</span> <span class="fl">0</span>, padding_mode <span class="op">=</span> <span class="st">"constant"</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_pad</span><span class="op">(</span><span class="va">img</span>, <span class="va">padding</span>, fill <span class="op">=</span> <span class="fl">0</span>, padding_mode <span class="op">=</span> <span class="st">"constant"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>padding</dt>
 <dd><p>(int or tuple or list): Padding on each border. If a single
 int is provided this is used to pad all borders. If tuple of length 2 is
 provided this is the padding on left/right and top/bottom respectively.
 If a tuple of length 4 is provided this is the padding for the left, right,
 top and bottom borders respectively.</p></dd>
+
+
 <dt>fill</dt>
 <dd><p>(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.
 Only int value is supported for Tensors.</p></dd>
+
+
 <dt>padding_mode</dt>
 <dd><p>Type of padding. Should be: constant, edge, reflect or
 symmetric. Default is constant. Mode symmetric is not yet supported for
@@ -118,6 +124,7 @@ in reflect mode will result in <code>[3, 2, 1, 2, 3, 4, 3, 2]</code></p></li>
 the edge) padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides in
 symmetric mode will result in <code>[2, 1, 1, 2, 3, 4, 4, 3]</code></p></li>
 </ul></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -171,7 +178,7 @@ symmetric mode will result in <code>[2, 1, 1, 2, 3, 4, 4, 3]</code></p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

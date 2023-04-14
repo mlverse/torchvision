@@ -25,13 +25,13 @@ related papers (see Functions)"><!-- mathjax --><script src="https://cdnjs.cloud
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
      
     <span class="caret"></span>
@@ -88,50 +88,55 @@ related papers (see Functions)</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">model_resnet18</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnet34</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnet50</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnet101</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnet152</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnext50_32x4d</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_resnext101_32x8d</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_wide_resnet50_2</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">model_wide_resnet101_2</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">model_resnet18</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnet34</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnet50</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnet101</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnet152</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnext50_32x4d</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_resnext101_32x8d</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_wide_resnet50_2</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">model_wide_resnet101_2</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>pretrained</dt>
 <dd><p>(bool): If TRUE, returns a model pre-trained on ImageNet.</p></dd>
+
+
 <dt>progress</dt>
 <dd><p>(bool): If TRUE, displays a progress bar of the download to
 stderr.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other parameters passed to the resnet model.</p></dd>
+
 </dl></div>
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>model_resnet18</code>: ResNet 18-layer model</p></li>
-<li><p><code>model_resnet34</code>: ResNet 34-layer model</p></li>
-<li><p><code>model_resnet50</code>: ResNet 50-layer model</p></li>
-<li><p><code>model_resnet101</code>: ResNet 101-layer model</p></li>
-<li><p><code>model_resnet152</code>: ResNet 152-layer model</p></li>
-<li><p><code>model_resnext50_32x4d</code>: ResNeXt-50 32x4d model from <a href="https://arxiv.org/pdf/1611.05431.pdf" class="external-link">"Aggregated Residual Transformation for Deep Neural Networks"</a>
+<ul><li><p><code>model_resnet18()</code>: ResNet 18-layer model</p></li>
+<li><p><code>model_resnet34()</code>: ResNet 34-layer model</p></li>
+<li><p><code>model_resnet50()</code>: ResNet 50-layer model</p></li>
+<li><p><code>model_resnet101()</code>: ResNet 101-layer model</p></li>
+<li><p><code>model_resnet152()</code>: ResNet 152-layer model</p></li>
+<li><p><code>model_resnext50_32x4d()</code>: ResNeXt-50 32x4d model from <a href="https://arxiv.org/pdf/1611.05431.pdf" class="external-link">"Aggregated Residual Transformation for Deep Neural Networks"</a>
 with 32 groups having each a width of 4.</p></li>
-<li><p><code>model_resnext101_32x8d</code>: ResNeXt-101 32x8d model from <a href="https://arxiv.org/pdf/1611.05431.pdf" class="external-link">"Aggregated Residual Transformation for Deep Neural Networks"</a>
+<li><p><code>model_resnext101_32x8d()</code>: ResNeXt-101 32x8d model from <a href="https://arxiv.org/pdf/1611.05431.pdf" class="external-link">"Aggregated Residual Transformation for Deep Neural Networks"</a>
 with 32 groups having each a width of 8.</p></li>
-<li><p><code>model_wide_resnet50_2</code>: Wide ResNet-50-2 model from <a href="https://arxiv.org/pdf/1605.07146.pdf" class="external-link">"Wide Residual Networks"</a>
+<li><p><code>model_wide_resnet50_2()</code>: Wide ResNet-50-2 model from <a href="https://arxiv.org/pdf/1605.07146.pdf" class="external-link">"Wide Residual Networks"</a>
 with width per group of 128.</p></li>
-<li><p><code>model_wide_resnet101_2</code>: Wide ResNet-101-2 model from <a href="https://arxiv.org/pdf/1605.07146.pdf" class="external-link">"Wide Residual Networks"</a>
+<li><p><code>model_wide_resnet101_2()</code>: Wide ResNet-101-2 model from <a href="https://arxiv.org/pdf/1605.07146.pdf" class="external-link">"Wide Residual Networks"</a>
 with width per group of 128.</p></li>
 </ul></div>
     <div id="see-also">
@@ -153,7 +158,7 @@ with width per group of 128.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
      
     <span class="caret"></span>
@@ -79,7 +79,17 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
+<h2 class="page-header" data-toc-text="0.5.1" id="torchvision-051">torchvision 0.5.1<a class="anchor" aria-label="anchor" href="#torchvision-051"></a></h2>
+<ul><li>Remove usage of <code>torch_lstsq</code> that was removed in torch v0.10.0</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.5.0" id="torchvision-050">torchvision 0.5.0<small>2023-03-15</small><a class="anchor" aria-label="anchor" href="#torchvision-050"></a></h2>
+<ul><li>Bugs fixed in <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code><a href="../reference/transform_linear_transformation.html">transform_linear_transformation()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/72" class="external-link">#72</a>, <a href="https://github.com/mlverse/torchvision/issues/73" class="external-link">#73</a>, <a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>)</li>
+<li>add <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> , <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> on top of image tensors, and add a convenience <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> and <code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> functions to visualize image tensors respectively in browser or in X11 device (<a href="https://github.com/mlverse/torchvision/issues/80" class="external-link">#80</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
+<li>Added the InceptionV3 model. (<a href="https://github.com/mlverse/torchvision/issues/82" class="external-link">#82</a>)</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<small>2022-01-28</small><a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
 <ul><li>Implemented MobileNetV2 (<a href="https://github.com/mlverse/torchvision/issues/60" class="external-link">#60</a>)</li>
 <li>Improved vignettes so they use <code>nnf_cross_entropy</code> for numerical stability. (<a href="https://github.com/mlverse/torchvision/issues/61" class="external-link">#61</a>)</li>
 <li>Implement the full list of ResNet model family (<a href="https://github.com/mlverse/torchvision/issues/66" class="external-link">#66</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
@@ -88,7 +98,7 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.0" id="torchvision-040">torchvision 0.4.0<small>2021-08-17</small><a class="anchor" aria-label="anchor" href="#torchvision-040"></a></h2>
 <ul><li>Added a dependency on <code>zip</code> to <code><a href="https://rdrr.io/pkg/zip/man/unzip.html" class="external-link">zip::unzip</a></code> the tinyimagenet dataset.</li>
-<li>Removed all usages of <code><a href="https://torch.mlverse.org/docs/reference/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
+<li>Removed all usages of <code><a href="https://rdrr.io/pkg/torch/man/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
 <li>Fixed non-namespaced calls to <code>torch</code>. (<a href="https://github.com/mlverse/torchvision/issues/58" class="external-link">#58</a>)</li>
 </ul></div>
     <div class="section level2">
@@ -121,7 +131,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

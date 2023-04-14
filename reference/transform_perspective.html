@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
      
     <span class="caret"></span>
@@ -84,37 +84,46 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">transform_perspective</span><span class="op">(</span>
-  <span class="va">img</span>,
-  <span class="va">startpoints</span>,
-  <span class="va">endpoints</span>,
-  interpolation <span class="op">=</span> <span class="fl">2</span>,
-  fill <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_perspective</span><span class="op">(</span></span>
+<span>  <span class="va">img</span>,</span>
+<span>  <span class="va">startpoints</span>,</span>
+<span>  <span class="va">endpoints</span>,</span>
+<span>  interpolation <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>img</dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
+
+
 <dt>startpoints</dt>
 <dd><p>(list of list of ints): List containing four lists of two
 integers corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the original image.</p></dd>
+
+
 <dt>endpoints</dt>
 <dd><p>(list of list of ints): List containing four lists of two
 integers corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed
 image.</p></dd>
+
+
 <dt>interpolation</dt>
 <dd><p>(int, optional) Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
+
+
 <dt>fill</dt>
 <dd><p>(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.
 Only int value is supported for Tensors.</p></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -168,7 +177,7 @@ Only int value is supported for Tensors.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
