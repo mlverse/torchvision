@@ -1,4 +1,4 @@
-# torchvision (development version)
+# torchvision 0.5.1
 
 - Remove usage of `torch_lstsq` that was removed in torch v0.10.0
 
