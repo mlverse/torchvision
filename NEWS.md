@@ -1,5 +1,7 @@
 # torchvision (development version)
 
+- Remove usage of `torch_lstsq` that was removed in torch v0.10.0
+
 # torchvision 0.5.0
 
 -   Bugs fixed in `transform_adjust_hue()` and `transform_linear_transformation()` (#72, #73, @sebffischer)
