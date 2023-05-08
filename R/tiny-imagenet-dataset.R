@@ -47,10 +47,6 @@ tiny_imagenet_dataset <- torch::dataset(
 
     rlang::inform("Download complete. Now unzipping.")
 
-    # if (is.null(rlang::check_installed("zip"))) {
-    #   zip::unzip(raw_path, exdir = self$root_path)
-    # }
-
     unzip(raw_path, exdir = self$root_path)
 
     # organize validation images
