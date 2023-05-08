@@ -555,6 +555,7 @@ transform_rotate.default <- function(img, angle, resample = 0, expand = FALSE,
   not_implemented_for_class(img)
 }
 
+#' @export
 transform_affine.default <- function(img, angle, translate, scale, shear,
                                      resample = 0, fillcolor = NULL) {
   not_implemented_for_class(img)

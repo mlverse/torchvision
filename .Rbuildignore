@@ -13,3 +13,4 @@
 ^x.pth$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
+^CRAN-SUBMISSION$

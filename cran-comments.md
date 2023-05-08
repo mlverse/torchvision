@@ -1,1 +1,1 @@
-New release with a few bugfixes
+Re-submission to fix function call removed from dependency.

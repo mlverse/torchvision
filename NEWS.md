@@ -1,7 +1,14 @@
 # torchvision (development version)
 
+# torchvision 0.5.1
+
+- Remove usage of `torch_lstsq` that was removed in torch v0.10.0
+
+# torchvision 0.5.0
+
 -   Bugs fixed in `transform_adjust_hue()` and `transform_linear_transformation()` (#72, #73, @sebffischer)
 -   add `draw_bounding_boxes()` , `draw_segmentation_masks()` and `draw_keypoints()` on top of image tensors, and add a convenience `tensor_image_browse()` and `tensor_image_display()` functions to visualize image tensors respectively in browser or in X11 device (#80, @cregouby)
+-   Added the InceptionV3 model. (#82)
 -   Remove again dependency on `zip::unzip` added in version 0.4.0. (#89)
 
 # torchvision 0.4.1
