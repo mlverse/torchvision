@@ -46,7 +46,7 @@ valid_dl <- dataloader(valid_ds, batch_size = 32, shuffle = FALSE, drop_last = T
 model <- model_alexnet(pretrained = FALSE, num_classes = length(train_ds$classes))
 model$to(device = device)
 
-optimizer <- optim_adam(model$parameters)
+optimizer <- optim_adagrad(model$parameters, lr = 0.005)
 scheduler <- lr_step(optimizer, step_size = 1, 0.95)
 loss_fn <- nn_cross_entropy_loss()
 
