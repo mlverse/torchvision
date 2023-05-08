@@ -33,7 +33,6 @@ tiny_imagenet_dataset <- torch::dataset(
   },
   download = function() {
 
-    browser()
     p <- fs::path_join(c(self$root_path, self$tar_name))
 
     if (fs::dir_exists(p))
