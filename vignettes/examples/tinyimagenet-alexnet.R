@@ -65,7 +65,7 @@ train_step <- function(batch) {
 valid_step <- function(batch) {
   model$eval()
   pred <- model(batch[[1]]$to(device = device))
-  pred <- torch_topk(pred, k = 5, dim = 2, TRUE, TRUE)[[2]]$add(1L)
+  pred <- torch_topk(pred, k = 5, dim = 2, TRUE, TRUE)[[2]]
   pred <- pred$to(device = torch_device("cpu"))
   correct <- batch[[2]]$view(c(-1, 1))$eq(pred)$any(dim = 2)
   model$train()
