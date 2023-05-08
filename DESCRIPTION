@@ -37,5 +37,4 @@ Imports:
 Suggests:
     magick,
     testthat,
-    coro,
-    zip
+    coro

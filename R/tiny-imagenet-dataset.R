@@ -40,16 +40,14 @@ tiny_imagenet_dataset <- torch::dataset(
 
     raw_path <- fs::path_join(c(self$root_path, "tiny-imagenet-200.zip"))
 
-    rlang::inform("Downloding tiny imagenet dataset!")
+    rlang::inform("Downloading tiny imagenet dataset!")
 
     p <- download_and_cache(self$url)
     fs::file_copy(p, raw_path)
 
     rlang::inform("Download complete. Now unzipping.")
 
-    if (is.null(rlang::check_installed("zip"))) {
-      zip::unzip(raw_path, exdir = self$root_path)
-    }
+    utils::unzip(raw_path, exdir = self$root_path)
 
     # organize validation images
     val_path <- fs::path_join(c(self$root_path, self$tar_name, "val"))
