@@ -82,7 +82,7 @@
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.5.1" id="torchvision-051">torchvision 0.5.1<a class="anchor" aria-label="anchor" href="#torchvision-051"></a></h2>
+<h2 class="page-header" data-toc-text="0.5.1" id="torchvision-051">torchvision 0.5.1<small>2023-04-14</small><a class="anchor" aria-label="anchor" href="#torchvision-051"></a></h2>
 <ul><li>Remove usage of <code>torch_lstsq</code> that was removed in torch v0.10.0</li>
 </ul></div>
     <div class="section level2">
@@ -90,6 +90,7 @@
 <ul><li>Bugs fixed in <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code><a href="../reference/transform_linear_transformation.html">transform_linear_transformation()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/72" class="external-link">#72</a>, <a href="https://github.com/mlverse/torchvision/issues/73" class="external-link">#73</a>, <a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>)</li>
 <li>add <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> , <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> on top of image tensors, and add a convenience <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> and <code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> functions to visualize image tensors respectively in browser or in X11 device (<a href="https://github.com/mlverse/torchvision/issues/80" class="external-link">#80</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
 <li>Added the InceptionV3 model. (<a href="https://github.com/mlverse/torchvision/issues/82" class="external-link">#82</a>)</li>
+<li>Remove again dependency on <code>zip::unzip</code> added in version 0.4.0. (<a href="https://github.com/mlverse/torchvision/issues/89" class="external-link">#89</a>)</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.1" id="torchvision-041">torchvision 0.4.1<small>2022-01-28</small><a class="anchor" aria-label="anchor" href="#torchvision-041"></a></h2>
@@ -100,7 +101,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.0" id="torchvision-040">torchvision 0.4.0<small>2021-08-17</small><a class="anchor" aria-label="anchor" href="#torchvision-040"></a></h2>
-<ul><li>Added a dependency on <code>zip</code> to <code><a href="https://rdrr.io/pkg/zip/man/unzip.html" class="external-link">zip::unzip</a></code> the tinyimagenet dataset.</li>
+<ul><li>Added a dependency on <code>zip</code> to <code>zip::unzip</code> the tinyimagenet dataset.</li>
 <li>Removed all usages of <code><a href="https://rdrr.io/pkg/torch/man/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
 <li>Fixed non-namespaced calls to <code>torch</code>. (<a href="https://github.com/mlverse/torchvision/issues/58" class="external-link">#58</a>)</li>
 </ul></div>
