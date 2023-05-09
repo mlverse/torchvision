@@ -1,6 +1,7 @@
 # torchvision (development version)
 
 - Remove again dependency on `zip::unzip` added in version 0.4.0. (#89)
+- Improve performance on `tinyimagenet-alexnet` example (#90, @statist-bhfz)
 
 # torchvision 0.5.1
 
