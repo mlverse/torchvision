@@ -87,7 +87,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_random_rotation</span><span class="op">(</span></span>
 <span>  <span class="va">img</span>,</span>
 <span>  <span class="va">degrees</span>,</span>
-<span>  resample <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  resample <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  expand <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  center <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fill <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -107,7 +107,8 @@ degrees will be (-degrees, +degrees).</p></dd>
 
 
 <dt>resample</dt>
-<dd><p>(int, optional): An optional resampling filter.</p></dd>
+<dd><p>(int, optional): An optional resampling filter. See interpolation
+modes.</p></dd>
 
 
 <dt>expand</dt>
