@@ -39,7 +39,8 @@ will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
 will be applied. Will not apply shear by default.}
 
-\item{resample}{(int, optional): An optional resampling filter.}
+\item{resample}{(int, optional): An optional resampling filter. See interpolation
+modes.}
 
 \item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
 int for grayscale) for the area outside the transform in the output image

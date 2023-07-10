@@ -676,7 +676,7 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
   }
 
   grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
-  mode <- interpolation_modes[as.character(resample)]
+  mode <- interpolation_modes[as.character(as.integer(resample))]
 
   apply_grid_transform(img, grid, mode)
 }

@@ -212,3 +212,15 @@ test_that("random vertical flip", {
 
 })
 
+test_that("random rotation works", {
+
+  x <- torch::torch_tensor(array(1, dim = c(3, 200, 200)))
+
+  # Transforms
+  rotate <- function(img) transform_random_rotation(img, 20)
+
+  expect_error(rotate(x), regexp = NA)
+
+
+})
+

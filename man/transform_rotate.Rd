@@ -19,7 +19,8 @@ transform_rotate(
 \item{angle}{(float or int): rotation angle value in degrees,
 counter-clockwise.}
 
-\item{resample}{(int, optional): An optional resampling filter.}
+\item{resample}{(int, optional): An optional resampling filter. See interpolation
+modes.}
 
 \item{expand}{(bool, optional): Optional expansion flag. If true, expands the
 output to make it large enough to hold the entire rotated image. If false
