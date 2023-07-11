@@ -224,3 +224,35 @@ test_that("random rotation works", {
 
 })
 
+test_that("random choice transform works", {
+
+  # Example Image
+  x <- array(1, dim = c(3, 200, 200))
+
+  # Transforms
+  color_transform <- function(img) transform_color_jitter(
+    img, brightness = 0.5, contrast = 0.5, saturation = 0.5, hue = 0.5
+  )
+  resize_crop <- function(img) transform_random_resized_crop(img, size = c(200, 200))
+  hflip <- function(img) transform_random_horizontal_flip(img)
+  vflip <- function(img) transform_random_vertical_flip(img)
+  rotate <- function(img) transform_random_rotation(img, 20)
+  identity <- function(img) img
+
+  # Select a Random Transform to Apply
+  expect_error(regexp = NA, {
+    transform_random_choice(
+      torch_tensor(x),
+      list(
+        color_transform,
+        resize_crop,
+        hflip,
+        vflip,
+        rotate,
+        identity
+      )
+    )
+  })
+
+})
+
