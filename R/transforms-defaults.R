@@ -85,7 +85,7 @@ transform_random_apply.default <- function(img, transforms, p = 0.5) {
 
 #' @export
 transform_random_choice.default <- function(img, transforms) {
-  i <- sample.int(length(transforms))
+  i <- sample.int(length(transforms), 1L)
   transforms[[i]](img)
 }
 

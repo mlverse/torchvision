@@ -212,3 +212,9 @@ test_that("random vertical flip", {
 
 })
 
+test_that("random choice", {
+  x = torch_randn(3, 8, 8)
+  y = transform_random_choice(x, list(function(x) x + 1, function(x) -x))
+  expect_true(torch_equal(x + 1, y) || torch_equal(-x, y))
+})
+
