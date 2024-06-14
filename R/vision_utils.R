@@ -259,10 +259,12 @@ draw_segmentation_masks  <-  function(image,
 #'
 #' @examples
 #' if (torch::torch_is_installed()) {
+#' \dontrun{
 #' image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
 #' keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
 #' keypoint_image <- draw_keypoints(image, keypoints)
 #' tensor_image_browse(keypoint_image)
+#' }
 #' }
 #' @export
 draw_keypoints <- function(image,
