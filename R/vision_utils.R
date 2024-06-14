@@ -82,12 +82,14 @@ vision_make_grid <- function(tensor,
 #'
 #' @examples
 #' if (torch::torch_is_installed()) {
+#' \dontrun{
 #' image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 #' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
 #' bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
 #' tensor_image_browse(bboxed)
+#' }
 #' }
 #' @export
 draw_bounding_boxes <- function(image,
