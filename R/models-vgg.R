@@ -85,14 +85,14 @@ vgg_cfgs <- list(
 )
 
 vgg_model_urls <- list(
-  'vgg11'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg11.pth',
-  'vgg13'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg13.pth',
-  'vgg16'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg16.pth',
-  'vgg19'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg19.pth',
-  'vgg11_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg11_bn.pth',
-  'vgg13_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg13_bn.pth',
-  'vgg16_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg16_bn.pth',
-  'vgg19_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg19_bn.pth'
+  'vgg11'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg11.pth',
+  'vgg13'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg13.pth',
+  'vgg16'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg16.pth',
+  'vgg19'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg19.pth',
+  'vgg11_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg11_bn.pth',
+  'vgg13_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg13_bn.pth',
+  'vgg16_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg16_bn.pth',
+  'vgg19_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg19_bn.pth'
 )
 
 vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {

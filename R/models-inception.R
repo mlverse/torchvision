@@ -393,7 +393,7 @@ BasicConv2d <- torch::nn_module(
 )
 
 inception_model_urls <- list(
-  inception_v3_google = "https://storage.googleapis.com/torchvision-models/v1/models/inception_v3_google.pth"
+  inception_v3_google = "https://torch-cdn.mlverse.org/models/vision/v1/models/inception_v3_google.pth"
 )
 
 #' Inception v3 model

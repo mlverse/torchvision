@@ -18,7 +18,7 @@ model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model
 }
 
-mobilenet_v2_url <- "https://storage.googleapis.com/torchvision-models/v2/models/mobilenet_v2.pth"
+mobilenet_v2_url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth"
 
 mobilenet_v2 <- torch::nn_module(
   "mobilenet_v2",

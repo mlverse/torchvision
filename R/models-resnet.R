@@ -1,14 +1,14 @@
 
 resnet_model_urls <- c(
-  'resnet18' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet18.pth',
-  'resnet34' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet34.pth',
-  'resnet50' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet50.pth',
-  'resnet101' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet101.pth',
-  'resnet152' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet152.pth',
-  'resnext50_32x4d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext50_32x4d.pth',
-  'resnext101_32x8d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext101_32x8d.pth',
-  'wide_resnet50_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet50_2.pth',
-  'wide_resnet101_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet101_2.pth'
+  'resnet18' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet18.pth',
+  'resnet34' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet34.pth',
+  'resnet50' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet50.pth',
+  'resnet101' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet101.pth',
+  'resnet152' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet152.pth',
+  'resnext50_32x4d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext50_32x4d.pth',
+  'resnext101_32x8d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext101_32x8d.pth',
+  'wide_resnet50_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet50_2.pth',
+  'wide_resnet101_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet101_2.pth'
 )
 
 conv_3x3 <- function(in_planes, out_planes, stride = 1, groups = 1, dilation = 1) {
