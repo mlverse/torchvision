@@ -2,6 +2,7 @@
 
 - Remove again dependency on `zip::unzip` added in version 0.4.0. (#89)
 - Improve performance on `tinyimagenet-alexnet` example (#90, @statist-bhfz)
+- Updated URL of downloaded resources to use the new torch CDN. (#109)
 
 # torchvision 0.5.1
 
