@@ -38,7 +38,7 @@ to stderr}
 }
 \description{
 VGG models implementations based on
-\href{https://arxiv.org/pdf/1409.1556.pdf}{Very Deep Convolutional Networks For Large-Scale Image Recognition}
+\href{https://arxiv.org/pdf/1409.1556}{Very Deep Convolutional Networks For Large-Scale Image Recognition}
 }
 \section{Functions}{
 \itemize{

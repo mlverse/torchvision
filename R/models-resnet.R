@@ -252,7 +252,7 @@ resnet <- torch::nn_module(
 #' ResNet implementation
 #'
 #' ResNet models implementation from
-#'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf) and later
+#'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385) and later
 #'   related papers (see Functions)
 #'
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet.
@@ -295,28 +295,28 @@ model_resnet152 <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("resnet152", bottleneck, c(3,8,36,3), pretrained, progress, ...)
 }
 
-#' @describeIn model_resnet ResNeXt-50 32x4d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431.pdf)
+#' @describeIn model_resnet ResNeXt-50 32x4d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431)
 #' with 32 groups having each a width of 4.
 #' @export
 model_resnext50_32x4d <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("resnext50_32x4d", bottleneck, c(3,4,6,3), pretrained, progress, groups=32, width_per_group=4,...)
 }
 
-#' @describeIn model_resnet ResNeXt-101 32x8d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431.pdf)
+#' @describeIn model_resnet ResNeXt-101 32x8d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431)
 #' with 32 groups having each a width of 8.
 #' @export
 model_resnext101_32x8d <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("resnext101_32x8d", bottleneck, c(3,4,23,3), pretrained, progress, groups=32, width_per_group=8,...)
 }
 
-#' @describeIn model_resnet Wide ResNet-50-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146.pdf)
+#' @describeIn model_resnet Wide ResNet-50-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146)
 #' with width per group of 128.
 #' @export
 model_wide_resnet50_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("wide_resnet50_2", bottleneck, c(3,4,6,3), pretrained, progress, width_per_group=64*2,...)
 }
 
-#' @describeIn model_resnet Wide ResNet-101-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146.pdf)
+#' @describeIn model_resnet Wide ResNet-101-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146)
 #' with width per group of 128.
 #' @export
 model_wide_resnet101_2 <- function(pretrained = FALSE, progress = TRUE, ...) {

@@ -431,7 +431,7 @@ transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
 #' Randomly selects a rectangular region in an image and erases its pixel values
 #'
 #' 'Random Erasing Data Augmentation' by Zhong _et al._
-#'   See <https://arxiv.org/pdf/1708.04896.pdf>
+#'   See <https://arxiv.org/pdf/1708.04896>
 #'
 #' @inheritParams transform_to_tensor
 #' @param p probability that the random erasing operation will be performed.

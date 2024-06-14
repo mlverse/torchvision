@@ -41,7 +41,7 @@ stderr.}
 }
 \description{
 ResNet models implementation from
-\href{https://arxiv.org/pdf/1512.03385.pdf}{Deep Residual Learning for Image Recognition} and later
+\href{https://arxiv.org/pdf/1512.03385}{Deep Residual Learning for Image Recognition} and later
 related papers (see Functions)
 }
 \section{Functions}{
@@ -56,16 +56,16 @@ related papers (see Functions)
 
 \item \code{model_resnet152()}: ResNet 152-layer model
 
-\item \code{model_resnext50_32x4d()}: ResNeXt-50 32x4d model from \href{https://arxiv.org/pdf/1611.05431.pdf}{"Aggregated Residual Transformation for Deep Neural Networks"}
+\item \code{model_resnext50_32x4d()}: ResNeXt-50 32x4d model from \href{https://arxiv.org/pdf/1611.05431}{"Aggregated Residual Transformation for Deep Neural Networks"}
 with 32 groups having each a width of 4.
 
-\item \code{model_resnext101_32x8d()}: ResNeXt-101 32x8d model from \href{https://arxiv.org/pdf/1611.05431.pdf}{"Aggregated Residual Transformation for Deep Neural Networks"}
+\item \code{model_resnext101_32x8d()}: ResNeXt-101 32x8d model from \href{https://arxiv.org/pdf/1611.05431}{"Aggregated Residual Transformation for Deep Neural Networks"}
 with 32 groups having each a width of 8.
 
-\item \code{model_wide_resnet50_2()}: Wide ResNet-50-2 model from \href{https://arxiv.org/pdf/1605.07146.pdf}{"Wide Residual Networks"}
+\item \code{model_wide_resnet50_2()}: Wide ResNet-50-2 model from \href{https://arxiv.org/pdf/1605.07146}{"Wide Residual Networks"}
 with width per group of 128.
 
-\item \code{model_wide_resnet101_2()}: Wide ResNet-101-2 model from \href{https://arxiv.org/pdf/1605.07146.pdf}{"Wide Residual Networks"}
+\item \code{model_wide_resnet101_2()}: Wide ResNet-101-2 model from \href{https://arxiv.org/pdf/1605.07146}{"Wide Residual Networks"}
 with width per group of 128.
 
 }}

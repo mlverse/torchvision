@@ -31,7 +31,7 @@ If a str of 'random', erasing each pixel with random values.}
 }
 \description{
 'Random Erasing Data Augmentation' by Zhong \emph{et al.}
-See \url{https://arxiv.org/pdf/1708.04896.pdf}
+See \url{https://arxiv.org/pdf/1708.04896}
 }
 \seealso{
 Other transforms: 

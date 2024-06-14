@@ -121,7 +121,7 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
 #'
 #'
 #' VGG models implementations based on
-#' [Very Deep Convolutional Networks For Large-Scale Image Recognition](https://arxiv.org/pdf/1409.1556.pdf)
+#' [Very Deep Convolutional Networks For Large-Scale Image Recognition](https://arxiv.org/pdf/1409.1556)
 #'
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet
 #' @param progress (bool): If TRUE, displays a progress bar of the download
