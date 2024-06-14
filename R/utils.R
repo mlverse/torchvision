@@ -17,7 +17,7 @@ download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
     on.exit({try({fs::file_delete(tmp)}, silent = TRUE)}, add = TRUE)
 
     withr::with_options(
-      list(timeout = 600),
+      list(timeout = max(600, getOption("timeout", default = 0))),
       utils::download.file(url, tmp, mode = "wb")
     )
     fs::file_move(tmp, path)
