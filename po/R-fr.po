@@ -1,0 +1,218 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: torchvision 0.6.0.9000\n"
+"POT-Creation-Date: 2024-08-21 18:58+0200\n"
+"PO-Revision-Date: 2024-08-21 19:58+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.3\n"
+
+#: dataset-cifar.R:38
+msgid "Files not found. Use download = TRUE"
+msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
+
+#: dataset-cifar.R:86
+msgid "Corrupt file! Delete the file in '%s' and try again."
+msgstr "Fichier corrompu. Supprimez le fichier `%s` et recommencez."
+
+#: dataset-mnist.R:44
+msgid "Dataset not found. You can use `download = TRUE` to download it."
+msgstr ""
+"Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
+"télécharger."
+
+#: dataset-mnist.R:71
+msgid "MD5 sums are not identical for file: {r[1]}."
+msgstr ""
+"Les sommes de contrôle MD5 ne sont pas identiques pour le fichier {r[1]}."
+
+#: folder-dataset.R:19
+msgid ""
+"Both extensions and is_valid_file cannot be None or not None at the same time"
+msgstr ""
+"Les deux paramètres `extensions` et `is_valid_file` ne peuvent ni être "
+"`None`, ni être différents de `None` ensemble."
+
+#: folder-dataset.R:138
+msgid "unknown extension '%s' in path '%s'"
+msgstr "Extension de fichier '%s' inconnue pour '%s'."
+
+#: models-efficientnet.R:29 models-resnet.R:34
+msgid "basic_block only supports groups=1 and base_width=64"
+msgstr ""
+"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
+
+#: models-efficientnet.R:32 models-resnet.R:37
+msgid "Dilation > 1 not supported in basic_block"
+msgstr "`dilation > 1` non compatible avec le `basic_block`"
+
+#: models-efficientnet.R:140 models-resnet.R:145
+msgid "replace_stride_with_dilation should be NULL"
+msgstr "`replace_stride_with_dilation` doit être `NULL`"
+
+#: models-efficientnet.R:141 models-resnet.R:146
+msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
+msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
+
+#: models-mobilenetv2.R:58
+msgid "inverted_residual_setting should be non-empty"
+msgstr "`inverted_residual_setting` doit être non-vide "
+
+#: models-mobilenetv2.R:59
+msgid "or a 4-element list, got {inverted_residual_setting}"
+msgstr ""
+"ou une liste de vecteurs, chacun de longeur 4. Ici, c'est "
+"{inverted_residual_setting}"
+
+#: transforms-defaults.R:298
+msgid "must be positive if a single number"
+msgstr "`value` doit être positif quand c'est une valeur unitaire."
+
+#: transforms-defaults.R:308
+msgid "out of bounds."
+msgstr "hors limites."
+
+#: transforms-defaults.R:346 transforms-defaults.R:402
+msgid "degrees must be positive if it's a single value"
+msgstr "`degrees` doit être positif quand c'est une valeur unique."
+
+#: transforms-defaults.R:351 transforms-defaults.R:407
+msgid "degrees must be length 1 or 2"
+msgstr "La longueur de `degrees` doit être 1 ou 2."
+
+#: transforms-defaults.R:414
+msgid "translate must be length 2"
+msgstr "La longueur de `translate` doit être 2."
+
+#: transforms-defaults.R:417
+msgid "translate must be between 0 and 1"
+msgstr "La valeur de `translate` doit être entre 0 et 1."
+
+#: transforms-defaults.R:424
+msgid "scale must be length 2"
+msgstr "La longueur de `scale` doit être 2."
+
+#: transforms-defaults.R:427
+msgid "scale must be positive"
+msgstr "`scale` doit être positive."
+
+#: transforms-defaults.R:436
+msgid "shear must be positive if it's a single value"
+msgstr "`shear` doit être positif quand c'est une valeur unique."
+
+#: transforms-defaults.R:441
+msgid "shear's length must be 1, 2, or 4"
+msgstr "La longueur de `shear` doit être 1, 2 ou 4."
+
+#: transforms-defaults.R:579
+msgid "not implemented for"
+msgstr "n'est pas supporté pour"
+
+#: transforms-tensor.R:18
+msgid "The cast from {img$dtype} to {dtype} cannot be performed safely."
+msgstr ""
+"La conversion de {img$dtype} en {dtype} ne peut pas être faite sans risque."
+
+#: transforms-tensor.R:72
+msgid ""
+"std evaluated to zero after conversion to {dtype}, leading to division by "
+"zero."
+msgstr ""
+"Après conversion en {dtype}, `std` est à zéro, ce qui conduit à une division "
+"par zéro."
+
+#: transforms-tensor.R:98
+msgid "This interpolation mode is unsupported with Tensor input"
+msgstr ""
+"Ce mode d'interpolation n'est pas supporté avec des tenseurs en entrée."
+
+#: transforms-tensor.R:101
+msgid "Size must be a numeric vector of length 1 or 2."
+msgstr "`size` doit être un vecteur numérique de longueur 1 ou 2."
+
+#: transforms-tensor.R:184
+msgid "Padding must be an int or a 1, 2, or 4 element numeric vector"
+msgstr ""
+"`padding` doit être un entier, ou un vecteur numérique de taille 1, 2 ou 4."
+
+#: transforms-tensor.R:187
+msgid "Padding mode should be either constant, edge, reflect or symmetric"
+msgstr ""
+"Le bourrage `padding_mode` doit être pris parmi `constant`, `edge`, "
+"`reflect` ou `symmetric`."
+
+#: transforms-tensor.R:208
+msgid "Padding can not be negative for symmetric padding_mode"
+msgstr ""
+"le bourrage `padding` ne peut pas être négatif avec le mode `symmetric`."
+
+#: transforms-tensor.R:246 transforms-tensor.R:272
+msgid "Please provide only 2 dimensions (h, w) for size."
+msgstr ""
+"Le vecteur de `size` doit contenir seulement les deux dimensions (h, w)."
+
+#: transforms-tensor.R:255
+msgid "Requested crop size is bigger than input size."
+msgstr "La coupe demandée avec `crop` est de taille plus grande que l'entrée."
+
+#: transforms-tensor.R:320
+msgid "brightness factor is negative"
+msgstr "`brightness_factor` doit être positif."
+
+#: transforms-tensor.R:331
+msgid "contrast must be positive"
+msgstr "`contrast` doit être positif."
+
+#: transforms-tensor.R:344
+msgid "hue_factor must be between -0.5 and 0.5."
+msgstr "`hue_factor` doit être pris entre -0.5 et 0.5"
+
+#: transforms-tensor.R:369
+msgid "saturation factor must be positive."
+msgstr "`saturation_factor` doit être positif."
+
+#: transforms-tensor.R:401
+msgid "Argument angle should be int or float"
+msgstr "`angle` doit être un entier ou un réel."
+
+#: transforms-tensor.R:404
+msgid "translate should be length 2"
+msgstr "La longueur de `translate` doit être 2."
+
+#: transforms-tensor.R:407
+msgid "Argument scale should be positive"
+msgstr "`scale` doit être positif."
+
+#: transforms-tensor.R:410
+msgid "Shear should be either a single value or a sequence of 2 values"
+msgstr ""
+"`shear` doit être une valeur simple ou un vecteur de deux valeurs numériques."
+
+#: transforms-tensor.R:424
+msgid "transform perspective is not implemented yet."
+msgstr "`transform_perspective` n'est pas encore implémenté."
+
+#: transforms-tensor.R:441
+msgid "tensor is not a torch image."
+msgstr "Le tenseur n'est pas une image torch."
+
+#: transforms-tensor.R:725
+msgid "Symmetric padding of N-D tensors are not supported yet"
+msgstr ""
+"Le bourrage en mode `symmetric` de N-D tenseurs n'est pas encore implémenté."
+
+#: transforms-tensor.R:734
+msgid "gamma must be non-negative"
+msgstr "`gamma` doit être positif."
+
+#: vision_utils.R:115
+msgid "boxes doesn't contain any box. No box was drawn"
+msgstr "`boxes` ne contient aucun cadre. Aucun cadre n'a été tracé."
+
+#: vision_utils.R:219
+msgid "masks doesn't contain any mask. No mask was drawn"
+msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."
