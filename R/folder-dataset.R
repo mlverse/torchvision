@@ -135,7 +135,7 @@ base_loader <- function(path) {
   else if (ext %in% c("png"))
     img <- png::readPNG(path)
   else
-    runtime_error(sprintf("unknown extension '%s' in path '%s'", ext, path))
+    runtime_error("unknown extension {ext} in path {path}")
 
   if (length(dim(img)) == 2)
     img <- abind::abind(img, img, img, along = 3)

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-21 18:58+0200\n"
-"PO-Revision-Date: 2024-08-21 19:58+0200\n"
+"POT-Creation-Date: 2024-08-21 22:26+0200\n"
+"PO-Revision-Date: 2024-08-21 22:30+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -11,13 +11,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.3\n"
 
+#: conditions.R:2
+msgid "type_error"
+msgstr ""
+
+#: conditions.R:6
+msgid "value_error"
+msgstr ""
+
+#: conditions.R:10
+msgid "runtime_error"
+msgstr ""
+
+#: conditions.R:14
+msgid "not_implemented_error"
+msgstr ""
+
 #: dataset-cifar.R:38
 msgid "Files not found. Use download = TRUE"
 msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
 
 #: dataset-cifar.R:86
-msgid "Corrupt file! Delete the file in '%s' and try again."
-msgstr "Fichier corrompu. Supprimez le fichier `%s` et recommencez."
+msgid "Corrupt file! Delete the file in {p} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {p} et recommencez."
 
 #: dataset-mnist.R:44
 msgid "Dataset not found. You can use `download = TRUE` to download it."
@@ -37,9 +53,17 @@ msgstr ""
 "Les deux paramètres `extensions` et `is_valid_file` ne peuvent ni être "
 "`None`, ni être différents de `None` ensemble."
 
+#: folder-dataset.R:65
+msgid "Found 0 files in subfolders of {self$root}"
+msgstr "Aucun fichiers trouvé dans le répertoire {self$root}."
+
+#: folder-dataset.R:67
+msgid "Supported extensions are {paste(extensions, collapse=',')}"
+msgstr "Les extensions supportées sont {paste(extensions, collapse=',')}"
+
 #: folder-dataset.R:138
-msgid "unknown extension '%s' in path '%s'"
-msgstr "Extension de fichier '%s' inconnue pour '%s'."
+msgid "unknown extension {ext} in path {path}"
+msgstr "Extension de fichier {ext} inconnue pour {path}."
 
 #: models-efficientnet.R:29 models-resnet.R:34
 msgid "basic_block only supports groups=1 and base_width=64"
@@ -57,6 +81,14 @@ msgstr "`replace_stride_with_dilation` doit être `NULL`"
 #: models-efficientnet.R:141 models-resnet.R:146
 msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
 msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
+
+#: models-inception.R:24
+msgid ""
+"length of {.arg inception_blocks} should be 7 instead of "
+"{length(inception_blocks)}"
+msgstr ""
+"La longueur de {.arg inception_blocks} doit être 7 et non "
+"{length(inception_blocks)}."
 
 #: models-mobilenetv2.R:58
 msgid "inverted_residual_setting should be non-empty"
@@ -109,8 +141,8 @@ msgid "shear's length must be 1, 2, or 4"
 msgstr "La longueur de `shear` doit être 1, 2 ou 4."
 
 #: transforms-defaults.R:579
-msgid "not implemented for"
-msgstr "n'est pas supporté pour"
+msgid "not implemented for {class(x)}"
+msgstr "n'est pas supporté pour {class(x)}."
 
 #: transforms-tensor.R:18
 msgid "The cast from {img$dtype} to {dtype} cannot be performed safely."
@@ -213,6 +245,14 @@ msgstr "`gamma` doit être positif."
 msgid "boxes doesn't contain any box. No box was drawn"
 msgstr "`boxes` ne contient aucun cadre. Aucun cadre n'a été tracé."
 
-#: vision_utils.R:219
+#: vision_utils.R:120
+msgid ""
+"Number of labels {length(labels)} cannot be broadcasted on number of boxes "
+"{num_boxes}"
+msgstr ""
+"Le nombre de labels ({length(labels)}) n'est pas un multiple du nombre de "
+"cadres ({num_boxes}) et ne peut pas être broadcasté."
+
+#: vision_utils.R:214
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."

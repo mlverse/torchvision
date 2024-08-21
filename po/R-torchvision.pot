@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-21 18:58+0200\n"
+"POT-Creation-Date: 2024-08-21 22:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10,12 +10,28 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: conditions.R:2
+msgid "type_error"
+msgstr ""
+
+#: conditions.R:6
+msgid "value_error"
+msgstr ""
+
+#: conditions.R:10
+msgid "runtime_error"
+msgstr ""
+
+#: conditions.R:14
+msgid "not_implemented_error"
+msgstr ""
+
 #: dataset-cifar.R:38
 msgid "Files not found. Use download = TRUE"
 msgstr ""
 
 #: dataset-cifar.R:86
-msgid "Corrupt file! Delete the file in '%s' and try again."
+msgid "Corrupt file! Delete the file in {p} and try again."
 msgstr ""
 
 #: dataset-mnist.R:44
@@ -31,8 +47,16 @@ msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
 msgstr ""
 
+#: folder-dataset.R:65
+msgid "Found 0 files in subfolders of {self$root}"
+msgstr ""
+
+#: folder-dataset.R:67
+msgid "Supported extensions are {paste(extensions, collapse=',')}"
+msgstr ""
+
 #: folder-dataset.R:138
-msgid "unknown extension '%s' in path '%s'"
+msgid "unknown extension {ext} in path {path}"
 msgstr ""
 
 #: models-efficientnet.R:29 models-resnet.R:34
@@ -49,6 +73,12 @@ msgstr ""
 
 #: models-efficientnet.R:141 models-resnet.R:146
 msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
+msgstr ""
+
+#: models-inception.R:24
+msgid ""
+"length of {.arg inception_blocks} should be 7 instead of "
+"{length(inception_blocks)}"
 msgstr ""
 
 #: models-mobilenetv2.R:58
@@ -100,7 +130,7 @@ msgid "shear's length must be 1, 2, or 4"
 msgstr ""
 
 #: transforms-defaults.R:579
-msgid "not implemented for"
+msgid "not implemented for {class(x)}"
 msgstr ""
 
 #: transforms-tensor.R:18
@@ -193,6 +223,12 @@ msgstr ""
 msgid "boxes doesn't contain any box. No box was drawn"
 msgstr ""
 
-#: vision_utils.R:219
+#: vision_utils.R:120
+msgid ""
+"Number of labels {length(labels)} cannot be broadcasted on number of boxes "
+"{num_boxes}"
+msgstr ""
+
+#: vision_utils.R:214
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr ""

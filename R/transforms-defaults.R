@@ -576,6 +576,6 @@ transform_adjust_gamma.default <- function(img, gamma, gain = 1) {
 # Helpers -----------------------------------------------------------------
 
 not_implemented_for_class <- function(x) {
-  not_implemented_error(paste0("not implemented for ", class(x)))
+  not_implemented_error("not implemented for {class(x)}")
 }
 
