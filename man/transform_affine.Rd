@@ -21,13 +21,13 @@ transform_affine(
 counter-clockwise.}
 
 \item{translate}{(tuple, optional): tuple of maximum absolute fraction for
-horizontal and vertical translations. For example translate=(a, b), then
+horizontal and vertical translations. For example \code{translate=c(a, b)}, then
 horizontal shift is randomly sampled in the range
 -img_width * a < dx < img_width * a and vertical shift is randomly sampled
 in the range -img_height * b < dy < img_height * b. Will not translate by
 default.}
 
-\item{scale}{(tuple, optional): scaling factor interval, e.g (a, b), then
+\item{scale}{(tuple, optional): scaling factor interval, e.g c(a, b), then
 scale is randomly sampled from the range a <= scale <= b. Will keep
 original scale by default.}
 

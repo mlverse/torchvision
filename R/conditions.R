@@ -3,7 +3,7 @@ type_error <- function(msg, env = rlang::caller_env()) {
 }
 
 value_error <- function(..., env = rlang::caller_env()) {
-  rlang::abort(glue::glue(gettext(..., domain = "R-torchvision")[[1]], .envir = env), class = "value_error")
+  rlang::abort(glue::glue(gettext(..., domain = "R-torchvision"), .envir = env), class = "value_error")
 }
 
 runtime_error <- function(msg, env = rlang::caller_env()) {

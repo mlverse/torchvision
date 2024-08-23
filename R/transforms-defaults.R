@@ -423,7 +423,7 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
     if (length(scale) != 2)
       value_error("scale must be length 2")
 
-    if (any(scale > 0))
+    if (any(scale < 0))
       value_error("scale must be positive")
 
   }
