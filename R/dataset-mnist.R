@@ -11,7 +11,7 @@
 #'   it is not downloaded again.
 #' @param transform (callable, optional): A function/transform that  takes in an
 #'   PIL image and returns a transformed version. E.g,
-#'   `transforms.RandomCrop`.
+#'   [transform_random_crop()].
 #' @param target_transform (callable, optional): A function/transform that takes
 #'   in the target and transforms it.
 #'
@@ -132,7 +132,7 @@ mnist_dataset <- dataset(
 #'   internet and puts it in root directory. If dataset is already downloaded,
 #'   it is not downloaded again.
 #' @param transform (callable, optional): A function/transform that  takes in an
-#'   PIL image and returns a transformed version. E.g, `transforms.RandomCrop`.
+#'   PIL image and returns a transformed version. E.g, [transform_random_crop()].
 #' @param target_transform (callable, optional): A function/transform that takes
 #'   in the target and transforms it.
 #'
