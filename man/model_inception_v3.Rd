@@ -7,16 +7,16 @@
 model_inception_v3(pretrained = FALSE, progress = TRUE, ...)
 }
 \arguments{
-\item{pretrained}{(bool): If True, returns a model pre-trained on ImageNet}
+\item{pretrained}{(bool): If \code{TRUE}, returns a model pre-trained on ImageNet}
 
-\item{progress}{(bool): If True, displays a progress bar of the download to stderr}
+\item{progress}{(bool): If \code{TRUE}, displays a progress bar of the download to stderr}
 
 \item{...}{Used to pass keyword arguments to the Inception module:
 \itemize{
-\item aux_logits (bool): If True, add an auxiliary branch that can improve training.
-Default: \emph{True}
-\item transform_input (bool): If True, preprocesses the input according to the method with which it
-was trained on ImageNet. Default: \emph{False}
+\item aux_logits (bool): If \code{TRUE}, add an auxiliary branch that can improve training.
+Default: \emph{TRUE}
+\item transform_input (bool): If \code{TRUE}, preprocess the input according to the method with which it
+was trained on ImageNet. Default: \emph{FALSE}
 }}
 }
 \description{
