@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-21 22:26+0200\n"
-"PO-Revision-Date: 2024-08-21 22:30+0200\n"
+"POT-Creation-Date: 2024-08-23 09:42+0200\n"
+"PO-Revision-Date: 2024-08-23 09:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -46,6 +46,14 @@ msgid "MD5 sums are not identical for file: {r[1]}."
 msgstr ""
 "Les sommes de contrôle MD5 ne sont pas identiques pour le fichier {r[1]}."
 
+#: dataset-mnist.R:75
+msgid "Processing..."
+msgstr "Traitement en cours..."
+
+#: dataset-mnist.R:90 tiny-imagenet-dataset.R:67
+msgid "Done!"
+msgstr "Terminé!"
+
 #: folder-dataset.R:19
 msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
@@ -82,6 +90,28 @@ msgstr "`replace_stride_with_dilation` doit être `NULL`"
 msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
 msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
 
+#: models-inception.R:16
+msgid ""
+"The default weight initialization of inception_v3 will be changed in future "
+"releases of"
+msgstr ""
+"L'initialisation des poids par défaut de inception_v3 sera modifiée dans les "
+"prochaines versions de"
+
+#: models-inception.R:17
+msgid ""
+"torchvision. If you wish to keep the old behavior (which leads to long "
+"initialization times"
+msgstr ""
+"torchvision. Si vous souhaitez garder le comportement précédent (qui conduit "
+"à des temps d'initialisation plus long"
+
+#: models-inception.R:18
+msgid "due to scipy/scipy#11299), please set init_weights={.val TRUE}."
+msgstr ""
+"du fait du problème scipy/scipy#11299), veuillez utiliser set init_weights={."
+"val TRUE}."
+
 #: models-inception.R:24
 msgid ""
 "length of {.arg inception_blocks} should be 7 instead of "
@@ -99,6 +129,14 @@ msgid "or a 4-element list, got {inverted_residual_setting}"
 msgstr ""
 "ou une liste de vecteurs, chacun de longeur 4. Ici, c'est "
 "{inverted_residual_setting}"
+
+#: tiny-imagenet-dataset.R:43
+msgid "Downloading tiny imagenet dataset!"
+msgstr "Téléchargement d'un mini jeu de données imagenet en cours!"
+
+#: tiny-imagenet-dataset.R:48
+msgid "Download complete. Now unzipping."
+msgstr "Téléchargement terminé. Décompression en cours."
 
 #: transforms-defaults.R:298
 msgid "must be positive if a single number"

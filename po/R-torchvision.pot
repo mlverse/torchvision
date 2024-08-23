@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-21 22:26+0200\n"
+"POT-Creation-Date: 2024-08-23 09:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,6 +42,14 @@ msgstr ""
 msgid "MD5 sums are not identical for file: {r[1]}."
 msgstr ""
 
+#: dataset-mnist.R:75
+msgid "Processing..."
+msgstr ""
+
+#: dataset-mnist.R:90 tiny-imagenet-dataset.R:67
+msgid "Done!"
+msgstr ""
+
 #: folder-dataset.R:19
 msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
@@ -75,6 +83,22 @@ msgstr ""
 msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
 msgstr ""
 
+#: models-inception.R:16
+msgid ""
+"The default weight initialization of inception_v3 will be changed in future "
+"releases of"
+msgstr ""
+
+#: models-inception.R:17
+msgid ""
+"torchvision. If you wish to keep the old behavior (which leads to long "
+"initialization times"
+msgstr ""
+
+#: models-inception.R:18
+msgid "due to scipy/scipy#11299), please set init_weights={.val TRUE}."
+msgstr ""
+
 #: models-inception.R:24
 msgid ""
 "length of {.arg inception_blocks} should be 7 instead of "
@@ -87,6 +111,14 @@ msgstr ""
 
 #: models-mobilenetv2.R:59
 msgid "or a 4-element list, got {inverted_residual_setting}"
+msgstr ""
+
+#: tiny-imagenet-dataset.R:43
+msgid "Downloading tiny imagenet dataset!"
+msgstr ""
+
+#: tiny-imagenet-dataset.R:48
+msgid "Download complete. Now unzipping."
 msgstr ""
 
 #: transforms-defaults.R:298
