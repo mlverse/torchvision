@@ -12,7 +12,6 @@ NULL
 #' @param padding amount of padding between batch images (default 2).
 #' @param pad_value pixel value to use for padding.
 #'
-#' @family display
 #' @export
 vision_make_grid <- function(tensor,
            scale = TRUE,
@@ -92,7 +91,6 @@ vision_make_grid <- function(tensor,
 #' tensor_image_browse(bboxed)
 #' }
 #' }
-#' @family display
 #' @export
 draw_bounding_boxes <- function(image,
                                boxes,
@@ -195,7 +193,6 @@ draw_bounding_boxes <- function(image,
 #' masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
 #' tensor_image_browse(masked_image)
 #' }
-#' @family display
 #' @export
 draw_segmentation_masks  <-  function(image,
                                       masks,
@@ -264,7 +261,6 @@ draw_segmentation_masks  <-  function(image,
 #' tensor_image_browse(keypoint_image)
 #' }
 #' }
-#' @family display
 #' @export
 draw_keypoints <- function(image,
     keypoints,
@@ -322,7 +318,6 @@ draw_keypoints <- function(image,
 #'   of type `torch_uint8()` to display
 #' @param animate support animations in the X11 display
 #'
-#' @family display
 #' @export
 tensor_image_display <- function(image, animate = TRUE) {
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
@@ -344,7 +339,6 @@ tensor_image_display <- function(image, animate = TRUE) {
 #'   of type `torch_uint8()` to display
 #' @param browser argument passed to [browseURL]
 #'
-#' @family display
 #' @export
 tensor_image_browse <- function(image, browser = getOption("browser")) {
   stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
