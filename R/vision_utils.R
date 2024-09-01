@@ -323,20 +323,29 @@ draw_keypoints <- function(image,
 #' Display image tensor
 #'
 #' Display image tensor onto the X11 device
-#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-#'   of type `torch_uint8()` to display
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for
+#'  color image to display
 #' @param animate support animations in the X11 display
 #'
 #' @family image display
 #' @export
 tensor_image_display <- function(image, animate = TRUE) {
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
 
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
+      as.array() / 255
 
-  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_display(animate = animate)
+  } else {
+    img_min = image$min()
+    img_range = image$max() - image$min()
+    stopifnot("`image` value range will lead to division by zero." = as.numeric(img_range$to(device = "cpu")) != 0)
+
+    img_to_draw <- transform_normalize(image, img_min, img_range)$permute(c(2, 3, 1))$to(device = "cpu") %>%
+      as.array()
+  }
+  png::writePNG(img_to_draw) %>% magick::image_read() %>% magick::image_display(animate = animate)
 
   invisible(NULL)
 }
@@ -345,20 +354,30 @@ tensor_image_display <- function(image, animate = TRUE) {
 #' Display image tensor
 #'
 #' Display image tensor into browser
-#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-#'   of type `torch_uint8()` to display
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for
+#'  color image to display
 #' @param browser argument passed to [browseURL]
 #'
 #' @family image display
 #' @export
 tensor_image_browse <- function(image, browser = getOption("browser")) {
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
 
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
+      as.array() / 255
 
-  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_browse(browser = browser)
+  } else {
+    img_min = image$min()
+    img_range = image$max() - image$min()
+    stopifnot("`image` value range will lead to division by zero." = as.numeric(img_range$to(device = "cpu")) != 0)
+
+    img_to_draw <- transform_normalize(image, img_min, img_range)$permute(c(2, 3, 1))$to(device = "cpu") %>%
+      as.array()
+  }
+
+  png::writePNG(img_to_draw) %>% magick::image_read() %>% magick::image_browse(browser = browser)
 
   invisible(NULL)
 }

@@ -7,8 +7,8 @@
 tensor_image_browse(image, browser = getOption("browser"))
 }
 \arguments{
-\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-of type \code{torch_uint8()} to display}
+\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for
+color image to display}
 
 \item{browser}{argument passed to \link{browseURL}}
 }

@@ -7,8 +7,8 @@
 tensor_image_display(image, animate = TRUE)
 }
 \arguments{
-\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-of type \code{torch_uint8()} to display}
+\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for
+color image to display}
 
 \item{animate}{support animations in the X11 display}
 }
