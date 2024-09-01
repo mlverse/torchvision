@@ -1,5 +1,7 @@
 # torchvision (development version)
 
+- fix `transform_rotation` wrongly using w x w for image size (@114, cregouby)
+
 # torchvision 0.6.0
 
 - Remove again dependency on `zip::unzip` added in version 0.4.0. (#89)
