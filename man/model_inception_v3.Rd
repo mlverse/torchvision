@@ -27,3 +27,11 @@ The required minimum input size of the model is 75x75.
 \strong{Important}: In contrast to the other models the inception_v3 expects tensors with a size of
 N x 3 x 299 x 299, so ensure your images are sized accordingly.
 }
+\seealso{
+Other models: 
+\code{\link{model_alexnet}()},
+\code{\link{model_mobilenet_v2}()},
+\code{\link{model_resnet}},
+\code{\link{model_vgg}}
+}
+\concept{models}

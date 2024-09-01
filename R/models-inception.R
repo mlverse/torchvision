@@ -410,6 +410,8 @@ inception_model_urls <- list(
 #'  Default: *TRUE*
 #'  - transform_input (bool): If `TRUE`, preprocess the input according to the method with which it
 #'  was trained on ImageNet. Default: *FALSE*
+#'
+#' @family models
 #' @export
 model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
   args <- rlang::list2(...)
