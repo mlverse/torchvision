@@ -44,3 +44,12 @@ tensor_image_browse(keypoint_image)
 }
 }
 }
+\seealso{
+Other display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{tensor_image_display}()},
+\code{\link{vision_make_grid}()}
+}
+\concept{display}

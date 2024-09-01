@@ -15,3 +15,12 @@ of type \code{torch_uint8()} to display}
 \description{
 Display image tensor onto the X11 device
 }
+\seealso{
+Other display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{vision_make_grid}()}
+}
+\concept{display}
