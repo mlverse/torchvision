@@ -1,5 +1,7 @@
 # torchvision (development version)
 
+- fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
+
 # torchvision 0.6.0
 
 - Remove again dependency on `zip::unzip` added in version 0.4.0. (#89)

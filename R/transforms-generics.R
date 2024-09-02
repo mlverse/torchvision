@@ -586,8 +586,15 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
 
 #' Apply affine transformation on an image keeping image center invariant
 #'
-#' @inheritParams transform_random_affine
 #' @inheritParams transform_rotate
+#' @inheritParams transform_random_affine
+#' @param translate (sequence of int) – horizontal and vertical translations
+#'  (post-rotation translation)
+#' @param scale (float) – overall scale
+#' @param shear (float or sequence) – shear angle value in degrees between -180 to 180,
+#'  clockwise direction. If a sequence is specified, the first value corresponds
+#'  to a shear parallel to the x-axis, while the second value corresponds to a
+#'  shear parallel to the y-axis.
 #'
 #' @family transforms
 #' @export
