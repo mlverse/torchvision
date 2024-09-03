@@ -338,7 +338,11 @@ tensor_image_display <- function(image, animate = TRUE) {
       as.array() / 255
 
   } else {
-    img_to_draw <- transform_convert_image_dtype(image, dtype = torch::torch_uint8())$permute(c(2, 3, 1))$to(device = "cpu") %>%
+    img_min = image$min()
+    img_range = image$max() - image$min()
+    stopifnot("`image` value range will lead to division by zero." = as.numeric(img_range$to(device = "cpu")) != 0)
+
+    img_to_draw <- transform_normalize(image, img_min, img_range)$permute(c(2, 3, 1))$to(device = "cpu") %>%
       as.array()
   }
   png::writePNG(img_to_draw) %>% magick::image_read() %>% magick::image_display(animate = animate)
@@ -365,7 +369,11 @@ tensor_image_browse <- function(image, browser = getOption("browser")) {
       as.array() / 255
 
   } else {
-    img_to_draw <- transform_convert_image_dtype(image, dtype = torch::torch_uint8())$permute(c(2, 3, 1))$to(device = "cpu") %>%
+    img_min = image$min()
+    img_range = image$max() - image$min()
+    stopifnot("`image` value range will lead to division by zero." = as.numeric(img_range$to(device = "cpu")) != 0)
+
+    img_to_draw <- transform_normalize(image, img_min, img_range)$permute(c(2, 3, 1))$to(device = "cpu") %>%
       as.array()
   }
 
