@@ -12,16 +12,16 @@ Inception3 <- torch::nn_module(
       )
 
     if (is.null(init_weights)) {
-      cli::cli_warn(paste(collapse = "", c(
+      cli::cli_warn(paste(collapse = "", gettext(c(
         "The default weight initialization of inception_v3 will be changed in future releases of ",
         "torchvision. If you wish to keep the old behavior (which leads to long initialization times",
         " due to scipy/scipy#11299), please set init_weights={.val TRUE}."
-      )))
+      ))))
       init_weights <- TRUE
     }
 
     if (length(inception_blocks) != 7) {
-      cli::cli_abort("length of {.arg inception_blocks} should be 7 instead of {length(inception_blocks)}")
+      cli::cli_abort(gettext("length of {.arg inception_blocks} should be 7 instead of {length(inception_blocks)}"))
     }
 
     conv_block <- inception_blocks[[0+1]]

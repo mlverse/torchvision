@@ -8,11 +8,11 @@ test_that("R-level type_error messages are correctly translated in FR", {
   )
 })
 
-test_that("R-level value_error messages are correctly translated in FR", {
+test_that("R-level cli_warning messages are correctly translated in FR", {
   withr::with_language(lang = "fr",
-                       expect_error(
-                         transform_adjust_gamma(torch::torch_rand(c(3, 5, 5)), gamma = -0.5),
-                        regexp = "`gamma` doit être positif",
+                       expect_warning(
+                         torchvision:::Inception3(),
+                        regexp = "L'initialisation des poids par défaut de inception_v3",
                         fixed = TRUE
                       )
   )
