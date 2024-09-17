@@ -1,6 +1,7 @@
 # torchvision (development version)
 
 - fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
+- add message translation in french (#112, @cregouby)
 
 # torchvision 0.6.0
 

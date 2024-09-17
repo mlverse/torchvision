@@ -12,16 +12,16 @@ Inception3 <- torch::nn_module(
       )
 
     if (is.null(init_weights)) {
-      cli::cli_warn(paste(collapse = "", c(
+      cli::cli_warn(paste(collapse = "", gettext(c(
         "The default weight initialization of inception_v3 will be changed in future releases of ",
         "torchvision. If you wish to keep the old behavior (which leads to long initialization times",
         " due to scipy/scipy#11299), please set init_weights={.val TRUE}."
-      )))
+      ))))
       init_weights <- TRUE
     }
 
     if (length(inception_blocks) != 7) {
-      cli::cli_abort("length of {.arg inception_blocks} should be 7 instead of {length(inception_blocks)}")
+      cli::cli_abort(gettext("length of {.arg inception_blocks} should be 7 instead of {length(inception_blocks)}"))
     }
 
     conv_block <- inception_blocks[[0+1]]
@@ -403,13 +403,15 @@ inception_model_urls <- list(
 #' @note
 #' **Important**: In contrast to the other models the inception_v3 expects tensors with a size of
 #' N x 3 x 299 x 299, so ensure your images are sized accordingly.
-#' @param pretrained (bool): If True, returns a model pre-trained on ImageNet
-#' @param progress (bool): If True, displays a progress bar of the download to stderr
+#' @param pretrained (bool): If `TRUE`, returns a model pre-trained on ImageNet
+#' @param progress (bool): If `TRUE`, displays a progress bar of the download to stderr
 #' @param ... Used to pass keyword arguments to the Inception module:
-#'  - aux_logits (bool): If True, add an auxiliary branch that can improve training.
-#'  Default: *True*
-#'  - transform_input (bool): If True, preprocesses the input according to the method with which it
-#'  was trained on ImageNet. Default: *False*
+#'  - aux_logits (bool): If `TRUE`, add an auxiliary branch that can improve training.
+#'  Default: *TRUE*
+#'  - transform_input (bool): If `TRUE`, preprocess the input according to the method with which it
+#'  was trained on ImageNet. Default: *FALSE*
+#'
+#' @family models
 #' @export
 model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
   args <- rlang::list2(...)
