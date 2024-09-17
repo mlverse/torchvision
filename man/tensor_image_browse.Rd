@@ -7,11 +7,20 @@
 tensor_image_browse(image, browser = getOption("browser"))
 }
 \arguments{
-\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-of type \code{torch_uint8()} to display}
+\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for
+color image to display}
 
 \item{browser}{argument passed to \link{browseURL}}
 }
 \description{
 Display image tensor into browser
 }
+\seealso{
+Other image display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_display}()},
+\code{\link{vision_make_grid}()}
+}
+\concept{image display}

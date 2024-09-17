@@ -7,11 +7,20 @@
 tensor_image_display(image, animate = TRUE)
 }
 \arguments{
-\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-of type \code{torch_uint8()} to display}
+\item{image}{\code{torch_tensor()} of shape (1, W, H) for grayscale image or (3, W, H) for
+color image to display}
 
 \item{animate}{support animations in the X11 display}
 }
 \description{
 Display image tensor onto the X11 device
 }
+\seealso{
+Other image display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{vision_make_grid}()}
+}
+\concept{image display}
