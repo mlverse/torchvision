@@ -119,12 +119,7 @@ draw_bounding_boxes <- function(image,
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     rlang::abort(
-      paste0(
-        "Number of labels ",
-        length(labels),
-        "cannot be broadcasted on number of boxes",
-        num_boxes
-      )
+      "Number of labels {length(labels)} cannot be broadcasted on number of boxes {num_boxes}"
     )
   }
   if (is.null(colors)) {

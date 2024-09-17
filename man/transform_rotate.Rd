@@ -27,7 +27,7 @@ output to make it large enough to hold the entire rotated image. If false
 or omitted, make the output image the same size as the input image. Note
 that the expand flag assumes rotation around the center and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, (x, y).
+\item{center}{(list or tuple, optional): Optional center of rotation, c(x, y).
 Origin is the upper left corner. Default is the center of the image.}
 
 \item{fill}{(n-tuple or int or float): Pixel fill value for area outside the
