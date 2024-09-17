@@ -9,7 +9,7 @@
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -31,7 +31,7 @@
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -62,20 +62,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Draw segmentation masks</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/vision_utils.R" class="external-link"><code>R/vision_utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/vision_utils.R" class="external-link"><code>R/vision_utils.R</code></a></small>
     <div class="hidden name"><code>draw_segmentation_masks.Rd</code></div>
     </div>
 
@@ -89,19 +89,21 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>image</dt>
+
+
+<dl><dt id="arg-image">image<a class="anchor" aria-label="anchor" href="#arg-image"></a></dt>
 <dd><p>: torch_tensor of shape (3, H, W) and dtype uint8.</p></dd>
 
 
-<dt>masks</dt>
+<dt id="arg-masks">masks<a class="anchor" aria-label="anchor" href="#arg-masks"></a></dt>
 <dd><p>: torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.</p></dd>
 
 
-<dt>alpha</dt>
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>: number between 0 and 1 denoting the transparency of the masks.</p></dd>
 
 
-<dt>colors</dt>
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>: character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks</p></dd>
@@ -109,9 +111,7 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for ma
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.</p>
+    <p>torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.</p>
     </div>
 
     <div id="ref-examples">
@@ -136,15 +136,15 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for ma
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

@@ -10,7 +10,7 @@ The required minimum input size of the model is 75x75."><meta name="robots" cont
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -32,7 +32,7 @@ The required minimum input size of the model is 75x75."><meta name="robots" cont
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -63,20 +63,20 @@ The required minimum input size of the model is 75x75."><meta name="robots" cont
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Inception v3 model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/models-inception.R" class="external-link"><code>R/models-inception.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/models-inception.R" class="external-link"><code>R/models-inception.R</code></a></small>
     <div class="hidden name"><code>model_inception_v3.Rd</code></div>
     </div>
 
@@ -91,19 +91,21 @@ The required minimum input size of the model is 75x75.</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>pretrained</dt>
-<dd><p>(bool): If True, returns a model pre-trained on ImageNet</p></dd>
 
 
-<dt>progress</dt>
-<dd><p>(bool): If True, displays a progress bar of the download to stderr</p></dd>
+<dl><dt id="arg-pretrained">pretrained<a class="anchor" aria-label="anchor" href="#arg-pretrained"></a></dt>
+<dd><p>(bool): If <code>TRUE</code>, returns a model pre-trained on ImageNet</p></dd>
 
 
-<dt>...</dt>
-<dd><p>Used to pass keyword arguments to the Inception module:</p><ul><li><p>aux_logits (bool): If True, add an auxiliary branch that can improve training.
-Default: <em>True</em></p></li>
-<li><p>transform_input (bool): If True, preprocesses the input according to the method with which it
-was trained on ImageNet. Default: <em>False</em></p></li>
+<dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
+<dd><p>(bool): If <code>TRUE</code>, displays a progress bar of the download to stderr</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Used to pass keyword arguments to the Inception module:</p><ul><li><p>aux_logits (bool): If <code>TRUE</code>, add an auxiliary branch that can improve training.
+Default: <em>TRUE</em></p></li>
+<li><p>transform_input (bool): If <code>TRUE</code>, preprocess the input according to the method with which it
+was trained on ImageNet. Default: <em>FALSE</em></p></li>
 </ul></dd>
 
 </dl></div>
@@ -111,6 +113,14 @@ was trained on ImageNet. Default: <em>False</em></p></li>
     <h2>Note</h2>
     <p><strong>Important</strong>: In contrast to the other models the inception_v3 expects tensors with a size of
 N x 3 x 299 x 299, so ensure your images are sized accordingly.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other models:
+<code><a href="model_alexnet.html">model_alexnet</a>()</code>,
+<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
+<code><a href="model_resnet.html">model_resnet</a></code>,
+<code><a href="model_vgg.html">model_vgg</a></code></p></div>
     </div>
 
   </div>
@@ -125,15 +135,15 @@ N x 3 x 299 x 299, so ensure your images are sized accordingly.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
