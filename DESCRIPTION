@@ -33,7 +33,8 @@ Imports:
     magrittr,
     png,
     abind,
-    withr
+    withr,
+    glue
 Suggests:
     magick,
     testthat,
