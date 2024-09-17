@@ -8,7 +8,7 @@
 #' @param train (bool, optional): If TRUE, creates dataset from training set, otherwise
 #'   creates from test set.
 #' @param transform (callable, optional): A function/transform that takes in an PIL image
-#'   and returns a transformed version. E.g, `transforms.RandomCrop`
+#'   and returns a transformed version. E.g, [transform_random_crop()]
 #' @param target_transform (callable, optional): A function/transform that takes in the
 #'   target and transforms it.
 #' @param download (bool, optional): If true, downloads the dataset from the internet and
@@ -83,7 +83,7 @@ cifar10_dataset <- torch::dataset(
     p <- download_and_cache(self$url)
 
     if (!tools::md5sum(p) == self$md5)
-      runtime_error(sprintf("Corrupt file! Delete the file in '%s' and try again.", p))
+      runtime_error("Corrupt file! Delete the file in {p} and try again.")
 
     utils::untar(p, exdir = self$root)
   },

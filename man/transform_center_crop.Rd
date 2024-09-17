@@ -10,9 +10,9 @@ transform_center_crop(img, size)
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
 \item{size}{(sequence or int): Desired output size of the crop. If size is
-an int instead of sequence like (h, w), a square crop (size, size) is
+an int instead of sequence like c(h, w), a square crop (size, size) is
 made. If provided a tuple or list of length 1, it will be interpreted as
-\verb{(size, size)}.}
+\code{c(size, size)}.}
 }
 \description{
 The image can be a Magick Image or a torch Tensor, in which case it is

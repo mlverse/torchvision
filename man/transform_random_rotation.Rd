@@ -17,7 +17,7 @@ transform_random_rotation(
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
 \item{degrees}{(sequence or float or int): Range of degrees to select from.
-If degrees is a number instead of sequence like (min, max), the range of
+If degrees is a number instead of sequence like c(min, max), the range of
 degrees will be (-degrees, +degrees).}
 
 \item{resample}{(int, optional): An optional resampling filter. See interpolation
@@ -28,7 +28,7 @@ output to make it large enough to hold the entire rotated image. If false
 or omitted, make the output image the same size as the input image. Note
 that the expand flag assumes rotation around the center and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, (x, y).
+\item{center}{(list or tuple, optional): Optional center of rotation, c(x, y).
 Origin is the upper left corner. Default is the center of the image.}
 
 \item{fill}{(n-tuple or int or float): Pixel fill value for area outside the

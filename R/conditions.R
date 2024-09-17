@@ -1,16 +1,16 @@
-type_error <- function(msg) {
-  rlang::abort(msg, class = "type_error")
+type_error <- function(msg, env = rlang::caller_env()) {
+  rlang::abort(glue::glue(gettext(msg), .envir = env), class = "type_error")
 }
 
-value_error <- function(msg) {
-  rlang::abort(msg, class = "value_error")
+value_error <- function(..., env = rlang::caller_env()) {
+  rlang::abort(glue::glue(gettext(..., domain = "R-torchvision"), .envir = env), class = "value_error")
 }
 
-runtime_error <- function(msg) {
-  rlang::abort(msg, class = "runtime_error")
+runtime_error <- function(msg, env = rlang::caller_env()) {
+  rlang::abort(glue::glue(gettext(msg), .envir = env), class = "runtime_error")
 }
 
-not_implemented_error <- function(msg) {
-  rlang::abort(msg, class = "not_implemented_error")
+not_implemented_error <- function(msg, env = rlang::caller_env()) {
+  rlang::abort(glue::glue(gettext(msg), .envir = env), class = "not_implemented_error")
 }
 

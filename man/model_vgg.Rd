@@ -59,3 +59,11 @@ VGG models implementations based on
 \item \code{model_vgg19_bn()}: VGG 19-layer model (configuration "E") with batch normalization
 
 }}
+\seealso{
+Other models: 
+\code{\link{model_alexnet}()},
+\code{\link{model_inception_v3}()},
+\code{\link{model_mobilenet_v2}()},
+\code{\link{model_resnet}}
+}
+\concept{models}
