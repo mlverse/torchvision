@@ -109,28 +109,19 @@ counter-clockwise.</p></dd>
 
 
 <dt id="arg-translate">translate<a class="anchor" aria-label="anchor" href="#arg-translate"></a></dt>
-<dd><p>(tuple, optional): tuple of maximum absolute fraction for
-horizontal and vertical translations. For example <code>translate=c(a, b)</code>, then
-horizontal shift is randomly sampled in the range
--img_width * a &lt; dx &lt; img_width * a and vertical shift is randomly sampled
-in the range -img_height * b &lt; dy &lt; img_height * b. Will not translate by
-default.</p></dd>
+<dd><p>(sequence of int) – horizontal and vertical translations
+(post-rotation translation)</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>(tuple, optional): scaling factor interval, e.g c(a, b), then
-scale is randomly sampled from the range a &lt;= scale &lt;= b. Will keep
-original scale by default.</p></dd>
+<dd><p>(float) – overall scale</p></dd>
 
 
 <dt id="arg-shear">shear<a class="anchor" aria-label="anchor" href="#arg-shear"></a></dt>
-<dd><p>(sequence or float or int, optional): Range of degrees to select
-from. If shear is a number, a shear parallel to the x axis in the range
-(-shear, +shear) will be applied. Else if shear is a tuple or list of 2
-values a shear parallel to the x axis in the range <code>(shear[1], shear[2])</code>
-will be applied. Else if shear is a tuple or list of 4 values, a x-axis
-shear in <code>(shear[1], shear[2])</code> and y-axis shear in <code>(shear[3], shear[4])</code>
-will be applied. Will not apply shear by default.</p></dd>
+<dd><p>(float or sequence) – shear angle value in degrees between -180 to 180,
+clockwise direction. If a sequence is specified, the first value corresponds
+to a shear parallel to the x-axis, while the second value corresponds to a
+shear parallel to the y-axis.</p></dd>
 
 
 <dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
