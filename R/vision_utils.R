@@ -12,6 +12,7 @@ NULL
 #' @param padding amount of padding between batch images (default 2).
 #' @param pad_value pixel value to use for padding.
 #'
+#' @family image display
 #' @export
 vision_make_grid <- function(tensor,
            scale = TRUE,
@@ -91,6 +92,7 @@ vision_make_grid <- function(tensor,
 #' tensor_image_browse(bboxed)
 #' }
 #' }
+#' @family image display
 #' @export
 draw_bounding_boxes <- function(image,
                                boxes,
@@ -117,12 +119,7 @@ draw_bounding_boxes <- function(image,
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     rlang::abort(
-      paste0(
-        "Number of labels ",
-        length(labels),
-        "cannot be broadcasted on number of boxes",
-        num_boxes
-      )
+      "Number of labels {length(labels)} cannot be broadcasted on number of boxes {num_boxes}"
     )
   }
   if (is.null(colors)) {
@@ -198,6 +195,7 @@ draw_bounding_boxes <- function(image,
 #' masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
 #' tensor_image_browse(masked_image)
 #' }
+#' @family image display
 #' @export
 draw_segmentation_masks  <-  function(image,
                                       masks,
@@ -266,6 +264,7 @@ draw_segmentation_masks  <-  function(image,
 #' tensor_image_browse(keypoint_image)
 #' }
 #' }
+#' @family image display
 #' @export
 draw_keypoints <- function(image,
     keypoints,
@@ -319,19 +318,25 @@ draw_keypoints <- function(image,
 #' Display image tensor
 #'
 #' Display image tensor onto the X11 device
-#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-#'   of type `torch_uint8()` to display
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for
+#'  color image to display
 #' @param animate support animations in the X11 display
 #'
+#' @family image display
 #' @export
 tensor_image_display <- function(image, animate = TRUE) {
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
 
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
+      as.array() / 255
 
-  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_display(animate = animate)
+  } else {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>%
+      as.array()
+  }
+  png::writePNG(img_to_draw) %>% magick::image_read() %>% magick::image_display(animate = animate)
 
   invisible(NULL)
 }
@@ -340,19 +345,26 @@ tensor_image_display <- function(image, animate = TRUE) {
 #' Display image tensor
 #'
 #' Display image tensor into browser
-#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for color image,
-#'   of type `torch_uint8()` to display
+#' @param image `torch_tensor()` of shape (1, W, H) for grayscale image or (3, W, H) for
+#'  color image to display
 #' @param browser argument passed to [browseURL]
 #'
+#' @family image display
 #' @export
 tensor_image_browse <- function(image, browser = getOption("browser")) {
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
   stopifnot("Pass individual images, not batches" = image$ndim == 3)
   stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
 
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
+      as.array() / 255
 
-  png::writePNG(img_to_draw / 255) %>% magick::image_read() %>% magick::image_browse(browser = browser)
+  } else {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>%
+      as.array()
+  }
+
+  png::writePNG(img_to_draw) %>% magick::image_read() %>% magick::image_browse(browser = browser)
 
   invisible(NULL)
 }

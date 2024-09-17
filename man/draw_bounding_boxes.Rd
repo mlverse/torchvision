@@ -54,3 +54,12 @@ tensor_image_browse(bboxed)
 }
 }
 }
+\seealso{
+Other image display: 
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{tensor_image_display}()},
+\code{\link{vision_make_grid}()}
+}
+\concept{image display}

@@ -21,7 +21,7 @@ mnist_dataset(
 
 \item{transform}{(callable, optional): A function/transform that  takes in an
 PIL image and returns a transformed version. E.g,
-\code{transforms.RandomCrop}.}
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
 \item{target_transform}{(callable, optional): A function/transform that takes
 in the target and transforms it.}

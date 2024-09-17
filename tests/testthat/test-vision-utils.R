@@ -69,15 +69,20 @@ test_that("draw_keypoints works", {
 test_that("tensor_image_browse works", {
   skip_on_cran()
   skip_on_ci()
-  # color image
+  # uint8 color image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(3, 360, 360))))$to(torch::torch_uint8())
   expect_no_error(tensor_image_browse(image))
-  # grayscale image
+  # uint8 grayscale image
   image <- (255 - (torch::torch_randint(low = 1, high = 200, size = c(1, 360, 360))))$to(torch::torch_uint8())
   expect_no_error(tensor_image_browse(image))
-  # error cases : dtype
-  image_int16 <- image$to(torch::torch_int16())
-  expect_error(tensor_image_browse(image_int16), "dtype torch_uint8")
+
+  # float color image
+  image <- torch::torch_rand(size = c(3, 360, 360))
+  expect_no_error(tensor_image_browse(image))
+  # float grayscale image
+  image <- torch::torch_rand(size = c(1, 360, 360))
+  expect_no_error(tensor_image_browse(image))
+
   # error cases : shape
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 3, 360, 360))$to(torch::torch_uint8())
   expect_error(tensor_image_browse(image), "individual images")

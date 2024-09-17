@@ -17,6 +17,14 @@ test_that("normalize", {
 
 })
 
+test_that("normalize error is glued", {
+
+  x <- torch_randn(3, 10, 10)
+
+  expect_error(transform_normalize(x, 1, 0), "evaluated to zero after conversion to Float")
+
+})
+
 test_that("resize", {
   x <- torch_randn(3, 10, 10)
   o <- transform_resize(x, c(20, 20))
