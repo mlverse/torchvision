@@ -1,5 +1,6 @@
 # torchvision (development version)
 
+- added dataset-fashionmnist.R for `support for more datasets` (@104, @cregouby)
 - fix `transform_rotation` wrongly using w x w for image size (@114, cregouby)
 - `tensor_image_display` and `tensor_image_browse` now accept all tensor_image dtypes. (#115, @cregouby) 
 - fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
