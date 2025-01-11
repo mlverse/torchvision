@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>PermanentRedirect</Code><Message>The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.</Message><Endpoint>ml-inat-competition-datasets.s3.us-east-2.amazonaws.com</Endpoint><Bucket>ml-inat-competition-datasets</Bucket><RequestId>ZGY2MQDAAHRZGRX3</RequestId><HostId>hp05gkl6cD+PpTSanpkQuQqV25gPaQWl6TPW+h0n3/bhBEEGvvjA2t62GIJbW4YyDogRICllZjyCZh5XaPNt7RTn5wcPkb5s7qiZqFtX7S0=</HostId></Error>
