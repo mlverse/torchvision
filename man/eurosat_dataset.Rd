@@ -17,34 +17,12 @@ If \code{NULL}, a temporary directory is used.}
 
 \item{download}{Logical. If \code{TRUE}, downloads the dataset if not already present.}
 
-\item{transform}{Function. Optional transformation to be applied on the images.}
+\item{transform}{Function. Optional transformation to be applied to the images.}
 
-\item{target_transform}{Function. Optional transformation to be applied on the labels.}
-
-\item{i}{Integer. Index of the sample to retrieve.}
+\item{target_transform}{Function. Optional transformation to be applied to the labels.}
 }
 \value{
 An R6 dataset object that inherits from \code{torch::dataset}.
-
-Invisible \code{NULL}.
-Check if the EuroSAT dataset exists
-
-Verifies whether the EuroSAT dataset has already been downloaded
-and extracted in the specified root directory.
-
-Logical. \code{TRUE} if the dataset exists, \code{FALSE} otherwise.
-Get a sample from the dataset
-
-Retrieves a single sample (image and label) from the dataset.
-
-A list containing:
-\itemize{
-\item \code{x}: The image as an array or tensor.
-\item \code{y}: The label as an integer.
-Get the length of the dataset
-}
-
-Integer. The number of samples in the dataset.
 }
 \description{
 Downloads and loads the RGB version of the EuroSAT dataset.
