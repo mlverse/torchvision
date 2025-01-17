@@ -1,10 +1,10 @@
 test_that("eurosat_dataset handles temporary directories correctly", {
   skip_on_cran()
   skip_if_not_installed("torch")
+  
   ds <- eurosat_dataset(download = TRUE)
   
   expect_true(!is.null(ds), info = "Dataset should load successfully")
-  
   expect_true(length(ds) > 0, info = "Dataset should have a non-zero length")
   
   temp_root <- ds$root
@@ -19,3 +19,4 @@ test_that("eurosat_dataset handles temporary directories correctly", {
   image_files <- list.files(extracted_dir, pattern = "\\.jpg$", recursive = TRUE, full.names = TRUE)
   expect_true(length(image_files) > 0, info = "Image files should be present in the extracted directory")
 })
+
