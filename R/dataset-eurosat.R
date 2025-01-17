@@ -26,28 +26,31 @@
 #' }
 #'
 #' @export
-eurosat_dataset <- dataset(
+eurosat_dataset <- torch::dataset(
   name = "eurosat",
   
   resources = list(
-    url = "https://madm.dfki.de/files/sentinel/EuroSAT.zip"
+    url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/c877bcd43f099cd0196738f714544e355477f3fd/EuroSAT.zip",
+    md5 = "c8fa014336c82ac7804f0398fcb19387"
   ),
   
   initialize = function(root = NULL, download = FALSE, transform = NULL, target_transform = NULL) {
-    self$root <- if (is.null(root)) tempfile(fileext = "/") else root
+    self$root <- normalizePath(if (is.null(root)) tempfile(fileext = "/") else root, mustWork = FALSE)
+    self$base_folder <- file.path(self$root, "eurosat")
+    self$data_folder <- file.path(self$base_folder, "2750")
     self$transform <- transform
     self$target_transform <- target_transform
-    if (!dir.exists(self$root)) {
-      dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
-    }
+    
     if (download) {
       self$download()
     }
+    
     if (!self$check_exists()) {
-      rlang::abort("Files not found. Use download=TRUE to retrieve them.")
+      stop("Dataset not found. Use download = TRUE to download it.")
     }
+    
     self$image_paths <- list.files(
-      path = file.path(self$root, "2750"),
+      path = self$data_folder,
       pattern = "\\.jpg$",
       recursive = TRUE,
       full.names = TRUE
@@ -60,39 +63,51 @@ eurosat_dataset <- dataset(
     )
   },
   
-  download = function() {
-    zip_file <- file.path(self$root, "EuroSAT.zip")
-    extracted_dir <- file.path(self$root, "2750")
-    if (dir.exists(extracted_dir)) {
-      message("Dataset already extracted. Skipping download.")
-      return(invisible(NULL))
-    }
-    if (!file.exists(zip_file)) {
-      utils::download.file(self$resources$url, destfile = zip_file, mode = "wb")
-    } else {
-      message("File already downloaded. Skipping re-download.")
-    }
-    utils::unzip(zip_file, exdir = self$root)
-  },
-  
-  check_exists = function() {
-    dir.exists(file.path(self$root, "2750"))
-  },
-  
   .getitem = function(i) {
     img_path <- self$image_paths[i]
     img <- jpeg::readJPEG(img_path)
     label <- self$labels[i]
+    
     if (!is.null(self$transform)) {
       img <- self$transform(img)
     }
     if (!is.null(self$target_transform)) {
       label <- self$target_transform(label)
     }
+    
     list(x = img, y = label)
   },
   
   .length = function() {
     length(self$image_paths)
+  },
+  
+  check_exists = function() {
+    dir.exists(self$data_folder)
+  },
+  
+  download = function() {
+    if (self$check_exists()) {
+      message("Dataset already exists. Skipping download.")
+      return(invisible(NULL))
+    }
+    
+    dir.create(self$base_folder, recursive = TRUE, showWarnings = FALSE)
+    zip_file <- file.path(self$base_folder, "EuroSAT.zip")
+    
+    utils::download.file(
+      self$resources$url,
+      destfile = zip_file,
+      mode = "wb",
+      method = "curl",
+      extra = "--insecure"
+    )
+    
+    md5_actual <- tools::md5sum(zip_file)
+    if (md5_actual != self$resources$md5) {
+      stop("Downloaded file has an invalid MD5 checksum. Please try again.")
+    }
+    
+    utils::unzip(zip_file, exdir = self$base_folder)
   }
 )
