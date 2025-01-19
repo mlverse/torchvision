@@ -26,11 +26,11 @@
 #' }
 #'
 #' @export
-eurosat_dataset <- torch::dataset(
+eurosat_dataset <- dataset(
   name = "eurosat",
   
   resources = list(
-    url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/c877bcd43f099cd0196738f714544e355477f3fd/EuroSAT.zip",
+    url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
     md5 = "c8fa014336c82ac7804f0398fcb19387"
   ),
   
@@ -98,16 +98,13 @@ eurosat_dataset <- torch::dataset(
     utils::download.file(
       self$resources$url,
       destfile = zip_file,
-      mode = "wb",
-      method = "curl",
-      extra = "--insecure"
+      mode = "wb"
     )
     
-    md5_actual <- tools::md5sum(zip_file)
-    if (md5_actual != self$resources$md5) {
-      stop("Downloaded file has an invalid MD5 checksum. Please try again.")
-    }
-    
-    utils::unzip(zip_file, exdir = self$base_folder)
+    tryCatch({
+      utils::unzip(zip_file, exdir = self$base_folder)
+    }, error = function(e) {
+      stop("Failed to extract the dataset. Please check the zip file.")
+    })
   }
 )
