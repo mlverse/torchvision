@@ -1,11 +1,11 @@
-#' EuroSAT Dataset Loader
+#' EuroSAT Dataset Loader (via Hugging Face API)
 #'
-#' Downloads and loads the RGB version of the EuroSAT dataset.
+#' Downloads and loads the EuroSAT dataset using Hugging Face API.
 #' The dataset consists of Sentinel-2 satellite images organized into 10 classes.
 #'
 #' @param root Character. The root directory where the dataset will be stored.
-#'   If `NULL`, a temporary directory is used.
-#' @param download Logical. If `TRUE`, downloads the dataset if not already present.
+#' @param split Character. One of `train`, `val`, or `test`.
+#' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
 #' @param transform Function. Optional transformation to be applied to the images.
 #' @param target_transform Function. Optional transformation to be applied to the labels.
 #'
@@ -13,60 +13,64 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Use a temporary directory and download the dataset
-#' ds <- eurosat_dataset(download = TRUE)
-#'
-#' # Specify a custom root directory
-#' ds <- eurosat_dataset(root = "./data/eurosat", download = TRUE)
+#' # Initialize the dataset
+#' ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
 #'
 #' # Access the first sample
 #' sample <- ds[1]
-#' print(sample$x) # Image
+#'  # Image
 #' print(sample$y) # Label
 #' }
-#'
 #' @export
-eurosat_dataset <- dataset(
+eurosat_dataset <- torch::dataset(
   name = "eurosat",
   
-  resources = list(
-    url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
-    md5 = "c8fa014336c82ac7804f0398fcb19387"
-  ),
-  
-  initialize = function(root = NULL, download = FALSE, transform = NULL, target_transform = NULL) {
-    self$root <- normalizePath(if (is.null(root)) tempfile(fileext = "/") else root, mustWork = FALSE)
-    self$base_folder <- file.path(self$root, "eurosat")
-    self$data_folder <- file.path(self$base_folder, "2750")
+  initialize = function(root, split = "train", download = FALSE, transform = NULL, target_transform = NULL) {
+    self$root <- normalizePath(root, mustWork = FALSE)
+    self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
+    self$data_file <- file.path(self$root, paste0("eurosat_", split, ".json"))
+    
+    if (!split %in% c("train", "val", "test")) {
+      stop("Invalid split. Choose one of 'train', 'val', or 'test'.")
+    }
     
     if (download) {
       self$download()
     }
     
-    if (!self$check_exists()) {
-      stop("Dataset not found. Use download = TRUE to download it.")
+    if (!file.exists(self$data_file)) {
+      stop("Dataset not found. Use `download = TRUE` to download it.")
     }
     
-    self$image_paths <- list.files(
-      path = self$data_folder,
-      pattern = "\\.jpg$",
-      recursive = TRUE,
-      full.names = TRUE
+    data <- jsonlite::fromJSON(self$data_file)
+    self$data <- data$rows
+  },
+  
+  download = function() {
+    if (file.exists(self$data_file)) {
+      message("Dataset already exists. Skipping download.")
+      return(invisible(NULL))
+    }
+    
+    dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
+    split_url <- sprintf(
+      "https://datasets-server.huggingface.co/rows?dataset=torchgeo%%2Feurosat&config=default&split=%s&offset=0&length=100",
+      self$split
     )
-    self$labels <- sapply(
-      basename(dirname(self$image_paths)), 
-      function(class_name) match(class_name, c("AnnualCrop", "Forest", "HerbaceousVegetation", "Highway",
-                                               "Industrial", "Pasture", "PermanentCrop", "Residential",
-                                               "River", "SeaLake"))
+    
+    utils::download.file(
+      split_url,
+      destfile = self$data_file,
+      mode = "wb"
     )
   },
   
-  .getitem = function(i) {
-    img_path <- self$image_paths[i]
-    img <- jpeg::readJPEG(img_path)
-    label <- self$labels[i]
+  .getitem = function(index) {
+    row <- self$data[index, ]
+    img <- base64enc::base64decode(row$image) # Assuming images are base64 encoded
+    label <- row$label
     
     if (!is.null(self$transform)) {
       img <- self$transform(img)
@@ -79,32 +83,6 @@ eurosat_dataset <- dataset(
   },
   
   .length = function() {
-    length(self$image_paths)
-  },
-  
-  check_exists = function() {
-    dir.exists(self$data_folder)
-  },
-  
-  download = function() {
-    if (self$check_exists()) {
-      message("Dataset already exists. Skipping download.")
-      return(invisible(NULL))
-    }
-    
-    dir.create(self$base_folder, recursive = TRUE, showWarnings = FALSE)
-    zip_file <- file.path(self$base_folder, "EuroSAT.zip")
-    
-    utils::download.file(
-      self$resources$url,
-      destfile = zip_file,
-      mode = "wb"
-    )
-    
-    tryCatch({
-      utils::unzip(zip_file, exdir = self$base_folder)
-    }, error = function(e) {
-      stop("Failed to extract the dataset. Please check the zip file.")
-    })
+    nrow(self$data)
   }
 )

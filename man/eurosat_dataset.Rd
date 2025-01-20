@@ -2,20 +2,22 @@
 % Please edit documentation in R/dataset-eurosat.R
 \name{eurosat_dataset}
 \alias{eurosat_dataset}
-\title{EuroSAT Dataset Loader}
+\title{EuroSAT Dataset Loader (via Hugging Face API)}
 \usage{
 eurosat_dataset(
-  root = NULL,
+  root,
+  split = "train",
   download = FALSE,
   transform = NULL,
   target_transform = NULL
 )
 }
 \arguments{
-\item{root}{Character. The root directory where the dataset will be stored.
-If \code{NULL}, a temporary directory is used.}
+\item{root}{Character. The root directory where the dataset will be stored.}
 
-\item{download}{Logical. If \code{TRUE}, downloads the dataset if not already present.}
+\item{split}{Character. One of \code{train}, \code{val}, or \code{test}.}
+
+\item{download}{Logical. If \code{TRUE}, downloads the dataset rows from the API if not already present.}
 
 \item{transform}{Function. Optional transformation to be applied to the images.}
 
@@ -25,21 +27,17 @@ If \code{NULL}, a temporary directory is used.}
 An R6 dataset object that inherits from \code{torch::dataset}.
 }
 \description{
-Downloads and loads the RGB version of the EuroSAT dataset.
+Downloads and loads the EuroSAT dataset using Hugging Face API.
 The dataset consists of Sentinel-2 satellite images organized into 10 classes.
 }
 \examples{
 \dontrun{
-# Use a temporary directory and download the dataset
-ds <- eurosat_dataset(download = TRUE)
-
-# Specify a custom root directory
-ds <- eurosat_dataset(root = "./data/eurosat", download = TRUE)
+# Initialize the dataset
+ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
 
 # Access the first sample
 sample <- ds[1]
-print(sample$x) # Image
+ # Image
 print(sample$y) # Label
 }
-
 }

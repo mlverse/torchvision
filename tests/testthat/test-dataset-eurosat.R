@@ -1,19 +1,21 @@
-test_that("eurosat_dataset handles dataset correctly with secure download", {
+test_that("eurosat_dataset API handles splits correctly via API", {
   skip_on_cran()
   skip_if_not_installed("torch")
   
-  ds <- eurosat_dataset(download = TRUE)
-  expect_true(!is.null(ds), info = "Dataset should load successfully")
-  expect_true(length(ds) > 0, info = "Dataset should have a non-zero length")
+  # Test train split
+  train_ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
+  expect_true(length(train_ds) > 0, info = "Train dataset should have a non-zero length")
   
-  temp_root <- ds$root
-  expect_true(dir.exists(temp_root), info = "Temporary directory should exist")
+  # Test validation split
+  val_ds <- eurosat_dataset(root = "./data/eurosat", split = "val", download = TRUE)
+  expect_true(length(val_ds) > 0, info = "Validation dataset should have a non-zero length")
   
-  extracted_dir <- list.dirs(temp_root, recursive = TRUE, full.names = TRUE)
-  extracted_dir <- extracted_dir[grepl("/2750$", extracted_dir)]
-  expect_true(length(extracted_dir) > 0, info = "Extracted data folder should exist")
+  # Test test split
+  test_ds <- eurosat_dataset(root = "./data/eurosat", split = "test", download = TRUE)
+  expect_true(length(test_ds) > 0, info = "Test dataset should have a non-zero length")
   
-  image_files <- list.files(extracted_dir, pattern = "\\.jpg$", recursive = TRUE, full.names = TRUE)
-  expect_true(length(image_files) > 0, info = "Image files should be present in the extracted directory")
+  # Test data content
+  sample <- train_ds[1]
+  expect_true(!is.null(sample$x), info = "Image should not be null")
+  expect_true(!is.null(sample$y), info = "Label should not be null")
 })
-
