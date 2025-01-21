@@ -4,7 +4,7 @@
 #' The dataset consists of Sentinel-2 satellite images organized into 10 classes.
 #'
 #' @param root Character. The root directory where the dataset will be stored.
-#' @param split Character. One of `train`, `val`, or `test`.
+#' @param split Character. One of `train`, `validation`, or `test`.
 #' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
 #' @param transform Function. Optional transformation to be applied to the images.
 #' @param target_transform Function. Optional transformation to be applied to the labels.
@@ -18,7 +18,7 @@
 #'
 #' # Access the first sample
 #' sample <- ds[1]
-#'  # Image
+#' print(sample$x) # Image
 #' print(sample$y) # Label
 #' }
 #' @export
@@ -32,8 +32,8 @@ eurosat_dataset <- torch::dataset(
     self$target_transform <- target_transform
     self$data_file <- file.path(self$root, paste0("eurosat_", split, ".json"))
     
-    if (!split %in% c("train", "val", "test")) {
-      stop("Invalid split. Choose one of 'train', 'val', or 'test'.")
+    if (!split %in% c("train", "validation", "test")) {
+      stop("Invalid split. Choose one of 'train', 'validation', or 'test'.")
     }
     
     if (download) {
@@ -44,12 +44,16 @@ eurosat_dataset <- torch::dataset(
       stop("Dataset not found. Use `download = TRUE` to download it.")
     }
     
-    data <- jsonlite::fromJSON(self$data_file)
+    data <- tryCatch(
+      jsonlite::fromJSON(self$data_file),
+      error = function(e) stop("Failed to parse dataset JSON file.")
+    )
+    
     self$data <- data$rows
   },
   
   download = function() {
-    if (file.exists(self$data_file)) {
+    if (file.exists(self$data_file) && file.size(self$data_file) > 0) {
       message("Dataset already exists. Skipping download.")
       return(invisible(NULL))
     }
@@ -60,16 +64,33 @@ eurosat_dataset <- torch::dataset(
       self$split
     )
     
-    utils::download.file(
-      split_url,
-      destfile = self$data_file,
-      mode = "wb"
-    )
+    tryCatch({
+      utils::download.file(
+        split_url,
+        destfile = self$data_file,
+        mode = "wb"
+      )
+      if (file.size(self$data_file) == 0) stop("Downloaded file is empty.")
+    }, error = function(e) {
+      stop("Failed to download dataset: ", conditionMessage(e))
+    })
   },
   
   .getitem = function(index) {
     row <- self$data[index, ]
-    img <- base64enc::base64decode(row$image) # Assuming images are base64 encoded
+    
+    img <- tryCatch(
+      base64enc::base64decode(row$image),
+      error = function(e) {
+        warning(sprintf("Skipping row %d due to image decoding failure: %s", index, conditionMessage(e)))
+        NULL
+      }
+    )
+    
+    if (is.null(img)) {
+      return(NULL)
+    }
+    
     label <- row$label
     
     if (!is.null(self$transform)) {

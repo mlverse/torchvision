@@ -7,8 +7,8 @@ test_that("eurosat_dataset API handles splits correctly via API", {
   expect_true(length(train_ds) > 0, info = "Train dataset should have a non-zero length")
   
   # Test validation split
-  val_ds <- eurosat_dataset(root = "./data/eurosat", split = "val", download = TRUE)
-  expect_true(length(val_ds) > 0, info = "Validation dataset should have a non-zero length")
+  validation_ds <- eurosat_dataset(root = "./data/eurosat", split = "validation", download = TRUE)
+  expect_true(length(validation_ds) > 0, info = "Validation dataset should have a non-zero length")
   
   # Test test split
   test_ds <- eurosat_dataset(root = "./data/eurosat", split = "test", download = TRUE)
