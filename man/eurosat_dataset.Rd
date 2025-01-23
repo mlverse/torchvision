@@ -15,7 +15,7 @@ eurosat_dataset(
 \arguments{
 \item{root}{Character. The root directory where the dataset files will be stored.}
 
-\item{split}{Character. One of "train", "val", or "test".}
+\item{split}{Character. One of \code{train}, \code{val}, or \code{test}.}
 
 \item{download}{Logical. If TRUE, downloads the ZIP and JSON file if not present.}
 
@@ -38,7 +38,7 @@ ds <- eurosat_dataset(root = "./data/eurosat", split = "val", download = TRUE)
 
 # Access the first sample
 sample <- ds[1]
-print(dim(sample$x)) # Image array dimensions
-print(sample$y)      # Label
+ # Image
+print(sample$y) # Label
 }
 }

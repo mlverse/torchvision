@@ -51,11 +51,13 @@ eurosat_dataset <- torch::dataset(
     if (!file.exists(self$split_file)) {
       stop(sprintf("Split file not found for split='%s'.", split))
     }
-    if (!dir.exists(self$images_dir)) {
-      stop("Images directory not found: ", self$images_dir)
-    }
     
-    self$data <- readLines(self$split_file, warn = FALSE)
+    data <- tryCatch(
+      jsonlite::fromJSON(self$data_file),
+      error = function(e) stop("Failed to parse dataset JSON file.")
+    )
+    
+    self$data <- data$rows
   },
   
   download = function() {
