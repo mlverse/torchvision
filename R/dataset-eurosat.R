@@ -25,85 +25,87 @@
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
   
-  initialize = function(root, split = "train", download = FALSE, transform = NULL, target_transform = NULL) {
+  initialize = function(root,
+                        split = "train",
+                        download = FALSE,
+                        transform = NULL,
+                        target_transform = NULL) {
     self$root <- normalizePath(root, mustWork = FALSE)
     self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
-    self$data_file <- file.path(self$root, paste0("eurosat_", split, ".json"))
     
-    if (!split %in% c("train", "validation", "test")) {
-      stop("Invalid split. Choose one of 'train', 'validation', or 'test'.")
+    if (!split %in% c("train", "val", "test")) {
+      stop("Invalid split. Must be one of 'train', 'val', or 'test'.")
     }
+    
+    self$zip_file <- file.path(self$root, "EuroSAT.zip")
+    self$images_dir <- file.path(self$root, "images")
+    self$split_file <- file.path(self$root, sprintf("eurosat-%s.txt", split))
     
     if (download) {
       self$download()
     }
     
-    if (!file.exists(self$data_file)) {
-      stop("Dataset not found. Use `download = TRUE` to download it.")
+    if (!file.exists(self$split_file)) {
+      stop(sprintf("Split file not found for split='%s'.", split))
+    }
+    if (!dir.exists(self$images_dir)) {
+      stop("Images directory not found: ", self$images_dir)
     }
     
-    data <- tryCatch(
-      jsonlite::fromJSON(self$data_file),
-      error = function(e) stop("Failed to parse dataset JSON file.")
-    )
-    
-    self$data <- data$rows
+    # Suppress the "incomplete final line" warning:
+    self$data <- readLines(self$split_file, warn = FALSE)
   },
   
   download = function() {
-    if (file.exists(self$data_file) && file.size(self$data_file) > 0) {
-      message("Dataset already exists. Skipping download.")
-      return(invisible(NULL))
+    if (!file.exists(self$zip_file) || file.size(self$zip_file) == 0) {
+      dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
+      zip_url <- "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true"
+      message("Downloading EuroSAT ZIP...")
+      utils::download.file(url = zip_url, destfile = self$zip_file, mode = "wb")
+      message("EuroSAT ZIP downloaded.")
     }
     
-    dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
-    split_url <- sprintf(
-      "https://datasets-server.huggingface.co/rows?dataset=torchgeo%%2Feurosat&config=default&split=%s&offset=0&length=100",
+    if (!dir.exists(self$images_dir)) {
+      message("Extracting EuroSAT ZIP...")
+      utils::unzip(self$zip_file, exdir = self$images_dir)
+      message("Extraction complete.")
+    }
+    
+    txt_url <- sprintf(
+      "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-%s.txt?download=true",
       self$split
     )
-    
-    tryCatch({
-      utils::download.file(
-        split_url,
-        destfile = self$data_file,
-        mode = "wb"
-      )
-      if (file.size(self$data_file) == 0) stop("Downloaded file is empty.")
-    }, error = function(e) {
-      stop("Failed to download dataset: ", conditionMessage(e))
-    })
+    message("Downloading split text file: ", txt_url)
+    utils::download.file(url = txt_url, destfile = self$split_file, mode = "wb")
+    if (file.size(self$split_file) == 0) {
+      stop("Downloaded split file is empty: ", self$split_file)
+    }
   },
   
   .getitem = function(index) {
-    row <- self$data[index, ]
+    filename <- self$data[index]
+    label <- sub("_.*", "", filename)
     
-    img <- tryCatch(
-      base64enc::base64decode(row$image),
-      error = function(e) {
-        warning(sprintf("Skipping row %d due to image decoding failure: %s", index, conditionMessage(e)))
-        NULL
-      }
-    )
-    
-    if (is.null(img)) {
-      return(NULL)
+    image_path <- file.path(self$images_dir, "2750", label, filename)
+    if (!file.exists(image_path)) {
+      stop("Image file not found: ", image_path)
     }
     
-    label <- row$label
+    img_array <- jpeg::readJPEG(image_path)
     
     if (!is.null(self$transform)) {
-      img <- self$transform(img)
+      img_array <- self$transform(img_array)
     }
     if (!is.null(self$target_transform)) {
       label <- self$target_transform(label)
     }
     
-    list(x = img, y = label)
+    list(x = img_array, y = label)
   },
   
   .length = function() {
-    nrow(self$data)
+    length(self$data)
   }
 )

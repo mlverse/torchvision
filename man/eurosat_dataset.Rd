@@ -15,7 +15,7 @@ eurosat_dataset(
 \arguments{
 \item{root}{Character. The root directory where the dataset will be stored.}
 
-\item{split}{Character. One of \code{train}, \code{val}, or \code{test}.}
+\item{split}{Character. One of \code{train}, \code{validation}, or \code{test}.}
 
 \item{download}{Logical. If \code{TRUE}, downloads the dataset rows from the API if not already present.}
 
@@ -37,7 +37,7 @@ ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
 
 # Access the first sample
 sample <- ds[1]
- # Image
+print(sample$x) # Image
 print(sample$y) # Label
 }
 }
