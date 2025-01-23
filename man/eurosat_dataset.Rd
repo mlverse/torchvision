@@ -13,31 +13,32 @@ eurosat_dataset(
 )
 }
 \arguments{
-\item{root}{Character. The root directory where the dataset will be stored.}
+\item{root}{Character. The root directory where the dataset files will be stored.}
 
-\item{split}{Character. One of \code{train}, \code{val}, or \code{test}.}
+\item{split}{Character. One of "train", "val", or "test".}
 
-\item{download}{Logical. If \code{TRUE}, downloads the dataset rows from the API if not already present.}
+\item{download}{Logical. If TRUE, downloads the ZIP and JSON file if not present.}
 
-\item{transform}{Function. Optional transformation to be applied to the images.}
+\item{transform}{Function. Optional transformation applied to the loaded image array.}
 
-\item{target_transform}{Function. Optional transformation to be applied to the labels.}
+\item{target_transform}{Function. Optional transformation applied to the label.}
 }
 \value{
-An R6 dataset object that inherits from \code{torch::dataset}.
+An R6 dataset object inheriting from \code{torch::dataset}.
 }
 \description{
-Downloads and loads the EuroSAT dataset using Hugging Face API.
-The dataset consists of Sentinel-2 satellite images organized into 10 classes.
+Downloads the EuroSAT ZIP archive and the split-specific JSON listing, then
+loads images according to the JSON. The images are assumed to be stored
+in \verb{[root]/images/2750/<Class>/<Filename>.jpg} once extracted.
 }
 \examples{
 \dontrun{
-# Initialize the dataset
-ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
+# Initialize the dataset (downloads both ZIP + JSON if not already)
+ds <- eurosat_dataset(root = "./data/eurosat", split = "val", download = TRUE)
 
 # Access the first sample
 sample <- ds[1]
- # Image
-print(sample$y) # Label
+print(dim(sample$x)) # Image array dimensions
+print(sample$y)      # Label
 }
 }
