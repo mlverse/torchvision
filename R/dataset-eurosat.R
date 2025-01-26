@@ -1,26 +1,25 @@
 #' EuroSAT Dataset Loader (via Hugging Face API)
 #'
-#' Downloads the EuroSAT ZIP archive and the split-specific JSON listing, then
-#' loads images according to the JSON. The images are assumed to be stored
-#' in `[root]/images/2750/<Class>/<Filename>.jpg` once extracted.
+#' Downloads and loads the EuroSAT dataset using Hugging Face API.
+#' The dataset consists of Sentinel-2 satellite images organized into 10 classes.
 #'
-#' @param root Character. The root directory where the dataset files will be stored.
-#' @param split Character. One of "train", "val", or "test".
-#' @param download Logical. If TRUE, downloads the ZIP and JSON file if not present.
-#' @param transform Function. Optional transformation applied to the loaded image array.
-#' @param target_transform Function. Optional transformation applied to the label.
+#' @param root Character. The root directory where the dataset will be stored.
+#' @param split Character. One of `train`, `validation`, or `test`.
+#' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
+#' @param transform Function. Optional transformation to be applied to the images.
+#' @param target_transform Function. Optional transformation to be applied to the labels.
 #'
-#' @return An R6 dataset object inheriting from `torch::dataset`.
+#' @return An R6 dataset object that inherits from `torch::dataset`.
 #'
 #' @examples
 #' \dontrun{
-#' # Initialize the dataset (downloads both ZIP + JSON if not already)
-#' ds <- eurosat_dataset(root = "./data/eurosat", split = "val", download = TRUE)
+#' # Initialize the dataset
+#' ds <- eurosat_dataset(root = "./data/eurosat", split = "train", download = TRUE)
 #'
 #' # Access the first sample
 #' sample <- ds[1]
-#' print(dim(sample$x)) # Image array dimensions
-#' print(sample$y)      # Label
+#' print(sample$x) # Image
+#' print(sample$y) # Label
 #' }
 #' @export
 eurosat_dataset <- torch::dataset(
@@ -52,12 +51,8 @@ eurosat_dataset <- torch::dataset(
       stop(sprintf("Split file not found for split='%s'.", split))
     }
     
-    data <- tryCatch(
-      jsonlite::fromJSON(self$data_file),
-      error = function(e) stop("Failed to parse dataset JSON file.")
-    )
-    
-    self$data <- data$rows
+    # Read the split-specific text file, ignoring incomplete final line warnings
+    self$data <- suppressWarnings(readLines(self$split_file))
   },
   
   download = function() {
@@ -75,6 +70,7 @@ eurosat_dataset <- torch::dataset(
       message("Extraction complete.")
     }
     
+    # Download the split-specific text file
     txt_url <- sprintf(
       "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-%s.txt?download=true",
       self$split
