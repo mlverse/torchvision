@@ -44,15 +44,17 @@ test_that("dataloader from eurosat_dataset gets torch tensors", {
   skip_if_not_installed("torch")
 
   ds <- eurosat_dataset(root = temp_root, split = "train", download = FALSE, transform = transform_to_tensor)
-  dl <- torch::dataloader(ds, batch_size = 50)
-  expect_length(dl, 324)
+  dl <- torch::dataloader(ds, batch_size = 10)
+  # 16,2k turns into 1620 batches of 10
+  expect_length(dl, 1620)
   iter <- dataloader_make_iter(dl)
   i <- dataloader_next(iter)
   # Check shape, dtype, and values on X
-  expect_tensor_shape(i[[1]], c(50, 3, 64, 64))
+  expect_tensor_shape(i[[1]], c(10, 3, 64, 64))
   expect_tensor_dtype(i[[1]], torch_float())
   expect_true((torch_max(i[[1]]) <= 1)$item())
   # Check shape, dtype and names on y
-  expect_tensor_shape(i[[2]], 50)
+  expect_tensor_shape(i[[2]], 10
+                      )
   expect_tensor_dtype(i[[2]], torch_long())
   expect_named(i, c("x", "y"))})
