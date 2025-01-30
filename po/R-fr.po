@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-23 09:42+0200\n"
-"PO-Revision-Date: 2024-08-23 09:49+0200\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2025-01-30 08:42+0100\n"
+"PO-Revision-Date: 2025-01-30 08:58+0100\n"
+"Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.4.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: conditions.R:2
 msgid "type_error"
@@ -34,6 +34,43 @@ msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
 #: dataset-cifar.R:86
 msgid "Corrupt file! Delete the file in {p} and try again."
 msgstr "Fichier corrompu. Supprimez le fichier {p} et recommencez."
+
+#: dataset-eurosat.R:39
+msgid "Invalid split. Must be one of 'train', 'val', or 'test'."
+msgstr ""
+"`split` invalide. Il doit être choisit parmi `train`, `val`, ou `test`."
+
+#: dataset-eurosat.R:51
+msgid "Split file not found for split='%s'."
+msgstr "Fichier de split introuvable pour `split=`'%s'."
+
+#: dataset-eurosat.R:62
+msgid "Downloading EuroSAT ZIP..."
+msgstr "Téléchargement du fichize zip `EuroSAT."
+
+#: dataset-eurosat.R:64
+msgid "EuroSAT ZIP downloaded."
+msgstr "`EuroSAT` zip téléchargé."
+
+#: dataset-eurosat.R:68
+msgid "Extracting EuroSAT ZIP..."
+msgstr "Extraction d' `EuroSAT.zip`."
+
+#: dataset-eurosat.R:70
+msgid "Extraction complete."
+msgstr "Extraction réussie."
+
+#: dataset-eurosat.R:78
+msgid "Downloading split text file:"
+msgstr "Téléchargement du fichier texte de `split:"
+
+#: dataset-eurosat.R:81
+msgid "Downloaded split file is empty:"
+msgstr "Le fichier de `split` est vide :"
+
+#: dataset-eurosat.R:91
+msgid "Image file not found:"
+msgstr "Fichier d'image introuvable :"
 
 #: dataset-mnist.R:44
 msgid "Dataset not found. You can use `download = TRUE` to download it."
@@ -72,23 +109,6 @@ msgstr "Les extensions supportées sont {paste(extensions, collapse=',')}"
 #: folder-dataset.R:138
 msgid "unknown extension {ext} in path {path}"
 msgstr "Extension de fichier {ext} inconnue pour {path}."
-
-#: models-efficientnet.R:29 models-resnet.R:34
-msgid "basic_block only supports groups=1 and base_width=64"
-msgstr ""
-"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
-
-#: models-efficientnet.R:32 models-resnet.R:37
-msgid "Dilation > 1 not supported in basic_block"
-msgstr "`dilation > 1` non compatible avec le `basic_block`"
-
-#: models-efficientnet.R:140 models-resnet.R:145
-msgid "replace_stride_with_dilation should be NULL"
-msgstr "`replace_stride_with_dilation` doit être `NULL`"
-
-#: models-efficientnet.R:141 models-resnet.R:146
-msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
-msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
 
 #: models-inception.R:16
 msgid ""
@@ -129,6 +149,23 @@ msgid "or a 4-element list, got {inverted_residual_setting}"
 msgstr ""
 "ou une liste de vecteurs, chacun de longeur 4. Ici, c'est "
 "{inverted_residual_setting}"
+
+#: models-resnet.R:34
+msgid "basic_block only supports groups=1 and base_width=64"
+msgstr ""
+"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
+
+#: models-resnet.R:37
+msgid "Dilation > 1 not supported in basic_block"
+msgstr "`dilation > 1` non compatible avec le `basic_block`"
+
+#: models-resnet.R:145
+msgid "replace_stride_with_dilation should be NULL"
+msgstr "`replace_stride_with_dilation` doit être `NULL`"
+
+#: models-resnet.R:146
+msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
+msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
 
 #: tiny-imagenet-dataset.R:43
 msgid "Downloading tiny imagenet dataset!"
@@ -279,11 +316,15 @@ msgstr ""
 msgid "gamma must be non-negative"
 msgstr "`gamma` doit être positif."
 
-#: vision_utils.R:115
+#: vision_utils.R:105 vision_utils.R:204 vision_utils.R:276
+msgid "magick"
+msgstr ""
+
+#: vision_utils.R:117
 msgid "boxes doesn't contain any box. No box was drawn"
 msgstr "`boxes` ne contient aucun cadre. Aucun cadre n'a été tracé."
 
-#: vision_utils.R:120
+#: vision_utils.R:122
 msgid ""
 "Number of labels {length(labels)} cannot be broadcasted on number of boxes "
 "{num_boxes}"
@@ -291,6 +332,6 @@ msgstr ""
 "Le nombre de labels ({length(labels)}) n'est pas un multiple du nombre de "
 "cadres ({num_boxes}) et ne peut pas être broadcasté."
 
-#: vision_utils.R:214
+#: vision_utils.R:217
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."
