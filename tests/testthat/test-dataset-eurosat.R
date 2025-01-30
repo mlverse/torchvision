@@ -54,7 +54,6 @@ test_that("dataloader from eurosat_dataset gets torch tensors", {
   expect_tensor_dtype(i[[1]], torch_float())
   expect_true((torch_max(i[[1]]) <= 1)$item())
   # Check shape, dtype and names on y
-  expect_tensor_shape(i[[2]], 10
-                      )
+  expect_tensor_shape(i[[2]], 10)
   expect_tensor_dtype(i[[2]], torch_long())
   expect_named(i, c("x", "y"))})
