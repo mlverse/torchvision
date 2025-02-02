@@ -51,8 +51,13 @@ eurosat_dataset <- torch::dataset(
       stop(sprintf("Split file not found for split='%s'.", split))
     }
     
-    # Read the split-specific text file, ignoring incomplete final line warnings
     self$data <- suppressWarnings(readLines(self$split_file))
+    self$load_meta()
+  },
+  
+  load_meta = function() {
+    self$classes <- unique(sub("_.*", "", self$data))
+    self$class_to_idx <- setNames(seq_along(self$classes) - 1, self$classes)
   },
   
   download = function() {
@@ -96,14 +101,14 @@ eurosat_dataset <- torch::dataset(
     if (!is.null(self$transform)) {
       img_array <- self$transform(img_array)
     }
-    if (!is.null(self$target_transform)) {
-      label <- self$target_transform(label)
-    }
     
-    list(x = img_array, y = label)
+    label_idx <- torch::torch_tensor(self$class_to_idx[[label]], dtype = torch_long())$squeeze()
+    
+    list(x = img_array, y = label_idx)
   },
   
   .length = function() {
     length(self$data)
   }
 )
+
