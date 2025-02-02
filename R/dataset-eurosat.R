@@ -51,8 +51,13 @@ eurosat_dataset <- torch::dataset(
       stop(sprintf("Split file not found for split='%s'.", split))
     }
     
-    # Read the split-specific text file, ignoring incomplete final line warnings
     self$data <- suppressWarnings(readLines(self$split_file))
+    self$load_meta()
+  },
+  
+  load_meta = function() {
+    self$classes <- unique(sub("_.*", "", self$data))
+    self$class_to_idx <- setNames(seq_along(self$classes) - 1, self$classes)
   },
   
   download = function() {
@@ -84,7 +89,7 @@ eurosat_dataset <- torch::dataset(
   
   .getitem = function(index) {
     filename <- self$data[index]
-    label <- sub("_.*", "", filename)
+    label <- as.character(sub("_.*", "", filename))  # Ensure label is a character string
     
     image_path <- file.path(self$images_dir, "2750", label, filename)
     if (!file.exists(image_path)) {
@@ -96,14 +101,21 @@ eurosat_dataset <- torch::dataset(
     if (!is.null(self$transform)) {
       img_array <- self$transform(img_array)
     }
-    if (!is.null(self$target_transform)) {
-      label <- self$target_transform(label)
+    
+    # Ensure label exists in class_to_idx
+    if (!label %in% names(self$class_to_idx)) {
+      stop("Label not found in class_to_idx: ", label)
     }
     
-    list(x = img_array, y = label)
+    # Convert label index to torch tensor with dtype = torch_long()
+    label_idx <- torch::torch_tensor(as.integer(self$class_to_idx[[label]]), dtype = torch_long())$squeeze()
+    
+    list(x = img_array, y = label_idx)
   },
+  
   
   .length = function() {
     length(self$data)
   }
 )
+
