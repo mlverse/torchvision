@@ -89,7 +89,7 @@ eurosat_dataset <- torch::dataset(
   
   .getitem = function(index) {
     filename <- self$data[index]
-    label <- sub("_.*", "", filename)
+    label <- as.character(sub("_.*", "", filename))  # Ensure label is a character string
     
     image_path <- file.path(self$images_dir, "2750", label, filename)
     if (!file.exists(image_path)) {
@@ -102,10 +102,17 @@ eurosat_dataset <- torch::dataset(
       img_array <- self$transform(img_array)
     }
     
-    label_idx <- torch::torch_tensor(self$class_to_idx[[label]], dtype = torch_long())$squeeze()
+    # Ensure label exists in class_to_idx
+    if (!label %in% names(self$class_to_idx)) {
+      stop("Label not found in class_to_idx: ", label)
+    }
+    
+    # Convert label index to torch tensor with dtype = torch_long()
+    label_idx <- torch::torch_tensor(as.integer(self$class_to_idx[[label]]), dtype = torch_long())$squeeze()
     
     list(x = img_array, y = label_idx)
   },
+  
   
   .length = function() {
     length(self$data)

@@ -1,42 +1,59 @@
-test_that("eurosat_dataset API handles splits correctly via API", {
+temp_root <- tempfile(fileext = "/")
+
+test_that("eurosat_dataset downloads correctly whatever the split", {
   skip_on_cran()
   skip_if_not_installed("torch")
-  
-  temp_root <- "./data/eurosat_test"
-  
-  if (!dir.exists(temp_root)) {
-    dir.create(temp_root, recursive = TRUE)
-  }
-  
-  ds <- eurosat_dataset(root = temp_root, split = "train", download = TRUE)
-  
-  expect_true(!is.null(ds), "Dataset should load successfully")
-  expect_true(length(ds) > 0, "Dataset should have a non-zero length")
-  
-  expect_true(dir.exists(temp_root), "Temporary directory should exist")
-  
-  extracted_dir <- list.dirs(temp_root, recursive = TRUE, full.names = TRUE)
-  extracted_dir <- extracted_dir[grepl("/2750$", extracted_dir)]
-  expect_true(length(extracted_dir) > 0, "Extracted data folder should exist")
-  
+
+
+  expect_error(
+    eurosat_dataset(root = temp_root, split = "test", download = FALSE),
+    "Split file not found for split",
+    label = "Dataset should fail if not previously downloaded"
+  )
+
+  expect_no_error(
+    ds <- eurosat_dataset(root = temp_root, split = "train", download = TRUE),
+    label = "Dataset should load successfully"
+  )
+
+  expect_is(ds, "dataset", "train should be a dataset")
+
+  extracted_dir <- list.dirs(paste0(temp_root,"images/2750"), recursive = TRUE, full.names = TRUE)
+  # Extracted data folder have one folder per category
+  expect_length(extracted_dir, 11)
+
   image_files <- list.files(extracted_dir, pattern = "\\.jpg$", recursive = TRUE, full.names = TRUE)
-  expect_true(length(image_files) > 0, "Image files should be present in the extracted directory")
-  
+  expect_gte(length(image_files), 16200, "Image files should be present in the extracted directory")
+
   train_ds <- eurosat_dataset(root = temp_root, split = "train", download = TRUE)
-  expect_equal(length(train_ds), 16200, tolerance = 0, label = "Train dataset should have exactly 16200 samples")
-  
+  # Train dataset should have exactly 16200 samples and reuse existing folder
+  expect_length(train_ds, 16200)
+
   val_ds <- eurosat_dataset(root = temp_root, split = "val", download = TRUE)
-  expect_equal(length(val_ds), 5400, tolerance = 0, label = "Validation dataset should have exactly 5400 samples")
-  
+  # Validation dataset should have exactly 5400 samples
+  expect_length(val_ds, 5400)
+
   test_ds <- eurosat_dataset(root = temp_root, split = "test", download = TRUE)
-  expect_equal(length(test_ds), 5400, tolerance = 0, label = "Test dataset should have exactly 5400 samples")
-  
-  sample <- train_ds[1]
-  
-  expect_true(!is.null(sample$x), "Image should not be null")
-  expect_equal(dim(sample$x), c(64, 64, 3), label = "Image tensor should have shape (64, 64, 3)")
-  expect_equal(typeof(sample$x), "double", label = "Image tensor should have data type 'double'")
-  
-  expect_true(!is.null(sample$y), "Label should not be null")
-  expect_equal(typeof(sample$y), "character", label = "Label should have data type 'character'")
+  # Test dataset should have exactly 5400 samples
+  expect_length(test_ds, 5400)
+
 })
+
+test_that("dataloader from eurosat_dataset gets torch tensors", {
+  skip_on_cran()
+  skip_if_not_installed("torch")
+
+  ds <- eurosat_dataset(root = temp_root, split = "train", download = FALSE, transform = transform_to_tensor)
+  dl <- torch::dataloader(ds, batch_size = 10)
+  # 16,2k turns into 1620 batches of 10
+  expect_length(dl, 1620)
+  iter <- dataloader_make_iter(dl)
+  i <- dataloader_next(iter)
+  # Check shape, dtype, and values on X
+  expect_tensor_shape(i[[1]], c(10, 3, 64, 64))
+  expect_tensor_dtype(i[[1]], torch_float())
+  expect_true((torch_max(i[[1]]) <= 1)$item())
+  # Check shape, dtype and names on y
+  expect_tensor_shape(i[[2]], 10)
+  expect_tensor_dtype(i[[2]], torch_long())
+  expect_named(i, c("x", "y"))})
