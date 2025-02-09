@@ -99,7 +99,7 @@ eurosat_dataset <- torch::dataset(
 
     image_path <- grep(paste0(filename,"."), self$img_files, value = TRUE, fixed = TRUE)
     if (length(image_path) != 1) {
-      value_error("Image file not found for `{filename}`.")
+      value_error("Image file `{filename}` not found.")
     }
     image_ext <- fs::path_ext(image_path)
     if (image_ext == "jpg") {
@@ -135,7 +135,7 @@ eurosat_dataset <- torch::dataset(
 #' EuroSAT All Bands Dataset
 #'
 #' @details
-#'  `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral bands.
+#'  `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
 #'
 #' @rdname eurosat_dataset
 #'
@@ -153,7 +153,7 @@ eurosat_all_bands_dataset <- torch::dataset(
 #' EuroSAT-100 Dataset
 #'
 #' @details
-#'  `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral bands, intended for workshops and demos.
+#'  `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands, intended for workshops and demos.
 #'
 #' @rdname eurosat_dataset
 #'

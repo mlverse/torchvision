@@ -53,9 +53,9 @@ observation program Copernicus. Images are organized into 10 classes.
 \details{
 \code{eurostat_dataset()} provides a total of 27,000 RGB labeled images.
 
-\code{eurosat_all_bands_dataset()} provides a total of 27,000 labeled images with 13 spectral bands.
+\code{eurosat_all_bands_dataset()} provides a total of 27,000 labeled images with 13 spectral channel bands.
 
-\code{eurosat100_dataset()} provides a subset of 100 RGB labeled images, and is intended for workshops and demos.
+\code{eurosat100_dataset()} provides a subset of 100 labeled images with 13 spectral channel bands, intended for workshops and demos.
 }
 \examples{
 \dontrun{
