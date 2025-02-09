@@ -17,7 +17,7 @@ test_that("eurosat_dataset downloads correctly whatever the split", {
 
   expect_is(ds, "dataset", "train should be a dataset")
 
-  extracted_dir <- list.dirs(paste0(temp_root,"images/2750"), recursive = TRUE, full.names = TRUE)
+  extracted_dir <- list.dirs(paste0(temp_root,"eurosat/images/2750"), recursive = TRUE, full.names = TRUE)
   # Extracted data folder have one folder per category
   expect_length(extracted_dir, 11)
 
@@ -74,13 +74,13 @@ test_that("eurosat100_dataset derivatives download and prepare correctly", {
   )
 
   dl <- torch::dataloader(ds_100, batch_size = 10)
-  # 100 turns into 10 batches of 10
-  expect_length(dl, 10)
+  # 20 turns into 2 batches of 10
+  expect_length(dl, 2)
   iter <- dataloader_make_iter(dl)
   i <- dataloader_next(iter)
 
   # Check shape, dtype, and values on X
-  expect_tensor_shape(i[[1]], c(10, 64, 64, 3))
+  expect_tensor_shape(i[[1]], c(10, 64, 64, 13))
   expect_tensor_dtype(i[[1]], torch_float())
   expect_true((torch_max(i[[1]]) <= 1)$item())
   # Check shape, dtype and names on y
@@ -88,7 +88,7 @@ test_that("eurosat100_dataset derivatives download and prepare correctly", {
   expect_tensor_dtype(i[[2]], torch_long())
   expect_named(i, c("x", "y"))})
 
-test_that("eurosat_all_bands_dataset derivatives downloadand prepare correctly", {
+test_that("eurosat_all_bands_dataset derivatives download and prepare correctly", {
   skip_on_cran()
   skip_if_not_installed("torch")
 
