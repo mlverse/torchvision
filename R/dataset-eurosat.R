@@ -30,7 +30,7 @@
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
   dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
-  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-%s.txt?download=true",
+  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
 
   initialize = function(root,
                         split = "train",
@@ -43,20 +43,19 @@ eurosat_dataset <- torch::dataset(
     self$target_transform <- target_transform
 
     if (!split %in% c("train", "val", "test")) {
-      stop("Invalid split. Must be one of 'train', 'val', or 'test'.")
+      value_error("Invalid split. Must be one of 'train', 'val', or 'test'.")
     }
-    self$split_url <- sprintf(self$split_url, split)
+    self$split_url <- glue::glue(self$split_url)
     self$zip_file <- file.path(self$root, fs::path_ext_remove(basename(self$dataset_url)))
     self$images_dir <- file.path(self$root, "images")
-    self$split_file <- file.path(self$root, sprintf("eurosat-%s.txt", split))
+    self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
 
     if (download) {
       self$download()
     }
 
-    if (!file.exists(self$split_file)) {
-      stop(sprintf("Split file not found for split='%s'.", split))
-    }
+    if (!self$check_exists())
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     self$data <- suppressWarnings(readLines(self$split_file))
     self$load_meta()
@@ -70,24 +69,30 @@ eurosat_dataset <- torch::dataset(
   download = function() {
     if (!file.exists(self$zip_file) || file.size(self$zip_file) == 0) {
       dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
-      message("Downloading EuroSAT ZIP...")
-      utils::download.file(url = self$dataset_url, destfile = self$zip_file, mode = "wb")
+      message("Downloading archive...")
+      rlang::with_options(
+        timeout = max(400, getOption("timeout")),
+        utils::download.file(url = self$dataset_url, destfile = self$zip_file, mode = "wb")
+        )
       message("EuroSAT ZIP downloaded.")
     }
 
     if (!dir.exists(self$images_dir)) {
-      message("Extracting EuroSAT ZIP...")
+      message("Extracting archive...")
       utils::unzip(self$zip_file, exdir = self$images_dir)
       message("Extraction complete.")
     }
 
     # Download the split-specific text file
-
     message("Downloading split text file: ", self$split_url)
     utils::download.file(url = self$split_url, destfile = self$split_file, mode = "wb")
     if (file.size(self$split_file) == 0) {
-      stop("Downloaded split file is empty: ", self$split_file)
+      runtime_error("Downloaded split file `{self$split_file}` is empty.")
     }
+  },
+  check_exists = function() {
+    fs::file_exists(self$split_file) &&
+      fs::file_exists(self$zip_file)
   },
 
   .getitem = function(index) {
@@ -96,7 +101,7 @@ eurosat_dataset <- torch::dataset(
 
     image_path <- file.path(self$images_dir, "2750", label, filename)
     if (!file.exists(image_path)) {
-      stop("Image file not found: ", image_path)
+      runtime_error("Image file `{image_path}` not found.")
     }
 
     img_array <- jpeg::readJPEG(image_path)
@@ -107,15 +112,16 @@ eurosat_dataset <- torch::dataset(
 
     # Ensure label exists in class_to_idx
     if (!label %in% names(self$class_to_idx)) {
-      stop("Label not found in class_to_idx: ", label)
+      runtime_error("Label `{label}` not found in class_to_idx." )
     }
 
     # Convert label index to torch tensor with dtype = torch_long()
-    label_idx <- torch::torch_tensor(as.integer(self$class_to_idx[[label]]), dtype = torch_long())$squeeze()
+    label_idx <- torch::torch_tensor(
+        as.integer(self$class_to_idx[[label]]), dtype = torch_long()
+      )$squeeze()
 
     list(x = img_array, y = label_idx)
   },
-
 
   .length = function() {
     length(self$data)
@@ -135,7 +141,7 @@ eurosat_all_bands_dataset <- torch::dataset(
   name = "eurosat100",
   inherit = eurosat_dataset,
   dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSATallBands.zip?download=true",
-  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-%s.txt?download=true"
+  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true"
 )
 
 
@@ -153,7 +159,7 @@ eurosat100_dataset <- torch::dataset(
   name = "eurosat100",
   inherit = eurosat_dataset,
   dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
-  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-%s.txt?download=true"
+  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true"
 )
 
 

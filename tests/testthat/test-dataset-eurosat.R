@@ -7,13 +7,12 @@ test_that("eurosat_dataset downloads correctly whatever the split", {
 
   expect_error(
     eurosat_dataset(root = temp_root, split = "test", download = FALSE),
-    "Split file not found for split",
+    "Dataset not found. You can use `download = TRUE`",
     label = "Dataset should fail if not previously downloaded"
   )
 
   expect_no_error(
-    ds <- eurosat_dataset(root = temp_root, split = "train", download = TRUE),
-    label = "Dataset should load successfully"
+    ds <- eurosat_dataset(root = temp_root, split = "train", download = TRUE)
   )
 
   expect_is(ds, "dataset", "train should be a dataset")
@@ -66,13 +65,12 @@ test_that("eurosat100_dataset derivatives download and prepare correctly", {
 
   expect_error(
     eurosat100_dataset(root = temp_root, split = "test", download = FALSE),
-    "Split file not found for split",
+    "Dataset not found. You can use `download = TRUE`",
     label = "Dataset should fail if not previously downloaded"
   )
 
   expect_no_error(
-    ds_100 <- eurosat_dataset(root = temp_root, split = "val", download = TRUE),
-    label = "Dataset should load successfully"
+    ds_100 <- eurosat100_dataset(root = temp_root, split = "val", download = TRUE)
   )
 
   dl <- torch::dataloader(ds_100, batch_size = 10)
@@ -97,7 +95,7 @@ test_that("eurosat_all_bands_dataset derivatives downloadand prepare correctly",
 
   expect_error(
     eurosat_all_bands_dataset(root = temp_root, split = "test", download = FALSE),
-    "Split file not found for split",
+    "Dataset not found. You can use `download = TRUE`",
     label = "Dataset should fail if not previously downloaded"
   )
 
@@ -106,8 +104,8 @@ test_that("eurosat_all_bands_dataset derivatives downloadand prepare correctly",
     label = "Dataset should load successfully"
   )
   dl <- torch::dataloader(ds_all, batch_size = 10)
-  # 5400k turns into 54 batches of 10
-  expect_length(dl, 1620)
+  # 5400 turns into 540 batches of 10
+  expect_length(dl, 540)
   iter <- dataloader_make_iter(dl)
   i <- dataloader_next(iter)
   # Check shape, dtype, and values on X
