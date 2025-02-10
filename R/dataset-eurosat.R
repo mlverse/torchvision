@@ -4,7 +4,7 @@
 #' The dataset consists of Sentinel-2 satellite images organized into 10 classes.
 #'
 #' @param root Character. The root directory where the dataset will be stored.
-#' @param split Character. One of `train`, `validation`, or `test`.
+#' @param split Character. One of `train`, `val`, or `test`.
 #' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
 #' @param transform Function. Optional transformation to be applied to the images.
 #' @param target_transform Function. Optional transformation to be applied to the labels.
