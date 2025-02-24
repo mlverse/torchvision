@@ -24,7 +24,7 @@
 #' @export
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
-  
+
   initialize = function(root,
                         split = "train",
                         download = FALSE,
@@ -34,88 +34,83 @@ eurosat_dataset <- torch::dataset(
     self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
-    
+
     if (!split %in% c("train", "val", "test")) {
-      stop("Invalid split. Must be one of 'train', 'val', or 'test'.")
+      runtime_error("Invalid split. Must be one of 'train', 'val', or 'test'.")
     }
-    
+
     self$zip_file <- file.path(self$root, "EuroSAT.zip")
     self$images_dir <- file.path(self$root, "images")
-    self$split_file <- file.path(self$root, sprintf("eurosat-%s.txt", split))
-    
+    self$split_file <- file.path(self$root, glue::glue("eurosat-{split}.txt"))
+
     if (download) {
       self$download()
     }
-    
+
     if (!file.exists(self$split_file)) {
-      stop(sprintf("Split file not found for split='%s'.", split))
+      runtime_error(glue::glue("Split file not found for split='{split}'."))
     }
-    
+
     self$data <- suppressWarnings(readLines(self$split_file))
     self$load_meta()
   },
-  
+
   load_meta = function() {
     self$classes <- unique(sub("_.*", "", self$data))
     self$class_to_idx <- setNames(seq_along(self$classes) - 1, self$classes)
   },
-  
+
   download = function() {
     if (!file.exists(self$zip_file) || file.size(self$zip_file) == 0) {
       dir.create(self$root, recursive = TRUE, showWarnings = FALSE)
       zip_url <- "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true"
-      message("Downloading EuroSAT ZIP...")
+      rlang::inform("Downloading dataset...")
       utils::download.file(url = zip_url, destfile = self$zip_file, mode = "wb")
-      message("EuroSAT ZIP downloaded.")
+      rlang::inform("Download complete.")
     }
-    
+
     if (!dir.exists(self$images_dir)) {
-      message("Extracting EuroSAT ZIP...")
+      rlang::inform("Extracting dataset...")
       utils::unzip(self$zip_file, exdir = self$images_dir)
-      message("Extraction complete.")
+      rlang::inform("Extraction finished.")
     }
-    
+
     # Download the split-specific text file
-    txt_url <- sprintf(
-      "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-%s.txt?download=true",
-      self$split
+    txt_url <- glue::glue(
+      "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{self$split}.txt?download=true"
     )
-    message("Downloading split text file: ", txt_url)
+    rlang::inform("Downloading split file...")
     utils::download.file(url = txt_url, destfile = self$split_file, mode = "wb")
     if (file.size(self$split_file) == 0) {
-      stop("Downloaded split file is empty: ", self$split_file)
+      runtime_error("Downloaded split file is empty: ", self$split_file)
     }
   },
-  
+
   .getitem = function(index) {
     filename <- self$data[index]
     label <- as.character(sub("_.*", "", filename))  # Ensure label is a character string
-    
+
     image_path <- file.path(self$images_dir, "2750", label, filename)
     if (!file.exists(image_path)) {
-      stop("Image file not found: ", image_path)
+      runtime_error("Image file not found: ", image_path)
     }
-    
+
     img_array <- jpeg::readJPEG(image_path)
-    
+
     if (!is.null(self$transform)) {
       img_array <- self$transform(img_array)
     }
-    
-    # Ensure label exists in class_to_idx
+
     if (!label %in% names(self$class_to_idx)) {
-      stop("Label not found in class_to_idx: ", label)
+      runtime_error("Label not found in class_to_idx: ", label)
     }
-    
-    # Convert label index to torch tensor with dtype = torch_long()
+
     label_idx <- torch::torch_tensor(as.integer(self$class_to_idx[[label]]), dtype = torch_long())$squeeze()
-    
+
     list(x = img_array, y = label_idx)
   },
-  
-  
+
   .length = function() {
     length(self$data)
   }
 )
-
