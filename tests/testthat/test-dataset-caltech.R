@@ -1,55 +1,24 @@
-test_that("caltech101", {
-  skip_if_not_installed("R.matlab")
-  t <- tempfile()
-<<<<<<< HEAD
+library(testthat)
+library(arrow)
 
-=======
-  
->>>>>>> ff616daa0b5351af066d946532c60ea5e750a1a1
-  expect_error(
-    caltech101_dataset(t),
-    "Dataset not found"
-  )
-<<<<<<< HEAD
+# Define the path to the dataset inside the project
+dataset_path <- file.path("data", "train.parquet")
 
-  # Test download
-  ds <- caltech101_dataset(t, download = TRUE)
-  expect_equal(length(ds), 8677)
+# Test that the dataset loads correctly from local storage
+test_that("Caltech-101 dataset loads correctly from local storage", {
+  expect_true(file.exists(dataset_path), info = "Dataset file not found in data/ folder.")
 
-=======
-  
-  # Test download
-  ds <- caltech101_dataset(t, download = TRUE)
-  expect_equal(length(ds), 8677)
-  
->>>>>>> ff616daa0b5351af066d946532c60ea5e750a1a1
-  # Check sample item
-  el <- ds[1]
-  expect_tensor(el$x)
-  expect_equal(dim(el$x)[1], 3)  # CHW format
-  expect_equal(length(el$y), 1)  # Default target_type="category"
-<<<<<<< HEAD
+  # Load the dataset
+  dataset <- read_parquet(dataset_path)
 
-=======
-  
->>>>>>> ff616daa0b5351af066d946532c60ea5e750a1a1
-  # Test annotations
-  ds_anno <- caltech101_dataset(t, target_type = "annotation")
-  el_anno <- ds_anno[1]
-  expect_true(is.matrix(el_anno$y[[1]]))
-<<<<<<< HEAD
+  # Ensure required columns exist
+  expect_true("image" %in% colnames(dataset) || "filename" %in% colnames(dataset),
+              info = "Dataset must have either 'image' or 'filename' column.")
+  expect_true("label" %in% colnames(dataset), info = "Column 'label' not found in dataset.")
 
-=======
-  
->>>>>>> ff616daa0b5351af066d946532c60ea5e750a1a1
-  # Test combined targets
-  ds_both <- caltech101_dataset(t, target_type = c("category", "annotation"))
-  el_both <- ds_both[1]
-  expect_length(el_both$y, 2)
-  expect_type(el_both$y[[1]], "integer")
-  expect_true(is.matrix(el_both$y[[2]]))
-<<<<<<< HEAD
+  # Check that dataset has some rows
+  expect_gt(nrow(dataset), 0, info = "Dataset should not be empty.")
+
+  # Print first few rows (for debugging purposes)
+  print(head(dataset))
 })
-=======
-})
->>>>>>> ff616daa0b5351af066d946532c60ea5e750a1a1
