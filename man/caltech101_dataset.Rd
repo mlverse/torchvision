@@ -2,28 +2,22 @@
 % Please edit documentation in R/dataset-caltech.R
 \name{caltech101_dataset}
 \alias{caltech101_dataset}
-\title{Caltech101 Dataset}
+\title{Caltech-101 Dataset Loader (from Local Storage)}
 \usage{
-caltech101_dataset(
-  root,
-  target_type = "category",
-  transform = NULL,
-  target_transform = NULL,
-  download = FALSE
-)
+caltech101_dataset(root, split = "train")
 }
 \arguments{
-\item{root}{(string): Root directory where the dataset will be stored or exists.}
+\item{root}{Character. The root directory where the dataset is stored.}
 
-\item{target_type}{(string or list): Type of target to return. Can be "category", "annotation",
-or a list of both. "category" returns the class label, "annotation" returns contour points.}
+\item{split}{Character. One of \code{train} or \code{test}.}
 
-\item{transform}{(callable, optional): A function/transform to apply to the image.}
+\item{transform}{Function. Optional image transformation.}
 
-\item{target_transform}{(callable, optional): A function/transform to apply to the target(s).}
-
-\item{download}{(bool): If TRUE, downloads the dataset from the internet.}
+\item{target_transform}{Function. Optional label transformation.}
+}
+\value{
+An R6 dataset object that inherits from \code{torch::dataset}.
 }
 \description{
-\href{https://data.caltech.edu/records/20086}{Caltech101} Dataset.
+Loads the Caltech-101 dataset stored in the 'data/' folder.
 }
