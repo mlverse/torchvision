@@ -1,0 +1,47 @@
+---
+title: "Getting Started with spamtorch"
+author: "GSoC 2025 Candidate"
+date: "2025-04-08"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with spamtorch}
+  %\VignetteEngine{rmarkdown::html_vignette}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+`spamtorch` is a fully functional deep learning classifier built using the `torch` library in R. It loads the UCI spam dataset, preprocesses it, builds a robust neural network, and evaluates its performance.
+
+This vignette walks you through the full pipeline, from data loading to model evaluation.
+
+---
+
+# Load the Package
+
+```r
+library(spamtorch)
+library(torch)
+
+# Step 1: Load and Preprocess the Data
+data <- load_spam_data()
+datasets <- prepare_datasets(data)
+
+# Step 2: Create Dataloaders
+train_dl <- dataloader(datasets$train, batch_size = 64, shuffle = TRUE)
+test_dl <- dataloader(datasets$test, batch_size = 64)
+
+# Step 3: Create the Model
+model <- create_model()
+
+# Step 4: Train the Model with Early Stopping
+trained_model <- train_model(model, train_dl, test_dl, max_epochs = 100, patience = 5)
+
+# Step 5: Evaluate the Modelresults <- evaluate_model(trained_model, test_dl)
+print(results$confusion_matrix)
+
+# This provides a full confusion matrix and other metrics like accuracy, sensitivity, specificity, and ROC curve.
+
+# Save the Final Model
+torch_save(trained_model, "final_spam_classifier.pt")
+saveRDS(datasets$scaler, "scaler_params.rds")

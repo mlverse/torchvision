@@ -1,3 +1,30 @@
+Package: spamtorch
+Title: High-Accuracy Spam Classifier using Torch in R
+Version: 0.1.0
+Authors@R: 
+    person("Vidhaan", "Khare", email = "vidhankhare16@gmail.com", role = c("aut", "cre"))
+Description: A high-performance spam classification model implemented in R using the torch package.
+    This package provides a complete pipeline including data loading, preprocessing, model
+    definition, training with early stopping, and evaluation.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 4.0)
+Imports:
+    torch,
+    readr,
+    dplyr,
+    caret,
+    coro,
+    purrr,
+    stats,
+    utils
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
 Version: 0.6.0.9000
