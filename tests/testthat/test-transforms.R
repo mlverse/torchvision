@@ -17,6 +17,14 @@ test_that("normalize", {
 
 })
 
+test_that("normalize error is glued", {
+
+  x <- torch_randn(3, 10, 10)
+
+  expect_error(transform_normalize(x, 1, 0), "evaluated to zero after conversion to Float")
+
+})
+
 test_that("resize", {
   x <- torch_randn(3, 10, 10)
   o <- transform_resize(x, c(20, 20))
@@ -126,12 +134,23 @@ test_that("rotate", {
   img <- torch::torch_tensor(matrix(1:16))$view(c(1, 4, 4))
   output <- transform_rotate(img, 90)
 
-  expect_tensor_shape(img, c(1,4,4))
+  expect_tensor_shape(output, c(1,4,4))
   expect_equal_to_r(output[1,,1], c(4,3,2,1))
 
   output <- transform_rotate(img, 45, expand = TRUE)
   expect_equal_to_r(output[1,,2], c(0,0, 2, 5, 0, 0))
   expect_equal_to_r(output[1,,3], c(0,3, 7, 10, 9, 0))
+
+})
+
+test_that("rotate a rectangle image", {
+
+  img <- torch::torch_tensor(matrix(1:20))$view(c(1, 4, 5))
+  output <- transform_rotate(img, 90)
+
+  expect_tensor_shape(output, c(1,5,4))
+  expect_equal_to_r(output[1,,1], c(5,4,3,2,1))
+  expect_equal_to_r(output[1,,4], c(20,19,18,17,16))
 
 })
 

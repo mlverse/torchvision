@@ -133,6 +133,8 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
 NULL
 
 #' @describeIn model_vgg VGG 11-layer model (configuration "A")
+#'
+#' @family models
 #' @export
 model_vgg11 <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg('vgg11', 'A', FALSE, pretrained, progress, ...)
