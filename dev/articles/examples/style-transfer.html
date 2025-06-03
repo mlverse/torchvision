@@ -115,7 +115,7 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://torch.mlverse.org/docs" class="external-link">torch</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://torchvision.mlverse.org" class="external-link">torchvision</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/cuda_is_available.html" class="external-link">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span></span>
+<span><span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/cuda_is_available.html" class="external-link">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span></span>
 <span><span class="va">num_steps</span> <span class="op">&lt;-</span> <span class="fl">4000</span></span>
 <span><span class="va">content_weight</span> <span class="op">&lt;-</span> <span class="fl">1e-5</span></span>
 <span><span class="va">style_weight</span> <span class="op">&lt;-</span> <span class="fl">1e2</span></span>
@@ -124,13 +124,13 @@
 <span><span class="co"># Network definition ------------------------------------------------------</span></span>
 <span></span>
 <span><span class="va">content_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">content</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_mse_loss.html" class="external-link">nnf_mse_loss</a></span><span class="op">(</span><span class="va">content</span>, <span class="va">style</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_mse_loss.html" class="external-link">nnf_mse_loss</a></span><span class="op">(</span><span class="va">content</span>, <span class="va">style</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">gram_matrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">size</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">size</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">features</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">size</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="va">size</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="va">size</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="va">size</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_mm.html" class="external-link">torch_mm</a></span><span class="op">(</span><span class="va">features</span>, <span class="va">features</span><span class="op">$</span><span class="fu">t</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_mm.html" class="external-link">torch_mm</a></span><span class="op">(</span><span class="va">features</span>, <span class="va">features</span><span class="op">$</span><span class="fu">t</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="co"># we 'normalize' the values of the gram matrix</span></span>
 <span>  <span class="co"># by dividing by the number of element in each feature maps.</span></span>
 <span>  <span class="va">G</span><span class="op">$</span><span class="fu">div</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="va">size</span><span class="op">)</span><span class="op">)</span></span>
@@ -139,7 +139,7 @@
 <span><span class="va">style_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">content</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">C</span> <span class="op">&lt;-</span> <span class="fu">gram_matrix</span><span class="op">(</span><span class="va">content</span><span class="op">)</span></span>
 <span>  <span class="va">S</span> <span class="op">&lt;-</span> <span class="fu">gram_matrix</span><span class="op">(</span><span class="va">style</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_mse_loss.html" class="external-link">nnf_mse_loss</a></span><span class="op">(</span><span class="va">C</span>, <span class="va">S</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_mse_loss.html" class="external-link">nnf_mse_loss</a></span><span class="op">(</span><span class="va">C</span>, <span class="va">S</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">cnn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/model_vgg.html">model_vgg19</a></span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">features</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span></span>
@@ -148,7 +148,7 @@
 <span><span class="co"># we create an nn_module that does the same as the sequential container but</span></span>
 <span><span class="co"># returns the results of all convolutions. we also replace inplace operations</span></span>
 <span><span class="co"># for copy on modify ones</span></span>
-<span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nn_module.html" class="external-link">nn_module</a></span><span class="op">(</span></span>
+<span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nn_module.html" class="external-link">nn_module</a></span><span class="op">(</span></span>
 <span>  initialize <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">cnn</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">self</span><span class="op">$</span><span class="va">cnn</span> <span class="op">&lt;-</span> <span class="va">cnn</span></span>
 <span>  <span class="op">}</span>,</span>
@@ -158,7 +158,7 @@
 <span>      <span class="va">layer</span> <span class="op">&lt;-</span> <span class="va">self</span><span class="op">$</span><span class="va">cnn</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">layer</span>, <span class="st">"nn_relu"</span><span class="op">)</span><span class="op">)</span></span>
-<span>        <span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nnf_relu.html" class="external-link">nnf_relu</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
+<span>        <span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nnf_relu.html" class="external-link">nnf_relu</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>      <span class="kw">else</span></span>
 <span>        <span class="va">input</span> <span class="op">&lt;-</span> <span class="fu">layer</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span></span>
@@ -201,8 +201,8 @@
 <span></span>
 <span><span class="co"># Optimization ------------------------------------------------------------</span></span>
 <span></span>
-<span><span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/optim_adam.html" class="external-link">optim_adam</a></span><span class="op">(</span><span class="va">content_img</span>, lr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">lr_scheduler</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/lr_step.html" class="external-link">lr_step</a></span><span class="op">(</span><span class="va">optimizer</span>, <span class="fl">100</span>, <span class="fl">0.96</span><span class="op">)</span></span>
+<span><span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/optim_adam.html" class="external-link">optim_adam</a></span><span class="op">(</span><span class="va">content_img</span>, lr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">lr_scheduler</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/lr_step.html" class="external-link">lr_step</a></span><span class="op">(</span><span class="va">optimizer</span>, <span class="fl">100</span>, <span class="fl">0.96</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">step</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">num_steps</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span></span>
@@ -217,7 +217,7 @@
 <span>  <span class="va">l_content</span> <span class="op">&lt;-</span> <span class="va">content_weight</span> <span class="op">*</span> <span class="fu">content_loss</span><span class="op">(</span><span class="va">content_features</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="va">style_features</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co"># compute the style loss</span></span>
-<span>  <span class="va">l_style</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_tensor.html" class="external-link">torch_tensor</a></span><span class="op">(</span><span class="fl">0</span>, device <span class="op">=</span> <span class="va">device</span><span class="op">)</span></span>
+<span>  <span class="va">l_style</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_tensor.html" class="external-link">torch_tensor</a></span><span class="op">(</span><span class="fl">0</span>, device <span class="op">=</span> <span class="va">device</span><span class="op">)</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">l_style</span> <span class="op">&lt;-</span> <span class="va">l_style</span> <span class="op">+</span> <span class="fu">style_loss</span><span class="op">(</span><span class="va">content_features</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, <span class="va">style_features</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
@@ -268,7 +268,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer>

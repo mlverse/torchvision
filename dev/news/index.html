@@ -80,7 +80,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
-<ul><li>
+<ul><li>fix <code>transform_rotation</code> wrongly using w x w for image size (<a href="https://github.com/114" class="external-link">@114</a>, cregouby)</li>
+<li>
 <code>tensor_image_display</code> and <code>tensor_image_browse</code> now accept all tensor_image dtypes. (<a href="https://github.com/mlverse/torchvision/issues/115" class="external-link">#115</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
 <li>fix <code>transform_affine</code> help to remove confusion with <code>transforme_random_affine</code> help (<a href="https://github.com/mlverse/torchvision/issues/116" class="external-link">#116</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
 <li>add message translation in french (<a href="https://github.com/mlverse/torchvision/issues/112" class="external-link">#112</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>)</li>
@@ -111,7 +112,7 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.4.0" id="torchvision-040">torchvision 0.4.0<small>2021-08-17</small><a class="anchor" aria-label="anchor" href="#torchvision-040"></a></h2>
 <ul><li>Added a dependency on <code>zip</code> to <code>zip::unzip</code> the tinyimagenet dataset.</li>
-<li>Removed all usages of <code><a href="https://rdrr.io/pkg/torch/man/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
+<li>Removed all usages of <code><a href="https://torch.mlverse.org/docs/reference/enumerate.html" class="external-link">torch::enumerate()</a></code> from docs and tests in favor of <code><a href="https://coro.r-lib.org/reference/collect.html" class="external-link">coro::loop()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/57" class="external-link">#57</a>)</li>
 <li>Fixed non-namespaced calls to <code>torch</code>. (<a href="https://github.com/mlverse/torchvision/issues/58" class="external-link">#58</a>)</li>
 </ul></div>
     <div class="section level2">
@@ -144,7 +145,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
