@@ -276,11 +276,11 @@ emnist_dataset <- dataset(
     },
     images_file = function() {
       suffix <- if (self$train) "train" else "test"
-      file.path(self$raw_folder, sprintf("emnist-%s-images-idx3-ubyte", self$split, suffix))
+      file.path(self$raw_folder, sprintf("emnist-%s-%s-images-idx3-ubyte", self$split, suffix))
     },
     labels_file = function() {
       suffix <- if (self$train) "train" else "test"
-      file.path(self$raw_folder, sprintf("emnist-%s-labels-idx1-ubyte", self$split, suffix))
+      file.path(self$raw_folder, sprintf("emnist-%s-%s-labels-idx1-ubyte", self$split, suffix))
     }
   )
 )
