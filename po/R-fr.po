@@ -384,7 +384,7 @@ msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."
 #~ msgstr "Fichier de split introuvable pour `split=`'%s'."
 
 #~ msgid "Downloading EuroSAT ZIP..."
-#~ msgstr "Téléchargement du fichize zip `EuroSAT."
+#~ msgstr "Téléchargement du fichize zip `EuroSAT`."
 
 #~ msgid "EuroSAT ZIP downloaded."
 #~ msgstr "`EuroSAT` zip téléchargé."
