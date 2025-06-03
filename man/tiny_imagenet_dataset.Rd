@@ -18,4 +18,8 @@ tiny_imagenet_dataset(root, split = "train", download = FALSE, ...)
 \description{
 Prepares the Tiny ImageNet dataset and optionally downloads it.
 }
+\seealso{
+Other dataset: 
+\code{\link{places365_dataset}()}
+}
 \concept{dataset}

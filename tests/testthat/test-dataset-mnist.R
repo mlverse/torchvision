@@ -78,3 +78,35 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
 })
+
+
+test_that("tests for the places365 dataset", {
+  dir <- tempfile(fileext = "/")
+
+  expect_error(
+    ds <- places365_dataset(dir)
+  )
+
+  ds <- places365_dataset(dir, download = TRUE)
+
+  # First item should be a list with an image tensor and a class index
+  item <- ds[1]
+  expect_true(inherits(item[[1]], "torch_tensor"))
+  expect_true(is.numeric(item[[2]]))
+  expect_equal(length(ds), length(ds$classes)) # crude check that it loaded
+
+  # Test with transform
+  transform <- function(img) {
+    transform_to_tensor()(transform_resize(size = c(224, 224))(img))
+  }
+
+  ds <- places365_dataset(dir, transform = transform)
+  dl <- torch::dataloader(ds, batch_size = 4)
+
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+
+  expect_tensor_shape(batch[[1]], c(4, 3, 224, 224))
+  expect_tensor_shape(batch[[2]], 4)
+  expect_named(batch, c("x", "y"))
+})
