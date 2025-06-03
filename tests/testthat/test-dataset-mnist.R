@@ -53,3 +53,31 @@ test_that("tests for the kmnist dataset", {
   expect_true((torch_max(i[[1]]) <= 1)$item())
   expect_named(i, c("x", "y"))
 })
+
+test_that("tests for the emnist (balanced split) dataset", {
+
+  dir <- tempfile(fileext = "/")
+
+  expect_error(
+    ds <- emnist_dataset(dir)
+  )
+
+  ds <- emnist_dataset(dir, download = TRUE)
+
+  i <- ds[1]
+  expect_equal(dim(i[[1]]), c(28, 28))
+  expect_true(i[[2]] %in% 0:46)  # Label should be within expected range
+  expect_equal(length(ds), 112800)
+
+  ds <- emnist_dataset(dir, transform = transform_to_tensor)
+  dl <- torch::dataloader(ds, batch_size = 32)
+  expect_length(dl, ceiling(112800 / 32))
+  
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+  
+  expect_tensor_shape(batch[[1]], c(32, 1, 28, 28))
+  expect_tensor_shape(batch[[2]], 32)
+  expect_true((torch_max(batch[[1]]) <= 1)$item())
+  expect_named(batch, c("x", "y"))
+})
