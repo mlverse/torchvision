@@ -149,6 +149,160 @@ kmnist_dataset <- dataset(
   classes = c('o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo')
 )
 
+#' EMNIST (Balanced Split) Dataset
+#'
+#' Prepares and loads the EMNIST Balanced split dataset.  
+#' The EMNIST Balanced split contains digits and uppercase/lowercase letters  
+#' from the Extended MNIST dataset, organized into training and test subsets.
+#'
+#' @param root Character. Root directory where the dataset is stored or will be downloaded to.  
+#'   The dataset files will be located under `root/EMNIST/processed/`.
+#' @param train Logical, default `TRUE`. If `TRUE`, creates dataset from the training split, otherwise from the test split.
+#' @param download Logical, default `FALSE`. If `TRUE`, downloads the dataset if not already present in `root`.
+#' @param transform Optional function. A transformation to apply to the input images.  
+#'   Should accept an image and return a transformed version.
+#' @param target_transform Optional function. A transformation to apply to the target labels.
+#'
+#' @return An EMNIST Balanced dataset object containing images and labels.
+#'
+#' @details
+#' The dataset files are downloaded from the official EMNIST repository if not already available.  
+#' The raw files are processed and cached in `root/EMNIST/processed/` for faster loading.  
+#' The labels correspond to digits and letters as per the EMNIST Balanced mapping.
+#'
+#' @seealso
+#' \code{\link{mnist_dataset}} for the original MNIST dataset.  
+#' \code{\link{kmnist_dataset}} for the Kuzushiji-MNIST dataset.  
+#' \href{https://www.nist.gov/itl/products-and-services/emnist-dataset}{EMNIST official site} for more info.
+#'
+#' @examples
+#' \dontrun{
+#' # Create the EMNIST Balanced training dataset, downloading if needed
+#' ds <- emnist_dataset(root = "~/data", train = TRUE, download = TRUE)
+#'
+#' # Access the first image and label
+#' sample <- ds[1]
+#' image <- sample[[1]]
+#' label <- sample[[2]]
+#'
+#' # Print image dimensions and label
+#' print(dim(image))  # Expected: 28x28
+#' print(label)
+#' }
+#'
+#' @export
+
+emnist_dataset <- dataset(
+  name = "emnist_dataset",
+  resources = list(
+    c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
+  ),
+  training_file = "training.rds",
+  test_file = "test.rds",
+  classes = c(
+  "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+  "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+  "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+  "U", "V", "W", "X", "Y", "Z",
+  "a", "b", "d", "e", "f", "g", "h", "n", "q", "r", "t"
+  ), 
+  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
+                        download = FALSE) {
+    self$root_path <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+    self$train <- train
+
+    if (download)
+      self$download()
+
+    if (!self$check_exists())
+      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+
+    file_to_load <- if (train) self$training_file else self$test_file
+    data <- readRDS(file.path(self$processed_folder, file_to_load))
+    self$data <- data[[1]]
+    self$targets <- data[[2]] + 1L
+  },
+  download = function() {
+    if (self$check_exists()) return(NULL)
+
+    fs::dir_create(self$raw_folder)
+    fs::dir_create(self$processed_folder)
+
+    url <- self$resources[[1]][1]
+    expected_md5 <- self$resources[[1]][2]
+    zip_path <- download_and_cache(url, prefix = class(self)[1])
+
+    actual_md5 <- digest::digest(file = zip_path, algo = "md5")
+    if (!identical(actual_md5, expected_md5))
+      runtime_error("Downloaded EMNIST archive has incorrect checksum.")
+
+    unzip_dir <- file.path(self$raw_folder, "unzipped")
+    fs::dir_create(unzip_dir)
+    unzip(zip_path, exdir = unzip_dir)
+
+    # Automatically detect the real unzipped folder
+    unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
+
+    train_img <- file.path(unzipped_root, "emnist-balanced-train-images-idx3-ubyte.gz")
+    train_lbl <- file.path(unzipped_root, "emnist-balanced-train-labels-idx1-ubyte.gz")
+    test_img  <- file.path(unzipped_root, "emnist-balanced-test-images-idx3-ubyte.gz")
+    test_lbl  <- file.path(unzipped_root, "emnist-balanced-test-labels-idx1-ubyte.gz")
+
+    rlang::inform("Processing...")
+
+    training_set <- list(read_sn3_pascalvincent(train_img),
+                        read_sn3_pascalvincent(train_lbl))
+    test_set <- list(read_sn3_pascalvincent(test_img),
+                    read_sn3_pascalvincent(test_lbl))
+
+
+
+    training_set <- list(
+      read_sn3_pascalvincent(train_img),
+      read_sn3_pascalvincent(train_lbl)
+    )
+
+    test_set <- list(
+      read_sn3_pascalvincent(test_img),
+      read_sn3_pascalvincent(test_lbl)
+    )
+
+    saveRDS(training_set, file.path(self$processed_folder, self$training_file))
+    saveRDS(test_set, file.path(self$processed_folder, self$test_file))
+
+    rlang::inform("EMNIST (balanced) processed successfully.")
+  },
+  check_exists = function() {
+    fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
+      fs::file_exists(file.path(self$processed_folder, self$test_file))
+  },
+  .getitem = function(index) {
+    img <- self$data[index, ,]
+    target <- self$targets[index]
+
+    if (!is.null(self$transform))
+      img <- self$transform(img)
+
+    if (!is.null(self$target_transform))
+      target <- self$target_transform(target)
+
+    list(x = img, y = target)
+  },
+  .length = function() {
+    dim(self$data)[1]
+  },
+  active = list(
+    raw_folder = function() {
+      file.path(self$root_path, "emnist", "raw")
+    },
+    processed_folder = function() {
+      file.path(self$root_path, "emnist", "processed")
+    }
+  )
+)
+
 read_sn3_pascalvincent <- function(path) {
   x <- gzfile(path, open = "rb")
   on.exit({close(x)})
