@@ -12,6 +12,11 @@ Authors@R: c(
            role = c("ctb"),
            email = "christophe.regouby@free.fr"
            ),
+    person(given = "Derrick",
+       family = "Richard",
+       role = c("ctb"),
+       email = "derrickrds@gmail.com"
+            ),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing
