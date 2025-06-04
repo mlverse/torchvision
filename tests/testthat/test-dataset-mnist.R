@@ -79,7 +79,6 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_named(batch, c("x", "y"))
 })
 
-
 test_that("tests for the places365 dataset", {
   dir <- tempfile(fileext = "/")
 
