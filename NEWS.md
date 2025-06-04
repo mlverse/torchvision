@@ -4,6 +4,7 @@
 - `tensor_image_display` and `tensor_image_browse` now accept all tensor_image dtypes. (#115, @cregouby) 
 - fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
 - add message translation in french (#112, @cregouby)
+- Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset with support for `train`, `test`, and `nist` subsets. (#153, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
