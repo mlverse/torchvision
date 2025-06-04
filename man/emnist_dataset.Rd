@@ -41,7 +41,7 @@ The labels correspond to digits and letters as per the EMNIST Balanced mapping.
 \examples{
 \dontrun{
 # Create the EMNIST Balanced training dataset, downloading if needed
-ds <- emnist_dataset(root = "~/data", train = TRUE, download = TRUE)
+ds <- emnist_dataset(train = TRUE, download = TRUE)
 
 # Access the first image and label
 sample <- ds[1]
