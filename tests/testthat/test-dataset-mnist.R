@@ -55,28 +55,31 @@ test_that("tests for the kmnist dataset", {
 })
 
 test_that("tests for the qmnist dataset", {
-
   dir <- tempfile(fileext = "/")
 
-  expect_error(
-    ds <- qmnist_dataset(dir)
-  )
+  subsets <- c("train", "test", "nist")
 
-  ds <- qmnist_dataset(dir, download = TRUE)
+  for (subset in subsets) {
 
-  i <- ds[1]
-  expect_equal(dim(i[[1]]), c(28, 28))
-  expect_true(i[[2]] %in% 1:10)
-  expect_equal(length(ds), 60000)
+    expect_error(
+      ds <- qmnist_dataset(dir, what = subset)
+    )
 
-  ds <- qmnist_dataset(dir, transform = transform_to_tensor)
-  dl <- torch::dataloader(ds, batch_size = 32)
-  expect_length(dl, 1875)
-  iter <- dataloader_make_iter(dl)
-  i <- dataloader_next(iter)
-  expect_tensor_shape(i[[1]], c(32, 1, 28, 28))
-  expect_tensor_shape(i[[2]], 32)
-  expect_true((torch_max(i[[1]]) <= 1)$item())
-  expect_named(i, c("x", "y"))
+    ds <- qmnist_dataset(dir, what = subset, download = TRUE)
 
+    i <- ds[1]
+    expect_equal(dim(i[[1]]), c(28, 28))
+    expect_true(i[[2]] %in% 1:10)
+
+    expect_true(length(ds) > 0)
+
+    ds <- qmnist_dataset(dir, what = subset, transform = transform_to_tensor)
+    dl <- torch::dataloader(ds, batch_size = 32)
+    iter <- dataloader_make_iter(dl)
+    i <- dataloader_next(iter)
+    expect_tensor_shape(i[[1]], c(32, 1, 28, 28))
+    expect_tensor_shape(i[[2]], 32)
+    expect_true((torch_max(i[[1]]) <= 1)$item())
+    expect_named(i, c("x", "y"))
+  }
 })
