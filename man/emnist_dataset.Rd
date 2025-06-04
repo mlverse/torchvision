@@ -2,60 +2,47 @@
 % Please edit documentation in R/dataset-mnist.R
 \name{emnist_dataset}
 \alias{emnist_dataset}
-\title{EMNIST (Balanced Split) Dataset}
+\title{EMNIST Dataset}
 \usage{
 emnist_dataset(
   root,
-  train = TRUE,
+  split = "balanced",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
 )
 }
 \arguments{
-\item{root}{Character. Root directory where the dataset is stored or will be downloaded to.
-The dataset files will be located under \verb{root/EMNIST/processed/}.}
+\item{root}{Character. Root directory for dataset storage (default folder: \verb{root/emnist/processed/}).}
 
-\item{train}{Logical, default \code{TRUE}. If \code{TRUE}, creates dataset from the training split, otherwise from the test split.}
+\item{split}{Character. Dataset split to use. One of \code{"byclass"}, \code{"bymerge"}, \code{"balanced"}, \code{"letters"}, \code{"digits"}, or \code{"mnist"}. Default is \code{"balanced"}.}
 
-\item{transform}{Optional function. A transformation to apply to the input images.
-Should accept an image and return a transformed version.}
+\item{transform}{Optional function to transform input images.}
 
-\item{target_transform}{Optional function. A transformation to apply to the target labels.}
+\item{target_transform}{Optional function to transform labels.}
 
-\item{download}{Logical, default \code{FALSE}. If \code{TRUE}, downloads the dataset if not already present in \code{root}.}
+\item{download}{Logical. Whether to download the dataset if it is not found locally. Default is \code{FALSE}.}
 }
 \value{
-An EMNIST Balanced dataset object containing images and labels.
+An EMNIST dataset object.
 }
 \description{
-Prepares and loads the EMNIST Balanced split dataset.
-The EMNIST Balanced split contains digits and uppercase/lowercase letters
-from the Extended MNIST dataset, organized into training and test subsets.
+Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
+\itemize{
+\item "byclass": 62 classes (digits + uppercase + lowercase)
+\item "bymerge": 47 classes (merged uppercase and lowercase letters)
+\item "balanced": 47 classes balanced between digits and letters
+\item "letters": 26 letter classes only
+\item "digits": 10 digit classes only
+\item "mnist": classic 10 digit classes like the original MNIST dataset
 }
-\details{
-The dataset files are downloaded from the official EMNIST repository if not already available.
-The raw files are processed and cached in \verb{root/EMNIST/processed/} for faster loading.
-The labels correspond to digits and letters as per the EMNIST Balanced mapping.
 }
 \examples{
 \dontrun{
-# Create the EMNIST Balanced training dataset, downloading if needed
-ds <- emnist_dataset(train = TRUE, download = TRUE)
-
-# Access the first image and label
+ds <- emnist_dataset(root = "~/data", split = "balanced", download = TRUE)
 sample <- ds[1]
 image <- sample[[1]]
 label <- sample[[2]]
-
-# Print image dimensions and label
-print(dim(image))  # Expected: 28x28
-print(label)
 }
 
-}
-\seealso{
-\code{\link{mnist_dataset}} for the original MNIST dataset.
-\code{\link{kmnist_dataset}} for the Kuzushiji-MNIST dataset.
-\href{https://www.nist.gov/itl/products-and-services/emnist-dataset}{EMNIST official site} for more info.
 }
