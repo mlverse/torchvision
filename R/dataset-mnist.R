@@ -184,16 +184,12 @@ read_sn3_pascalvincent <- function(path) {
 #'
 #' @param root (string): Root directory of dataset where
 #' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
-#'
 #' @param train (bool, optional): If TRUE, creates dataset from \code{training.pt},
 #' otherwise from \code{test.pt}.
-#'
 #' @param transform (callable, optional): A function/transform that takes in an
 #' image and returns a transformed version. E.g., \code{\link[=transform_random_crop]{transform_random_crop()}}.
-#'
 #' @param target_transform (callable, optional): A function/transform that takes
 #' in the target and transforms it.
-#'
 #' @param download (bool, optional): If TRUE, downloads the dataset from the
 #' internet and puts it in root directory. If dataset is already downloaded,
 #' it is not downloaded again.
@@ -218,8 +214,7 @@ fashion_mnist_dataset <- dataset(
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz", "bb300cfdad3c16e7a12a480ee83cd310")
   ),
   classes = c(
-    '0 - T-shirt/top', '1 - Trouser', '2 - Pullover', '3 - Dress', '4 - Coat',
-    '5 - Sandal', '6 - Shirt', '7 - Sneaker', '8 - Bag', '9 - Ankle boot'
+    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
+    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
   )
 )
-
