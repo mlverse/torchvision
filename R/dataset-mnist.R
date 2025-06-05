@@ -204,8 +204,11 @@ qmnist_dataset <- dataset(
     test = "test.rds",
     nist = "nist.rds"
   ),
-  classes = c('0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
-              '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'),
+  classes = c(
+    '0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
+    '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
+  ),
+
   initialize = function(root = rappdirs::user_cache_dir("torch"), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
     split <- match.arg(split, c("train", "test", "nist"))
     self$split <- split
@@ -225,6 +228,7 @@ qmnist_dataset <- dataset(
     self$data <- data[[1]]
     self$targets <- data[[2]][, 1] + 1L
   },
+
   download = function() {
     if (self$check_exists())
       return(NULL)
@@ -232,50 +236,56 @@ qmnist_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    for (subset in names(self$resources)) {
-      for (r in self$resources[[subset]]) {
-        filename <- basename(r[1])
-        destpath <- file.path(self$raw_folder, filename)
+    for (r in self$resources[[self$split]]) {
+      filename <- basename(r[1])
+      destpath <- file.path(self$raw_folder, filename)
 
-        p <- download_and_cache(r[1], prefix = paste0("qmnist-", subset))
-        fs::file_copy(p, destpath, overwrite = TRUE)
+      p <- download_and_cache(r[1], prefix = paste0("qmnist-", self$split))
+      fs::file_copy(p, destpath, overwrite = TRUE)
 
-        if (!tools::md5sum(destpath) == r[2])
-          runtime_error(paste("MD5 mismatch for:", r[1]))
-      }
+      if (!tools::md5sum(destpath) == r[2])
+        runtime_error(paste("MD5 mismatch for:", r[1]))
     }
 
     rlang::inform("Processing...")
 
-    saveRDS(
-      list(
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'qmnist-train-images-idx3-ubyte.gz')),
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'qmnist-train-labels-idx2-int.gz'))
-      ),
-      file.path(self$processed_folder, self$files$train)
-    )
+    if (self$split == "train") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-images-idx3-ubyte.gz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-labels-idx2-int.gz"))
+        ),
+        file.path(self$processed_folder, self$files$train)
+      )
+    }
 
-    saveRDS(
-      list(
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'qmnist-test-images-idx3-ubyte.gz')),
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'qmnist-test-labels-idx2-int.gz'))
-      ),
-      file.path(self$processed_folder, self$files$test)
-    )
+    if (self$split == "test") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-images-idx3-ubyte.gz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-labels-idx2-int.gz"))
+        ),
+        file.path(self$processed_folder, self$files$test)
+      )
+    }
 
-    saveRDS(
-      list(
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'xnist-images-idx3-ubyte.xz')),
-        read_sn3_pascalvincent(file.path(self$raw_folder, 'xnist-labels-idx2-int.xz'))
-      ),
-      file.path(self$processed_folder, self$files$nist)
-    )
+    if (self$split == "nist") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-images-idx3-ubyte.xz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-labels-idx2-int.xz"))
+        ),
+        file.path(self$processed_folder, self$files$nist)
+      )
+    }
 
     rlang::inform("Done!")
   },
+
   check_exists = function() {
     fs::file_exists(file.path(self$processed_folder, self$files[[self$split]]))
   },
+
   .getitem = function(index) {
     img <- self$data[index, ,]
     target <- self$targets[index]
@@ -288,9 +298,11 @@ qmnist_dataset <- dataset(
 
     list(x = img, y = target)
   },
+
   .length = function() {
     dim(self$data)[1]
   },
+
   active = list(
     raw_folder = function() {
       file.path(self$root_path, "qmnist", "raw")
