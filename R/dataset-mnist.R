@@ -149,6 +149,54 @@ kmnist_dataset <- dataset(
   classes = c('o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo')
 )
 
+#' Fashion-MNIST dataset
+#'
+#' @usage
+#' fashion_mnist_dataset(
+#'   root,
+#'   train = TRUE,
+#'   transform = NULL,
+#'   target_transform = NULL,
+#'   download = FALSE
+#' )
+#'
+#' @param root (string): Root directory of dataset where
+#' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
+#' @param train (bool, optional): If TRUE, creates dataset from \code{training.pt},
+#' otherwise from \code{test.pt}.
+#' @param transform (callable, optional): A function/transform that takes in an
+#' image and returns a transformed version. E.g., \code{\link[=transform_random_crop]{transform_random_crop()}}.
+#' @param target_transform (callable, optional): A function/transform that takes
+#' in the target and transforms it.
+#' @param download (bool, optional): If TRUE, downloads the dataset from the
+#' internet and puts it in root directory. If dataset is already downloaded,
+#' it is not downloaded again.
+#'
+#' @description
+#' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
+#' and optionally downloads it.
+#'
+#' @seealso [mnist_dataset()], [kmnist_dataset()]
+#'
+#' @name fashion_mnist_dataset
+#' @aliases fashion_mnist_dataset
+#' @title Fashion-MNIST dataset
+#' @export
+fashion_mnist_dataset <- dataset(
+  name = "fashion_mnist_dataset",
+  inherit = mnist_dataset,
+  resources = list(
+    c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz", "8d4fb7e6c68d591d4c3dfef9ec88bf0d"),
+    c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz", "25c81989df183df01b3e8a0aad5dffbe"),
+    c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz", "bef4ecab320f06d8554ea6380940ec79"),
+    c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz", "bb300cfdad3c16e7a12a480ee83cd310")
+  ),
+  classes = c(
+    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
+    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
+  )
+)
+
 #' EMNIST Dataset
 #'
 #' Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
