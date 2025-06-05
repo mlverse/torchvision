@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-mnist.R
 \name{emnist_dataset}
 \alias{emnist_dataset}
-\title{EMNIST Dataset}
+\title{EMNIST dataset}
 \usage{
 emnist_dataset(
   root,
@@ -27,6 +27,9 @@ emnist_dataset(
 An EMNIST dataset object.
 }
 \description{
+EMNIST Dataset
+}
+\details{
 Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
 \itemize{
 \item "byclass": 62 classes (digits + uppercase + lowercase)
@@ -39,10 +42,15 @@ Loads the EMNIST dataset, a set of handwritten digits and letters with multiple 
 }
 \examples{
 \dontrun{
-ds <- emnist_dataset(split = "balanced", download = TRUE)
-sample <- ds[1]
-image <- sample[[1]]
-label <- sample[[2]]
+emnist <- emnist_dataset(split = "balanced", download = TRUE)
+first_item <- emnist[1]
+# image in item 1
+first_item$x
+# label of item 1
+first_item$y
 }
 
+}
+\seealso{
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
 }

@@ -177,6 +177,11 @@ kmnist_dataset <- dataset(
 #' first_item$y
 #' }
 #'
+#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
+#'
+#' @name emnist_dataset
+#' @aliases emnist_dataset
+#' @title EMNIST dataset
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",

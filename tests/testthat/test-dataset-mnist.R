@@ -59,7 +59,7 @@ test_that("tests for the emnist dataset", {
   dir <- tempfile(fileext = "/")
 
   expect_error(
-    ds <- kmnist_dataset(dir)
+    ds <- emnist_dataset(dir)
   )
 
   splits <- list(
