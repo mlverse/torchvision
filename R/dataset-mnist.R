@@ -169,7 +169,7 @@ kmnist_dataset <- dataset(
 #'
 #' @examples
 #' \dontrun{
-#' ds <- emnist_dataset(root = "~/data", split = "balanced", download = TRUE)
+#' ds <- emnist_dataset(split = "balanced", download = TRUE)
 #' sample <- ds[1]
 #' image <- sample[[1]]
 #' label <- sample[[2]]
@@ -187,7 +187,7 @@ emnist_dataset <- dataset(
     byclass = c(
       "0","1","2","3","4","5","6","7","8","9",
       LETTERS,
-      letters[c(1:9,11,12,14,17,20)]  # a,b,d,e,f,g,h,n,q,r,t
+      letters[c(1:9,11,12,14,17,20)]
     ),
     bymerge = c(
       "0","1","2","3","4","5","6","7","8","9",
@@ -230,7 +230,6 @@ emnist_dataset <- dataset(
     self$test_data <- test_data[[1]]
     self$test_targets <- test_data[[2]] + 1L
 
-    # Default to training split (can be changed by user externally)
     self$is_train <- TRUE
   },
 
@@ -254,7 +253,6 @@ emnist_dataset <- dataset(
 
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 
-    # Function to load and save dataset for each split
     process_split <- function(split_name) {
       train_img <- file.path(unzipped_root, paste0("emnist-", split_name, "-train-images-idx3-ubyte.gz"))
       train_lbl <- file.path(unzipped_root, paste0("emnist-", split_name, "-train-labels-idx1-ubyte.gz"))
@@ -270,7 +268,6 @@ emnist_dataset <- dataset(
       saveRDS(test_set, file.path(self$processed_folder, self$test_file(split_name)))
     }
 
-    # Process all splits
     for (split_name in names(self$classes_list)) {
       process_split(split_name)
     }

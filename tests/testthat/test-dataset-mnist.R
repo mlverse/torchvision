@@ -58,6 +58,10 @@ test_that("tests for the emnist dataset", {
 
   dir <- tempfile(fileext = "/")
 
+  expect_error(
+    ds <- kmnist_dataset(dir)
+  )
+
   splits <- list(
     byclass  = list(n_classes = 62, n_train = 697932),
     bymerge  = list(n_classes = 47, n_train = 697932),
@@ -69,11 +73,6 @@ test_that("tests for the emnist dataset", {
 
   for (split in names(splits)) {
     info <- splits[[split]]
-    #cat("Testing split:", split, "\n")
-
-    expect_error(
-      ds <- emnist_dataset(dir, split = split)
-    )
 
     ds <- emnist_dataset(dir, split = split, download = TRUE)
     
