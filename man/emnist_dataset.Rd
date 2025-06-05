@@ -39,7 +39,7 @@ Loads the EMNIST dataset, a set of handwritten digits and letters with multiple 
 }
 \examples{
 \dontrun{
-ds <- emnist_dataset(root = "~/data", split = "balanced", download = TRUE)
+ds <- emnist_dataset(split = "balanced", download = TRUE)
 sample <- ds[1]
 image <- sample[[1]]
 label <- sample[[2]]
