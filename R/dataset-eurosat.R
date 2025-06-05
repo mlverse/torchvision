@@ -8,7 +8,8 @@
 #' @details
 #'  `eurostat_dataset()` provides a total of 27,000 RGB labeled images.
 #'
-#' @param root Character. The root directory where the dataset will be stored.
+#' @param root (Optional) Character. The root directory where the dataset will be stored.
+#'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
 #' @param split Character. Must be one of `train`, `val`, or `test`.
 #' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
 #' @param transform Function. Optional transformation to be applied to the images.
@@ -19,7 +20,7 @@
 #' @examples
 #' \dontrun{
 #' # Initialize the dataset
-#' ds <- eurosat100_dataset(root = "./data/eurosat", split = "train", download = TRUE)
+#' ds <- eurosat100_dataset(split = "train", download = TRUE)
 #'
 #' # Access the first item
 #' head <- ds[1]

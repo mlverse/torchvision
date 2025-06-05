@@ -31,7 +31,8 @@ eurosat100_dataset(
 )
 }
 \arguments{
-\item{root}{Character. The root directory where the dataset will be stored.}
+\item{root}{(Optional) Character. The root directory where the dataset will be stored.
+if empty, will use the default \code{rappdirs::user_cache_dir("torch")}.}
 
 \item{split}{Character. Must be one of \code{train}, \code{val}, or \code{test}.}
 
@@ -60,7 +61,7 @@ observation program Copernicus. Images are organized into 10 classes.
 \examples{
 \dontrun{
 # Initialize the dataset
-ds <- eurosat100_dataset(root = "./data/eurosat", split = "train", download = TRUE)
+ds <- eurosat100_dataset(split = "train", download = TRUE)
 
 # Access the first item
 head <- ds[1]
