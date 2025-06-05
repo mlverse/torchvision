@@ -259,7 +259,7 @@ emnist_dataset <- dataset(
     mnist = as.character(0:9)
   ),
 
-  initialize = function(root, split = "balanced", transform = NULL, target_transform = NULL,
+  initialize = function(root = rappdirs::user_cache_dir("torch"), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
@@ -293,6 +293,8 @@ emnist_dataset <- dataset(
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
+    
+    rlang::inform("Downloading and processing EMNIST dataset. This may take approximately 6 minutes...")
 
     url <- self$resources[[1]][1]
     expected_md5 <- self$resources[[1]][2]
