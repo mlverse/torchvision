@@ -158,15 +158,9 @@ kmnist_dataset <- dataset(
 #' information. It is suitable for benchmarking modern machine learning models and can serve as a
 #' drop-in replacement for MNIST in most image classification tasks.
 #'
-#' @param root (string) Root directory where the dataset is or will be stored.
-#' @param what (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
+#' @inheritParams mnist_dataset
+#' @param split (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
 #'   Defaults to `"train"`. The `"nist"` option loads the full NIST digits set.
-#' @param download (logical, optional) If `TRUE`, downloads the dataset from the official
-#'   repository if it does not already exist. Defaults to `FALSE`.
-#' @param transform (function, optional) A function/transform that takes an image tensor and
-#'   returns a modified version (e.g., normalization, cropping).
-#' @param target_transform (function, optional) A function/transform that takes a target label and
-#'   returns a transformed version (e.g., one-hot encoding).
 #'
 #' @return An R6 dataset object compatible with the `{torch}` package, providing indexed access
 #'   to (image, label) pairs from the specified QMNIST subset.
@@ -176,22 +170,16 @@ kmnist_dataset <- dataset(
 #' - `"test"`: 60,000 test examples (extended QMNIST test set)
 #' - `"nist"`: Entire NIST digit dataset (for advanced benchmarking)
 #'
-#' @seealso
-#' - [mnist_dataset()] for the original MNIST dataset.
-#' - [kmnist_dataset()] for the Kuzushiji-MNIST dataset.
-#' - Official QMNIST repository: <https://github.com/facebookresearch/qmnist>
+#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()], [emnist_dataset()]
 #'
 #' @examples
-#' if (torch::torch_is_installed()) {
-#'   # Load and inspect the QMNIST training subset
-#'   ds <- qmnist_dataset(root = tempfile(), what = "train", download = TRUE)
-#'   sample <- ds[1]
-#'   cat("Label:", sample$y, "\n")
-#'   print(dim(sample$x))  # should print 28x28 image tensor dimensions
-#'
-#'   # Load the NIST variant
-#'   nist_ds <- qmnist_dataset(root = tempfile(), what = "nist", download = TRUE)
-#'   print(nist_ds[1])
+#' \dontrun{
+#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
+#' first_item <- qmnist[1]
+#' # image in item 1
+#' first_item$x
+#' # label of item 1
+#' first_item$y
 #' }
 #'
 #' @export
@@ -218,9 +206,9 @@ qmnist_dataset <- dataset(
   ),
   classes = c('0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
               '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'),
-  initialize = function(root, what = "train", transform = NULL, target_transform = NULL, download = FALSE) {
-    what <- match.arg(what, c("train", "test", "nist"))
-    self$what <- what
+  initialize = function(root = rappdirs::user_cache_dir("torch"), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+    split <- match.arg(split, c("train", "test", "nist"))
+    self$split <- split
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
@@ -231,7 +219,7 @@ qmnist_dataset <- dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
 
-    data_file <- self$files[[what]]
+    data_file <- self$files[[split]]
     data <- readRDS(file.path(self$processed_folder, data_file))
 
     self$data <- data[[1]]
@@ -246,7 +234,7 @@ qmnist_dataset <- dataset(
 
     for (subset in names(self$resources)) {
       for (r in self$resources[[subset]]) {
-        filename <- tail(strsplit(r[1], "/")[[1]], 1)
+        filename <- basename(r[1])
         destpath <- file.path(self$raw_folder, filename)
 
         p <- download_and_cache(r[1], prefix = paste0("qmnist-", subset))
@@ -286,7 +274,7 @@ qmnist_dataset <- dataset(
     rlang::inform("Done!")
   },
   check_exists = function() {
-    fs::file_exists(file.path(self$processed_folder, self$files[[self$what]]))
+    fs::file_exists(file.path(self$processed_folder, self$files[[self$split]]))
   },
   .getitem = function(index) {
     img <- self$data[index, ,]

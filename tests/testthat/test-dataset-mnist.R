@@ -57,15 +57,15 @@ test_that("tests for the kmnist dataset", {
 test_that("tests for the qmnist dataset", {
   dir <- tempfile(fileext = "/")
 
-  subsets <- c("train", "test", "nist")
-
-  for (subset in subsets) {
-
-    expect_error(
+  expect_error(
       ds <- qmnist_dataset(dir, what = subset)
-    )
+  )
 
-    ds <- qmnist_dataset(dir, what = subset, download = TRUE)
+  splits <- c("train", "test", "nist")
+
+  for (split in splits) {
+
+    ds <- qmnist_dataset(dir, split = split, download = TRUE)
 
     i <- ds[1]
     expect_equal(dim(i[[1]]), c(28, 28))
@@ -73,7 +73,7 @@ test_that("tests for the qmnist dataset", {
 
     expect_true(length(ds) > 0)
 
-    ds <- qmnist_dataset(dir, what = subset, transform = transform_to_tensor)
+    ds <- qmnist_dataset(dir, split = split, transform = transform_to_tensor)
     dl <- torch::dataloader(ds, batch_size = 32)
     iter <- dataloader_make_iter(dl)
     i <- dataloader_next(iter)

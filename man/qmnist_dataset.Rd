@@ -5,27 +5,30 @@
 \title{QMNIST Dataset}
 \usage{
 qmnist_dataset(
-  root,
-  what = "train",
+  root = rappdirs::user_cache_dir("torch"),
+  split = "train",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
 )
 }
 \arguments{
-\item{root}{(string) Root directory where the dataset is or will be stored.}
+\item{root}{(string): Root directory of dataset where
+\code{MNIST/processed/training.pt} and  \code{MNIST/processed/test.pt} exist.}
 
-\item{what}{(string, optional) Which subset to load: one of \code{"train"}, \code{"test"}, or \code{"nist"}.
+\item{split}{(string, optional) Which subset to load: one of \code{"train"}, \code{"test"}, or \code{"nist"}.
 Defaults to \code{"train"}. The \code{"nist"} option loads the full NIST digits set.}
 
-\item{transform}{(function, optional) A function/transform that takes an image tensor and
-returns a modified version (e.g., normalization, cropping).}
+\item{transform}{(callable, optional): A function/transform that  takes in an
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
-\item{target_transform}{(function, optional) A function/transform that takes a target label and
-returns a transformed version (e.g., one-hot encoding).}
+\item{target_transform}{(callable, optional): A function/transform that takes
+in the target and transforms it.}
 
-\item{download}{(logical, optional) If \code{TRUE}, downloads the dataset from the official
-repository if it does not already exist. Defaults to \code{FALSE}.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 }
 \value{
 An R6 dataset object compatible with the \code{{torch}} package, providing indexed access
@@ -50,23 +53,16 @@ drop-in replacement for MNIST in most image classification tasks.
 }
 
 \examples{
-if (torch::torch_is_installed()) {
-  # Load and inspect the QMNIST training subset
-  ds <- qmnist_dataset(root = tempfile(), what = "train", download = TRUE)
-  sample <- ds[1]
-  cat("Label:", sample$y, "\n")
-  print(dim(sample$x))  # should print 28x28 image tensor dimensions
-
-  # Load the NIST variant
-  nist_ds <- qmnist_dataset(root = tempfile(), what = "nist", download = TRUE)
-  print(nist_ds[1])
+\dontrun{
+qmnist <- qmnist_dataset(split = "train", download = TRUE)
+first_item <- qmnist[1]
+# image in item 1
+first_item$x
+# label of item 1
+first_item$y
 }
 
 }
 \seealso{
-\itemize{
-\item \code{\link[=mnist_dataset]{mnist_dataset()}} for the original MNIST dataset.
-\item \code{\link[=kmnist_dataset]{kmnist_dataset()}} for the Kuzushiji-MNIST dataset.
-\item Official QMNIST repository: \url{https://github.com/facebookresearch/qmnist}
-}
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}, \code{\link[=emnist_dataset]{emnist_dataset()}}
 }
