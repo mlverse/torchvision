@@ -39,13 +39,10 @@ eurosat_dataset <- torch::dataset(
                         transform = NULL,
                         target_transform = NULL) {
     self$root <- normalizePath(root, mustWork = FALSE)
-    self$split <- split
+    self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
 
-    if (!split %in% c("train", "val", "test")) {
-      value_error("Invalid split. Must be one of 'train', 'val', or 'test'.")
-    }
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
