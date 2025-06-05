@@ -12,6 +12,9 @@ Authors@R: c(
            role = c("ctb"),
            email = "christophe.regouby@free.fr"
            ),
+    person(given = "Akanksha", 
+           family = "Koshti", 
+           role = c("ctb")),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing
@@ -22,7 +25,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports:
     torch (>= 0.5.0),
     fs,

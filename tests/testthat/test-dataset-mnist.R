@@ -53,3 +53,28 @@ test_that("tests for the kmnist dataset", {
   expect_true((torch_max(i[[1]]) <= 1)$item())
   expect_named(i, c("x", "y"))
 })
+
+
+test_that("fashion_mnist_dataset loads correctly", {
+  dir <- tempfile()
+
+  ds <- fashion_mnist_dataset(
+    root = dir,
+    train = TRUE,
+    download = TRUE
+  )
+
+  expect_s3_class(ds, "fashion_mnist_dataset")
+  expect_type(ds$.getitem(1), "list")
+  expect_named(ds$.getitem(1), c("x", "y"))
+  expect_equal(dim(as.array(ds$.getitem(1)$x)), c(28, 28))
+  expect_true(ds$.getitem(1)$y >= 1 && ds$.getitem(1)$y <= 10)
+
+  ds2 <- fashion_mnist_dataset(dir, transform = transform_to_tensor)
+  dl <- torch::dataloader(ds2, batch_size = 32)
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+  expect_tensor_shape(batch$x, c(32, 1, 28, 28))
+  expect_tensor_shape(batch$y, 32)
+  expect_named(batch, c("x", "y"))
+})
