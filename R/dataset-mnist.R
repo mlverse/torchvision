@@ -169,10 +169,12 @@ kmnist_dataset <- dataset(
 #'
 #' @examples
 #' \dontrun{
-#' ds <- emnist_dataset(split = "balanced", download = TRUE)
-#' sample <- ds[1]
-#' image <- sample[[1]]
-#' label <- sample[[2]]
+#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
+#' first_item <- emnist[1]
+#' # image in item 1
+#' first_item$x
+#' # label of item 1
+#' first_item$y
 #' }
 #'
 #' @export
