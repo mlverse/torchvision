@@ -1,16 +1,19 @@
 #' FER2013 Dataset
 #'
-#' Loads the FER2013 dataset, a facial expression recognition dataset containing
-#' grayscale 48x48 pixel images labeled with one of 7 emotions.
+#' Loads the FER2013 dataset for facial expression recognition, consisting of grayscale 48x48 images.
+#' The dataset contains facial images categorized into seven emotion classes:
+#' - 0: Angry
+#' - 1: Disgust
+#' - 2: Fear
+#' - 3: Happy
+#' - 4: Sad
+#' - 5: Surprise
+#' - 6: Neutral
 #'
-#' The dataset consists of two splits:
-#' - "train": training set
-#' - "test": test set
-#'
-#' @param root Character. Root directory for dataset storage (default folder: `root/fer2013/processed/`).
-#' @param train Logical. If `TRUE`, loads the training split; otherwise, loads the test split. Default is `TRUE`.
-#' @param download Logical. Whether to download the dataset if it is not found locally. Default is `FALSE`.
-#' @param transform Optional function to transform input image tensors.
+#' @param root Character. Root directory where the `fer2013` folder exists or will be saved to if `download = TRUE`.
+#' @param train Logical. If `TRUE`, loads the training split; if `FALSE`, loads the test split. Default is `TRUE`.
+#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
+#' @param transform Optional function to transform input images.
 #' @param target_transform Optional function to transform target labels.
 #'
 #' @return A FER2013 dataset object.
@@ -19,9 +22,9 @@
 #' \dontrun{
 #' fer <- fer_dataset(train = TRUE, download = TRUE)
 #' first_item <- fer[1]
-#' # image tensor of the first sample
+#' # image in item 1
 #' first_item$x
-#' # label tensor of the first sample
+#' # label of item 1
 #' first_item$y
 #' }
 #'
@@ -30,107 +33,74 @@
 #' @title FER2013 dataset
 #' @export
 fer_dataset <- dataset(
-  name = "fer2013",
-  training_file = "train.rds",
-  test_file = "test.rds",
+  name = "fer_dataset",
   train_url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/train.csv.zip",
   test_url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip",
   train_md5 = "e6c225af03577e6dcbb1c59a71d09905",
   test_md5 = "024ec789776ef0a390db67b1d7ae60a3",
-
-  initialize = function(root = rappdirs::user_cache_dir("torch"), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
-    self$root_path <- root
+  folder_name = "fer2013",
+  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+    self$root <- root
+    self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
-    self$train <- train
+    self$split <- if (train) "train" else "test"
 
     if (download)
       self$download()
 
-    if (!self$check_exists())
-      runtime_error("Dataset not found. Use download = TRUE to download it.")
+    check <- self$check_files()
+    if (!check)
+      runtime_error("Files not found or corrupted. Use download = TRUE")
 
-    file <- if (self$train) self$training_file else self$test_file
-    data <- readRDS(file.path(self$processed_folder, file))
+    data_file <- fs::path(self$root, self$folder_name, paste0(self$split, ".csv"))
+    lines <- readLines(data_file)
+    header <- strsplit(lines[1], ",")[[1]]
+    parsed <- read.csv(data_file, stringsAsFactors = FALSE)
 
-    self$data_array <- data$images  
-    cat("Shape of loaded images:", paste(dim(data$images), collapse = " x "), "\n")
+    self$x <- lapply(parsed$pixels, function(p) {
+      img <- as.integer(strsplit(p, " ")[[1]])
+      torch_tensor(img, dtype = torch_uint8())$view(c(1, 48, 48))
+    })
 
-    self$targets <- torch_tensor(data$labels + 1L, dtype = torch_long())  
+    self$y <- as.integer(parsed$emotion) + 1L
   },
-
-  download = function() {
-    fs::dir_create(self$raw_folder)
-    fs::dir_create(self$processed_folder)
-
-    if (self$train) {
-      zip_url <- self$train_url
-      zip_md5 <- self$train_md5
-      split_name <- "train"
-    } else {
-      zip_url <- self$test_url
-      zip_md5 <- self$test_md5
-      split_name <- "test"
-    }
-
-    zip_name <- paste0(split_name, ".csv.zip")
-    csv_name <- paste0(split_name, ".csv")
-    zip_path <- file.path(self$raw_folder, zip_name)
-    csv_path <- file.path(self$raw_folder, csv_name)
-
-    p <- download_and_cache(zip_url, prefix = class(self)[1])
-    fs::file_copy(p, zip_path, overwrite = TRUE)
-
-    if (tools::md5sum(zip_path) != zip_md5)
-      runtime_error(paste("MD5 mismatch for", zip_path))
-
-    utils::unzip(zip_path, exdir = self$raw_folder)
-    rlang::inform(glue::glue("Processing FER2013 {split_name} dataset..."))
-
-    df <- read.csv(csv_path, stringsAsFactors = FALSE)
-    n <- nrow(df)
-    images <- array(0L, dim = c(n, 1, 48, 48))
-
-    for (i in seq_len(n)) {
-      pixels <- as.integer(strsplit(df$pixels[i], " ")[[1]])
-      images[i, 1, , ] <- matrix(pixels, nrow = 48, byrow = TRUE)
-    }
-
-    labels <- as.integer(df$emotion)
-
-    saveRDS(list(images = images, labels = labels), file.path(self$processed_folder, paste0(split_name, ".rds")))
-    rlang::inform(glue::glue("FER2013 {split_name} split downloaded and processed."))
-  },
-
-  check_exists = function() {
-    file <- if (self$train) self$training_file else self$test_file
-    fs::file_exists(file.path(self$processed_folder, file))
-  },
-
-  .getitem = function(index) {
-    img_array <- self$data_array[index, , , , drop = FALSE]
-    img <- torch_tensor(img_array, dtype = torch_float())
+  .getitem = function(i) {
+    x <- self$x[[i]]
+    y <- self$y[i]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
-    target <- self$targets[index]
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
-
   .length = function() {
-    dim(self$data_array)[1]
+    length(self$y)
   },
+  download = function() {
+    if (self$check_files())
+      return()
 
-  active = list(
-    raw_folder = function() {
-      file.path(self$root_path, "fer2013", "raw")
-    },
-    processed_folder = function() {
-      file.path(self$root_path, "fer2013", "processed")
+    dir <- fs::path(self$root, self$folder_name)
+    fs::dir_create(dir)
+
+    if (self$train) {
+      zipfile <- download_and_cache(self$train_url)
+      if (tools::md5sum(zipfile) != self$train_md5)
+        runtime_error(paste("Corrupt file!", basename(zipfile), "does not match expected checksum."))
+    } else {
+      zipfile <- download_and_cache(self$test_url)
+      if (tools::md5sum(zipfile) != self$test_md5)
+        runtime_error(paste("Corrupt file!", basename(zipfile), "does not match expected checksum."))
     }
-  )
+
+    utils::unzip(zipfile, exdir = dir)
+  },
+  check_files = function() {
+    file <- fs::path(self$root, self$folder_name, paste0(if (self$train) "train" else "test", ".csv"))
+    fs::file_exists(file)
+  }
 )
