@@ -1,4 +1,6 @@
-test_that("fer_dataset", {
+context("dataset-fer")
+
+test_that("tests for the FER-2013 dataset", {
 
   t <- tempfile()
 
@@ -8,27 +10,16 @@ test_that("fer_dataset", {
   )
 
   ds <- fer_dataset(root = t, train = TRUE, download = TRUE)
-  expect_equal(length(ds), dim(ds$data_array)[1])
-
-  el <- ds[1]
-  expect_true(is.list(el))
-  expect_named(el, c("x", "y"))
-  
-  actual_dims <- dim(el$x)
-  expect_true(length(actual_dims) >= 3)
-  expect_equal(actual_dims[2:4], c(48, 48))
-
-  expect_equal(length(el$y), 1)
+  expect_equal(length(ds), 28709)
+  first_item <- ds[1]
+  expect_equal(dim(first_item[[1]]), c(1, 48, 48))
+  expect_named(first_item, c("x", "y"))
+  expect_equal(length(first_item[[2]]), 1)
 
   ds <- fer_dataset(root = t, train = FALSE, download = TRUE)
-  expect_equal(length(ds), dim(ds$data_array)[1])
-
-  el <- ds[1]
-  expect_named(el, c("x", "y"))
-  
-  actual_dims <- dim(el$x)
-  expect_true(length(actual_dims) >= 3)
-  expect_equal(actual_dims[2:4], c(48, 48))
-  expect_equal(length(el$y), 1)
+  first_item <- ds[1]
+  expect_equal(dim(first_item[[1]]), c(1, 48, 48))
+  expect_equal(length(first_item[[2]]), 1)
+  expect_named(first_item, c("x", "y"))
 
 })
