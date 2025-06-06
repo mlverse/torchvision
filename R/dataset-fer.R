@@ -87,6 +87,8 @@ fer_dataset <- dataset(
     dir <- fs::path(self$root, self$folder_name)
     fs::dir_create(dir)
 
+    rlang::inform(glue::glue("Downloading and processing FER-2013 dataset ({if (train) 'train' else 'test'} split)..."))
+
     if (self$train) {
       zipfile <- download_and_cache(self$train_url)
       if (tools::md5sum(zipfile) != self$train_md5)
@@ -98,6 +100,9 @@ fer_dataset <- dataset(
     }
 
     utils::unzip(zipfile, exdir = dir)
+
+    rlang::inform(glue::glue("FER-2013 dataset ({if (train) 'train' else 'test'} split) Processed Successfully !"))
+
   },
   check_files = function() {
     file <- fs::path(self$root, self$folder_name, paste0(if (self$train) "train" else "test", ".csv"))
