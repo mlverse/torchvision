@@ -199,10 +199,13 @@ read_sn3_pascalvincent <- function(path) {
 #' @param download (bool, optional): If TRUE, downloads the dataset from the
 #' internet and puts it in root directory. If dataset is already downloaded,
 #' it is not downloaded again.
+#' @param train (bool, optional): If TRUE, creates dataset from \code{training.pt}, otherwise from \code{test.pt}.
+#' @param transform (callable, optional): A function/transform that takes in an image and returns a transformed version. E.g., \code{\link[=transform_random_crop]{transform_random_crop()}}.
+#' @param target_transform (callable, optional): A function/transform that takes in the target and transforms it.
+#' @param download (bool, optional): If TRUE, downloads the dataset from the internet and puts it in root directory. If dataset is already downloaded, it is not downloaded again.
 #'
 #' @description
-#' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
-#' and optionally downloads it.
+#' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset and optionally downloads it.
 #'
 #' @seealso [mnist_dataset()], [kmnist_dataset()]
 #'

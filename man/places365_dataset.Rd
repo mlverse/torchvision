@@ -2,8 +2,7 @@
 % Please edit documentation in R/places365-dataset.R
 \name{places365_dataset}
 \alias{places365_dataset}
-\title{Places365 dataset
-Prepares the Places365 dataset and optionally downloads it.}
+\title{Places365 dataset}
 \usage{
 places365_dataset(root, split = "train", download = FALSE, ...)
 }
@@ -17,7 +16,6 @@ places365_dataset(root, split = "train", download = FALSE, ...)
 \item{...}{other arguments passed to \code{\link[=image_folder_dataset]{image_folder_dataset()}}.}
 }
 \description{
-Places365 dataset
 Prepares the Places365 dataset and optionally downloads it.
 }
 \seealso{

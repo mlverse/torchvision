@@ -1,4 +1,5 @@
 #' Places365 dataset
+#'
 #' Prepares the Places365 dataset and optionally downloads it.
 #'
 #' @param root directory path to download the dataset.
