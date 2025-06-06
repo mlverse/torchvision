@@ -5,7 +5,7 @@
 \title{FER2013 dataset}
 \usage{
 fer_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root,
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -13,15 +13,15 @@ fer_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage (default folder: \verb{root/fer2013/processed/}).}
+\item{root}{Character. Root directory where the \code{fer2013} folder exists or will be saved to if \code{download = TRUE}.}
 
-\item{train}{Logical. If \code{TRUE}, loads the training split; otherwise, loads the test split. Default is \code{TRUE}.}
+\item{train}{Logical. If \code{TRUE}, loads the training split; if \code{FALSE}, loads the test split. Default is \code{TRUE}.}
 
-\item{transform}{Optional function to transform input image tensors.}
+\item{transform}{Optional function to transform input images.}
 
 \item{target_transform}{Optional function to transform target labels.}
 
-\item{download}{Logical. Whether to download the dataset if it is not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 A FER2013 dataset object.
@@ -30,22 +30,25 @@ A FER2013 dataset object.
 FER2013 Dataset
 }
 \details{
-Loads the FER2013 dataset, a facial expression recognition dataset containing
-grayscale 48x48 pixel images labeled with one of 7 emotions.
-
-The dataset consists of two splits:
+Loads the FER2013 dataset for facial expression recognition, consisting of grayscale 48x48 images.
+The dataset contains facial images categorized into seven emotion classes:
 \itemize{
-\item "train": training set
-\item "test": test set
+\item 0: Angry
+\item 1: Disgust
+\item 2: Fear
+\item 3: Happy
+\item 4: Sad
+\item 5: Surprise
+\item 6: Neutral
 }
 }
 \examples{
 \dontrun{
 fer <- fer_dataset(train = TRUE, download = TRUE)
 first_item <- fer[1]
-# image tensor of the first sample
+# image in item 1
 first_item$x
-# label tensor of the first sample
+# label of item 1
 first_item$y
 }
 
