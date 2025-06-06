@@ -46,6 +46,8 @@ fer_dataset <- dataset(
     self$target_transform <- target_transform
     self$split <- if (train) "train" else "test"
 
+    rlang::inform(glue::glue("Downloading and processing FER-2013 dataset ({self$split} split)..."))
+
     if (download)
       self$download()
 
@@ -64,6 +66,9 @@ fer_dataset <- dataset(
     })
 
     self$y <- as.integer(parsed$emotion) + 1L
+
+    rlang::inform(glue::glue("FER-2013 dataset ({self$split} split) Processed Successfully !"))
+    
   },
   .getitem = function(i) {
     x <- self$x[[i]]
@@ -87,8 +92,6 @@ fer_dataset <- dataset(
     dir <- fs::path(self$root, self$folder_name)
     fs::dir_create(dir)
 
-    rlang::inform(glue::glue("Downloading and processing FER-2013 dataset ({if (train) 'train' else 'test'} split)..."))
-
     if (self$train) {
       zipfile <- download_and_cache(self$train_url)
       if (tools::md5sum(zipfile) != self$train_md5)
@@ -100,8 +103,6 @@ fer_dataset <- dataset(
     }
 
     utils::unzip(zipfile, exdir = dir)
-
-    rlang::inform(glue::glue("FER-2013 dataset ({if (train) 'train' else 'test'} split) Processed Successfully !"))
 
   },
   check_files = function() {
