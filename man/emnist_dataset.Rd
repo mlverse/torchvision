@@ -5,7 +5,7 @@
 \title{EMNIST dataset}
 \usage{
 emnist_dataset(
-  root,
+  root = rappdirs::user_cache_dir("torch"),
   split = "balanced",
   transform = NULL,
   target_transform = NULL,
