@@ -51,7 +51,7 @@ first_item$x
 # label of item 1
 first_item$y
 # label name
-first_item$class  
+first_item$class_name
 }
 
 }

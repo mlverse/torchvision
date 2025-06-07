@@ -27,7 +27,7 @@
 #' # label of item 1
 #' first_item$y
 #' # label name
-#' first_item$class  
+#' first_item$class_name
 #' }
 #'
 #' @name fer_dataset
@@ -82,7 +82,7 @@ fer_dataset <- dataset(
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
-    list(x = x, y = y, class = self$classes[y])
+    list(x = x, y = y, class_name = self$classes[y])
   },
   .length = function() {
     length(self$y)
