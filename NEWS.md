@@ -5,6 +5,7 @@
 - fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
 - add message translation in french (#112, @cregouby)
 - Added support for the Fashion-MNIST dataset. (#148, @koshtiakanksha)
+- Added `fgcv_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
