@@ -5,7 +5,7 @@
 \title{FER2013 dataset}
 \usage{
 fer_dataset(
-  root,
+  root = rappdirs::user_cache_dir("torch"),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -50,6 +50,8 @@ first_item <- fer[1]
 first_item$x
 # label of item 1
 first_item$y
+# label name
+first_item$class  
 }
 
 }
