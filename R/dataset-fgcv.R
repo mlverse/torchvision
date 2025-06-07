@@ -25,6 +25,8 @@
 #' first_item$x
 #' # label of first item
 #' first_item$y
+#' #class name of the first item
+#' first_item$class_name
 #' }
 #'
 #' @name fgcv_aircraft_dataset
@@ -96,7 +98,10 @@ fgcv_aircraft_dataset <- dataset(
     if (!is.null(self$transform)) img <- self$transform(img)
     label <- self$labels[index]
     if (!is.null(self$target_transform)) label <- self$target_transform(label)
-    list(x = img, y = label)
+
+    class_name <- names(self$class_to_idx)[self$labels[index]]
+    list(x = img, y = label, class_name = class_name)
+
   },
 
   .length = function() {

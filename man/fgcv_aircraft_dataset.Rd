@@ -51,6 +51,8 @@ first_item <- fgcv[1]
 first_item$x
 # label of first item
 first_item$y
+#class name of the first item
+first_item$class_name
 }
 
 }
