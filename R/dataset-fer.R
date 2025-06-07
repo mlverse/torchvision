@@ -26,6 +26,8 @@
 #' first_item$x
 #' # label of item 1
 #' first_item$y
+#' # label name
+#' first_item$class  
 #' }
 #'
 #' @name fer_dataset
@@ -39,6 +41,7 @@ fer_dataset <- dataset(
   train_md5 = "e6c225af03577e6dcbb1c59a71d09905",
   test_md5 = "024ec789776ef0a390db67b1d7ae60a3",
   folder_name = "fer2013",
+  classes = c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"),
   initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
     self$root <- root
     self$train <- train
@@ -68,7 +71,6 @@ fer_dataset <- dataset(
     self$y <- as.integer(parsed$emotion) + 1L
 
     rlang::inform(glue::glue("FER-2013 dataset ({self$split} split) Processed Successfully !"))
-    
   },
   .getitem = function(i) {
     x <- self$x[[i]]
@@ -80,7 +82,7 @@ fer_dataset <- dataset(
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
-    list(x = x, y = y)
+    list(x = x, y = y, class = self$classes[y])
   },
   .length = function() {
     length(self$y)
@@ -103,7 +105,6 @@ fer_dataset <- dataset(
     }
 
     utils::unzip(zipfile, exdir = dir)
-
   },
   check_files = function() {
     file <- fs::path(self$root, self$folder_name, paste0(if (self$train) "train" else "test", ".csv"))
