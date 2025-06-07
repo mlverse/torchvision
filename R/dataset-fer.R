@@ -42,7 +42,7 @@ fer_dataset <- dataset(
   test_md5 = "024ec789776ef0a390db67b1d7ae60a3",
   folder_name = "fer2013",
   classes = c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"),
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(root = rappdirs::user_cache_dir("torch"), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
     self$root <- root
     self$train <- train
     self$transform <- transform
