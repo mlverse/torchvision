@@ -1,15 +1,15 @@
-context("dataset-flikr")
+context("dataset-flickr")
 
-test_that("tests for the Flikr8k dataset", {
+test_that("tests for the flickr8k dataset", {
   t <- tempfile()
 
   expect_error(
     flickr8k_dataset(root = t, download = FALSE)
   )
 
-  flikr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
-  expect_equal(length(flikr8k), 6000)
-  first_item <- flikr8k[1]
+  flickr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
+  expect_equal(length(flickr8k), 6000)
+  first_item <- flickr8k[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "torch_tensor"))
   expect_equal((first_item$y[[1]]), "A black dog is running after a white dog in the snow .")
@@ -18,9 +18,9 @@ test_that("tests for the Flikr8k dataset", {
   expect_equal((first_item$y[[4]]), "Two dogs play together in the snow .")
   expect_equal((first_item$y[[5]]), "Two dogs running through a low lying body of water .")
 
-  flikr8k <- flickr8k_dataset(root = t, train = FALSE, download = TRUE)
-  expect_equal(length(flikr8k), 1000)
-  first_item <- flikr8k[1]
+  flickr8k <- flickr8k_dataset(root = t, train = FALSE, download = TRUE)
+  expect_equal(length(flickr8k), 1000)
+  first_item <- flickr8k[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "torch_tensor"))
   expect_equal((first_item$y[[1]]), "The dogs are in the snow in front of a fence .")
