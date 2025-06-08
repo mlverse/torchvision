@@ -6,7 +6,7 @@
 - add message translation in french (#112, @cregouby)
 - Added support for the Fashion-MNIST dataset. (#148, @koshtiakanksha)
 - Added `caltech101_dataset()` – a dataset loader for the Caltech101 dataset. (#158, @DerrickUnleashed)
-- Added `caltech256_dataset` – a dataset loader for the Caltech256 dataset. (#158, @DerrickUnleashed)
+- Added `caltech256_dataset()` – a dataset loader for the Caltech256 dataset. (#158, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
