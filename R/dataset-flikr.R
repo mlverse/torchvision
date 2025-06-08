@@ -44,6 +44,7 @@ flickr8k_dataset <- dataset(
     self$train <- train
 
     if (download)
+      rlang::inform("Downloading Flickr8k Dataset...")
       self$download()
 
     if (!self$check_exists())
@@ -75,8 +76,6 @@ flickr8k_dataset <- dataset(
   fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
   utils::unzip(dest_zip, exdir = self$raw_folder)
 }
-
-
 
     rlang::inform("Processing Flickr8k captions...")
 
@@ -143,6 +142,32 @@ flickr8k_dataset <- dataset(
   )
 )
 
+#' Flickr30k Dataset
+#'
+#' Loads the Flickr30k dataset consisting of 31,014 images, each annotated with five captions.
+#' The dataset is split into training and test sets using the official Karpathy splits.
+#' Images are resized to a fixed 224x224 resolution, and captions are extracted as lists of raw strings.
+#'
+#' @inheritParams flickr8k_dataset
+#' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.
+#'
+#' @return A flickr30k_dataset object representing the dataset with images and their corresponding captions.
+#'
+#' @examples
+#' \dontrun{
+#' root_dir <- tempfile()
+#' flickr30k <- flickr30k_dataset(root = root_dir, train = TRUE, download = TRUE)
+#' first_item <- flickr30k[1]
+#' # Tensor representing the image
+#' first_item$x
+#' # List of captions for the image
+#' first_item$y
+#' }
+#'
+#' @name flickr30k_dataset
+#' @aliases flickr30k_dataset
+#' @title Flickr30k Dataset
+#' @export
 flickr30k_dataset <- dataset(
   name = "flickr30k",
   resources = list(
@@ -163,10 +188,13 @@ flickr30k_dataset <- dataset(
     self$train <- train
 
     if (download)
+      rlang::inform("Downloading Flickr30k Dataset...")
       self$download()
 
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+
+    rlang::inform("Processing Flickr30k captions...")
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
     captions_json <- jsonlite::fromJSON(captions_path)
@@ -181,22 +209,16 @@ flickr30k_dataset <- dataset(
     self$captions_map <- list()
     for (i in seq_len(nrow(filtered_images))) {
       img_entry <- filtered_images[i, ]
+      filename <- img_entry$filename
       sentences_list <- img_entry$sentences[[1]]
 
-      if (is.list(sentences_list) && length(sentences_list) > 0) {
-        if (is.list(sentences_list[[1]]) && !is.null(sentences_list[[1]]$raw)) {
-          caps <- sapply(sentences_list, function(s) s$raw)
-        } else if (is.character(sentences_list)) {
-          caps <- sentences_list
-        } else {
-          caps <- character(0)
-        }
-      } else {
-        caps <- character(0)
-      }
+      captions <- sentences_list$raw
+      captions <- captions[!is.na(captions) & nzchar(captions)]
 
-      self$captions_map[[img_entry$filename]] <- caps
+      self$captions_map[[filename]] <- captions
     }
+
+    rlang::inform("Flickr30k Dataset Processed Successfully !")
   },
 
   download = function() {
@@ -227,11 +249,7 @@ flickr30k_dataset <- dataset(
       }
     }
 
-    rlang::inform("Done downloading and extracting Flickr30k dataset.")
   },
-
-
-
 
   check_exists = function() {
     fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) &&
