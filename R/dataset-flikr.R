@@ -111,7 +111,7 @@ flickr8k_dataset <- dataset(
     saveRDS(train_data, file.path(self$processed_folder, self$training_file))
     saveRDS(test_data, file.path(self$processed_folder, self$test_file))
 
-    rlang::inform("Done processing Flickr8k.")
+    rlang::inform("Flickr8k Dataset Processed Successfully !")
   },
   check_exists = function() {
     fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
@@ -139,6 +139,130 @@ flickr8k_dataset <- dataset(
     },
     processed_folder = function() {
       file.path(self$root, "flickr8k", "processed")
+    }
+  )
+)
+
+flickr30k_dataset <- dataset(
+  name = "flickr30k",
+  resources = list(
+    c(
+      "https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz",
+      "985ac761bbb52ca49e0c474ae806c07c"
+    ),
+    c(
+      "https://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip",
+      "4fa8c08369d22fe16e41dc124bd1adc2"
+    )
+  ),
+
+  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+    self$root <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+    self$train <- train
+
+    if (download)
+      self$download()
+
+    if (!self$check_exists())
+      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+
+    captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
+    captions_json <- jsonlite::fromJSON(captions_path)
+
+    split_name <- if (self$train) "train" else "test"
+
+    imgs_df <- captions_json$images
+    filtered_images <- imgs_df[imgs_df$split == split_name, ]
+
+    self$filenames <- filtered_images$filename
+
+    self$captions_map <- list()
+    for (i in seq_len(nrow(filtered_images))) {
+      img_entry <- filtered_images[i, ]
+      sentences_list <- img_entry$sentences[[1]]
+
+      if (is.list(sentences_list) && length(sentences_list) > 0) {
+        if (is.list(sentences_list[[1]]) && !is.null(sentences_list[[1]]$raw)) {
+          caps <- sapply(sentences_list, function(s) s$raw)
+        } else if (is.character(sentences_list)) {
+          caps <- sentences_list
+        } else {
+          caps <- character(0)
+        }
+      } else {
+        caps <- character(0)
+      }
+
+      self$captions_map[[img_entry$filename]] <- caps
+    }
+  },
+
+  download = function() {
+    if (self$check_exists()) {
+      return(invisible(NULL))
+    }
+
+    fs::dir_create(self$raw_folder)
+
+    for (r in self$resources) {
+      archive_path <- download_and_cache(r[1], prefix = class(self)[1])
+      md5_actual <- tools::md5sum(archive_path)
+      if (md5_actual != r[2]) {
+        runtime_error(glue::glue("MD5 mismatch: expected {r[2]}, got {md5_actual}"))
+      }
+
+      dest_path <- file.path(self$raw_folder, basename(archive_path))
+      fs::file_copy(archive_path, dest_path, overwrite = TRUE)
+
+      if (grepl("\\.zip$", dest_path)) {
+        utils::unzip(dest_path, exdir = self$raw_folder)
+      } else if (grepl("\\.tar\\.gz$", dest_path)) {
+        utils::untar(dest_path, exdir = self$raw_folder)
+      } else if (grepl("\\.gz$", dest_path)) {
+        tar_path <- sub("\\.gz$", "", dest_path)
+        R.utils::gunzip(dest_path, destname = tar_path, overwrite = TRUE)
+        utils::untar(tar_path, exdir = self$raw_folder)
+      }
+    }
+
+    rlang::inform("Done downloading and extracting Flickr30k dataset.")
+  },
+
+
+
+
+  check_exists = function() {
+    fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) &&
+    fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
+  },
+
+  .getitem = function(index) {
+    fname <- self$filenames[[index]]
+    img_path <- file.path(self$raw_folder, "flickr30k-images", fname)
+    img <- magick::image_read(img_path)
+    img <- magick::image_resize(img, "224x224!")
+    img_tensor <- torchvision::transform_to_tensor(img)
+
+    if (!is.null(self$transform))
+      img_tensor <- self$transform(img_tensor)
+
+    target <- self$captions_map[[fname]]
+
+    if (!is.null(self$target_transform))
+      target <- self$target_transform(target)
+
+    list(x = img_tensor, y = target)
+  },
+
+  .length = function() {
+    length(self$filenames)
+  },
+
+  active = list(
+    raw_folder = function() {
+      file.path(self$root, "flickr30k", "raw")
     }
   )
 )
