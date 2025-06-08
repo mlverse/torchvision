@@ -1,6 +1,6 @@
-#' FGCV Aircraft Dataset
+#' fgvc Aircraft Dataset
 #'
-#' Loads the FGCV Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
+#' Loads the fgvc Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
 #' - "variant": fine-grained aircraft variants (e.g., specific model variants)
 #' - "family": aircraft families
 #' - "manufacturer": aircraft manufacturers
@@ -14,13 +14,13 @@
 #' @param target_transform Optional function to transform labels.
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
-#' @return A fgcv_aircraft_dataset object representing the dataset.
+#' @return A fgvc_aircraft_dataset object representing the dataset.
 #'
 #' @examples
 #' \dontrun{
 #' root_dir <- tempfile()
-#' fgcv <- fgcv_aircraft_dataset(root = root_dir, split = "train", annotation_level = "variant", download = TRUE)
-#' first_item <- fgcv[1]
+#' fgvc <- fgvc_aircraft_dataset(root = root_dir, split = "train", annotation_level = "variant", download = TRUE)
+#' first_item <- fgvc[1]
 #' # image tensor of first item
 #' first_item$x
 #' # label of first item
@@ -29,12 +29,12 @@
 #' first_item$class_name
 #' }
 #'
-#' @name fgcv_aircraft_dataset
-#' @aliases fgcv_aircraft_dataset
-#' @title FGCV Aircraft dataset
+#' @name fgvc_aircraft_dataset
+#' @aliases fgvc_aircraft_dataset
+#' @title FGVC Aircraft dataset
 #' @export
-fgcv_aircraft_dataset <- dataset(
-  name = "fgcv_aircraft_dataset",
+fgvc_aircraft_dataset <- dataset(
+  name = "fgvc_aircraft_dataset",
 
   initialize = function(root = rappdirs::user_cache_dir("torch"),
                         split = "train",
@@ -115,7 +115,7 @@ fgcv_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5_expected <- "d4acdd33327262359767eeaa97a4f732"
 
-    rlang::inform("Downloading and processing FGCV-Aircraft dataset...")
+    rlang::inform("Downloading and processing FGVC-Aircraft dataset...")
 
     archive <- withr::with_options(
       list(timeout = 6000),
@@ -130,7 +130,7 @@ fgcv_aircraft_dataset <- dataset(
 
     untar(archive, exdir = self$root)
 
-    rlang::inform("FGCV-Aircraft dataset processed successfully !")
+    rlang::inform("FGVC-Aircraft dataset processed successfully !")
 
   },
 
