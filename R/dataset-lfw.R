@@ -1,3 +1,38 @@
+#' Labeled Faces in the Wild (LFW) People Dataset
+#'
+#' Loads the LFW People Dataset, a collection of face photographs designed for studying unconstrained face recognition.
+#' Each person in the dataset has multiple images, and each image is labeled with the corresponding person's name.
+#' Supports image subsets: "deepfunneled", "funneled", and "original". Images are automatically split into training and test subsets.
+#'
+#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/lfw_people`.
+#' @param split Character. Either `"train"` or `"test"`. Indicates which subset to load.
+#' @param image_set Character. Type of image preprocessing to use. Must be one of `"deepfunneled"`, `"funneled"`, or `"original"`.
+#' Default is `"deepfunneled"`.
+#' @param transform Optional function to transform input images after loading.
+#' @param target_transform Optional function to transform labels.
+#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
+#'
+#' @return An `lfw_people_dataset` object representing the dataset, with fields:
+#' \itemize{
+#'   \item \code{x}: image tensor (250x250x3 RGB).
+#'   \item \code{y}: class name as a string (person's name).
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' root_dir <- tempfile()
+#' lfw <- lfw_people_dataset(root = root_dir, split = "train", download = TRUE)
+#' first_item <- lfw[1]
+#' # RGB image of the first face
+#' first_item$x
+#' # Name of the person
+#' first_item$y
+#' }
+#'
+#' @name lfw_people_dataset
+#' @aliases lfw_people_dataset
+#' @title Labeled Faces in the Wild (LFW) People Dataset
+#' @export
 lfw_people_dataset <- dataset(
   name = "lfw_people",
   resources = list(
