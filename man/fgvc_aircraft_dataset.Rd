@@ -45,7 +45,6 @@ Each element is a named list with:
 \itemize{
 \item \code{x}: the image as a 3D torch tensor (C x H x W), already converted using \code{transform_to_tensor()}, unlike most torchvision-style datasets where images are returned as PIL objects.
 \item \code{y}: an integer class label corresponding to the selected \code{annotation_level}.
-\item \code{class_name}: the human-readable class name at the specified \code{annotation_level} (\code{"variant"}, \code{"family"}, or \code{"manufacturer"}).
 }
 
 The dataset supports standard dataset operations like indexing (\code{dataset[i]}) and length (\code{length(dataset)}).
