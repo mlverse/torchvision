@@ -5,7 +5,7 @@
 \title{QMNIST Dataset}
 \usage{
 qmnist_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root = tempdir(),
   split = "train",
   transform = NULL,
   target_transform = NULL,
@@ -64,5 +64,5 @@ first_item$y
 
 }
 \seealso{
-\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}, \code{\link[=emnist_dataset]{emnist_dataset()}}
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
 }
