@@ -5,7 +5,7 @@
 \title{FER2013 dataset}
 \usage{
 fer_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
