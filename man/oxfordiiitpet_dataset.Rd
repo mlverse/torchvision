@@ -5,7 +5,7 @@
 \title{Oxford-IIIT Pet Dataset}
 \usage{
 oxfordiiitpet_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -23,7 +23,8 @@ oxfordiiitpet_dataset(
 \item{target_transform}{Optional function to transform labels.}
 
 \item{target_type}{Character. Type of target to load: one of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"}.
-Default is \code{"category"}.}
+Default is \code{"category"}. For \code{"binary-category"}, labels are assigned based on the first letter
+capitalization of the original class name: capitalized = Cat (y=1), lowercase = Dog (y=2).}
 
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
@@ -31,8 +32,8 @@ Default is \code{"category"}.}
 An \code{oxfordiiitpet_dataset} object representing the dataset, with fields:
 \itemize{
 \item \code{x}: image tensor.
-\item \code{y}: class index or segmentation mask.
-\item \code{class_name}: (if applicable) class label as a string.
+\item \code{y}: class index or segmentation mask. For \code{"binary-category"}: 1 = Cat, 2 = Dog.
+\item \code{class_name}: (if applicable) class label as a string. For \code{"binary-category"}: "Cat" or "Dog".
 }
 }
 \description{
@@ -47,6 +48,7 @@ Dataset is automatically split into train and test subsets.
 \examples{
 \dontrun{
 root_dir <- tempfile()
+# Load with category labels
 oxford <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, download = TRUE)
 first_item <- oxford[1]
 # image tensor of first item
@@ -55,6 +57,10 @@ first_item$x
 first_item$y
 # class name (if applicable)
 first_item$class_name
+
+# Load with binary category labels (Cat/Dog)
+oxford_binary <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, 
+                                       target_type = "binary-category")
 }
 
 }
