@@ -259,7 +259,7 @@ emnist_dataset <- dataset(
     mnist = as.character(0:9)
   ),
 
-  initialize = function(root = rappdirs::user_cache_dir("torch"), split = "balanced", transform = NULL, target_transform = NULL,
+  initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
