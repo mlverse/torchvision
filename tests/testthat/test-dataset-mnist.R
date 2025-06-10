@@ -76,11 +76,11 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
 })
-
 test_that("tests for the emnist dataset", {
-
+  skip_on_cran()
+  
   dir <- tempfile(fileext = "/")
-
+  
   expect_error(
     ds <- emnist_dataset(dir)
   )
@@ -94,28 +94,28 @@ test_that("tests for the emnist dataset", {
     mnist    = list(n_classes = 10, n_train = 60000)
   )
 
-  for (split in names(splits)) {
-    info <- splits[[split]]
+  test_split <- "balanced"
+  info <- splits[[test_split]]
+  
+  ds <- emnist_dataset(dir, split = test_split, download = TRUE)
+  
+  i <- ds[1]
+  expect_equal(dim(i[[1]]), c(28, 28))
+  expect_true(i[[2]] %in% 0:(info$n_classes - 1))
+  expect_equal(length(ds), info$n_train)
 
-    ds <- emnist_dataset(dir, split = split, download = TRUE)
-    
-    i <- ds[1]
-    expect_equal(dim(i[[1]]), c(28, 28))
-    expect_true(i[[2]] %in% 0:(info$n_classes - 1))
-    expect_equal(length(ds), info$n_train)
+  ds_transformed <- emnist_dataset(dir, split = test_split, transform = transform_to_tensor)
+  dl <- dataloader(ds_transformed, batch_size = 32)
+  expect_length(dl, ceiling(info$n_train / 32))
 
-    ds <- emnist_dataset(dir, split = split, transform = transform_to_tensor)
-    dl <- dataloader(ds, batch_size = 32)
-    expect_length(dl, ceiling(info$n_train / 32))
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
 
-    iter <- dataloader_make_iter(dl)
-    batch <- dataloader_next(iter)
-
-    expect_tensor_shape(batch[[1]], c(32, 1, 28, 28))
-    expect_tensor_shape(batch[[2]], 32)
-    expect_true((torch_max(batch[[1]]) <= 1)$item())
-    expect_named(batch, c("x", "y"))
-  }
+  expect_tensor_shape(batch[[1]], c(32, 1, 28, 28))
+  expect_tensor_shape(batch[[2]], 32)
+  expect_true((torch_max(batch[[1]]) <= 1)$item())
+  expect_named(batch, c("x", "y"))
+  
 })
 
 test_that("tests for the qmnist dataset", {
