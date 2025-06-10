@@ -10,19 +10,21 @@
 #' @param transform Optional function to transform input images after loading.
 #' @param target_transform Optional function to transform labels.
 #' @param target_type Character. Type of target to load: one of `"category"`, `"binary-category"`, or `"segmentation"`.
-#' Default is `"category"`.
+#' Default is `"category"`. For `"binary-category"`, labels are assigned based on the first letter 
+#' capitalization of the original class name: capitalized = Cat (y=1), lowercase = Dog (y=2).
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
 #' @return An `oxfordiiitpet_dataset` object representing the dataset, with fields:
 #' \itemize{
 #'   \item \code{x}: image tensor.
-#'   \item \code{y}: class index or segmentation mask.
-#'   \item \code{class_name}: (if applicable) class label as a string.
+#'   \item \code{y}: class index or segmentation mask. For `"binary-category"`: 1 = Cat, 2 = Dog.
+#'   \item \code{class_name}: (if applicable) class label as a string. For `"binary-category"`: "Cat" or "Dog".
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' root_dir <- tempfile()
+#' # Load with category labels
 #' oxford <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, download = TRUE)
 #' first_item <- oxford[1]
 #' # image tensor of first item
@@ -31,6 +33,10 @@
 #' first_item$y
 #' # class name (if applicable)
 #' first_item$class_name
+#' 
+#' # Load with binary category labels (Cat/Dog)
+#' oxford_binary <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, 
+#'                                        target_type = "binary-category")
 #' }
 #'
 #' @name oxfordiiitpet_dataset
@@ -45,7 +51,7 @@ oxfordiiitpet_dataset <- dataset(
   ),
   training_file = "trainval.rds",
   test_file = "test.rds",
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
+  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL,
                         target_type = "category", download = FALSE) {
 
     self$root_path <- root
@@ -122,7 +128,7 @@ oxfordiiitpet_dataset <- dataset(
       }
 
       class_names <- unique(raw_classes)
-      class_names <- sapply(class_names, function(x) gsub("_", " ", tools::toTitleCase(x)))
+      class_names <- sapply(class_names, function(x) gsub("_", " ", x))
       class_to_idx <- setNames(seq_along(class_names), class_names)
 
       saveRDS(list(
@@ -151,8 +157,18 @@ oxfordiiitpet_dataset <- dataset(
 
     if (self$target_type == "segmentation") {
         class_name <- NA
+    } else if (self$target_type == "binary-category") {
+        original_class_name <- names(self$class_to_idx)[self$labels[index]]
+        
+        if (substr(original_class_name, 1, 1) == toupper(substr(original_class_name, 1, 1))) {
+            label <- 1
+            class_name <- "Cat"
+        } else {
+            label <- 2
+            class_name <- "Dog"
+        }
     } else {
-        class_name <- names(self$class_to_idx)[label]
+        class_name <- tools::toTitleCase(names(self$class_to_idx)[label])
     }
 
     list(x = img, y = label, class_name = class_name)
