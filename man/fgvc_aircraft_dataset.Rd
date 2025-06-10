@@ -40,7 +40,7 @@ Default is \code{"variant"}.}
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
-A \code{fgvc_aircraft_dataset} object, which is a torch-style dataset.
+An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 Each element is a named list with:
 \itemize{
 \item \code{x}: the image as a 3D torch tensor (C x H x W), already converted using \code{transform_to_tensor()}, unlike most torchvision-style datasets where images are returned as PIL objects.
