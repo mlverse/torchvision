@@ -5,7 +5,7 @@
 \title{FGVC Aircraft dataset}
 \usage{
 fgvc_aircraft_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root = tempdir(),
   split = "train",
   annotation_level = "variant",
   transform = NULL,
@@ -16,9 +16,22 @@ fgvc_aircraft_dataset(
 \arguments{
 \item{root}{Character. Root directory for dataset storage. The dataset will be stored under \verb{root/fgvc-aircraft-2013b}.}
 
-\item{split}{Character. Dataset split to use. One of \code{"train"}, \code{"trainval"}, or \code{"test"}. Default is \code{"train"}.}
+\item{split}{Character. One of \code{"train"}, \code{"val"}, \code{"trainval"}, or \code{"test"}. Default is \code{"train"}.}
 
-\item{annotation_level}{Character. Level of annotation to use. One of \code{"variant"}, \code{"family"}, or \code{"manufacturer"}. Default is \code{"variant"}.}
+\item{annotation_level}{Character. Level of annotation to use for classification.
+One of:
+\itemize{
+\item \code{"variant"}: the most fine-grained level, e.g., \code{"Boeing 737-700"}. There are 100 visually distinguishable aircraft variants.
+\item \code{"family"}: a mid-level grouping, e.g., \code{"Boeing 737"}, which includes multiple variants. There are 70 distinct families.
+\item \code{"manufacturer"}: the coarsest level, e.g., \code{"Boeing"}, grouping multiple families under a single aircraft manufacturer. There are 30 manufacturers.
+}
+
+Note: These levels form a strict hierarchy:
+each \code{"manufacturer"} consists of multiple \code{"families"}, and each \code{"family"} contains several \code{"variants"}.
+Not all combinations of levels are valid — for example, a \code{"variant"} always belongs to exactly one \code{"family"},
+and a \code{"family"} always belongs to exactly one \code{"manufacturer"}. You cannot mix or arbitrarily combine levels.
+
+Default is \code{"variant"}.}
 
 \item{transform}{Optional function to transform input images after loading.}
 
@@ -27,32 +40,45 @@ fgvc_aircraft_dataset(
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
-A fgvc_aircraft_dataset object representing the dataset.
+A \code{fgvc_aircraft_dataset} object, which is a torch-style dataset.
+Each element is a named list with:
+\itemize{
+\item \code{x}: the image as a 3D torch tensor (C x H x W), already converted using \code{transform_to_tensor()}, unlike most torchvision-style datasets where images are returned as PIL objects.
+\item \code{y}: an integer class label corresponding to the selected \code{annotation_level}.
+\item \code{class_name}: the human-readable class name at the specified \code{annotation_level} (\code{"variant"}, \code{"family"}, or \code{"manufacturer"}).
+}
+
+The dataset supports standard dataset operations like indexing (\code{dataset[i]}) and length (\code{length(dataset)}).
 }
 \description{
-fgvc Aircraft Dataset
+FGVC Aircraft Dataset
 }
 \details{
-Loads the fgvc Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
+Loads the FGVC Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
 \itemize{
 \item "variant": fine-grained aircraft variants (e.g., specific model variants)
 \item "family": aircraft families
 \item "manufacturer": aircraft manufacturers
 }
 
-The dataset supports different splits: "train", "trainval", and "test".
+The dataset supports the following splits:
+\itemize{
+\item \code{"train"}: training subset (simulated from \code{"trainval"})
+\item \code{"val"}: validation subset (simulated from \code{"trainval"})
+\item \code{"trainval"}: full training + validation set (as provided by the official dataset)
+\item \code{"test"}: test set with labels
+}
+
+Note: The original dataset provides \code{"trainval"} and \code{"test"} splits. The \code{"train"} and \code{"val"} subsets are simulated from \code{"trainval"} by an 80/20 split with a fixed random seed.
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-fgvc <- fgvc_aircraft_dataset(root = root_dir, split = "train", annotation_level = "variant", download = TRUE)
+fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE)
 first_item <- fgvc[1]
 # image tensor of first item
 first_item$x
 # label of first item
 first_item$y
-#class name of the first item
-first_item$class_name
 }
 
 }
