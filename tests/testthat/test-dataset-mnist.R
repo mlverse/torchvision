@@ -117,3 +117,33 @@ test_that("tests for the emnist dataset", {
     expect_named(batch, c("x", "y"))
   }
 })
+
+test_that("tests for the qmnist dataset", {
+  dir <- tempfile(fileext = "/")
+
+  expect_error(
+      ds <- qmnist_dataset(dir, what = subset)
+  )
+
+  splits <- c("train", "test", "nist")
+
+  for (split in splits) {
+
+    ds <- qmnist_dataset(dir, split = split, download = TRUE)
+
+    i <- ds[1]
+    expect_equal(dim(i[[1]]), c(28, 28))
+    expect_true(i[[2]] %in% 1:10)
+
+    expect_true(length(ds) > 0)
+
+    ds <- qmnist_dataset(dir, split = split, transform = transform_to_tensor)
+    dl <- torch::dataloader(ds, batch_size = 32)
+    iter <- dataloader_make_iter(dl)
+    i <- dataloader_next(iter)
+    expect_tensor_shape(i[[1]], c(32, 1, 28, 28))
+    expect_tensor_shape(i[[2]], 32)
+    expect_true((torch_max(i[[1]]) <= 1)$item())
+    expect_named(i, c("x", "y"))
+  }
+})
