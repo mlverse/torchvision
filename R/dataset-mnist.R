@@ -170,7 +170,7 @@ kmnist_dataset <- dataset(
 #' - `"test"`: 60,000 test examples (extended QMNIST test set)
 #' - `"nist"`: Entire NIST digit dataset (for advanced benchmarking)
 #'
-#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()], [emnist_dataset()]
+#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
 #'
 #' @examples
 #' \dontrun{
@@ -209,7 +209,7 @@ qmnist_dataset <- dataset(
     '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
   ),
 
-  initialize = function(root = rappdirs::user_cache_dir("torch"), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
     split <- match.arg(split, c("train", "test", "nist"))
     self$split <- split
     self$root_path <- root
