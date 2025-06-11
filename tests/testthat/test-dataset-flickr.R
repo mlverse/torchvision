@@ -2,7 +2,7 @@ context("dataset-flickr")
 
 test_that("tests for the flickr8k dataset", {
   skip_on_cran()
-  
+
   t <- tempfile()
 
   flickr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
@@ -16,7 +16,7 @@ test_that("tests for the flickr8k dataset", {
   expect_equal((first_item$y[[4]]), "Two dogs play together in the snow .")
   expect_equal((first_item$y[[5]]), "Two dogs running through a low lying body of water .")
 
-  flickr8k <- flickr8k_dataset(root = t, train = FALSE, download = TRUE)
+  flickr8k <- flickr8k_dataset(root = t, train = FALSE)
   expect_equal(length(flickr8k), 1000)
   first_item <- flickr8k[1]
   expect_named(first_item, c("x", "y"))
@@ -64,7 +64,7 @@ test_that("tests for the flickr30k dataset", {
   expect_equal((first_item$y[[4]]), "A man in a blue shirt standing in a garden.")
   expect_equal((first_item$y[[5]]), "Two friends enjoy time spent together.")
 
-  flickr30k <- flickr30k_dataset(root = t, train = FALSE, download = TRUE)
+  flickr30k <- flickr30k_dataset(root = t, train = FALSE)
   expect_equal(length(flickr30k), 1000)
   first_item <- flickr30k[1]
   expect_named(first_item, c("x", "y"))
@@ -75,7 +75,7 @@ test_that("tests for the flickr30k dataset", {
   expect_equal((first_item$y[[4]]), "A man in an orange hat starring at something.")
   expect_equal((first_item$y[[5]]), "A man wears an orange hat and glasses.")
 
-  ds <- flickr30k_dataset(root = t, train = TRUE, download = TRUE)
+  ds <- flickr30k_dataset(root = t, train = TRUE)
   collate_fn <- function(batch) {
     x <- torch_stack(lapply(batch, function(item) item$x))
     y <- lapply(batch, function(item) item$y)
