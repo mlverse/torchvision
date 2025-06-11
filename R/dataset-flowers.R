@@ -1,7 +1,10 @@
 #' Flowers 102 Dataset
 #'
 #' Loads the Oxford Flowers 102 Dataset, consisting of 102 flower categories with images and labels.
-#' The dataset supports different splits: `"train"`, `"val"`, and `"test"`.
+#' The Flowers102 dataset supports the following official splits:
+#' - `"train"`: training subset
+#' - `"val"`: validation subset
+#' - `"test"`: test subset
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flowers102`.
 #' @param split Character. Dataset split to use. One of `"train"`, `"val"`, or `"test"`. Default is `"train"`.
