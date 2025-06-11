@@ -58,7 +58,7 @@ fer_dataset <- dataset(
     if (!check)
       runtime_error("Files not found or corrupted. Use download = TRUE")
 
-    data_file <- fs::path(self$root, self$folder_name, paste0(self$split, ".csv"))
+    data_file <- as.character(glue::glue("{self$root}/{self$folder_name}/{self$split}.csv"))
     lines <- readLines(data_file)
     header <- strsplit(lines[1], ",")[[1]]
     parsed <- read.csv(data_file, stringsAsFactors = FALSE)
@@ -97,17 +97,17 @@ fer_dataset <- dataset(
     if (self$train) {
       zipfile <- download_and_cache(self$train_url)
       if (tools::md5sum(zipfile) != self$train_md5)
-        runtime_error(paste("Corrupt file!", basename(zipfile), "does not match expected checksum."))
+        runtime_error(glue::glue("Corrupt file! {basename(zipfile)} does not match expected checksum."))
     } else {
       zipfile <- download_and_cache(self$test_url)
       if (tools::md5sum(zipfile) != self$test_md5)
-        runtime_error(paste("Corrupt file!", basename(zipfile), "does not match expected checksum."))
+        runtime_error(glue::glue("Corrupt file! {basename(zipfile)} does not match expected checksum."))
     }
 
     utils::unzip(zipfile, exdir = dir)
   },
   check_files = function() {
-    file <- fs::path(self$root, self$folder_name, paste0(if (self$train) "train" else "test", ".csv"))
+    file <- as.character(glue::glue("{self$root}/{self$folder_name}/{if (self$train) 'train' else 'test'}.csv"))
     fs::file_exists(file)
   }
 )
