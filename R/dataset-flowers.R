@@ -64,15 +64,17 @@ flowers102_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes
 
-    if (download)
+    if (download) {
+      rlang::inform("Oxford Flowers 102 (~344MB) will be downloaded and processed if not already cached.")
       self$download()
-
+    }
     if (!self$check_exists(self$split))
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
-
+    rlang::inform(glue::glue("Loading processed split: '{self$split}'"))
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$samples <- meta$samples
     self$labels <- meta$labels
+    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$samples)} samples."))
   },
 
   .getitem = function(index) {
@@ -99,11 +101,11 @@ flowers102_dataset <- dataset(
   },
 
   download = function() {
-    rlang::inform(glue::glue("Downloading Flowers102 split: {self$split}"))
-
-    if (self$check_exists(self$split))
+    if (self$check_exists(self$split)) {
+      rlang::inform(glue::glue("Split '{self$split}' is already processed and cached."))
       return(NULL)
-
+    }
+    rlang::inform(glue::glue("Downloading Flowers102 split: '{self$split}' (~344MB)"))
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
@@ -117,7 +119,7 @@ flowers102_dataset <- dataset(
         runtime_error(sprintf("MD5 mismatch for file: %s", r[1]))
     }
 
-    rlang::inform("Extracting archive and processing metadata...")
+    rlang::inform("Extracting images and processing metadata (may take a minute)...")
     untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
     if (!requireNamespace("R.matlab", quietly = TRUE)) {
@@ -139,7 +141,7 @@ flowers102_dataset <- dataset(
     lbls <- as.integer(labels[idxs])
     saveRDS(list(samples = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
 
-    rlang::inform(glue::glue("Done processing split: {split_name}"))
+    rlang::inform(glue::glue("Done processing split: '{split_name}' ({length(paths)} samples saved)"))
   },
 
   check_exists = function(split) {
