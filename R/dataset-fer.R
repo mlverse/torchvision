@@ -49,9 +49,8 @@ fer_dataset <- dataset(
     self$test_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip"
     self$train_md5 <- "e6c225af03577e6dcbb1c59a71d09905"
     self$test_md5 <- "024ec789776ef0a390db67b1d7ae60a3"
-
-    self$.classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
-    self$class_to_idx <- setNames(seq_along(self$.classes), self$.classes)
+    self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
+    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
     rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split} split)..."))
 
@@ -64,19 +63,23 @@ fer_dataset <- dataset(
     data_file <- file.path(self$root, self$folder_name, glue::glue("{self$split}.csv"))
     parsed <- read.csv(data_file, stringsAsFactors = FALSE)
 
+    rlang::inform("Parsing image data into tensors (1x48x48 per sample)...")
     self$x <- lapply(parsed$pixels, function(p) {
       img <- as.integer(strsplit(p, " ")[[1]])
       torch_tensor(img, dtype = torch_uint8())$view(c(1, 48, 48))
     })
 
-    self$y <- self$.classes[as.integer(parsed$emotion) + 1L]  # ← Now store class names directly
+    self$y <- self$classes[as.integer(parsed$emotion) + 1L]
 
-    rlang::inform(glue::glue("FER-2013 ({self$split}) loaded successfully. Total samples: {length(self$y)}"))
+    file_size <- fs::file_info(data_file)$size
+    readable <- fs::fs_bytes(file_size)
+
+    rlang::inform(glue::glue("FER-2013 ({self$split}) loaded: {length(self$y)} images (~{readable}), 48x48 grayscale, {length(self$classes)} classes."))
   },
 
   .getitem = function(i) {
     x <- self$x[[i]]
-    y <- self$y[i]  # Already a class name string
+    y <- self$y[i]
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -92,16 +95,19 @@ fer_dataset <- dataset(
   },
 
   get_classes = function() {
-    self$.classes
+    self$classes
   },
 
   download = function() {
-    if (self$check_files())
+    if (self$check_files()) {
+      rlang::inform(glue::glue("Dataset already exists for {self$split} split. Skipping download."))
       return()
+    }
 
     dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dir)
 
+    rlang::inform(glue::glue("Downloading FER-2013 {self$split} split... This may take a moment depending on your internet speed."))
     zipfile <- download_and_cache(
       url = if (self$train) self$train_url else self$test_url
     )
@@ -110,17 +116,12 @@ fer_dataset <- dataset(
     if (tools::md5sum(zipfile) != expected_md5)
       runtime_error("MD5 checksum mismatch. File may be corrupted.")
 
+    rlang::inform(glue::glue("Download complete. Extracting files to '{dir}'..."))
     utils::unzip(zipfile, exdir = dir)
+    rlang::inform("Extraction complete. Proceeding to load data.")
   },
 
   check_files = function() {
     file.exists(file.path(self$root, self$folder_name, glue::glue("{self$split}.csv")))
-  },
-
-  active = list(
-    classes = function() {
-      self$.classes
-    }
-  )
+  }
 )
-
