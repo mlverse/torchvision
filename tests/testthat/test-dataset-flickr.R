@@ -25,15 +25,25 @@ test_that("tests for the flickr8k dataset", {
   expect_equal((first_item$y[[4]]), "Two brown dogs wrestle in the snow .")
   expect_equal((first_item$y[[5]]), "Two dogs playing in the snow .")
 
-  ds <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
-  dl <- dataloader(ds, batch_size = 4, shuffle = TRUE)
+  collate_fn <- function(batch) {
+    xs <- lapply(batch, function(sample) sample$x)
+    ys <- lapply(batch, function(sample) sample$y[[1]])
+    list(
+      x = torch::torch_stack(xs),
+      y = ys
+    )
+  }
+  dl <- dataloader(flickr8k, batch_size = 4, shuffle = FALSE, collate_fn = collate_fn)
   iter <- dataloader_make_iter(dl)
   b <- dataloader_next(iter)
   expect_named(b, c("x", "y"))
   expect_true(inherits(b$x, "torch_tensor"))
   expect_equal(b$x$shape[1], 4)
   expect_true(is.list(b$y))
-  expect_length(b$y, 5)
+  expect_length(b$y, 4)
+  expect_true(is.character(b$y[[1]]))
+  expect_equal(b$y[[1]],"The dogs are in the snow in front of a fence .")
+
 })
 
 test_that("tests for the flickr30k dataset", {

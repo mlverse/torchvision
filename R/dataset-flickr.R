@@ -114,18 +114,20 @@ flickr8k_dataset <- dataset(
     fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
       fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
-  .getitem = function(index) {
-    img_path <- self$images[[index]]
-    img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, "224x224!")
-    img_tensor <- torchvision::transform_to_tensor(img)
-    if (!is.null(self$transform))
-      img_tensor <- self$transform(img_tensor)
-    target <- self$captions[[index]]
-    if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
-    list(x = img_tensor, y = target)
-  },
+.getitem = function(index) {
+  img_path <- self$images[[index]]
+  img <- magick::image_read(img_path)
+  img <- magick::image_resize(img, "224x224!")
+  img_tensor <- torchvision::transform_to_tensor(img)
+  if (!is.null(self$transform) && is.function(self$transform)) {
+    img_tensor <- self$transform(img_tensor)
+  }
+  target <- self$captions[[index]]
+  if (!is.null(self$target_transform) && is.function(self$target_transform)) {
+    target <- self$target_transform(target)
+  }
+  list(x = img_tensor, y = target)
+},
 
   .length = function() {
     length(self$images)
