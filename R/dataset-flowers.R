@@ -176,7 +176,7 @@ flowers102_dataset <- dataset(
     if (!self$check_exists(self$split))
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
 
-    meta <- readRDS(file.path(self$processed_folder, paste0(self$split, ".rds")))
+    meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$samples <- meta$samples
     self$labels <- meta$labels
   },
@@ -188,7 +188,7 @@ flowers102_dataset <- dataset(
 
 
     img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, paste(self$image_size, collapse = "x"))
+    img <- magick::image_resize(img, glue::glue("{self$image_size[1]}x{self$image_size[2]}"))
     img_tensor <- torchvision::transform_to_tensor(img)
 
     if (!is.null(self$transform))
@@ -240,13 +240,13 @@ flowers102_dataset <- dataset(
     jpg_dir <- file.path(self$raw_folder, "jpg")
     paths <- file.path(jpg_dir, sprintf("image_%05d.jpg", idxs))
     lbls <- as.integer(labels[idxs])
-    saveRDS(list(samples = paths, labels = lbls), file.path(self$processed_folder, paste0(split_name, ".rds")))
+    saveRDS(list(samples = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
 
     rlang::inform(glue::glue("Done processing split: {split_name}"))
   },
 
   check_exists = function(split) {
-    fs::file_exists(file.path(self$processed_folder, paste0(split, ".rds")))
+    fs::file_exists(file.path(self$processed_folder, glue::glue("{split}.rds")))
   },
 
   active = list(
