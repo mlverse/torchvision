@@ -2,8 +2,8 @@ context("dataset-flickr")
 
 test_that("tests for the flickr8k dataset", {
   skip_on_cran()
-
-  t <- tempfile()
+  skip("Skip Flickr8k due to large size")
+  t <- withr::local_tempdir()
 
   flickr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
   expect_equal(length(flickr8k), 6000)
@@ -50,8 +50,8 @@ test_that("tests for the flickr8k dataset", {
 
 test_that("tests for the flickr30k dataset", {
   skip_on_cran()
-
-  t <- tempfile()
+  skip("Skip Flickr30k due to large size")
+  t <- withr::local_tempdir()
 
   flickr30k <- flickr30k_dataset(root = t, train = TRUE, download = TRUE)
   expect_equal(length(flickr30k), 29000)
