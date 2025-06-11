@@ -16,7 +16,7 @@
 #'
 #' @return A torch-style dataset object. Each item is a list with:
 #' - `x`: 3D torch tensor (1x48x48)
-#' - `y`: integer label (1-based index)
+#' - `y`: character label (class name, e.g., "Angry")
 #'
 #' @examples
 #' \dontrun{
@@ -24,10 +24,8 @@
 #' first_item <- fer[1]
 #' # image tensor of item 1
 #' first_item$x
-#' # label index of item 1
-#' first_item$y
 #' # label name of item 1
-#' fer$get_classes[first_item$y]
+#' first_item$y
 #' }
 #' 
 #' @name fer_dataset
@@ -51,8 +49,9 @@ fer_dataset <- dataset(
     self$test_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip"
     self$train_md5 <- "e6c225af03577e6dcbb1c59a71d09905"
     self$test_md5 <- "024ec789776ef0a390db67b1d7ae60a3"
-    self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
-    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
+
+    self$.classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
+    self$class_to_idx <- setNames(seq_along(self$.classes), self$.classes)
 
     rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split} split)..."))
 
@@ -70,13 +69,14 @@ fer_dataset <- dataset(
       torch_tensor(img, dtype = torch_uint8())$view(c(1, 48, 48))
     })
 
-    self$y <- as.integer(parsed$emotion) + 1L
+    self$y <- self$.classes[as.integer(parsed$emotion) + 1L]  # ← Now store class names directly
 
     rlang::inform(glue::glue("FER-2013 ({self$split}) loaded successfully. Total samples: {length(self$y)}"))
   },
+
   .getitem = function(i) {
     x <- self$x[[i]]
-    y <- self$y[i]
+    y <- self$y[i]  # Already a class name string
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -86,12 +86,15 @@ fer_dataset <- dataset(
 
     list(x = x, y = y)
   },
+
   .length = function() {
     length(self$y)
   },
+
   get_classes = function() {
-    self$classes
+    self$.classes
   },
+
   download = function() {
     if (self$check_files())
       return()
@@ -109,7 +112,15 @@ fer_dataset <- dataset(
 
     utils::unzip(zipfile, exdir = dir)
   },
+
   check_files = function() {
     file.exists(file.path(self$root, self$folder_name, glue::glue("{self$split}.csv")))
-  }
+  },
+
+  active = list(
+    classes = function() {
+      self$.classes
+    }
+  )
 )
+

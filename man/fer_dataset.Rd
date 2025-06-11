@@ -27,7 +27,7 @@ fer_dataset(
 A torch-style dataset object. Each item is a list with:
 \itemize{
 \item \code{x}: 3D torch tensor (1x48x48)
-\item \code{y}: integer label (1-based index)
+\item \code{y}: character label (class name, e.g., "Angry")
 }
 }
 \description{
@@ -50,10 +50,8 @@ fer <- fer_dataset(download = TRUE)
 first_item <- fer[1]
 # image tensor of item 1
 first_item$x
-# label index of item 1
-first_item$y
 # label name of item 1
-fer$get_classes[first_item$y]
+first_item$y
 }
 
 }
