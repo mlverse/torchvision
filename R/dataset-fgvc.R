@@ -101,14 +101,11 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- character()
     self$labels <- integer()
 
-    parts_list <- strsplit(lines, " ", fixed = TRUE)
-    valid_mask <- vapply(parts_list, function(p) length(p) >= 2, logical(1))
-    parts_list <- parts_list[valid_mask]
-    img_ids <- vapply(parts_list, function(p) p[1], character(1))
-    class_names <- vapply(parts_list, function(p) trimws(paste(p[-1], collapse = " ")), character(1))
-    class_idxs <- self$class_to_idx[class_names]
+    split_df <- read.fwf(label_file, widths = c(7, 100), colClasses = "character", stringsAsFactors = FALSE)
+    colnames(split_df) <- c("img_id", "class_name")
+    class_idxs <- self$class_to_idx[trimws(split_df$class_name)]
     known_mask <- !vapply(class_idxs, is.null, logical(1))
-    self$image_paths <- file.path(self$data_dir, "images",glue::glue("{img_ids[known_mask]}.jpg", .envir = environment()))
+    self$image_paths <- file.path(self$data_dir, "images",glue::glue("{split_df$img_id[known_mask]}.jpg", .envir = environment()))
     self$labels <- as.integer(unlist(class_idxs[known_mask]))
 
     rlang::inform(glue::glue(
