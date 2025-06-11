@@ -121,16 +121,12 @@ caltech101_dataset <- dataset(
         if (!fs::file_exists(ann_file)) {
           NULL
         } else {
-          if (!requireNamespace("reticulate", quietly = TRUE)) {
-            runtime_error("Package 'reticulate' is needed for this dataset. Please install it.")
+          if (!requireNamespace("R.matlab", quietly = TRUE)) {
+            runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
           }
-          if (!reticulate::py_module_available("scipy.io")) {
-            runtime_error("Python module 'scipy.io' not found. Please install it in your Python environment.")
-          }
-          scipy <- reticulate::import("scipy.io")
-          mat_data <- scipy$loadmat(as.character(ann_file))
-          box_coord <- as.numeric(mat_data[["box_coord"]])
-          obj_contour <- mat_data[["obj_contour"]] |>
+          mat_data <- R.matlab::readMat(as.character(ann_file))
+          box_coord <- as.numeric(mat_data[["box.coord"]])
+          obj_contour <- mat_data[["obj.contour"]] |>
             as.matrix() |>
             apply(2, as.numeric) |>
             t()
