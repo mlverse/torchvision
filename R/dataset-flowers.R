@@ -121,7 +121,7 @@ flowers102_dataset <- dataset(
     untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
     if (!requireNamespace("R.matlab", quietly = TRUE)) {
-      runtime_error("Package {.pkg R.matlab} is needed for this dataset. Please install it.")
+      runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
     }
     labels <- R.matlab::readMat(file.path(self$raw_folder, "imagelabels.mat"))$labels
     setids <- R.matlab::readMat(file.path(self$raw_folder, "setid.mat"))
