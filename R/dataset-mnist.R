@@ -447,6 +447,12 @@ emnist_dataset <- dataset(
 
   initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
+    rlang::inform(paste0(
+      "Preparing to download EMNIST dataset.\n",
+      "- Size: ~0.5GB compressed\n",
+      "- Expected downloading time: ~6 minutes\n",
+      "- Will extract and convert for all ", length(self$classes_list), " splits\n"
+    ))
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
     self$root_path <- root
@@ -472,6 +478,7 @@ emnist_dataset <- dataset(
     self$test_targets <- test_data[[2]] + 1L
 
     self$is_train <- TRUE
+    rlang::inform("EMNIST dataset processed successfully!")
   },
 
   download = function() {
@@ -480,8 +487,6 @@ emnist_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
     
-    rlang::inform("Downloading and processing EMNIST dataset. This may take approximately 6 minutes...")
-
     url <- self$resources[[1]][1]
     expected_md5 <- self$resources[[1]][2]
     zip_path <- download_and_cache(url, prefix = class(self)[1])
@@ -514,8 +519,6 @@ emnist_dataset <- dataset(
     for (split_name in names(self$classes_list)) {
       process_split(split_name)
     }
-
-    rlang::inform("EMNIST dataset processed successfully.")
   },
 
   check_exists = function() {
