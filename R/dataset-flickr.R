@@ -243,7 +243,7 @@ flickr30k_dataset <- dataset(
         utils::untar(dest_path, exdir = self$raw_folder)
       } else if (grepl("\\.gz$", dest_path)) {
         tar_path <- sub("\\.gz$", "", dest_path)
-        R.utils::gunzip(dest_path, destname = tar_path, overwrite = TRUE)
+        gunzip_base(dest_path, tar_path)
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
@@ -283,3 +283,17 @@ flickr30k_dataset <- dataset(
     }
   )
 )
+
+gunzip_base <- function(src, dest) {
+  in_con <- gzfile(src, "rb")
+  out_con <- file(dest, "wb")
+  on.exit({ close(in_con); close(out_con) }, add = TRUE)
+
+  repeat {
+    bytes <- readBin(in_con, what = raw(), n = 65536)
+    if (length(bytes) == 0) break
+    writeBin(bytes, out_con)
+  }
+
+  invisible(dest)
+}
