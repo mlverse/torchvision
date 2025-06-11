@@ -59,7 +59,7 @@ fgvc_aircraft_dataset <- dataset(
                         transform = NULL, target_transform = NULL,
                         download = FALSE) {
 
-    rlang::inform("Initializing FGVC-Aircraft dataset...")
+    rlang::inform(glue::glue("Initializing FGVC-Aircraft dataset..."))
 
     self$root <- root
     self$split <- split
@@ -71,7 +71,7 @@ fgvc_aircraft_dataset <- dataset(
     self$data_dir <- file.path(self$base_dir, "data")
 
     if (download) {
-      rlang::inform("Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)...")
+      rlang::inform(glue::glue("Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."))
       self$download()
     }
 
@@ -80,8 +80,7 @@ fgvc_aircraft_dataset <- dataset(
 
     label_file <- file.path(
       self$data_dir,
-      sprintf("images_%s_%s.txt", annotation_level,
-              if (split %in% c("train", "val")) "trainval" else split)
+      glue::glue("images_{annotation_level}_{if (split %in% c('train', 'val')) 'trainval' else split}.txt")
     )
 
     cls_file <- file.path(
@@ -100,7 +99,7 @@ fgvc_aircraft_dataset <- dataset(
     lines <- readLines(label_file)
 
     if (split %in% c("train", "val")) {
-      rlang::inform(sprintf("Creating '%s' subset from 'trainval' via 80/20 split (seed = 42)", split))
+      rlang::inform(glue::glue("Creating '{split}' subset from 'trainval' via 80/20 split (seed = 42)"))
       set.seed(42)
       idx <- sample(length(lines))
       cutoff <- floor(0.8 * length(lines))
@@ -118,14 +117,13 @@ fgvc_aircraft_dataset <- dataset(
       idx <- self$class_to_idx[[class]]
       if (is.null(idx)) next
 
-      path <- file.path(self$data_dir, "images", paste0(img_id, ".jpg"))
+      path <- file.path(self$data_dir, "images", glue::glue("{img_id}.jpg"))
       self$image_paths <- c(self$image_paths, path)
       self$labels <- c(self$labels, idx)
     }
 
-    rlang::inform(sprintf(
-      "FGVC-Aircraft dataset loaded successfully with %d samples (%s, %s-level).",
-      length(self$image_paths), split, annotation_level
+    rlang::inform(glue::glue(
+      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
     ))
   },
 
@@ -164,6 +162,6 @@ fgvc_aircraft_dataset <- dataset(
     }
 
     untar(file, exdir = self$root)
-    rlang::inform("FGVC-Aircraft dataset downloaded and extracted successfully.")
+    rlang::inform(glue::glue("FGVC-Aircraft dataset downloaded and extracted successfully."))
   }
 )
