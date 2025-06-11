@@ -149,6 +149,170 @@ kmnist_dataset <- dataset(
   classes = c('o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo')
 )
 
+#' QMNIST Dataset
+#'
+#' Loads and preprocesses the [QMNIST dataset](https://github.com/facebookresearch/qmnist),
+#' including optional support for the NIST digit subset.
+#'
+#' This dataset is an extended version of the original MNIST, offering more samples and precise label
+#' information. It is suitable for benchmarking modern machine learning models and can serve as a
+#' drop-in replacement for MNIST in most image classification tasks.
+#'
+#' @inheritParams mnist_dataset
+#' @param split (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
+#'   Defaults to `"train"`. The `"nist"` option loads the full NIST digits set.
+#'
+#' @return An R6 dataset object compatible with the `{torch}` package, providing indexed access
+#'   to (image, label) pairs from the specified QMNIST subset.
+#'
+#' @section Supported Subsets:
+#' - `"train"`: 60,000 training examples (compatible with MNIST)
+#' - `"test"`: 60,000 test examples (extended QMNIST test set)
+#' - `"nist"`: Entire NIST digit dataset (for advanced benchmarking)
+#'
+#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
+#'
+#' @examples
+#' \dontrun{
+#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
+#' first_item <- qmnist[1]
+#' # image in item 1
+#' first_item$x
+#' # label of item 1
+#' first_item$y
+#' }
+#'
+#' @export
+qmnist_dataset <- dataset(
+  name = "qmnist_dataset",
+  resources = list(
+    train = list(
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-train-images-idx3-ubyte.gz", "ed72d4157d28c017586c42bc6afe6370"),
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-train-labels-idx2-int.gz", "0058f8dd561b90ffdd0f734c6a30e5e4")
+    ),
+    test = list(
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-test-images-idx3-ubyte.gz", "1394631089c404de565df7b7aeaf9412"),
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-test-labels-idx2-int.gz", "5b5b05890a5e13444e108efe57b788aa")
+    ),
+    nist = list(
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/xnist-images-idx3-ubyte.xz", "7f124b3b8ab81486c9d8c2749c17f834"),
+      c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/xnist-labels-idx2-int.xz", "5ed0e788978e45d4a8bd4b7caec3d79d")
+    )
+  ),
+  files = list(
+    train = "training.rds",
+    test = "test.rds",
+    nist = "nist.rds"
+  ),
+  classes = c(
+    '0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
+    '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
+  ),
+
+  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+    split <- match.arg(split, c("train", "test", "nist"))
+    self$split <- split
+    self$root_path <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+
+    if (download)
+      self$download()
+
+    if (!self$check_exists())
+      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+
+    data_file <- self$files[[split]]
+    data <- readRDS(file.path(self$processed_folder, data_file))
+
+    self$data <- data[[1]]
+    self$targets <- data[[2]][, 1] + 1L
+  },
+
+  download = function() {
+    if (self$check_exists())
+      return(NULL)
+
+    fs::dir_create(self$raw_folder)
+    fs::dir_create(self$processed_folder)
+
+    for (r in self$resources[[self$split]]) {
+      filename <- basename(r[1])
+      destpath <- file.path(self$raw_folder, filename)
+
+      p <- download_and_cache(r[1], prefix = paste0("qmnist-", self$split))
+      fs::file_copy(p, destpath, overwrite = TRUE)
+
+      if (!tools::md5sum(destpath) == r[2])
+        runtime_error(paste("MD5 mismatch for:", r[1]))
+    }
+
+    rlang::inform("Processing...")
+
+    if (self$split == "train") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-images-idx3-ubyte.gz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-labels-idx2-int.gz"))
+        ),
+        file.path(self$processed_folder, self$files$train)
+      )
+    }
+
+    if (self$split == "test") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-images-idx3-ubyte.gz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-labels-idx2-int.gz"))
+        ),
+        file.path(self$processed_folder, self$files$test)
+      )
+    }
+
+    if (self$split == "nist") {
+      saveRDS(
+        list(
+          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-images-idx3-ubyte.xz")),
+          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-labels-idx2-int.xz"))
+        ),
+        file.path(self$processed_folder, self$files$nist)
+      )
+    }
+
+    rlang::inform("Done!")
+  },
+
+  check_exists = function() {
+    fs::file_exists(file.path(self$processed_folder, self$files[[self$split]]))
+  },
+
+  .getitem = function(index) {
+    img <- self$data[index, ,]
+    target <- self$targets[index]
+
+    if (!is.null(self$transform))
+      img <- self$transform(img)
+
+    if (!is.null(self$target_transform))
+      target <- self$target_transform(target)
+
+    list(x = img, y = target)
+  },
+
+  .length = function() {
+    dim(self$data)[1]
+  },
+
+  active = list(
+    raw_folder = function() {
+      file.path(self$root_path, "qmnist", "raw")
+    },
+    processed_folder = function() {
+      file.path(self$root_path, "qmnist", "processed")
+    }
+  )
+)
+
 read_sn3_pascalvincent <- function(path) {
   x <- gzfile(path, open = "rb")
   on.exit({close(x)})
