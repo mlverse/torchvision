@@ -1,6 +1,8 @@
 context("dataset-flickr")
 
 test_that("tests for the flickr8k dataset", {
+  skip_on_cran()
+  
   t <- tempfile()
 
   flickr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
@@ -47,6 +49,8 @@ test_that("tests for the flickr8k dataset", {
 })
 
 test_that("tests for the flickr30k dataset", {
+  skip_on_cran()
+
   t <- tempfile()
 
   flickr30k <- flickr30k_dataset(root = t, train = TRUE, download = TRUE)
