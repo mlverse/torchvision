@@ -60,15 +60,15 @@ Loads the FGVC Aircraft Dataset, a dataset of aircraft images with multiple anno
 \item "manufacturer": aircraft manufacturers
 }
 
-The dataset supports the following splits:
+The FGVC-Aircraft dataset supports the following official splits:
 \itemize{
-\item \code{"train"}: training subset (simulated from \code{"trainval"})
-\item \code{"val"}: validation subset (simulated from \code{"trainval"})
-\item \code{"trainval"}: full training + validation set (as provided by the official dataset)
-\item \code{"test"}: test set with labels
+\item \code{"train"}: training subset
+\item \code{"val"}: validation subset
+\item \code{"trainval"}: combined training and validation set
+\item \code{"test"}: test set with labels (used for evaluation)
 }
 
-Note: The original dataset provides \code{"trainval"} and \code{"test"} splits. The \code{"train"} and \code{"val"} subsets are simulated from \code{"trainval"} by an 80/20 split with a fixed random seed.
+These splits are provided directly in the dataset archive. No manual splitting is performed.
 }
 \examples{
 \dontrun{
