@@ -52,7 +52,7 @@ test_that("Caltech101 dataset works correctly", {
   expect_true(all(purrr::map_lgl(batch, ~ inherits(.x$x, "torch_tensor"))))
 })
 
-test_that("tests for the Caltech256 dataset", {
+test_that("Caltech256 dataset works correctly", {
   t <- tempfile()
 
   expect_error(
@@ -65,6 +65,12 @@ test_that("tests for the Caltech256 dataset", {
   first_item <- caltech256[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "torch_tensor"))
-  expect_equal((first_item[[2]]), "001.ak47")
+  expect_equal(first_item$y, "001.ak47")
 
+  dl <- dataloader(caltech256, batch_size = 1)
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+  expect_true(inherits(batch$x, "torch_tensor"))
+  expect_equal(batch$x$shape[1], 1)
+  expect_equal(batch$y, "001.ak47")
 })

@@ -178,18 +178,23 @@ caltech101_dataset <- dataset(
 #' The dataset includes images and their corresponding class labels.
 #' There is no built-in train/test split.
 #'
-#' @inheritParams caltech101_dataset
+#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech256`.
+#' @param transform Optional function to transform input images after loading.
+#' @param target_transform Optional function to transform labels.
+#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
-#' @return A caltech256_dataset object representing the dataset.
+#' @return An R6 dataset object inheriting from `dataset`. Each item is a named list with elements:
+#' \describe{
+#'   \item{x}{An image tensor of shape `(3, H, W)` with values in `[0, 1]`.}
+#'   \item{y}{The class label as a character string.}
+#' }
 #'
 #' @examples
 #' \dontrun{
 #' root_dir <- tempfile()
 #' caltech <- caltech256_dataset(root = root_dir, download = TRUE)
 #' first_item <- caltech[1]
-#' # image tensor of first item
 #' first_item$x
-#' # label (class name) of first item
 #' first_item$y
 #' }
 #'
@@ -207,11 +212,11 @@ caltech256_dataset <- dataset(
       md5 = "67b4f42ca05d46448c6bb8ecd2220f6d"
     )
   ),
-  initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE, image_size = c(224, 224)) {
-    self$root <- file.path(root, "caltech256")
+  
+  initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE) {
+    self$root <- fs::path(root, "caltech256")
     self$transform <- transform
     self$target_transform <- target_transform
-    self$image_size <- image_size
 
     if (download)
       self$download()
@@ -219,15 +224,16 @@ caltech256_dataset <- dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
 
-    all_dirs <- fs::dir_ls(file.path(self$root, "256_ObjectCategories"), type = "directory")
-    self$classes <- sort(basename(all_dirs))
+    all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
+    self$classes <- sort(fs::path_file(all_dirs))
 
     self$samples <- list()
     self$labels <- integer()
 
     for (i in seq_along(self$classes)) {
-      class_dir <- file.path(self$root, "256_ObjectCategories", self$classes[[i]])
+      class_dir <- fs::path(self$root, "256_ObjectCategories", self$classes[[i]])
       images <- fs::dir_ls(class_dir, glob = "*.jpg")
+      images <- sort(images)
       self$samples <- c(self$samples, images)
       self$labels <- c(self$labels, rep(i, length(images)))
     }
@@ -238,7 +244,6 @@ caltech256_dataset <- dataset(
     label <- self$classes[label_idx]
 
     img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, paste(self$image_size, collapse = "x"))
     img_tensor <- torchvision::transform_to_tensor(img)
 
     if (!is.null(self$transform))
@@ -252,12 +257,12 @@ caltech256_dataset <- dataset(
     length(self$samples)
   },
   download = function() {
-    rlang::inform(glue::glue("Downloading Caltech256 Dataset..."))
+    rlang::inform("Downloading Caltech256 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
     for (res in self$resources) {
       tar_path <- download_and_cache(res$url, prefix = class(self)[1])
-      dest <- file.path(self$root, basename(res$filename))
+      dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(tar_path, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
       if (md5_actual != res$md5)
@@ -266,9 +271,9 @@ caltech256_dataset <- dataset(
       rlang::inform("Extracting archive and preparing dataset...")
       utils::untar(dest, exdir = self$root)
     }
-    rlang::inform(glue::glue("Dataset Caltech256 processed successfully !"))
+    rlang::inform("Dataset Caltech256 processed successfully!")
   },
   check_exists = function() {
-    fs::dir_exists(file.path(self$root, "256_ObjectCategories"))
+    fs::dir_exists(fs::path(self$root, "256_ObjectCategories"))
   }
 )

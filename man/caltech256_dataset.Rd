@@ -5,26 +5,27 @@
 \title{Caltech 256 Dataset}
 \usage{
 caltech256_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root = tempdir(),
   transform = NULL,
   target_transform = NULL,
-  download = FALSE,
-  image_size = c(224, 224)
+  download = FALSE
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech101}.}
+\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech256}.}
 
 \item{transform}{Optional function to transform input images after loading.}
 
 \item{target_transform}{Optional function to transform labels.}
 
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
-
-\item{image_size}{Integer vector of length 2. Size to resize images to (width, height). Default is \code{c(224, 224)}.}
 }
 \value{
-A caltech256_dataset object representing the dataset.
+An R6 dataset object inheriting from \code{dataset}. Each item is a named list with elements:
+\describe{
+\item{x}{An image tensor of shape \verb{(3, H, W)} with values in \verb{[0, 1]}.}
+\item{y}{The class label as a character string.}
+}
 }
 \description{
 Caltech 256 Dataset
@@ -39,9 +40,7 @@ There is no built-in train/test split.
 root_dir <- tempfile()
 caltech <- caltech256_dataset(root = root_dir, download = TRUE)
 first_item <- caltech[1]
-# image tensor of first item
 first_item$x
-# label (class name) of first item
 first_item$y
 }
 
