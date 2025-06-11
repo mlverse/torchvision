@@ -5,7 +5,7 @@
 \title{Flickr8k Dataset}
 \usage{
 flickr8k_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -36,8 +36,7 @@ Images are resized to a fixed size and captions are stored as lists of strings.
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-flickr8k <- flickr8k_dataset(root = root_dir, train = TRUE, download = TRUE)
+flickr8k <- flickr8k_dataset(download = TRUE)
 first_item <- flickr8k[1]
 # image tensor of first item
 first_item$x

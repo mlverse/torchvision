@@ -14,8 +14,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' root_dir <- tempfile()
-#' flickr8k <- flickr8k_dataset(root = root_dir, train = TRUE, download = TRUE)
+#' flickr8k <- flickr8k_dataset(download = TRUE)
 #' first_item <- flickr8k[1]
 #' # image tensor of first item
 #' first_item$x
@@ -37,7 +36,7 @@ flickr8k_dataset <- dataset(
     c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip",
       "f18a1e2920de5bd84dae7cf08ec78978")
   ),
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
@@ -156,7 +155,7 @@ flickr8k_dataset <- dataset(
 #' @examples
 #' \dontrun{
 #' root_dir <- tempfile()
-#' flickr30k <- flickr30k_dataset(root = root_dir, train = TRUE, download = TRUE)
+#' flickr30k <- flickr30k_dataset(download = TRUE)
 #' first_item <- flickr30k[1]
 #' # Tensor representing the image
 #' first_item$x
@@ -181,7 +180,7 @@ flickr30k_dataset <- dataset(
     )
   ),
 
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform

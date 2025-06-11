@@ -5,7 +5,7 @@
 \title{Flickr30k Dataset}
 \usage{
 flickr30k_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -37,7 +37,7 @@ Images are resized to a fixed 224x224 resolution, and captions are extracted as 
 \examples{
 \dontrun{
 root_dir <- tempfile()
-flickr30k <- flickr30k_dataset(root = root_dir, train = TRUE, download = TRUE)
+flickr30k <- flickr30k_dataset(download = TRUE)
 first_item <- flickr30k[1]
 # Tensor representing the image
 first_item$x
