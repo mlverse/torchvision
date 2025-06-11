@@ -37,7 +37,7 @@ caltech101_dataset <- dataset(
       md5 = "3138e1922a9193bfa496528edbbc45d0"
     )
   ),
-  initialize = function(root = rappdirs::user_cache_dir("torch"), transform = NULL, target_transform = NULL, download = FALSE, image_size = c(224, 224)) {
+  initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE, image_size = c(224, 224)) {
     self$root <- file.path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
@@ -149,7 +149,7 @@ caltech256_dataset <- dataset(
       md5 = "67b4f42ca05d46448c6bb8ecd2220f6d"
     )
   ),
-  initialize = function(root = rappdirs::user_cache_dir("torch"), transform = NULL, target_transform = NULL, download = FALSE, image_size = c(224, 224)) {
+  initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE, image_size = c(224, 224)) {
     self$root <- file.path(root, "caltech256")
     self$transform <- transform
     self$target_transform <- target_transform
