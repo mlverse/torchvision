@@ -101,18 +101,15 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- character()
     self$labels <- integer()
 
-    for (line in lines) {
-      parts <- strsplit(line, " ", fixed = TRUE)[[1]]
-      if (length(parts) < 2) next
-      img_id <- parts[1]
-      class <- trimws(paste(parts[-1], collapse = " "))
-      idx <- self$class_to_idx[[class]]
-      if (is.null(idx)) next
-
-      path <- file.path(self$data_dir, "images", glue::glue("{img_id}.jpg"))
-      self$image_paths <- c(self$image_paths, path)
-      self$labels <- c(self$labels, idx)
-    }
+    parts_list <- strsplit(lines, " ", fixed = TRUE)
+    valid_mask <- vapply(parts_list, function(p) length(p) >= 2, logical(1))
+    parts_list <- parts_list[valid_mask]
+    img_ids <- vapply(parts_list, function(p) p[1], character(1))
+    class_names <- vapply(parts_list, function(p) trimws(paste(p[-1], collapse = " ")), character(1))
+    class_idxs <- self$class_to_idx[class_names]
+    known_mask <- !vapply(class_idxs, is.null, logical(1))
+    self$image_paths <- file.path(self$data_dir, "images",glue::glue("{img_ids[known_mask]}.jpg", .envir = environment()))
+    self$labels <- as.integer(unlist(class_idxs[known_mask]))
 
     rlang::inform(glue::glue(
       "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."

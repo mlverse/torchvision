@@ -1,6 +1,6 @@
 context("dataset-fgvc")
 
-test_that("FGVC-Aircraft dataset: all splits, levels, and dataloader", {
+test_that("tests for the FGVC-Aircraft dataset", {
   t <- tempfile()
 
   expect_error(
