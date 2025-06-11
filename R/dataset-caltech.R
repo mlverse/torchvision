@@ -63,7 +63,7 @@ caltech101_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$resize_shape <- c(224, 224)
-
+    rlang::inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
     if (is.character(target_type))
       target_type <- list(target_type)
     valid_types <- c("category", "annotation")
@@ -74,32 +74,30 @@ caltech101_dataset <- dataset(
     }
     self$target_type <- target_type
 
-    if (download)
+    if (download) {
+      rlang::inform("Downloading and preparing the Caltech101 dataset...")
       self$download()
-
+    }
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
-
+    rlang::inform("Loading Caltech101 image paths and labels...")
     all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
     self$classes <- sort(base::basename(all_dirs))
     self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
     name_map <- list("Faces"="Faces_2", "Faces_easy"="Faces_3", "Motorbikes"="Motorbikes_16", "airplanes"="Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
-    all_samples <- list()
-    all_labels <- list()
-    all_indices <- list()
-    class_dirs <- fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes)
+
     samples_per_class <- lapply(seq_along(self$classes), function(i) {
-      images <- fs::dir_ls(class_dirs[[i]], glob = "*.jpg")
+      images <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes[[i]]), glob = "*.jpg")
       images <- sort(images)
-      list(samples = images,labels = rep(i, length(images)),indices = seq_along(images))
+      list(samples = images, labels = rep(i, length(images)), indices = seq_along(images))
     })
-    all_samples <- unlist(lapply(samples_per_class, `[[`, "samples"), recursive = FALSE)
-    all_labels <- unlist(lapply(samples_per_class, `[[`, "labels"))
-    all_indices <- unlist(lapply(samples_per_class, `[[`, "indices"))
-    self$samples <- all_samples
-    self$labels <- all_labels
-    self$image_indices <- all_indices
+
+    self$samples <- unlist(lapply(samples_per_class, `[[`, "samples"), recursive = FALSE)
+    self$labels <- unlist(lapply(samples_per_class, `[[`, "labels"))
+    self$image_indices <- unlist(lapply(samples_per_class, `[[`, "indices"))
+
+    rlang::inform(glue::glue("Caltech101 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes."))
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
@@ -109,14 +107,13 @@ caltech101_dataset <- dataset(
     img <- magick::image_read(img_path)
     img <- magick::image_resize(img, "224x224!")
     img_tensor <- torchvision::transform_to_tensor(img)
-    
-    target_list <- list()
+
     target_list <- lapply(self$target_type, function(t) {
       if (t == "category") {
         label
       } else if (t == "annotation") {
         ann_class <- self$annotation_classes[label_idx]
-        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")  # pad with 0
+        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
         ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
         if (!fs::file_exists(ann_file)) {
           NULL
@@ -148,8 +145,8 @@ caltech101_dataset <- dataset(
     length(self$samples)
   },
   download = function() {
-    rlang::inform("Downloading Caltech101 Dataset...")
     if (self$check_exists()) return()
+    rlang::inform("Downloading Caltech101 archive...")
     fs::dir_create(self$root)
     invisible(lapply(self$resources, function(res) {
       zip_path <- download_and_cache(res$url, prefix = class(self)[1])
@@ -159,22 +156,23 @@ caltech101_dataset <- dataset(
       if (md5_actual != res$md5) {
         runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
       }
-      rlang::inform("Extracting archive and processing metadata...")
+      rlang::inform("Extracting main archive...")
       utils::unzip(dest, exdir = self$root)
       extracted_dir <- fs::path(self$root, "caltech-101")
       tar_gz_path <- fs::path(extracted_dir, "101_ObjectCategories.tar.gz")
       if (fs::file_exists(tar_gz_path)) {
+        rlang::inform("Extracting 101_ObjectCategories...")
         utils::untar(tar_gz_path, exdir = extracted_dir)
       } else {
         runtime_error("Expected 101_ObjectCategories.tar.gz not found after unzip.")
       }
       annotations_path <- fs::path(extracted_dir, "Annotations.tar")
       if (fs::file_exists(annotations_path)) {
+        rlang::inform("Extracting Annotations...")
         utils::untar(annotations_path, exdir = extracted_dir)
       }
     }))
-
-    rlang::inform("Dataset Caltech101 processed successfully!")
+    rlang::inform("Caltech101 dataset downloaded and extracted successfully.")
   },
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, "caltech-101", "101_ObjectCategories"))
@@ -227,17 +225,19 @@ caltech256_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    if (download)
-      self$download()
+    rlang::inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
 
-    if (!self$check_exists())
+    if (download) {
+      rlang::inform("Downloading Caltech256 dataset archive...")
+      self$download()
+    }
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
+    }
+    rlang::inform("Preparing file list and labels...")
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
     self$classes <- sort(fs::path_file(all_dirs))
-
-    self$samples <- list()
-    self$labels <- integer()
 
     class_dirs <- fs::path(self$root, "256_ObjectCategories", self$classes)
     images_per_class <- lapply(class_dirs, function(class_dir) {
@@ -251,6 +251,7 @@ caltech256_dataset <- dataset(
       }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
       use.names = FALSE
     )
+    rlang::inform(glue::glue("Loaded {length(self$samples)} samples across {length(self$classes)} classes."))
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
@@ -271,9 +272,9 @@ caltech256_dataset <- dataset(
     length(self$samples)
   },
   download = function() {
-    rlang::inform("Downloading Caltech256 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
+    rlang::inform("Starting download and integrity check...")
     lapply(self$resources, function(res) {
       tar_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
@@ -282,11 +283,11 @@ caltech256_dataset <- dataset(
       if (md5_actual != res$md5) {
         runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
       }
-      rlang::inform("Extracting archive and preparing dataset...")
+
+      rlang::inform("Extracting dataset (this may take a moment)...")
       utils::untar(dest, exdir = self$root)
-      invisible(NULL)
     })
-    rlang::inform("Dataset Caltech256 processed successfully!")
+    rlang::inform("Caltech256 dataset downloaded and extracted successfully!")
   },
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, "256_ObjectCategories"))
