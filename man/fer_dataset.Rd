@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-fer.R
 \name{fer_dataset}
 \alias{fer_dataset}
-\title{FER2013 dataset}
+\title{FER-2013 Emotion Recognition Dataset}
 \usage{
 fer_dataset(
   root = tempdir(),
@@ -13,45 +13,47 @@ fer_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory where the \code{fer2013} folder exists or will be saved to if \code{download = TRUE}.}
+\item{root}{Character. Root directory for dataset storage.}
 
-\item{train}{Logical. If \code{TRUE}, loads the training split; if \code{FALSE}, loads the test split. Default is \code{TRUE}.}
+\item{train}{Logical. If TRUE, loads training set; else loads test set.}
 
-\item{transform}{Optional function to transform input images.}
+\item{transform}{Optional. A function to apply on input images.}
 
-\item{target_transform}{Optional function to transform target labels.}
+\item{target_transform}{Optional. A function to apply on labels.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download the dataset if not found locally.}
 }
 \value{
-A FER2013 dataset object.
+A torch-style dataset object. Each item is a list with:
+\itemize{
+\item \code{x}: 3D torch tensor (1x48x48)
+\item \code{y}: integer label (1-based index)
+}
 }
 \description{
-FER2013 Dataset
+FER-2013 Facial Expression Dataset
 }
 \details{
-Loads the FER2013 dataset for facial expression recognition, consisting of grayscale 48x48 images.
-The dataset contains facial images categorized into seven emotion classes:
+Loads the FER-2013 dataset for facial expression recognition. The dataset contains grayscale images
+(48x48) of human faces, each labeled with one of seven emotion categories:
+\code{"Angry"}, \code{"Disgust"}, \code{"Fear"}, \code{"Happy"}, \code{"Sad"}, \code{"Surprise"}, and \code{"Neutral"}.
+
+The dataset provides only two splits: \code{"train"} and \code{"test"}.
 \itemize{
-\item 0: Angry
-\item 1: Disgust
-\item 2: Fear
-\item 3: Happy
-\item 4: Sad
-\item 5: Surprise
-\item 6: Neutral
+\item \code{"train"}: training subset
+\item \code{"test"}: test set with labels (used for evaluation)
 }
 }
 \examples{
 \dontrun{
-fer <- fer_dataset(train = TRUE, download = TRUE)
+fer <- fer_dataset(download = TRUE)
 first_item <- fer[1]
-# image in item 1
+# image tensor of item 1
 first_item$x
-# label of item 1
+# label index of item 1
 first_item$y
-# label name
-first_item$class_name
+# label name of item 1
+fer$get_classes[first_item$y]
 }
 
 }

@@ -1,10 +1,12 @@
-#' FER-2013 Dataset
+#' FER-2013 Facial Expression Dataset
 #'
-#' Loads the FER-2013 facial expression dataset.
-#' The dataset contains grayscale facial images (48x48) with 7 emotion labels:
-#' - Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
+#' Loads the FER-2013 dataset for facial expression recognition. The dataset contains grayscale images
+#' (48x48) of human faces, each labeled with one of seven emotion categories:
+#' `"Angry"`, `"Disgust"`, `"Fear"`, `"Happy"`, `"Sad"`, `"Surprise"`, and `"Neutral"`.
 #'
-#' Supports train and test splits.
+#' The dataset provides only two splits: `"train"` and `"test"`.
+#' - `"train"`: training subset
+#' - `"test"`: test set with labels (used for evaluation)
 #'
 #' @param root Character. Root directory for dataset storage.
 #' @param train Logical. If TRUE, loads training set; else loads test set.
