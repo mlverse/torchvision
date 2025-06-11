@@ -49,7 +49,7 @@ test_that("Caltech101 dataset works correctly", {
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
   expect_equal(length(batch), 4)
-  expect_true(all(purrr::map_lgl(batch, ~ inherits(.x$x, "torch_tensor"))))
+  expect_true(all(vapply(batch, function(item) inherits(item$x, "torch_tensor"), logical(1))))
 })
 
 test_that("Caltech256 dataset works correctly", {
