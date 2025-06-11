@@ -67,9 +67,10 @@ caltech101_dataset <- dataset(
     if (is.character(target_type))
       target_type <- list(target_type)
     valid_types <- c("category", "annotation")
-    for (t in target_type) {
-      if (!(t %in% valid_types))
-        runtime_error(sprintf("Invalid target_type: %s", t))
+    invalid <- setdiff(target_type, valid_types)
+    if (length(invalid) > 0) {
+      invalid_str <- glue::glue_collapse(invalid, sep = ", ", last = " and ")
+      runtime_error(glue::glue("Invalid target_type(s): {invalid_str}"))
     }
     self$target_type <- target_type
 
@@ -84,17 +85,21 @@ caltech101_dataset <- dataset(
     self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
     name_map <- list("Faces"="Faces_2", "Faces_easy"="Faces_3", "Motorbikes"="Motorbikes_16", "airplanes"="Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
-    self$samples <- list()
-    self$labels <- integer()
-    self$image_indices <- integer()
-    for (i in seq_along(self$classes)) {
-      class_dir <- fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes[[i]])
-      images <- fs::dir_ls(class_dir, glob = "*.jpg")
+    all_samples <- list()
+    all_labels <- list()
+    all_indices <- list()
+    class_dirs <- fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes)
+    samples_per_class <- lapply(seq_along(self$classes), function(i) {
+      images <- fs::dir_ls(class_dirs[[i]], glob = "*.jpg")
       images <- sort(images)
-      self$samples <- c(self$samples, images)
-      self$labels <- c(self$labels, rep(i, length(images)))
-      self$image_indices <- c(self$image_indices, seq_along(images))
-    }
+      list(samples = images,labels = rep(i, length(images)),indices = seq_along(images))
+    })
+    all_samples <- unlist(lapply(samples_per_class, `[[`, "samples"), recursive = FALSE)
+    all_labels <- unlist(lapply(samples_per_class, `[[`, "labels"))
+    all_indices <- unlist(lapply(samples_per_class, `[[`, "indices"))
+    self$samples <- all_samples
+    self$labels <- all_labels
+    self$image_indices <- all_indices
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
@@ -106,32 +111,37 @@ caltech101_dataset <- dataset(
     img_tensor <- torchvision::transform_to_tensor(img)
     
     target_list <- list()
-    for (t in self$target_type) {
+    target_list <- purrr::map(self$target_type, function(t) {
       if (t == "category") {
-        target_list <- c(target_list, label)
+        label
       } else if (t == "annotation") {
         ann_class <- self$annotation_classes[label_idx]
-        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class,
-                              sprintf("annotation_%04d.mat", self$image_indices[[index]]))
+        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{stringr::str_pad(self$image_indices[[index]], 4, pad = '0')}.mat"))
+        
         if (!fs::file_exists(ann_file)) {
-          target_list <- c(target_list, NULL)
+          NULL
         } else {
           if (!requireNamespace("reticulate", quietly = TRUE)) {
             runtime_error("Package 'reticulate' is needed for this dataset. Please install it.")
           }
+          if (!reticulate::py_module_available("scipy.io")) {
+            runtime_error("Python module 'scipy.io' not found. Please install it in your Python environment.")
+          }
           scipy <- reticulate::import("scipy.io")
           mat_data <- scipy$loadmat(as.character(ann_file))
-          box_coord <- mat_data[["box_coord"]]
-          box_coord <- as.numeric(box_coord)
-          obj_contour <- mat_data[["obj_contour"]]
-          obj_contour <- as.matrix(obj_contour)
-          obj_contour <- apply(obj_contour, 2, as.numeric)
-          obj_contour <- t(obj_contour)
-          annotation <- list(box_coord = box_coord, obj_contour = obj_contour)
-          target_list <- c(target_list, list(annotation))
+          
+          box_coord <- as.numeric(mat_data[["box_coord"]])
+          obj_contour <- mat_data[["obj_contour"]] |> 
+            as.matrix() |> 
+            apply(2, as.numeric) |> 
+            t()
+          
+          list(box_coord = box_coord, obj_contour = obj_contour)
         }
+      } else {
+        runtime_error(glue::glue("Invalid target_type: {t}"))
       }
-    }
+    })
     target <- if (length(target_list) == 1) target_list[[1]] else target_list
     if (!is.null(self$transform))
       img_tensor <- self$transform(img_tensor)
@@ -147,13 +157,15 @@ caltech101_dataset <- dataset(
     rlang::inform("Downloading Caltech101 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
-    for (res in self$resources) {
+    purrr::walk(self$resources, function(res) {
       zip_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(zip_path, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
-      if (md5_actual != res$md5)
-        runtime_error(sprintf("MD5 mismatch for file: %s (expected %s, got %s)", res$filename, res$md5, md5_actual))
+      if (md5_actual != res$md5) {
+        runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
+      }
+
       rlang::inform("Extracting archive and processing metadata...")
       utils::unzip(dest, exdir = self$root)
       extracted_dir <- fs::path(self$root, "caltech-101")
@@ -167,7 +179,8 @@ caltech101_dataset <- dataset(
       if (fs::file_exists(annotations_path)) {
         utils::untar(annotations_path, exdir = extracted_dir)
       }
-    }
+    })
+
     rlang::inform("Dataset Caltech101 processed successfully!")
   },
   check_exists = function() {
@@ -233,13 +246,18 @@ caltech256_dataset <- dataset(
     self$samples <- list()
     self$labels <- integer()
 
-    for (i in seq_along(self$classes)) {
-      class_dir <- fs::path(self$root, "256_ObjectCategories", self$classes[[i]])
-      images <- fs::dir_ls(class_dir, glob = "*.jpg")
-      images <- sort(images)
-      self$samples <- c(self$samples, images)
-      self$labels <- c(self$labels, rep(i, length(images)))
-    }
+    class_dirs <- fs::path(self$root, "256_ObjectCategories", self$classes)
+    images_per_class <- lapply(class_dirs, function(class_dir) {
+      imgs <- fs::dir_ls(class_dir, glob = "*.jpg")
+      sort(imgs)
+    })
+    self$samples <- unlist(images_per_class, use.names = FALSE)
+    self$labels <- unlist(
+      purrr::map2(seq_along(self$classes), images_per_class, function(i, imgs) {
+        rep(i, length(imgs))
+      }),
+      use.names = FALSE
+    )
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
@@ -263,17 +281,19 @@ caltech256_dataset <- dataset(
     rlang::inform("Downloading Caltech256 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
-    for (res in self$resources) {
+    purrr::walk(self$resources, function(res) {
       tar_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(tar_path, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
-      if (md5_actual != res$md5)
-        runtime_error(sprintf("MD5 mismatch for file: %s (expected %s, got %s)", res$filename, res$md5, md5_actual))
-
+      if (md5_actual != res$md5) {
+        runtime_error(glue::glue(
+          "MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"
+        ))
+      }
       rlang::inform("Extracting archive and preparing dataset...")
       utils::untar(dest, exdir = self$root)
-    }
+    })
     rlang::inform("Dataset Caltech256 processed successfully!")
   },
   check_exists = function() {
