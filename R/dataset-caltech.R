@@ -111,13 +111,13 @@ caltech101_dataset <- dataset(
     img_tensor <- torchvision::transform_to_tensor(img)
     
     target_list <- list()
-    target_list <- purrr::map(self$target_type, function(t) {
+    target_list <- lapply(self$target_type, function(t) {
       if (t == "category") {
         label
       } else if (t == "annotation") {
         ann_class <- self$annotation_classes[label_idx]
-        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{stringr::str_pad(self$image_indices[[index]], 4, pad = '0')}.mat"))
-        
+        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")  # pad with 0
+        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
         if (!fs::file_exists(ann_file)) {
           NULL
         } else {
@@ -129,13 +129,11 @@ caltech101_dataset <- dataset(
           }
           scipy <- reticulate::import("scipy.io")
           mat_data <- scipy$loadmat(as.character(ann_file))
-          
           box_coord <- as.numeric(mat_data[["box_coord"]])
-          obj_contour <- mat_data[["obj_contour"]] |> 
-            as.matrix() |> 
-            apply(2, as.numeric) |> 
+          obj_contour <- mat_data[["obj_contour"]] |>
+            as.matrix() |>
+            apply(2, as.numeric) |>
             t()
-          
           list(box_coord = box_coord, obj_contour = obj_contour)
         }
       } else {
@@ -157,7 +155,7 @@ caltech101_dataset <- dataset(
     rlang::inform("Downloading Caltech101 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
-    purrr::walk(self$resources, function(res) {
+    invisible(lapply(self$resources, function(res) {
       zip_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(zip_path, dest, overwrite = TRUE)
@@ -165,7 +163,6 @@ caltech101_dataset <- dataset(
       if (md5_actual != res$md5) {
         runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
       }
-
       rlang::inform("Extracting archive and processing metadata...")
       utils::unzip(dest, exdir = self$root)
       extracted_dir <- fs::path(self$root, "caltech-101")
@@ -179,7 +176,7 @@ caltech101_dataset <- dataset(
       if (fs::file_exists(annotations_path)) {
         utils::untar(annotations_path, exdir = extracted_dir)
       }
-    })
+    }))
 
     rlang::inform("Dataset Caltech101 processed successfully!")
   },
@@ -253,9 +250,9 @@ caltech256_dataset <- dataset(
     })
     self$samples <- unlist(images_per_class, use.names = FALSE)
     self$labels <- unlist(
-      purrr::map2(seq_along(self$classes), images_per_class, function(i, imgs) {
+      mapply(function(i, imgs) {
         rep(i, length(imgs))
-      }),
+      }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
       use.names = FALSE
     )
   },
@@ -281,18 +278,17 @@ caltech256_dataset <- dataset(
     rlang::inform("Downloading Caltech256 Dataset...")
     if (self$check_exists()) return()
     fs::dir_create(self$root)
-    purrr::walk(self$resources, function(res) {
+    lapply(self$resources, function(res) {
       tar_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(tar_path, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
       if (md5_actual != res$md5) {
-        runtime_error(glue::glue(
-          "MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"
-        ))
+        runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
       }
       rlang::inform("Extracting archive and preparing dataset...")
       utils::untar(dest, exdir = self$root)
+      invisible(NULL)
     })
     rlang::inform("Dataset Caltech256 processed successfully!")
   },
