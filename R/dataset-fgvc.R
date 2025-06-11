@@ -5,13 +5,13 @@
 #' - "family": aircraft families
 #' - "manufacturer": aircraft manufacturers
 #' 
-#' The dataset supports the following splits:
-#' - `"train"`: training subset (simulated from `"trainval"`)
-#' - `"val"`: validation subset (simulated from `"trainval"`)
-#' - `"trainval"`: full training + validation set (as provided by the official dataset)
-#' - `"test"`: test set with labels
+#' The FGVC-Aircraft dataset supports the following official splits:
+#' - `"train"`: training subset
+#' - `"val"`: validation subset
+#' - `"trainval"`: combined training and validation set
+#' - `"test"`: test set with labels (used for evaluation)
 #'
-#' Note: The original dataset provides `"trainval"` and `"test"` splits. The `"train"` and `"val"` subsets are simulated from `"trainval"` by an 80/20 split with a fixed random seed.
+#' These splits are provided directly in the dataset archive. No manual splitting is performed.
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/fgvc-aircraft-2013b`.
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Default is `"train"`.
@@ -80,7 +80,7 @@ fgvc_aircraft_dataset <- dataset(
 
     label_file <- file.path(
       self$data_dir,
-      glue::glue("images_{annotation_level}_{if (split %in% c('train', 'val')) 'trainval' else split}.txt")
+      glue::glue("images_{annotation_level}_{split}.txt")
     )
 
     cls_file <- file.path(
@@ -97,14 +97,6 @@ fgvc_aircraft_dataset <- dataset(
     self$class_to_idx <- setNames(seq_along(classes), classes)
 
     lines <- readLines(label_file)
-
-    if (split %in% c("train", "val")) {
-      rlang::inform(glue::glue("Creating '{split}' subset from 'trainval' via 80/20 split (seed = 42)"))
-      set.seed(42)
-      idx <- sample(length(lines))
-      cutoff <- floor(0.8 * length(lines))
-      lines <- if (split == "train") lines[idx[1:cutoff]] else lines[idx[(cutoff + 1):length(lines)]]
-    }
 
     self$image_paths <- character()
     self$labels <- integer()

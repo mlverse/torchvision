@@ -9,12 +9,12 @@ test_that("FGVC-Aircraft dataset: all splits, levels, and dataloader", {
   )
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "variant", download = TRUE)
-  expect_equal(length(fgvc), 5333)
+  expect_equal(length(fgvc), 3334)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_true(inherits(item$x, "torch_tensor"))
   expect_type(item$y, "integer")
-  expect_equal(as.numeric(item$y), 79)
+  expect_equal(as.numeric(item$y), 1)
 
   resize_collate_fn <- function(batch) {
     xs <- lapply(batch, function(sample) {
@@ -38,46 +38,90 @@ test_that("FGVC-Aircraft dataset: all splits, levels, and dataloader", {
   expect_equal(length(batch$y), 2)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "variant")
-  expect_equal(length(fgvc), 1334)
-  expect_equal(as.numeric(fgvc[1]$y), 65)
+  expect_equal(length(fgvc), 3333)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "variant")
   expect_equal(length(fgvc), 6667)
-  expect_equal(as.numeric(fgvc[1]$y), 1)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "variant")
   expect_equal(length(fgvc), 3333)
-  expect_equal(as.numeric(fgvc[1]$y), 1)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "family")
-  expect_equal(length(fgvc), 5333)
-  expect_equal(as.numeric(fgvc[1]$y), 51)
+  expect_equal(length(fgvc), 3334)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "family")
-  expect_equal(length(fgvc), 1334)
-  expect_equal(as.numeric(fgvc[1]$y), 41)
+  expect_equal(length(fgvc), 3333)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "family")
   expect_equal(length(fgvc), 6667)
-  expect_equal(as.numeric(fgvc[1]$y), 13)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "family")
   expect_equal(length(fgvc), 3333)
-  expect_equal(as.numeric(fgvc[1]$y), 13)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 5333)
-  expect_equal(as.numeric(fgvc[1]$y), 17)
+  expect_equal(length(fgvc), 3334)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 1334)
-  expect_equal(as.numeric(fgvc[1]$y), 14)
+  expect_equal(length(fgvc), 3333)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "manufacturer")
   expect_equal(length(fgvc), 6667)
-  expect_equal(as.numeric(fgvc[1]$y), 5)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "manufacturer")
   expect_equal(length(fgvc), 3333)
-  expect_equal(as.numeric(fgvc[1]$y), 5)
+  item <- fgvc[1]
+  expect_named(item, c("x", "y"))
+  expect_true(inherits(item$x, "torch_tensor"))
+  expect_type(item$y, "integer")
+  expect_equal(as.numeric(item$y), 5)
 })
