@@ -1,66 +1,66 @@
-#' FER2013 Dataset
+#' FER-2013 Dataset
 #'
-#' Loads the FER2013 dataset for facial expression recognition, consisting of grayscale 48x48 images.
-#' The dataset contains facial images categorized into seven emotion classes:
-#' - 0: Angry
-#' - 1: Disgust
-#' - 2: Fear
-#' - 3: Happy
-#' - 4: Sad
-#' - 5: Surprise
-#' - 6: Neutral
+#' Loads the FER-2013 facial expression dataset.
+#' The dataset contains grayscale facial images (48x48) with 7 emotion labels:
+#' - Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
 #'
-#' @param root Character. Root directory where the `fer2013` folder exists or will be saved to if `download = TRUE`.
-#' @param train Logical. If `TRUE`, loads the training split; if `FALSE`, loads the test split. Default is `TRUE`.
-#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
-#' @param transform Optional function to transform input images.
-#' @param target_transform Optional function to transform target labels.
+#' Supports train and test splits.
 #'
-#' @return A FER2013 dataset object.
+#' @param root Character. Root directory for dataset storage.
+#' @param train Logical. If TRUE, loads training set; else loads test set.
+#' @param transform Optional. A function to apply on input images.
+#' @param target_transform Optional. A function to apply on labels.
+#' @param download Logical. Whether to download the dataset if not found locally.
+#'
+#' @return A torch-style dataset object. Each item is a list with:
+#' - `x`: 3D torch tensor (1x48x48)
+#' - `y`: integer label (1-based index)
 #'
 #' @examples
 #' \dontrun{
-#' fer <- fer_dataset(train = TRUE, download = TRUE)
+#' fer <- fer_dataset(download = TRUE)
 #' first_item <- fer[1]
-#' # image in item 1
+#' # image tensor of item 1
 #' first_item$x
-#' # label of item 1
+#' # label index of item 1
 #' first_item$y
-#' # label name
-#' first_item$class_name
+#' # label name of item 1
+#' fer$get_classes[first_item$y]
 #' }
-#'
+#' 
 #' @name fer_dataset
 #' @aliases fer_dataset
-#' @title FER2013 dataset
+#' @title FER-2013 Emotion Recognition Dataset
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
-  train_url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/train.csv.zip",
-  test_url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip",
-  train_md5 = "e6c225af03577e6dcbb1c59a71d09905",
-  test_md5 = "024ec789776ef0a390db67b1d7ae60a3",
-  folder_name = "fer2013",
-  classes = c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"),
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+
+  initialize = function(root = tempdir(), train = TRUE,
+                        transform = NULL, target_transform = NULL,
+                        download = FALSE) {
+
     self$root <- root
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
     self$split <- if (train) "train" else "test"
+    self$folder_name <- "fer2013"
+    self$train_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/train.csv.zip"
+    self$test_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip"
+    self$train_md5 <- "e6c225af03577e6dcbb1c59a71d09905"
+    self$test_md5 <- "024ec789776ef0a390db67b1d7ae60a3"
+    self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
+    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    rlang::inform(glue::glue("Downloading and processing FER-2013 dataset ({self$split} split)..."))
+    rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split} split)..."))
 
     if (download)
       self$download()
 
-    check <- self$check_files()
-    if (!check)
-      runtime_error("Files not found or corrupted. Use download = TRUE")
+    if (!self$check_files())
+      runtime_error("Dataset files missing. Use download = TRUE to fetch them.")
 
-    data_file <- as.character(glue::glue("{self$root}/{self$folder_name}/{self$split}.csv"))
-    lines <- readLines(data_file)
-    header <- strsplit(lines[1], ",")[[1]]
+    data_file <- file.path(self$root, self$folder_name, glue::glue("{self$split}.csv"))
     parsed <- read.csv(data_file, stringsAsFactors = FALSE)
 
     self$x <- lapply(parsed$pixels, function(p) {
@@ -70,7 +70,7 @@ fer_dataset <- dataset(
 
     self$y <- as.integer(parsed$emotion) + 1L
 
-    rlang::inform(glue::glue("FER-2013 dataset ({self$split} split) Processed Successfully !"))
+    rlang::inform(glue::glue("FER-2013 ({self$split}) loaded successfully. Total samples: {length(self$y)}"))
   },
   .getitem = function(i) {
     x <- self$x[[i]]
@@ -82,32 +82,32 @@ fer_dataset <- dataset(
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
-    list(x = x, y = y, class_name = self$classes[y])
+    list(x = x, y = y)
   },
   .length = function() {
     length(self$y)
+  },
+  get_classes = function() {
+    self$classes
   },
   download = function() {
     if (self$check_files())
       return()
 
-    dir <- fs::path(self$root, self$folder_name)
+    dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dir)
 
-    if (self$train) {
-      zipfile <- download_and_cache(self$train_url)
-      if (tools::md5sum(zipfile) != self$train_md5)
-        runtime_error(glue::glue("Corrupt file! {basename(zipfile)} does not match expected checksum."))
-    } else {
-      zipfile <- download_and_cache(self$test_url)
-      if (tools::md5sum(zipfile) != self$test_md5)
-        runtime_error(glue::glue("Corrupt file! {basename(zipfile)} does not match expected checksum."))
-    }
+    zipfile <- download_and_cache(
+      url = if (self$train) self$train_url else self$test_url
+    )
+
+    expected_md5 <- if (self$train) self$train_md5 else self$test_md5
+    if (tools::md5sum(zipfile) != expected_md5)
+      runtime_error("MD5 checksum mismatch. File may be corrupted.")
 
     utils::unzip(zipfile, exdir = dir)
   },
   check_files = function() {
-    file <- as.character(glue::glue("{self$root}/{self$folder_name}/{if (self$train) 'train' else 'test'}.csv"))
-    fs::file_exists(file)
+    file.exists(file.path(self$root, self$folder_name, glue::glue("{self$split}.csv")))
   }
 )
