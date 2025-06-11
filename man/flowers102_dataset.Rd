@@ -24,7 +24,9 @@ flowers102_dataset(
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
-A flowers102_dataset object representing the dataset.
+A torch dataset containing the Flowers102 subset.
+Images are returned as preloaded torch tensors in \code{x}, and corresponding class names as \code{y}.
+As \code{x} is already a tensor (unlike most datasets in this library),this is made explicit here.
 }
 \description{
 Flowers 102 Dataset

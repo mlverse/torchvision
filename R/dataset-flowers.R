@@ -9,7 +9,9 @@
 #' @param target_transform Optional function to transform labels.
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
-#' @return A flowers102_dataset object representing the dataset.
+#' @return A torch dataset containing the Flowers102 subset.
+#' Images are returned as preloaded torch tensors in `x`, and corresponding class names as `y`.
+#' As `x` is already a tensor (unlike most datasets in this library),this is made explicit here.
 #'
 #' @examples
 #' \dontrun{
