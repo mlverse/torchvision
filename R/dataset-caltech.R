@@ -116,6 +116,9 @@ caltech101_dataset <- dataset(
         if (!fs::file_exists(ann_file)) {
           target_list <- c(target_list, NULL)
         } else {
+          if (!requireNamespace("reticulate", quietly = TRUE)) {
+            runtime_error("Package 'reticulate' is needed for this dataset. Please install it.")
+          }
           scipy <- reticulate::import("scipy.io")
           mat_data <- scipy$loadmat(as.character(ann_file))
           box_coord <- mat_data[["box_coord"]]
