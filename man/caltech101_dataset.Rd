@@ -5,44 +5,59 @@
 \title{Caltech 101 Dataset}
 \usage{
 caltech101_dataset(
-  root = rappdirs::user_cache_dir("torch"),
+  root = tempdir(),
+  target_type = "category",
   transform = NULL,
   target_transform = NULL,
-  download = FALSE,
-  image_size = c(224, 224)
+  download = FALSE
 )
 }
 \arguments{
 \item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech101}.}
 
+\item{target_type}{Character or character vector. Type of target to load. Either \code{"category"}, \code{"annotation"}, or both.}
+
 \item{transform}{Optional function to transform input images after loading.}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{Optional function to transform labels or annotations.}
 
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
-
-\item{image_size}{Integer vector of length 2. Size to resize images to (width, height). Default is \code{c(224, 224)}.}
 }
 \value{
-A caltech101_dataset object representing the dataset.
+An R6 dataset object inheriting from \code{dataset}. Each item is a named list with elements:
+\describe{
+\item{x}{An image tensor of shape \verb{(3, H, W)} with values in \verb{[0, 1]}.}
+\item{y}{The target label. If \code{target_type = "category"}, this is the class name (character string).
+If \code{target_type = "annotation"}, this is a list containing:
+\describe{
+\item{box_coord}{Numeric vector of length 4 with bounding box coordinates.}
+\item{obj_contour}{Matrix of shape \verb{(N, 2)} with object contour coordinates.}
+}}
+}
 }
 \description{
 Caltech 101 Dataset
 }
 \details{
 Loads the Caltech 101 Dataset, containing images from 101 object categories.
-The dataset includes images and their corresponding class labels.
+The dataset includes images and optionally their object annotations.
 There is no built-in train/test split.
 }
 \examples{
 \dontrun{
 root_dir <- tempfile()
-caltech <- caltech101_dataset(root = root_dir, download = TRUE)
+caltech <- caltech101_dataset(root = root_dir, target_type = "category", download = TRUE)
 first_item <- caltech[1]
 # image tensor of first item
 first_item$x
 # label (class name) of first item
 first_item$y
+
+# If annotations are requested
+caltech_ann <- caltech101_dataset(root = root_dir, target_type = "annotation", download = FALSE)
+annotation_item <- caltech_ann[1]
+annotation_item$y$box_coord
+annotation_item$y$obj_contour
 }
 
 }

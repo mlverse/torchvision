@@ -62,6 +62,7 @@ caltech101_dataset <- dataset(
     self$root <- fs::path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
+    self$resize_shape <- c(224, 224)
 
     if (is.character(target_type))
       target_type <- list(target_type)
@@ -101,8 +102,9 @@ caltech101_dataset <- dataset(
     label <- self$classes[label_idx]
 
     img <- magick::image_read(img_path)
+    img <- magick::image_resize(img, "224x224!")
     img_tensor <- torchvision::transform_to_tensor(img)
-
+    
     target_list <- list()
     for (t in self$target_type) {
       if (t == "category") {
@@ -122,7 +124,7 @@ caltech101_dataset <- dataset(
           obj_contour <- as.matrix(obj_contour)
           obj_contour <- apply(obj_contour, 2, as.numeric)
           obj_contour <- t(obj_contour)
-          annotation <- list(box_coord = box_coord,obj_contour = obj_contour)
+          annotation <- list(box_coord = box_coord, obj_contour = obj_contour)
           target_list <- c(target_list, list(annotation))
         }
       }
@@ -151,7 +153,6 @@ caltech101_dataset <- dataset(
         runtime_error(sprintf("MD5 mismatch for file: %s (expected %s, got %s)", res$filename, res$md5, md5_actual))
       rlang::inform("Extracting archive and processing metadata...")
       utils::unzip(dest, exdir = self$root)
-
       extracted_dir <- fs::path(self$root, "caltech-101")
       tar_gz_path <- fs::path(extracted_dir, "101_ObjectCategories.tar.gz")
       if (fs::file_exists(tar_gz_path)) {
@@ -159,7 +160,6 @@ caltech101_dataset <- dataset(
       } else {
         runtime_error("Expected 101_ObjectCategories.tar.gz not found after unzip.")
       }
-
       annotations_path <- fs::path(extracted_dir, "Annotations.tar")
       if (fs::file_exists(annotations_path)) {
         utils::untar(annotations_path, exdir = extracted_dir)
