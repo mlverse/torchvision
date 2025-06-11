@@ -79,7 +79,7 @@ test_that("fashion_mnist_dataset loads correctly", {
 
 test_that("tests for the emnist dataset", {
   skip_on_cran()
-  
+  skip("Skip EMNIST due to large size")
   dir <- tempdir()
   
   emnist <- emnist_dataset(dir, split = "balanced", download = TRUE)
