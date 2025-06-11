@@ -13,8 +13,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' root_dir <- tempfile()
-#' flowers <- flowers102_dataset(root = root_dir, split = "train", download = TRUE)
+#' flowers <- flowers102_dataset(download = TRUE)
 #' first_item <- flowers[1]
 #' # image tensor of first item
 #' first_item$x
@@ -58,7 +57,7 @@ flowers102_dataset <- dataset(
     c("https://www.robots.ox.ac.uk/~vgg/data/flowers/102/setid.mat", "a5357ecc9cb78c4bef273ce3793fc85c")
   ),
 
-  initialize = function(root, split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
     self$root_path <- root
     self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform

@@ -5,7 +5,7 @@
 \title{Oxford Flowers 102 Dataset}
 \usage{
 flowers102_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   transform = NULL,
   target_transform = NULL,
@@ -35,8 +35,7 @@ The dataset supports different splits: \code{"train"}, \code{"val"}, and \code{"
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-flowers <- flowers102_dataset(root = root_dir, split = "train", download = TRUE)
+flowers <- flowers102_dataset(download = TRUE)
 first_item <- flowers[1]
 # image tensor of first item
 first_item$x
