@@ -42,41 +42,45 @@ flickr8k_dataset <- dataset(
     self$target_transform <- target_transform
     self$train <- train
 
-    if (download)
-      rlang::inform("Downloading Flickr8k Dataset...")
+    split <- if (train) "train" else "test"
+    rlang::inform(glue::glue("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached."))
+    
+    if (download) {
+      rlang::inform(glue::glue("Downloading Flickr8k split: '{split}' (~1GB)"))
       self$download()
+    }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+    }
 
-    if (self$train)
-      data <- readRDS(file.path(self$processed_folder, self$training_file))
-    else
-      data <- readRDS(file.path(self$processed_folder, self$test_file))
+    rlang::inform(glue::glue("Loading processed split: '{split}'"))
+
+    file <- if (self$train) self$training_file else self$test_file
+    data <- readRDS(file.path(self$processed_folder, file))
 
     self$images <- data$images
     self$captions <- data$captions
+    rlang::inform(glue::glue("Split '{split}' loaded with {length(self$images)} samples."))
   },
   download = function() {
-    if (self$check_exists())
-      return(invisible(NULL))
+    if (self$check_exists()) return(invisible(NULL))
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
     for (r in self$resources) {
-  zip_path <- download_and_cache(r[1], prefix = class(self)[1])
-  
-  md5_actual <- tools::md5sum(zip_path)
-  if (md5_actual != r[2]) {
-    runtime_error(glue::glue("MD5 sums do not match for: {r[1]}. Expected {r[2]}, got {md5_actual}"))
-  }
-  dest_zip <- file.path(self$raw_folder, basename(zip_path))
-  fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
-  utils::unzip(dest_zip, exdir = self$raw_folder)
-}
+      zip_path <- download_and_cache(r[1], prefix = class(self)[1])
+      md5_actual <- tools::md5sum(zip_path)
+      if (md5_actual != r[2]) {
+        runtime_error(glue::glue("MD5 mismatch for {r[1]}.\nExpected: {r[2]}, Got: {md5_actual}"))
+      }
+      dest_zip <- file.path(self$raw_folder, basename(zip_path))
+      fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
+      utils::unzip(dest_zip, exdir = self$raw_folder)
+    }
 
-    rlang::inform("Processing Flickr8k captions...")
+    rlang::inform("Extracting images and processing captions (may take a minute)...")
 
     captions_file <- file.path(self$raw_folder, "Flickr8k.token.txt")
     captions_lines <- readLines(captions_file)
@@ -86,30 +90,25 @@ flickr8k_dataset <- dataset(
       parts <- strsplit(line, "\t")[[1]]
       img_id <- strsplit(parts[1], "#")[[1]][1]
       caption <- parts[2]
-
-      if (!img_id %in% names(captions_map)) {
-        captions_map[[img_id]] <- list()
-      }
       captions_map[[img_id]] <- c(captions_map[[img_id]], caption)
     }
 
     train_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.trainImages.txt"))
     test_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.testImages.txt"))
 
-    process_split <- function(ids) {
+    process_split <- function(ids, split_name) {
       img_paths <- file.path(self$raw_folder, "Flicker8k_Dataset", ids)
       img_paths <- img_paths[file.exists(img_paths)]
       captions <- lapply(ids, function(id) captions_map[[id]])
+      rlang::inform(glue::glue("Done processing split: '{split_name}' ({length(img_paths)} samples saved)"))
       list(images = img_paths, captions = captions)
     }
 
-    train_data <- process_split(train_ids)
-    test_data <- process_split(test_ids)
+    train_data <- process_split(train_ids, "train")
+    test_data <- process_split(test_ids, "test")
 
     saveRDS(train_data, file.path(self$processed_folder, self$training_file))
     saveRDS(test_data, file.path(self$processed_folder, self$test_file))
-
-    rlang::inform("Flickr8k Dataset Processed Successfully !")
   },
   check_exists = function() {
     fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
@@ -132,12 +131,8 @@ flickr8k_dataset <- dataset(
     length(self$images)
   },
   active = list(
-    raw_folder = function() {
-      file.path(self$root, "flickr8k", "raw")
-    },
-    processed_folder = function() {
-      file.path(self$root, "flickr8k", "processed")
-    }
+    raw_folder = function() file.path(self$root, "flickr8k", "raw"),
+    processed_folder = function() file.path(self$root, "flickr8k", "processed")
   )
 )
 
@@ -186,23 +181,26 @@ flickr30k_dataset <- dataset(
     self$target_transform <- target_transform
     self$train <- train
 
-    if (download)
-      rlang::inform("Downloading Flickr30k Dataset...")
+    split <- if (self$train) "train" else "test"
+    rlang::inform("Flickr30k Dataset (~4.1GB) will be downloaded and processed if not already cached.")
+
+    if (download) {
+      rlang::inform(glue::glue("Downloading Flickr30k split: '{split}' (~4.1GB)"))
       self$download()
+    }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+    }
 
-    rlang::inform("Processing Flickr30k captions...")
+    rlang::inform("Extracting images and processing metadata (may take a minute)...")
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
     captions_json <- jsonlite::fromJSON(captions_path)
 
     split_name <- if (self$train) "train" else "test"
-
     imgs_df <- captions_json$images
     filtered_images <- imgs_df[imgs_df$split == split_name, ]
-
     self$filenames <- filtered_images$filename
 
     self$captions_map <- list()
@@ -217,19 +215,20 @@ flickr30k_dataset <- dataset(
       self$captions_map[[filename]] <- captions
     }
 
-    rlang::inform("Flickr30k Dataset Processed Successfully !")
+    rlang::inform(glue::glue("Done processing split: '{split}' ({length(self$filenames)} samples saved)"))
+    rlang::inform(glue::glue("Loading processed split: '{split}'"))
+    rlang::inform(glue::glue("Split '{split}' loaded with {length(self$filenames)} samples."))
   },
 
   download = function() {
-    if (self$check_exists()) {
-      return(invisible(NULL))
-    }
+    if (self$check_exists()) return(invisible(NULL))
 
     fs::dir_create(self$raw_folder)
 
     for (r in self$resources) {
       archive_path <- download_and_cache(r[1], prefix = class(self)[1])
       md5_actual <- tools::md5sum(archive_path)
+
       if (md5_actual != r[2]) {
         runtime_error(glue::glue("MD5 mismatch: expected {r[2]}, got {md5_actual}"))
       }
@@ -247,12 +246,11 @@ flickr30k_dataset <- dataset(
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
-
   },
 
   check_exists = function() {
     fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) &&
-    fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
+      fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
   },
 
   .getitem = function(index) {
