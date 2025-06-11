@@ -33,7 +33,12 @@ Flowers 102 Dataset
 }
 \details{
 Loads the Oxford Flowers 102 Dataset, consisting of 102 flower categories with images and labels.
-The dataset supports different splits: \code{"train"}, \code{"val"}, and \code{"test"}.
+The Flowers102 dataset supports the following official splits:
+\itemize{
+\item \code{"train"}: training subset
+\item \code{"val"}: validation subset
+\item \code{"test"}: test subset
+}
 }
 \examples{
 \dontrun{
