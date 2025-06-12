@@ -22,7 +22,7 @@
 #' @return A dataset object of class `oxfordiiitpet_dataset`, where each indexed item returns a named list:
 #' \describe{
 #'   \item{\code{x}}{An image tensor of shape (3, H, W).}
-#'   \item{\code{y}}{The label — an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
+#'   \item{\code{y}}{The label - an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
 #' }
 #'
 #' @examples
@@ -93,14 +93,14 @@ oxfordiiitpet_dataset <- dataset(
       md5 <- r[2]
       filename <- basename(url)
       destpath <- file.path(self$raw_folder, filename)
-      rlang::inform(glue::glue("→ Downloading: {url}"))
+      rlang::inform(glue::glue("Downloading: {url}"))
       p <- download_and_cache(url, prefix = class(self)[1])
       fs::file_copy(p, destpath, overwrite = TRUE)
       actual_md5 <- unname(tools::md5sum(destpath))
       if (!identical(actual_md5, md5)) {
-        runtime_error(glue::glue("✗ MD5 mismatch for {url}\nExpected: {md5}\nFound:    {actual_md5}"))
+        runtime_error(glue::glue("MD5 mismatch for {url}\nExpected: {md5}\nFound:    {actual_md5}"))
       }
-      rlang::inform(glue::glue("✓ Extracting {filename}..."))
+      rlang::inform(glue::glue("Extracting {filename}..."))
       utils::untar(destpath, exdir = self$raw_folder)
     })
     rlang::inform("Preparing image paths and labels from annotations...")
@@ -118,7 +118,7 @@ oxfordiiitpet_dataset <- dataset(
       if (any(!valid)) {
         rlang::warn(glue::glue("Some files are missing in {split} split and will be skipped."))
         invisible(lapply(img_ids[!valid], function(id) {
-          rlang::warn(glue::glue("  ✗ Missing files for: {id}"))
+          rlang::warn(glue::glue("Missing files for: {id}"))
         }))
       }
       image_paths <- img_paths[valid]
