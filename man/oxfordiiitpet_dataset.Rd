@@ -35,7 +35,7 @@ oxfordiiitpet_dataset(
 A dataset object of class \code{oxfordiiitpet_dataset}, where each indexed item returns a named list:
 \describe{
 \item{\code{x}}{An image tensor of shape (3, H, W).}
-\item{\code{y}}{The label — an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
+\item{\code{y}}{The label - an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
 }
 }
 \description{
