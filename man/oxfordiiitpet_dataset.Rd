@@ -18,22 +18,24 @@ oxfordiiitpet_dataset(
 
 \item{train}{Logical. Whether to load the training split. Default is \code{TRUE}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to transform the input image tensors.}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{Optional function to transform target labels or segmentation masks.}
 
-\item{target_type}{Character. Type of target to load: one of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"}.
-Default is \code{"category"}. For \code{"binary-category"}, labels are assigned based on the first letter
-capitalization of the original class name: capitalized = Cat (y=1), lowercase = Dog (y=2).}
+\item{target_type}{Character. One of:
+\describe{
+\item{\code{"category"}}{(default) Integer class index from 1 to 37.}
+\item{\code{"binary-category"}}{Returns 1 for Cat and 2 for Dog. Based on whether the class name starts with an uppercase letter.}
+\item{\code{"segmentation"}}{Returns a single-channel pixel-level segmentation mask as a torch tensor.}
+}}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download the dataset if not already present. Default is \code{FALSE}.}
 }
 \value{
-An \code{oxfordiiitpet_dataset} object representing the dataset, with fields:
-\itemize{
-\item \code{x}: image tensor.
-\item \code{y}: class index or segmentation mask. For \code{"binary-category"}: 1 = Cat, 2 = Dog.
-\item \code{class_name}: (if applicable) class label as a string. For \code{"binary-category"}: "Cat" or "Dog".
+A dataset object of class \code{oxfordiiitpet_dataset}, where each indexed item returns a named list:
+\describe{
+\item{\code{x}}{An image tensor of shape (3, H, W).}
+\item{\code{y}}{The label — an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
 }
 }
 \description{
@@ -42,25 +44,28 @@ Oxford-IIIT Pet Dataset
 \details{
 Loads the Oxford-IIIT Pet Dataset, which contains images of 37 pet breeds (cats and dogs),
 each annotated with a class label and optional segmentation mask.
-Supports category labels, binary-category labels (cat/dog), and pixel-level segmentation maps.
-Dataset is automatically split into train and test subsets.
+Supports three types of targets: class category labels, binary-category labels (Cat vs Dog),
+and pixel-level segmentation masks.
+
+The dataset is automatically split into \code{"train"} and \code{"test"} subsets based on the official annotation files.
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-# Load with category labels
-oxford <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, download = TRUE)
-first_item <- oxford[1]
-# image tensor of first item
-first_item$x
-# class index or segmentation mask
-first_item$y
-# class name (if applicable)
-first_item$class_name
+# Load training data with class indices
+ds <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
+item <- ds[1]
+item$x  # image tensor
+item$y  # class index
 
-# Load with binary category labels (Cat/Dog)
-oxford_binary <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, 
-                                       target_type = "binary-category")
+# Load binary-category labels: 1 = Cat, 2 = Dog
+ds_bin <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, target_type = "binary-category")
+
+# Load segmentation masks
+ds_seg <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, target_type = "segmentation")
+
+# Use custom collate function for variable image sizes
+dl <- dataloader(ds, batch_size = 4, collate_fn = collate_fn_variable_size)
+batch <- dataloader_next(dataloader_make_iter(dl))
 }
 
 }
