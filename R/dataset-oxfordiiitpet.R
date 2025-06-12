@@ -66,7 +66,8 @@ oxfordiiitpet_dataset <- dataset(
     self$target_type <- target_type
 
     if (download)
-      rlang::inform("Downloading the Oxford-IIIT Pet Dataset...\n")
+      rlang::inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
+      rlang::inform("Downloading and preparing the Oxford-IIIT Pet dataset...")
       self$download()
 
     if (!self$check_exists())
@@ -102,7 +103,7 @@ oxfordiiitpet_dataset <- dataset(
       utils::untar(destpath, exdir = self$raw_folder)  # Ensures 'annotations' folder is inside self$raw_folder
     }
 
-    rlang::inform("Processing Oxford-IIIT Pet dataset...")
+    rlang::inform("Preparing image paths and labels from annotations...")
 
     for (split in c("trainval", "test")) {
       ann_file <- file.path(self$raw_folder, "annotations", paste0(split, ".txt"))
@@ -137,9 +138,10 @@ oxfordiiitpet_dataset <- dataset(
         labels = labels,
         class_to_idx = class_to_idx
       ), file.path(self$processed_folder, paste0(split, ".rds")))
+      rlang::inform(glue::glue("Loaded {length(labels)} samples for split: {split}"))
     }
 
-    rlang::inform("Processed Oxford-IIIT Pet dataset Successfully!")
+    rlang::inform("Oxford-IIIT Pet dataset downloaded and processed successfully.")
   },
   check_exists = function() {
     fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
