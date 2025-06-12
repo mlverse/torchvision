@@ -73,6 +73,7 @@ oxfordiiitpet_dataset <- dataset(
     self$image_paths <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
+    self$classes <- names(self$class_to_idx)
   },
   download = function() {
     if (self$check_exists())
@@ -148,32 +149,23 @@ oxfordiiitpet_dataset <- dataset(
     img <- torchvision::transform_to_tensor(magick::image_read(self$image_paths[index]))
 
     if (!is.null(self$transform))
-        img <- self$transform(img)
+      img <- self$transform(img)
 
     label <- self$labels[index]
 
     if (!is.null(self$target_transform))
-        label <- self$target_transform(label)
-
-    if (self$target_type == "segmentation") {
-        class_name <- NA
-    } else if (self$target_type == "binary-category") {
-        original_class_name <- names(self$class_to_idx)[self$labels[index]]
-        
-        if (substr(original_class_name, 1, 1) == toupper(substr(original_class_name, 1, 1))) {
-            label <- 1
-            class_name <- "Cat"
-        } else {
-            label <- 2
-            class_name <- "Dog"
-        }
-    } else {
-        class_name <- tools::toTitleCase(names(self$class_to_idx)[label])
+      label <- self$target_transform(label)
+    if (self$target_type == "binary-category") {
+      original_class <- names(self$class_to_idx)[self$labels[index]]
+      if (substr(original_class, 1, 1) == toupper(substr(original_class, 1, 1))) {
+        label <- 1  # Cat
+      } else {
+        label <- 2  # Dog
+      }
     }
 
-    list(x = img, y = label, class_name = class_name)
+    list(x = img, y = label)
   },
-
   .length = function() {
     length(self$image_paths)
   },
