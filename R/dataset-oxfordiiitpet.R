@@ -88,58 +88,56 @@ oxfordiiitpet_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    for (r in self$resources) {
+    lapply(self$resources, function(r) {
       url <- r[1]
       md5 <- r[2]
       filename <- basename(url)
       destpath <- file.path(self$raw_folder, filename)
-
+      rlang::inform(glue::glue("→ Downloading: {url}"))
       p <- download_and_cache(url, prefix = class(self)[1])
       fs::file_copy(p, destpath, overwrite = TRUE)
-
-      if (!tools::md5sum(destpath) == md5)
-        runtime_error(paste("MD5 mismatch for:", url))
-
-      utils::untar(destpath, exdir = self$raw_folder)  # Ensures 'annotations' folder is inside self$raw_folder
-    }
-
+      actual_md5 <- unname(tools::md5sum(destpath))
+      if (!identical(actual_md5, md5)) {
+        runtime_error(glue::glue("✗ MD5 mismatch for {url}\nExpected: {md5}\nFound:    {actual_md5}"))
+      }
+      rlang::inform(glue::glue("✓ Extracting {filename}..."))
+      utils::untar(destpath, exdir = self$raw_folder)
+    })
     rlang::inform("Preparing image paths and labels from annotations...")
 
-    for (split in c("trainval", "test")) {
-      ann_file <- file.path(self$raw_folder, "annotations", paste0(split, ".txt"))
+    lapply(c("trainval", "test"), function(split) {
+      ann_file <- file.path(self$raw_folder, "annotations", glue::glue("{split}.txt"))
       lines <- readLines(ann_file)
-
-      image_paths <- character()
-      labels <- integer()
-      raw_classes <- character()
-
-      for (line in lines) {
-        parts <- strsplit(line, " ")[[1]]
-        img_id <- parts[1]
-        label <- as.integer(parts[2])
-        bin_label <- as.integer(parts[3])
-
-        seg_path <- file.path(self$raw_folder, "annotations", "trimaps", paste0(img_id, ".png"))
-        if (!file.exists(seg_path)) {
-          warning("Missing segmentation file: ", seg_path)
-        }
-        image_paths <- c(image_paths, seg_path)
-        labels <- c(labels, NA)
-
-        raw_classes <- c(raw_classes, sub("_\\d+$", "", img_id))
+      parts <- strsplit(lines, " ")
+      img_ids <- vapply(parts, `[[`, character(1), 1)
+      labels <- vapply(parts, function(x) as.integer(x[2]), integer(1))
+      bin_labels <- vapply(parts, function(x) as.integer(x[3]), integer(1))
+      img_paths <- file.path(self$raw_folder, "images", glue::glue("{img_ids}.jpg"))
+      seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{img_ids}.png"))
+      valid <- file.exists(img_paths) & file.exists(seg_paths)
+      if (any(!valid)) {
+        rlang::warn(glue::glue("Some files are missing in {split} split and will be skipped."))
+        invisible(lapply(img_ids[!valid], function(id) {
+          rlang::warn(glue::glue("  ✗ Missing files for: {id}"))
+        }))
       }
-
+      image_paths <- img_paths[valid]
+      labels <- labels[valid]
+      raw_classes <- sub("_\\d+$", "", img_ids[valid])
       class_names <- unique(raw_classes)
-      class_names <- sapply(class_names, function(x) gsub("_", " ", x))
+      class_names <- gsub("_", " ", class_names, fixed = TRUE)
       class_to_idx <- setNames(seq_along(class_names), class_names)
+      saveRDS(
+        list(
+          image_paths = image_paths,
+          labels = labels,
+          class_to_idx = class_to_idx
+        ),
+        file.path(self$processed_folder, glue::glue("{split}.rds"))
+      )
+      rlang::inform(glue::glue("Loaded {length(labels)} valid samples for split: '{split}'"))
+    })
 
-      saveRDS(list(
-        image_paths = image_paths,
-        labels = labels,
-        class_to_idx = class_to_idx
-      ), file.path(self$processed_folder, paste0(split, ".rds")))
-      rlang::inform(glue::glue("Loaded {length(labels)} samples for split: {split}"))
-    }
 
     rlang::inform("Oxford-IIIT Pet dataset downloaded and processed successfully.")
   },
@@ -154,7 +152,7 @@ oxfordiiitpet_dataset <- dataset(
       img <- self$transform(img)
     if (self$target_type == "segmentation") {
       mask <- magick::image_read(self$image_paths[index])
-      mask_tensor <- torchvision::transform_to_tensor(mask)[1, , ]  # Trimap is single-channel
+      mask_tensor <- torchvision::transform_to_tensor(mask)[1, , ]
       label <- mask_tensor
     } else if (self$target_type == "binary-category") {
       label_index <- self$labels[index]
