@@ -1,20 +1,20 @@
-test_that("coco_detection_dataset handles missing files gracefully", {
+test_that("dataset_coco_detection$new handles missing files gracefully", {
   tmp <- tempfile()
 
   expect_error(
-    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    dataset_coco_detection$new(root = tmp, train = TRUE, year = "2017", download = FALSE),
     class = "rlang_error"
   )
 })
 
-test_that("coco_detection_dataset loads correctly", {
+test_that("dataset_coco_detection$new loads correctly", {
   skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
 
   tmp <- tempfile()
 
-  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
+  ds <- dataset_coco_detection$new(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
-  expect_s3_class(ds, "coco_detection_dataset")
+  expect_s3_class(ds, "dataset_coco_detection$new")
   expect_gt(length(ds), 0)
 
   el <- ds[1]
@@ -41,16 +41,16 @@ test_that("coco_detection_dataset loads correctly", {
   expect_true(is.numeric(target$iscrowd))
 })
 
-test_that("coco_detection_dataset parameter validation", {
+test_that("dataset_coco_detection$new parameter validation", {
   tmp <- tempfile()
 
   expect_error(
-    coco_detection_dataset(root = tmp, year = "2020"),
+    dataset_coco_detection$new(root = tmp, year = "2020"),
     "should be one of"
   )
 
   expect_error(
-    coco_detection_dataset(root = tmp, year = "2017", download = FALSE),
+    dataset_coco_detection$new(root = tmp, year = "2017", download = FALSE),
     class = "rlang_error"
   )
 })
