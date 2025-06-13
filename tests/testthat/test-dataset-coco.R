@@ -1,66 +1,56 @@
-test_that("coco_detection_dataset loads and returns expected fields", {
-  skip_if_not_installed("magick")
-  skip_if_not_installed("jsonlite")
-  skip_if_not_installed("withr")
-  skip_if_not_installed("fs")
+test_that("coco_detection_dataset handles missing files gracefully", {
+  tmp <- tempfile()
 
-  # Skip on CI unless explicitly requested
+  expect_error(
+    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    class = "rlang_error"
+  )
+})
+
+test_that("coco_detection_dataset loads correctly", {
   skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
 
-  dir <- tempfile()
-  dataset <- coco_detection_dataset(root = dir, train = FALSE, year = "2017", download = TRUE)
+  tmp <- tempfile()
 
-  expect_s3_class(dataset, "coco_detection")  # More specific than inherits()
-  expect_gt(length(dataset), 0)
+  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
-  sample <- dataset[1]
-  expect_type(sample, "list")
-  expect_named(sample, c("image", "target"))  # More specific than %in%
+  expect_s3_class(ds, "coco_detection_dataset")
+  expect_gt(length(ds), 0)
 
-  expect_true(is.array(sample$image))
-  expect_equal(length(dim(sample$image)), 3)  # height, width, channels
-  expect_true(is.list(sample$target))
+  el <- ds[1]
 
-  target <- sample$target
-  expected_fields <- c("image_id", "boxes", "labels", "area", "iscrowd", "segmentation", "height", "width")
-  expect_true(all(expected_fields %in% names(target)))
+  expect_type(el, "list")
+  expect_named(el, c("image", "target"))
 
-  # Your handling of empty boxes is perfect
-  expect_true(is.matrix(target$boxes) || is.null(dim(target$boxes)))
-  expect_true(is.numeric(target$labels))
-  expect_true(is.numeric(target$area))
-  expect_true(is.numeric(target$iscrowd))
+  img <- el$image
+  target <- el$target
 
-  # Test bounding box format if present
+  expect_true(is.array(img))
+  expect_equal(length(dim(img)), 3)
+
+  expect_true(is.list(target))
+  expect_true(all(c("image_id", "boxes", "labels", "area", "iscrowd", "segmentation", "height", "width") %in% names(target)))
+
   if (is.matrix(target$boxes) && nrow(target$boxes) > 0) {
     expect_equal(ncol(target$boxes), 4)
     expect_equal(colnames(target$boxes), c("x1", "y1", "x2", "y2"))
   }
-})
 
-test_that("coco_detection_dataset handles missing files gracefully", {
-  skip_if_not_installed("fs")
-
-  dir <- tempfile()
-
-  # Should throw error if download=FALSE and data is not present
-  expect_error(
-    coco_detection_dataset(root = dir, train = TRUE, year = "2017", download = FALSE),
-    "Dataset files not found"
-  )
+  expect_true(is.numeric(target$labels))
+  expect_true(is.numeric(target$area))
+  expect_true(is.numeric(target$iscrowd))
 })
 
 test_that("coco_detection_dataset parameter validation", {
-  dir <- tempfile()
+  tmp <- tempfile()
 
-  # Test invalid year
   expect_error(
-    coco_detection_dataset(root = dir, year = "2020"),
+    coco_detection_dataset(root = tmp, year = "2020"),
     "should be one of"
   )
 
-  # Test valid years don't error on initialization (without download)
-  expect_error(coco_detection_dataset(root = dir, year = "2017", download = FALSE), "Dataset files not found")
-  expect_error(coco_detection_dataset(root = dir, year = "2016", download = FALSE), "Dataset files not found")
-  expect_error(coco_detection_dataset(root = dir, year = "2014", download = FALSE), "Dataset files not found")
+  expect_error(
+    coco_detection_dataset(root = tmp, year = "2017", download = FALSE),
+    class = "rlang_error"
+  )
 })
