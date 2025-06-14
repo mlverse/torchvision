@@ -16,7 +16,7 @@
 #' @param annotation_level Character. Level of annotation to use for classification. Default is `"variant"`.
 #' One of `"variant"`, `"family"`, or `"manufacturer"`. See *Details*.
 #'
-#' @param transform Optional function to transform input images after loading.
+#' @param transform Optional function to transform input images after loading. Default is [transform_to_tensor()].
 #' @param target_transform Optional function to transform labels.
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
