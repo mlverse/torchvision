@@ -26,7 +26,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
     ys <- torch::torch_tensor(sapply(batch, function(item) item$y), dtype = torch::torch_long())
     list(x = xs, y = ys)
   }
-  dl <- torch::dataloader(dataset = fgvc,batch_size = 2,shuffle = TRUE,collate_fn = resize_collate_fn)
+  dl <- torch::dataloader(dataset = fgvc,batch_size = 2,collate_fn = resize_collate_fn)
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
   expect_named(batch, c("x", "y"))
@@ -35,6 +35,8 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_tensor_dtype(batch$x,torch_float())
   expect_equal(dim(batch$x)[1], 2)
   expect_length(batch$y, 2)
+  expect_equal_to_r(batch$y[1],1)
+  expect_equal_to_r(batch$y[2],1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "variant")
   expect_equal(length(fgvc), 3333)
