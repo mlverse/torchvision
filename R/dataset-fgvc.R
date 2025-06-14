@@ -39,14 +39,24 @@
 #'
 #' @examples
 #' \dontrun{
-#' fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE)
-#' first_item <- fgvc[1]
-#' # image tensor of first item
-#' first_item$x
-#' # label of first item
-#' first_item$y
+#' fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE )
+#'
+#' # Define a custom collate function to resize images in the batch
+#' resize_collate_fn <- function(batch) {
+#'   xs <- lapply(batch, function(sample) {
+#'     torchvision::transform_resize(sample$x, c(768, 1024))
+#'   })
+#'   xs <- torch::torch_stack(xs)
+#'   ys <- torch::torch_tensor(sapply(batch, function(sample) sample$y), dtype = torch::torch_long())
+#'   list(x = xs, y = ys)
 #' }
-#' 
+#'
+#' dl <- torch::dataloader( dataset = fgvc, batch_size = 2, shuffle = TRUE, collate_fn = resize_collate_fn )
+#' batch <- dataloader_next(dataloader_make_iter(dl))
+#' batch$x  # batched image tensors resized to 768x1024
+#' batch$y  # class labels
+#' }
+#'
 #' @name fgvc_aircraft_dataset
 #' @aliases fgvc_aircraft_dataset
 #' @title FGVC Aircraft dataset
