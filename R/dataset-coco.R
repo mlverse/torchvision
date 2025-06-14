@@ -1,3 +1,5 @@
+# Fixing the COCO detection dataset based on mentor comments
+
 #' COCO Detection Dataset
 #'
 #' Loads MS COCO Dataset for object detection and segmentation.
@@ -8,8 +10,11 @@
 #' @param download If TRUE, downloads the dataset if needed.
 #' @param transforms Transform applied to image.
 #' @param target_transform Transform applied to target.
+#'
+#' The returned image is in CHW format (channels, height, width), matching torch convention.
+#'
 #' @export
-dataset_coco_detection <- torch::dataset(
+coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
 
   initialize = function(root, train = TRUE, year = c("2017", "2016", "2014"),
@@ -22,11 +27,14 @@ dataset_coco_detection <- torch::dataset(
     self$root <- root
     self$year <- year
     self$split <- split
+
     self$transforms <- transforms
     self$target_transform <- target_transform
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
-    self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{ifelse(year == '2016', '2014', year)}"))
+
+    image_year <- if (year == "2016") "2014" else year
+    self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{image_year}"))
     self$ann_file <- fs::path(self$data_dir, "annotations",
                               glue::glue("instances_{split}{year}.json"))
 
@@ -39,14 +47,17 @@ dataset_coco_detection <- torch::dataset(
     self$load_annotations()
   },
 
+  check_files = function() {
+    fs::file_exists(self$ann_file) && fs::dir_exists(self$image_dir)
+  },
+
   .getitem = function(index) {
     image_id <- self$image_ids[index]
     info <- self$images[[as.character(image_id)]]
 
     img_path <- fs::path(self$image_dir, info$file_name)
-    img <- magick::image_read(img_path)
-    img_arr <- as.array(magick::image_data(img, "rgb"))
-    img_arr <- aperm(img_arr, c(3, 2, 1))  # [H, W, C]
+    img_arr <- jpeg::readJPEG(img_path)
+    img_arr <- aperm(img_arr, c(3, 2, 1))  # CHW format
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -138,7 +149,6 @@ dataset_coco_detection <- torch::dataset(
     self$categories <- json_data$categories
     self$category_names <- setNames(self$categories$name, self$categories$id)
 
-    # Only keep images that exist
     ids <- as.numeric(names(self$images))
     image_files <- fs::path(self$image_dir,
                             sapply(ids, function(id) self$images[[as.character(id)]]$file_name))
