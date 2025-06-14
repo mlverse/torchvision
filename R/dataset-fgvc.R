@@ -11,25 +11,24 @@
 #' - `"trainval"`: combined training and validation set
 #' - `"test"`: test set with labels (used for evaluation)
 #'
-#' These splits are provided directly in the dataset archive. No manual splitting is performed.
-#'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/fgvc-aircraft-2013b`.
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Default is `"train"`.
-#' @param annotation_level Character. Level of annotation to use for classification.
-#' One of:
-#' - `"variant"`: the most fine-grained level, e.g., `"Boeing 737-700"`. There are 100 visually distinguishable aircraft variants.
-#' - `"family"`: a mid-level grouping, e.g., `"Boeing 737"`, which includes multiple variants. There are 70 distinct families.
-#' - `"manufacturer"`: the coarsest level, e.g., `"Boeing"`, grouping multiple families under a single aircraft manufacturer. There are 30 manufacturers.
+#' @param annotation_level Character. Level of annotation to use for classification. Default is `"variant"`.
+#' One of `"variant"`, `"family"`, or `"manufacturer"`. See *Details*.
 #'
-#' Note: These levels form a strict hierarchy: 
-#' each `"manufacturer"` consists of multiple `"families"`, and each `"family"` contains several `"variants"`. 
-#' Not all combinations of levels are valid — for example, a `"variant"` always belongs to exactly one `"family"`, 
-#' and a `"family"` always belongs to exactly one `"manufacturer"`. You cannot mix or arbitrarily combine levels.
-#'
-#' Default is `"variant"`.
 #' @param transform Optional function to transform input images after loading.
 #' @param target_transform Optional function to transform labels.
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
+#'
+#' @details
+#' The `annotation_level` determines the granularity of labels used for classification and supports three values:
+#'
+#' - `"variant"`: the most fine-grained level, e.g., `"Boeing 737-700"`. There are 100 visually distinguishable variants.
+#' - `"family"`: a mid-level grouping, e.g., `"Boeing 737"`, which includes multiple variants. There are 70 distinct families.
+#' - `"manufacturer"`: the coarsest level, e.g., `"Boeing"`, grouping multiple families under a single manufacturer. There are 30 manufacturers.
+#'
+#' These levels form a strict hierarchy: each `"manufacturer"` consists of multiple `"families"`, and each `"family"` contains several `"variants"`.
+#' Not all combinations of levels are valid — for example, a `"variant"` always belongs to exactly one `"family"`, and a `"family"` to exactly one `"manufacturer"`.
 #'
 #' @return An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 #' Each element is a named list with:

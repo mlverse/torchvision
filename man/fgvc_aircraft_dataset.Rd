@@ -18,20 +18,8 @@ fgvc_aircraft_dataset(
 
 \item{split}{Character. One of \code{"train"}, \code{"val"}, \code{"trainval"}, or \code{"test"}. Default is \code{"train"}.}
 
-\item{annotation_level}{Character. Level of annotation to use for classification.
-One of:
-\itemize{
-\item \code{"variant"}: the most fine-grained level, e.g., \code{"Boeing 737-700"}. There are 100 visually distinguishable aircraft variants.
-\item \code{"family"}: a mid-level grouping, e.g., \code{"Boeing 737"}, which includes multiple variants. There are 70 distinct families.
-\item \code{"manufacturer"}: the coarsest level, e.g., \code{"Boeing"}, grouping multiple families under a single aircraft manufacturer. There are 30 manufacturers.
-}
-
-Note: These levels form a strict hierarchy:
-each \code{"manufacturer"} consists of multiple \code{"families"}, and each \code{"family"} contains several \code{"variants"}.
-Not all combinations of levels are valid — for example, a \code{"variant"} always belongs to exactly one \code{"family"},
-and a \code{"family"} always belongs to exactly one \code{"manufacturer"}. You cannot mix or arbitrarily combine levels.
-
-Default is \code{"variant"}.}
+\item{annotation_level}{Character. Level of annotation to use for classification. Default is \code{"variant"}.
+One of \code{"variant"}, \code{"family"}, or \code{"manufacturer"}. See \emph{Details}.}
 
 \item{transform}{Optional function to transform input images after loading.}
 
@@ -68,7 +56,15 @@ The FGVC-Aircraft dataset supports the following official splits:
 \item \code{"test"}: test set with labels (used for evaluation)
 }
 
-These splits are provided directly in the dataset archive. No manual splitting is performed.
+The \code{annotation_level} determines the granularity of labels used for classification and supports three values:
+\itemize{
+\item \code{"variant"}: the most fine-grained level, e.g., \code{"Boeing 737-700"}. There are 100 visually distinguishable variants.
+\item \code{"family"}: a mid-level grouping, e.g., \code{"Boeing 737"}, which includes multiple variants. There are 70 distinct families.
+\item \code{"manufacturer"}: the coarsest level, e.g., \code{"Boeing"}, grouping multiple families under a single manufacturer. There are 30 manufacturers.
+}
+
+These levels form a strict hierarchy: each \code{"manufacturer"} consists of multiple \code{"families"}, and each \code{"family"} contains several \code{"variants"}.
+Not all combinations of levels are valid — for example, a \code{"variant"} always belongs to exactly one \code{"family"}, and a \code{"family"} to exactly one \code{"manufacturer"}.
 }
 \examples{
 \dontrun{
