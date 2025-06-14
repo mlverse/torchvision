@@ -17,11 +17,11 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 1)
 
   resize_collate_fn <- function(batch) {
-    xs <- lapply(batch, function(sample) {
-      torchvision::transform_resize(sample$x, c(224, 224))
+    xs <- lapply(batch, function(item) {
+      torchvision::transform_resize(item$x, c(224, 224))
     })
     xs <- torch::torch_stack(xs)
-    ys <- torch::torch_tensor(sapply(batch, function(sample) sample$y), dtype = torch::torch_long())
+    ys <- torch::torch_tensor(sapply(batch, function(item) item$y), dtype = torch::torch_long())
     list(x = xs, y = ys)
   }
   dl <- torch::dataloader(
