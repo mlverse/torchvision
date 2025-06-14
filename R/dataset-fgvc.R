@@ -100,9 +100,8 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- character()
     self$labels <- integer()
 
-    split_df <- read.fwf(label_file, widths = c(7, 100), colClasses = "character", stringsAsFactors = FALSE)
-    colnames(split_df) <- c("img_id", "class_name")
-    class_idxs <- self$class_to_idx[trimws(split_df$class_name)]
+    split_df <- read.fwf(label_file, widths = c(7, 100), colClasses = "character", stringsAsFactors = FALSE, col.names = c("img_id", "class_name"), strip.white = TRUE)
+    class_idxs <- self$class_to_idx[split_df$class_name]
     known_mask <- !vapply(class_idxs, is.null, logical(1))
     self$image_paths <- file.path(self$data_dir, "images",glue::glue("{split_df$img_id[known_mask]}.jpg", .envir = environment()))
     self$labels <- as.integer(unlist(class_idxs[known_mask]))
