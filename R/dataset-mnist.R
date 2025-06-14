@@ -448,9 +448,8 @@ emnist_dataset <- dataset(
   initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
     rlang::inform(glue::glue(
-      "Preparing to download EMNIST dataset.\n",
-      "- Size: ~0.5GB compressed\n",
-      "- Expected downloading time: ~6 minutes\n",
+      "Preparing to download EMNIST dataset. Archive size is ~0.5GB\n",
+      "You may have to increase the download timeout in your session with `options()` in case of failure\n",
       "- Will extract and convert for all {length(self$classes_list)} splits\n"
     ))
     split <- match.arg(split, choices = names(self$classes_list))
