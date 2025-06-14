@@ -32,7 +32,7 @@
 #'
 #' @return An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 #' Each element is a named list with:
-#' - `x`: the image as a 3D torch tensor (C x H x W), already converted using `transform_to_tensor()`, unlike most torchvision-style datasets where images are returned as PIL objects.
+#' - `x`: a torch tensor of the image with shape (C x H x W). Please note that images have varying sizes.
 #' - `y`: an integer class label corresponding to the selected `annotation_level`.
 #'
 #' The dataset supports standard dataset operations like indexing (`dataset[i]`) and length (`length(dataset)`).
