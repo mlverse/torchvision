@@ -142,8 +142,10 @@ coco_detection_dataset <- torch::dataset(
   load_annotations = function() {
     json_data <- jsonlite::fromJSON(self$ann_file)
 
-    self$images <- setNames(split(json_data$images, seq_len(nrow(json_data$images))),
-                            vapply(json_data$images, function(x) as.character(x$id), character(1)))
+    self$images <- setNames(
+      split(json_data$images, seq_len(nrow(json_data$images))),
+      as.character(json_data$images$id)
+    )
 
     self$annotations <- json_data$annotations
     self$categories <- json_data$categories
