@@ -21,7 +21,7 @@ fgvc_aircraft_dataset(
 \item{annotation_level}{Character. Level of annotation to use for classification. Default is \code{"variant"}.
 One of \code{"variant"}, \code{"family"}, or \code{"manufacturer"}. See \emph{Details}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{\link[=transform_to_tensor]{transform_to_tensor()}}.}
 
 \item{target_transform}{Optional function to transform labels.}
 
@@ -31,7 +31,7 @@ One of \code{"variant"}, \code{"family"}, or \code{"manufacturer"}. See \emph{De
 An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 Each element is a named list with:
 \itemize{
-\item \code{x}: the image as a 3D torch tensor (C x H x W), already converted using \code{transform_to_tensor()}, unlike most torchvision-style datasets where images are returned as PIL objects.
+\item \code{x}: a torch tensor of the image with shape (C x H x W). Please note that images have varying sizes.
 \item \code{y}: an integer class label corresponding to the selected \code{annotation_level}.
 }
 
@@ -68,12 +68,22 @@ Not all combinations of levels are valid — for example, a \code{"variant"} alw
 }
 \examples{
 \dontrun{
-fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE)
-first_item <- fgvc[1]
-# image tensor of first item
-first_item$x
-# label of first item
-first_item$y
+fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE )
+
+# Define a custom collate function to resize images in the batch
+resize_collate_fn <- function(batch) {
+  xs <- lapply(batch, function(sample) {
+    torchvision::transform_resize(sample$x, c(768, 1024))
+  })
+  xs <- torch::torch_stack(xs)
+  ys <- torch::torch_tensor(sapply(batch, function(sample) sample$y), dtype = torch::torch_long())
+  list(x = xs, y = ys)
+}
+
+dl <- torch::dataloader( dataset = fgvc, batch_size = 2, shuffle = TRUE, collate_fn = resize_collate_fn )
+batch <- dataloader_next(dataloader_make_iter(dl))
+batch$x  # batched image tensors resized to 768x1024
+batch$y  # class labels
 }
 
 }
