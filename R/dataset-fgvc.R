@@ -242,7 +242,10 @@ fgvc_aircraft_dataset <- dataset(
     fs::dir_create(self$root)
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
-    file <- download_and_cache(url)
+    file <- withr::with_options(
+      list(timeout = 6000),
+      download_and_cache(url)
+    )
 
     if (digest::digest(file, algo = "md5", file = TRUE) != md5) {
       fs::file_delete(file)
