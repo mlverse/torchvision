@@ -4,33 +4,32 @@
 #' (48x48) of human faces, each labeled with one of seven emotion categories:
 #' `"Angry"`, `"Disgust"`, `"Fear"`, `"Happy"`, `"Sad"`, `"Surprise"`, and `"Neutral"`.
 #'
-#' The dataset provides two splits: `"train"` and `"test"`.
-#' - `"train"`: training subset with labels.
-#' - `"test"`: test set without labels.
+#' The dataset is split into:
+#' - `"Train"`: training images labeled as `"Training"` in the original CSV.
+#' - `"Test"`: includes both `"PublicTest"` and `"PrivateTest"` entries.
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/fer2013`.
-#' @param train Logical. If TRUE, loads training set; else loads test set. Default is `"train"`
-#' @param transform Optional. A function to apply on input images. Default is `"NULL"`.
-#' @param target_transform Optional. A function to apply on labels. Default is `"NULL"`.
-#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
-#' 
-#' @return A torch-style dataset object. Each item is a list with:
-#' - `x`: 3D torch tensor (1x48x48)
-#' - `y`: character label (class name)
+#' @param train Logical. Whether to load the training split (`TRUE`) or test split (`FALSE`). Default is `TRUE`.
+#' @param transform Optional function to transform input images after loading. Each image is 48x48 by default.
+#' @param target_transform Optional function to transform emotion labels. Default is `NULL`.
+#' @param download Logical. Whether to download the dataset archive if not found locally. Default is `FALSE`.
+#'
+#' @return An object of class \code{fer_dataset}, which behaves like a torch dataset.
+#' Each element is a named list:
+#' - `x`: a 48x48 grayscale array
+#' - `y`: a character emotion label from the 7-class list
 #'
 #' @examples
 #' \dontrun{
-#' fer <- fer_dataset(download = TRUE)
+#' fer <- fer_dataset(train = TRUE, download = TRUE)
 #' first_item <- fer[1]
-#' # image tensor of item 1
-#' first_item$x
-#' # label name of item 1
-#' first_item$y
+#' first_item$x  # 48x48 grayscale array
+#' first_item$y  # "Happy", "Sad", etc.
 #' }
-#' 
+#'
 #' @name fer_dataset
 #' @aliases fer_dataset
-#' @title FER-2013 Emotion Recognition Dataset
+#' @title FER-2013 Facial Expression Dataset
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
@@ -46,18 +45,16 @@ fer_dataset <- dataset(
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
-    self$split <- if (train) "train" else "test"
+    self$split <- if (train) "Train" else "Test"
 
     self$folder_name <- "fer2013"
-    self$train_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/train.csv.zip"
-    self$test_url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/test.csv.zip"
-    self$train_md5 <- "e6c225af03577e6dcbb1c59a71d09905"
-    self$test_md5 <- "024ec789776ef0a390db67b1d7ae60a3"
+    self$url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz"
+    self$md5 <- "ca95d94fe42f6ce65aaae694d18c628a"
 
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split} split)..."))
+    rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split})..."))
 
     if (download) {
       self$download()
@@ -67,36 +64,42 @@ fer_dataset <- dataset(
       runtime_error("Dataset files missing. Use download = TRUE to fetch them.")
     }
 
-    data_file <- file.path(self$root, self$folder_name, glue::glue("{self$split}.csv"))
-    parsed <- read.csv(data_file, stringsAsFactors = FALSE)
+    csv_file <- file.path(self$root, self$folder_name, "fer2013.csv")
+    parsed <- read.csv(csv_file, stringsAsFactors = FALSE)
 
-    rlang::inform("Parsing image data into tensors (1x48x48 per sample)...")
+    if (self$train) {
+      parsed <- parsed[parsed$Usage == "Training", ]
+    } else {
+      parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
+    }
+
+    rlang::inform("Parsing image data into 48x48 grayscale arrays...")
     self$x <- lapply(parsed$pixels, function(pixels) {
-      vals <- as.integer(strsplit(pixels, " ")[[1]])
-      torch_tensor(vals, dtype = torch_uint8())$view(c(1, 48, 48))
+      as.integer(strsplit(pixels, " ")[[1]])
     })
 
     self$y <- self$classes[as.integer(parsed$emotion) + 1L]
 
-    file_size <- fs::file_info(data_file)$size
+    file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
     rlang::inform(glue::glue(
-      "FER-2013 ({self$split}) loaded: {length(self$x)} images (~{readable}), 48x48 grayscale, {length(self$classes)} classes."
+      "FER-2013 ({self$split}) loaded: {length(self$x)} images, 48x48 grayscale, {length(self$classes)} classes."
     ))
   },
 
   .getitem = function(i) {
-    x <- self$x[[i]]
+    raw_vec <- self$x[[i]]
+    x <- matrix(raw_vec, nrow = 48, ncol = 48, byrow = TRUE)
+    x <- array(x, dim = c(48, 48))
+
     y <- self$y[i]
 
-    if (!is.null(self$transform)) {
+    if (!is.null(self$transform))
       x <- self$transform(x)
-    }
 
-    if (!is.null(self$target_transform)) {
+    if (!is.null(self$target_transform))
       y <- self$target_transform(y)
-    }
 
     list(x = x, y = y)
   },
@@ -105,38 +108,28 @@ fer_dataset <- dataset(
     length(self$y)
   },
 
-  get_classes = function() {
-    self$classes
-  },
-
   download = function() {
     if (self$check_files()) {
-      rlang::inform(glue::glue("Dataset already exists for {self$split} split. Skipping download."))
+      rlang::inform("FER-2013 already exists. Skipping download.")
       return()
     }
 
-    dir <- file.path(self$root, self$folder_name)
-    fs::dir_create(dir)
+    dest_dir <- file.path(self$root, self$folder_name)
+    fs::dir_create(dest_dir)
 
-    rlang::inform(glue::glue("Downloading FER-2013 {self$split} split..."))
+    rlang::inform(glue::glue("Downloading FER-2013 dataset...(Size : ~96.4MB)"))
 
-    zipfile <- download_and_cache(
-      url = if (self$train) self$train_url else self$test_url
-    )
+    archive_path <- download_and_cache(self$url)
+    
+    if (!tools::md5sum(archive_path) == self$md5)
+      runtime_error("Corrupt file! Delete the file in {p} and try again.")
 
-    expected_md5 <- if (self$train) self$train_md5 else self$test_md5
-    actual_md5 <- tools::md5sum(zipfile)
-
-    if (actual_md5 != expected_md5) {
-      runtime_error("MD5 checksum mismatch. File may be corrupted.")
-    }
-
-    rlang::inform(glue::glue("Download complete. Extracting files to '{dir}'..."))
-    utils::unzip(zipfile, exdir = dir)
-    rlang::inform("Extraction complete. Proceeding to load data.")
+    rlang::inform("Extracting dataset...")
+    untar(archive_path, exdir = self$root)
+    rlang::inform("Extraction complete.")
   },
 
   check_files = function() {
-    file.exists(file.path(self$root, self$folder_name, glue::glue("{self$split}.csv")))
+    file.exists(file.path(self$root, self$folder_name, "fer2013.csv"))
   }
 )

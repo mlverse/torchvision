@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-fer.R
 \name{fer_dataset}
 \alias{fer_dataset}
-\title{FER-2013 Emotion Recognition Dataset}
+\title{FER-2013 Facial Expression Dataset}
 \usage{
 fer_dataset(
   root = tempdir(),
@@ -13,21 +13,22 @@ fer_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage.}
+\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/fer2013}.}
 
-\item{train}{Logical. If TRUE, loads training set; else loads test set.}
+\item{train}{Logical. Whether to load the training split (\code{TRUE}) or test split (\code{FALSE}). Default is \code{TRUE}.}
 
-\item{transform}{Optional. A function to apply on input images.}
+\item{transform}{Optional function to transform input images after loading. Each image is 48x48 by default.}
 
-\item{target_transform}{Optional. A function to apply on labels.}
+\item{target_transform}{Optional function to transform emotion labels. Default is \code{NULL}.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally.}
+\item{download}{Logical. Whether to download the dataset archive if not found locally. Default is \code{FALSE}.}
 }
 \value{
-A torch-style dataset object. Each item is a list with:
+An object of class \code{fer_dataset}, which behaves like a torch dataset.
+Each element is a named list:
 \itemize{
-\item \code{x}: 3D torch tensor (1x48x48)
-\item \code{y}: character label (class name, e.g., "Angry")
+\item \code{x}: a 48x48 grayscale array
+\item \code{y}: a character emotion label from the 7-class list
 }
 }
 \description{
@@ -38,20 +39,18 @@ Loads the FER-2013 dataset for facial expression recognition. The dataset contai
 (48x48) of human faces, each labeled with one of seven emotion categories:
 \code{"Angry"}, \code{"Disgust"}, \code{"Fear"}, \code{"Happy"}, \code{"Sad"}, \code{"Surprise"}, and \code{"Neutral"}.
 
-The dataset provides only two splits: \code{"train"} and \code{"test"}.
+The dataset is split into:
 \itemize{
-\item \code{"train"}: training subset
-\item \code{"test"}: test set with labels (used for evaluation)
+\item \code{"Train"}: training images labeled as \code{"Training"} in the original CSV.
+\item \code{"Test"}: includes both \code{"PublicTest"} and \code{"PrivateTest"} entries.
 }
 }
 \examples{
 \dontrun{
-fer <- fer_dataset(download = TRUE)
+fer <- fer_dataset(train = TRUE, download = TRUE)
 first_item <- fer[1]
-# image tensor of item 1
-first_item$x
-# label name of item 1
-first_item$y
+first_item$x  # 48x48 grayscale array
+first_item$y  # "Happy", "Sad", etc.
 }
 
 }
