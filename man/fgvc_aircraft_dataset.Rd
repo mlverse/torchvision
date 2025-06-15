@@ -73,11 +73,6 @@ When \code{annotation_level = "all"} is used, the \verb{$classes} field is a nam
 # Single-label classification
 fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE )
 
-# Multi-label classification
-fgvc_multi <- fgvc_aircraft_dataset( split = "train", annotation_level = "all", download = TRUE )
-item <- fgvc_multi[1]
-item$y  # Returns a named list with class indices, e.g., list(manufacturer = 5, family = 13, variant = 1)
-
 # Define a custom collate function to resize images in the batch
 resize_collate_fn <- function(batch) {
   xs <- lapply(batch, function(sample) {
@@ -92,6 +87,11 @@ dl <- torch::dataloader( dataset = fgvc, batch_size = 2, collate_fn = resize_col
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x  # batched image tensors resized to 768x1024
 batch$y  # class labels
+
+# Multi-label classification
+fgvc_multi <- fgvc_aircraft_dataset( split = "train", annotation_level = "all", download = TRUE )
+item <- fgvc_multi[1]
+item$y  # Returns a named list with class indices
 }
 
 }
