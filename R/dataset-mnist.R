@@ -28,7 +28,7 @@ mnist_dataset <- dataset(
   test_file = 'test.rds',
   classes = c('0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
              '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'),
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
+  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL,
                         download = FALSE) {
 
     self$root_path <- root
@@ -240,7 +240,7 @@ qmnist_dataset <- dataset(
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
 
-      p <- download_and_cache(r[1], prefix = paste0("qmnist-", self$split))
+      p <- download_and_cache(r[1], prefix = glue::glue("qmnist-{self$split}"))
       fs::file_copy(p, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
@@ -382,3 +382,205 @@ fashion_mnist_dataset <- dataset(
     "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
   )
 )
+
+#' EMNIST Dataset
+#'
+#' Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
+#' - "byclass": 62 classes (digits + uppercase + lowercase)
+#' - "bymerge": 47 classes (merged uppercase and lowercase letters)
+#' - "balanced": 47 classes balanced between digits and letters
+#' - "letters": 26 letter classes only
+#' - "digits": 10 digit classes only
+#' - "mnist": classic 10 digit classes like the original MNIST dataset
+#'
+#' @param root Character. Root directory for dataset storage (default folder: `root/emnist/processed/`).
+#' @param split Character. Dataset split to use. One of `"byclass"`, `"bymerge"`, `"balanced"`, `"letters"`, `"digits"`, or `"mnist"`. Default is `"balanced"`.
+#' @param download Logical. Whether to download the dataset if it is not found locally. Default is `FALSE`.
+#' @param transform Optional function to transform input images.
+#' @param target_transform Optional function to transform labels.
+#'
+#' @return An EMNIST dataset object.
+#'
+#' @examples
+#' \dontrun{
+#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
+#' first_item <- emnist[1]
+#' # image in item 1
+#' first_item$x
+#' # label of item 1
+#' first_item$y
+#' }
+#'
+#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
+#'
+#' @name emnist_dataset
+#' @aliases emnist_dataset
+#' @title EMNIST dataset
+#' @export
+emnist_dataset <- dataset(
+  name = "emnist_dataset",
+  resources = list(
+    c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
+  ),
+  training_file = function(split) glue::glue("training-{split}.rds"),
+  test_file = function(split) glue::glue("test-{split}.rds"),
+  classes_list = list(
+    byclass = c(
+      "0","1","2","3","4","5","6","7","8","9",
+      LETTERS,
+      letters[c(1:9,11,12,14,17,20)]
+    ),
+    bymerge = c(
+      "0","1","2","3","4","5","6","7","8","9",
+      LETTERS[1:26],
+      letters[c(1:4,6,7,10,13,16,19,21,22,24,25,26)]
+    ),
+    balanced = c(
+      "0","1","2","3","4","5","6","7","8","9",
+      LETTERS,
+      letters[c(1:9,11,12,14,17,20)]
+    ),
+    letters = letters,
+    digits = as.character(0:9),
+    mnist = as.character(0:9)
+  ),
+
+  initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
+                        download = FALSE) {
+    rlang::inform(glue::glue(
+      "Preparing to download EMNIST dataset. Archive size is ~0.5GB\n",
+      "You may have to increase the download timeout in your session with `options()` in case of failure\n",
+      "- Will extract and convert for all {length(self$classes_list)} splits\n"
+    ))
+    split <- match.arg(split, choices = names(self$classes_list))
+    self$split <- split
+    self$root_path <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+    self$classes <- self$classes_list[[split]]
+
+    if (download)
+      self$download()
+
+    if (!self$check_exists())
+      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+
+    file_to_load_train <- self$training_file(split)
+    file_to_load_test <- self$test_file(split)
+
+    training_data <- readRDS(file.path(self$processed_folder, file_to_load_train))
+    test_data <- readRDS(file.path(self$processed_folder, file_to_load_test))
+
+    self$data <- training_data[[1]]
+    self$targets <- training_data[[2]] + 1L
+    self$test_data <- test_data[[1]]
+    self$test_targets <- test_data[[2]] + 1L
+
+    self$is_train <- TRUE
+    rlang::inform("EMNIST dataset processed successfully!")
+  },
+
+  download = function() {
+    if (self$check_exists()) return(NULL)
+
+    fs::dir_create(self$raw_folder)
+    fs::dir_create(self$processed_folder)
+
+    url <- self$resources[[1]][1]
+    expected_md5 <- self$resources[[1]][2]
+    zip_path <- download_and_cache(url, prefix = class(self)[1])
+
+    actual_md5 <- digest::digest(file = zip_path, algo = "md5")
+    if (!identical(actual_md5, expected_md5))
+      runtime_error("Downloaded EMNIST archive has incorrect checksum.")
+
+    unzip_dir <- file.path(self$raw_folder, "unzipped")
+    fs::dir_create(unzip_dir)
+    unzip(zip_path, exdir = unzip_dir)
+
+    unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
+
+    process_split <- function(split_name) {
+      train_img <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-images-idx3-ubyte.gz"))
+      train_lbl <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-labels-idx1-ubyte.gz"))
+      test_img  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-images-idx3-ubyte.gz"))
+      test_lbl  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-labels-idx1-ubyte.gz"))
+
+      train_set <- list(read_sn3_pascalvincent(train_img),
+                        read_sn3_pascalvincent(train_lbl))
+      test_set <- list(read_sn3_pascalvincent(test_img),
+                       read_sn3_pascalvincent(test_lbl))
+
+      saveRDS(train_set, file.path(self$processed_folder, self$training_file(split_name)))
+      saveRDS(test_set, file.path(self$processed_folder, self$test_file(split_name)))
+    }
+
+    for (split_name in names(self$classes_list)) {
+      process_split(split_name)
+    }
+  },
+
+  check_exists = function() {
+    all(sapply(names(self$classes_list), function(split_name) {
+      fs::file_exists(file.path(self$processed_folder, self$training_file(split_name))) &&
+      fs::file_exists(file.path(self$processed_folder, self$test_file(split_name)))
+    }))
+  },
+
+  .getitem = function(index) {
+    data_set <- if (self$is_train) self$data else self$test_data
+    targets_set <- if (self$is_train) self$targets else self$test_targets
+
+    img <- data_set[index, , ]
+    target <- targets_set[index]
+
+    if (!is.null(self$transform))
+      img <- self$transform(img)
+
+    if (!is.null(self$target_transform))
+      target <- self$target_transform(target)
+
+    list(x = img, y = target)
+  },
+
+  .length = function() {
+    data_set <- if (self$is_train) self$data else self$test_data
+    dim(data_set)[1]
+  },
+
+  active = list(
+    raw_folder = function() {
+      file.path(self$root_path, "emnist", "raw")
+    },
+    processed_folder = function() {
+      file.path(self$root_path, "emnist", "processed")
+    }
+  ),
+
+  set_train = function(train = TRUE) {
+    self$is_train <- train
+    invisible(self)
+  }
+)
+
+read_sn3_pascalvincent <- function(path) {
+  x <- gzfile(path, open = "rb")
+  on.exit({close(x)})
+
+  magic <- readBin(x, endian = "big", what = integer(), n = 1)
+  n_dimensions <- magic %% 256
+  ty <- magic %/% 256
+
+  dim <- readBin(x, what = integer(), size = 4, endian = "big",
+          n = n_dimensions)
+
+  a <- readBin(
+    x,
+    what = "int", endian = "big", n = prod(dim),
+    size = 1, signed = FALSE
+  )
+
+  a <- array(a, dim = rev(dim))
+  a <- aperm(a, perm = rev(seq_along(dim)))
+  a
+}
