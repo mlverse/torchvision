@@ -33,6 +33,7 @@ Imports:
     rappdirs,
     utils,
     jpeg,
+    tiff,
     magrittr,
     png,
     abind,
