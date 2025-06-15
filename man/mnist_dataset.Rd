@@ -5,7 +5,7 @@
 \title{MNIST dataset}
 \usage{
 mnist_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
