@@ -6,6 +6,7 @@
 - add message translation in french (#112, @cregouby)
 - Added support for the Fashion-MNIST dataset. (#148, @koshtiakanksha)
 - Added support for the MS COCO Captions dataset. (#141, @koshtiakanksha)
+- Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
