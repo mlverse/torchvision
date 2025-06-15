@@ -1,5 +1,5 @@
 
-IMG_EXTENSIONS <-  c('jpg', 'jpeg', 'png') # 'ppm', 'bmp', 'pgm', 'tif', 'tiff', 'webp'
+IMG_EXTENSIONS <-  c('jpg', 'jpeg', 'png', 'tif', 'tiff') # 'ppm', 'bmp', 'pgm', 'webp'
 
 has_file_allowed_extension <- function(filename, extensions) {
   tolower(fs::path_ext(filename)) %in% tolower(extensions )
@@ -120,7 +120,7 @@ magick_loader <- function(path) {
 
 #' Base loader
 #'
-#' Loads an image using `jpeg`, or `png` packages depending on the
+#' Loads an image using `jpeg`, `png` or `tiff` packages depending on the
 #' file extension.
 #'
 #' @param path path to the image to load from
@@ -134,6 +134,8 @@ base_loader <- function(path) {
     img <- jpeg::readJPEG(path)
   else if (ext %in% c("png"))
     img <- png::readPNG(path)
+  else if (ext %in% c("tif", "tiff"))
+    img <- tiff::readTIFF(path)
   else
     runtime_error("unknown extension {ext} in path {path}")
 
