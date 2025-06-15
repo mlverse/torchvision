@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-23 09:42+0200\n"
+"POT-Creation-Date: 2025-02-09 20:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,8 +34,36 @@ msgstr ""
 msgid "Corrupt file! Delete the file in {p} and try again."
 msgstr ""
 
-#: dataset-mnist.R:44
+#: dataset-eurosat.R:46
+msgid "Invalid split. Must be one of 'train', 'val', or 'test'."
+msgstr ""
+
+#: dataset-eurosat.R:58 dataset-mnist.R:44
 msgid "Dataset not found. You can use `download = TRUE` to download it."
+msgstr ""
+
+#: dataset-eurosat.R:78
+msgid "Extracting archive..."
+msgstr ""
+
+#: dataset-eurosat.R:80
+msgid "Extraction complete."
+msgstr ""
+
+#: dataset-eurosat.R:84
+msgid "Downloading split text file:"
+msgstr ""
+
+#: dataset-eurosat.R:88
+msgid "Downloaded split file `{self$split_file}` is empty."
+msgstr ""
+
+#: dataset-eurosat.R:102
+msgid "Image file `{filename}` not found."
+msgstr ""
+
+#: dataset-eurosat.R:118
+msgid "Label `{label}` not found in class_to_idx."
 msgstr ""
 
 #: dataset-mnist.R:71
@@ -67,20 +95,52 @@ msgstr ""
 msgid "unknown extension {ext} in path {path}"
 msgstr ""
 
-#: models-efficientnet.R:29 models-resnet.R:34
-msgid "basic_block only supports groups=1 and base_width=64"
+#: model-detection-anchor-utils.R:83 model-detection-anchor-utils.R:83
+msgid "cell_anchors should not be NULL"
 msgstr ""
 
-#: models-efficientnet.R:32 models-resnet.R:37
-msgid "Dilation > 1 not supported in basic_block"
+#: model-detection-anchor-utils.R:86 model-detection-anchor-utils.R:86
+msgid "Anchors should be Tuple[Tuple[int]] because each feature"
 msgstr ""
 
-#: models-efficientnet.R:140 models-resnet.R:145
-msgid "replace_stride_with_dilation should be NULL"
+#: model-detection-anchor-utils.R:87 model-detection-anchor-utils.R:87
+msgid "map could potentially have different sizes and aspect ratios."
 msgstr ""
 
-#: models-efficientnet.R:141 models-resnet.R:146
-msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
+#: model-detection-anchor-utils.R:88 model-detection-anchor-utils.R:88
+msgid "There needs to be a match between the number of"
+msgstr ""
+
+#: model-detection-anchor-utils.R:89 model-detection-anchor-utils.R:89
+msgid "feature maps passed and the number of sizes / aspect ratios specified."
+msgstr ""
+
+#: model-detection-anchor-utils.R:162 model-detection-anchor-utils.R:162
+msgid "aspect_ratios and steps should have the same length"
+msgstr ""
+
+#: model-detection-anchor-utils.R:250
+msgid "{self.__class__.__name__}("
+msgstr ""
+
+#: model-detection-anchor-utils.R:251
+msgid "aspect_ratios = {self$aspect_ratios}"
+msgstr ""
+
+#: model-detection-anchor-utils.R:252
+msgid ", clip = {self$clip}"
+msgstr ""
+
+#: model-detection-anchor-utils.R:253
+msgid ", scales = {self$scales}"
+msgstr ""
+
+#: model-detection-anchor-utils.R:254
+msgid ", steps = {self$steps}"
+msgstr ""
+
+#: model-detection-anchor-utils.R:255
+msgid ")"
 msgstr ""
 
 #: models-inception.R:16
@@ -111,6 +171,22 @@ msgstr ""
 
 #: models-mobilenetv2.R:59
 msgid "or a 4-element list, got {inverted_residual_setting}"
+msgstr ""
+
+#: models-resnet.R:34
+msgid "basic_block only supports groups=1 and base_width=64"
+msgstr ""
+
+#: models-resnet.R:37
+msgid "Dilation > 1 not supported in basic_block"
+msgstr ""
+
+#: models-resnet.R:145
+msgid "replace_stride_with_dilation should be NULL"
+msgstr ""
+
+#: models-resnet.R:146
+msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
 msgstr ""
 
 #: tiny-imagenet-dataset.R:43
@@ -251,16 +327,20 @@ msgstr ""
 msgid "gamma must be non-negative"
 msgstr ""
 
-#: vision_utils.R:115
+#: vision_utils.R:105 vision_utils.R:204 vision_utils.R:276
+msgid "magick"
+msgstr ""
+
+#: vision_utils.R:117
 msgid "boxes doesn't contain any box. No box was drawn"
 msgstr ""
 
-#: vision_utils.R:120
+#: vision_utils.R:122
 msgid ""
 "Number of labels {length(labels)} cannot be broadcasted on number of boxes "
 "{num_boxes}"
 msgstr ""
 
-#: vision_utils.R:214
+#: vision_utils.R:217
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr ""
