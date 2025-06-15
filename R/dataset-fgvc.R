@@ -46,7 +46,7 @@
 #'   list(x = xs, y = ys)
 #' }
 #'
-#' dl <- torch::dataloader( dataset = fgvc, batch_size = 2, shuffle = TRUE, collate_fn = resize_collate_fn )
+#' dl <- torch::dataloader( dataset = fgvc, batch_size = 2, collate_fn = resize_collate_fn )
 #' batch <- dataloader_next(dataloader_make_iter(dl))
 #' batch$x  # batched image tensors resized to 768x1024
 #' batch$y  # class labels
