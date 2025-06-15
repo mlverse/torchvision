@@ -41,13 +41,13 @@ coco_detection_dataset <- torch::dataset(
     if (download)
       self$download()
 
-    if (!self$check_files())
-      rlang::abort("Dataset files not found. Use download = TRUE to fetch them.")
+    if (!self$check_exists())
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     self$load_annotations()
   },
 
-  check_files = function() {
+  check_exists = function() {
     fs::file_exists(self$ann_file) && fs::dir_exists(self$image_dir)
   },
 
