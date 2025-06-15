@@ -79,9 +79,9 @@ test_that("fashion_mnist_dataset loads correctly", {
 
 test_that("tests for the emnist dataset", {
   skip_on_cran()
-  
+
   dir <- tempdir()
-  
+
   emnist <- emnist_dataset(dir, split = "balanced", download = TRUE)
   expect_equal(length(emnist), 112800)
   first_item <- emnist[1]
@@ -142,7 +142,8 @@ test_that("tests for the qmnist dataset", {
   dir <- tempfile(fileext = "/")
 
   expect_error(
-      ds <- qmnist_dataset(dir, what = subset)
+      ds <- qmnist_dataset(dir, split = "nist"),
+      "Dataset not found."
   )
 
   splits <- c("train", "test", "nist")

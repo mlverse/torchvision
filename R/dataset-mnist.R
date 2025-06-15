@@ -240,7 +240,7 @@ qmnist_dataset <- dataset(
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
 
-      p <- download_and_cache(r[1], prefix = as.character(glue::glue("qmnist-{self$split}")))
+      p <- download_and_cache(r[1], prefix = glue::glue("qmnist-{self$split}"))
       fs::file_copy(p, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
@@ -422,8 +422,8 @@ emnist_dataset <- dataset(
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
-  training_file = function(split) as.character(glue::glue("training-{split}.rds")),
-  test_file = function(split) as.character(glue::glue("test-{split}.rds")),
+  training_file = function(split) glue::glue("training-{split}.rds"),
+  test_file = function(split) glue::glue("test-{split}.rds"),
   classes_list = list(
     byclass = c(
       "0","1","2","3","4","5","6","7","8","9",
@@ -485,7 +485,7 @@ emnist_dataset <- dataset(
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
-    
+
     url <- self$resources[[1]][1]
     expected_md5 <- self$resources[[1]][2]
     zip_path <- download_and_cache(url, prefix = class(self)[1])
@@ -501,10 +501,10 @@ emnist_dataset <- dataset(
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 
     process_split <- function(split_name) {
-      train_img <- file.path(unzipped_root, as.character(glue::glue("emnist-{split_name}-train-images-idx3-ubyte.gz")))
-      train_lbl <- file.path(unzipped_root, as.character(glue::glue("emnist-{split_name}-train-labels-idx1-ubyte.gz")))
-      test_img  <- file.path(unzipped_root, as.character(glue::glue("emnist-{split_name}-test-images-idx3-ubyte.gz")))
-      test_lbl  <- file.path(unzipped_root, as.character(glue::glue("emnist-{split_name}-test-labels-idx1-ubyte.gz")))
+      train_img <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-images-idx3-ubyte.gz"))
+      train_lbl <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-labels-idx1-ubyte.gz"))
+      test_img  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-images-idx3-ubyte.gz"))
+      test_lbl  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-labels-idx1-ubyte.gz"))
 
       train_set <- list(read_sn3_pascalvincent(train_img),
                         read_sn3_pascalvincent(train_lbl))
