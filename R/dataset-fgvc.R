@@ -164,7 +164,7 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
     archive <- download_and_cache(url)
-    if (digest::digest(archive, algo = "md5", file = TRUE) != md5) {
+    if (!tools::md5sum(archive) == md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
