@@ -6,6 +6,7 @@
 - add message translation in french (#112, @cregouby)
 - Added support for the Fashion-MNIST dataset. (#148, @koshtiakanksha)
 - Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
+- Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
