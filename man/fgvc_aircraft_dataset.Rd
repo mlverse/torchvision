@@ -19,7 +19,7 @@ fgvc_aircraft_dataset(
 \item{split}{Character. One of \code{"train"}, \code{"val"}, \code{"trainval"}, or \code{"test"}. Default is \code{"train"}.}
 
 \item{annotation_level}{Character. Level of annotation to use for classification. Default is \code{"variant"}.
-One of \code{"variant"}, \code{"family"}, or \code{"manufacturer"}. See \emph{Details}.}
+One of \code{"variant"}, \code{"family"}, \code{"manufacturer"}, or \code{"all"}. See \emph{Details}.}
 
 \item{transform}{Optional function to transform input images after loading. Default is \code{\link[=transform_to_tensor]{transform_to_tensor()}}.}
 
@@ -32,7 +32,8 @@ An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-styl
 Each element is a named list with:
 \itemize{
 \item \code{x}: a torch tensor of the image with shape (C x H x W). Please note that images have varying sizes.
-\item \code{y}: an integer class label corresponding to the selected \code{annotation_level}.
+\item \code{y}: for single-level annotation (\code{"variant"}, \code{"family"}, \code{"manufacturer"}): an integer class label.
+for multi-level annotation (\code{"all"}): a vector of three integers \code{c(manufacturer_idx, family_idx, variant_idx)}.
 }
 
 The dataset supports standard dataset operations like indexing (\code{dataset[i]}) and length (\code{length(dataset)}).
@@ -49,19 +50,33 @@ The FGVC-Aircraft dataset supports the following official splits:
 \item \code{"test"}: test set with labels (used for evaluation)
 }
 
-The \code{annotation_level} determines the granularity of labels used for classification and supports three values:
+The \code{annotation_level} determines the granularity of labels used for classification and supports four values:
 \itemize{
 \item \code{"variant"}: the most fine-grained level, e.g., \code{"Boeing 737-700"}. There are 100 visually distinguishable variants.
 \item \code{"family"}: a mid-level grouping, e.g., \code{"Boeing 737"}, which includes multiple variants. There are 70 distinct families.
 \item \code{"manufacturer"}: the coarsest level, e.g., \code{"Boeing"}, grouping multiple families under a single manufacturer. There are 30 manufacturers.
+\item \code{"all"}: multi-label format that returns all three levels as a vector of class indices \code{c(manufacturer_idx, family_idx, variant_idx)}.
 }
 
 These levels form a strict hierarchy: each \code{"manufacturer"} consists of multiple \code{"families"}, and each \code{"family"} contains several \code{"variants"}.
 Not all combinations of levels are valid — for example, a \code{"variant"} always belongs to exactly one \code{"family"}, and a \code{"family"} to exactly one \code{"manufacturer"}.
+
+When \code{annotation_level = "all"} is used, the \verb{$classes} field is a named list with three components:
+\itemize{
+\item \code{classes$manufacturer}: a character vector of manufacturer names
+\item \code{classes$family}: a character vector of family names
+\item \code{classes$variant}: a character vector of variant names
+}
 }
 \examples{
 \dontrun{
+# Single-label classification
 fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE )
+
+# Multi-label classification
+fgvc_multi <- fgvc_aircraft_dataset( split = "train", annotation_level = "all", download = TRUE )
+item <- fgvc_multi[1]
+item$y  # Returns a named list with class indices, e.g., list(manufacturer = 5, family = 13, variant = 1)
 
 # Define a custom collate function to resize images in the batch
 resize_collate_fn <- function(batch) {
