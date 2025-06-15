@@ -71,10 +71,10 @@ eurosat_dataset <- torch::dataset(
     fs::dir_create(self$root, recurse = TRUE, showWarnings = FALSE)
 
     # Download and extract the dataset archive
-    zip_file <- download_and_cache(self$dataset_url, prefix = class(self)[1])
+    archive <- download_and_cache(self$dataset_url, prefix = class(self)[1])
     if (!dir.exists(self$images_dir)) {
       message("Extracting archive...")
-      utils::unzip(zip_file, exdir = self$images_dir)
+      utils::unzip(archive, exdir = self$images_dir)
       message("Extraction complete.")
     }
 

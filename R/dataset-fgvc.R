@@ -86,7 +86,7 @@ fgvc_aircraft_dataset <- dataset(
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use download = TRUE to fetch it.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
     label_file <- file.path(
@@ -163,13 +163,12 @@ fgvc_aircraft_dataset <- dataset(
     fs::dir_create(self$root)
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
-    file <- download_and_cache(url)
-    if (digest::digest(file, algo = "md5", file = TRUE) != md5) {
-      fs::file_delete(file)
-      stop("MD5 mismatch. Corrupted file.")
+    archive <- download_and_cache(url)
+    if (digest::digest(archive, algo = "md5", file = TRUE) != md5) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    untar(file, exdir = self$root)
+    untar(archive, exdir = self$root)
     rlang::inform(glue::glue(
       "FGVC-Aircraft dataset downloaded and extracted successfully."
     ))
