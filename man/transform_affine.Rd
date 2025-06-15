@@ -20,26 +20,18 @@ transform_affine(
 \item{angle}{(float or int): rotation angle value in degrees,
 counter-clockwise.}
 
-\item{translate}{(tuple, optional): tuple of maximum absolute fraction for
-horizontal and vertical translations. For example translate=(a, b), then
-horizontal shift is randomly sampled in the range
--img_width * a < dx < img_width * a and vertical shift is randomly sampled
-in the range -img_height * b < dy < img_height * b. Will not translate by
-default.}
+\item{translate}{(sequence of int) – horizontal and vertical translations
+(post-rotation translation)}
 
-\item{scale}{(tuple, optional): scaling factor interval, e.g (a, b), then
-scale is randomly sampled from the range a <= scale <= b. Will keep
-original scale by default.}
+\item{scale}{(float) – overall scale}
 
-\item{shear}{(sequence or float or int, optional): Range of degrees to select
-from. If shear is a number, a shear parallel to the x axis in the range
-(-shear, +shear) will be applied. Else if shear is a tuple or list of 2
-values a shear parallel to the x axis in the range \verb{(shear[1], shear[2])}
-will be applied. Else if shear is a tuple or list of 4 values, a x-axis
-shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
-will be applied. Will not apply shear by default.}
+\item{shear}{(float or sequence) – shear angle value in degrees between -180 to 180,
+clockwise direction. If a sequence is specified, the first value corresponds
+to a shear parallel to the x-axis, while the second value corresponds to a
+shear parallel to the y-axis.}
 
-\item{resample}{(int, optional): An optional resampling filter.}
+\item{resample}{(int, optional): An optional resampling filter. See interpolation
+modes.}
 
 \item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
 int for grayscale) for the area outside the transform in the output image
@@ -79,8 +71,8 @@ Other transforms:
 \code{\link{transform_random_resized_crop}()},
 \code{\link{transform_random_rotation}()},
 \code{\link{transform_random_vertical_flip}()},
-\code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_resized_crop}()},
 \code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},

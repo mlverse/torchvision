@@ -13,11 +13,16 @@ expect_tensor_shape <- function(object, expected) {
   expect_equal(object$shape, expected)
 }
 
+expect_tensor_dtype <- function(object, expected_dtype) {
+  expect_tensor(object)
+  expect_true(object$dtype == expected_dtype)
+}
+
 expect_tensor <- function(object) {
   expect_true(is_torch_tensor(object))
   expect_no_error(torch::as_array(object))
 }
 
-expect_equal_to_r <- function(object, expected) {
-  expect_equal(torch::as_array(object), expected)
+expect_equal_to_r <- function(object, expected, ...) {
+  expect_equal(torch::as_array(object), expected, ...)
 }

@@ -31,14 +31,36 @@ transform_center_crop.default <- function(img, size) {
 
   size <- get_image_size(img)
 
-  image_width <- size[1]
-  image_height <- size[2]
+  image_height <- size[1]
+  image_width <- size[2]
 
   crop_height <- output_size[1]
   crop_width <- output_size[2]
 
+  if (crop_width > image_width || crop_height > image_height) {
+
+    padding_ltrb <- c(
+      if (crop_width > image_width) (crop_width - image_width) %/% 2  else 0,
+      if (crop_width > image_width) (crop_width - image_width + 1) %/% 2  else 0,
+      if (crop_height > image_height) (crop_height - image_height) %/% 2  else 0,
+      if (crop_height > image_height) (crop_height - image_height + 1) %/% 2  else 0
+    )
+
+    img <- transform_pad(img, padding_ltrb, fill = 0)  # PIL uses fill value 0
+
+    size <- get_image_size(img)
+    image_height <- size[1]
+    image_width <- size[2]
+
+    if (crop_width == image_width && crop_height == image_height) return(img)
+  }
+
   crop_top <- as.integer((image_height - crop_height) / 2)
   crop_left <- as.integer((image_width - crop_width) / 2)
+
+  # if either of these is 0, we will lose a pixel in transform_crop
+  if (crop_top == 0) crop_top <- 1
+  if (crop_left == 0) crop_left <- 1
 
   transform_crop(img, crop_top, crop_left, crop_height, crop_width)
 }
@@ -63,7 +85,7 @@ transform_random_apply.default <- function(img, transforms, p = 0.5) {
 
 #' @export
 transform_random_choice.default <- function(img, transforms) {
-  i <- sample.int(length(transforms))
+  i <- sample.int(length(transforms), 1)
   transforms[[i]](img)
 }
 
@@ -137,7 +159,7 @@ transform_random_horizontal_flip.default <- function(img, p = 0.5) {
 
 
 #' @export
-transform_random_vertical_flip.default <- function(img, p) {
+transform_random_vertical_flip.default <- function(img, p = 0.5) {
 
   if (stats::runif(1) < p)
     img <- transform_vflip(img)
@@ -149,7 +171,7 @@ transform_random_vertical_flip.default <- function(img, p) {
 get_random_resized_crop_params <- function(img, scale, ratio) {
 
   img_size <- get_image_size(img)
-  width <- img_size[1]; height <- img_size[2]
+  width <- img_size[2]; height <- img_size[1]
 
   area <- height * width
 
@@ -401,7 +423,7 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
     if (length(scale) != 2)
       value_error("scale must be length 2")
 
-    if (any(scale > 0))
+    if (any(scale < 0))
       value_error("scale must be positive")
 
   }
@@ -533,6 +555,7 @@ transform_rotate.default <- function(img, angle, resample = 0, expand = FALSE,
   not_implemented_for_class(img)
 }
 
+#' @export
 transform_affine.default <- function(img, angle, translate, scale, shear,
                                      resample = 0, fillcolor = NULL) {
   not_implemented_for_class(img)
@@ -553,6 +576,6 @@ transform_adjust_gamma.default <- function(img, gamma, gain = 1) {
 # Helpers -----------------------------------------------------------------
 
 not_implemented_for_class <- function(x) {
-  not_implemented_error(paste0("not implemented for ", class(x)))
+  not_implemented_error("not implemented for {class(x)}")
 }
 

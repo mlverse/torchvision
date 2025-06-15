@@ -1,6 +1,5 @@
 
-torchvision <a href='https://torchvision.mlverse.org'><img src='https://torch.mlverse.org/css/images/hex/torchvision.png' align="right" height="139" /></a>
-============================================================================================================
+# torchvision <img src='https://torch.mlverse.org/css/images/hex/torchvision.png' align="right" style="width: 15%"/>
 
 <!-- badges: start -->
 [![R build status](https://github.com/mlverse/torchvision/workflows/R-CMD-check/badge.svg)](https://github.com/mlverse/torchvision/actions)

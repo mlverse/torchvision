@@ -104,24 +104,36 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
   w <- wh[1]
   h <- wh[2]
 
-  if (length(size) == 1)
-    size_w <- size_h <- size
-  else if (length(size) == 2) {
-    size_w <- size[2]
-    size_h <- size[1]
-  }
-
   if (length(size) == 1) {
 
-    if (w < h)
-      size_h <- as.integer(size_w * h / w)
-    else
-      size_w <- as.integer(size_h * w / h)
+    if (w <= h) {
+      short <- w
+      long <- h
+    } else {
+      short <- h
+      long <- w
+    }
 
+    requested_new_short <- size
+
+    if (short == requested_new_short)
+      return(img)
+
+    new_short <- requested_new_short
+    new_long <- as.integer(requested_new_short * long / short)
+
+    if (w <= h) {
+      new_w <- new_short
+      new_h <- new_long
+    } else {
+      new_w <- new_long
+      new_h <- new_short
+    }
+
+  } else {
+    new_w <- size[2]
+    new_h <- size[1]
   }
-
-  if ((w <= h  && w == size_w) || (h <= w && h == size_h))
-    return(img)
 
   # make NCHW
   need_squeeze <- FALSE
@@ -147,7 +159,7 @@ transform_resize.torch_tensor <- function(img, size, interpolation = 2) {
     align_corners <- NULL
 
 
-  img <- torch::nnf_interpolate(img, size = c(size_h, size_w), mode = mode,
+  img <- torch::nnf_interpolate(img, size = c(new_h, new_w), mode = mode,
                                 align_corners = align_corners)
 
   if (need_squeeze)
@@ -274,7 +286,7 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
 #' @export
 transform_linear_transformation.torch_tensor <- function(img, transformation_matrix,
                                                          mean_vector) {
-  flat_tensor <- img$view(1, -1) - mean_vector
+  flat_tensor <- img$view(c(1, -1)) - mean_vector
   transformed_tensor <- torch::torch_mm(flat_tensor, transformation_matrix)
 
   transformed_tensor$view(img$size())
@@ -328,7 +340,7 @@ transform_adjust_contrast.torch_tensor <- function(img, contrast_factor) {
 #' @export
 transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
 
-  if (hue_factor < 0.5 || hue_factor > 0.5)
+  if (hue_factor < -0.5 || hue_factor > 0.5)
     value_error("hue_factor must be between -0.5 and 0.5.")
 
   check_img(img)
@@ -433,7 +445,7 @@ check_img <- function(x) {
 get_image_size.torch_tensor <- function(img) {
   check_img(img)
 
-  tail(img$size(), 2)
+  rev(tail(img$size(), 2))
 }
 
 blend <- function(img1, img2, ratio) {
@@ -497,7 +509,7 @@ hsv2rgb <- function(img) {
   t <- torch::torch_clamp((hsv[[3]] * (1 - f)), 0, 1)
   i <- i %% 6
 
-  mask <- i == torch::torch_arange(start= 0, end = 6)[,NULL,NULL]
+  mask <- i == torch::torch_arange(start= 0, end = 5)[,NULL,NULL]
 
   a1 <- torch::torch_stack(list(hsv[[3]], q, p, p, t, hsv[[3]]))
   a2 <- torch::torch_stack(list(t, hsv[[3]], hsv[[3]], q, p, p))
@@ -651,8 +663,8 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
 
   assert_grid_transform_inputs(img, matrix, resample, fill, interpolation_modes)
   theta <- torch::torch_tensor(matrix)$reshape(c(1, 2, 3))
-  w <- tail(img$shape, 2)[2]
-  h <- tail(img$shape, 1)[1]
+  w <- tail(img$shape, 2)[1]
+  h <- tail(img$shape, 2)[2]
 
   if (expand) {
     o_shape <- rotate_compute_output_size(theta, w, h)
@@ -664,7 +676,7 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
   }
 
   grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
-  mode <- interpolation_modes[as.character(resample)]
+  mode <- interpolation_modes[as.character(as.integer(resample))]
 
   apply_grid_transform(img, grid, mode)
 }
@@ -754,10 +766,9 @@ get_perspective_coeffs <- function(startpoints, endpoints) {
   }
 
   b_matrix <- torch::torch_tensor(unlist(startpoints), dtype = torch::torch_float())$view(8)
-  res <- torch::torch_lstsq(b_matrix, a_matrix)[[1]]
+  res <- torch::linalg_lstsq(b_matrix, a_matrix)[[1]]
 
   output <- torch::as_array(res$squeeze(1))
-
   output
 }
 

@@ -1,14 +1,14 @@
 
 resnet_model_urls <- c(
-  'resnet18' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet18.pth',
-  'resnet34' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet34.pth',
-  'resnet50' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet50.pth',
-  'resnet101' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet101.pth',
-  'resnet152' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnet152.pth',
-  'resnext50_32x4d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext50_32x4d.pth',
-  'resnext101_32x8d' = 'https://storage.googleapis.com/torchvision-models/v1/models/resnext101_32x8d.pth',
-  'wide_resnet50_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet50_2.pth',
-  'wide_resnet101_2' = 'https://storage.googleapis.com/torchvision-models/v1/models/wide_resnet101_2.pth'
+  'resnet18' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet18.pth',
+  'resnet34' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet34.pth',
+  'resnet50' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet50.pth',
+  'resnet101' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet101.pth',
+  'resnet152' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet152.pth',
+  'resnext50_32x4d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext50_32x4d.pth',
+  'resnext101_32x8d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext101_32x8d.pth',
+  'wide_resnet50_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet50_2.pth',
+  'wide_resnet101_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet101_2.pth'
 )
 
 conv_3x3 <- function(in_planes, out_planes, stride = 1, groups = 1, dilation = 1) {
@@ -28,7 +28,7 @@ basic_block <- torch::nn_module(
                         base_width=64, dilation=1, norm_layer=NULL) {
 
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
 
     if (groups != 1 || base_width != 64)
       value_error("basic_block only supports groups=1 and base_width=64")
@@ -38,7 +38,7 @@ basic_block <- torch::nn_module(
 
     self$conv1 <- conv_3x3(inplanes, planes, stride)
     self$bn1 <- norm_layer(planes)
-    self$relu <- nn_relu(inplace = TRUE)
+    self$relu <- torch::nn_relu(inplace = TRUE)
     self$conv2 <- conv_3x3(planes, planes)
     self$bn2 <- norm_layer(planes)
     self$downsample <- downsample
@@ -78,7 +78,7 @@ bottleneck <- torch::nn_module(
                         base_width=64, dilation=1, norm_layer=NULL) {
 
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
 
     width <- as.integer(planes * (base_width / 64)) * groups
 
@@ -91,7 +91,7 @@ bottleneck <- torch::nn_module(
     self$conv3 <- conv_1x1(width, planes * self$expansion)
     self$bn3 <- norm_layer(planes * self$expansion)
 
-    self$relu <- nn_relu(inplace = TRUE)
+    self$relu <- torch::nn_relu(inplace = TRUE)
     self$downsample <- downsample
     self$stride <- stride
 
@@ -148,11 +148,11 @@ resnet <- torch::nn_module(
 
     self$groups <- groups
     self$base_width <- width_per_group
-    self$conv1 <- nn_conv2d(3, self$inplanes, kernel_size=7, stride=2, padding=3,
+    self$conv1 <- torch::nn_conv2d(3, self$inplanes, kernel_size=7, stride=2, padding=3,
                            bias=FALSE)
     self$bn1 <- norm_layer(self$inplanes)
-    self$relu <- nn_relu(inplace=TRUE)
-    self$maxpool <- nn_max_pool2d(kernel_size=3, stride=2, padding=1)
+    self$relu <- torch::nn_relu(inplace=TRUE)
+    self$maxpool <- torch::nn_max_pool2d(kernel_size=3, stride=2, padding=1)
     self$layer1 <- self$.make_layer(block, 64, layers[1])
     self$layer2 <- self$.make_layer(block, 128, layers[2], stride=2,
                                    dilate=replace_stride_with_dilation[1])
@@ -160,8 +160,8 @@ resnet <- torch::nn_module(
                                    dilate=replace_stride_with_dilation[2])
     self$layer4 <- self$.make_layer(block, 512, layers[4], stride=2,
                                    dilate=replace_stride_with_dilation[3])
-    self$avgpool <- nn_adaptive_avg_pool2d(c(1, 1))
-    self$fc <- nn_linear(512 * block$public_fields$expansion, num_classes)
+    self$avgpool <- torch::nn_adaptive_avg_pool2d(c(1, 1))
+    self$fc <- torch::nn_linear(512 * block$public_fields$expansion, num_classes)
 
     for (m in private$modules_) {
       if (inherits(m, "nn_conv2d")) {
@@ -180,9 +180,9 @@ resnet <- torch::nn_module(
       for (m in private$modules_) {
 
         if (inherits(m, "bottleneck"))
-          nn_init_constant_(m$bn3$weight, 0)
+          torch::nn_init_constant_(m$bn3$weight, 0)
         else if (inherits(m, "basic_block"))
-          nn_init_constant_(m$bn2$weight, 0)
+          torch::nn_init_constant_(m$bn2$weight, 0)
 
       }
     }
@@ -200,7 +200,7 @@ resnet <- torch::nn_module(
     }
 
     if (stride != 1 || self$inplanes != planes * block$public_fields$expansion) {
-      downsample <- nn_sequential(
+      downsample <- torch::nn_sequential(
         conv_1x1(self$inplanes, planes * block$public_fields$expansion, stride),
         norm_layer(planes * block$public_fields$expansion)
       )
@@ -249,10 +249,11 @@ resnet <- torch::nn_module(
   model
 }
 
-#' ResNet-18 Model Architecture
+#' ResNet implementation
 #'
-#' ResNet-18 model architecture from
-#'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf)
+#' ResNet models implementation from
+#'   [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385) and later
+#'   related papers (see Functions)
 #'
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet.
 #' @param progress (bool): If TRUE, displays a progress bar of the download to
@@ -260,10 +261,64 @@ resnet <- torch::nn_module(
 #' @param ... Other parameters passed to the resnet model.
 #'
 #' @family models
-#'
+#' @name model_resnet
+#' @rdname model_resnet
+NULL
+
+#' @describeIn model_resnet ResNet 18-layer model
 #' @export
 model_resnet18 <- function(pretrained = FALSE, progress = TRUE, ...) {
   .resnet("resnet18", basic_block, c(2,2,2,2), pretrained, progress, ...)
 }
 
+#' @describeIn model_resnet ResNet 34-layer model
+#' @export
+model_resnet34 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet34", basic_block, c(3,4,6,3), pretrained, progress, ...)
+}
 
+#' @describeIn model_resnet ResNet 50-layer model
+#' @export
+model_resnet50 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet50", bottleneck, c(3,4,6,3), pretrained, progress, ...)
+}
+
+#' @describeIn model_resnet ResNet 101-layer model
+#' @export
+model_resnet101 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet101", bottleneck, c(3,4,23,3), pretrained, progress, ...)
+}
+
+#' @describeIn model_resnet ResNet 152-layer model
+#' @export
+model_resnet152 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnet152", bottleneck, c(3,8,36,3), pretrained, progress, ...)
+}
+
+#' @describeIn model_resnet ResNeXt-50 32x4d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431)
+#' with 32 groups having each a width of 4.
+#' @export
+model_resnext50_32x4d <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnext50_32x4d", bottleneck, c(3,4,6,3), pretrained, progress, groups=32, width_per_group=4,...)
+}
+
+#' @describeIn model_resnet ResNeXt-101 32x8d model from ["Aggregated Residual Transformation for Deep Neural Networks"](https://arxiv.org/pdf/1611.05431)
+#' with 32 groups having each a width of 8.
+#' @export
+model_resnext101_32x8d <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("resnext101_32x8d", bottleneck, c(3,4,23,3), pretrained, progress, groups=32, width_per_group=8,...)
+}
+
+#' @describeIn model_resnet Wide ResNet-50-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146)
+#' with width per group of 128.
+#' @export
+model_wide_resnet50_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("wide_resnet50_2", bottleneck, c(3,4,6,3), pretrained, progress, width_per_group=64*2,...)
+}
+
+#' @describeIn model_resnet Wide ResNet-101-2 model from ["Wide Residual Networks"](https://arxiv.org/pdf/1605.07146)
+#' with width per group of 128.
+#' @export
+model_wide_resnet101_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  .resnet("wide_resnet101_2", bottleneck, c(3,4,23,3), pretrained, progress, width_per_group=64*2,...)
+}

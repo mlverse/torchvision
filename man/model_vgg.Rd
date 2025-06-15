@@ -38,24 +38,32 @@ to stderr}
 }
 \description{
 VGG models implementations based on
-\href{https://arxiv.org/pdf/1409.1556.pdf}{Very Deep Convolutional Networks For Large-Scale Image Recognition}
+\href{https://arxiv.org/pdf/1409.1556}{Very Deep Convolutional Networks For Large-Scale Image Recognition}
 }
 \section{Functions}{
 \itemize{
-\item \code{model_vgg11}: VGG 11-layer model (configuration "A")
+\item \code{model_vgg11()}: VGG 11-layer model (configuration "A")
 
-\item \code{model_vgg11_bn}: VGG 11-layer model (configuration "A") with batch normalization
+\item \code{model_vgg11_bn()}: VGG 11-layer model (configuration "A") with batch normalization
 
-\item \code{model_vgg13}: VGG 13-layer model (configuration "B")
+\item \code{model_vgg13()}: VGG 13-layer model (configuration "B")
 
-\item \code{model_vgg13_bn}: VGG 13-layer model (configuration "B") with batch normalization
+\item \code{model_vgg13_bn()}: VGG 13-layer model (configuration "B") with batch normalization
 
-\item \code{model_vgg16}: VGG 13-layer model (configuration "D")
+\item \code{model_vgg16()}: VGG 13-layer model (configuration "D")
 
-\item \code{model_vgg16_bn}: VGG 13-layer model (configuration "D") with batch normalization
+\item \code{model_vgg16_bn()}: VGG 13-layer model (configuration "D") with batch normalization
 
-\item \code{model_vgg19}: VGG 19-layer model (configuration "E")
+\item \code{model_vgg19()}: VGG 19-layer model (configuration "E")
 
-\item \code{model_vgg19_bn}: VGG 19-layer model (configuration "E") with batch normalization
+\item \code{model_vgg19_bn()}: VGG 19-layer model (configuration "E") with batch normalization
+
 }}
-
+\seealso{
+Other models: 
+\code{\link{model_alexnet}()},
+\code{\link{model_inception_v3}()},
+\code{\link{model_mobilenet_v2}()},
+\code{\link{model_resnet}}
+}
+\concept{models}

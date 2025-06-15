@@ -41,6 +41,14 @@ reference:
   desc: Datasets readily available
   contents:
    - ends_with("_dataset")
+- title: Displaying
+  desc: Show images
+  contents:
+   - draw_bounding_boxes
+   - draw_keypoints
+   - draw_segmentation_masks
+   - tensor_image_browse
+   - tensor_image_display
 - title: Misc
   contents:
    - magick_loader

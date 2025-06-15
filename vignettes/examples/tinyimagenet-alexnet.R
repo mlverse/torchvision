@@ -46,7 +46,7 @@ valid_dl <- dataloader(valid_ds, batch_size = 32, shuffle = FALSE, drop_last = T
 model <- model_alexnet(pretrained = FALSE, num_classes = length(train_ds$classes))
 model$to(device = device)
 
-optimizer <- optim_adam(model$parameters)
+optimizer <- optim_adagrad(model$parameters, lr = 0.005)
 scheduler <- lr_step(optimizer, step_size = 1, 0.95)
 loss_fn <- nn_cross_entropy_loss()
 
@@ -65,7 +65,7 @@ train_step <- function(batch) {
 valid_step <- function(batch) {
   model$eval()
   pred <- model(batch[[1]]$to(device = device))
-  pred <- torch_topk(pred, k = 5, dim = 2, TRUE, TRUE)[[2]]$add(1L)
+  pred <- torch_topk(pred, k = 5, dim = 2, TRUE, TRUE)[[2]]
   pred <- pred$to(device = torch_device("cpu"))
   correct <- batch[[2]]$view(c(-1, 1))$eq(pred)$any(dim = 2)
   model$train()
@@ -80,17 +80,19 @@ for (epoch in 1:50) {
   )
 
   l <- c()
-  for (b in enumerate(train_dl)) {
+  coro::loop(for (b in train_dl) {
     loss <- train_step(b)
     l <- c(l, loss$item())
     pb$tick(tokens = list(loss = mean(l)))
-  }
+  })
 
   acc <- c()
-  for (b in enumerate(valid_dl)) {
-    accuracy <- valid_step(b)
-    acc <- c(acc, accuracy)
-  }
+  with_no_grad({
+    coro::loop(for (b in valid_dl) {
+      accuracy <- valid_step(b)
+      acc <- c(acc, accuracy)
+    })
+  })
 
   scheduler$step()
   cat(sprintf("[epoch %d]: Loss = %3f, Acc= %3f \n", epoch, mean(l), mean(acc)))

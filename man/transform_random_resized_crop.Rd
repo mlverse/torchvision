@@ -16,7 +16,7 @@ transform_random_resized_crop(
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
 \item{size}{(sequence or int): Desired output size. If size is a sequence
-like (h, w), output size will be matched to this. If size is an int,
+like c(h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}
@@ -72,8 +72,8 @@ Other transforms:
 \code{\link{transform_random_perspective}()},
 \code{\link{transform_random_rotation}()},
 \code{\link{transform_random_vertical_flip}()},
-\code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_resized_crop}()},
 \code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},

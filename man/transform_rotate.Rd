@@ -19,14 +19,15 @@ transform_rotate(
 \item{angle}{(float or int): rotation angle value in degrees,
 counter-clockwise.}
 
-\item{resample}{(int, optional): An optional resampling filter.}
+\item{resample}{(int, optional): An optional resampling filter. See interpolation
+modes.}
 
 \item{expand}{(bool, optional): Optional expansion flag. If true, expands the
 output to make it large enough to hold the entire rotated image. If false
 or omitted, make the output image the same size as the input image. Note
 that the expand flag assumes rotation around the center and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, (x, y).
+\item{center}{(list or tuple, optional): Optional center of rotation, c(x, y).
 Origin is the upper left corner. Default is the center of the image.}
 
 \item{fill}{(n-tuple or int or float): Pixel fill value for area outside the
@@ -69,8 +70,8 @@ Other transforms:
 \code{\link{transform_random_resized_crop}()},
 \code{\link{transform_random_rotation}()},
 \code{\link{transform_random_vertical_flip}()},
-\code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_resized_crop}()},
 \code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},

@@ -31,7 +31,7 @@ If a str of 'random', erasing each pixel with random values.}
 }
 \description{
 'Random Erasing Data Augmentation' by Zhong \emph{et al.}
-See \url{https://arxiv.org/pdf/1708.04896.pdf}
+See \url{https://arxiv.org/pdf/1708.04896}
 }
 \seealso{
 Other transforms: 
@@ -63,8 +63,8 @@ Other transforms:
 \code{\link{transform_random_resized_crop}()},
 \code{\link{transform_random_rotation}()},
 \code{\link{transform_random_vertical_flip}()},
-\code{\link{transform_resized_crop}()},
 \code{\link{transform_resize}()},
+\code{\link{transform_resized_crop}()},
 \code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
 \code{\link{transform_ten_crop}()},

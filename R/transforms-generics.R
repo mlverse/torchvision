@@ -64,7 +64,7 @@ transform_normalize <- function(img, mean, std, inplace = FALSE) {
 #'
 #' @inheritParams transform_to_tensor
 #' @param size (sequence or int): Desired output size. If size is a sequence
-#'   like (h, w), output size will be matched to this. If size is an int,
+#'   like c(h, w), output size will be matched to this. If size is an int,
 #'   smaller edge of the image will be matched to this number.
 #'   i.e, if height > width, then image will be rescaled to
 #'   (size * height / width, size).
@@ -87,9 +87,9 @@ transform_resize <- function(img, size, interpolation = 2) {
 #'
 #' @inheritParams transform_to_tensor
 #' @param size (sequence or int): Desired output size of the crop. If size is
-#'   an int instead of sequence like (h, w), a square crop (size, size) is
+#'   an int instead of sequence like c(h, w), a square crop (size, size) is
 #'   made. If provided a tuple or list of length 1, it will be interpreted as
-#'   `(size, size)`.
+#'   `c(size, size)`.
 #'
 #' @family transforms
 #'
@@ -328,14 +328,15 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #' Rotate the image by angle
 #'
 #' @param degrees (sequence or float or int): Range of degrees to select from.
-#'   If degrees is a number instead of sequence like (min, max), the range of
+#'   If degrees is a number instead of sequence like c(min, max), the range of
 #'   degrees will be (-degrees, +degrees).
-#' @param resample (int, optional): An optional resampling filter.
+#' @param resample (int, optional): An optional resampling filter. See interpolation
+#'   modes.
 #' @param expand (bool, optional): Optional expansion flag. If true, expands the
 #'   output to make it large enough to hold the entire rotated image. If false
 #'   or omitted, make the output image the same size as the input image. Note
 #'   that the expand flag assumes rotation around the center and no translation.
-#' @param center (list or tuple, optional): Optional center of rotation, (x, y).
+#' @param center (list or tuple, optional): Optional center of rotation, c(x, y).
 #'   Origin is the upper left corner. Default is the center of the image.
 #' @param fill (n-tuple or int or float): Pixel fill value for area outside the
 #'   rotated image. If int or float, the value is used for all bands
@@ -346,7 +347,7 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #'
 #' @family transforms
 #' @export
-transform_random_rotation <- function(img, degrees, resample=FALSE, expand=FALSE,
+transform_random_rotation <- function(img, degrees, resample = 0, expand=FALSE,
                                       center=NULL, fill=NULL) {
   UseMethod("transform_random_rotation", img)
 }
@@ -355,12 +356,12 @@ transform_random_rotation <- function(img, degrees, resample=FALSE, expand=FALSE
 #'
 #' @inheritParams transform_random_rotation
 #' @param translate (tuple, optional): tuple of maximum absolute fraction for
-#'   horizontal and vertical translations. For example translate=(a, b), then
+#'   horizontal and vertical translations. For example `translate=c(a, b)`, then
 #'   horizontal shift is randomly sampled in the range
 #'   -img_width * a < dx < img_width * a and vertical shift is randomly sampled
 #'   in the range -img_height * b < dy < img_height * b. Will not translate by
 #'   default.
-#' @param scale (tuple, optional): scaling factor interval, e.g (a, b), then
+#' @param scale (tuple, optional): scaling factor interval, e.g c(a, b), then
 #'   scale is randomly sampled from the range a <= scale <= b. Will keep
 #'   original scale by default.
 #' @param shear (sequence or float or int, optional): Range of degrees to select
@@ -430,7 +431,7 @@ transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
 #' Randomly selects a rectangular region in an image and erases its pixel values
 #'
 #' 'Random Erasing Data Augmentation' by Zhong _et al._
-#'   See <https://arxiv.org/pdf/1708.04896.pdf>
+#'   See <https://arxiv.org/pdf/1708.04896>
 #'
 #' @inheritParams transform_to_tensor
 #' @param p probability that the random erasing operation will be performed.
@@ -585,8 +586,15 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
 
 #' Apply affine transformation on an image keeping image center invariant
 #'
-#' @inheritParams transform_random_affine
 #' @inheritParams transform_rotate
+#' @inheritParams transform_random_affine
+#' @param translate (sequence of int) – horizontal and vertical translations
+#'  (post-rotation translation)
+#' @param scale (float) – overall scale
+#' @param shear (float or sequence) – shear angle value in degrees between -180 to 180,
+#'  clockwise direction. If a sequence is specified, the first value corresponds
+#'  to a shear parallel to the x-axis, while the second value corresponds to a
+#'  shear parallel to the y-axis.
 #'
 #' @family transforms
 #' @export

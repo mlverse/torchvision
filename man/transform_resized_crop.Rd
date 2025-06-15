@@ -19,7 +19,7 @@ box.}
 \item{width}{(int): Width of the crop box.}
 
 \item{size}{(sequence or int): Desired output size. If size is a sequence
-like (h, w), output size will be matched to this. If size is an int,
+like c(h, w), output size will be matched to this. If size is an int,
 smaller edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 (size * height / width, size).}

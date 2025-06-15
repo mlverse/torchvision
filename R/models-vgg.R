@@ -85,14 +85,14 @@ vgg_cfgs <- list(
 )
 
 vgg_model_urls <- list(
-  'vgg11'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg11.pth',
-  'vgg13'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg13.pth',
-  'vgg16'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg16.pth',
-  'vgg19'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg19.pth',
-  'vgg11_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg11_bn.pth',
-  'vgg13_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg13_bn.pth',
-  'vgg16_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg16_bn.pth',
-  'vgg19_bn'= 'https://storage.googleapis.com/torchvision-models/v1/models/vgg19_bn.pth'
+  'vgg11'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg11.pth',
+  'vgg13'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg13.pth',
+  'vgg16'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg16.pth',
+  'vgg19'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg19.pth',
+  'vgg11_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg11_bn.pth',
+  'vgg13_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg13_bn.pth',
+  'vgg16_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg16_bn.pth',
+  'vgg19_bn'= 'https://torch-cdn.mlverse.org/models/vision/v1/models/vgg19_bn.pth'
 )
 
 vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
@@ -121,7 +121,7 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
 #'
 #'
 #' VGG models implementations based on
-#' [Very Deep Convolutional Networks For Large-Scale Image Recognition](https://arxiv.org/pdf/1409.1556.pdf)
+#' [Very Deep Convolutional Networks For Large-Scale Image Recognition](https://arxiv.org/pdf/1409.1556)
 #'
 #' @param pretrained (bool): If TRUE, returns a model pre-trained on ImageNet
 #' @param progress (bool): If TRUE, displays a progress bar of the download
@@ -133,6 +133,8 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
 NULL
 
 #' @describeIn model_vgg VGG 11-layer model (configuration "A")
+#'
+#' @family models
 #' @export
 model_vgg11 <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg('vgg11', 'A', FALSE, pretrained, progress, ...)
