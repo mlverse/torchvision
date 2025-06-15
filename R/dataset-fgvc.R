@@ -4,7 +4,7 @@
 #' - "variant": fine-grained aircraft variants (e.g., specific model variants)
 #' - "family": aircraft families
 #' - "manufacturer": aircraft manufacturers
-#' 
+#'
 #' The FGVC-Aircraft dataset supports the following official splits:
 #' - `"train"`: training subset
 #' - `"val"`: validation subset
@@ -64,10 +64,14 @@
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
 
-  initialize = function(root = tempdir(), split = "train", annotation_level = "variant",
-                        transform = NULL, target_transform = NULL,
-                        download = FALSE) {
-
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    annotation_level = "variant",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
     rlang::inform(glue::glue("Initializing FGVC-Aircraft dataset..."))
 
     self$root <- root
@@ -80,12 +84,15 @@ fgvc_aircraft_dataset <- dataset(
     self$data_dir <- file.path(self$base_dir, "data")
 
     if (download) {
-      rlang::inform(glue::glue("Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."))
+      rlang::inform(glue::glue(
+        "Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."
+      ))
       self$download()
     }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. Use download = TRUE to fetch it.")
+    }
 
     label_file <- file.path(
       self$data_dir,
@@ -94,27 +101,35 @@ fgvc_aircraft_dataset <- dataset(
 
     cls_file <- file.path(
       self$data_dir,
-      switch(annotation_level,
-             "variant" = "variants.txt",
-             "family" = "families.txt",
-             "manufacturer" = "manufacturers.txt",
-             runtime_error("Invalid annotation_level"))
+      switch(
+        annotation_level,
+        "variant" = "variants.txt",
+        "family" = "families.txt",
+        "manufacturer" = "manufacturers.txt",
+        runtime_error("Invalid annotation_level")
+      )
     )
 
     classes <- readLines(cls_file)
     self$classes <- classes
     self$class_to_idx <- setNames(seq_along(classes), classes)
 
-    lines <- readLines(label_file)
-
-    self$image_paths <- character()
-    self$labels <- integer()
-
-    split_df <- read.fwf(label_file, widths = c(7, 100), colClasses = "character", stringsAsFactors = FALSE, col.names = c("img_id", "class_name"), strip.white = TRUE)
+    split_df <- read.fwf(
+      label_file,
+      widths = c(7, 100),
+      colClasses = "character",
+      stringsAsFactors = FALSE,
+      col.names = c("img_id", "class_name"),
+      strip.white = TRUE
+    )
     class_idxs <- self$class_to_idx[split_df$class_name]
     known_mask <- !vapply(class_idxs, is.null, logical(1))
-    self$image_paths <- file.path(self$data_dir, "images",glue::glue("{split_df$img_id[known_mask]}.jpg", .envir = environment()))
-    self$labels <- as.integer(unlist(class_idxs[known_mask]))
+    self$image_paths <- file.path(
+      self$data_dir,
+      "images",
+      glue::glue("{split_df$img_id[known_mask]}.jpg", .envir = environment())
+    )
+    self$labels <- class_idxs[known_mask]
 
     rlang::inform(glue::glue(
       "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
@@ -130,7 +145,9 @@ fgvc_aircraft_dataset <- dataset(
     }
 
     label <- self$labels[index]
-    if (!is.null(self$target_transform)) label <- self$target_transform(label)
+    if (!is.null(self$target_transform)) {
+      label <- self$target_transform(label)
+    }
 
     list(x = img, y = label)
   },
@@ -144,7 +161,9 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   download = function() {
-    if (self$check_exists()) return()
+    if (self$check_exists()) {
+      return()
+    }
 
     fs::dir_create(self$root)
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
@@ -156,6 +175,8 @@ fgvc_aircraft_dataset <- dataset(
     }
 
     untar(file, exdir = self$root)
-    rlang::inform(glue::glue("FGVC-Aircraft dataset downloaded and extracted successfully."))
+    rlang::inform(glue::glue(
+      "FGVC-Aircraft dataset downloaded and extracted successfully."
+    ))
   }
 )
