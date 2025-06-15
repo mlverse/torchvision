@@ -30,7 +30,8 @@
 #' @export
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
-  dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
+  archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
+  archive_md5 = "c8fa014336c82ac7804f0398fcb19387",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
 
   initialize = function(root,
@@ -71,7 +72,11 @@ eurosat_dataset <- torch::dataset(
     fs::dir_create(self$root, recurse = TRUE, showWarnings = FALSE)
 
     # Download and extract the dataset archive
-    archive <- download_and_cache(self$dataset_url, prefix = class(self)[1])
+    archive <- download_and_cache(self$archive_url, prefix = class(self)[1])
+    if (!tools::md5sum(archive) == self$archive_md5)
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+
+
     if (!dir.exists(self$images_dir)) {
       message("Extracting archive...")
       utils::unzip(archive, exdir = self$images_dir)
@@ -103,7 +108,7 @@ eurosat_dataset <- torch::dataset(
     if (image_ext == "jpg") {
       img_array <- jpeg::readJPEG(image_path)
     } else {
-      img_array <- tiff::readTIFF(image_path)
+      img_array <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
     }
 
     if (!is.null(self$transform)) {
@@ -141,7 +146,8 @@ eurosat_dataset <- torch::dataset(
 eurosat_all_bands_dataset <- torch::dataset(
   name = "eurosat_all_bands",
   inherit = eurosat_dataset,
-  dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSATallBands.zip?download=true",
+  archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSATallBands.zip?download=true",
+  archive_md5 = "5ac12b3b2557aa56e1826e981e8e200e",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true"
 )
 
@@ -159,7 +165,8 @@ eurosat_all_bands_dataset <- torch::dataset(
 eurosat100_dataset <- torch::dataset(
   name = "eurosat100",
   inherit = eurosat_dataset,
-  dataset_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
+  archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
+  archive_md5 = "c21c649ba747e86eda813407ef17d596",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true"
 )
 
