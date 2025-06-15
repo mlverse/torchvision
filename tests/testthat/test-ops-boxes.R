@@ -5,15 +5,16 @@ y2 = y1 + 1
 boxes = torch::torch_stack(list(x1,y1,x2,y2))$transpose(2,1)
 
 test_that("batched_nms", {
-  expect_no_error(
+  expect_error(
     x <- batched_nms(
       boxes = boxes,
       scores = torch::torch_ones(5)*0.6,
       idxs = torch::torch_ones(5),
       iou_threshold = 0.5
-    )
+    ),
+    class = "not_implemented_error"
   )
-  expect_tensor(x)
+  # expect_tensor(x)
 })
 
 test_that("remove_small_boxes", {

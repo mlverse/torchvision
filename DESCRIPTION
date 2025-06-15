@@ -43,7 +43,8 @@ Imports:
     png,
     abind,
     withr,
-    glue
+    glue,
+    zeallot
 Suggests:
     magick,
     testthat,
