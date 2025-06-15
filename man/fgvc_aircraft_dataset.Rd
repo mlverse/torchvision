@@ -41,13 +41,6 @@ The dataset supports standard dataset operations like indexing (\code{dataset[i]
 FGVC Aircraft Dataset
 }
 \details{
-Loads the FGVC Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
-\itemize{
-\item "variant": fine-grained aircraft variants (e.g., specific model variants)
-\item "family": aircraft families
-\item "manufacturer": aircraft manufacturers
-}
-
 The FGVC-Aircraft dataset supports the following official splits:
 \itemize{
 \item \code{"train"}: training subset

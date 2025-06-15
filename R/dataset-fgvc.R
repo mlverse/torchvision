@@ -1,10 +1,5 @@
 #' FGVC Aircraft Dataset
 #'
-#' Loads the FGVC Aircraft Dataset, a dataset of aircraft images with multiple annotation levels:
-#' - "variant": fine-grained aircraft variants (e.g., specific model variants)
-#' - "family": aircraft families
-#' - "manufacturer": aircraft manufacturers
-#'
 #' The FGVC-Aircraft dataset supports the following official splits:
 #' - `"train"`: training subset
 #' - `"val"`: validation subset
