@@ -9,7 +9,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   )
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "variant", download = TRUE)
-  expect_equal(length(fgvc), 3334)
+  expect_length(fgvc, 3334)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -33,13 +33,14 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_tensor(batch$x)
   expect_tensor_shape(batch$x,c(2,3,224,224))
   expect_tensor_dtype(batch$x,torch_float())
-  expect_equal(dim(batch$x)[1], 2)
-  expect_length(batch$y, 2)
+  expect_tensor(batch$y)
+  expect_tensor_shape(batch$y,2)
+  expect_tensor_dtype(batch$y,torch_long())
   expect_equal_to_r(batch$y[1],1)
   expect_equal_to_r(batch$y[2],1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "variant")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -49,7 +50,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "variant")
-  expect_equal(length(fgvc), 6667)
+  expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -59,7 +60,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "variant")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -69,7 +70,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 1)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "family")
-  expect_equal(length(fgvc), 3334)
+  expect_length(fgvc, 3334)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -79,7 +80,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "family")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -89,7 +90,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "family")
-  expect_equal(length(fgvc), 6667)
+  expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -99,7 +100,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "family")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -109,7 +110,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "train", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 3334)
+  expect_length(fgvc, 3334)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -119,7 +120,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "val", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -129,7 +130,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 6667)
+  expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
@@ -139,7 +140,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(as.numeric(item$y), 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "manufacturer")
-  expect_equal(length(fgvc), 3333)
+  expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
