@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-caltech.R
 \name{caltech256_dataset}
 \alias{caltech256_dataset}
-\title{Caltech 256 Dataset}
+\title{Caltech-256 Object Category Dataset}
 \usage{
 caltech256_dataset(
   root = tempdir(),
@@ -14,34 +14,35 @@ caltech256_dataset(
 \arguments{
 \item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech256}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to apply to each image after loading (e.g., resizing, normalization).}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{Optional function to transform the target label.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. If \code{TRUE}, downloads and extracts the dataset if it's not already present. Default is \code{FALSE}.}
 }
 \value{
-An R6 dataset object inheriting from \code{dataset}. Each item is a named list with elements:
+An object of class \code{caltech256_dataset}, which behaves like a torch dataset.
+Each element is a named list:
 \describe{
-\item{x}{An image tensor of shape \verb{(3, H, W)} with values in \verb{[0, 1]}.}
-\item{y}{The class label as a character string.}
+\item{x}{A H x W x 3 integer array representing an RGB image.}
+\item{y}{A character string representing the class label.}
 }
 }
 \description{
-Caltech 256 Dataset
+Caltech-256 Dataset
 }
 \details{
-Loads the Caltech 256 Dataset, containing images from 256 object categories.
-The dataset includes images and their corresponding class labels.
-There is no built-in train/test split.
+Loads the Caltech-256 Object Category Dataset, which consists of 30,607 images from 256 distinct object categories.
+Each category has at least 80 images, with significant variability in object position, scale, and background.
+#'
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-caltech <- caltech256_dataset(root = root_dir, download = TRUE)
-first_item <- caltech[1]
-first_item$x
-first_item$y
+caltech256 <- caltech256_dataset(download = TRUE)
+
+first_item <- caltech256[1]
+first_item$x  # Image array
+first_item$y  # Class label, e.g., "ak47"
 }
 
 }

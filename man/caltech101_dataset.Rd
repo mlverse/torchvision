@@ -35,7 +35,7 @@ Each element is a named list:
 Caltech-101 Dataset
 }
 \details{
-Loads the Caltech-101 dataset consisting of 101 object categories (excluding background), with images of varied size and shape.
+Loads the Caltech-101 dataset consisting of 101 object categories, with images of varied dimensions.
 Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
 
 You can specify the type of target returned:
@@ -44,8 +44,6 @@ You can specify the type of target returned:
 \item \code{"annotation"}: returns a list with bounding box coordinates and object contour.
 \item \code{"all"}: returns both the class label and the annotation.
 }
-
-The dataset will be downloaded and extracted under \code{root/caltech101} if not already present.
 }
 \examples{
 \dontrun{
