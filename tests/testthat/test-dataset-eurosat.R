@@ -80,7 +80,7 @@ test_that("eurosat100_dataset derivatives download and prepare correctly", {
   i <- dataloader_next(iter)
 
   # Check shape, dtype, and values on X
-  expect_tensor_shape(i[[1]], c(10, 64, 64, 13))
+  expect_tensor_shape(i[[1]], c(10, 13, 64, 64))
   expect_tensor_dtype(i[[1]], torch_float())
   expect_true((torch_max(i[[1]]) <= 1)$item())
   # Check shape, dtype and names on y
@@ -109,7 +109,7 @@ test_that("eurosat_all_bands_dataset derivatives download and prepare correctly"
   iter <- dataloader_make_iter(dl)
   i <- dataloader_next(iter)
   # Check shape, dtype, and values on X
-  expect_tensor_shape(i[[1]], c(10, 64, 64, 13))
+  expect_tensor_shape(i[[1]], c(10, 13, 64, 64))
   expect_tensor_dtype(i[[1]], torch_float())
   expect_true((torch_max(i[[1]]) <= 1)$item())
   # Check shape, dtype and names on y
