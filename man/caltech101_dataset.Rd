@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-caltech.R
 \name{caltech101_dataset}
 \alias{caltech101_dataset}
-\title{Caltech 101 Dataset}
+\title{Caltech-101 Dataset}
 \usage{
 caltech101_dataset(
   root = tempdir(),
@@ -13,51 +13,62 @@ caltech101_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech101}.}
+\item{root}{Character. Root directory for dataset storage. Default is a temporary directory. Data will be stored under \code{root/caltech101}.}
 
-\item{target_type}{Character or character vector. Type of target to load. Either \code{"category"}, \code{"annotation"}, or both.}
+\item{target_type}{Character. One of \code{"category"}, \code{"annotation"}, or \code{"all"}. Determines the type of target returned. Default is \code{"category"}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to apply to each image (e.g., resizing or normalization).}
 
-\item{target_transform}{Optional function to transform labels or annotations.}
+\item{target_transform}{Optional function to transform the target. Default is \code{NULL}.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download and extract the dataset if not already available. Default is \code{FALSE}.}
 }
 \value{
-An R6 dataset object inheriting from \code{dataset}. Each item is a named list with elements:
-\describe{
-\item{x}{An image tensor of shape \verb{(3, H, W)} with values in \verb{[0, 1]}.}
-\item{y}{The target label. If \code{target_type = "category"}, this is the class name (character string).
-If \code{target_type = "annotation"}, this is a list containing:
-\describe{
-\item{box_coord}{Numeric vector of length 4 with bounding box coordinates.}
-\item{obj_contour}{Matrix of shape \verb{(N, 2)} with object contour coordinates.}
-}}
+An object of class \code{caltech101_dataset}, which behaves like a torch dataset.
+Each element is a named list:
+\itemize{
+\item \code{x}: a H x W x 3 integer array representing an RGB image.
+\item \code{y}: either a character label, annotation list, or both depending on \code{target_type}.
 }
 }
 \description{
-Caltech 101 Dataset
+Caltech-101 Dataset
 }
 \details{
-Loads the Caltech 101 Dataset, containing images from 101 object categories.
-The dataset includes images and optionally their object annotations.
-There is no built-in train/test split.
+Loads the Caltech-101 dataset consisting of 101 object categories (excluding background), with images of varied size and shape.
+Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
+
+You can specify the type of target returned:
+\itemize{
+\item \code{"category"}: returns the class label (e.g., \code{"accordion"}).
+\item \code{"annotation"}: returns a list with bounding box coordinates and object contour.
+\item \code{"all"}: returns both the class label and the annotation.
+}
+
+The dataset will be downloaded and extracted under \code{root/caltech101} if not already present.
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-caltech <- caltech101_dataset(root = root_dir, target_type = "category", download = TRUE)
-first_item <- caltech[1]
-# image tensor of first item
-first_item$x
-# label (class name) of first item
-first_item$y
+# Category-only target
+ds1 <- caltech101_dataset(target_type = "category", download = TRUE)
+first_item <- ds1[1]
+first_item$x  # RGB image array
+first_item$y  # e.g., "accordion"
 
-# If annotations are requested
-caltech_ann <- caltech101_dataset(root = root_dir, target_type = "annotation", download = FALSE)
-annotation_item <- caltech_ann[1]
-annotation_item$y$box_coord
-annotation_item$y$obj_contour
+# Annotation-only target
+ds2 <- caltech101_dataset(target_type = "annotation", download = TRUE)
+first_item <- ds2[1]
+first_item$x  # RGB image array
+first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
+first_item$y$obj_contour    # Matrix of contour points: N x 2
+
+# Category + Annotation target (All target)
+ds3 <- caltech101_dataset(target_type = "all", download = TRUE)
+first_item <- ds3[1]
+first_item$x  # RGB image array
+first_item$y$label          # e.g., "accordion"
+first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
+first_item$y$obj_contour    # Matrix of contour points: N x 2
 }
 
 }
