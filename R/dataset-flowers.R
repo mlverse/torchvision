@@ -1,29 +1,29 @@
-#' Flowers 102 Dataset
+#' Oxford Flowers 102 Dataset
 #'
-#' Loads the Oxford Flowers 102 Dataset, consisting of 102 flower categories with images and labels.
-#' The Flowers102 dataset supports the following official splits:
-#' - `"train"`: training subset
-#' - `"val"`: validation subset
-#' - `"test"`: test subset
+#' Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, with between 40 and 258 images per class. 
+#'
+#' The dataset is split into:
+#' - `"train"`: training subset with labels.
+#' - `"val"`: validation subset with labels.
+#' - `"test"`: test subset with labels (used for evaluation).
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flowers102`.
-#' @param split Character. Dataset split to use. One of `"train"`, `"val"`, or `"test"`. Default is `"train"`.
-#' @param transform Optional function to transform input images after loading.
-#' @param target_transform Optional function to transform labels.
-#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
+#' @param split Character. One of `"train"`, `"val"`, or `"test"`. Defines which subset of the data to load. Default is `"train"`.
+#' @param transform Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.
+#' @param target_transform Optional function to transform the target labels. Default is `NULL`.
+#' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
 #'
-#' @return A torch dataset containing the Flowers102 subset.
-#' Images are returned as preloaded torch tensors in `x`, and corresponding class names as `y`.
-#' As `x` is already a tensor (unlike most datasets in this library),this is made explicit here.
+#' @return An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
+#' Each element is a named list:
+#' - `x`: a H x W x 3 numeric array representing an RGB image.
+#' - `y`: a character label indicating the flower class.
 #'
 #' @examples
 #' \dontrun{
-#' flowers <- flowers102_dataset(download = TRUE)
+#' flowers <- flowers102_dataset(split = "train", download = TRUE)
 #' first_item <- flowers[1]
-#' # image tensor of first item
-#' first_item$x
-#' # label (flower class name) of first item
-#' first_item$y
+#' first_item$x  # RGB image as H x W x 3 array
+#' first_item$y  # e.g., "rose"
 #' }
 #'
 #' @name flowers102_dataset
@@ -55,7 +55,6 @@ flowers102_dataset <- dataset(
     "camellia", "mallow", "mexican petunia", "bromelia", "blanket flower",
     "trumpet creeper", "blackberry lily"
   ),
-  image_size = c(224, 224),
   resources = list(
     c("https://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz", "52808999861908f626f3c1f4e79d11fa"),
     c("https://www.robots.ox.ac.uk/~vgg/data/flowers/102/imagelabels.mat", "e0620be6f572b9609742df49c70aed4d"),
@@ -75,7 +74,6 @@ flowers102_dataset <- dataset(
     }
     if (!self$check_exists(self$split))
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
-    rlang::inform(glue::glue("Loading processed split: '{self$split}'"))
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$samples <- meta$samples
     self$labels <- meta$labels
@@ -87,18 +85,17 @@ flowers102_dataset <- dataset(
     label_idx <- self$labels[[index]]
     label <- self$classes[label_idx]
 
-
     img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, glue::glue("{self$image_size[1]}x{self$image_size[2]}"))
-    img_tensor <- torchvision::transform_to_tensor(img)
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
 
     if (!is.null(self$transform))
-      img_tensor <- self$transform(img_tensor)
+      img <- self$transform(img)
 
     if (!is.null(self$target_transform))
       label <- self$target_transform(label)
 
-    structure(list(x = img_tensor, y = label), class = "flowers102_item")
+    list(x = img, y = label)
   },
 
   .length = function() {
@@ -110,7 +107,6 @@ flowers102_dataset <- dataset(
       rlang::inform(glue::glue("Split '{self$split}' is already processed and cached."))
       return(NULL)
     }
-    rlang::inform(glue::glue("Downloading Flowers102 split: '{self$split}' (~344MB)"))
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
@@ -121,10 +117,10 @@ flowers102_dataset <- dataset(
       fs::file_copy(p, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error(sprintf("MD5 mismatch for file: %s", r[1]))
+        runtime_error("Corrupt file! Delete the file in {p} and try again.")
     }
 
-    rlang::inform("Extracting images and processing metadata (may take a minute)...")
+    rlang::inform("Extracting images and processing dataset...")
     untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
     if (!requireNamespace("R.matlab", quietly = TRUE)) {
@@ -142,11 +138,9 @@ flowers102_dataset <- dataset(
     split_name <- self$split
     idxs <- set_map[[split_name]]
     jpg_dir <- file.path(self$raw_folder, "jpg")
-    paths <- file.path(jpg_dir, sprintf("image_%05d.jpg", idxs))
+    paths <- file.path(jpg_dir, glue::glue("image_{sprintf('%05d', idxs)}.jpg"))
     lbls <- as.integer(labels[idxs])
     saveRDS(list(samples = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
-
-    rlang::inform(glue::glue("Done processing split: '{split_name}' ({length(paths)} samples saved)"))
   },
 
   check_exists = function(split) {

@@ -15,39 +15,41 @@ flowers102_dataset(
 \arguments{
 \item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/flowers102}.}
 
-\item{split}{Character. Dataset split to use. One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
+\item{split}{Character. One of \code{"train"}, \code{"val"}, or \code{"test"}. Defines which subset of the data to load. Default is \code{"train"}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{Optional function to transform the target labels. Default is \code{NULL}.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download and process the dataset if it's not already available. Default is \code{FALSE}.}
 }
 \value{
-A torch dataset containing the Flowers102 subset.
-Images are returned as preloaded torch tensors in \code{x}, and corresponding class names as \code{y}.
-As \code{x} is already a tensor (unlike most datasets in this library),this is made explicit here.
+An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
+Each element is a named list:
+\itemize{
+\item \code{x}: a H x W x 3 numeric array representing an RGB image.
+\item \code{y}: a character label indicating the flower class.
+}
 }
 \description{
-Flowers 102 Dataset
+Oxford Flowers 102 Dataset
 }
 \details{
-Loads the Oxford Flowers 102 Dataset, consisting of 102 flower categories with images and labels.
-The Flowers102 dataset supports the following official splits:
+Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, with between 40 and 258 images per class.
+
+The dataset is split into:
 \itemize{
-\item \code{"train"}: training subset
-\item \code{"val"}: validation subset
-\item \code{"test"}: test subset
+\item \code{"train"}: training subset with labels.
+\item \code{"val"}: validation subset with labels.
+\item \code{"test"}: test subset with labels (used for evaluation).
 }
 }
 \examples{
 \dontrun{
-flowers <- flowers102_dataset(download = TRUE)
+flowers <- flowers102_dataset(split = "train", download = TRUE)
 first_item <- flowers[1]
-# image tensor of first item
-first_item$x
-# label (flower class name) of first item
-first_item$y
+first_item$x  # RGB image as H x W x 3 array
+first_item$y  # e.g., "rose"
 }
 
 }
