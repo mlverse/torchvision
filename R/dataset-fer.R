@@ -122,7 +122,7 @@ fer_dataset <- dataset(
     archive_path <- download_and_cache(self$url)
     
     if (!tools::md5sum(archive_path) == self$md5)
-      runtime_error("Corrupt file! Delete the file in {p} and try again.")
+      runtime_error("Corrupt file! Delete the file in {archive_path} and try again.")
 
     rlang::inform("Extracting dataset...")
     untar(archive_path, exdir = self$root)
