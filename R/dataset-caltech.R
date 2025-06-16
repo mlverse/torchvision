@@ -68,13 +68,10 @@ caltech101_dataset <- dataset(
     self$target_type <- match.arg(target_type, c("category", "annotation", "all"))
 
     if (download) {
-      rlang::inform("Downloading and preparing the Caltech101 dataset...")
       self$download()
     }
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
-
-    rlang::inform("Loading Caltech101 image paths and labels...")
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
     self$classes <- sort(base::basename(all_dirs))
