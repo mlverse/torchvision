@@ -1,14 +1,12 @@
 #' Caltech-101 Dataset
 #'
-#' Loads the Caltech-101 dataset consisting of 101 object categories (excluding background), with images of varied size and shape.
+#' Loads the Caltech-101 dataset consisting of 101 object categories, with images of varied dimensions.
 #' Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
 #'
 #' You can specify the type of target returned:
 #' - `"category"`: returns the class label (e.g., `"accordion"`).
 #' - `"annotation"`: returns a list with bounding box coordinates and object contour.
 #' - `"all"`: returns both the class label and the annotation.
-#'
-#' The dataset will be downloaded and extracted under `root/caltech101` if not already present.
 #'
 #' @param root Character. Root directory for dataset storage. Default is a temporary directory. Data will be stored under `root/caltech101`.
 #' @param target_type Character. One of `"category"`, `"annotation"`, or `"all"`. Determines the type of target returned. Default is `"category"`.
@@ -259,13 +257,11 @@ caltech256_dataset <- dataset(
     rlang::inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
 
     if (download) {
-      rlang::inform("Downloading Caltech256 dataset archive...")
       self$download()
     }
     if (!self$check_exists()) {
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
     }
-    rlang::inform("Preparing file list and labels...")
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
     self$classes <- sort(fs::path_file(all_dirs))
@@ -282,22 +278,24 @@ caltech256_dataset <- dataset(
       }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
       use.names = FALSE
     )
-    rlang::inform(glue::glue("Loaded {length(self$samples)} samples across {length(self$classes)} classes."))
+    rlang::inform(glue::glue("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes."))
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
     label_idx <- self$labels[[index]]
     label <- self$classes[label_idx]
+    label <- substring(label,5)
 
     img <- magick::image_read(img_path)
-    img_tensor <- torchvision::transform_to_tensor(img)
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
 
     if (!is.null(self$transform))
-      img_tensor <- self$transform(img_tensor)
+      img <- self$transform(img)
     if (!is.null(self$target_transform))
       label <- self$target_transform(label)
 
-    list(x = img_tensor, y = label)
+    list(x = img, y = label)
   },
   .length = function() {
     length(self$samples)
@@ -305,7 +303,6 @@ caltech256_dataset <- dataset(
   download = function() {
     if (self$check_exists()) return()
     fs::dir_create(self$root)
-    rlang::inform("Starting download and integrity check...")
     lapply(self$resources, function(res) {
       tar_path <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
@@ -315,7 +312,6 @@ caltech256_dataset <- dataset(
         runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
       }
 
-      rlang::inform("Extracting dataset (this may take a moment)...")
       utils::untar(dest, exdir = self$root)
     })
     rlang::inform("Caltech256 dataset downloaded and extracted successfully!")
