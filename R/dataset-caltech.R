@@ -127,10 +127,7 @@ caltech101_dataset <- dataset(
           }
           mat_data <- R.matlab::readMat(as.character(ann_file))
           box_coord <- as.numeric(mat_data[["box.coord"]])
-          obj_contour <- mat_data[["obj.contour"]] |>
-            as.matrix() |>
-            apply(2, as.numeric) |>
-            t()
+          obj_contour <- t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric))
           list(box_coord = box_coord, obj_contour = obj_contour)
         }
       },
@@ -148,10 +145,7 @@ caltech101_dataset <- dataset(
           }
           mat_data <- R.matlab::readMat(as.character(ann_file))
           box_coord <- as.numeric(mat_data[["box.coord"]])
-          obj_contour <- mat_data[["obj.contour"]] |>
-            as.matrix() |>
-            apply(2, as.numeric) |>
-            t()
+          obj_contour <- t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric))
         }
 
         list(
