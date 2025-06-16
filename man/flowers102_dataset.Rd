@@ -47,9 +47,21 @@ The dataset is split into:
 \examples{
 \dontrun{
 flowers <- flowers102_dataset(split = "train", download = TRUE)
-first_item <- flowers[1]
-first_item$x  # RGB image as H x W x 3 array
-first_item$y  # e.g., "rose"
+
+# Define a custom collate function to resize images in the batch
+resize_collate_fn <- function(batch) {
+  xs <- lapply(batch, function(sample) {
+    torchvision::transform_resize(sample$x, c(224, 224))
+  })
+  xs <- torch::torch_stack(xs)
+  ys <- sapply(batch, function(sample) sample$y)
+  list(x = xs, y = ys)
+}
+
+dl <- torch::dataloader(dataset = flowers, batch_size = 4, collate_fn = resize_collate_fn)
+batch <- dataloader_next(dataloader_make_iter(dl))
+batch$x  # batched image tensors resized to 224x224
+batch$y  # class labels as integers
 }
 
 }
