@@ -17,7 +17,7 @@ test_that("tests for the Flowers102 dataset", {
   expect_type(first_item$y,"character")
   expect_equal(first_item$y, "pink primrose")
 
-  flowers <- flowers102_dataset(root = t, split = "test")
+  flowers <- flowers102_dataset(root = t, split = "test", download = TRUE)
   expect_length(flowers, 6149)
   first_item <- flowers[1]
   expect_length(first_item$x,784500)
@@ -26,7 +26,7 @@ test_that("tests for the Flowers102 dataset", {
   expect_type(first_item$y,"character")
   expect_equal(first_item$y, "pink primrose")
 
-  flowers <- flowers102_dataset(root = t, split = "val")
+  flowers <- flowers102_dataset(root = t, split = "val", download = TRUE)
   expect_length(flowers, 1020)
   first_item <- flowers[1]
   expect_length(first_item$x,909000)
@@ -44,7 +44,7 @@ test_that("tests for the Flowers102 dataset", {
     list(x = xs, y = ys)
   }
   dl <- torch::dataloader(
-    dataset = flowers102_dataset(root = t, transform = transform_to_tensor),
+    dataset = flowers102_dataset(root = t, transform = transform_to_tensor, download = TRUE),
     batch_size = 4,
     collate_fn = resize_collate_fn
   )
