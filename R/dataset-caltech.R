@@ -58,22 +58,14 @@ caltech101_dataset <- dataset(
     target_type = "category",
     transform = NULL,
     target_transform = NULL,
-    download = FALSE) {
-
+    download = FALSE
+  ) {
     self$root <- fs::path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
     rlang::inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
 
-    if (is.character(target_type))
-      target_type <- list(target_type)
-    valid_types <- c("category", "annotation")
-    invalid <- setdiff(target_type, valid_types)
-    if (length(invalid) > 0) {
-      invalid_str <- glue::glue_collapse(invalid, sep = ", ", last = " and ")
-      runtime_error(glue::glue("Invalid target_type(s): {invalid_str}"))
-    }
-    self$target_type <- target_type
+    self$target_type <- match.arg(target_type, c("category", "annotation", "all"))
 
     if (download) {
       rlang::inform("Downloading and preparing the Caltech101 dataset...")
@@ -81,6 +73,7 @@ caltech101_dataset <- dataset(
     }
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
+
     rlang::inform("Loading Caltech101 image paths and labels...")
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
@@ -109,7 +102,7 @@ caltech101_dataset <- dataset(
   .getitem = function(index) {
     img_path <- self$samples[[index]]
     label_idx <- self$labels[[index]]
-    label <- self$classes[label_idx]
+    label <- self$classes[[label_idx]]
 
     img <- magick::image_read(img_path)
     img <- magick::image_data(img, channels = "rgb")
@@ -118,11 +111,10 @@ caltech101_dataset <- dataset(
     if (!is.null(self$transform))
       img <- self$transform(img)
 
-    target_list <- lapply(self$target_type, function(t) {
-      if (t == "category") {
-        label
-      } else if (t == "annotation") {
-        ann_class <- self$annotation_classes[label_idx]
+    y <- switch(self$target_type,
+      "category" = label,
+      "annotation" = {
+        ann_class <- self$annotation_classes[[label_idx]]
         index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
         ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
         if (!fs::file_exists(ann_file)) {
@@ -139,17 +131,39 @@ caltech101_dataset <- dataset(
             t()
           list(box_coord = box_coord, obj_contour = obj_contour)
         }
-      } else {
-        runtime_error(glue::glue("Invalid target_type: {t}"))
-      }
-    })
+      },
+      "all" = {
+        ann_class <- self$annotation_classes[[label_idx]]
+        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
+        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
 
-    target <- if (length(target_list) == 1) target_list[[1]] else target_list
+        if (!fs::file_exists(ann_file)) {
+          box_coord <- NULL
+          obj_contour <- NULL
+        } else {
+          if (!requireNamespace("R.matlab", quietly = TRUE)) {
+            runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
+          }
+          mat_data <- R.matlab::readMat(as.character(ann_file))
+          box_coord <- as.numeric(mat_data[["box.coord"]])
+          obj_contour <- mat_data[["obj.contour"]] |>
+            as.matrix() |>
+            apply(2, as.numeric) |>
+            t()
+        }
+
+        list(
+          label = label,
+          box_coord = box_coord,
+          obj_contour = obj_contour
+        )
+      }
+    )
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = img, y = y)
   },
 
   .length = function() {
