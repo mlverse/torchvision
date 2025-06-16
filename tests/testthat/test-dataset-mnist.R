@@ -77,11 +77,73 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_named(batch, c("x", "y"))
 })
 
+test_that("tests for the emnist dataset", {
+  skip_on_cran()
+
+  dir <- tempdir()
+
+  emnist <- emnist_dataset(dir, split = "balanced", download = TRUE)
+  expect_equal(length(emnist), 112800)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 46)
+
+  emnist <- emnist_dataset(dir, split = "byclass")
+  expect_equal(length(emnist), 697932)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 36)
+
+  emnist <- emnist_dataset(dir, split = "bymerge")
+  expect_equal(length(emnist), 697932)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 25)
+
+  emnist <- emnist_dataset(dir, split = "letters")
+  expect_equal(length(emnist), 124800)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 24)
+
+  emnist <- emnist_dataset(dir, split = "digits")
+  expect_equal(length(emnist), 240000)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 9)
+
+  emnist <- emnist_dataset(dir, split = "mnist")
+  expect_equal(length(emnist), 60000)
+  first_item <- emnist[1]
+  expect_named(first_item, c("x", "y"))
+  expect_true(inherits(first_item$x, "array"))
+  expect_equal((first_item[[2]]), 5)
+
+  ds2 <- emnist_dataset(
+    root = dir,
+    split = "balanced",
+    transform = transform_to_tensor
+  )
+  dl <- torch::dataloader(ds2, batch_size = 32)
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+  expect_tensor_shape(batch$x, c(32, 1, 28, 28))
+  expect_tensor_shape(batch$y, 32)
+  expect_named(batch, c("x", "y"))
+})
+
+
 test_that("tests for the qmnist dataset", {
   dir <- tempfile(fileext = "/")
 
   expect_error(
-      ds <- qmnist_dataset(dir, what = subset)
+      ds <- qmnist_dataset(dir, split = "nist"),
+      "Dataset not found."
   )
 
   splits <- c("train", "test", "nist")
