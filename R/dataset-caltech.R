@@ -53,17 +53,18 @@ caltech101_dataset <- dataset(
     )
   ),
 
-  initialize = function(root = tempdir(),
-                        target_type = "category",
-                        transform = NULL,
-                        target_transform = NULL,
-                        download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    target_type = "category",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE) {
 
     self$root <- fs::path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
-    self$resize_shape <- c(224, 224)
     rlang::inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
+
     if (is.character(target_type))
       target_type <- list(target_type)
     valid_types <- c("category", "annotation")
@@ -81,32 +82,41 @@ caltech101_dataset <- dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. Use `download = TRUE` to download.")
     rlang::inform("Loading Caltech101 image paths and labels...")
+
     all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
     self$classes <- sort(base::basename(all_dirs))
     self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
+
     name_map <- list("Faces"="Faces_2", "Faces_easy"="Faces_3", "Motorbikes"="Motorbikes_16", "airplanes"="Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
 
-    samples_per_class <- lapply(seq_along(self$classes), function(i) {
-      images <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes[[i]]), glob = "*.jpg")
-      images <- sort(images)
-      list(samples = images, labels = rep(i, length(images)), indices = seq_along(images))
-    })
+    self$samples <- list()
+    self$labels <- c()
+    self$image_indices <- c()
 
-    self$samples <- unlist(lapply(samples_per_class, `[[`, "samples"), recursive = FALSE)
-    self$labels <- unlist(lapply(samples_per_class, `[[`, "labels"))
-    self$image_indices <- unlist(lapply(samples_per_class, `[[`, "indices"))
+    for (i in seq_along(self$classes)) {
+      img_dir <- fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes[[i]])
+      imgs <- fs::dir_ls(img_dir, glob = "*.jpg")
+      imgs <- sort(imgs)
+      self$samples <- append(self$samples, imgs)
+      self$labels <- c(self$labels, rep(i, length(imgs)))
+      self$image_indices <- c(self$image_indices, seq_along(imgs))
+    }
 
     rlang::inform(glue::glue("Caltech101 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes."))
   },
+
   .getitem = function(index) {
     img_path <- self$samples[[index]]
     label_idx <- self$labels[[index]]
     label <- self$classes[label_idx]
 
     img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, "224x224!")
-    img_tensor <- torchvision::transform_to_tensor(img)
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
+
+    if (!is.null(self$transform))
+      img <- self$transform(img)
 
     target_list <- lapply(self$target_type, function(t) {
       if (t == "category") {
@@ -133,17 +143,19 @@ caltech101_dataset <- dataset(
         runtime_error(glue::glue("Invalid target_type: {t}"))
       }
     })
+
     target <- if (length(target_list) == 1) target_list[[1]] else target_list
-    if (!is.null(self$transform))
-      img_tensor <- self$transform(img_tensor)
+
     if (!is.null(self$target_transform))
       target <- self$target_transform(target)
 
-    list(x = img_tensor, y = target)
+    list(x = img, y = target)
   },
+
   .length = function() {
     length(self$samples)
   },
+
   download = function() {
     if (self$check_exists()) return()
     rlang::inform("Downloading Caltech101 archive...")
@@ -174,6 +186,7 @@ caltech101_dataset <- dataset(
     }))
     rlang::inform("Caltech101 dataset downloaded and extracted successfully.")
   },
+
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, "caltech-101", "101_ObjectCategories"))
   }
