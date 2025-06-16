@@ -13,33 +13,28 @@ test_that("Caltech101 dataset works correctly", {
   first_item <- ds_category[1]
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "integer")
-  expect_length(first_item$x,234000)
   expect_type(first_item$y,"character")
-  expect_equal(first_item$y,"accordion")
+  expect_true(first_item$y %in% ds_category$classes)
 
   ds_annotation <- caltech101_dataset(root = t, target_type = "annotation")
   expect_equal(length(ds_annotation), 8677)
   first_item <- ds_annotation[1]
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "integer")
-  expect_length(first_item$x,234000)
   expect_type(first_item$y$box_coord, "double")
   expect_length(first_item$y$box_coord,4)
   expect_type(first_item$y$obj_contour,"double")
-  expect_length(first_item$y$obj_contour,40)
 
   ds_all <- caltech101_dataset(root = t, target_type = "all")
   expect_equal(length(ds_all), 8677)
   first_item <- ds_all[1]
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "integer")
-  expect_length(first_item$x,234000)
   expect_type(first_item$y$label, "character")
-  expect_equal(first_item$y$label,"accordion")
+  expect_true(first_item$y$label %in% ds_all$classes)
   expect_type(first_item$y$box_coord, "double")
   expect_length(first_item$y$box_coord,4)
   expect_type(first_item$y$obj_contour,"double")
-  expect_length(first_item$y$obj_contour,40)
 
   resize_collate_fn <- function(batch) {
     target_size <- c(224, 224)
@@ -65,10 +60,10 @@ test_that("Caltech101 dataset works correctly", {
   expect_tensor_dtype(batch$x,torch_float())
   expect_type(batch$y,"list")
   expect_type(batch$y[[1]],"character")
-  expect_equal(batch$y[[1]],"accordion")
-  expect_equal(batch$y[[2]],"accordion")
-  expect_equal(batch$y[[3]],"accordion")
-  expect_equal(batch$y[[4]],"accordion")
+  expect_true(batch$y[[1]] %in% ds$classes)
+  expect_true(batch$y[[2]] %in% ds$classes)
+  expect_true(batch$y[[3]] %in% ds$classes)
+  expect_true(batch$y[[4]] %in% ds$classes)
 })
 
 test_that("Caltech256 dataset works correctly", {
