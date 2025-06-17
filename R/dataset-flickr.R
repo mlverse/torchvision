@@ -66,7 +66,6 @@ flickr8k_dataset <- dataset(
     rlang::inform(glue::glue("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached."))
     
     if (download) {
-      rlang::inform(glue::glue("Downloading Flickr8k split: '{self$split}' (~1GB)"))
       self$download()
     }
 
@@ -87,6 +86,7 @@ flickr8k_dataset <- dataset(
       return()
     }
 
+    rlang::inform(glue::glue("Downloading Flickr8k split: '{self$split}' (~1GB)"))
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
@@ -162,24 +162,38 @@ flickr8k_dataset <- dataset(
 
 #' Flickr30k Dataset
 #'
-#' Loads the Flickr30k dataset consisting of 31,014 images, each annotated with five captions.
-#' The dataset is split into training and test sets using the official Karpathy splits.
-#' Images are resized to a fixed 224x224 resolution, and captions are extracted as lists of raw strings.
+#' Loads the Flickr30k dataset consisting of 30,000 images with five human-annotated captions per image.
+#'
+#' The dataset is split into:
+#' - `"train"`: training subset with image paths and captions.
+#' - `"test"`: test subset with image paths and captions.
 #'
 #' @inheritParams flickr8k_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.
 #'
-#' @return A flickr30k_dataset object representing the dataset with images and their corresponding captions.
+#' @return An object of class \code{flickr30k_dataset}, which behaves like a torch dataset.
+#' Each element is a named list:
+#' - `x`: a H x W x 3 integer array representing an RGB image.
+#' - `y`: a character vector of captions for the image.
 #'
 #' @examples
 #' \dontrun{
-#' root_dir <- tempfile()
-#' flickr30k <- flickr30k_dataset(download = TRUE)
-#' first_item <- flickr30k[1]
-#' # Tensor representing the image
-#' first_item$x
-#' # List of captions for the image
-#' first_item$y
+#' flickr <- flickr30k_dataset(train = TRUE, download = TRUE)
+#'
+#' # Define a custom collate function to resize images in the batch
+#' resize_collate_fn <- function(batch) {
+#'   xs <- lapply(batch, function(sample) {
+#'     torchvision::transform_resize(sample$x, c(224, 224))
+#'   })
+#'   xs <- torch::torch_stack(xs)
+#'   ys <- sapply(batch, function(sample) sample$y)
+#'   list(x = xs, y = ys)
+#' }
+#'
+#' dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+#' batch <- dataloader_next(dataloader_make_iter(dl))
+#' batch$x  # batched image tensors resized to 224x224
+#' batch$y  # list of caption vectors
 #' }
 #'
 #' @name flickr30k_dataset
@@ -189,35 +203,32 @@ flickr8k_dataset <- dataset(
 flickr30k_dataset <- dataset(
   name = "flickr30k",
   resources = list(
-    c(
-      "https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz",
-      "985ac761bbb52ca49e0c474ae806c07c"
-    ),
-    c(
-      "https://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip",
-      "4fa8c08369d22fe16e41dc124bd1adc2"
-    )
+    c("https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz","985ac761bbb52ca49e0c474ae806c07c"),
+    c("https://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip","4fa8c08369d22fe16e41dc124bd1adc2")
   ),
 
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE) {
+
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
 
-    split <- if (self$train) "train" else "test"
+    self$split <- if (self$train) "train" else "test"
     rlang::inform("Flickr30k Dataset (~4.1GB) will be downloaded and processed if not already cached.")
 
     if (download) {
-      rlang::inform(glue::glue("Downloading Flickr30k split: '{split}' (~4.1GB)"))
       self$download()
     }
 
     if (!self$check_exists()) {
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
     }
-
-    rlang::inform("Extracting images and processing metadata (may take a minute)...")
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
     captions_json <- jsonlite::fromJSON(captions_path)
@@ -239,14 +250,15 @@ flickr30k_dataset <- dataset(
       self$captions_map[[filename]] <- captions
     }
 
-    rlang::inform(glue::glue("Done processing split: '{split}' ({length(self$filenames)} samples saved)"))
-    rlang::inform(glue::glue("Loading processed split: '{split}'"))
-    rlang::inform(glue::glue("Split '{split}' loaded with {length(self$filenames)} samples."))
+    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$filenames)} samples."))
   },
 
   download = function() {
-    if (self$check_exists()) return(invisible(NULL))
+    if (self$check_exists()){
+      return()
+    }
 
+    rlang::inform(glue::glue("Downloading Flickr30k split: '{self$split}' (~4.1GB)"))
     fs::dir_create(self$raw_folder)
 
     for (r in self$resources) {
@@ -273,26 +285,24 @@ flickr30k_dataset <- dataset(
   },
 
   check_exists = function() {
-    fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) &&
-      fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
+    fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) && fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
   },
 
   .getitem = function(index) {
     fname <- self$filenames[[index]]
     img_path <- file.path(self$raw_folder, "flickr30k-images", fname)
     img <- magick::image_read(img_path)
-    img <- magick::image_resize(img, "224x224!")
-    img_tensor <- torchvision::transform_to_tensor(img)
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
+    target <- self$captions_map[[fname]]
 
     if (!is.null(self$transform))
-      img_tensor <- self$transform(img_tensor)
-
-    target <- self$captions_map[[fname]]
+      img <- self$transform(img)
 
     if (!is.null(self$target_transform))
       target <- self$target_transform(target)
 
-    list(x = img_tensor, y = target)
+    list(x = img, y = target)
   },
 
   .length = function() {
