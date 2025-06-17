@@ -1,25 +1,40 @@
 #' Flickr8k Dataset
 #'
-#' Loads the Flickr8k dataset consisting of 8,000 images with five captions each.
-#' The dataset is split into training and test sets with 6,000 and 1,000 images respectively.
-#' Images are resized to a fixed size and captions are stored as lists of strings.
+#' Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image.
 #'
-#' @param root Character. Root directory where the dataset will be stored under `root/flickr8k`.
-#' @param train Logical. If `TRUE`, loads the training split, otherwise the test split. Default is `TRUE`.
-#' @param transform Optional function to transform input images after loading.
-#' @param target_transform Optional function to transform captions.
-#' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
+#' The dataset is split into:
+#' - `"train"`: training subset with image paths and captions.
+#' - `"test"`: test subset with image paths and captions.
 #'
-#' @return A flickr8k_dataset object representing the dataset.
+#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
+#' @param train Logical. If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
+#' @param transform Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.
+#' @param target_transform Optional function to transform the captions. Default is `NULL`.
+#' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
+#'
+#' @return An object of class \code{flickr8k_dataset}, which behaves like a torch dataset.
+#' Each element is a named list:
+#' - `x`: a H x W x 3 integer array representing an RGB image.
+#' - `y`: a character vector of captions for the image.
 #'
 #' @examples
 #' \dontrun{
-#' flickr8k <- flickr8k_dataset(download = TRUE)
-#' first_item <- flickr8k[1]
-#' # image tensor of first item
-#' first_item$x
-#' # list of captions of first item
-#' first_item$y
+#' flickr <- flickr8k_dataset(train = TRUE, download = TRUE)
+#'
+#' # Define a custom collate function to resize images in the batch
+#' resize_collate_fn <- function(batch) {
+#'   xs <- lapply(batch, function(sample) {
+#'     torchvision::transform_resize(sample$x, c(224, 224))
+#'   })
+#'   xs <- torch::torch_stack(xs)
+#'   ys <- sapply(batch, function(sample) sample$y)
+#'   list(x = xs, y = ys)
+#' }
+#'
+#' dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+#' batch <- dataloader_next(dataloader_make_iter(dl))
+#' batch$x  # batched image tensors resized to 224x224
+#' batch$y  # list of caption vectors
 #' }
 #'
 #' @name flickr8k_dataset
