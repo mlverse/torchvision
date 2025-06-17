@@ -15,34 +15,52 @@ flickr30k_dataset(
 \arguments{
 \item{root}{Character. Root directory where the dataset will be stored under \code{root/flickr30k}.}
 
-\item{train}{Logical. If \code{TRUE}, loads the training split, otherwise the test split. Default is \code{TRUE}.}
+\item{train}{Logical. If \code{TRUE}, loads the training set. If \code{FALSE}, loads the test set. Default is \code{TRUE}.}
 
-\item{transform}{Optional function to transform input images after loading.}
+\item{transform}{Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.}
 
-\item{target_transform}{Optional function to transform captions.}
+\item{target_transform}{Optional function to transform the captions. Default is \code{NULL}.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download and process the dataset if it's not already available. Default is \code{FALSE}.}
 }
 \value{
-A flickr30k_dataset object representing the dataset with images and their corresponding captions.
+An object of class \code{flickr30k_dataset}, which behaves like a torch dataset.
+Each element is a named list:
+\itemize{
+\item \code{x}: a H x W x 3 integer array representing an RGB image.
+\item \code{y}: a character vector of captions for the image.
+}
 }
 \description{
 Flickr30k Dataset
 }
 \details{
-Loads the Flickr30k dataset consisting of 31,014 images, each annotated with five captions.
-The dataset is split into training and test sets using the official Karpathy splits.
-Images are resized to a fixed 224x224 resolution, and captions are extracted as lists of raw strings.
+Loads the Flickr30k dataset consisting of 30,000 images with five human-annotated captions per image.
+
+The dataset is split into:
+\itemize{
+\item \code{"train"}: training subset with image paths and captions.
+\item \code{"test"}: test subset with image paths and captions.
+}
 }
 \examples{
 \dontrun{
-root_dir <- tempfile()
-flickr30k <- flickr30k_dataset(download = TRUE)
-first_item <- flickr30k[1]
-# Tensor representing the image
-first_item$x
-# List of captions for the image
-first_item$y
+flickr <- flickr30k_dataset(train = TRUE, download = TRUE)
+
+# Define a custom collate function to resize images in the batch
+resize_collate_fn <- function(batch) {
+  xs <- lapply(batch, function(sample) {
+    torchvision::transform_resize(sample$x, c(224, 224))
+  })
+  xs <- torch::torch_stack(xs)
+  ys <- sapply(batch, function(sample) sample$y)
+  list(x = xs, y = ys)
+}
+
+dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+batch <- dataloader_next(dataloader_make_iter(dl))
+batch$x  # batched image tensors resized to 224x224
+batch$y  # list of caption vectors
 }
 
 }
