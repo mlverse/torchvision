@@ -1,33 +1,43 @@
-# Fixing the COCO detection dataset based on mentor comments
-
 #' COCO Detection Dataset
 #'
-#' Loads MS COCO Dataset for object detection and segmentation.
+#' Loads the MS COCO dataset for object detection and segmentation.
 #'
-#' @param root Root directory for data.
-#' @param train Whether to load training split (TRUE) or validation (FALSE).
-#' @param year Dataset year: "2014", "2016", or "2017".
-#' @param download If TRUE, downloads the dataset if needed.
-#' @param transforms Transform applied to image.
-#' @param target_transform Transform applied to target.
+#' @param root Root directory where the dataset is stored or will be downloaded to.
+#' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
+#' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
+#' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
+#' @param transforms Optional transform function applied to the image.
+#' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
-#' @return A dataset object that returns a list with:
+#' @return
+#' An R6 dataset object. Each item is a list with two elements:
 #' \describe{
-#'   \item{image}{A 3D torch tensor \code{[C, H, W]} in float format.}
-#'   \item{target}{A list containing bounding boxes, labels, area, iscrowd, segmentation, etc.}
+#'   \item{image}{A 3D \code{torch_tensor} of shape \code{[C, H, W]} (channel-first).}
+#'   \item{target}{A list with:
+#'     \describe{
+#'       \item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
+#'       \item{labels}{A numeric vector of integer class labels.}
+#'       \item{area}{A numeric vector indicating the area of each object.}
+#'       \item{iscrowd}{A logical or numeric vector indicating whether objects are crowds.}
+#'       \item{segmentation}{A list of segmentation polygons per object.}
+#'     }
+#'   }
 #' }
+#'
+#' @details
+#' The returned image is in CHW format (channels, height, width), matching the torch convention.
+#' The dataset supports loading object detection annotations such as bounding boxes, labels,
+#' areas, crowd indicators, and segmentation masks from the official COCO annotations.
 #'
 #' @examples
 #' \dontrun{
-#' ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
-#' el <- ds[1]
-#' image <- el$image
-#' target <- el$target
-#' draw_bounding_boxes(image, target$boxes, labels = as.character(target$labels))
+#' ds <- coco_detection_dataset(root = "data", train = FALSE, year = "2017", download = TRUE)
+#' sample <- ds[1]
+#' image <- sample$image
+#' target <- sample$target
 #' }
 #'
-#' The returned image is in CHW format (channels, height, width), matching torch convention.
-#'
+#' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
