@@ -14,20 +14,47 @@ coco_detection_dataset(
 )
 }
 \arguments{
-\item{root}{Root directory for data.}
+\item{root}{Root directory where the dataset is stored or will be downloaded to.}
 
-\item{train}{Whether to load training split (TRUE) or validation (FALSE).}
+\item{train}{Logical. If TRUE, loads the training split; otherwise, loads the validation split.}
 
-\item{year}{Dataset year: "2014", "2016", or "2017".}
+\item{year}{Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.}
 
-\item{download}{If TRUE, downloads the dataset if needed.}
+\item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 
-\item{transforms}{Transform applied to image.}
+\item{transforms}{Optional transform function applied to the image.}
 
-\item{target_transform}{Transform applied to target.
-
-The returned image is in CHW format (channels, height, width), matching torch convention.}
+\item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
+}
+\value{
+An R6 dataset object. Each item is a list with two elements:
+\describe{
+\item{image}{A 3D \code{torch_tensor} of shape \code{[C, H, W]} (channel-first).}
+\item{target}{A list with:
+\describe{
+\item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
+\item{labels}{A numeric vector of integer class labels.}
+\item{area}{A numeric vector indicating the area of each object.}
+\item{iscrowd}{A logical or numeric vector indicating whether objects are crowds.}
+\item{segmentation}{A list of segmentation polygons per object.}
+}
+}
+}
 }
 \description{
-Loads MS COCO Dataset for object detection and segmentation.
+Loads the MS COCO dataset for object detection and segmentation.
+}
+\details{
+The returned image is in CHW format (channels, height, width), matching the torch convention.
+The dataset supports loading object detection annotations such as bounding boxes, labels,
+areas, crowd indicators, and segmentation masks from the official COCO annotations.
+}
+\examples{
+\dontrun{
+ds <- coco_detection_dataset(root = "data", train = FALSE, year = "2017", download = TRUE)
+sample <- ds[1]
+image <- sample$image
+target <- sample$target
+}
+
 }

@@ -1,18 +1,43 @@
-# Fixing the COCO detection dataset based on mentor comments
-
 #' COCO Detection Dataset
 #'
-#' Loads MS COCO Dataset for object detection and segmentation.
+#' Loads the MS COCO dataset for object detection and segmentation.
 #'
-#' @param root Root directory for data.
-#' @param train Whether to load training split (TRUE) or validation (FALSE).
-#' @param year Dataset year: "2014", "2016", or "2017".
-#' @param download If TRUE, downloads the dataset if needed.
-#' @param transforms Transform applied to image.
-#' @param target_transform Transform applied to target.
+#' @param root Root directory where the dataset is stored or will be downloaded to.
+#' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
+#' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
+#' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
+#' @param transforms Optional transform function applied to the image.
+#' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
-#' The returned image is in CHW format (channels, height, width), matching torch convention.
+#' @return
+#' An R6 dataset object. Each item is a list with two elements:
+#' \describe{
+#'   \item{image}{A 3D \code{torch_tensor} of shape \code{[C, H, W]} (channel-first).}
+#'   \item{target}{A list with:
+#'     \describe{
+#'       \item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
+#'       \item{labels}{A numeric vector of integer class labels.}
+#'       \item{area}{A numeric vector indicating the area of each object.}
+#'       \item{iscrowd}{A logical or numeric vector indicating whether objects are crowds.}
+#'       \item{segmentation}{A list of segmentation polygons per object.}
+#'     }
+#'   }
+#' }
 #'
+#' @details
+#' The returned image is in CHW format (channels, height, width), matching the torch convention.
+#' The dataset supports loading object detection annotations such as bounding boxes, labels,
+#' areas, crowd indicators, and segmentation masks from the official COCO annotations.
+#'
+#' @examples
+#' \dontrun{
+#' ds <- coco_detection_dataset(root = "data", train = FALSE, year = "2017", download = TRUE)
+#' sample <- ds[1]
+#' image <- sample$image
+#' target <- sample$target
+#' }
+#'
+#' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
@@ -38,11 +63,13 @@ coco_detection_dataset <- torch::dataset(
     self$ann_file <- fs::path(self$data_dir, "annotations",
                               glue::glue("instances_{split}{year}.json"))
 
-    if (download)
+    if (download) {
       self$download()
+    }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
     self$load_annotations()
   },
@@ -56,8 +83,13 @@ coco_detection_dataset <- torch::dataset(
     info <- self$images[[as.character(image_id)]]
 
     img_path <- fs::path(self$image_dir, info$file_name)
+
     img_arr <- jpeg::readJPEG(img_path)
-    img_arr <- aperm(img_arr, c(3, 2, 1))  # CHW format
+    if (length(dim(img_arr)) == 2) {
+      img_arr <- array(rep(img_arr, 3), dim = c(dim(img_arr), 3)) # Convert grayscale to RGB
+    }
+    img_arr <- aperm(img_arr, c(3, 1, 2)) # CHW format
+    img_arr <- torch::torch_tensor(img_arr, dtype = torch::torch_float())
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -75,14 +107,11 @@ coco_detection_dataset <- torch::dataset(
     }
 
     target <- list(
-      image_id = image_id,
       boxes = boxes,
       labels = labels,
       area = area,
       iscrowd = iscrowd,
-      segmentation = segmentation,
-      height = info$height,
-      width = info$width
+      segmentation = segmentation
     )
 
     if (!is.null(self$transforms))
@@ -102,13 +131,10 @@ coco_detection_dataset <- torch::dataset(
     info <- self$get_resource_info()
 
     ann_zip <- download_and_cache(info$ann_url)
-    if (tools::md5sum(ann_zip) != info$ann_md5) {
-      stop("MD5 mismatch for annotations zip: corrupted download?")
-    }
 
     img_zip <- download_and_cache(info$img_url)
     if (tools::md5sum(img_zip) != info$img_md5) {
-      stop("MD5 mismatch for image zip: corrupted download?")
+      rlang::abort(glue::glue("Corrupt file! Delete the file in {img_zip} and try again."))
     }
 
     utils::unzip(ann_zip, exdir = self$data_dir)

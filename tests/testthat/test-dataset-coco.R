@@ -2,8 +2,8 @@ test_that("coco_detection_dataset  handles missing files gracefully", {
   tmp <- tempfile()
 
   expect_error(
-    coco_detection_dataset (root = tmp, train = TRUE, year = "2017", download = FALSE),
-    class = "rlang_error"
+    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    class = "runtime_error"
   )
 })
 
@@ -25,11 +25,22 @@ test_that("coco_detection_dataset loads correctly", {
   img <- el$image
   target <- el$target
 
-  expect_true(is.array(img))
+  expect_true(inherits(img, "torch_tensor"))
   expect_equal(length(dim(img)), 3)
 
   expect_true(is.list(target))
-  expect_true(all(c("image_id", "boxes", "labels", "area", "iscrowd", "segmentation", "height", "width") %in% names(target)))
+
+  dl <- dataloader(ds, batch_size = 1)
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+
+  expect_true(inherits(batch$image, "torch_tensor"))
+  expect_equal(batch$image$ndim, 4) # [B, C, H, W]
+  expect_equal(batch$image$dtype, torch::torch_float())
+
+  expect_true(is.list(batch$target))
+
+  expect_true(all(c("boxes", "labels", "area", "iscrowd", "segmentation") %in% names(target)))
 
   if (is.matrix(target$boxes) && nrow(target$boxes) > 0) {
     expect_equal(ncol(target$boxes), 4)
@@ -47,10 +58,5 @@ test_that("coco_detection_dataset parameter validation", {
   expect_error(
     coco_detection_dataset(root = tmp, year = "2020"),
     "should be one of"
-  )
-
-  expect_error(
-    coco_detection_dataset(root = tmp, year = "2017", download = FALSE),
-    class = "rlang_error"
   )
 })
