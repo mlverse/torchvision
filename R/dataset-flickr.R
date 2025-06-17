@@ -36,17 +36,24 @@ flickr8k_dataset <- dataset(
     c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip",
       "f18a1e2920de5bd84dae7cf08ec78978")
   ),
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL, download = FALSE) {
+
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE) {
+
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
+    self$split <- if (train) "train" else "test"
 
-    split <- if (train) "train" else "test"
     rlang::inform(glue::glue("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached."))
     
     if (download) {
-      rlang::inform(glue::glue("Downloading Flickr8k split: '{split}' (~1GB)"))
+      rlang::inform(glue::glue("Downloading Flickr8k split: '{self$split}' (~1GB)"))
       self$download()
     }
 
@@ -54,17 +61,18 @@ flickr8k_dataset <- dataset(
       runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
     }
 
-    rlang::inform(glue::glue("Loading processed split: '{split}'"))
-
     file <- if (self$train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, file))
 
     self$images <- data$images
     self$captions <- data$captions
-    rlang::inform(glue::glue("Split '{split}' loaded with {length(self$images)} samples."))
+    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$images)} samples."))
   },
+
   download = function() {
-    if (self$check_exists()) return(invisible(NULL))
+    if (self$check_exists()){
+      return()
+    }
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
@@ -73,14 +81,12 @@ flickr8k_dataset <- dataset(
       zip_path <- download_and_cache(r[1], prefix = class(self)[1])
       md5_actual <- tools::md5sum(zip_path)
       if (md5_actual != r[2]) {
-        runtime_error(glue::glue("MD5 mismatch for {r[1]}.\nExpected: {r[2]}, Got: {md5_actual}"))
+        runtime_error("Corrupt file! Delete the file in {zip_path} and try again.")
       }
       dest_zip <- file.path(self$raw_folder, basename(zip_path))
       fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
       utils::unzip(dest_zip, exdir = self$raw_folder)
     }
-
-    rlang::inform("Extracting images and processing captions (may take a minute)...")
 
     captions_file <- file.path(self$raw_folder, "Flickr8k.token.txt")
     captions_lines <- readLines(captions_file)
@@ -100,7 +106,6 @@ flickr8k_dataset <- dataset(
       img_paths <- file.path(self$raw_folder, "Flicker8k_Dataset", ids)
       img_paths <- img_paths[file.exists(img_paths)]
       captions <- lapply(ids, function(id) captions_map[[id]])
-      rlang::inform(glue::glue("Done processing split: '{split_name}' ({length(img_paths)} samples saved)"))
       list(images = img_paths, captions = captions)
     }
 
@@ -110,28 +115,32 @@ flickr8k_dataset <- dataset(
     saveRDS(train_data, file.path(self$processed_folder, self$training_file))
     saveRDS(test_data, file.path(self$processed_folder, self$test_file))
   },
+
   check_exists = function() {
-    fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
-      fs::file_exists(file.path(self$processed_folder, self$test_file))
+    fs::file_exists(file.path(self$processed_folder, self$training_file)) && fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
-.getitem = function(index) {
-  img_path <- self$images[[index]]
-  img <- magick::image_read(img_path)
-  img <- magick::image_resize(img, "224x224!")
-  img_tensor <- torchvision::transform_to_tensor(img)
-  if (!is.null(self$transform) && is.function(self$transform)) {
-    img_tensor <- self$transform(img_tensor)
-  }
-  target <- self$captions[[index]]
-  if (!is.null(self$target_transform) && is.function(self$target_transform)) {
-    target <- self$target_transform(target)
-  }
-  list(x = img_tensor, y = target)
-},
+
+  .getitem = function(index) {
+    img_path <- self$images[[index]]
+    img <- magick::image_read(img_path)
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
+    target <- self$captions[[index]]
+
+    if (!is.null(self$transform)) {
+      img <- self$transform(img)
+    }
+
+    if (!is.null(self$target_transform)) {
+      target <- self$target_transform(target)
+    }
+    list(x = img, y = target)
+  },
 
   .length = function() {
     length(self$images)
   },
+
   active = list(
     raw_folder = function() file.path(self$root, "flickr8k", "raw"),
     processed_folder = function() file.path(self$root, "flickr8k", "processed")
