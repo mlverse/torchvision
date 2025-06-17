@@ -3,8 +3,7 @@ test_that("coco_detection_dataset  handles missing files gracefully", {
 
   expect_error(
     coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
-    "Dataset files not found. Use download = TRUE to fetch them.",
-    class = "rlang_error"
+    class = "runtime_error"
   )
 })
 

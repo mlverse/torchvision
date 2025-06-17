@@ -29,7 +29,7 @@ coco_detection_dataset(
 \value{
 A dataset object that returns a list with:
 \describe{
-\item{image}{A 3D torch tensor \link{C, H, W} in float format.}
+\item{image}{A 3D torch tensor \code{[C, H, W]} in float format.}
 \item{target}{A list containing bounding boxes, labels, area, iscrowd, segmentation, etc.}
 }
 }

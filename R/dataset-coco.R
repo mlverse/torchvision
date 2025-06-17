@@ -13,7 +13,7 @@
 #'
 #' @return A dataset object that returns a list with:
 #' \describe{
-#'   \item{image}{A 3D torch tensor [C, H, W] in float format.}
+#'   \item{image}{A 3D torch tensor \code{[C, H, W]} in float format.}
 #'   \item{target}{A list containing bounding boxes, labels, area, iscrowd, segmentation, etc.}
 #' }
 #'
@@ -53,11 +53,13 @@ coco_detection_dataset <- torch::dataset(
     self$ann_file <- fs::path(self$data_dir, "annotations",
                               glue::glue("instances_{split}{year}.json"))
 
-    if (download)
+    if (download) {
       self$download()
+    }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
     self$load_annotations()
   },
