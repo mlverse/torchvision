@@ -3,8 +3,8 @@
 #' Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image.
 #'
 #' The dataset is split into:
-#' - `"train"`: training subset with image paths and captions.
-#' - `"test"`: test subset with image paths and captions.
+#' - `"train"`: training subset with captions.
+#' - `"test"`: test subset with captions.
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
 #' @param train Logical. If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
@@ -165,8 +165,8 @@ flickr8k_dataset <- dataset(
 #' Loads the Flickr30k dataset consisting of 30,000 images with five human-annotated captions per image.
 #'
 #' The dataset is split into:
-#' - `"train"`: training subset with image paths and captions.
-#' - `"test"`: test subset with image paths and captions.
+#' - `"train"`: training subset with captions.
+#' - `"test"`: test subset with captions.
 #'
 #' @inheritParams flickr8k_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.

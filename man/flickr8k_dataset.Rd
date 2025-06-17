@@ -39,8 +39,8 @@ Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated 
 
 The dataset is split into:
 \itemize{
-\item \code{"train"}: training subset with image paths and captions.
-\item \code{"test"}: test subset with image paths and captions.
+\item \code{"train"}: training subset with captions.
+\item \code{"test"}: test subset with captions.
 }
 }
 \examples{
