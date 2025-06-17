@@ -11,6 +11,21 @@
 #' @param transforms Transform applied to image.
 #' @param target_transform Transform applied to target.
 #'
+#' @return A dataset object that returns a list with:
+#' \describe{
+#'   \item{image}{A 3D torch tensor [C, H, W] in float format.}
+#'   \item{target}{A list containing bounding boxes, labels, area, iscrowd, segmentation, etc.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
+#' el <- ds[1]
+#' image <- el$image
+#' target <- el$target
+#' draw_bounding_boxes(image, target$boxes, labels = as.character(target$labels))
+#' }
+#'
 #' The returned image is in CHW format (channels, height, width), matching torch convention.
 #'
 #' @export
@@ -56,8 +71,13 @@ coco_detection_dataset <- torch::dataset(
     info <- self$images[[as.character(image_id)]]
 
     img_path <- fs::path(self$image_dir, info$file_name)
+
     img_arr <- jpeg::readJPEG(img_path)
-    img_arr <- aperm(img_arr, c(3, 2, 1))  # CHW format
+    if (length(dim(img_arr)) == 2) {
+      img_arr <- array(rep(img_arr, 3), dim = c(dim(img_arr), 3)) # Convert grayscale to RGB
+    }
+    img_arr <- aperm(img_arr, c(3, 1, 2)) # CHW format
+    img_arr <- torch::torch_tensor(img_arr, dtype = torch::torch_float())
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -75,14 +95,11 @@ coco_detection_dataset <- torch::dataset(
     }
 
     target <- list(
-      image_id = image_id,
       boxes = boxes,
       labels = labels,
       area = area,
       iscrowd = iscrowd,
-      segmentation = segmentation,
-      height = info$height,
-      width = info$width
+      segmentation = segmentation
     )
 
     if (!is.null(self$transforms))
@@ -102,13 +119,10 @@ coco_detection_dataset <- torch::dataset(
     info <- self$get_resource_info()
 
     ann_zip <- download_and_cache(info$ann_url)
-    if (tools::md5sum(ann_zip) != info$ann_md5) {
-      stop("MD5 mismatch for annotations zip: corrupted download?")
-    }
 
     img_zip <- download_and_cache(info$img_url)
     if (tools::md5sum(img_zip) != info$img_md5) {
-      stop("MD5 mismatch for image zip: corrupted download?")
+      rlang::abort(glue::glue("Corrupt file! Delete the file in {img_zip} and try again."))
     }
 
     utils::unzip(ann_zip, exdir = self$data_dir)

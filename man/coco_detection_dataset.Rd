@@ -24,10 +24,27 @@ coco_detection_dataset(
 
 \item{transforms}{Transform applied to image.}
 
-\item{target_transform}{Transform applied to target.
-
-The returned image is in CHW format (channels, height, width), matching torch convention.}
+\item{target_transform}{Transform applied to target.}
+}
+\value{
+A dataset object that returns a list with:
+\describe{
+\item{image}{A 3D torch tensor \link{C, H, W} in float format.}
+\item{target}{A list containing bounding boxes, labels, area, iscrowd, segmentation, etc.}
+}
 }
 \description{
 Loads MS COCO Dataset for object detection and segmentation.
+}
+\examples{
+\dontrun{
+ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
+el <- ds[1]
+image <- el$image
+target <- el$target
+draw_bounding_boxes(image, target$boxes, labels = as.character(target$labels))
+}
+
+The returned image is in CHW format (channels, height, width), matching torch convention.
+
 }
