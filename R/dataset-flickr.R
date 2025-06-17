@@ -31,10 +31,8 @@ flickr8k_dataset <- dataset(
   training_file = "train.rds",
   test_file = "test.rds",
   resources = list(
-    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip",
-      "bf6c1abcb8e4a833b7f922104de18627"),
-    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip",
-      "f18a1e2920de5bd84dae7cf08ec78978")
+    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip","bf6c1abcb8e4a833b7f922104de18627"),
+    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip","f18a1e2920de5bd84dae7cf08ec78978")
   ),
 
   initialize = function(

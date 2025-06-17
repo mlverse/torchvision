@@ -2,14 +2,21 @@ context("dataset-flickr")
 
 test_that("tests for the flickr8k dataset", {
   skip_on_cran()
-  skip("Skip Flickr8k due to large size")
-  t <- withr::local_tempdir()
+
+  t <- tempdir()
+
+  expect_error(
+    flickr8k <- flickr8k_dataset(root = tempfile()),
+    class = "runtime_error"
+  )
 
   flickr8k <- flickr8k_dataset(root = t, train = TRUE, download = TRUE)
-  expect_equal(length(flickr8k), 6000)
+  expect_length(flickr8k, 6000)
   first_item <- flickr8k[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "torch_tensor"))
+  expect_type(first_item$x, "integer")
+  expect_type(first_item$y,"character")
+  expect_length(first_item$x,598500)
   expect_equal((first_item$y[[1]]), "A black dog is running after a white dog in the snow .")
   expect_equal((first_item$y[[2]]), "Black dog chasing brown dog through snow")
   expect_equal((first_item$y[[3]]), "Two dogs chase each other across the snowy ground .")
@@ -20,31 +27,38 @@ test_that("tests for the flickr8k dataset", {
   expect_equal(length(flickr8k), 1000)
   first_item <- flickr8k[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "torch_tensor"))
+  expect_type(first_item$x, "integer")
+  expect_type(first_item$y,"character")
+  expect_length(first_item$x,502500)
   expect_equal((first_item$y[[1]]), "The dogs are in the snow in front of a fence .")
   expect_equal((first_item$y[[2]]), "The dogs play on the snow .")
   expect_equal((first_item$y[[3]]), "Two brown dogs playfully fight in the snow .")
   expect_equal((first_item$y[[4]]), "Two brown dogs wrestle in the snow .")
   expect_equal((first_item$y[[5]]), "Two dogs playing in the snow .")
 
-  collate_fn <- function(batch) {
-    xs <- lapply(batch, function(sample) sample$x)
-    ys <- lapply(batch, function(sample) sample$y[[1]])
-    list(
-      x = torch::torch_stack(xs),
-      y = ys
-    )
+  resize_collate_fn <- function(batch) {
+    xs <- lapply(batch, function(sample) {
+      torchvision::transform_resize(sample$x, c(224, 224))
+    })
+    xs <- torch::torch_stack(xs)
+    ys <- sapply(batch, function(sample) sample$y)
+    list(x = xs, y = ys)
   }
-  dl <- dataloader(flickr8k, batch_size = 4, shuffle = FALSE, collate_fn = collate_fn)
+  flickr8k <- flickr8k_dataset(root = t, transform = transform_to_tensor)
+  dl <- dataloader(flickr8k, batch_size = 4, collate_fn = resize_collate_fn)
   iter <- dataloader_make_iter(dl)
-  b <- dataloader_next(iter)
-  expect_named(b, c("x", "y"))
-  expect_true(inherits(b$x, "torch_tensor"))
-  expect_equal(b$x$shape[1], 4)
-  expect_true(is.list(b$y))
-  expect_length(b$y, 4)
-  expect_true(is.character(b$y[[1]]))
-  expect_equal(b$y[[1]],"The dogs are in the snow in front of a fence .")
+  batch <- dataloader_next(iter)
+  expect_named(batch, c("x", "y"))
+  expect_tensor(batch$x)
+  expect_length(batch$x,602112)
+  expect_tensor_shape(batch$x,c(4,3,224,224))
+  expect_tensor_dtype(batch$x,torch_float())
+  expect_type(batch$y,"character")
+  expect_length(batch$y, 20)
+  expect_equal(batch$y[1],"A black dog is running after a white dog in the snow .")
+  expect_equal(batch$y[2],"Black dog chasing brown dog through snow")
+  expect_equal(batch$y[3],"Two dogs chase each other across the snowy ground .")
+  expect_equal(batch$y[4],"Two dogs play together in the snow .")
 
 })
 
