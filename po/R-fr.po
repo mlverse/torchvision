@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2024-08-23 09:42+0200\n"
-"PO-Revision-Date: 2024-08-23 09:49+0200\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2025-06-15 16:10+0200\n"
+"PO-Revision-Date: 2025-06-15 23:24+0200\n"
+"Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.4.3\n"
+"X-Generator: Poedit 3.6\n"
 
 #: conditions.R:2
 msgid "type_error"
@@ -31,28 +31,100 @@ msgstr ""
 msgid "Files not found. Use download = TRUE"
 msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
 
-#: dataset-cifar.R:86
-msgid "Corrupt file! Delete the file in {p} and try again."
-msgstr "Fichier corrompu. Supprimez le fichier {p} et recommencez."
+#: dataset-cifar.R:86 dataset-fgvc.R:168 dataset-mnist.R:71 dataset-mnist.R:247
+#: dataset-mnist.R:493
+msgid "Corrupt file! Delete the file in {archive} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
 
-#: dataset-mnist.R:44
+#: dataset-eurosat.R:56 dataset-fgvc.R:89 dataset-mnist.R:44
+#: dataset-mnist.R:223 dataset-mnist.R:466
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 "Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
 "télécharger."
 
-#: dataset-mnist.R:71
-msgid "MD5 sums are not identical for file: {r[1]}."
-msgstr ""
-"Les sommes de contrôle MD5 ne sont pas identiques pour le fichier {r[1]}."
+#: dataset-eurosat.R:76
+msgid "Extracting archive..."
+msgstr "Extraction de l'archive..."
 
-#: dataset-mnist.R:75
+#: dataset-eurosat.R:78
+msgid "Extraction complete."
+msgstr "Extraction réussie."
+
+#: dataset-eurosat.R:82
+msgid "Downloading split text file:"
+msgstr "Téléchargement du fichier texte de `split:"
+
+#: dataset-eurosat.R:86
+msgid "Downloaded split file `{self$split_file}` is empty."
+msgstr "Le fichier téléchargé `{self$split_file}` est vide."
+
+#: dataset-eurosat.R:100
+msgid "Image file `{filename}` not found."
+msgstr "Fichier d'image `{filename}` introuvable."
+
+#: dataset-eurosat.R:116
+msgid "Label `{label}` not found in class_to_idx."
+msgstr "Le label `{label}` ne fait pas partie de `class_to_idx`"
+
+#: dataset-fgvc.R:70
+msgid "Initializing FGVC-Aircraft dataset..."
+msgstr "Initialisation du jeu de données FGVC-Aircraft..."
+
+#: dataset-fgvc.R:83
+msgid "Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."
+msgstr ""
+"Téléchargement et extraction du jeu de données FGVC-Aircraft (Taille : ~2.6 "
+"GB)..."
+
+#: dataset-fgvc.R:104
+msgid "Invalid annotation_level"
+msgstr "`annotation_level` invalide."
+
+#: dataset-fgvc.R:130
+msgid ""
+"FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} "
+"samples ({split}, {annotation_level}-level)."
+msgstr ""
+"Le jeu de données FGVC-Aircraft a été chargé avec succès avec "
+"{length(self$image_paths)} échantillons ({split}, niveau {annotation_level})."
+
+#: dataset-fgvc.R:173
+msgid "FGVC-Aircraft dataset downloaded and extracted successfully."
+msgstr ""
+"Le jeu de données FGVC-Aircraft a été téléchargé et extrait avec succès."
+
+#: dataset-mnist.R:75 dataset-mnist.R:250
 msgid "Processing..."
 msgstr "Traitement en cours..."
 
-#: dataset-mnist.R:90 tiny-imagenet-dataset.R:67
+#: dataset-mnist.R:90 dataset-mnist.R:282 tiny-imagenet-dataset.R:67
 msgid "Done!"
 msgstr "Terminé!"
+
+#: dataset-mnist.R:451
+msgid "Preparing to download EMNIST dataset. Archive size is ~0.5GB"
+msgstr ""
+"Préparation du téléchargement du jeu de données EMNIST. La taille de "
+"l'archive est de ~0.5GB"
+
+#: dataset-mnist.R:452
+msgid ""
+"You may have to increase the download timeout in your session with "
+"`options()` in case of failure"
+msgstr ""
+"Le délai de téléchargement dans votre session peut être augmenté avec "
+"`options()` en cas d'échec"
+
+#: dataset-mnist.R:453
+msgid "- Will extract and convert for all {length(self$classes_list)} splits"
+msgstr ""
+"- Extraction et conversion de l'ensemble des {length(self$classes_list)} "
+"classes du sous-ensemble de donnée."
+
+#: dataset-mnist.R:480
+msgid "EMNIST dataset processed successfully!"
+msgstr "L'ensemble de données EMNIST a été traité avec succès !"
 
 #: folder-dataset.R:19
 msgid ""
@@ -61,34 +133,37 @@ msgstr ""
 "Les deux paramètres `extensions` et `is_valid_file` ne peuvent ni être "
 "`None`, ni être différents de `None` ensemble."
 
-#: folder-dataset.R:65
-msgid "Found 0 files in subfolders of {self$root}"
-msgstr "Aucun fichiers trouvé dans le répertoire {self$root}."
-
-#: folder-dataset.R:67
-msgid "Supported extensions are {paste(extensions, collapse=',')}"
-msgstr "Les extensions supportées sont {paste(extensions, collapse=',')}"
-
 #: folder-dataset.R:138
 msgid "unknown extension {ext} in path {path}"
 msgstr "Extension de fichier {ext} inconnue pour {path}."
 
-#: models-efficientnet.R:29 models-resnet.R:34
-msgid "basic_block only supports groups=1 and base_width=64"
+#: model-detection-anchor-utils.R:83
+msgid "cell_anchors should not be NULL"
+msgstr "les ancres de cellules ne doivent pas être NULL"
+
+#: model-detection-anchor-utils.R:86
+msgid "Anchors should be Tuple[Tuple[int]] because each feature"
+msgstr "Les ancres doivent être des Tuple[Tuple[int]] car chaque carte de"
+
+#: model-detection-anchor-utils.R:87
+msgid "map could potentially have different sizes and aspect ratios."
 msgstr ""
-"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
+"caractéristique peut potentiellement avoir des tailles et des rapports "
+"d'aspet différents."
 
-#: models-efficientnet.R:32 models-resnet.R:37
-msgid "Dilation > 1 not supported in basic_block"
-msgstr "`dilation > 1` non compatible avec le `basic_block`"
+#: model-detection-anchor-utils.R:88
+msgid "There needs to be a match between the number of"
+msgstr "Il faut qu'il y ait une adéquation entre le nombre de"
 
-#: models-efficientnet.R:140 models-resnet.R:145
-msgid "replace_stride_with_dilation should be NULL"
-msgstr "`replace_stride_with_dilation` doit être `NULL`"
+#: model-detection-anchor-utils.R:89
+msgid "feature maps passed and the number of sizes / aspect ratios specified."
+msgstr ""
+"carte de caractéristiques et le nombre de tailles/rapports d'aspect "
+"spécifiés."
 
-#: models-efficientnet.R:141 models-resnet.R:146
-msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
-msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
+#: model-detection-anchor-utils.R:164
+msgid "aspect_ratios and steps should have the same length"
+msgstr "les aspects_ratios et les étapes doivent avoir la même longueur"
 
 #: models-inception.R:16
 msgid ""
@@ -129,6 +204,23 @@ msgid "or a 4-element list, got {inverted_residual_setting}"
 msgstr ""
 "ou une liste de vecteurs, chacun de longeur 4. Ici, c'est "
 "{inverted_residual_setting}"
+
+#: models-resnet.R:34
+msgid "basic_block only supports groups=1 and base_width=64"
+msgstr ""
+"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
+
+#: models-resnet.R:37
+msgid "Dilation > 1 not supported in basic_block"
+msgstr "`dilation > 1` non compatible avec le `basic_block`"
+
+#: models-resnet.R:145
+msgid "replace_stride_with_dilation should be NULL"
+msgstr "`replace_stride_with_dilation` doit être `NULL`"
+
+#: models-resnet.R:146
+msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
+msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
 
 #: tiny-imagenet-dataset.R:43
 msgid "Downloading tiny imagenet dataset!"
@@ -192,8 +284,8 @@ msgid ""
 "std evaluated to zero after conversion to {dtype}, leading to division by "
 "zero."
 msgstr ""
-"Après conversion en {dtype}, `std` est à zéro, ce qui conduit à une division "
-"par zéro."
+"Après conversion en {dtype}, l'écart-type est à zéro, ce qui conduit à une "
+"division par zéro."
 
 #: transforms-tensor.R:98
 msgid "This interpolation mode is unsupported with Tensor input"
@@ -202,7 +294,7 @@ msgstr ""
 
 #: transforms-tensor.R:101
 msgid "Size must be a numeric vector of length 1 or 2."
-msgstr "`size` doit être un vecteur numérique de longueur 1 ou 2."
+msgstr "La longueur de `size` doit être 1 ou 2."
 
 #: transforms-tensor.R:184
 msgid "Padding must be an int or a 1, 2, or 4 element numeric vector"
@@ -227,7 +319,8 @@ msgstr ""
 
 #: transforms-tensor.R:255
 msgid "Requested crop size is bigger than input size."
-msgstr "La coupe demandée avec `crop` est de taille plus grande que l'entrée."
+msgstr ""
+"Le détourage demandée avec `crop` est de taille plus grande que l'entrée."
 
 #: transforms-tensor.R:320
 msgid "brightness factor is negative"
@@ -250,6 +343,8 @@ msgid "Argument angle should be int or float"
 msgstr "`angle` doit être un entier ou un réel."
 
 #: transforms-tensor.R:404
+#, fuzzy
+#| msgid "translate must be length 2"
 msgid "translate should be length 2"
 msgstr "La longueur de `translate` doit être 2."
 
@@ -273,17 +368,22 @@ msgstr "Le tenseur n'est pas une image torch."
 #: transforms-tensor.R:725
 msgid "Symmetric padding of N-D tensors are not supported yet"
 msgstr ""
-"Le bourrage en mode `symmetric` de N-D tenseurs n'est pas encore implémenté."
+"Le bourrage en mode `symmetric` de tenseurs de dimension N n'est pas encore "
+"implémenté."
 
 #: transforms-tensor.R:734
 msgid "gamma must be non-negative"
 msgstr "`gamma` doit être positif."
 
-#: vision_utils.R:115
+#: vision_utils.R:105 vision_utils.R:204 vision_utils.R:276
+msgid "magick"
+msgstr ""
+
+#: vision_utils.R:117
 msgid "boxes doesn't contain any box. No box was drawn"
 msgstr "`boxes` ne contient aucun cadre. Aucun cadre n'a été tracé."
 
-#: vision_utils.R:120
+#: vision_utils.R:122
 msgid ""
 "Number of labels {length(labels)} cannot be broadcasted on number of boxes "
 "{num_boxes}"
@@ -291,6 +391,6 @@ msgstr ""
 "Le nombre de labels ({length(labels)}) n'est pas un multiple du nombre de "
 "cadres ({num_boxes}) et ne peut pas être broadcasté."
 
-#: vision_utils.R:214
+#: vision_utils.R:217
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."

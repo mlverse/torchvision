@@ -5,7 +5,7 @@
 \title{Kuzushiji-MNIST}
 \usage{
 kmnist_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
