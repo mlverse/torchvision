@@ -148,4 +148,6 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_tensor_dtype(item$x,torch_float())
   expect_type(item$y, "integer")
   expect_equal(as.numeric(item$y), 5)
+
+  unlink(t, recursive = TRUE)
 })

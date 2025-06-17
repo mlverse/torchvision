@@ -25,6 +25,8 @@ test_that("tests for the mnist dataset", {
   expect_true((torch_max(i[[1]]) <= 1)$item())
   expect_named(i, c("x", "y"))
 
+  unlink(dir, recursive = TRUE)
+
 })
 
 test_that("tests for the kmnist dataset", {
@@ -51,6 +53,9 @@ test_that("tests for the kmnist dataset", {
   expect_tensor_shape(i[[2]], 32)
   expect_true((torch_max(i[[1]]) <= 1)$item())
   expect_named(i, c("x", "y"))
+
+  unlink(dir, recursive = TRUE)
+
 })
 
 test_that("fashion_mnist_dataset loads correctly", {
@@ -75,6 +80,9 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_tensor_shape(batch$x, c(32, 1, 28, 28))
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
+
+  unlink(dir, recursive = TRUE)
+
 })
 
 test_that("tests for the emnist dataset", {
@@ -135,6 +143,8 @@ test_that("tests for the emnist dataset", {
   expect_tensor_shape(batch$x, c(32, 1, 28, 28))
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
+
+  unlink(dir, recursive = TRUE)
 })
 
 
@@ -167,4 +177,6 @@ test_that("tests for the qmnist dataset", {
     expect_true((torch_max(i[[1]]) <= 1)$item())
     expect_named(i, c("x", "y"))
   }
+  
+  unlink(dir, recursive = TRUE)
 })

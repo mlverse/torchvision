@@ -22,6 +22,8 @@ test_that("cifar10", {
   expect_equal(length(el[[2]]), 1)
   expect_named(el, c("x", "y"))
 
+  unlink(t, recursive = TRUE)
+
 })
 
 test_that("cifar100", {
@@ -48,5 +50,7 @@ test_that("cifar100", {
   expect_equal(length(el[[2]]), 1)
   expect_named(el, c("x", "y"))
   expect_equal(ds$classes[el[[2]]], "mouse")
+
+  unlink(t, recursive = TRUE)
 
 })
