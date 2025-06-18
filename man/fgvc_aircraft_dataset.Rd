@@ -31,7 +31,7 @@ One of \code{"variant"}, \code{"family"}, \code{"manufacturer"}, or \code{"all"}
 An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 Each element is a named list with:
 \itemize{
-\item \code{x}: a torch tensor of the image with shape (C x H x W). Please note that images have varying sizes.
+\item \code{x}: an array of shape (H, W, C) with pixel values in the range \link{0, 255}. Please note that images have varying sizes.
 \item \code{y}: for single-level annotation (\code{"variant"}, \code{"family"}, \code{"manufacturer"}): an integer class label.
 for multi-level annotation (\code{"all"}): a vector of three integers \code{c(manufacturer_idx, family_idx, variant_idx)}.
 }
@@ -71,27 +71,30 @@ When \code{annotation_level = "all"} is used, the \verb{$classes} field is a nam
 \examples{
 \dontrun{
 # Single-label classification
-fgvc <- fgvc_aircraft_dataset( split = "train", annotation_level = "variant", download = TRUE )
+fgvc <- fgvc_aircraft_dataset(split = "trainval", annotation_level = "variant", download = TRUE)
 
-# Define a custom collate function to resize images in the batch
+# Create a custom collate function to resize images and prepare batches
 resize_collate_fn <- function(batch) {
-  xs <- lapply(batch, function(sample) {
-    torchvision::transform_resize(sample$x, c(768, 1024))
+  xs <- lapply(batch, function(item) {
+    torchvision::transform_resize(item$x, c(224, 224))
   })
   xs <- torch::torch_stack(xs)
-  ys <- torch::torch_tensor(sapply(batch, function(sample) sample$y), dtype = torch::torch_long())
+  ys <- torch::torch_tensor(sapply(batch, function(item) item$y), dtype = torch::torch_long())
   list(x = xs, y = ys)
 }
-
-dl <- torch::dataloader( dataset = fgvc, batch_size = 2, collate_fn = resize_collate_fn )
+dl <- torch::dataloader(dataset = fgvc, batch_size = 2, collate_fn = resize_collate_fn)
 batch <- dataloader_next(dataloader_make_iter(dl))
-batch$x  # batched image tensors resized to 768x1024
-batch$y  # class labels
+batch$x  # batched image tensors with shape (2, 3, 224, 224)
+batch$y  # class labels as integer tensor of shape (2,)
 
 # Multi-label classification
-fgvc_multi <- fgvc_aircraft_dataset( split = "train", annotation_level = "all", download = TRUE )
-item <- fgvc_multi[1]
-item$y  # Returns a named list with class indices
+fgvc <- fgvc_aircraft_dataset(split = "test", annotation_level = "all")
+item <- fgvc[1]
+item$x  # a numeric vector representing the image
+item$y  # an integer vector of length 3: manufacturer, family, and variant indices
+fgvc$classes$manufacturer[item$y[1]]  # e.g., "Boeing"
+fgvc$classes$family[item$y[2]]        # e.g., "Boeing 707"
+fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 }
 
 }
