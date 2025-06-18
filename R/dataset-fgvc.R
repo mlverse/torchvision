@@ -10,8 +10,8 @@
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Default is `"train"`.
 #' @param annotation_level Character. Level of annotation to use for classification. Default is `"variant"`.
 #' One of `"variant"`, `"family"`, `"manufacturer"`, or `"all"`. See *Details*.
-#' @param transform Optional function to transform input images after loading. Default is [transform_to_tensor()].
-#' @param target_transform Optional function to transform labels.
+#' @param transform Optional function to transform input images after loading. Default is `NULL`.
+#' @param target_transform Optional function to transform labels. Default is `NULL`.
 #' @param download Logical. Whether to download the dataset if not found locally. Default is `FALSE`.
 #'
 #' @details

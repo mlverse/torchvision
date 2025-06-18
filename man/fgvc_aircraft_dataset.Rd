@@ -21,9 +21,9 @@ fgvc_aircraft_dataset(
 \item{annotation_level}{Character. Level of annotation to use for classification. Default is \code{"variant"}.
 One of \code{"variant"}, \code{"family"}, \code{"manufacturer"}, or \code{"all"}. See \emph{Details}.}
 
-\item{transform}{Optional function to transform input images after loading. Default is \code{\link[=transform_to_tensor]{transform_to_tensor()}}.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
