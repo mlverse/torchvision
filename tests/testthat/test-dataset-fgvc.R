@@ -89,22 +89,22 @@ test_that("tests for the FGVC-Aircraft dataset", {
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 3175200)
+  expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
   expect_equal(fgvc$classes$manufacturer[item$y[1]],"Boeing")
-  expect_equal(fgvc$classes$family[item$y[2]],"Boeing 707")
-  expect_equal(fgvc$classes$variant[item$y[3]],"707-320")
+  expect_equal(fgvc$classes$family[item$y[2]],"Boeing 737")
+  expect_equal(fgvc$classes$variant[item$y[3]],"737-200")
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "all")
   expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 2135040)
+  expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(fgvc$classes$manufacturer[item$y[1]],"Boeing")
-  expect_equal(fgvc$classes$family[item$y[2]],"Boeing 707")
-  expect_equal(fgvc$classes$variant[item$y[3]],"707-320")
+  expect_equal(fgvc$classes$manufacturer[item$y[1]],"Douglas Aircraft Company")
+  expect_equal(fgvc$classes$family[item$y[2]],"DC-8")
+  expect_equal(fgvc$classes$variant[item$y[3]],"DC-8")
 
     resize_collate_fn <- function(batch) {
     xs <- lapply(batch, function(item) {
@@ -125,9 +125,9 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_tensor(batch$y)
   expect_tensor_shape(batch$y,c(3,2))
   expect_tensor_dtype(batch$y,torch_long())
-  expect_equal_to_r(batch$y[1],c(5,5))
-  expect_equal_to_r(batch$y[2],c(13,13))
-  expect_equal_to_r(batch$y[3],c(1,1))
+  expect_equal_to_r(batch$y[1],c(22,5))
+  expect_equal_to_r(batch$y[2],c(58,14))
+  expect_equal_to_r(batch$y[3],c(86,42))
 
   unlink(file.path(t, "fgvc-aircraft-2013b"), recursive = TRUE)
 })
