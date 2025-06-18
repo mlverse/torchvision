@@ -211,14 +211,15 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- magick::image_read(self$image_paths[index])
-    img <- if (!is.null(self$transform)) {
-      self$transform(img)
-    } else {
-      torchvision::transform_to_tensor(img)
+    img <- jpeg::readJPEG(self$image_paths[index])
+    img <- img * 255L
+    img <- as.integer(img)
+    label <- self$labels[[index]]
+
+    if (!is.null(self$transform)) {
+      img <- self$transform(img)
     }
 
-    label <- self$labels[[index]]
     if (!is.null(self$target_transform)) {
       label <- self$target_transform(label)
     }
