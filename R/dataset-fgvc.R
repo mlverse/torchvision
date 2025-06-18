@@ -1,10 +1,10 @@
 #' FGVC Aircraft Dataset
 #'
 #' The FGVC-Aircraft dataset supports the following official splits:
-#' - `"train"`: training subset
-#' - `"val"`: validation subset
-#' - `"trainval"`: combined training and validation set
-#' - `"test"`: test set with labels (used for evaluation)
+#' - `"train"`: training subset with labels.
+#' - `"val"`: validation subset with labels.
+#' - `"trainval"`: combined training and validation set with labels.
+#' - `"test"`: test set with labels (used for evaluation).
 #'
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/fgvc-aircraft-2013b`.
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Default is `"train"`.
@@ -35,17 +35,15 @@
 #' - `y`: for single-level annotation (`"variant"`, `"family"`, `"manufacturer"`): an integer class label.
 #'        for multi-level annotation (`"all"`): a vector of three integers `c(manufacturer_idx, family_idx, variant_idx)`.
 #'
-#' The dataset supports standard dataset operations like indexing (`dataset[i]`) and length (`length(dataset)`).
-#'
 #' @examples
 #' \dontrun{
 #' # Single-label classification
-#' fgvc <- fgvc_aircraft_dataset(split = "trainval", annotation_level = "variant", download = TRUE)
+#' fgvc <- fgvc_aircraft_dataset(transform = transform_to_tensor, download = TRUE)
 #'
 #' # Create a custom collate function to resize images and prepare batches
 #' resize_collate_fn <- function(batch) {
 #'   xs <- lapply(batch, function(item) {
-#'     torchvision::transform_resize(item$x, c(224, 224))
+#'     torchvision::transform_resize(item$x, c(768, 1024))
 #'   })
 #'   xs <- torch::torch_stack(xs)
 #'   ys <- torch::torch_tensor(sapply(batch, function(item) item$y), dtype = torch::torch_long())
@@ -53,13 +51,13 @@
 #' }
 #' dl <- torch::dataloader(dataset = fgvc, batch_size = 2, collate_fn = resize_collate_fn)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
-#' batch$x  # batched image tensors with shape (2, 3, 224, 224)
-#' batch$y  # class labels as integer tensor of shape (2,)
+#' batch$x  # batched image tensors with shape (2, 3, 768, 1024)
+#' batch$y  # class labels as integer tensor of shape 2
 #'
 #' # Multi-label classification
 #' fgvc <- fgvc_aircraft_dataset(split = "test", annotation_level = "all")
 #' item <- fgvc[1]
-#' item$x  # a numeric vector representing the image
+#' item$x  # a double vector representing the image
 #' item$y  # an integer vector of length 3: manufacturer, family, and variant indices
 #' fgvc$classes$manufacturer[item$y[1]]  # e.g., "Boeing"
 #' fgvc$classes$family[item$y[2]]        # e.g., "Boeing 707"
