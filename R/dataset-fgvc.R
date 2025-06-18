@@ -183,22 +183,25 @@ fgvc_aircraft_dataset <- dataset(
     names(label_data) <- levels
 
     common_img_ids <- Reduce(intersect, lapply(label_data, function(df) df$img_id))
-    
-    valid_entries <- lapply(common_img_ids, function(img_id) {
-      entry <- lapply(levels, function(level) {
-        row <- label_data[[level]][label_data[[level]]$img_id == img_id, ]
-        self$class_to_idx[[level]][row$class_name]
-      })
-      if (!any(vapply(entry, is.null, logical(1)))) {
-        list(entry = entry, path = file.path(self$data_dir, "images", glue::glue("{img_id}.jpg")))
-      } else {
-        NULL
-      }
-    })
-    valid_entries <- Filter(Negate(is.null), valid_entries)
 
-    self$labels <- lapply(valid_entries, `[[`, "entry")
-    self$image_paths <- vapply(valid_entries, `[[`, character(1), "path")
+    idx_mat <- lapply(levels, function(level) {
+      df <- label_data[[level]]
+      fct <- factor(df$class_name, levels = names(self$class_to_idx[[level]]))
+      idx <- as.integer(fct)
+      names(idx) <- df$img_id
+      idx
+    })
+
+    for (img_id in common_img_ids) {
+      entry <- lapply(seq_along(levels), function(i) {
+        idx_mat[[i]][[img_id]]
+      })
+
+      self$labels[[length(self$labels) + 1]] <- entry
+      self$image_paths <- c(self$image_paths, file.path(
+        self$data_dir, "images", glue::glue("{img_id}.jpg")
+      ))
+    }
   },
 
   .getitem = function(index) {
