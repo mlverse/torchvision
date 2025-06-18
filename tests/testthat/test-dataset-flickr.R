@@ -67,6 +67,10 @@ test_that("tests for the flickr8k dataset", {
 test_that("tests for the flickr30k dataset", {
   skip_on_cran()
 
+  if (Sys.info()[["sysname"]] == "Linux") {
+    skip("Skipping on Ubuntu/Linux due to disk constraints.")
+  }
+
   t <- tempdir()
 
   expect_error(
