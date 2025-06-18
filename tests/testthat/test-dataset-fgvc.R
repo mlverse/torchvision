@@ -16,7 +16,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
     ys <- torch::torch_tensor(sapply(batch, function(item) item$y), dtype = torch::torch_long())
     list(x = xs, y = ys)
   }
-  fgvc <- fgvc_aircraft_dataset(root = t, transform = transform_to_tensor)
+  fgvc <- fgvc_aircraft_dataset(root = t, transform = transform_to_tensor, download = TRUE)
   dl <- torch::dataloader(dataset = fgvc,batch_size = 2,collate_fn = resize_collate_fn)
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
@@ -128,4 +128,6 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal_to_r(batch$y[1],c(5,5))
   expect_equal_to_r(batch$y[2],c(13,13))
   expect_equal_to_r(batch$y[3],c(1,1))
+
+  unlink(file.path(t, "fgvc-aircraft-2013b"), recursive = TRUE)
 })
