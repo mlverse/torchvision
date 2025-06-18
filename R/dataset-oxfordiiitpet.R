@@ -1,48 +1,42 @@
 #' Oxford-IIIT Pet Dataset
 #'
-#' Loads the Oxford-IIIT Pet Dataset, which contains images of 37 pet breeds (cats and dogs),
-#' each annotated with a class label and optional segmentation mask.  
-#' Supports three types of targets: class category labels, binary-category labels (Cat vs Dog),
-#' and pixel-level segmentation masks.
+#' Loads the Oxford-IIIT Pet Dataset, consisting of images of 37 pet breeds (cats and dogs).
 #'
-#' The dataset is automatically split into `"train"` and `"test"` subsets based on the official annotation files.
+#' The dataset is split into:
+#' - `"train"`: training subset with labels.
+#' - `"test"`: test subset with labels.
 #'
-#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/oxfordiiitpet`.
-#' @param train Logical. Whether to load the training split. Default is `TRUE`.
-#' @param transform Optional function to transform the input image tensors.
-#' @param target_transform Optional function to transform target labels or segmentation masks.
-#' @param target_type Character. One of:
+#' @param root Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under `root/oxfordiiitpet`.
+#' @param train Logical. If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
+#' @param transform Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.
+#' @param target_transform Optional function to transform the target. Default is `NULL`.
+#' @param target_type Character. One of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"} (default: \code{"category"}).
+#' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
+#'
+#' @return A dataset object of class \code{oxfordiiitpet_dataset}, where each item is a named list:
 #' \describe{
-#'   \item{\code{"category"}}{(default) Integer class index from 1 to 37.}
-#'   \item{\code{"binary-category"}}{Returns 1 for Cat and 2 for Dog. Based on whether the class name starts with an uppercase letter.}
-#'   \item{\code{"segmentation"}}{Returns a single-channel pixel-level segmentation mask as a torch tensor.}
-#' }
-#' @param download Logical. Whether to download the dataset if not already present. Default is `FALSE`.
-#'
-#' @return A dataset object of class `oxfordiiitpet_dataset`, where each indexed item returns a named list:
-#' \describe{
-#'   \item{\code{x}}{An image tensor of shape (3, H, W).}
-#'   \item{\code{y}}{The label - an integer index, a binary category, or a segmentation mask tensor depending on \code{target_type}.}
+#'   \item{\code{x}}{a H x W x 3 integer array representing an RGB image.}
+#'   \item{\code{y}}{
+#'     The target value, depending on \code{target_type}:
+#'     \code{"category"} – class index (1–37);
+#'     \code{"binary-category"} – 1 for Cat, 2 for Dog;
+#'     \code{"segmentation"} – integer mask with values: 1 (pet), 2 (background), 3 (outline).
+#'   }
 #' }
 #'
 #' @examples
 #' \dontrun{
-#' # Load training data with class indices
-#' ds <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
-#' item <- ds[1]
-#' item$x  # image tensor
-#' item$y  # class index
+#' # Load training data with class labels (1 to 37)
+#' oxfordiiitpet <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
+#' first_item <- oxfordiiitpet[1]
+#' first_item$x  # image tensor
+#' first_item$y  # class index
 #'
-#' # Load binary-category labels: 1 = Cat, 2 = Dog
-#' ds_bin <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, target_type = "binary-category")
-#'
-#' # Load segmentation masks
-#' ds_seg <- oxfordiiitpet_dataset(root = root_dir, train = TRUE, target_type = "segmentation")
-#'
-#' # Use custom collate function for variable image sizes
-#' dl <- dataloader(ds, batch_size = 4, collate_fn = collate_fn_variable_size)
-#' batch <- dataloader_next(dataloader_make_iter(dl))
-#' }
+#' # Load with segmentation masks
+#' oxfordiiitpet <- oxfordiiitpet_dataset(root = root_dir, target_type = "segmentation")
+#' first_item <- oxfordiiitpet[1]
+#' first_item$x  # image tensor
+#' first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
 #'
 #' @name oxfordiiitpet_dataset
 #' @aliases oxfordiiitpet_dataset
@@ -98,19 +92,17 @@ oxfordiiitpet_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    lapply(self$resources, function(r) {
+    for (r in self$resources) {
       url <- r[1]
-      filename <- basename(url)
-      destpath <- file.path(self$raw_folder, filename)
       p <- download_and_cache(url)
-      fs::file_copy(p, destpath, overwrite = TRUE)
-      actual_md5 <- tools::md5sum(destpath)
+      actual_md5 <- tools::md5sum(p)
 
       if (actual_md5 != r[2]) {
-        runtime_error("Corrupt file! Delete the file in {p} and try again.")
+        runtime_error(glue::glue("Corrupt file! Delete the file in {p} and try again."))
       }
-      utils::untar(destpath, exdir = self$raw_folder)
-    })
+
+      utils::untar(p, exdir = self$raw_folder)
+    }
 
     for (split in c("trainval", "test")) {
       ann_file <- file.path(self$raw_folder, "annotations", glue::glue("{split}.txt"))
@@ -165,8 +157,10 @@ oxfordiiitpet_dataset <- dataset(
       img <- self$transform(img)
 
     if (self$target_type == "segmentation") {
-      mask <- magick::image_read(self$image_paths[index])
-      mask <- magick::image_data(mask, channels = "rgb")
+      seg_name <- basename(self$image_paths[index])
+      mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
+      mask <- magick::image_read(mask_path)
+      mask <- magick::image_data(mask, channels = "gray")
       mask <- as.integer(mask)
       label <- mask
     } else if (self$target_type == "binary-category") {
