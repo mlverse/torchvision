@@ -31,7 +31,7 @@
 #'
 #' @return An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 #' Each element is a named list with:
-#' - `x`: an array of shape (H, W, C) with pixel values in the range [0, 255]. Please note that images have varying sizes.
+#' - `x`: an array of shape (H, W, C) with pixel values in the range (0, 255). Please note that images have varying sizes.
 #' - `y`: for single-level annotation (`"variant"`, `"family"`, `"manufacturer"`): an integer class label.
 #'        for multi-level annotation (`"all"`): a vector of three integers `c(manufacturer_idx, family_idx, variant_idx)`.
 #'

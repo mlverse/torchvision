@@ -31,7 +31,7 @@ One of \code{"variant"}, \code{"family"}, \code{"manufacturer"}, or \code{"all"}
 An object of class \code{fgvc_aircraft_dataset}, which behaves like a torch-style dataset.
 Each element is a named list with:
 \itemize{
-\item \code{x}: an array of shape (H, W, C) with pixel values in the range \link{0, 255}. Please note that images have varying sizes.
+\item \code{x}: an array of shape (H, W, C) with pixel values in the range (0, 255). Please note that images have varying sizes.
 \item \code{y}: for single-level annotation (\code{"variant"}, \code{"family"}, \code{"manufacturer"}): an integer class label.
 for multi-level annotation (\code{"all"}): a vector of three integers \code{c(manufacturer_idx, family_idx, variant_idx)}.
 }
