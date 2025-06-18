@@ -16,9 +16,9 @@
 #'   \item{target}{A list with:
 #'     \describe{
 #'       \item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
-#'       \item{labels}{A numeric vector of integer class labels.}
+#'       \item{labels}{An integer vector of class labels.}
 #'       \item{area}{A numeric vector indicating the area of each object.}
-#'       \item{iscrowd}{A logical or numeric vector indicating whether objects are crowds.}
+#'       \item{iscrowd}{An integer vector (0 or 1) indicating whether objects are crowds.}
 #'       \item{segmentation}{A list of segmentation polygons per object.}
 #'     }
 #'   }
@@ -31,12 +31,43 @@
 #'
 #' @examples
 #' \dontrun{
-#' ds <- coco_detection_dataset(root = "data", train = FALSE, year = "2017", download = TRUE)
+#' ds <- coco_detection_dataset(
+#'   root = "~/data",
+#'   train = FALSE,
+#'   year = "2017",
+#'   download = TRUE
+#' )
+#'
 #' sample <- ds[1]
 #' image <- sample$image
 #' target <- sample$target
+#'
+#' # Convert image to uint8
+#' image_uint8 <- image$mul(255)$clamp(0, 255)$to(dtype = torch::torch_uint8())
+#'
+#' # Ensure bounding boxes are torch tensors
+#' boxes <- if (!inherits(target$boxes, "torch_tensor")) {
+#'   torch::torch_tensor(target$boxes, dtype = torch::torch_float())
+#' } else {
+#'   target$boxes
 #' }
 #'
+#' # Convert labels to character
+#' labels <- as.character(torch::as_array(target$labels))
+#'
+#' # Draw bounding boxes
+#' output <- torchvision::draw_bounding_boxes(
+#'   image = image_uint8,
+#'   boxes = boxes,
+#'   labels = labels
+#' )
+#'
+#' # Convert to array and plot
+#' output_array <- as.array(output$permute(c(2, 3, 1)))  # CHW to HWC
+#' output_array <- as.numeric(output_array) / 255
+#' dim(output_array) <- dim(as.array(output$permute(c(2, 3, 1))))
+#' plot(as.raster(output_array))
+#' }
 #' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
@@ -95,16 +126,20 @@ coco_detection_dataset <- torch::dataset(
 
     if (nrow(anns) > 0) {
       boxes <- do.call(rbind, lapply(anns$bbox, function(b) c(b[1], b[2], b[1] + b[3], b[2] + b[4])))
-      colnames(boxes) <- c("x1", "y1", "x2", "y2")
-      labels <- anns$category_id
-      area <- sapply(anns$area, identity)
-      iscrowd <- sapply(anns$iscrowd, identity)
-      segmentation <- anns$segmentation
+      boxes <- torch::torch_tensor(boxes, dtype = torch::torch_float())
+
+      labels <- torch::torch_tensor(anns$category_id, dtype = torch::torch_int())   # ✔️ numeric integer
+      area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())          # ✔️ numeric float
+      iscrowd <- torch::torch_tensor(anns$iscrowd, dtype = torch::torch_int())      # ✔️ integer (0 or 1)
+      segmentation <- anns$segmentation                                             # ✔️ leave as list
     } else {
-      boxes <- matrix(nrow = 0, ncol = 4, dimnames = list(NULL, c("x1", "y1", "x2", "y2")))
-      labels <- area <- iscrowd <- integer(0)
-      segmentation <- list()
+      boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())         # ✔️ zero-size tensor
+      labels <- torch::torch_empty(0, dtype = torch::torch_int())                # ✔️ empty integer tensor
+      area <- torch::torch_empty(0, dtype = torch::torch_float())                # ✔️ empty float tensor
+      iscrowd <- torch::torch_empty(0, dtype = torch::torch_int())               # ✔️ empty integer tensor
+      segmentation <- list()                                                    # ✔️ remains list
     }
+
 
     target <- list(
       boxes = boxes,
@@ -132,13 +167,13 @@ coco_detection_dataset <- torch::dataset(
 
     ann_zip <- download_and_cache(info$ann_url)
 
-    img_zip <- download_and_cache(info$img_url)
-    if (tools::md5sum(img_zip) != info$img_md5) {
-      rlang::abort(glue::glue("Corrupt file! Delete the file in {img_zip} and try again."))
+    archive <- download_and_cache(info$img_url)
+    if (tools::md5sum(archive) != info$img_md5) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
     utils::unzip(ann_zip, exdir = self$data_dir)
-    utils::unzip(img_zip, exdir = self$data_dir)
+    utils::unzip(archive, exdir = self$data_dir)
   },
 
   get_resource_info = function() {
