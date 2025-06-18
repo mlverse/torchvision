@@ -192,16 +192,11 @@ fgvc_aircraft_dataset <- dataset(
       idx
     })
 
-    for (img_id in common_img_ids) {
-      entry <- lapply(seq_along(levels), function(i) {
-        idx_mat[[i]][[img_id]]
-      })
+    self$image_paths <- file.path(self$data_dir, "images", glue::glue("{common_img_ids}.jpg"))
+    self$labels <- lapply(common_img_ids, function(img_id) {
+      vapply(seq_along(levels), function(i) idx_mat[[i]][[img_id]], integer(1))
+    })
 
-      self$labels[[length(self$labels) + 1]] <- entry
-      self$image_paths <- c(self$image_paths, file.path(
-        self$data_dir, "images", glue::glue("{img_id}.jpg")
-      ))
-    }
   },
 
   .getitem = function(index) {
