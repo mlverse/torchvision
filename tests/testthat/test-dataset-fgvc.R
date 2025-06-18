@@ -27,60 +27,60 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_tensor(batch$y)
   expect_tensor_shape(batch$y,2)
   expect_tensor_dtype(batch$y,torch_long())
-  expect_equal_to_r(batch$y[1],1)
-  expect_equal_to_r(batch$y[2],1)
+  expect_equal_to_r(batch$y[1],86)
+  expect_equal_to_r(batch$y[2],42)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "variant")
   expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 2135040)
+  expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 1)
+  expect_equal(item$y, 56)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "variant")
   expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 3175200)
+  expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 1)
+  expect_equal(item$y, 3)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "family")
   expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 2135040)
+  expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 13)
+  expect_equal(item$y, 32)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "family")
   expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 3175200)
+  expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 13)
+  expect_equal(item$y, 16)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "manufacturer")
   expect_length(fgvc, 6667)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 2135040)
+  expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 5)
+  expect_equal(item$y, 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "manufacturer")
   expect_length(fgvc, 3333)
   item <- fgvc[1]
   expect_named(item, c("x", "y"))
   expect_type(item$x, "double")
-  expect_length(item$x, 3175200)
+  expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
   expect_equal(item$y, 5)
 

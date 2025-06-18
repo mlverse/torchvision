@@ -79,8 +79,8 @@ fgvc_aircraft_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-    rlang::inform(glue::glue("Initializing FGVC-Aircraft dataset..."))
-
+    
+    rlang::inform("FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
@@ -90,87 +90,24 @@ fgvc_aircraft_dataset <- dataset(
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
 
-    if (download) {
-      rlang::inform(glue::glue(
-        "Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."
-      ))
+    if (download){
       self$download()
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
     }
 
-    if (annotation_level == "all") {
-      self$setup_multilabel()
-    } else {
-      self$setup_singlelabel()
-    }
-
-    rlang::inform(glue::glue(
-      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
-    ))
-  },
-
-  setup_singlelabel = function() {
-    label_file <- file.path(
-      self$data_dir,
-      glue::glue("images_{self$annotation_level}_{self$split}.txt")
-    )
-
-    cls_file <- file.path(
-      self$data_dir,
-      switch(
-        self$annotation_level,
-        "variant" = "variants.txt",
-        "family" = "families.txt",
-        "manufacturer" = "manufacturers.txt",
-        runtime_error("Invalid annotation_level")
-      )
-    )
-
-    self$classes <- readLines(cls_file)
-    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
-
-    split_df <- read.fwf(
-      label_file,
-      widths = c(7, 100),
-      colClasses = "character",
-      stringsAsFactors = FALSE,
-      col.names = c("img_id", "class_name"),
-      strip.white = TRUE
-    )
-
-    class_idxs <- self$class_to_idx[split_df$class_name]
-    known_mask <- !vapply(class_idxs, is.null, logical(1))
-
-    self$image_paths <- file.path(
-      self$data_dir,
-      "images",
-      glue::glue("{split_df$img_id[known_mask]}.jpg", .envir = environment())
-    )
-    self$labels <- class_idxs[known_mask]
-  },
-
-  setup_multilabel = function() {
     self$classes <- list(
       manufacturer = readLines(file.path(self$data_dir, "manufacturers.txt")),
       family = readLines(file.path(self$data_dir, "families.txt")),
       variant = readLines(file.path(self$data_dir, "variants.txt"))
     )
 
-    self$class_to_idx <- lapply(self$classes, function(cls) {
-      setNames(seq_along(cls), cls)
-    })
-
     levels <- names(self$classes)
     label_data <- lapply(levels, function(level) {
-      label_file <- file.path(
-        self$data_dir,
-        glue::glue("images_{level}_{self$split}.txt")
-      )
       read.fwf(
-        label_file,
+        file.path(self$data_dir, glue::glue("images_{level}_{self$split}.txt")),
         widths = c(7, 100),
         colClasses = "character",
         stringsAsFactors = FALSE,
@@ -184,14 +121,24 @@ fgvc_aircraft_dataset <- dataset(
     merged_df[levels] <- lapply(levels, function(level) {
       as.integer(factor(merged_df[[level]], levels = self$classes[[level]]))
     })
-    
+
+    merged_df <- merged_df[complete.cases(merged_df), ]
     self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
-    self$labels <- split(as.matrix(merged_df[, levels]), seq_len(nrow(merged_df)))
+    self$labels_df <- merged_df[, levels]
+
+    rlang::inform(glue::glue(
+      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
+    ))
   },
 
   .getitem = function(index) {
     img <- jpeg::readJPEG(self$image_paths[index]) * 255
-    label <- self$labels[[index]]
+
+    label <- if (self$annotation_level == "all") {
+      as.integer(self$labels_df[index, ])
+    } else {
+      self$labels_df[[self$annotation_level]][index]
+    }
 
     if (!is.null(self$transform)) {
       img <- self$transform(img)
@@ -213,7 +160,7 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   download = function() {
-    if (self$check_exists()) {
+    if (self$check_exists()){
       return()
     }
 
@@ -221,18 +168,11 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
-    archive <- withr::with_options(
-      list(timeout = 1200),
-      download_and_cache(url)
-    )
+    archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+      runtime_error("Corrupt file! Delete the file at {archive} and try again.")
     }
 
     untar(archive, exdir = self$root)
-
-    rlang::inform(glue::glue(
-      "FGVC-Aircraft dataset downloaded and extracted successfully."
-    ))
   }
 )
