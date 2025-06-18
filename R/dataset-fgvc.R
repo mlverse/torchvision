@@ -130,9 +130,8 @@ fgvc_aircraft_dataset <- dataset(
       )
     )
 
-    classes <- readLines(cls_file)
-    self$classes <- classes
-    self$class_to_idx <- setNames(seq_along(classes), classes)
+    self$classes <- readLines(cls_file)
+    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
     split_df <- read.fwf(
       label_file,
@@ -200,9 +199,7 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- jpeg::readJPEG(self$image_paths[index])
-    img <- img * 255L
-    img <- as.integer(img)
+    img <- jpeg::readJPEG(self$image_paths[index]) * 255
     label <- self$labels[[index]]
 
     if (!is.null(self$transform)) {
