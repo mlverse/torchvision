@@ -56,18 +56,24 @@ oxfordiiitpet_dataset <- dataset(
   ),
   training_file = "trainval.rds",
   test_file = "test.rds",
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL,
-                        target_type = "category", download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    target_type = "category",
+    download = FALSE) {
 
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
     self$target_type <- target_type
+    self$split <- if (train) "train" else "test"
+
+    rlang::inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
 
     if (download)
-      rlang::inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
-      rlang::inform("Downloading and preparing the Oxford-IIIT Pet dataset...")
       self$download()
 
     if (!self$check_exists())
@@ -80,53 +86,60 @@ oxfordiiitpet_dataset <- dataset(
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- names(self$class_to_idx)
+
+    rlang::inform(glue::glue("Loaded {length(self$labels)} valid samples for split: '{self$split}'"))
   },
+
   download = function() {
+
     if (self$check_exists())
-      return(NULL)
+      return()
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
     lapply(self$resources, function(r) {
       url <- r[1]
-      md5 <- r[2]
       filename <- basename(url)
       destpath <- file.path(self$raw_folder, filename)
-      rlang::inform(glue::glue("Downloading: {url}"))
-      p <- download_and_cache(url, prefix = class(self)[1])
+      p <- download_and_cache(url)
       fs::file_copy(p, destpath, overwrite = TRUE)
-      actual_md5 <- unname(tools::md5sum(destpath))
-      if (!identical(actual_md5, md5)) {
-        runtime_error(glue::glue("MD5 mismatch for {url}\nExpected: {md5}\nFound:    {actual_md5}"))
+      actual_md5 <- tools::md5sum(destpath)
+
+      if (actual_md5 != r[2]) {
+        runtime_error("Corrupt file! Delete the file in {p} and try again.")
       }
-      rlang::inform(glue::glue("Extracting {filename}..."))
       utils::untar(destpath, exdir = self$raw_folder)
     })
-    rlang::inform("Preparing image paths and labels from annotations...")
 
-    lapply(c("trainval", "test"), function(split) {
+    for (split in c("trainval", "test")) {
       ann_file <- file.path(self$raw_folder, "annotations", glue::glue("{split}.txt"))
       lines <- readLines(ann_file)
       parts <- strsplit(lines, " ")
       img_ids <- vapply(parts, `[[`, character(1), 1)
       labels <- vapply(parts, function(x) as.integer(x[2]), integer(1))
       bin_labels <- vapply(parts, function(x) as.integer(x[3]), integer(1))
+      
       img_paths <- file.path(self$raw_folder, "images", glue::glue("{img_ids}.jpg"))
       seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{img_ids}.png"))
+      
       valid <- file.exists(img_paths) & file.exists(seg_paths)
+      
       if (any(!valid)) {
         rlang::warn(glue::glue("Some files are missing in {split} split and will be skipped."))
-        invisible(lapply(img_ids[!valid], function(id) {
+        for (id in img_ids[!valid]) {
           rlang::warn(glue::glue("Missing files for: {id}"))
-        }))
+        }
       }
+      
       image_paths <- img_paths[valid]
       labels <- labels[valid]
+      
       raw_classes <- sub("_\\d+$", "", img_ids[valid])
-      class_names <- unique(raw_classes)
-      class_names <- gsub("_", " ", class_names, fixed = TRUE)
-      class_to_idx <- setNames(seq_along(class_names), class_names)
+      self$classes <- unique(raw_classes)
+      self$classes <- gsub("_", " ", self$classes, fixed = TRUE)
+      class_to_idx <- setNames(seq_along(self$classes), self$classes)
+      
       saveRDS(
         list(
           image_paths = image_paths,
@@ -135,45 +148,48 @@ oxfordiiitpet_dataset <- dataset(
         ),
         file.path(self$processed_folder, glue::glue("{split}.rds"))
       )
-      rlang::inform(glue::glue("Loaded {length(labels)} valid samples for split: '{split}'"))
-    })
-
-
-    rlang::inform("Oxford-IIIT Pet dataset downloaded and processed successfully.")
+    }
   },
+
   check_exists = function() {
-    fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
-      fs::file_exists(file.path(self$processed_folder, self$test_file))
+    fs::file_exists(file.path(self$processed_folder, self$training_file)) && fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
+
   .getitem = function(index) {
-    img <- torchvision::transform_to_tensor(magick::image_read(self$image_paths[index]))
+    img <- magick::image_read(self$image_paths[index])
+    img <- magick::image_data(img, channels = "rgb")
+    img <- as.integer(img)
+    label <- self$labels[index]
 
     if (!is.null(self$transform))
       img <- self$transform(img)
+
     if (self$target_type == "segmentation") {
       mask <- magick::image_read(self$image_paths[index])
-      mask_tensor <- torchvision::transform_to_tensor(mask)[1, , ]
-      label <- mask_tensor
+      mask <- magick::image_data(mask, channels = "rgb")
+      mask <- as.integer(mask)
+      label <- mask
     } else if (self$target_type == "binary-category") {
-      label_index <- self$labels[index]
-      original_class <- names(self$class_to_idx)[label_index]
-      if (!is.na(original_class) && substr(original_class, 1, 1) == toupper(substr(original_class, 1, 1))) {
+      self$classes <- names(self$class_to_idx)[label]
+      if (grepl("^[A-Z]", self$classes)) {
         label <- 1
+        self$classes <- "Cat"
       } else {
         label <- 2
+        self$classes <- "Dog"
       }
-      if (!is.null(self$target_transform))
-        label <- self$target_transform(label)
-    } else {  
-      label <- self$labels[index]
-      if (!is.null(self$target_transform))
-        label <- self$target_transform(label)
     }
+
+    if (!is.null(self$target_transform))
+      label <- self$target_transform(label)
+
     list(x = img, y = label)
   },
+
   .length = function() {
     length(self$image_paths)
   },
+
   active = list(
     raw_folder = function() {
       file.path(self$root_path, "oxfordiiitpet", "raw")
