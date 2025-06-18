@@ -33,9 +33,9 @@ An R6 dataset object. Each item is a list with two elements:
 \item{target}{A list with:
 \describe{
 \item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
-\item{labels}{A numeric vector of integer class labels.}
+\item{labels}{An integer vector of class labels.}
 \item{area}{A numeric vector indicating the area of each object.}
-\item{iscrowd}{A logical or numeric vector indicating whether objects are crowds.}
+\item{iscrowd}{An integer vector (0 or 1) indicating whether objects are crowds.}
 \item{segmentation}{A list of segmentation polygons per object.}
 }
 }
@@ -51,10 +51,41 @@ areas, crowd indicators, and segmentation masks from the official COCO annotatio
 }
 \examples{
 \dontrun{
-ds <- coco_detection_dataset(root = "data", train = FALSE, year = "2017", download = TRUE)
+ds <- coco_detection_dataset(
+  root = "~/data",
+  train = FALSE,
+  year = "2017",
+  download = TRUE
+)
+
 sample <- ds[1]
 image <- sample$image
 target <- sample$target
+
+# Convert image to uint8
+image_uint8 <- image$mul(255)$clamp(0, 255)$to(dtype = torch::torch_uint8())
+
+# Ensure bounding boxes are torch tensors
+boxes <- if (!inherits(target$boxes, "torch_tensor")) {
+  torch::torch_tensor(target$boxes, dtype = torch::torch_float())
+} else {
+  target$boxes
 }
 
+# Convert labels to character
+labels <- as.character(torch::as_array(target$labels))
+
+# Draw bounding boxes
+output <- torchvision::draw_bounding_boxes(
+  image = image_uint8,
+  boxes = boxes,
+  labels = labels
+)
+
+# Convert to array and plot
+output_array <- as.array(output$permute(c(2, 3, 1)))  # CHW to HWC
+output_array <- as.numeric(output_array) / 255
+dim(output_array) <- dim(as.array(output$permute(c(2, 3, 1))))
+plot(as.raster(output_array))
+}
 }
