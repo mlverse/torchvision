@@ -174,27 +174,19 @@ fgvc_aircraft_dataset <- dataset(
         widths = c(7, 100),
         colClasses = "character",
         stringsAsFactors = FALSE,
-        col.names = c("img_id", "class_name"),
+        col.names = c("img_id", level),
         strip.white = TRUE
       )
     })
     names(label_data) <- levels
 
-    common_img_ids <- Reduce(intersect, lapply(label_data, function(df) df$img_id))
-
-    idx_mat <- lapply(levels, function(level) {
-      df <- label_data[[level]]
-      fct <- factor(df$class_name, levels = names(self$class_to_idx[[level]]))
-      idx <- as.integer(fct)
-      names(idx) <- df$img_id
-      idx
+    merged_df <- Reduce(function(x, y) merge(x, y, by = "img_id"), label_data)
+    merged_df[levels] <- lapply(levels, function(level) {
+      as.integer(factor(merged_df[[level]], levels = self$classes[[level]]))
     })
-
-    self$image_paths <- file.path(self$data_dir, "images", glue::glue("{common_img_ids}.jpg"))
-    self$labels <- lapply(common_img_ids, function(img_id) {
-      vapply(seq_along(levels), function(i) idx_mat[[i]][[img_id]], integer(1))
-    })
-
+    
+    self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
+    self$labels <- split(as.matrix(merged_df[, levels]), seq_len(nrow(merged_df)))
   },
 
   .getitem = function(index) {
