@@ -27,16 +27,17 @@ coco_detection_dataset(
 \item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
 \value{
-An R6 dataset object. Each item is a list with two elements:
+A torch dataset. Each item is a list with two elements:
+
 \describe{
-\item{image}{A 3D \code{torch_tensor} of shape \code{[C, H, W]} (channel-first).}
-\item{target}{A list with:
+\item{image}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
+\item{target}{A list containing:
 \describe{
-\item{boxes}{A matrix of bounding boxes in \code{[x1, y1, x2, y2]} format.}
-\item{labels}{An integer vector of class labels.}
-\item{area}{A numeric vector indicating the area of each object.}
-\item{iscrowd}{An integer vector (0 or 1) indicating whether objects are crowds.}
-\item{segmentation}{A list of segmentation polygons per object.}
+\item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes in the format \code{c(xmin, ymin, xmax, ymax)}.}
+\item{labels}{A 1D \code{torch_tensor} of type integer, representing the class label for each object.}
+\item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
+\item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
+\item{segmentation}{A list of segmentation polygons for each object.}
 }
 }
 }
@@ -46,7 +47,7 @@ Loads the MS COCO dataset for object detection and segmentation.
 }
 \details{
 The returned image is in CHW format (channels, height, width), matching the torch convention.
-The dataset supports loading object detection annotations such as bounding boxes, labels,
+The dataset \code{target} offers object detection annotations such as bounding boxes, labels,
 areas, crowd indicators, and segmentation masks from the official COCO annotations.
 }
 \examples{
@@ -58,34 +59,29 @@ ds <- coco_detection_dataset(
   download = TRUE
 )
 
-sample <- ds[1]
-image <- sample$image
-target <- sample$target
+example <- ds[1]
+image <- example$image
+target <- example$target
 
 # Convert image to uint8
 image_uint8 <- image$mul(255)$clamp(0, 255)$to(dtype = torch::torch_uint8())
 
-# Ensure bounding boxes are torch tensors
-boxes <- if (!inherits(target$boxes, "torch_tensor")) {
-  torch::torch_tensor(target$boxes, dtype = torch::torch_float())
-} else {
-  target$boxes
-}
+# Access the bounding boxes tensor from the target
+boxes <- target$boxes
 
-# Convert labels to character
-labels <- as.character(torch::as_array(target$labels))
+# Map label IDs to category names
+label_ids <- as.integer(torch::as_array(target$labels))
+label_names <- ds$category_names[as.character(label_ids)]
 
-# Draw bounding boxes
-output <- torchvision::draw_bounding_boxes(
+# Draw bounding boxes with label names
+output <- draw_bounding_boxes(
   image = image_uint8,
   boxes = boxes,
-  labels = labels
+  labels = label_names
 )
 
-# Convert to array and plot
-output_array <- as.array(output$permute(c(2, 3, 1)))  # CHW to HWC
-output_array <- as.numeric(output_array) / 255
-dim(output_array) <- dim(as.array(output$permute(c(2, 3, 1))))
-plot(as.raster(output_array))
+# Display the result
+tensor_image_browse(output)
 }
+
 }
