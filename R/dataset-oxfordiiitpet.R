@@ -37,6 +37,7 @@
 #' first_item <- oxfordiiitpet[1]
 #' first_item$x  # image tensor
 #' first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
+#' }
 #'
 #' @name oxfordiiitpet_dataset
 #' @aliases oxfordiiitpet_dataset

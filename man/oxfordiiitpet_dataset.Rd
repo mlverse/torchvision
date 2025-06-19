@@ -50,3 +50,19 @@ The dataset is split into:
 \item \code{"test"}: test subset with labels.
 }
 }
+\examples{
+\dontrun{
+# Load training data with class labels (1 to 37)
+oxfordiiitpet <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
+first_item <- oxfordiiitpet[1]
+first_item$x  # image tensor
+first_item$y  # class index
+
+# Load with segmentation masks
+oxfordiiitpet <- oxfordiiitpet_dataset(root = root_dir, target_type = "segmentation")
+first_item <- oxfordiiitpet[1]
+first_item$x  # image tensor
+first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
+}
+
+}
