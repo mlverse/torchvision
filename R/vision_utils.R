@@ -104,28 +104,41 @@ draw_bounding_boxes <- function(image,
                                font_size = 10) {
   rlang::check_installed("magick")
 
-  stopifnot("Image is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
-  stopifnot("Image is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
-  stopifnot("Pass individual images, not batches" = image$ndim == 3)
-  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
-  stopifnot(
-    "Boxes need to be in (xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them" = (boxes[, 1] < boxes[, 3])$all() %>% as.logical() &&
-      (boxes[, 2] < boxes[, 4])$all() %>% as.logical()
-  )
+  if (!inherits(image, "torch_tensor")) {
+    value_error("`image` should be a torch_tensor")
+  }
+  if (image$dtype == torch::torch_uint8()) {
+    divide = 255
+  } else if (image$dtype == torch::torch_float()) {
+    divide = 1
+  } else {
+    value_error("`image` should be of dtype torch_uint8")
+  }
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
+  }
+  if (!image$size(1) %in% c(1, 3)) {
+    value_error("Only grayscale and RGB images are supported")
+  }
+  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
+    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
+  }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
-    rlang::warn("boxes doesn't contain any box. No box was drawn")
+    cli_inform("boxes doesn't contain any box. No box was drawn")
     return(image)
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
-    rlang::abort(
-      "Number of labels {length(labels)} cannot be broadcasted on number of boxes {num_boxes}"
+    cli_abort(
+      "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
     )
   }
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_boxes)
   }
-  stopifnot("colors vector cannot be broadcasted on boxes" = num_boxes %% length(colors) == 0)
+  if (num_boxes %% length(colors) != 0) {
+    value_error("colors vector cannot be broadcasted on boxes")
+  }
 
   if (!fill) {
     fill_col <- NA
@@ -149,7 +162,7 @@ draw_bounding_boxes <- function(image,
   img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
 
 
-  draw <- png::writePNG(img_to_draw / 255) %>%
+  draw <- png::writePNG(img_to_draw / divide) %>%
     magick::image_read() %>%
     magick::image_draw()
   graphics::rect(img_bb[, 1],
