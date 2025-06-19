@@ -42,7 +42,7 @@ test_that("coco_detection_dataset loads a single sample correctly", {
   expect_tensor_dtype(target$area, torch::torch_float())
 
   expect_tensor(target$iscrowd)
-  expect_tensor_dtype(target$iscrowd, torch::torch_int())
+  expect_tensor_dtype(target$iscrowd, torch::torch_bool())
 
 })
 
