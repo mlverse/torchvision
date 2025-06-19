@@ -16,7 +16,7 @@
 #'   \item{image}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
 #'   \item{target}{A list containing:
 #'     \describe{
-#'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes in the format \code{c(xmin, ymin, xmax, ymax)}.}
+#'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
 #'       \item{labels}{A 1D \code{torch_tensor} of type integer, representing the class label for each object.}
 #'       \item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
 #'       \item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
