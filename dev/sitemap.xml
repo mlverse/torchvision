@@ -13,6 +13,7 @@
 <url><loc>/news/index.html</loc></url>
 <url><loc>/reference/base_loader.html</loc></url>
 <url><loc>/reference/cifar10_dataset.html</loc></url>
+<url><loc>/reference/coco_detection_dataset.html</loc></url>
 <url><loc>/reference/draw_bounding_boxes.html</loc></url>
 <url><loc>/reference/draw_keypoints.html</loc></url>
 <url><loc>/reference/draw_segmentation_masks.html</loc></url>
