@@ -101,39 +101,43 @@
 
 
 <dl><dt id="arg-image">image<a class="anchor" aria-label="anchor" href="#arg-image"></a></dt>
-<dd><p>: Tensor of shape (C x H x W) and dtype uint8.</p></dd>
+<dd><p>Tensor of shape (C x H x W) and dtype <code>uint8</code> or dtype <code>float</code>.
+In case of dtype float, values are assumed to be in range \([0, 1]\).
+C value for channel can only be 1 (grayscale) or 3 (RGB).</p></dd>
 
 
 <dt id="arg-boxes">boxes<a class="anchor" aria-label="anchor" href="#arg-boxes"></a></dt>
-<dd><p>: Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
-the boxes are absolute coordinates with respect to the image. In other words: <code>0  = xmin &lt; xmax &lt; W</code> and
-<code>0  = ymin &lt; ymax &lt; H</code>.</p></dd>
+<dd><p>Tensor of size (N, 4) containing N bounding boxes in
+c(\(x_{min}\), \(y_{min}\), \(x_{max}\), \(y_{max}\)).
+format. Note that the boxes coordinates are absolute with respect
+to the image. In other words: \(0  \leq x_{min} &lt; x_{max} &lt; W \) and
+\(0  \leq y_{min} &lt; y_{max} &lt; W \).</p></dd>
 
 
 <dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
-<dd><p>: character vector containing the labels of bounding boxes.</p></dd>
+<dd><p>character vector containing the labels of bounding boxes.</p></dd>
 
 
 <dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
-<dd><p>: character vector containing the colors
+<dd><p>character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>: If <code>TRUE</code> fills the bounding box with specified color.</p></dd>
+<dd><p>If <code>TRUE</code> fills the bounding box with specified color.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>: Width of text shift to the bounding box.</p></dd>
+<dd><p>Width of text shift to the bounding box.</p></dd>
 
 
 <dt id="arg-font">font<a class="anchor" aria-label="anchor" href="#arg-font"></a></dt>
-<dd><p>: NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.</p></dd>
+<dd><p>NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.</p></dd>
 
 
 <dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
-<dd><p>: The requested font size in points.</p></dd>
+<dd><p>The requested font size in points.</p></dd>
 
 </dl></div>
     <div id="value">

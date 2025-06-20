@@ -168,23 +168,15 @@ areas, crowd indicators, and segmentation masks from the official COCO annotatio
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">example</span> <span class="op">&lt;-</span> <span class="va">ds</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">image</span> <span class="op">&lt;-</span> <span class="va">example</span><span class="op">$</span><span class="va">image</span></span></span>
-<span class="r-in"><span><span class="va">target</span> <span class="op">&lt;-</span> <span class="va">example</span><span class="op">$</span><span class="va">target</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Convert image to uint8</span></span></span>
-<span class="r-in"><span><span class="va">image_uint8</span> <span class="op">&lt;-</span> <span class="va">image</span><span class="op">$</span><span class="fu">mul</span><span class="op">(</span><span class="fl">255</span><span class="op">)</span><span class="op">$</span><span class="fu">clamp</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">255</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>dtype <span class="op">=</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access the bounding boxes tensor from the target</span></span></span>
-<span class="r-in"><span><span class="va">boxes</span> <span class="op">&lt;-</span> <span class="va">target</span><span class="op">$</span><span class="va">boxes</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Map label IDs to category names</span></span></span>
-<span class="r-in"><span><span class="va">label_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/as_array.html" class="external-link">as_array</a></span><span class="op">(</span><span class="va">target</span><span class="op">$</span><span class="va">labels</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Get back target label IDs of the example from COCO category names</span></span></span>
+<span class="r-in"><span><span class="va">label_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/as_array.html" class="external-link">as_array</a></span><span class="op">(</span><span class="va">example</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">labels</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">label_names</span> <span class="op">&lt;-</span> <span class="va">ds</span><span class="op">$</span><span class="va">category_names</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">label_ids</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Draw bounding boxes with label names</span></span></span>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_bounding_boxes.html">draw_bounding_boxes</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  image <span class="op">=</span> <span class="va">image_uint8</span>,</span></span>
-<span class="r-in"><span>  boxes <span class="op">=</span> <span class="va">boxes</span>,</span></span>
+<span class="r-in"><span>  image <span class="op">=</span> <span class="va">example</span><span class="op">$</span><span class="va">image</span>,</span></span>
+<span class="r-in"><span>  boxes <span class="op">=</span> <span class="va">example</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">boxes</span>,</span></span>
 <span class="r-in"><span>  labels <span class="op">=</span> <span class="va">label_names</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

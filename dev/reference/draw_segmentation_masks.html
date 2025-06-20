@@ -92,19 +92,21 @@
 
 
 <dl><dt id="arg-image">image<a class="anchor" aria-label="anchor" href="#arg-image"></a></dt>
-<dd><p>: torch_tensor of shape (3, H, W) and dtype uint8.</p></dd>
+<dd><p>Tensor of shape (C x H x W) and dtype <code>uint8</code> or dtype <code>float</code>.
+In case of dtype float, values are assumed to be in range \([0, 1]\).
+C value for channel can only be 1 (grayscale) or 3 (RGB).</p></dd>
 
 
 <dt id="arg-masks">masks<a class="anchor" aria-label="anchor" href="#arg-masks"></a></dt>
-<dd><p>: torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.</p></dd>
+<dd><p>torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>: number between 0 and 1 denoting the transparency of the masks.</p></dd>
+<dd><p>number between 0 and 1 denoting the transparency of the masks.</p></dd>
 
 
 <dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
-<dd><p>: character vector containing the colors
+<dd><p>character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks</p></dd>
 
