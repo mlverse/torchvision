@@ -7,12 +7,12 @@
 generalized_box_iou(boxes1, boxes2)
 }
 \arguments{
-\item{boxes1}{(Tensor\link{N, 4})}
+\item{boxes1}{(Tensor[N, 4])}
 
-\item{boxes2}{(Tensor\link{M, 4})}
+\item{boxes2}{(Tensor[M, 4])}
 }
 \value{
-generalized_iou (Tensor\link{N, M}): the NxM matrix containing the pairwise generalized_IoU values
+generalized_iou (Tensor[N, M]): the NxM matrix containing the pairwise generalized_IoU values
 for every element in boxes1 and boxes2
 }
 \description{

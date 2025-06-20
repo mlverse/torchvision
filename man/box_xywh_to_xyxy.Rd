@@ -7,10 +7,10 @@
 box_xywh_to_xyxy(boxes)
 }
 \arguments{
-\item{boxes}{(Tensor\link{N, 4}): boxes in (x, y, w, h) which will be converted.}
+\item{boxes}{(Tensor[N, 4]): boxes in (x, y, w, h) which will be converted.}
 }
 \value{
-boxes (Tensor\link{N, 4}): boxes in (x1, y1, x2, y2) format.
+boxes (Tensor[N, 4]): boxes in (x1, y1, x2, y2) format.
 }
 \description{
 Converts bounding boxes from  (x, y, w, h) format to (x1, y1, x2, y2) format.

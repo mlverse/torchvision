@@ -7,12 +7,12 @@
 box_iou(boxes1, boxes2)
 }
 \arguments{
-\item{boxes1}{(Tensor\link{N, 4})}
+\item{boxes1}{(Tensor[N, 4])}
 
-\item{boxes2}{(Tensor\link{M, 4})}
+\item{boxes2}{(Tensor[M, 4])}
 }
 \value{
-iou (Tensor\link{N, M}): the NxM matrix containing the pairwise IoU values for every element in boxes1 and boxes2
+iou (Tensor[N, M]): the NxM matrix containing the pairwise IoU values for every element in boxes1 and boxes2
 }
 \description{
 Return intersection-over-union  (Jaccard index) of boxes.

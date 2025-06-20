@@ -5,10 +5,10 @@
 #' lower scoring boxes which have an IoU greater than iou_threshold
 #' with another (higher scoring) box.
 #'
-#' @param boxes  (Tensor[N, 4])): boxes to perform NMS on. They are
+#' @param boxes  (Tensor\[N, 4\])): boxes to perform NMS on. They are
 #' expected to be in `` (x1, y1, x2, y2)`` format with
 #' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
-#' @param scores (Tensor[N]): scores for each one of the boxes
+#' @param scores (Tensor\[N\]): scores for each one of the boxes
 #' @param iou_threshold  (float): discards all overlapping boxes with IoU > iou_threshold
 #'
 #' @details
@@ -32,10 +32,10 @@ nms <- function(boxes, scores, iou_threshold) {
 #'    Each index value correspond to a category, and NMS
 #'    will not be applied between elements of different categories.
 #'
-#' @param boxes (Tensor[N, 4]): boxes where NMS will be performed. They are expected to be
+#' @param boxes (Tensor\[N, 4\]): boxes where NMS will be performed. They are expected to be
 #'  in `` (x1, y1, x2, y2)`` format with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
-#' @param scores  (Tensor[N]): scores for each one of the boxes
-#' @param idxs  (Tensor[N]): indices of the categories for each one of the boxes.
+#' @param scores  (Tensor\[N\]): scores for each one of the boxes
+#' @param idxs  (Tensor\[N\]): indices of the categories for each one of the boxes.
 #' @param iou_threshold  (float): discards all overlapping boxes with IoU > iou_threshold
 #'
 #'
@@ -73,11 +73,11 @@ batched_nms <- function(
 #'
 #' Remove boxes which contains at least one side smaller than min_size.
 #'
-#' @param boxes  (Tensor[N, 4]): boxes in ``(x1, y1, x2, y2)`` format
+#' @param boxes  (Tensor\[N, 4\]): boxes in ``(x1, y1, x2, y2)`` format
 #'  with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
 #' @param min_size  (float): minimum size
 #'
-#' @return keep (Tensor[K]): indices of the boxes that have both sides
+#' @return keep (Tensor\[K\]): indices of the boxes that have both sides
 #'  larger than min_size
 #'
 #' @export
@@ -92,11 +92,11 @@ remove_small_boxes <- function(boxes, min_size) {
 #'
 #' Clip boxes so that they lie inside an image of size `size`.
 #'
-#' @param boxes  (Tensor[N, 4]): boxes in ``(x1, y1, x2, y2)`` format
+#' @param boxes  (Tensor\[N, 4\]): boxes in ``(x1, y1, x2, y2)`` format
 #' with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
-#' @param size  (Tuple[height, width]): size of the image
+#' @param size  (Tuple\[height, width]): size of the image
 #'
-#' @return clipped_boxes (Tensor[N, 4])
+#' @return clipped_boxes (Tensor\[N, 4\])
 #'
 #' @export
 clip_boxes_to_image <- function(boxes, size) {
@@ -122,10 +122,10 @@ clip_boxes_to_image <- function(boxes, size) {
 #'
 #'  Converts boxes from given in_fmt to out_fmt.
 #'
-#' @param boxes  (Tensor[N, 4]): boxes which will be converted.
-#' @param in_fmt  (str): Input format of given boxes. Supported formats are ['xyxy', 'xywh', 'cxcywh'].
-#' @param out_fmt  (str): Output format of given boxes. Supported formats are ['xyxy', 'xywh', 'cxcywh']
-#' @return boxes (Tensor[N, 4]): Boxes into converted format.
+#' @param boxes  (Tensor\[N, 4\]): boxes which will be converted.
+#' @param in_fmt  (str): Input format of given boxes. Supported formats are \['xyxy', 'xywh', 'cxcywh'\].
+#' @param out_fmt  (str): Output format of given boxes. Supported formats are \['xyxy', 'xywh', 'cxcywh'\]
+#' @return boxes (Tensor\[N, 4]): Boxes into converted format.
 #'
 #' @details
 #' Supported in_fmt and out_fmt are:
@@ -183,10 +183,10 @@ upcast <- function(t) {
 #' Computes the area of a set of bounding boxes, which are specified by its
 #' (x1, y1, x2, y2) coordinates.
 #'
-#' @param boxes  (Tensor[N, 4]): boxes for which the area will be computed. They
+#' @param boxes  (Tensor\[N, 4\]): boxes for which the area will be computed. They
 #' are expected to be in  (x1, y1, x2, y2) format with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
 #'
-#' @return area (Tensor[N]): area for each box
+#' @return area (Tensor\[N\]): area for each box
 #'
 #' @export
 box_area <- function(boxes) {
@@ -217,10 +217,10 @@ box_inter_union <- function(boxes1, boxes2) {
 #' Both sets of boxes are expected to be in `` (x1, y1, x2, y2)`` format with
 #' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
 #'
-#' @param boxes1  (Tensor[N, 4])
-#' @param boxes2  (Tensor[M, 4])
+#' @param boxes1  (Tensor\[N, 4\])
+#' @param boxes2  (Tensor\[M, 4\])
 #'
-#' @return iou (Tensor[N, M]): the NxM matrix containing the pairwise IoU values for every element in boxes1 and boxes2
+#' @return iou (Tensor\[N, M\]): the NxM matrix containing the pairwise IoU values for every element in boxes1 and boxes2
 #'
 #' @export
 box_iou <- function(boxes1, boxes2) {
@@ -235,13 +235,13 @@ box_iou <- function(boxes1, boxes2) {
 #' Both sets of boxes are expected to be in `` (x1, y1, x2, y2)`` format with
 #' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
 #'
-#' @param boxes1  (Tensor[N, 4])
-#' @param boxes2  (Tensor[M, 4])
+#' @param boxes1  (Tensor\[N, 4\])
+#' @param boxes2  (Tensor\[M, 4\])
 #'
 #' @details
 #' Implementation adapted from https://github.com/facebookresearch/detr/blob/master/util/box_ops.py
 #'
-#' @return generalized_iou (Tensor[N, M]): the NxM matrix containing the pairwise generalized_IoU values
+#' @return generalized_iou (Tensor\[N, M\]): the NxM matrix containing the pairwise generalized_IoU values
 #'        for every element in boxes1 and boxes2
 #'
 #' @export

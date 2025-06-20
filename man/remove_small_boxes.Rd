@@ -7,13 +7,13 @@
 remove_small_boxes(boxes, min_size)
 }
 \arguments{
-\item{boxes}{(Tensor\link{N, 4}): boxes in \verb{(x1, y1, x2, y2)} format
+\item{boxes}{(Tensor[N, 4]): boxes in \verb{(x1, y1, x2, y2)} format
 with \verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
 
 \item{min_size}{(float): minimum size}
 }
 \value{
-keep (Tensor\link{K}): indices of the boxes that have both sides
+keep (Tensor[K]): indices of the boxes that have both sides
 larger than min_size
 }
 \description{

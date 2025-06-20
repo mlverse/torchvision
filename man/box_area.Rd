@@ -7,11 +7,11 @@
 box_area(boxes)
 }
 \arguments{
-\item{boxes}{(Tensor\link{N, 4}): boxes for which the area will be computed. They
+\item{boxes}{(Tensor[N, 4]): boxes for which the area will be computed. They
 are expected to be in  (x1, y1, x2, y2) format with \verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
 }
 \value{
-area (Tensor\link{N}): area for each box
+area (Tensor[N]): area for each box
 }
 \description{
 Computes the area of a set of bounding boxes, which are specified by its

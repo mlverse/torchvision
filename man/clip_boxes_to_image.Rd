@@ -7,13 +7,13 @@
 clip_boxes_to_image(boxes, size)
 }
 \arguments{
-\item{boxes}{(Tensor\link{N, 4}): boxes in \verb{(x1, y1, x2, y2)} format
+\item{boxes}{(Tensor[N, 4]): boxes in \verb{(x1, y1, x2, y2)} format
 with \verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
 
-\item{size}{(Tuple\link{height, width}): size of the image}
+\item{size}{(Tuple[height, width]): size of the image}
 }
 \value{
-clipped_boxes (Tensor\link{N, 4})
+clipped_boxes (Tensor[N, 4])
 }
 \description{
 Clip boxes so that they lie inside an image of size \code{size}.

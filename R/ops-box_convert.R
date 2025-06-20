@@ -7,7 +7,7 @@ NULL
 #'  (cx, cy) refers to center of bounding box
 #'  (w, h) are width and height of bounding box
 #'
-#' @param boxes  (Tensor[N, 4]): boxes in (cx, cy, w, h) format which will be converted.
+#' @param boxes  (Tensor\[N, 4]): boxes in (cx, cy, w, h) format which will be converted.
 #'
 #' @return boxes (Tensor(N, 4)): boxes in (x1, y1, x2, y2) format.
 box_cxcywh_to_xyxy <- function(boxes) {
@@ -29,7 +29,7 @@ box_cxcywh_to_xyxy <- function(boxes) {
 #'  (x1, y1) refer to top left of bounding box
 #'  (x2, y2) refer to bottom right of bounding box
 #'
-#'  @param boxes  (Tensor[N, 4]): boxes in (x1, y1, x2, y2) format which will be converted.
+#' @param boxes  (Tensor\[N, 4\]): boxes in (x1, y1, x2, y2) format which will be converted.
 #'
 #' @return boxes (Tensor(N, 4)): boxes in (cx, cy, w, h) format.
 box_xyxy_to_cxcywh <- function(boxes) {
@@ -50,9 +50,9 @@ box_xyxy_to_cxcywh <- function(boxes) {
 #' (x, y) refers to top left of bouding box.
 #' (w, h) refers to width and height of box.
 #'
-#' @param boxes  (Tensor[N, 4]): boxes in (x, y, w, h) which will be converted.
+#' @param boxes  (Tensor\[N, 4\]): boxes in (x, y, w, h) which will be converted.
 #'
-#' @return boxes (Tensor[N, 4]): boxes in (x1, y1, x2, y2) format.
+#' @return boxes (Tensor\[N, 4\]): boxes in (x1, y1, x2, y2) format.
 box_xywh_to_xyxy <- function(boxes) {
   c(x, y, w, h) %<-% boxes$unbind(-1)
   boxes = torch::torch_stack(list(x, y, x + w, y + h), dim=-1)
@@ -65,9 +65,9 @@ box_xywh_to_xyxy <- function(boxes) {
 #' (x1, y1) refer to top left of bounding box
 #' (x2, y2) refer to bottom right of bounding box
 #'
-#' @param boxes  (Tensor[N, 4]): boxes in (x1, y1, x2, y2) which will be converted.
+#' @param boxes  (Tensor\[N, 4\]): boxes in (x1, y1, x2, y2) which will be converted.
 #'
-#' @return boxes (Tensor[N, 4]): boxes in (x, y, w, h) format.
+#' @return boxes (Tensor\[N, 4\]): boxes in (x, y, w, h) format.
 box_xyxy_to_xywh <- function(boxes) {
   c(x1, y1, x2, y2) %<-% boxes$unbind(-1)
   w = x2 - x1 # x2 - x1

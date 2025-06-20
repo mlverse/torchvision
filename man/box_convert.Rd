@@ -7,14 +7,14 @@
 box_convert(boxes, in_fmt, out_fmt)
 }
 \arguments{
-\item{boxes}{(Tensor\link{N, 4}): boxes which will be converted.}
+\item{boxes}{(Tensor[N, 4]): boxes which will be converted.}
 
-\item{in_fmt}{(str): Input format of given boxes. Supported formats are \link{'xyxy', 'xywh', 'cxcywh'}.}
+\item{in_fmt}{(str): Input format of given boxes. Supported formats are ['xyxy', 'xywh', 'cxcywh'].}
 
-\item{out_fmt}{(str): Output format of given boxes. Supported formats are \link{'xyxy', 'xywh', 'cxcywh'}}
+\item{out_fmt}{(str): Output format of given boxes. Supported formats are ['xyxy', 'xywh', 'cxcywh']}
 }
 \value{
-boxes (Tensor\link{N, 4}): Boxes into converted format.
+boxes (Tensor[N, 4]): Boxes into converted format.
 }
 \description{
 Converts boxes from given in_fmt to out_fmt.

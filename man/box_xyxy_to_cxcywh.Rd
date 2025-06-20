@@ -6,6 +6,9 @@
 \usage{
 box_xyxy_to_cxcywh(boxes)
 }
+\arguments{
+\item{boxes}{(Tensor[N, 4]): boxes in (x1, y1, x2, y2) format which will be converted.}
+}
 \value{
 boxes (Tensor(N, 4)): boxes in (cx, cy, w, h) format.
 }
@@ -13,7 +16,4 @@ boxes (Tensor(N, 4)): boxes in (cx, cy, w, h) format.
 Converts bounding boxes from  (x1, y1, x2, y2) format to (cx, cy, w, h) format.
 (x1, y1) refer to top left of bounding box
 (x2, y2) refer to bottom right of bounding box
-}
-\details{
-@param boxes  (Tensor\link{N, 4}): boxes in (x1, y1, x2, y2) format which will be converted.
 }
