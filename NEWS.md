@@ -10,8 +10,7 @@
 - Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
 - Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
 - add tiff image support to `folder_dataset()` (#169, @cregouby)
-- Added `caltech101_dataset()` – a dataset loader for the Caltech101 dataset. (#158, @DerrickUnleashed)
-- Added `caltech256_dataset()` – a dataset loader for the Caltech256 dataset. (#158, @DerrickUnleashed)
+- Added `caltech101_dataset()` and `caltech256_dataset()` – dataset loaders for the Caltech101 and Caltech256 datasets. (#158, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
