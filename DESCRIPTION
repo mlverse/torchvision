@@ -15,6 +15,11 @@ Authors@R: c(
     person(given = "Akanksha", 
            family = "Koshti", 
            role = c("ctb")),
+    person(given = "Derrick",
+           family = "Richard",
+           role = c("ctb"),
+           email = "derrickrds@gmail.com"
+           ),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing
@@ -34,9 +39,11 @@ Imports:
     utils,
     jpeg,
     jsonlite,
+    tiff,
     magrittr,
     png,
     abind,
+    jsonlite,
     withr,
     glue
 Suggests:

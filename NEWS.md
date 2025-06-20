@@ -6,7 +6,13 @@
 - add message translation in french (#112, @cregouby)
 - Added support for the Fashion-MNIST dataset. (#148, @koshtiakanksha)
 - Added support for the MS COCO Captions dataset. (#141, @koshtiakanksha)
+- Added the Fashion-MNIST dataset. (#148, @koshtiakanksha)
+- Added 3 EuroSAT datasets (#126 @cregouby)
 - Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
+- Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
+- Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
+- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
+- add tiff image support to `folder_dataset()` (#169, @cregouby)
 
 # torchvision 0.6.0
 
