@@ -7,8 +7,12 @@
 remove_small_boxes(boxes, min_size)
 }
 \arguments{
-\item{boxes}{(Tensor[N, 4]): boxes in \verb{(x1, y1, x2, y2)} format
-with \verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
+\item{boxes}{(Tensor[N, 4]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
+with
+\itemize{
+\item \eqn{0 \leq x_{min} < x_{max}} and
+\item \eqn{0 \leq y_{min} < y_{max}}.
+}}
 
 \item{min_size}{(float): minimum size}
 }

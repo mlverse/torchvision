@@ -8,8 +8,11 @@ nms(boxes, scores, iou_threshold)
 }
 \arguments{
 \item{boxes}{(Tensor[N, 4])): boxes to perform NMS on. They are
-expected to be in \verb{ (x1, y1, x2, y2)} format with
-\verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
+expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+\itemize{
+\item \eqn{0 \leq x_{min} < x_{max}} and
+\item \eqn{0 \leq y_{min} < y_{max}}.
+}}
 
 \item{scores}{(Tensor[N]): scores for each one of the boxes}
 

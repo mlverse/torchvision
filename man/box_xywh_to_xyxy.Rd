@@ -10,10 +10,10 @@ box_xywh_to_xyxy(boxes)
 \item{boxes}{(Tensor[N, 4]): boxes in (x, y, w, h) which will be converted.}
 }
 \value{
-boxes (Tensor[N, 4]): boxes in (x1, y1, x2, y2) format.
+boxes (Tensor[N, 4]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 }
 \description{
-Converts bounding boxes from  (x, y, w, h) format to (x1, y1, x2, y2) format.
+Converts bounding boxes from  (x, y, w, h) format to \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 (x, y) refers to top left of bouding box.
 (w, h) refers to width and height of box.
 }

@@ -7,13 +7,13 @@
 box_xyxy_to_xywh(boxes)
 }
 \arguments{
-\item{boxes}{(Tensor[N, 4]): boxes in (x1, y1, x2, y2) which will be converted.}
+\item{boxes}{(Tensor[N, 4]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} which will be converted.}
 }
 \value{
 boxes (Tensor[N, 4]): boxes in (x, y, w, h) format.
 }
 \description{
-Converts bounding boxes from  (x1, y1, x2, y2) format to (x, y, w, h) format.
+Converts bounding boxes from  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format to (x, y, w, h) format.
 (x1, y1) refer to top left of bounding box
 (x2, y2) refer to bottom right of bounding box
 }

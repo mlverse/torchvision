@@ -8,13 +8,17 @@ batched_nms(boxes, scores, idxs, iou_threshold)
 }
 \arguments{
 \item{boxes}{(Tensor[N, 4]): boxes where NMS will be performed. They are expected to be
-in \verb{ (x1, y1, x2, y2)} format with \verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.}
+in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+\itemize{
+\item \eqn{0 \leq x_{min} < x_{max}} and
+\item \eqn{0 \leq y_{min} < y_{max}}.
+}}
 
 \item{scores}{(Tensor[N]): scores for each one of the boxes}
 
 \item{idxs}{(Tensor[N]): indices of the categories for each one of the boxes.}
 
-\item{iou_threshold}{(float): discards all overlapping boxes with IoU > iou_threshold}
+\item{iou_threshold}{(float): discards all overlapping boxes with IoU > \code{iou_threshold}}
 }
 \value{
 keep (Tensor): int64 tensor with the indices of

@@ -17,8 +17,8 @@ for every element in boxes1 and boxes2
 }
 \description{
 Return generalized intersection-over-union  (Jaccard index) of boxes.
-Both sets of boxes are expected to be in \verb{ (x1, y1, x2, y2)} format with
-\verb{0 <= x1 < x2} and \verb{0 <= y1 < y2}.
+Both sets of boxes are expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+\eqn{0 \leq x_{min} < x_{max}} and \eqn{0 \leq y_{min} < y_{max}}.
 }
 \details{
 Implementation adapted from https://github.com/facebookresearch/detr/blob/master/util/box_ops.py

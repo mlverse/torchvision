@@ -21,8 +21,21 @@ Converts boxes from given in_fmt to out_fmt.
 }
 \details{
 Supported in_fmt and out_fmt are:
-'xyxy': boxes are represented via corners, x1, y1 being top left and x2, y2 being bottom right.
-'xywh' : boxes are represented via corner, width and height, x1, y2 being top left, w, h being width and height.
-'cxcywh' : boxes are represented via centre, width and height, cx, cy being center of box, w, h
-being width and height.
+\itemize{
+\item 'xyxy': boxes are represented via corners,
+\itemize{
+\item \eqn{x_{min}, y_{min}} being top left and
+\item \eqn{x_{max}, y_{max}} being bottom right.
+}
+\item 'xywh' : boxes are represented via corner, width and height,
+\itemize{
+\item \eqn{x_{min}, y_{min}} being top left,
+\item w, h being width and height.
+}
+\item 'cxcywh' : boxes are represented via centre, width and height,
+\itemize{
+\item \eqn{c_x, c_y} being center of box,
+\item w, h  being width and height.
+}
+}
 }

@@ -6,8 +6,9 @@
 #' with another (higher scoring) box.
 #'
 #' @param boxes  (Tensor\[N, 4\])): boxes to perform NMS on. They are
-#' expected to be in `` (x1, y1, x2, y2)`` format with
-#' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+#' * \eqn{0 \leq x_{min} < x_{max}} and
+#' * \eqn{0 \leq y_{min} < y_{max}}.
 #' @param scores (Tensor\[N\]): scores for each one of the boxes
 #' @param iou_threshold  (float): discards all overlapping boxes with IoU > iou_threshold
 #'
@@ -33,10 +34,12 @@ nms <- function(boxes, scores, iou_threshold) {
 #'    will not be applied between elements of different categories.
 #'
 #' @param boxes (Tensor\[N, 4\]): boxes where NMS will be performed. They are expected to be
-#'  in `` (x1, y1, x2, y2)`` format with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#'  in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+#'  *  \eqn{0 \leq x_{min} < x_{max}} and
+#'  *  \eqn{0 \leq y_{min} < y_{max}}.
 #' @param scores  (Tensor\[N\]): scores for each one of the boxes
 #' @param idxs  (Tensor\[N\]): indices of the categories for each one of the boxes.
-#' @param iou_threshold  (float): discards all overlapping boxes with IoU > iou_threshold
+#' @param iou_threshold  (float): discards all overlapping boxes with IoU > `iou_threshold`
 #'
 #'
 #' @return keep (Tensor): int64 tensor with the indices of
@@ -73,8 +76,10 @@ batched_nms <- function(
 #'
 #' Remove boxes which contains at least one side smaller than min_size.
 #'
-#' @param boxes  (Tensor\[N, 4\]): boxes in ``(x1, y1, x2, y2)`` format
-#'  with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' @param boxes  (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
+#'  with
+#'  * \eqn{0 \leq x_{min} < x_{max}} and
+#'  * \eqn{0 \leq y_{min} < y_{max}}.
 #' @param min_size  (float): minimum size
 #'
 #' @return keep (Tensor\[K\]): indices of the boxes that have both sides
@@ -92,8 +97,10 @@ remove_small_boxes <- function(boxes, min_size) {
 #'
 #' Clip boxes so that they lie inside an image of size `size`.
 #'
-#' @param boxes  (Tensor\[N, 4\]): boxes in ``(x1, y1, x2, y2)`` format
-#' with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' @param boxes  (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
+#' with
+#' * \eqn{0 \leq x_{min} < x_{max}} and
+#' * \eqn{0 \leq y_{min} < y_{max}}.
 #' @param size  (Tuple\[height, width]): size of the image
 #'
 #' @return clipped_boxes (Tensor\[N, 4\])
@@ -129,10 +136,15 @@ clip_boxes_to_image <- function(boxes, size) {
 #'
 #' @details
 #' Supported in_fmt and out_fmt are:
-#'  'xyxy': boxes are represented via corners, x1, y1 being top left and x2, y2 being bottom right.
-#'  'xywh' : boxes are represented via corner, width and height, x1, y2 being top left, w, h being width and height.
-#'  'cxcywh' : boxes are represented via centre, width and height, cx, cy being center of box, w, h
-#'  being width and height.
+#' * 'xyxy': boxes are represented via corners,
+#'    * \eqn{x_{min}, y_{min}} being top left and
+#'    * \eqn{x_{max}, y_{max}} being bottom right.
+#' * 'xywh' : boxes are represented via corner, width and height,
+#'    * \eqn{x_{min}, y_{min}} being top left,
+#'    * w, h being width and height.
+#' * 'cxcywh' : boxes are represented via centre, width and height,
+#'    * \eqn{c_x, c_y} being center of box,
+#'    * w, h  being width and height.
 #'
 #' @export
 box_convert <- function(boxes, in_fmt, out_fmt) {
@@ -181,10 +193,12 @@ upcast <- function(t) {
 #' Box Area
 #'
 #' Computes the area of a set of bounding boxes, which are specified by its
-#' (x1, y1, x2, y2) coordinates.
+#' \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} coordinates.
 #'
 #' @param boxes  (Tensor\[N, 4\]): boxes for which the area will be computed. They
-#' are expected to be in  (x1, y1, x2, y2) format with ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' are expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+#' * \eqn{0 \leq x_{min} < x_{max}} and
+#' * \eqn{0 \leq y_{min} < y_{max}}.
 #'
 #' @return area (Tensor\[N\]): area for each box
 #'
@@ -214,8 +228,8 @@ box_inter_union <- function(boxes1, boxes2) {
 #' Box IoU
 #'
 #' Return intersection-over-union  (Jaccard index) of boxes.
-#' Both sets of boxes are expected to be in `` (x1, y1, x2, y2)`` format with
-#' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' Both sets of boxes are expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+#' \eqn{0 \leq x_{min} < x_{max}} and \eqn{0 \leq y_{min} < y_{max}}.
 #'
 #' @param boxes1  (Tensor\[N, 4\])
 #' @param boxes2  (Tensor\[M, 4\])
@@ -232,8 +246,8 @@ box_iou <- function(boxes1, boxes2) {
 #' Generalized Box IoU
 #'
 #' Return generalized intersection-over-union  (Jaccard index) of boxes.
-#' Both sets of boxes are expected to be in `` (x1, y1, x2, y2)`` format with
-#' ``0 <= x1 < x2`` and ``0 <= y1 < y2``.
+#' Both sets of boxes are expected to be in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format with
+#' \eqn{0 \leq x_{min} < x_{max}} and \eqn{0 \leq y_{min} < y_{max}}.
 #'
 #' @param boxes1  (Tensor\[N, 4\])
 #' @param boxes2  (Tensor\[M, 4\])
