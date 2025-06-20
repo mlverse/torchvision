@@ -5,16 +5,31 @@ y2 = y1 + 1
 boxes = torch::torch_stack(list(x1,y1,x2,y2))$transpose(2,1)
 
 test_that("batched_nms", {
-  expect_error(
+  expect_no_error(
     x <- batched_nms(
       boxes = boxes,
       scores = torch::torch_ones(5)*0.6,
       idxs = torch::torch_ones(5),
       iou_threshold = 0.5
-    ),
-    class = "not_implemented_error"
+    )
   )
-  # expect_tensor(x)
+  expect_tensor(x)
+  expect_equal_to_r(x, 1L)
+
+  boxes = torch::torch_stack(list(x1 + torch_randint(0,6,5),
+                                  y1 + torch_randint(0,6,5),
+                                  x2 + torch_randint(6,12,5),
+                                  y2 + torch_randint(6,12,5)))$transpose(2,1)
+  expect_no_error(
+    x <- batched_nms(
+      boxes = boxes,
+      scores = torch::torch_ones(5)*0.6,
+      idxs = torch::torch_ones(5),
+      iou_threshold = 2
+    )
+  )
+  expect_tensor(x)
+  expect_true(x$shape > 1L)
 })
 
 test_that("remove_small_boxes", {
@@ -45,8 +60,10 @@ test_that("box_area", {
 test_that("box_iou", {
   expect_no_error(x <- box_iou(boxes, boxes))
   expect_tensor(x)
+  expect_equal_to_r(x, matrix(1, nrow = 5, ncol = 5))
 
   expect_no_error(x <- generalized_box_iou(boxes, boxes))
   expect_tensor(x)
+  expect_equal_to_r(x, matrix(1, nrow = 5, ncol = 5))
 })
 

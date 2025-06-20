@@ -18,14 +18,39 @@
 #'    not guaranteed to be the same between CPU and GPU. This is similar
 #'    to the behavior of argsort in torch when repeated values are present.
 #'
+#'    Current algorithm has a time complexity of O(n^2) and runs in native R.
+#'    It may be improve in the future by a Rcpp implementation or through alternative algorithm
+#'
 #' @return keep (Tensor): int64 tensor with the indices of the elements that
 #'  have been kept by NMS, sorted in decreasing order of scores.
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
-  assert_has_ops()
-  return(torch::torch_nms(boxes, scores, iou_threshold))
+  # assert_has_ops()
+  # return(torch::torch_nms(boxes, scores, iou_threshold))
+  if (length(scores) == 0) {
+    return(integer())
+  }
+
+  # Sort scores in descending order
+  order <- scores$sort(descending = TRUE)[[2]]
+  boxes <- boxes[order, ]
+  scores <- scores[order]
+
+  keep <- c(1L)
+
+  for (i in 2:length(scores)) {
+    # Compute IoU with the last kept box
+    iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i, , drop = FALSE])
+    # Check if the current box has IoU <= iou_threshold with all kept boxes
+    if (all(as.logical(iou <= iou_threshold))) {
+      keep <- c(keep, i)
+    }
+  }
+
+  return(order[keep])
 }
+
 
 #' Batched Non-maximum Suppression (NMS)
 #'

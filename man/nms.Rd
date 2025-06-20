@@ -33,4 +33,7 @@ If multiple boxes have the exact same score and satisfy the IoU
 criterion with respect to a reference box, the selected box is
 not guaranteed to be the same between CPU and GPU. This is similar
 to the behavior of argsort in torch when repeated values are present.
+
+Current algorithm has a time complexity of O(n^2) and runs in native R.
+It may be improve in the future by a Rcpp implementation or through alternative algorithm
 }
