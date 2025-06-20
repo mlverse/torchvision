@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-02-09 20:55+0100\n"
+"POT-Creation-Date: 2025-06-15 16:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,52 +30,84 @@ msgstr ""
 msgid "Files not found. Use download = TRUE"
 msgstr ""
 
-#: dataset-cifar.R:86
-msgid "Corrupt file! Delete the file in {p} and try again."
+#: dataset-cifar.R:86 dataset-fgvc.R:168 dataset-mnist.R:71 dataset-mnist.R:247 dataset-mnist.R:493
+msgid "Corrupt file! Delete the file in {archive} and try again."
 msgstr ""
 
-#: dataset-eurosat.R:46
-msgid "Invalid split. Must be one of 'train', 'val', or 'test'."
-msgstr ""
-
-#: dataset-eurosat.R:58 dataset-mnist.R:44
+#: dataset-eurosat.R:56 dataset-fgvc.R:89 dataset-mnist.R:44 dataset-mnist.R:223 dataset-mnist.R:466
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 
-#: dataset-eurosat.R:78
+#: dataset-eurosat.R:76
 msgid "Extracting archive..."
 msgstr ""
 
-#: dataset-eurosat.R:80
+#: dataset-eurosat.R:78
 msgid "Extraction complete."
 msgstr ""
 
-#: dataset-eurosat.R:84
+#: dataset-eurosat.R:82
 msgid "Downloading split text file:"
 msgstr ""
 
-#: dataset-eurosat.R:88
+#: dataset-eurosat.R:86
 msgid "Downloaded split file `{self$split_file}` is empty."
 msgstr ""
 
-#: dataset-eurosat.R:102
+#: dataset-eurosat.R:100
 msgid "Image file `{filename}` not found."
 msgstr ""
 
-#: dataset-eurosat.R:118
+#: dataset-eurosat.R:116
 msgid "Label `{label}` not found in class_to_idx."
 msgstr ""
 
-#: dataset-mnist.R:71
-msgid "MD5 sums are not identical for file: {r[1]}."
+#: dataset-fgvc.R:70
+msgid "Initializing FGVC-Aircraft dataset..."
 msgstr ""
 
-#: dataset-mnist.R:75
+#: dataset-fgvc.R:83
+msgid "Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."
+msgstr ""
+
+#: dataset-fgvc.R:104
+msgid "Invalid annotation_level"
+msgstr ""
+
+#: dataset-fgvc.R:130
+msgid ""
+"FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} "
+"samples ({split}, {annotation_level}-level)."
+msgstr ""
+
+#: dataset-fgvc.R:173
+msgid "FGVC-Aircraft dataset downloaded and extracted successfully."
+msgstr ""
+
+#: dataset-mnist.R:75 dataset-mnist.R:250
 msgid "Processing..."
 msgstr ""
 
-#: dataset-mnist.R:90 tiny-imagenet-dataset.R:67
+#: dataset-mnist.R:90 dataset-mnist.R:282 tiny-imagenet-dataset.R:67
 msgid "Done!"
+msgstr ""
+
+#: dataset-mnist.R:451
+msgid "Preparing to download EMNIST dataset. Archive size is ~0.5GB"
+msgstr ""
+
+#: dataset-mnist.R:452
+msgid ""
+"You may have to increase the download timeout in your session with "
+"`options()` in case of failure"
+msgstr ""
+
+#: dataset-mnist.R:453
+msgid "- Will extract and convert for all {length(self$classes_list)} splits"
+msgstr ""
+
+#: dataset-mnist.R:480
+msgid "EMNIST dataset processed successfully!"
 msgstr ""
 
 #: folder-dataset.R:19
@@ -83,64 +115,32 @@ msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
 msgstr ""
 
-#: folder-dataset.R:65
-msgid "Found 0 files in subfolders of {self$root}"
-msgstr ""
-
-#: folder-dataset.R:67
-msgid "Supported extensions are {paste(extensions, collapse=',')}"
-msgstr ""
-
 #: folder-dataset.R:138
 msgid "unknown extension {ext} in path {path}"
 msgstr ""
 
-#: model-detection-anchor-utils.R:83 model-detection-anchor-utils.R:83
+#: model-detection-anchor-utils.R:83
 msgid "cell_anchors should not be NULL"
 msgstr ""
 
-#: model-detection-anchor-utils.R:86 model-detection-anchor-utils.R:86
+#: model-detection-anchor-utils.R:86
 msgid "Anchors should be Tuple[Tuple[int]] because each feature"
 msgstr ""
 
-#: model-detection-anchor-utils.R:87 model-detection-anchor-utils.R:87
+#: model-detection-anchor-utils.R:87
 msgid "map could potentially have different sizes and aspect ratios."
 msgstr ""
 
-#: model-detection-anchor-utils.R:88 model-detection-anchor-utils.R:88
+#: model-detection-anchor-utils.R:88
 msgid "There needs to be a match between the number of"
 msgstr ""
 
-#: model-detection-anchor-utils.R:89 model-detection-anchor-utils.R:89
+#: model-detection-anchor-utils.R:89
 msgid "feature maps passed and the number of sizes / aspect ratios specified."
 msgstr ""
 
-#: model-detection-anchor-utils.R:162 model-detection-anchor-utils.R:162
+#: model-detection-anchor-utils.R:164
 msgid "aspect_ratios and steps should have the same length"
-msgstr ""
-
-#: model-detection-anchor-utils.R:250
-msgid "{self.__class__.__name__}("
-msgstr ""
-
-#: model-detection-anchor-utils.R:251
-msgid "aspect_ratios = {self$aspect_ratios}"
-msgstr ""
-
-#: model-detection-anchor-utils.R:252
-msgid ", clip = {self$clip}"
-msgstr ""
-
-#: model-detection-anchor-utils.R:253
-msgid ", scales = {self$scales}"
-msgstr ""
-
-#: model-detection-anchor-utils.R:254
-msgid ", steps = {self$steps}"
-msgstr ""
-
-#: model-detection-anchor-utils.R:255
-msgid ")"
 msgstr ""
 
 #: models-inception.R:16

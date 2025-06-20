@@ -10,6 +10,6 @@ base_loader(path)
 \item{path}{path to the image to load from}
 }
 \description{
-Loads an image using \code{jpeg}, or \code{png} packages depending on the
+Loads an image using \code{jpeg}, \code{png} or \code{tiff} packages depending on the
 file extension.
 }

@@ -42,6 +42,7 @@ Imports:
     magrittr,
     png,
     abind,
+    jsonlite,
     withr,
     glue,
     zeallot
