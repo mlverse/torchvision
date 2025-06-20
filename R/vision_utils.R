@@ -3,15 +3,16 @@ NULL
 
 #' A simplified version of torchvision.utils.make_grid
 #'
-#' Arranges a batch of (image) tensors in a grid, with optional padding between
+#' Arranges a batch B of (image) tensors in a grid, with optional padding between
 #'   images. Expects a 4d mini-batch tensor of shape (B x C x H x W).
 #'
-#' @param tensor tensor to arrange in grid.
+#' @param tensor tensor of shape (B x C x H x W) to arrange in grid.
 #' @param scale whether to normalize (min-max-scale) the input tensor.
 #' @param num_rows number of rows making up the grid (default 8).
 #' @param padding amount of padding between batch images (default 2).
 #' @param pad_value pixel value to use for padding.
 #'
+#' @return  a 3d torch_tensor of shape \eqn{\approx(C , num\_rows \times H , num\_cols \times W)} of all images arranged in a grid.
 #' @family image display
 #' @export
 vision_make_grid <- function(tensor,

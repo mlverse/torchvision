@@ -45,7 +45,8 @@ Imports:
     jsonlite,
     withr,
     cli,
-    glue
+    glue,
+    zeallot
 Suggests:
     magick,
     testthat,
