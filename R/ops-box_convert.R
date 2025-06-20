@@ -1,3 +1,6 @@
+#' @importFrom zeallot %<-%
+NULL
+
 #' box_cxcywh_to_xyxy
 #'
 #' Converts bounding boxes from  (cx, cy, w, h) format to (x1, y1, x2, y2) format.
