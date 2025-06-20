@@ -9,7 +9,9 @@
 - Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
 - Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
 - Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
+- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
 - add tiff image support to `folder_dataset()` (#169, @cregouby)
+- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168 by @DerrickUnleashed)
 - Added `caltech101_dataset()` and `caltech256_dataset()` – dataset loaders for the Caltech101 and Caltech256 datasets. (#158, @DerrickUnleashed)
 
 # torchvision 0.6.0
