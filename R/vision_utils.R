@@ -65,19 +65,23 @@ vision_make_grid <- function(tensor,
 #'
 #' Draws bounding boxes on top of one image tensor
 #'
-#' @param image : Tensor of shape (C x H x W) and dtype uint8.
-#' @param boxes : Tensor of size (N, 4) containing bounding boxes in (xmin, ymin, xmax, ymax) format. Note that
-#'            the boxes are absolute coordinates with respect to the image. In other words: `0  = xmin < xmax < W` and
-#'            `0  = ymin < ymax < H`.
-#' @param labels : character vector containing the labels of bounding boxes.
-#' @param colors : character vector containing the colors
+#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+#'              C value for channel can only be 1 (grayscale) or 3 (RGB).
+#' @param boxes Tensor of size (N, 4) containing N bounding boxes in
+#'            c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
+#'            format. Note that the boxes coordinates are absolute with respect
+#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < W } and
+#'            \eqn{0  \leq y_{min} < y_{max} < W }.
+#' @param labels character vector containing the labels of bounding boxes.
+#' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
-#' @param fill : If `TRUE` fills the bounding box with specified color.
-#' @param width : Width of text shift to the bounding box.
-#' @param font : NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
+#' @param fill If `TRUE` fills the bounding box with specified color.
+#' @param width  Width of text shift to the bounding box.
+#' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 # ' The first element of the vector selects a typeface and the second element selects a style.
-#' @param font_size : The requested font size in points.
+#' @param font_size The requested font size in points.
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
@@ -105,20 +109,20 @@ draw_bounding_boxes <- function(image,
   rlang::check_installed("magick")
 
   if (!inherits(image, "torch_tensor")) {
-    value_error("`image` should be a torch_tensor")
-  }
-  if (image$dtype == torch::torch_uint8()) {
-    divide = 255
-  } else if (image$dtype == torch::torch_float()) {
-    divide = 1
-  } else {
-    value_error("`image` should be of dtype torch_uint8")
+    type_error("`image` should be a torch_tensor")
   }
   if (image$ndim != 3) {
     value_error("Pass individual `image`, not batches")
   }
   if (!image$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
+  }
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else if (image$dtype == torch::torch_float()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else {
+    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
   }
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
     value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
@@ -159,10 +163,9 @@ draw_bounding_boxes <- function(image,
   }
 
   img_bb <- boxes$to(torch::torch_int64()) %>% as.array
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
 
 
-  draw <- png::writePNG(img_to_draw / divide) %>%
+  draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
   graphics::rect(img_bb[, 1],
@@ -191,11 +194,13 @@ draw_bounding_boxes <- function(image,
 #'
 #' Draw segmentation masks with their respective colors on top of a given RGB tensor image
 #'
-#' @param image : torch_tensor of shape (3, H, W) and dtype uint8.
-#' @param masks : torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
-#' @param alpha : number between 0 and 1 denoting the transparency of the masks.
+#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+#'              C value for channel can only be 1 (grayscale) or 3 (RGB).
+#' @param masks torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
+#' @param alpha number between 0 and 1 denoting the transparency of the masks.
 #   0 means full transparency, 1 means no transparency.
-#' @param colors : character vector containing the colors
+#' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
 #'
@@ -215,10 +220,22 @@ draw_segmentation_masks  <-  function(image,
                                       alpha = 0.8,
                                       colors = NULL) {
   rlang::check_installed("magick")
-  stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
-  stopifnot("Pass individual images, not batches" = image$ndim == 3)
-  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+  if (!inherits(image, "torch_tensor")) {
+    type_error("`image` should be a torch_tensor")
+  }
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
+  }
+  if (!image$size(1) %in% c(1, 3)) {
+    value_error("Only grayscale and RGB images are supported")
+  }
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$detach()$clone()
+  } else if (image$dtype == torch::torch_float()) {
+    img_to_draw <- image$detach()$clone()$mul(255)$to(dtype = torch_uint8())
+  } else {
+    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
+  }
   if (masks$ndim == 2) {
     masks <- masks$unsqueeze(1)
   }
@@ -240,8 +257,6 @@ draw_segmentation_masks  <-  function(image,
   color_tt <-
     colors %>% grDevices::col2rgb() %>% t() %>% torch::torch_tensor(dtype = out_dtype)
 
-  img_to_draw <- image$detach()$clone()
-
   colored_mask_stack <- torch::torch_stack(lapply(
      seq(masks$size(1)),
      function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ])
@@ -256,15 +271,16 @@ draw_segmentation_masks  <-  function(image,
 #' Draws Keypoints
 #'
 #' Draws Keypoints, an object describing a body part (like rightArm or leftShoulder), on given RGB tensor image.
-#' @param image : Tensor of shape (3, H, W) and dtype uint8
-#' @param keypoints : Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
+#' @param image Tensor of shape (3 x H x W) and dtype `uint8` or dtype `float`.
+#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+#' @param keypoints Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
-#' @param connectivity : Vector of pair of keypoints to be connected (currently unavailable)
-#' @param colors : character vector containing the colors
+#' @param connectivity Vector of pair of keypoints to be connected (currently unavailable)
+#' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints
-#' @param radius : radius of the plotted keypoint.
-#' @param width : width of line connecting keypoints.
+#' @param radius radius of the plotted keypoint.
+#' @param width width of line connecting keypoints.
 #'
 #' @return Image Tensor of dtype uint8 with keypoints drawn.
 #'
@@ -287,14 +303,26 @@ draw_keypoints <- function(image,
     width = 3) {
 
   rlang::check_installed("magick")
-  stopifnot("`image` is expected to be a torch_tensor" = inherits(image, "torch_tensor"))
-  stopifnot("`image` is expected to be of dtype torch_uint8" = image$dtype == torch::torch_uint8())
-  stopifnot("Pass individual images, not batches" = image$ndim == 3)
-  stopifnot("Only RGB images are supported" = image$size(1) == 3)
+  if (!inherits(image, "torch_tensor")) {
+    type_error("`image` should be a torch_tensor")
+  }
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
+  }
+  if (!image$size(1) %in% c(1, 3)) {
+    value_error("Only grayscale and RGB images are supported")
+  }
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else if (image$dtype == torch::torch_float()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else {
+    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
+  }
+
   stopifnot("keypoints must be of shape (num_instances, K, 2)" = keypoints$ndim == 3)
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
-  img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>% as.array
   draw <- png::writePNG(img_to_draw / 255) %>%
     magick::image_read() %>%
     magick::image_draw()
