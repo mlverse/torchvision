@@ -108,15 +108,15 @@
 
 <dt id="arg-annotation-level">annotation_level<a class="anchor" aria-label="anchor" href="#arg-annotation-level"></a></dt>
 <dd><p>Character. Level of annotation to use for classification. Default is <code>"variant"</code>.
-One of <code>"variant"</code>, <code>"family"</code>, or <code>"manufacturer"</code>. See <em>Details</em>.</p></dd>
+One of <code>"variant"</code>, <code>"family"</code>, <code>"manufacturer"</code>, or <code>"all"</code>. See <em>Details</em>.</p></dd>
 
 
 <dt id="arg-transform">transform<a class="anchor" aria-label="anchor" href="#arg-transform"></a></dt>
-<dd><p>Optional function to transform input images after loading. Default is <code><a href="transform_to_tensor.html">transform_to_tensor()</a></code>.</p></dd>
+<dd><p>Optional function to transform input images after loading. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-target-transform">target_transform<a class="anchor" aria-label="anchor" href="#arg-target-transform"></a></dt>
-<dd><p>Optional function to transform labels.</p></dd>
+<dd><p>Optional function to transform labels. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-download">download<a class="anchor" aria-label="anchor" href="#arg-download"></a></dt>
@@ -126,42 +126,55 @@ One of <code>"variant"</code>, <code>"family"</code>, or <code>"manufacturer"</c
     <div id="value">
     <h2>Value</h2>
     <p>An object of class <code>fgvc_aircraft_dataset</code>, which behaves like a torch-style dataset.
-Each element is a named list with:</p><ul><li><p><code>x</code>: a torch tensor of the image with shape (C x H x W). Please note that images have varying sizes.</p></li>
-<li><p><code>y</code>: an integer class label corresponding to the selected <code>annotation_level</code>.</p></li>
-</ul><p>The dataset supports standard dataset operations like indexing (<code>dataset[i]</code>) and length (<code>length(dataset)</code>).</p>
-    </div>
+Each element is a named list with:</p><ul><li><p><code>x</code>: an array of shape (H, W, C) with pixel values in the range (0, 255). Please note that images have varying sizes.</p></li>
+<li><p><code>y</code>: for single-level annotation (<code>"variant"</code>, <code>"family"</code>, <code>"manufacturer"</code>): an integer class label.
+for multi-level annotation (<code>"all"</code>): a vector of three integers <code>c(manufacturer_idx, family_idx, variant_idx)</code>.</p></li>
+</ul></div>
     <div id="details">
     <h2>Details</h2>
-    <p>The FGVC-Aircraft dataset supports the following official splits:</p><ul><li><p><code>"train"</code>: training subset</p></li>
-<li><p><code>"val"</code>: validation subset</p></li>
-<li><p><code>"trainval"</code>: combined training and validation set</p></li>
-<li><p><code>"test"</code>: test set with labels (used for evaluation)</p></li>
-</ul><p>The <code>annotation_level</code> determines the granularity of labels used for classification and supports three values:</p><ul><li><p><code>"variant"</code>: the most fine-grained level, e.g., <code>"Boeing 737-700"</code>. There are 100 visually distinguishable variants.</p></li>
+    <p>The FGVC-Aircraft dataset supports the following official splits:</p><ul><li><p><code>"train"</code>: training subset with labels.</p></li>
+<li><p><code>"val"</code>: validation subset with labels.</p></li>
+<li><p><code>"trainval"</code>: combined training and validation set with labels.</p></li>
+<li><p><code>"test"</code>: test set with labels (used for evaluation).</p></li>
+</ul><p>The <code>annotation_level</code> determines the granularity of labels used for classification and supports four values:</p><ul><li><p><code>"variant"</code>: the most fine-grained level, e.g., <code>"Boeing 737-700"</code>. There are 100 visually distinguishable variants.</p></li>
 <li><p><code>"family"</code>: a mid-level grouping, e.g., <code>"Boeing 737"</code>, which includes multiple variants. There are 70 distinct families.</p></li>
 <li><p><code>"manufacturer"</code>: the coarsest level, e.g., <code>"Boeing"</code>, grouping multiple families under a single manufacturer. There are 30 manufacturers.</p></li>
+<li><p><code>"all"</code>: multi-label format that returns all three levels as a vector of class indices <code>c(manufacturer_idx, family_idx, variant_idx)</code>.</p></li>
 </ul><p>These levels form a strict hierarchy: each <code>"manufacturer"</code> consists of multiple <code>"families"</code>, and each <code>"family"</code> contains several <code>"variants"</code>.
 Not all combinations of levels are valid — for example, a <code>"variant"</code> always belongs to exactly one <code>"family"</code>, and a <code>"family"</code> to exactly one <code>"manufacturer"</code>.</p>
-    </div>
+<p>When <code>annotation_level = "all"</code> is used, the <code>$classes</code> field is a named list with three components:</p><ul><li><p><code>classes$manufacturer</code>: a character vector of manufacturer names</p></li>
+<li><p><code>classes$family</code>: a character vector of family names</p></li>
+<li><p><code>classes$variant</code>: a character vector of variant names</p></li>
+</ul></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">fgvc</span> <span class="op">&lt;-</span> <span class="fu">fgvc_aircraft_dataset</span><span class="op">(</span> split <span class="op">=</span> <span class="st">"train"</span>, annotation_level <span class="op">=</span> <span class="st">"variant"</span>, download <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Single-label classification</span></span></span>
+<span class="r-in"><span><span class="va">fgvc</span> <span class="op">&lt;-</span> <span class="fu">fgvc_aircraft_dataset</span><span class="op">(</span>transform <span class="op">=</span> <span class="va">transform_to_tensor</span>, download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Define a custom collate function to resize images in the batch</span></span></span>
+<span class="r-in"><span><span class="co"># Create a custom collate function to resize images and prepare batches</span></span></span>
 <span class="r-in"><span><span class="va">resize_collate_fn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">xs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">batch</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="fu">torchvision</span><span class="fu">::</span><span class="fu"><a href="transform_resize.html">transform_resize</a></span><span class="op">(</span><span class="va">sample</span><span class="op">$</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">768</span>, <span class="fl">1024</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">xs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">batch</span>, <span class="kw">function</span><span class="op">(</span><span class="va">item</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">torchvision</span><span class="fu">::</span><span class="fu"><a href="transform_resize.html">transform_resize</a></span><span class="op">(</span><span class="va">item</span><span class="op">$</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">768</span>, <span class="fl">1024</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">xs</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_stack.html" class="external-link">torch_stack</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">ys</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_tensor.html" class="external-link">torch_tensor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">batch</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span> <span class="va">sample</span><span class="op">$</span><span class="va">y</span><span class="op">)</span>, dtype <span class="op">=</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_long</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">ys</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_tensor.html" class="external-link">torch_tensor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">batch</span>, <span class="kw">function</span><span class="op">(</span><span class="va">item</span><span class="op">)</span> <span class="va">item</span><span class="op">$</span><span class="va">y</span><span class="op">)</span>, dtype <span class="op">=</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_long</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">xs</span>, y <span class="op">=</span> <span class="va">ys</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">dl</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span> dataset <span class="op">=</span> <span class="va">fgvc</span>, batch_size <span class="op">=</span> <span class="fl">2</span>, collate_fn <span class="op">=</span> <span class="va">resize_collate_fn</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dl</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">fgvc</span>, batch_size <span class="op">=</span> <span class="fl">2</span>, collate_fn <span class="op">=</span> <span class="va">resize_collate_fn</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="fu">dataloader_next</span><span class="op">(</span><span class="fu">dataloader_make_iter</span><span class="op">(</span><span class="va">dl</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">batch</span><span class="op">$</span><span class="va">x</span>  <span class="co"># batched image tensors resized to 768x1024</span></span></span>
-<span class="r-in"><span><span class="va">batch</span><span class="op">$</span><span class="va">y</span>  <span class="co"># class labels</span></span></span>
+<span class="r-in"><span><span class="va">batch</span><span class="op">$</span><span class="va">x</span>  <span class="co"># batched image tensors with shape (2, 3, 768, 1024)</span></span></span>
+<span class="r-in"><span><span class="va">batch</span><span class="op">$</span><span class="va">y</span>  <span class="co"># class labels as integer tensor of shape 2</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Multi-label classification</span></span></span>
+<span class="r-in"><span><span class="va">fgvc</span> <span class="op">&lt;-</span> <span class="fu">fgvc_aircraft_dataset</span><span class="op">(</span>split <span class="op">=</span> <span class="st">"test"</span>, annotation_level <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">item</span> <span class="op">&lt;-</span> <span class="va">fgvc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">x</span>  <span class="co"># a double vector representing the image</span></span></span>
+<span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">y</span>  <span class="co"># an integer vector of length 3: manufacturer, family, and variant indices</span></span></span>
+<span class="r-in"><span><span class="va">fgvc</span><span class="op">$</span><span class="va">classes</span><span class="op">$</span><span class="va">manufacturer</span><span class="op">[</span><span class="va">item</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>  <span class="co"># e.g., "Boeing"</span></span></span>
+<span class="r-in"><span><span class="va">fgvc</span><span class="op">$</span><span class="va">classes</span><span class="op">$</span><span class="va">family</span><span class="op">[</span><span class="va">item</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>        <span class="co"># e.g., "Boeing 707"</span></span></span>
+<span class="r-in"><span><span class="va">fgvc</span><span class="op">$</span><span class="va">classes</span><span class="op">$</span><span class="va">variant</span><span class="op">[</span><span class="va">item</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span>       <span class="co"># e.g., "707-320"</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
