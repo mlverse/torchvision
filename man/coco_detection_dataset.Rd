@@ -61,23 +61,15 @@ ds <- coco_detection_dataset(
 )
 
 example <- ds[1]
-image <- example$image
-target <- example$target
 
-# Convert image to uint8
-image_uint8 <- image$mul(255)$clamp(0, 255)$to(dtype = torch::torch_uint8())
-
-# Access the bounding boxes tensor from the target
-boxes <- target$boxes
-
-# Map label IDs to category names
-label_ids <- as.integer(torch::as_array(target$labels))
+# Get back target label IDs of the example from COCO category names
+label_ids <- as.integer(torch::as_array(example$target$labels))
 label_names <- ds$category_names[as.character(label_ids)]
 
 # Draw bounding boxes with label names
 output <- draw_bounding_boxes(
-  image = image_uint8,
-  boxes = boxes,
+  image = example$image,
+  boxes = example$target$boxes,
   labels = label_names
 )
 
