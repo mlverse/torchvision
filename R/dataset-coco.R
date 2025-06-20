@@ -215,3 +215,89 @@ coco_detection_dataset <- torch::dataset(
     self$image_ids <- ids[exist]
   }
 )
+
+#' COCO Caption Dataset
+#'
+#' Loads the MS COCO dataset for image captioning.
+#'
+#' @rdname coco_caption_dataset
+#' @inheritParams coco_detection_dataset
+#'
+#' @examples
+#' \dontrun{
+#' ds <- coco_caption_dataset(
+#'   root = "~/data",
+#'   train = FALSE,
+#'   download = TRUE
+#' )
+#' example <- ds[1]
+#'
+#' # Access image and caption
+#' image <- example$x
+#' caption <- example$y
+#'
+#' # Prepare image for plotting
+#' image_array <- as.numeric(image)
+#' dim(image_array) <- dim(image)
+#'
+#' plot(as.raster(image_array))
+#' title(main = caption, col.main = "black")
+#' }
+#' @export
+
+coco_caption_dataset  <- torch::dataset(
+  name = "coco_caption_dataset",
+  inherit = coco_detection_dataset,
+
+  initialize = function(root, train = TRUE, year = c("2014"), download = FALSE) {
+    year <- match.arg(year)
+    split <- if (train) "train" else "val"
+
+    root <- fs::path_expand(root)
+    self$root <- root
+    self$split <- split
+    self$year <- year
+    self$data_dir <- fs::path(root, glue::glue("coco{year}"))
+    self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
+    self$ann_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
+
+    if (download)
+      self$download()
+
+    if (!self$check_files())
+      rlang::abort("Dataset files not found. Use download = TRUE to fetch them.")
+
+    self$load_annotations()
+  },
+
+  check_files = function() {
+    fs::file_exists(self$ann_file) && fs::dir_exists(self$image_dir)
+  },
+
+  load_annotations = function() {
+    annotations <- jsonlite::fromJSON(self$ann_file)
+    self$samples <- annotations$annotations
+  },
+
+  .getitem = function(index) {
+    if (index < 1 || index > length(self))
+      rlang::abort("Index out of bounds")
+
+    ann <- self$samples[index, ]
+    image_id <- ann$image_id
+    caption <- ann$caption
+
+    prefix <- if (self$split == "train") "COCO_train2014_" else "COCO_val2014_"
+    filename <- paste0(prefix, sprintf("%012d", image_id), ".jpg")
+    image_path <- fs::path(self$image_dir, filename)
+
+    image <- jpeg::readJPEG(image_path)
+
+    list(x = image, y = caption)
+  },
+
+  .length = function() {
+    nrow(self$samples)
+  }
+)
+
