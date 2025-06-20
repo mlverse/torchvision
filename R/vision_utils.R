@@ -220,6 +220,8 @@ draw_segmentation_masks  <-  function(image,
                                       alpha = 0.8,
                                       colors = NULL) {
   rlang::check_installed("magick")
+  out_dtype <- torch::torch_uint8()
+
   if (!inherits(image, "torch_tensor")) {
     type_error("`image` should be a torch_tensor")
   }
@@ -229,10 +231,10 @@ draw_segmentation_masks  <-  function(image,
   if (!image$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
   }
-  if (image$dtype == torch::torch_uint8()) {
+  if (image$dtype == out_dtype) {
     img_to_draw <- image$detach()$clone()
   } else if (image$dtype == torch::torch_float()) {
-    img_to_draw <- image$detach()$clone()$mul(255)$to(dtype = torch_uint8())
+    img_to_draw <- image$detach()$clone()$mul(255)$to(dtype = out_dtype)
   } else {
     type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
   }
@@ -260,10 +262,7 @@ draw_segmentation_masks  <-  function(image,
     cli_abort("colors vector of size {.value {length(colors)}} cannot be broadcasted on {.value {num_masks}} masks")
   }
 
-  out_dtype <- torch::torch_uint8()
-
-  color_tt <-
-    colors %>% grDevices::col2rgb() %>% t() %>% torch::torch_tensor(dtype = out_dtype)
+  color_tt <- colors %>% grDevices::col2rgb() %>% t() %>% torch::torch_tensor(dtype = out_dtype)
 
   colored_mask_stack <- torch::torch_stack(lapply(
      seq(masks$size(1)),
