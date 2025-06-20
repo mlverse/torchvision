@@ -54,7 +54,7 @@ reference:
    - magick_loader
    - base_loader
    - vision_make_grid
-   - ends_with("_nms")
+   - ends_with("nms")
    - starts_with("box_")
    - clip_boxes_to_image
    - generalized_box_iou
