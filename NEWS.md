@@ -11,6 +11,7 @@
 - Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
 - Added support for the MS COCO dataset. (#161, @koshtiakanksha)
 - add tiff image support to `folder_dataset()` (#169, @cregouby)
+- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168 by @DerrickUnleashed)
 
 # torchvision 0.6.0
 
