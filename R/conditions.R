@@ -19,7 +19,11 @@ warn <- function(..., env = rlang::caller_env()) {
 }
 
 cli_abort <- function(..., env = rlang::caller_env()) {
-  cli::cli_abort(gettext(...)[[1]], .envir = env)
+  cli::cli_abort(gettext(..., domain = "R-torchvision")[[1]], .envir = env)
+}
+
+cli_warn <- function(..., env = rlang::caller_env()) {
+  cli::cli_warn(gettext(..., domain = "R-torchvision")[[1]], .envir = env)
 }
 
 cli_inform <- function(..., env = rlang::caller_env()) {

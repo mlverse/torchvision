@@ -129,7 +129,7 @@ draw_bounding_boxes <- function(image,
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
-    cli_inform("boxes doesn't contain any box. No box was drawn")
+    cli_warn("boxes doesn't contain any box. No box was drawn")
     return(image)
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
@@ -239,18 +239,26 @@ draw_segmentation_masks  <-  function(image,
   if (masks$ndim == 2) {
     masks <- masks$unsqueeze(1)
   }
-  stopifnot("`masks` must be of shape (H, W) or (num_masks, H, W)" = masks$ndim == 3)
-  stopifnot("`masks` is expected to be of dtype torch_bool" = masks$dtype == torch::torch_bool())
-  stopifnot("`masks` and `image` must have the same height and width" = masks$shape[2:3] == image$shape[2:3])
+  if (masks$ndim != 3) {
+    value_error("`masks` must be of shape (H, W) or (num_masks, H, W)")
+  }
+  if (masks$dtype != torch::torch_bool()) {
+    type_error("`masks` is expected to be of dtype torch_bool")
+  }
+  if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
+    value_error("`masks` and `image` must have the same height and width")
+  }
   num_masks <- masks$size(1)
   if (num_masks == 0) {
-    rlang::warn("masks doesn't contain any mask. No mask was drawn")
+    cli_warn("masks doesn't contain any mask. No mask was drawn")
     return(image)
   }
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_masks)
   }
-  stopifnot("colors vector cannot be broadcasted on masks" = num_masks %% length(colors) == 0)
+  if (num_masks %% length(colors) != 0) {
+    cli_abort("colors vector of size {.value {length(colors)}} cannot be broadcasted on {.value {num_masks}} masks")
+  }
 
   out_dtype <- torch::torch_uint8()
 
@@ -320,7 +328,9 @@ draw_keypoints <- function(image,
     type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
   }
 
-  stopifnot("keypoints must be of shape (num_instances, K, 2)" = keypoints$ndim == 3)
+  if (keypoints$ndim != 3) {
+    cli_abort("{.var keypoints} must be of shape (num_instances, K, 2), but is current shape is {.value {keypoints$shape}}")
+  }
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
   draw <- png::writePNG(img_to_draw / 255) %>%
@@ -366,13 +376,16 @@ draw_keypoints <- function(image,
 #' @family image display
 #' @export
 tensor_image_display <- function(image, animate = TRUE) {
-  stopifnot("Pass individual images, not batches" = image$ndim == 3)
-  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
+  }
+  if (!image$size(1) %in% c(1, 3)) {
+    value_error("Only grayscale and RGB images are supported")
+  }
 
   if (image$dtype == torch::torch_uint8()) {
     img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
       as.array() / 255
-
   } else {
     img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>%
       as.array()
@@ -393,13 +406,16 @@ tensor_image_display <- function(image, animate = TRUE) {
 #' @family image display
 #' @export
 tensor_image_browse <- function(image, browser = getOption("browser")) {
-  stopifnot("Pass individual images, not batches" = image$ndim == 3)
-  stopifnot("Only grayscale and RGB images are supported" = image$size(1) %in% c(1, 3))
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
+  }
+  if (!image$size(1) %in% c(1, 3)) {
+    value_error("Only grayscale and RGB images are supported")
+  }
 
   if (image$dtype == torch::torch_uint8()) {
     img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu", dtype = torch::torch_long()) %>%
       as.array() / 255
-
   } else {
     img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>%
       as.array()

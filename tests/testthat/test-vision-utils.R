@@ -54,6 +54,9 @@ test_that("draw_segmentation_masks works", {
   masks <- torch::torch_stack(c(lower_mask, upper_mask), dim = 1)
 
   expect_no_error(masked_image <- draw_segmentation_masks(image_float, masks))
+  expect_tensor_dtype(masked_image, torch::torch_uint8())
+  expect_tensor_shape(masked_image, c(3, 360, 360))
+
   expect_no_error(masked_image <- draw_segmentation_masks(image_uint, masks))
   expect_tensor_dtype(masked_image, torch::torch_uint8())
   expect_tensor_shape(masked_image, c(3, 360, 360))
@@ -64,14 +67,20 @@ test_that("draw_segmentation_masks works", {
 
 test_that("draw_keypoints works", {
 
-  image <- torch::torch_randint(low = 190, high = 255, size = c(3, 360, 360))$to(torch::torch_uint8())
+  image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
+  image_uint <- torch::torch_randint(low = 190, high = 255, size = c(3, 360, 360))$to(torch::torch_uint8())
   keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
-  expect_no_error(keypoint_image <- draw_keypoints(image, keypoints))
+  colors <-  hcl.colors(n = 5)
+
+  expect_no_error(keypoint_image <- draw_keypoints(image_float, keypoints))
   expect_tensor_dtype(keypoint_image, torch::torch_uint8())
   expect_tensor_shape(keypoint_image, c(3, 360, 360))
+  expect_no_error(keypoint_image <- draw_keypoints(image_float, keypoints, colors = colors, radius = 7))
 
-  colors <-  hcl.colors(n = 5)
-  expect_no_error(keypoint_image <- draw_keypoints(image, keypoints, colors = colors, radius = 7))
+  expect_no_error(keypoint_image <- draw_keypoints(image_uint, keypoints))
+  expect_tensor_dtype(keypoint_image, torch::torch_uint8())
+  expect_tensor_shape(keypoint_image, c(3, 360, 360))
+  expect_no_error(keypoint_image <- draw_keypoints(image_uint, keypoints, colors = colors, radius = 7))
 })
 
 test_that("tensor_image_browse works", {
@@ -93,7 +102,7 @@ test_that("tensor_image_browse works", {
 
   # error cases : shape
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 3, 360, 360))$to(torch::torch_uint8())
-  expect_error(tensor_image_browse(image), "individual images")
+  expect_error(tensor_image_browse(image), "Pass individual `image`")
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 360, 360))$to(torch::torch_uint8())
   expect_error(tensor_image_browse(image), "Only grayscale and RGB")
 
