@@ -44,6 +44,7 @@ Imports:
     abind,
     jsonlite,
     withr,
+    cli,
     glue,
     zeallot
 Suggests:
