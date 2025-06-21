@@ -60,7 +60,7 @@ fer_dataset <- dataset(
       self$download()
     }
 
-    if (!self$check_exists()) {
+    if (!self$check_files()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
