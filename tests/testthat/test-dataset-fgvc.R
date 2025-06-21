@@ -106,7 +106,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal(fgvc$classes$family[item$y[2]],"DC-8")
   expect_equal(fgvc$classes$variant[item$y[3]],"DC-8")
 
-  resize_collate_fn <- function(batch) {
+    resize_collate_fn <- function(batch) {
     xs <- lapply(batch, function(item) {
       torchvision::transform_resize(item$x, c(224, 224))
     })

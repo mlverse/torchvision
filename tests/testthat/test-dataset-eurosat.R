@@ -116,5 +116,3 @@ test_that("eurosat_all_bands_dataset derivatives download and prepare correctly"
   expect_tensor_shape(i[[2]], 10)
   expect_tensor_dtype(i[[2]], torch_long())
   expect_named(i, c("x", "y"))})
-
-unlink(temp_root, recursive = TRUE)
