@@ -65,7 +65,7 @@ fer_dataset <- dataset(
     }
 
     csv_file <- file.path(self$root, self$folder_name, "fer2013.csv")
-    parsed <- readr::read_csv(csv_file, col_types = "icc")
+    parsed <- read.csv(csv_file, stringsAsFactors = FALSE)
 
     if (self$train) {
       parsed <- parsed[parsed$Usage == "Training", ]
