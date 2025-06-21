@@ -7,16 +7,16 @@
 #' - `"val"`: validation subset with labels.
 #' - `"test"`: test subset with labels (used for evaluation).
 #'
-#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flowers102`.
-#' @param split Character. One of `"train"`, `"val"`, or `"test"`. Defines which subset of the data to load. Default is `"train"`.
-#' @param transform Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.
-#' @param target_transform Optional function to transform the target labels. Default is `NULL`.
-#' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
+#' @inheritParams mnist_dataset
+#' @param root (string, optional): Root directory for dataset storage,
+#' the dataset will be stored under `root/flowers102`.
+#' @param split (string, optional): One of `"train"`, `"val"`, or `"test"`,
+#' defines which subset of the data to load. Default is `"train"`.
 #'
 #' @return An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 numeric array representing an RGB image.
-#' - `y`: a character label indicating the flower class.
+#' - `y`: an integer label indicating the class index.
 #'
 #' @examples
 #' \dontrun{
@@ -35,7 +35,7 @@
 #' dl <- torch::dataloader(dataset = flowers, batch_size = 4, collate_fn = resize_collate_fn)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
 #' batch$x  # batched image tensors resized to 224x224
-#' batch$y  # class labels as integers
+#' batch$y  # batched integer labels
 #' }
 #'
 #' @name flowers102_dataset

@@ -13,22 +13,29 @@ flowers102_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/flowers102}.}
+\item{root}{(string, optional): Root directory for dataset storage,
+the dataset will be stored under \code{root/flowers102}.}
 
-\item{split}{Character. One of \code{"train"}, \code{"val"}, or \code{"test"}. Defines which subset of the data to load. Default is \code{"train"}.}
+\item{split}{(string, optional): One of \code{"train"}, \code{"val"}, or \code{"test"},
+defines which subset of the data to load. Default is \code{"train"}.}
 
-\item{transform}{Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.}
+\item{transform}{(callable, optional): A function/transform that  takes in an
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
-\item{target_transform}{Optional function to transform the target labels. Default is \code{NULL}.}
+\item{target_transform}{(callable, optional): A function/transform that takes
+in the target and transforms it.}
 
-\item{download}{Logical. Whether to download and process the dataset if it's not already available. Default is \code{FALSE}.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 }
 \value{
 An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 numeric array representing an RGB image.
-\item \code{y}: a character label indicating the flower class.
+\item \code{y}: an integer label indicating the class index.
 }
 }
 \description{
@@ -61,7 +68,7 @@ resize_collate_fn <- function(batch) {
 dl <- torch::dataloader(dataset = flowers, batch_size = 4, collate_fn = resize_collate_fn)
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x  # batched image tensors resized to 224x224
-batch$y  # class labels as integers
+batch$y  # batched integer labels
 }
 
 }
