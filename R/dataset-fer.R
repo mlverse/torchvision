@@ -115,7 +115,7 @@ fer_dataset <- dataset(
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    rlang::inform(glue::glue("Downloading FER-2013 dataset...(Size : ~96.4MB)"))
+    cli::cli_inform("Downloading FER-2013 dataset... (Size: ~100MB)")
 
     archive <- download_and_cache(self$url)
 
