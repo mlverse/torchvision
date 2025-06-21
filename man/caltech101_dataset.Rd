@@ -6,67 +6,67 @@
 \usage{
 caltech101_dataset(
   root = tempdir(),
-  target_type = "category",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. Default is a temporary directory. Data will be stored under \code{root/caltech101}.}
+\item{root}{Root directory where the dataset is stored or will be downloaded to.}
 
-\item{target_type}{Character. One of \code{"category"}, \code{"annotation"}, or \code{"all"}. Determines the type of target returned. Default is \code{"category"}.}
+\item{transform}{Optional transform function applied to the image.}
 
-\item{transform}{Optional function to apply to each image (e.g., resizing or normalization).}
+\item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 
-\item{target_transform}{Optional function to transform the target. Default is \code{NULL}.}
-
-\item{download}{Logical. Whether to download and extract the dataset if not already available. Default is \code{FALSE}.}
+\item{download}{Logical. If TRUE, downloads and extracts the dataset if not already present in \code{root}.}
 }
 \value{
-An object of class \code{caltech101_dataset}, which behaves like a torch dataset.
-Each element is a named list:
-\itemize{
-\item \code{x}: a H x W x 3 integer array representing an RGB image.
-\item \code{y}: either a character label, annotation list, or both depending on \code{target_type}.
+A torch dataset. Each item is a list with two elements:
+\describe{
+\item{x}{A 3D \code{torch_tensor} of shape \code{(3, H, W)} representing the image in RGB format.}
+\item{y}{A list with:
+\describe{
+\item{boxes}{A 2D \code{torch_tensor} of shape \code{(1, 4)} containing the bounding box in \code{xywh} format.}
+\item{labels}{A character scalar giving the class label for the image.}
+\item{contour}{A 2D \code{torch_tensor} of shape \code{(N, 2)} with the object contour coordinates.}
+}
+}
 }
 }
 \description{
-Caltech-101 Dataset
+Caltech-101 Detection Dataset
 }
 \details{
-Loads the Caltech-101 dataset consisting of 101 object categories, with images of varied dimensions.
-Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
-
-You can specify the type of target returned:
-\itemize{
-\item \code{"category"}: returns the class label (e.g., \code{"accordion"}).
-\item \code{"annotation"}: returns a list with bounding box coordinates and object contour.
-\item \code{"all"}: returns both the class label and the annotation.
-}
+Loads the Caltech-101 dataset with image-level labels, bounding boxes, and object contours.
 }
 \examples{
 \dontrun{
-# Category-only target
-ds1 <- caltech101_dataset(target_type = "category", download = TRUE)
-first_item <- ds1[1]
-first_item$x  # RGB image array
-first_item$y  # e.g., "accordion"
+ds <- caltech101_dataset(download = TRUE)
+sample <- ds[102]
 
-# Annotation-only target
-ds2 <- caltech101_dataset(target_type = "annotation", download = TRUE)
-first_item <- ds2[1]
-first_item$x  # RGB image array
-first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
-first_item$y$obj_contour    # Matrix of contour points: N x 2
+image <- sample$x$clamp(0, 255)$round()$to(dtype = torch_uint8())
+target <- sample$y
 
-# Category + Annotation target (All target)
-ds3 <- caltech101_dataset(target_type = "all", download = TRUE)
-first_item <- ds3[1]
-first_item$x  # RGB image array
-first_item$y$label          # e.g., "accordion"
-first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
-first_item$y$obj_contour    # Matrix of contour points: N x 2
+# Convert boxes to xyxy format for visualization
+boxes <- box_convert(target$boxes, in_fmt = "xywh", out_fmt = "xyxy")
+
+# Draw bounding box
+boxed <- draw_bounding_boxes(
+  image = image,
+  boxes = boxes,
+  labels = target$labels,
+  colors = "red"
+)
+
+# Draw contour points as keypoints
+output <- draw_keypoints(
+  image = image,
+  keypoints = target$contour$unsqueeze(1),
+  colors = "green",
+  radius = 2
+)
+
+tensor_image_browse(boxed)
 }
 
 }

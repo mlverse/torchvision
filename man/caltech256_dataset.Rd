@@ -24,7 +24,7 @@ caltech256_dataset(
 An object of class \code{caltech256_dataset}, which behaves like a torch dataset.
 Each element is a named list:
 \describe{
-\item{x}{A H x W x 3 integer array representing an RGB image.}
+\item{x}{A 3 x W x H integer array representing an RGB image.}
 \item{y}{A character string representing the class label.}
 }
 }

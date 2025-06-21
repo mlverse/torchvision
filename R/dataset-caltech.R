@@ -1,41 +1,48 @@
-#' Caltech-101 Dataset
+#' Caltech-101 Detection Dataset
 #'
-#' Loads the Caltech-101 dataset consisting of 101 object categories, with images of varied dimensions.
-#' Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
+#' Loads the Caltech-101 dataset with image-level labels, bounding boxes, and object contours.
 #'
+#' @inheritParams coco_detection_dataset
+#' @param transform Optional transform function applied to the image.
+#' @param download Logical. If TRUE, downloads and extracts the dataset if not already present in \code{root}.
 #'
-#' @param root Character. Root directory for dataset storage. Default is a temporary directory. Data will be stored under `root/caltech101`.
-#' @param transform Optional function to apply to each image (e.g., resizing or normalization).
-#' @param target_transform Optional function to transform the target. Default is `NULL`.
-#' @param download Logical. Whether to download and extract the dataset if not already available. Default is `FALSE`.
-#'
-#' @return An object of class \code{caltech101_dataset}, which behaves like a torch dataset.
-#' Each element is a named list:
-#' - `x`: a 3 x W x H integer array representing an RGB image.
-#' - `y`: either a character label, annotation list, or both depending on `target_type`.
+#' @return
+#' A torch dataset. Each item is a list with two elements:
+#' \describe{
+#'   \item{x}{A 3D \code{torch_tensor} of shape \code{(3, H, W)} representing the image in RGB format.}
+#'   \item{y}{A list with:
+#'     \describe{
+#'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(1, 4)} containing the bounding box in \code{xywh} format.}
+#'       \item{labels}{A character scalar giving the class label for the image.}
+#'       \item{contour}{A 2D \code{torch_tensor} of shape \code{(N, 2)} with the object contour coordinates.}
+#'     }
+#'   }
+#' }
 #'
 #' @examples
 #' \dontrun{
-#' # Category-only target
-#' ds1 <- caltech101_dataset(download = TRUE)
-#' first_item <- ds1[1]
-#' first_item$x  # RGB image array
-#' first_item$y  # e.g., "accordion"
+#' caltech101 <- caltech101_dataset(download = TRUE)
+#' first_item <- caltech101[1]
 #'
-#' # Annotation-only target
-#' ds2 <- caltech101_dataset(download = TRUE)
-#' first_item <- ds2[1]
-#' first_item$x  # RGB image array
-#' first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
-#' first_item$y$obj_contour    # Matrix of contour points: N x 2
+#' first_item$x <- torch_tensor(first_item$x, dtype = torch::torch_uint8())
 #'
-#' # Category + Annotation target (All target)
-#' ds3 <- caltech101_dataset(download = TRUE)
-#' first_item <- ds3[1]
-#' first_item$x  # RGB image array
-#' first_item$y$label          # e.g., "accordion"
-#' first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
-#' first_item$y$obj_contour    # Matrix of contour points: N x 2
+#' # Draw bounding box
+#' bboxes <- draw_bounding_boxes(
+#'   image = first_item$x,
+#'   boxes = first_item$y$boxes,
+#'   labels = caltech101$classes[first_item$y$labels],
+#'   colors = "red"
+#' )
+#' tensor_image_browse(bboxes)
+#'
+#' # Draw contour points as keypoints
+#' contour_points <- draw_keypoints(
+#'   image = image,
+#'   keypoints = first_item$y$contour,
+#'   colors = "green",
+#'   radius = 2
+#' )
+#' tensor_image_browse(contour_points)
 #' }
 #'
 #' @name caltech101_dataset
@@ -44,7 +51,6 @@
 #' @export
 caltech101_dataset <- dataset(
   name = "caltech101",
-  classes = NULL,
   resources = list(
     list(
       url = "https://data.caltech.edu/records/mzrjq-6wc02/files/caltech-101.zip",
@@ -62,19 +68,21 @@ caltech101_dataset <- dataset(
     self$root <- fs::path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
-    cli::cli_inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
 
-    if (download) {
+    cli::cli_inform("Caltech101 Dataset (~130MB) will be downloaded and processed if not already available.")
+
+    if (download)
       self$download()
-    }
+
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
+    obj_dir <- fs::path(self$root, "caltech-101", "101_ObjectCategories")
+    all_dirs <- fs::dir_ls(obj_dir, type = "directory")
     self$classes <- sort(base::basename(all_dirs))
     self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
 
-    name_map <- list("Faces"="Faces_2", "Faces_easy"="Faces_3", "Motorbikes"="Motorbikes_16", "airplanes"="Airplanes_Side_2")
+    name_map <- list("Faces" = "Faces_2", "Faces_easy" = "Faces_3", "Motorbikes" = "Motorbikes_16", "airplanes" = "Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
 
     self$samples <- list()
@@ -82,9 +90,8 @@ caltech101_dataset <- dataset(
     self$image_indices <- c()
 
     for (i in seq_along(self$classes)) {
-      img_dir <- fs::path(self$root, "caltech-101", "101_ObjectCategories", self$classes[[i]])
-      imgs <- fs::dir_ls(img_dir, glob = "*.jpg")
-      imgs <- sort(imgs)
+      img_dir <- fs::path(obj_dir, self$classes[[i]])
+      imgs <- sort(fs::dir_ls(img_dir, glob = "*.jpg"))
       self$samples <- append(self$samples, imgs)
       self$labels <- c(self$labels, rep(i, length(imgs)))
       self$image_indices <- c(self$image_indices, seq_along(imgs))
@@ -96,101 +103,74 @@ caltech101_dataset <- dataset(
   .getitem = function(index) {
     img_path <- self$samples[[index]]
     label_idx <- self$labels[[index]]
-    label <- self$classes[[label_idx]]
 
     img <- jpeg::readJPEG(img_path)
     img <- img * 255
     img <- aperm(img, c(3, 1, 2))
 
+    ann_class <- self$annotation_classes[[label_idx]]
+    index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
+    ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
+
+    if (!fs::file_exists(ann_file))
+      runtime_error("Annotation file not found: {ann_file}")
+
+    if (!requireNamespace("R.matlab", quietly = TRUE))
+      runtime_error("Please install 'R.matlab' to read annotation files.")
+
+    mat_data <- R.matlab::readMat(as.character(ann_file))
+    coords <- as.numeric(mat_data[["box.coord"]])
+    box_coord <- torch_tensor(c(coords[1], coords[3], coords[2], coords[4]), dtype = torch_float())$unsqueeze(1)
+    box_coord <- box_convert(box_coord, in_fmt = "xywh", out_fmt = "xyxy")
+
+    contour <- torch_tensor(t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric)), dtype = torch_float())$unsqueeze(1)
+
+    target <- list(
+      boxes = box_coord,
+      labels = label_idx,
+      contour = contour
+    )
+
     if (!is.null(self$transform))
       img <- self$transform(img)
 
-    y <- switch(self$target_type,
-      "category" = label,
-      "annotation" = {
-        ann_class <- self$annotation_classes[[label_idx]]
-        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
-        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
-        if (!fs::file_exists(ann_file)) {
-          NULL
-        } else {
-          if (!requireNamespace("R.matlab", quietly = TRUE)) {
-            runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
-          }
-          mat_data <- R.matlab::readMat(as.character(ann_file))
-          box_coord <- as.numeric(mat_data[["box.coord"]])
-          obj_contour <- t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric))
-          list(box_coord = box_coord, obj_contour = obj_contour)
-        }
-      },
-      "all" = {
-        ann_class <- self$annotation_classes[[label_idx]]
-        index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
-        ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
-
-        if (!fs::file_exists(ann_file)) {
-          box_coord <- NULL
-          obj_contour <- NULL
-        } else {
-          if (!requireNamespace("R.matlab", quietly = TRUE)) {
-            runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
-          }
-          mat_data <- R.matlab::readMat(as.character(ann_file))
-          box_coord <- as.numeric(mat_data[["box.coord"]])
-          obj_contour <- t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric))
-        }
-
-        list(
-          label = label,
-          box_coord = box_coord,
-          obj_contour = obj_contour
-        )
-      }
-    )
-
     if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
+      target <- self$target_transform(target)
 
-    list(x = img, y = y)
+    list(x = img, y = target)
   },
 
   .length = function() {
     length(self$samples)
   },
 
-  download = function() {
-    if (self$check_exists()) return()
-    cli::cli_inform("Downloading Caltech101 archive...")
-    fs::dir_create(self$root)
-    invisible(lapply(self$resources, function(res) {
-      archive <- download_and_cache(res$url, prefix = class(self)[1])
-      dest <- fs::path(self$root, fs::path_file(res$filename))
-      fs::file_copy(archive, dest, overwrite = TRUE)
-      md5_actual <- tools::md5sum(dest)[[1]]
-      if (md5_actual != res$md5) {
-        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-      }
-      cli::cli_inform("Extracting main archive...")
-      utils::unzip(dest, exdir = self$root)
-      extracted_dir <- fs::path(self$root, "caltech-101")
-      tar_gz_path <- fs::path(extracted_dir, "101_ObjectCategories.tar.gz")
-      if (fs::file_exists(tar_gz_path)) {
-        cli::cli_inform("Extracting 101_ObjectCategories...")
-        utils::untar(tar_gz_path, exdir = extracted_dir)
-      } else {
-        runtime_error("Expected 101_ObjectCategories.tar.gz not found after unzip.")
-      }
-      annotations_path <- fs::path(extracted_dir, "Annotations.tar")
-      if (fs::file_exists(annotations_path)) {
-        cli::cli_inform("Extracting Annotations...")
-        utils::untar(annotations_path, exdir = extracted_dir)
-      }
-    }))
-    cli::cli_inform("Caltech101 dataset downloaded and extracted successfully.")
-  },
-
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, "caltech-101", "101_ObjectCategories"))
+  },
+
+  download = function() {
+    if (self$check_exists()) return()
+    fs::dir_create(self$root)
+
+    cli::cli_inform("Downloading Caltech-101...")
+
+    invisible(lapply(self$resources, function(res) {
+      archive <- download_and_cache(res$url, prefix = "caltech101")
+      dest <- fs::path(self$root, fs::path_file(res$filename))
+      fs::file_copy(archive, dest, overwrite = TRUE)
+      md5 <- tools::md5sum(dest)[[1]]
+      if (md5 != res$md5)
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+      utils::unzip(dest, exdir = self$root)
+
+      extracted <- fs::path(self$root, "caltech-101")
+      if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
+        utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
+      if (fs::file_exists(fs::path(extracted, "Annotations.tar")))
+        utils::untar(fs::path(extracted, "Annotations.tar"), exdir = extracted)
+    }))
+
+    cli::cli_inform("Caltech101 dataset downloaded and extracted successfully.")
   }
 )
 
