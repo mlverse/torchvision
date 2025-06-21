@@ -1,5 +1,7 @@
 context("dataset-fer")
 
+t <- withr::local_tempdir()
+
 test_that("tests for the FER-2013 dataset", {
 
   expect_error(
@@ -7,7 +9,7 @@ test_that("tests for the FER-2013 dataset", {
     class = "runtime_error"
   )
 
-  ds <- fer_dataset(train = TRUE, download = TRUE)
+  ds <- fer_dataset(root = t, train = TRUE, download = TRUE)
   expect_length(ds, 28709)
   first_item <- ds[1]
   expect_type(first_item$x,"integer")
@@ -15,7 +17,7 @@ test_that("tests for the FER-2013 dataset", {
   expect_named(first_item, c("x", "y"))
   expect_equal(first_item$y, "Angry")
 
-  ds <- fer_dataset(train = FALSE)
+  ds <- fer_dataset(root = t, train = FALSE)
   expect_length(ds, 7178)
   first_item <- ds[1]
   expect_type(first_item$x,"integer")
@@ -23,7 +25,7 @@ test_that("tests for the FER-2013 dataset", {
   expect_named(first_item, c("x", "y"))
   expect_equal(first_item$y, "Angry")
 
-  ds2 <- fer_dataset(train = TRUE)
+  ds2 <- fer_dataset(root = t, train = TRUE)
   dl <- torch::dataloader(ds2, batch_size = 32)
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
