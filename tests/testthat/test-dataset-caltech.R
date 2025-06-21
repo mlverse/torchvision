@@ -1,7 +1,8 @@
 context("dataset-caltech")
 
+t <- withr::local_tempdir()
+
 test_that("Caltech101 dataset works correctly", {
-  t <- tempdir()
 
   expect_error(
     caltech101_dataset(root = tempfile(), download = FALSE),
@@ -65,11 +66,9 @@ test_that("Caltech101 dataset works correctly", {
   expect_true(batch$y[[3]] %in% ds$classes)
   expect_true(batch$y[[4]] %in% ds$classes)
 
-  unlink(file.path(t, "caltech-101"), recursive = TRUE)
 })
 
 test_that("Caltech256 dataset works correctly", {
-  t <- tempdir()
 
   expect_error(
     caltech256_dataset(root = tempfile(), download = FALSE),
@@ -113,5 +112,4 @@ test_that("Caltech256 dataset works correctly", {
   expect_equal(batch$y[[3]],"ak47")
   expect_equal(batch$y[[4]],"ak47")
   
-  unlink(file.path(t, "caltech256"), recursive = TRUE)
 })

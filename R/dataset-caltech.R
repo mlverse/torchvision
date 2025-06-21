@@ -16,7 +16,7 @@
 #'
 #' @return An object of class \code{caltech101_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
-#' - `x`: a H x W x 3 integer array representing an RGB image.
+#' - `x`: a 3 x W x H integer array representing an RGB image.
 #' - `y`: either a character label, annotation list, or both depending on `target_type`.
 #'
 #' @examples
@@ -109,6 +109,7 @@ caltech101_dataset <- dataset(
     img <- magick::image_read(img_path)
     img <- magick::image_data(img, channels = "rgb")
     img <- as.integer(img)
+    img <- aperm(img, c(3, 1, 2))
 
     if (!is.null(self$transform))
       img <- self$transform(img)
@@ -215,7 +216,7 @@ caltech101_dataset <- dataset(
 #' @return An object of class \code{caltech256_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' \describe{
-#'   \item{x}{A H x W x 3 integer array representing an RGB image.}
+#'   \item{x}{A 3 x W x H integer array representing an RGB image.}
 #'   \item{y}{A character string representing the class label.}
 #' }
 #'
@@ -283,6 +284,7 @@ caltech256_dataset <- dataset(
     img <- magick::image_read(img_path)
     img <- magick::image_data(img, channels = "rgb")
     img <- as.integer(img)
+    img <- aperm(img, c(3, 1, 2))
 
     if (!is.null(self$transform))
       img <- self$transform(img)
