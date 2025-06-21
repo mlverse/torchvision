@@ -18,6 +18,8 @@ C value for channel can only be 1 (grayscale) or 3 (RGB).}
 \item{colors}{character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.

@@ -40,6 +40,8 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 \item{font}{NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
 
 \item{font_size}{The requested font size in points.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.

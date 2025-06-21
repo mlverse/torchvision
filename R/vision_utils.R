@@ -83,6 +83,7 @@ vision_make_grid <- function(tensor,
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 # ' The first element of the vector selects a typeface and the second element selects a style.
 #' @param font_size The requested font size in points.
+#' @param ... Additional arguments passed to methods.
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
@@ -113,7 +114,7 @@ draw_bounding_boxes.default <- function(x,
                                         fill = FALSE,
                                         width = 1,
                                         font = c("serif", "plain"),
-                                        font_size = 10) {
+                                        font_size = 10, ...) {
   rlang::check_installed("magick")
 
   if (!inherits(x, "torch_tensor")) {
@@ -267,6 +268,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
+#' @param ... Additional arguments passed to methods.
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
@@ -289,7 +291,8 @@ draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
 draw_segmentation_masks.default  <-  function(x,
                                               masks,
                                               alpha = 0.8,
-                                              colors = NULL) {
+                                              colors = NULL,
+                                              ...) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
