@@ -14,19 +14,20 @@ draw_keypoints(
 )
 }
 \arguments{
-\item{image}{: Tensor of shape (3, H, W) and dtype uint8}
+\item{image}{Tensor of shape (3 x H x W) and dtype \code{uint8} or dtype \code{float}.
+In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.}
 
-\item{keypoints}{: Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,}
+\item{keypoints}{Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,}
 
-\item{connectivity}{: Vector of pair of keypoints to be connected (currently unavailable)}
+\item{connectivity}{Vector of pair of keypoints to be connected (currently unavailable)}
 
-\item{colors}{: character vector containing the colors
+\item{colors}{character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints}
 
-\item{radius}{: radius of the plotted keypoint.}
+\item{radius}{radius of the plotted keypoint.}
 
-\item{width}{: width of line connecting keypoints.}
+\item{width}{width of line connecting keypoints.}
 }
 \value{
 Image Tensor of dtype uint8 with keypoints drawn.
