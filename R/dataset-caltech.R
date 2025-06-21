@@ -69,7 +69,7 @@ caltech101_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli::cli_inform("Caltech101 Dataset (~130MB) will be downloaded and processed if not already available.")
+    cli::cli_inform("{.cls {class(self)[[1]]}} Dataset (~130MB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
@@ -97,7 +97,7 @@ caltech101_dataset <- dataset(
       self$image_indices <- c(self$image_indices, seq_along(imgs))
     }
 
-    cli::cli_inform("Caltech101 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
+    cli::cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
@@ -152,7 +152,7 @@ caltech101_dataset <- dataset(
     if (self$check_exists()) return()
     fs::dir_create(self$root)
 
-    cli::cli_inform("Downloading Caltech-101...")
+    cli::cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     invisible(lapply(self$resources, function(res) {
       archive <- download_and_cache(res$url, prefix = "caltech101")
@@ -160,7 +160,7 @@ caltech101_dataset <- dataset(
       fs::file_copy(archive, dest, overwrite = TRUE)
       md5 <- tools::md5sum(dest)[[1]]
       if (md5 != res$md5)
-        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+        runtime_error("Corrupt file! Delete the file in {.file {archive}} and try again.")
       utils::unzip(dest, exdir = self$root)
 
       extracted <- fs::path(self$root, "caltech-101")
@@ -170,7 +170,7 @@ caltech101_dataset <- dataset(
         utils::untar(fs::path(extracted, "Annotations.tar"), exdir = extracted)
     }))
 
-    cli::cli_inform("Caltech101 dataset downloaded and extracted successfully.")
+    cli::cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )
 
