@@ -32,6 +32,10 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(torch)
+#' library(torchvision)
+#'
+#' # Load the COCO detection dataset
 #' ds <- coco_detection_dataset(
 #'   root = "~/data",
 #'   train = FALSE,
@@ -39,21 +43,16 @@
 #'   download = TRUE
 #' )
 #'
-#' example <- ds[1]
+#' # Access a sample from the dataset
+#' item <- ds[3]  # Change index if needed
 #'
-#' # Get back target label IDs of the example from COCO category names
-#' label_ids <- as.integer(torch::as_array(example$target$labels))
-#' label_names <- ds$category_names[as.character(label_ids)]
+#' # Draw segmentation masks
+#' masked_image <- draw_segmentation_masks(item)
+#' tensor_image_browse(masked_image)
 #'
-#' # Draw bounding boxes with label names
-#' output <- draw_bounding_boxes(
-#'   image = example$image,
-#'   boxes = example$target$boxes,
-#'   labels = label_names
-#' )
-#'
-#' # Display the result
-#' tensor_image_browse(output)
+#' # Draw bounding boxes
+#' boxed_image <- draw_bounding_boxes(item)
+#' tensor_image_browse(boxed_image)
 #' }
 #'
 #' @importFrom jsonlite fromJSON
@@ -100,50 +99,90 @@ coco_detection_dataset <- torch::dataset(
   .getitem = function(index) {
     image_id <- self$image_ids[index]
     info <- self$images[[as.character(image_id)]]
-
     img_path <- fs::path(self$image_dir, info$file_name)
 
+    # Load image
     img_arr <- jpeg::readJPEG(img_path)
     if (length(dim(img_arr)) == 2) {
-      img_arr <- array(rep(img_arr, 3), dim = c(dim(img_arr), 3)) # Convert grayscale to RGB
+      img_arr <- array(rep(img_arr, 3), dim = c(dim(img_arr), 3))  # Grayscale → RGB
     }
-    img_arr <- aperm(img_arr, c(3, 1, 2)) # CHW format
-    img_arr <- torch::torch_tensor(img_arr, dtype = torch::torch_float())
+    img_arr <- aperm(img_arr, c(3, 1, 2))  # CHW format
+    img_tensor <- torch::torch_tensor(img_arr, dtype = torch::torch_float())
 
+    # Dimensions
+    H <- as.integer(img_tensor$shape[2])
+    W <- as.integer(img_tensor$shape[3])
+
+    # Annotations for image
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
     if (nrow(anns) > 0) {
-      boxes <- do.call(rbind, lapply(anns$bbox, function(b) c(b[1], b[2], b[1] + b[3], b[2] + b[4])))
-      boxes <- torch::torch_tensor(boxes, dtype = torch::torch_float())
+      boxes <- torch::torch_tensor(do.call(rbind, lapply(
+        anns$bbox,
+        function(b) c(b[1], b[2], b[1] + b[3], b[2] + b[4])
+      )), dtype = torch::torch_float())
 
-      labels <- torch::torch_tensor(anns$category_id, dtype = torch::torch_int())
+      labels <- self$categories$name[match(anns$category_id, self$categories$id)]
       area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
-      segmentation <- anns$segmentation
+
+      # Segmentation masks
+      masks <- lapply(seq_len(nrow(anns)), function(i) {
+        seg <- anns$segmentation[[i]]
+        if (is.list(seg) && length(seg) > 0) {
+          mask <- coco_polygon_to_mask(seg, height = H, width = W)
+          if (inherits(mask, "torch_tensor") && mask$ndim == 2) return(mask)
+        }
+        NULL
+      })
+      masks <- Filter(Negate(is.null), masks)
+
+      if (length(masks) > 0) {
+        masks_tensor <- tryCatch({
+          torch::torch_stack(masks)
+        }, error = function(e) {
+          arr <- array(0, dim = c(length(masks), H, W))
+          for (i in seq_along(masks)) arr[i, , ] <- as.array(masks[[i]])
+          torch::torch_tensor(arr, dtype = torch::torch_bool())
+        })
+      } else {
+        masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+      }
+
     } else {
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- torch::torch_empty(0, dtype = torch::torch_int())
+      labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
-      segmentation <- list()
+      masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+      anns$segmentation <- list()  # ensure exists even if empty
     }
 
-
+    # Final target
     target <- list(
       boxes = boxes,
       labels = labels,
       area = area,
       iscrowd = iscrowd,
-      segmentation = segmentation
+      segmentation = anns$segmentation
     )
 
+    # Optional transforms
     if (!is.null(self$transforms))
-      img_arr <- self$transforms(img_arr)
-
+      img_tensor <- self$transforms(img_tensor)
     if (!is.null(self$target_transform))
       target <- self$target_transform(target)
 
-    list(image = img_arr, target = target)
+    structure(
+      list(
+        image = img_tensor,
+        boxes = boxes,
+        labels = labels,
+        masks = masks_tensor,
+        target = target
+      ),
+      class = "coco_detection_sample"
+    )
   },
 
   .length = function() {
@@ -205,5 +244,90 @@ coco_detection_dataset <- torch::dataset(
                             sapply(ids, function(id) self$images[[as.character(id)]]$file_name))
     exist <- fs::file_exists(image_files)
     self$image_ids <- ids[exist]
+  }
+)
+
+#' COCO Caption Dataset
+#'
+#' Loads the MS COCO dataset for image captioning.
+#'
+#' @rdname coco_caption_dataset
+#' @inheritParams coco_detection_dataset
+#'
+#' @examples
+#' \dontrun{
+#' ds <- coco_caption_dataset(
+#'   root = "~/data",
+#'   train = FALSE,
+#'   download = TRUE
+#' )
+#' example <- ds[1]
+#'
+#' # Access image and caption
+#' image <- example$x
+#' caption <- example$y
+#'
+#' # Prepare image for plotting
+#' image_array <- as.numeric(image)
+#' dim(image_array) <- dim(image)
+#'
+#' plot(as.raster(image_array))
+#' title(main = caption, col.main = "black")
+#' }
+#' @export
+
+coco_caption_dataset  <- torch::dataset(
+  name = "coco_caption_dataset",
+  inherit = coco_detection_dataset,
+
+  initialize = function(root, train = TRUE, year = c("2014"), download = FALSE) {
+    year <- match.arg(year)
+    split <- if (train) "train" else "val"
+
+    root <- fs::path_expand(root)
+    self$root <- root
+    self$split <- split
+    self$year <- year
+    self$data_dir <- fs::path(root, glue::glue("coco{year}"))
+    self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
+    self$ann_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
+
+    if (download)
+      self$download()
+
+    if (!self$check_files())
+      rlang::abort("Dataset files not found. Use download = TRUE to fetch them.")
+
+    self$load_annotations()
+  },
+
+  check_files = function() {
+    fs::file_exists(self$ann_file) && fs::dir_exists(self$image_dir)
+  },
+
+  load_annotations = function() {
+    annotations <- jsonlite::fromJSON(self$ann_file)
+    self$samples <- annotations$annotations
+  },
+
+  .getitem = function(index) {
+    if (index < 1 || index > length(self))
+      rlang::abort("Index out of bounds")
+
+    ann <- self$samples[index, ]
+    image_id <- ann$image_id
+    caption <- ann$caption
+
+    prefix <- if (self$split == "train") "COCO_train2014_" else "COCO_val2014_"
+    filename <- paste0(prefix, sprintf("%012d", image_id), ".jpg")
+    image_path <- fs::path(self$image_dir, filename)
+
+    image <- jpeg::readJPEG(image_path)
+
+    list(x = image, y = caption)
+  },
+
+  .length = function() {
+    nrow(self$samples)
   }
 )
