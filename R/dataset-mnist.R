@@ -64,7 +64,7 @@ mnist_dataset <- dataset(
       filename <- tail(strsplit(r[1], "/")[[1]], 1)
       destpath <- file.path(self$raw_folder, filename)
 
-      archive <- download_and_cache(r[1], prefix = class(self)[1])
+      archive <- withr::with_options(list(timeout = 1200), download_and_cache(r[1], prefix = class(self)[1]))
       fs::file_copy(archive, destpath)
 
       if (!tools::md5sum(destpath) == r[2])
