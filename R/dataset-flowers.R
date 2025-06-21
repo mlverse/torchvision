@@ -81,15 +81,16 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download) {
-      rlang::inform("Oxford Flowers 102 (~344MB) will be downloaded and processed if not already cached.")
+      cli::cli_inform("Oxford Flowers 102 (~344MB) will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$samples <- meta$samples
     self$labels <- meta$labels
-    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$samples)} samples."))
+    cli::cli_inform("Split '{self$split}' loaded with {length(self$samples)} samples.")
   },
 
   .getitem = function(index) {
@@ -116,7 +117,7 @@ flowers102_dataset <- dataset(
 
   download = function() {
     if (self$check_exists(self$split)) {
-      rlang::inform(glue::glue("Split '{self$split}' is already processed and cached."))
+      cli::cli_inform("Split '{self$split}' is already processed and cached.")
       return(NULL)
     }
     fs::dir_create(self$raw_folder)
@@ -125,14 +126,14 @@ flowers102_dataset <- dataset(
     for (r in self$resources) {
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
-      p <- download_and_cache(r[1], prefix = class(self)[1])
-      fs::file_copy(p, destpath, overwrite = TRUE)
+      archive <- download_and_cache(r[1], prefix = class(self)[1])
+      fs::file_copy(archive, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error("Corrupt file! Delete the file in {p} and try again.")
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    rlang::inform("Extracting images and processing dataset...")
+    cli::cli_inform("Extracting images and processing dataset...")
     untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
     if (!requireNamespace("R.matlab", quietly = TRUE)) {
