@@ -1,7 +1,8 @@
 context("dataset-flowers")
 
+t <- withr::local_tempdir()
+
 test_that("tests for the Flowers102 dataset", {
-  t <- tempdir()
 
   expect_error(
     flowers102_dataset(root = tempfile(), download = FALSE),
@@ -44,7 +45,7 @@ test_that("tests for the Flowers102 dataset", {
     list(x = xs, y = ys)
   }
   dl <- torch::dataloader(
-    dataset = flowers102_dataset(root = t, transform = transform_to_tensor, download = TRUE),
+    dataset = flowers102_dataset(root = t, transform = transform_to_tensor),
     batch_size = 4,
     collate_fn = resize_collate_fn
   )
