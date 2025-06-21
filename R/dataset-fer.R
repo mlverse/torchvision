@@ -8,11 +8,9 @@
 #' - `"Train"`: training images labeled as `"Training"` in the original CSV.
 #' - `"Test"`: includes both `"PublicTest"` and `"PrivateTest"` entries.
 #'
-#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/fer2013`.
-#' @param train Logical. Whether to load the training split (`TRUE`) or test split (`FALSE`). Default is `TRUE`.
-#' @param transform Optional function to transform input images after loading. Each image is 48x48 by default.
-#' @param target_transform Optional function to transform emotion labels. Default is `NULL`.
-#' @param download Logical. Whether to download the dataset archive if not found locally. Default is `FALSE`.
+#' @inheritParams mnist_dataset
+#' @param root (string): Root directory for dataset storage,
+#'   the dataset will be stored under `root/fer2013`.
 #'
 #' @return A torch dataset of class \code{fer_dataset}.
 #' Each element is a named list:

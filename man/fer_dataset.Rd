@@ -13,15 +13,22 @@ fer_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/fer2013}.}
+\item{root}{(string): Root directory for dataset storage,
+the dataset will be stored under \code{root/fer2013}.}
 
-\item{train}{Logical. Whether to load the training split (\code{TRUE}) or test split (\code{FALSE}). Default is \code{TRUE}.}
+\item{train}{(bool, optional): If True, creates dataset from
+\code{training.pt}, otherwise from \code{test.pt}.}
 
-\item{transform}{Optional function to transform input images after loading. Each image is 48x48 by default.}
+\item{transform}{(callable, optional): A function/transform that  takes in an
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
-\item{target_transform}{Optional function to transform emotion labels. Default is \code{NULL}.}
+\item{target_transform}{(callable, optional): A function/transform that takes
+in the target and transforms it.}
 
-\item{download}{Logical. Whether to download the dataset archive if not found locally. Default is \code{FALSE}.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 }
 \value{
 A torch dataset of class \code{fer_dataset}.
