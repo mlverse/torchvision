@@ -14,7 +14,7 @@
 #' @param target_transform Optional function to transform emotion labels. Default is `NULL`.
 #' @param download Logical. Whether to download the dataset archive if not found locally. Default is `FALSE`.
 #'
-#' @return An object of class \code{fer_dataset}, which behaves like a torch dataset.
+#' @return A torch dataset of class \code{fer_dataset}.
 #' Each element is a named list:
 #' - `x`: a 48x48 grayscale array
 #' - `y`: a character emotion label from the 7-class list
@@ -65,7 +65,7 @@ fer_dataset <- dataset(
     }
 
     csv_file <- file.path(self$root, self$folder_name, "fer2013.csv")
-    parsed <- read.csv(csv_file, stringsAsFactors = FALSE)
+    parsed <- readr::read_csv(csv_file, col_types = "icc")
 
     if (self$train) {
       parsed <- parsed[parsed$Usage == "Training", ]
@@ -74,11 +74,9 @@ fer_dataset <- dataset(
     }
 
     rlang::inform("Parsing image data into 48x48 grayscale arrays...")
-    self$x <- lapply(parsed$pixels, function(pixels) {
-      as.integer(strsplit(pixels, " ")[[1]])
-    })
+    self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
-    self$y <- self$classes[as.integer(parsed$emotion) + 1L]
+    self$y <- self$classes[parsed$emotion + 1L]
 
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
