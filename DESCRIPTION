@@ -42,8 +42,11 @@ Imports:
     magrittr,
     png,
     abind,
+    jsonlite,
     withr,
-    glue
+    cli,
+    glue,
+    zeallot
 Suggests:
     magick,
     testthat,
