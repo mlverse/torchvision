@@ -3,13 +3,8 @@
 #' Loads the Caltech-101 dataset consisting of 101 object categories, with images of varied dimensions.
 #' Each class contains between 40 and 800 images. Optional annotations include bounding box coordinates and object contours.
 #'
-#' You can specify the type of target returned:
-#' - `"category"`: returns the class label (e.g., `"accordion"`).
-#' - `"annotation"`: returns a list with bounding box coordinates and object contour.
-#' - `"all"`: returns both the class label and the annotation.
 #'
 #' @param root Character. Root directory for dataset storage. Default is a temporary directory. Data will be stored under `root/caltech101`.
-#' @param target_type Character. One of `"category"`, `"annotation"`, or `"all"`. Determines the type of target returned. Default is `"category"`.
 #' @param transform Optional function to apply to each image (e.g., resizing or normalization).
 #' @param target_transform Optional function to transform the target. Default is `NULL`.
 #' @param download Logical. Whether to download and extract the dataset if not already available. Default is `FALSE`.
@@ -22,20 +17,20 @@
 #' @examples
 #' \dontrun{
 #' # Category-only target
-#' ds1 <- caltech101_dataset(target_type = "category", download = TRUE)
+#' ds1 <- caltech101_dataset(download = TRUE)
 #' first_item <- ds1[1]
 #' first_item$x  # RGB image array
 #' first_item$y  # e.g., "accordion"
 #'
 #' # Annotation-only target
-#' ds2 <- caltech101_dataset(target_type = "annotation", download = TRUE)
+#' ds2 <- caltech101_dataset(download = TRUE)
 #' first_item <- ds2[1]
 #' first_item$x  # RGB image array
 #' first_item$y$box_coord      # Numeric vector: [x1, y1, x2, y2]
 #' first_item$y$obj_contour    # Matrix of contour points: N x 2
 #'
 #' # Category + Annotation target (All target)
-#' ds3 <- caltech101_dataset(target_type = "all", download = TRUE)
+#' ds3 <- caltech101_dataset(download = TRUE)
 #' first_item <- ds3[1]
 #' first_item$x  # RGB image array
 #' first_item$y$label          # e.g., "accordion"
@@ -60,7 +55,6 @@ caltech101_dataset <- dataset(
 
   initialize = function(
     root = tempdir(),
-    target_type = "category",
     transform = NULL,
     target_transform = NULL,
     download = FALSE
@@ -69,8 +63,6 @@ caltech101_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     rlang::inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
-
-    self$target_type <- match.arg(target_type, c("category", "annotation", "all"))
 
     if (download) {
       self$download()
@@ -106,9 +98,8 @@ caltech101_dataset <- dataset(
     label_idx <- self$labels[[index]]
     label <- self$classes[[label_idx]]
 
-    img <- magick::image_read(img_path)
-    img <- magick::image_data(img, channels = "rgb")
-    img <- as.integer(img)
+    img <- jpeg::readJPEG(img_path)
+    img <- img * 255
     img <- aperm(img, c(3, 1, 2))
 
     if (!is.null(self$transform))
@@ -281,9 +272,8 @@ caltech256_dataset <- dataset(
     label <- self$classes[label_idx]
     label <- substring(label,5)
 
-    img <- magick::image_read(img_path)
-    img <- magick::image_data(img, channels = "rgb")
-    img <- as.integer(img)
+    img <- jpeg::readJPEG(img_path)
+    img <- img * 255
     img <- aperm(img, c(3, 1, 2))
 
     if (!is.null(self$transform))
