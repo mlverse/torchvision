@@ -198,7 +198,7 @@ draw_bounding_boxes.default <- function(x,
 }
 
 #' @export
-draw_bounding_boxes.coco_detection_item <- function(x, ...) {
+draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
   draw_bounding_boxes.default(
     x = x$x,
     boxes = x$y$boxes,
@@ -349,7 +349,7 @@ draw_segmentation_masks.default  <-  function(x,
 }
 
 #' @export
-draw_segmentation_masks.coco_detection_item <- function(x, ...) {
+draw_segmentation_masks.image_with_segmentation_mask <- function(x, ...) {
   draw_segmentation_masks.default(
     x = x$x,
     masks = x$y$masks,
