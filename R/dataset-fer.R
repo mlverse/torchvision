@@ -54,7 +54,7 @@ fer_dataset <- dataset(
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    rlang::inform(glue::glue("Preparing FER-2013 dataset ({self$split})..."))
+    cli::cli_inform("Preparing FER-2013 dataset ({self$split})...")
 
     if (download) {
       self$download()
@@ -81,9 +81,9 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    rlang::inform(glue::glue(
+    cli::cli_inform(
       "FER-2013 ({self$split}) loaded: {length(self$x)} images, 48x48 grayscale, {length(self$classes)} classes."
-    ))
+    )
   },
 
   .getitem = function(i) {
