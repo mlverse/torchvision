@@ -9,9 +9,11 @@
 - Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
 - Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
 - Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
+- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
 - add tiff image support to `folder_dataset()` (#169, @cregouby)
-- Added `flickr8k_dataset()` – a dataset loader for the Flickr8k dataset. (#159, @DerrickUnleashed)
-- Added `flickr30k_dataset()` – a dataset loader for the Flickr30k dataset. (#159, @DerrickUnleashed)
+- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
+- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd
+- Added `flickr8k_dataset()` and `flickr30k_dataset()` – dataset loaders for the Flickr8k and Flickr30k dataset. (#159, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
