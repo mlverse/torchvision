@@ -16,49 +16,49 @@ NULL
 #' @family image display
 #' @export
 vision_make_grid <- function(tensor,
-           scale = TRUE,
-           num_rows = 8,
-           padding = 2,
-           pad_value = 0) {
+                             scale = TRUE,
+                             num_rows = 8,
+                             padding = 2,
+                             pad_value = 0) {
 
-    min_max_scale <- function(x) {
-      min = x$min()$item()
-      max = x$max()$item()
-      x$clamp_(min = min, max = max)
-      x$add_(-min)$div_(max - min + 1e-5)
-      x
+  min_max_scale <- function(x) {
+    min = x$min()$item()
+    max = x$max()$item()
+    x$clamp_(min = min, max = max)
+    x$add_(-min)$div_(max - min + 1e-5)
+    x
+  }
+  if(scale) tensor <- min_max_scale(tensor)
+
+  nmaps <- tensor$size(1)
+  xmaps <- min(num_rows, nmaps)
+  ymaps <- ceiling(nmaps / xmaps)
+  height <- floor(tensor$size(3) + padding)
+  width <- floor(tensor$size(4) + padding)
+  num_channels <- tensor$size(2)
+  grid <-
+    tensor$new_full(c(num_channels, height * ymaps + padding, width * xmaps + padding),
+                    pad_value)
+  k <- 0
+
+  for (y in 0:(ymaps - 1)) {
+    for (x in 0:(xmaps - 1)) {
+      if (k >= nmaps)
+        break
+      grid$narrow(
+        dim = 2,
+        start =  1 + torch::torch_tensor(y * height + padding, dtype = torch::torch_int64())$sum(dim = 1),
+        length = height - padding
+      )$narrow(
+        dim = 3,
+        start = 1 + torch::torch_tensor(x * width + padding, dtype = torch::torch_int64())$sum(dim = 1),
+        length = width - padding
+      )$copy_(tensor[k + 1, , ,])
+      k <- k + 1
     }
-    if(scale) tensor <- min_max_scale(tensor)
+  }
 
-    nmaps <- tensor$size(1)
-    xmaps <- min(num_rows, nmaps)
-    ymaps <- ceiling(nmaps / xmaps)
-    height <- floor(tensor$size(3) + padding)
-    width <- floor(tensor$size(4) + padding)
-    num_channels <- tensor$size(2)
-    grid <-
-      tensor$new_full(c(num_channels, height * ymaps + padding, width * xmaps + padding),
-                      pad_value)
-    k <- 0
-
-    for (y in 0:(ymaps - 1)) {
-      for (x in 0:(xmaps - 1)) {
-        if (k >= nmaps)
-          break
-        grid$narrow(
-          dim = 2,
-          start =  1 + torch::torch_tensor(y * height + padding, dtype = torch::torch_int64())$sum(dim = 1),
-          length = height - padding
-        )$narrow(
-          dim = 3,
-          start = 1 + torch::torch_tensor(x * width + padding, dtype = torch::torch_int64())$sum(dim = 1),
-          length = width - padding
-        )$copy_(tensor[k + 1, , ,])
-        k <- k + 1
-      }
-    }
-
-    grid
+  grid
 }
 
 
@@ -98,51 +98,56 @@ vision_make_grid <- function(tensor,
 #' }
 #' }
 #' @family image display
+#' @importFrom graphics rect text
+#' @importFrom grDevices dev.off
 #' @export
 draw_bounding_boxes <- function(x, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
 #' @export
-draw_bounding_boxes.default <- function(image,
-                               boxes,
-                               labels = NULL,
-                               colors = NULL,
-                               fill = FALSE,
-                               width = 1,
-                               font = c("serif", "plain"),
-                               font_size = 10) {
+draw_bounding_boxes.default <- function(x,
+                                        boxes,
+                                        labels = NULL,
+                                        colors = NULL,
+                                        fill = FALSE,
+                                        width = 1,
+                                        font = c("serif", "plain"),
+                                        font_size = 10) {
   rlang::check_installed("magick")
 
-  if (!inherits(image, "torch_tensor")) {
-    type_error("`image` should be a torch_tensor")
+  if (!inherits(x, "torch_tensor")) {
+    type_error("`x` should be a torch_tensor")
   }
-  if (image$ndim != 3) {
+  if (x$ndim != 3) {
     value_error("Pass individual `image`, not batches")
   }
-  if (!image$size(1) %in% c(1, 3)) {
+  if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
   }
-  if (image$dtype == torch::torch_uint8()) {
-    img_to_draw <- image$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
-  } else if (image$dtype == torch::torch_float()) {
-    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  if (x$dtype == torch::torch_uint8()) {
+    img_to_draw <- x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else if (x$dtype == torch::torch_float()) {
+    img_to_draw <- x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
   } else {
-    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
+    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
   }
+
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
     value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
   }
+
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
     cli_warn("boxes doesn't contain any box. No box was drawn")
-    return(image)
+    return(x)
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     cli_abort(
       "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
     )
   }
+
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_boxes)
   }
@@ -150,36 +155,26 @@ draw_bounding_boxes.default <- function(image,
     value_error("colors vector cannot be broadcasted on boxes")
   }
 
-  if (!fill) {
-    fill_col <- NA
-  } else {
-    fill_col <- colors
-  }
+  fill_col <- if (!fill) NA else colors
 
   if (is.null(font)) {
     vfont <- c("serif", "plain")
   } else {
-    if (is.null(font_size)) {
-      font_size <- 10
-    }
+    if (is.null(font_size)) font_size <- 10
   }
-  # Handle Grayscale images
-  if (image$size(1) == 1) {
-    image <- image$tile(c(4, 2, 2))
+
+  if (x$size(1) == 1) {
+    x <- x$tile(c(4, 2, 2))
   }
 
   img_bb <- boxes$to(torch::torch_int64()) %>% as.array
 
-
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
-  graphics::rect(img_bb[, 1],
-       img_bb[, 2],
-       img_bb[, 3],
-       img_bb[, 4],
-       col = fill_col,
-       border = colors)
+
+  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors)
+
   if (!is.null(labels)) {
     graphics::text(
       img_bb[, 1] + width,
@@ -190,21 +185,27 @@ draw_bounding_boxes.default <- function(image,
       cex = font_size / 10
     )
   }
+
   grDevices::dev.off()
-  draw_tt <-
-    draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
+
+  draw_tt <- draw %>%
+    magick::image_data(channels = "rgb") %>%
+    as.integer() %>%
+    torch::torch_tensor(dtype = torch::torch_uint8())
+
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
 #' @export
-draw_bounding_boxes.coco_detection_sample <- function(x, ...) {
-  draw_bounding_boxes(
-    image = x$image,
-    boxes = x$boxes,
-    labels = x$labels,
+draw_bounding_boxes.coco_detection_item <- function(x, ...) {
+  draw_bounding_boxes.default(
+    x = x$x,
+    boxes = x$y$boxes,
+    labels = x$y$labels,
     ...
   )
 }
+
 
 #' Convert COCO polygon to mask tensor (Robust Version)
 #'
@@ -277,34 +278,36 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' tensor_image_browse(masked_image)
 #' }
 #' @family image display
+#' @importFrom graphics polygon
+#' @importFrom grDevices dev.off
 #' @export
 draw_segmentation_masks <- function(x, ...) {
   UseMethod("draw_segmentation_masks")
 }
 
 #' @export
-draw_segmentation_masks.default  <-  function(image,
-                                      masks,
-                                      alpha = 0.8,
-                                      colors = NULL) {
+draw_segmentation_masks.default  <-  function(x,
+                                              masks,
+                                              alpha = 0.8,
+                                              colors = NULL) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
-  if (!inherits(image, "torch_tensor")) {
-    type_error("`image` should be a torch_tensor")
+  if (!inherits(x, "torch_tensor")) {
+    type_error("`x` should be a torch_tensor")
   }
-  if (image$ndim != 3) {
-    value_error("Pass individual `image`, not batches")
+  if (x$ndim != 3) {
+    value_error("Pass individual `x`, not batches")
   }
-  if (!image$size(1) %in% c(1, 3)) {
+  if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
   }
-  if (image$dtype == out_dtype) {
-    img_to_draw <- image$detach()$clone()
-  } else if (image$dtype == torch::torch_float()) {
-    img_to_draw <- image$detach()$clone()$mul(255)$to(dtype = out_dtype)
+  if (x$dtype == out_dtype) {
+    img_to_draw <- x$detach()$clone()
+  } else if (x$dtype == torch::torch_float()) {
+    img_to_draw <- x$detach()$clone()$mul(255)$to(dtype = out_dtype)
   } else {
-    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
+    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
   }
   if (masks$ndim == 2) {
     masks <- masks$unsqueeze(1)
@@ -316,12 +319,12 @@ draw_segmentation_masks.default  <-  function(image,
     type_error("`masks` is expected to be of dtype torch_bool")
   }
   if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
-    value_error("`masks` and `image` must have the same height and width")
+    value_error("`masks` and `x` must have the same height and width")
   }
   num_masks <- masks$size(1)
   if (num_masks == 0) {
     cli_warn("masks doesn't contain any mask. No mask was drawn")
-    return(image)
+    return(x)
   }
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_masks)
@@ -333,23 +336,24 @@ draw_segmentation_masks.default  <-  function(image,
   color_tt <- colors %>% grDevices::col2rgb() %>% t() %>% torch::torch_tensor(dtype = out_dtype)
 
   colored_mask_stack <- torch::torch_stack(lapply(
-     seq(masks$size(1)),
-     function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ])
-     ),
-    dim = 1
+    seq(masks$size(1)),
+    function(x) color_tt[x, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[x:x, , ])
+  ),
+  dim = 1
   )
   out <- img_to_draw * (1 - alpha) + torch::torch_sum(colored_mask_stack, dim = 1) * alpha
   return(out$to(out_dtype))
 }
 
 #' @export
-draw_segmentation_masks.coco_detection_sample <- function(x, ...) {
-  draw_segmentation_masks(
-    image = x$image,
-    masks = x$masks,
+draw_segmentation_masks.coco_detection_item <- function(x, ...) {
+  draw_segmentation_masks.default(
+    x = x$x,
+    masks = x$y$masks,
     ...
   )
 }
+
 
 
 #' Draws Keypoints
@@ -380,11 +384,11 @@ draw_segmentation_masks.coco_detection_sample <- function(x, ...) {
 #' @family image display
 #' @export
 draw_keypoints <- function(image,
-    keypoints,
-    connectivity = NULL,
-    colors = NULL,
-    radius = 2,
-    width = 3) {
+                           keypoints,
+                           connectivity = NULL,
+                           colors = NULL,
+                           radius = 2,
+                           width = 3) {
 
   rlang::check_installed("magick")
   if (!inherits(image, "torch_tensor")) {
@@ -418,27 +422,27 @@ draw_keypoints <- function(image,
 
   }
   # TODO need R-isation and vectorisation
-    # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
-    #     if (connectivity) {
-    #         for (connection in connectivity) {
-    #             start_pt_x <- kpt_inst[connection[0]][0]
-    #             start_pt_y <- kpt_inst[connection[0]][1]
-    #
-    #             end_pt_x <- kpt_inst[connection[1]][0]
-    #             end_pt_y <- kpt_inst[connection[1]][1]
-    #
-    #             draw$line(
-    #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
-    #                 widt = width,
-    #             )
-    #         }
-    #     }
-    # }
+  # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
+  #     if (connectivity) {
+  #         for (connection in connectivity) {
+  #             start_pt_x <- kpt_inst[connection[0]][0]
+  #             start_pt_y <- kpt_inst[connection[0]][1]
+  #
+  #             end_pt_x <- kpt_inst[connection[1]][0]
+  #             end_pt_y <- kpt_inst[connection[1]][1]
+  #
+  #             draw$line(
+  #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
+  #                 widt = width,
+  #             )
+  #         }
+  #     }
+  # }
   grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
 
-    return(draw_tt$permute(c(3, 1, 2)))
+  return(draw_tt$permute(c(3, 1, 2)))
 }
 
 

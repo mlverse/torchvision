@@ -75,3 +75,16 @@ box_xyxy_to_xywh <- function(boxes) {
   boxes = torch::torch_stack(list(x1, y1, w, h), dim=-1)
   return(boxes)
 }
+
+
+#' Torchvision ops
+#'
+#' Provides access to common bounding box conversion utilities.
+#'
+#' @export
+ops <- list(
+  box_cxcywh_to_xyxy = box_cxcywh_to_xyxy,
+  box_xyxy_to_cxcywh = box_xyxy_to_cxcywh,
+  box_xywh_to_xyxy = box_xywh_to_xyxy,
+  box_xyxy_to_xywh = box_xyxy_to_xywh
+)

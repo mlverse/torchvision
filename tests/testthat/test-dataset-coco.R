@@ -31,22 +31,15 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_equal(x$ndim, 3)
 
   expect_true(is.list(y))
-  expect_setequal(names(y), c("boxes", "labels", "area", "iscrowd", "segmentation"))
+  expect_setequal(names(y), c("boxes", "labels", "masks"))
 
-  if (!inherits(y$boxes, "torch_tensor")) {
-    expect_true(is.matrix(y$boxes))
-    expect_equal(ncol(y$boxes), 4)
-    expect_equal(colnames(y$boxes), c("x1", "y1", "x2", "y2"))
-  }
+  expect_tensor(y$boxes)
+  expect_equal(y$boxes$ndim, 2)
+  expect_equal(y$boxes$size(2), 4)
 
-  expect_tensor(y$labels)
-  expect_tensor_dtype(y$labels, torch::torch_int())
-
-  expect_tensor(y$area)
-  expect_tensor_dtype(y$area, torch::torch_float())
-
-  expect_tensor(y$iscrowd)
-  expect_tensor_dtype(y$iscrowd, torch::torch_bool())
+  expect_true(is.character(y$labels))
+  expect_tensor(y$masks)
+  expect_equal(y$masks$ndim, 3)
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
@@ -62,9 +55,10 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
   expect_type(batch$y, "list")
-  expect_setequal(names(batch$y[[1]]), c("boxes", "labels", "area", "iscrowd", "segmentation"))
+  expect_setequal(names(batch$y[[1]]), c("boxes", "labels", "masks"))
   expect_tensor(batch$y[[1]]$boxes)
-  expect_equal(dim(batch$y[[1]]$boxes)[2], 4)
+  expect_equal(batch$y[[1]]$boxes$ndim, 2)
+  expect_equal(batch$y[[1]]$boxes$size(2), 4)
 })
 
 test_that("coco_caption_dataset handles missing files gracefully", {
