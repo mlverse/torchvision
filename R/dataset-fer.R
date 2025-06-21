@@ -73,7 +73,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    rlang::inform("Parsing image data into 48x48 grayscale arrays...")
+    cli::cli_inform("Parsing image data into 48x48 grayscale arrays...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- self$classes[parsed$emotion + 1L]
@@ -108,7 +108,7 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      rlang::inform("FER-2013 already exists. Skipping download.")
+      cli::cli_inform("FER-2013 already exists. Skipping download.")
       return()
     }
 
