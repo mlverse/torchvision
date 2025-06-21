@@ -24,7 +24,7 @@ fer_dataset(
 \item{download}{Logical. Whether to download the dataset archive if not found locally. Default is \code{FALSE}.}
 }
 \value{
-An object of class \code{fer_dataset}, which behaves like a torch dataset.
+A torch dataset of class \code{fer_dataset}.
 Each element is a named list:
 \itemize{
 \item \code{x}: a 48x48 grayscale array
