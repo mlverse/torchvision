@@ -28,7 +28,7 @@ A torch dataset of class \code{fer_dataset}.
 Each element is a named list:
 \itemize{
 \item \code{x}: a 48x48 grayscale array
-\item \code{y}: a character emotion label from the 7-class list
+\item \code{y}: an integer from 1 to 7 indicating the class index
 }
 }
 \description{
@@ -50,7 +50,8 @@ The dataset is split into:
 fer <- fer_dataset(train = TRUE, download = TRUE)
 first_item <- fer[1]
 first_item$x  # 48x48 grayscale array
-first_item$y  # "Happy", "Sad", etc.
+first_item$y  # 4
+fer$classes[first_item$y]  # "Happy"
 }
 
 }

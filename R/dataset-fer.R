@@ -17,14 +17,15 @@
 #' @return A torch dataset of class \code{fer_dataset}.
 #' Each element is a named list:
 #' - `x`: a 48x48 grayscale array
-#' - `y`: a character emotion label from the 7-class list
+#' - `y`: an integer from 1 to 7 indicating the class index
 #'
 #' @examples
 #' \dontrun{
 #' fer <- fer_dataset(train = TRUE, download = TRUE)
 #' first_item <- fer[1]
 #' first_item$x  # 48x48 grayscale array
-#' first_item$y  # "Happy", "Sad", etc.
+#' first_item$y  # 4
+#' fer$classes[first_item$y]  # "Happy"
 #' }
 #'
 #' @name fer_dataset
@@ -76,7 +77,7 @@ fer_dataset <- dataset(
     cli::cli_inform("Parsing image data into 48x48 grayscale arrays...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
-    self$y <- self$classes[parsed$emotion + 1L]
+    self$y <- parsed$emotion + 1L
 
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
