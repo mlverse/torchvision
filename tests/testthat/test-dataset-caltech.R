@@ -9,48 +9,37 @@ test_that("Caltech101 dataset works correctly", {
     class = "runtime_error"
   )
 
-  ds_category <- caltech101_dataset(root = t, target_type = "category", download = TRUE)
-  expect_equal(length(ds_category), 8677)
-  first_item <- ds_category[1]
+  ds <- caltech101_dataset(root = t, download = TRUE)
+  expect_equal(length(ds), 8677)
+  first_item <- ds[1]
   expect_named(first_item, c("x", "y"))
-  expect_type(first_item$x, "integer")
-  expect_type(first_item$y,"character")
-  expect_true(first_item$y %in% ds_category$classes)
+  expect_type(first_item$x, "double")
+  expect_length(first_item$x, 234000)
+  expect_type(first_item$y,"list")
+  expect_tensor(first_item$y$boxes)
+  expect_tensor_shape(first_item$y$boxes,c(1,4))
+  expect_tensor_dtype(first_item$y$boxes,torch_float())
+  expect_type(first_item$y$labels, "integer")
+  expect_equal(first_item$y$labels,1)
+  expect_tensor(first_item$y$contour)
+  expect_tensor_shape(first_item$y$contour,c(1,20,2))
+  expect_tensor_dtype(first_item$y$contour,torch_float())
+})
 
-  ds_annotation <- caltech101_dataset(root = t, target_type = "annotation")
-  expect_equal(length(ds_annotation), 8677)
-  first_item <- ds_annotation[1]
-  expect_named(first_item, c("x", "y"))
-  expect_type(first_item$x, "integer")
-  expect_type(first_item$y$box_coord, "double")
-  expect_length(first_item$y$box_coord,4)
-  expect_type(first_item$y$obj_contour,"double")
-
-  ds_all <- caltech101_dataset(root = t, target_type = "all")
-  expect_equal(length(ds_all), 8677)
-  first_item <- ds_all[1]
-  expect_named(first_item, c("x", "y"))
-  expect_type(first_item$x, "integer")
-  expect_type(first_item$y$label, "character")
-  expect_true(first_item$y$label %in% ds_all$classes)
-  expect_type(first_item$y$box_coord, "double")
-  expect_length(first_item$y$box_coord,4)
-  expect_type(first_item$y$obj_contour,"double")
+test_that("Caltech101 dataset works correctly (dataloader)", {
 
   resize_collate_fn <- function(batch) {
     target_size <- c(224, 224)
     xs <- lapply(batch, function(sample) {
-      torchvision::transform_resize(sample$x, target_size)
+      img <- sample$x
+      img <- torch_tensor(img)
+      transform_resize(img, target_size)
     })
-    xs <- torch::torch_stack(lapply(xs, torch::torch_tensor))
+    xs <- torch::torch_stack(xs)
     ys <- lapply(batch, function(sample) sample$y)
     list(x = xs, y = ys)
   }
-  ds <- caltech101_dataset(
-    root = t,
-    target_type = "category",
-    transform = transform_to_tensor
-  )
+  ds <- caltech101_dataset(root = t)
   dl <- dataloader(ds, batch_size = 4, collate_fn = resize_collate_fn)
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
@@ -60,12 +49,14 @@ test_that("Caltech101 dataset works correctly", {
   expect_tensor_shape(batch$x,c(4,3,224,224))
   expect_tensor_dtype(batch$x,torch_float())
   expect_type(batch$y,"list")
-  expect_type(batch$y[[1]],"character")
-  expect_true(batch$y[[1]] %in% ds$classes)
-  expect_true(batch$y[[2]] %in% ds$classes)
-  expect_true(batch$y[[3]] %in% ds$classes)
-  expect_true(batch$y[[4]] %in% ds$classes)
-
+  expect_type(batch$y[[1]],"list")
+  expect_tensor(batch$y[[1]]$boxes)
+  expect_tensor_shape(batch$y[[1]]$boxes,c(1,4))
+  expect_tensor_dtype(batch$y[[1]]$boxes,torch_float())
+  expect_equal(batch$y[[1]]$labels,1)
+  expect_tensor(batch$y[[1]]$contour)
+  expect_tensor_shape(batch$y[[1]]$contour,c(1,20,2))
+  expect_tensor_dtype(batch$y[[1]]$contour,torch_float())
 })
 
 test_that("Caltech256 dataset works correctly", {
