@@ -12,7 +12,7 @@
 - Added support for the MS COCO dataset. (#161, @koshtiakanksha)
 - add tiff image support to `folder_dataset()` (#169, @cregouby)
 - Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
-- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd
+- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
 - Added `flickr8k_dataset()` and `flickr30k_dataset()` – dataset loaders for the Flickr8k and Flickr30k dataset. (#159, @DerrickUnleashed)
 
 # torchvision 0.6.0
