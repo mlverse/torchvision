@@ -4,10 +4,20 @@
 \alias{draw_bounding_boxes}
 \title{Draws bounding boxes on image.}
 \usage{
-draw_bounding_boxes(x, ...)
+draw_bounding_boxes(
+  x,
+  boxes,
+  labels = NULL,
+  colors = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
 }
 \arguments{
-\item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
 In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
 

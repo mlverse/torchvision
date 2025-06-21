@@ -7,7 +7,7 @@
 coco_polygon_to_mask(segmentation, height, width)
 }
 \arguments{
-\item{segmentation}{A list of polygons from COCO annotations (e.g., anns$segmentation[\link{i}])}
+\item{segmentation}{A list of polygons from COCO annotations (e.g., \code{anns$segmentation[[i]]}).}
 
 \item{height}{Height of the image}
 

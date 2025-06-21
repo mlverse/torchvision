@@ -66,7 +66,7 @@ vision_make_grid <- function(tensor,
 #'
 #' Draws bounding boxes on top of one image tensor
 #'
-#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
 #' @param boxes Tensor of size (N, 4) containing N bounding boxes in
@@ -101,7 +101,7 @@ vision_make_grid <- function(tensor,
 #' @importFrom graphics rect text
 #' @importFrom grDevices dev.off
 #' @export
-draw_bounding_boxes <- function(x, ...) {
+draw_bounding_boxes <- function(x, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
@@ -211,7 +211,7 @@ draw_bounding_boxes.coco_detection_item <- function(x, ...) {
 #'
 #' Converts a COCO-style polygon annotation (list of coordinates) into a binary mask tensor.
 #'
-#' @param segmentation A list of polygons from COCO annotations (e.g., anns$segmentation[[i]])
+#' @param segmentation A list of polygons from COCO annotations (e.g., \code{anns$segmentation[[i]]}).
 #' @param height Height of the image
 #' @param width Width of the image
 #'
@@ -258,10 +258,10 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'
 #' Draw segmentation masks with their respective colors on top of a given RGB tensor image
 #'
-#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
-#' @param masks torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
+#' @param masks A boolean tensor of shape (N, H, W), typically derived from COCO polygon annotations.
 #' @param alpha number between 0 and 1 denoting the transparency of the masks.
 #   0 means full transparency, 1 means no transparency.
 #' @param colors character vector containing the colors
@@ -281,7 +281,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' @importFrom graphics polygon
 #' @importFrom grDevices dev.off
 #' @export
-draw_segmentation_masks <- function(x, ...) {
+draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
   UseMethod("draw_segmentation_masks")
 }
 
