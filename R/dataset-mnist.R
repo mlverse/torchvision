@@ -65,7 +65,6 @@ mnist_dataset <- dataset(
       destpath <- file.path(self$raw_folder, filename)
 
       archive <- download_and_cache(r[1], prefix = class(self)[1])
-      
       fs::file_copy(archive, destpath)
 
       if (!tools::md5sum(destpath) == r[2])
