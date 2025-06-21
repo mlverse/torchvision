@@ -9,7 +9,7 @@
 #' - `"Test"`: includes both `"PublicTest"` and `"PrivateTest"` entries.
 #'
 #' @inheritParams mnist_dataset
-#' @param root (string): Root directory for dataset storage,
+#' @param root (string, optional): Root directory for dataset storage,
 #'   the dataset will be stored under `root/fer2013`.
 #'
 #' @return A torch dataset of class \code{fer_dataset}.

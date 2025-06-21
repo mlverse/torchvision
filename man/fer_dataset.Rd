@@ -13,7 +13,7 @@ fer_dataset(
 )
 }
 \arguments{
-\item{root}{(string): Root directory for dataset storage,
+\item{root}{(string, optional): Root directory for dataset storage,
 the dataset will be stored under \code{root/fer2013}.}
 
 \item{train}{(bool, optional): If True, creates dataset from
