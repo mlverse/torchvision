@@ -62,13 +62,13 @@ caltech101_dataset <- dataset(
     self$root <- fs::path(root, "caltech101")
     self$transform <- transform
     self$target_transform <- target_transform
-    rlang::inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
+    cli::cli_inform("Caltech101 Dataset (~131MB) will be downloaded and processed if not already available.")
 
     if (download) {
       self$download()
     }
     if (!self$check_exists())
-      runtime_error("Dataset not found. Use `download = TRUE` to download.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "caltech-101", "101_ObjectCategories"), type = "directory")
     self$classes <- sort(base::basename(all_dirs))
@@ -90,7 +90,7 @@ caltech101_dataset <- dataset(
       self$image_indices <- c(self$image_indices, seq_along(imgs))
     }
 
-    rlang::inform(glue::glue("Caltech101 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes."))
+    cli::cli_inform("Caltech101 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
@@ -160,33 +160,33 @@ caltech101_dataset <- dataset(
 
   download = function() {
     if (self$check_exists()) return()
-    rlang::inform("Downloading Caltech101 archive...")
+    cli::cli_inform("Downloading Caltech101 archive...")
     fs::dir_create(self$root)
     invisible(lapply(self$resources, function(res) {
-      zip_path <- download_and_cache(res$url, prefix = class(self)[1])
+      archive <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
-      fs::file_copy(zip_path, dest, overwrite = TRUE)
+      fs::file_copy(archive, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
       if (md5_actual != res$md5) {
-        runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
-      rlang::inform("Extracting main archive...")
+      cli::cli_inform("Extracting main archive...")
       utils::unzip(dest, exdir = self$root)
       extracted_dir <- fs::path(self$root, "caltech-101")
       tar_gz_path <- fs::path(extracted_dir, "101_ObjectCategories.tar.gz")
       if (fs::file_exists(tar_gz_path)) {
-        rlang::inform("Extracting 101_ObjectCategories...")
+        cli::cli_inform("Extracting 101_ObjectCategories...")
         utils::untar(tar_gz_path, exdir = extracted_dir)
       } else {
         runtime_error("Expected 101_ObjectCategories.tar.gz not found after unzip.")
       }
       annotations_path <- fs::path(extracted_dir, "Annotations.tar")
       if (fs::file_exists(annotations_path)) {
-        rlang::inform("Extracting Annotations...")
+        cli::cli_inform("Extracting Annotations...")
         utils::untar(annotations_path, exdir = extracted_dir)
       }
     }))
-    rlang::inform("Caltech101 dataset downloaded and extracted successfully.")
+    cli::cli_inform("Caltech101 dataset downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -240,13 +240,13 @@ caltech256_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    rlang::inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
+    cli::cli_inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
 
     if (download) {
       self$download()
     }
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use `download = TRUE` to download.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
     all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
@@ -264,7 +264,7 @@ caltech256_dataset <- dataset(
       }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
       use.names = FALSE
     )
-    rlang::inform(glue::glue("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes."))
+    cli::cli_inform("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
   },
   .getitem = function(index) {
     img_path <- self$samples[[index]]
@@ -290,17 +290,17 @@ caltech256_dataset <- dataset(
     if (self$check_exists()) return()
     fs::dir_create(self$root)
     lapply(self$resources, function(res) {
-      tar_path <- download_and_cache(res$url, prefix = class(self)[1])
+      archive <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
-      fs::file_copy(tar_path, dest, overwrite = TRUE)
+      fs::file_copy(archive, dest, overwrite = TRUE)
       md5_actual <- tools::md5sum(dest)[[1]]
       if (md5_actual != res$md5) {
-        runtime_error(glue::glue("MD5 mismatch for file: {res$filename} (expected {res$md5}, got {md5_actual})"))
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
 
       utils::untar(dest, exdir = self$root)
     })
-    rlang::inform("Caltech256 dataset downloaded and extracted successfully!")
+    cli::cli_inform("Caltech256 dataset downloaded and extracted successfully!")
   },
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, "256_ObjectCategories"))
