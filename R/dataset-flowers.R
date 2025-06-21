@@ -81,7 +81,7 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download) {
-      cli::cli_inform("Oxford Flowers 102 (~344MB) will be downloaded and processed if not already cached.")
+      cli::cli_inform("Oxford Flowers 102 (~350MB) will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))
@@ -108,7 +108,7 @@ flowers102_dataset <- dataset(
     if (!is.null(self$target_transform))
       label <- self$target_transform(label)
 
-    list(x = img, y = label)
+    list(x = img, y = label_idx)
   },
 
   .length = function() {
