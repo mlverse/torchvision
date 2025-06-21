@@ -60,8 +60,8 @@ fer_dataset <- dataset(
       self$download()
     }
 
-    if (!self$check_files()) {
-      runtime_error("Dataset files missing. Use download = TRUE to fetch them.")
+    if (!self$check_exists()) {
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
     csv_file <- file.path(self$root, self$folder_name, "fer2013.csv")
