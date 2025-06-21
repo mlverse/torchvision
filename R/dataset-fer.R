@@ -117,14 +117,12 @@ fer_dataset <- dataset(
 
     rlang::inform(glue::glue("Downloading FER-2013 dataset...(Size : ~96.4MB)"))
 
-    archive_path <- download_and_cache(self$url)
-    
-    if (!tools::md5sum(archive_path) == self$md5)
-      runtime_error("Corrupt file! Delete the file in {archive_path} and try again.")
+    archive <- download_and_cache(self$url)
 
-    rlang::inform("Extracting dataset...")
-    untar(archive_path, exdir = self$root)
-    rlang::inform("Extraction complete.")
+    if (!tools::md5sum(archive) == self$md5)
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+
+    untar(archive, exdir = self$root)
   },
 
   check_files = function() {
