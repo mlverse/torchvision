@@ -4,16 +4,7 @@
 \alias{draw_bounding_boxes}
 \title{Draws bounding boxes on image.}
 \usage{
-draw_bounding_boxes(
-  image,
-  boxes,
-  labels = NULL,
-  colors = NULL,
-  fill = FALSE,
-  width = 1,
-  font = c("serif", "plain"),
-  font_size = 10
-)
+draw_bounding_boxes(x, ...)
 }
 \arguments{
 \item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.

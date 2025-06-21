@@ -99,7 +99,12 @@ vision_make_grid <- function(tensor,
 #' }
 #' @family image display
 #' @export
-draw_bounding_boxes <- function(image,
+draw_bounding_boxes <- function(x, ...) {
+  UseMethod("draw_bounding_boxes")
+}
+
+#' @export
+draw_bounding_boxes.default <- function(image,
                                boxes,
                                labels = NULL,
                                colors = NULL,
@@ -191,6 +196,63 @@ draw_bounding_boxes <- function(image,
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
+#' @export
+draw_bounding_boxes.coco_detection_sample <- function(x, ...) {
+  draw_bounding_boxes(
+    image = x$image,
+    boxes = x$boxes,
+    labels = x$labels,
+    ...
+  )
+}
+
+#' Convert COCO polygon to mask tensor (Robust Version)
+#'
+#' Converts a COCO-style polygon annotation (list of coordinates) into a binary mask tensor.
+#'
+#' @param segmentation A list of polygons from COCO annotations (e.g., anns$segmentation[[i]])
+#' @param height Height of the image
+#' @param width Width of the image
+#'
+#' @return A torch_bool() tensor of shape (height, width)
+#'
+#' @keywords internal
+coco_polygon_to_mask <- function(segmentation, height, width) {
+  rlang::check_installed("magick")
+
+  mask_img <- magick::image_blank(width = width, height = height, color = "black")
+
+  mask_img <- magick::image_draw(mask_img)
+  for (poly in segmentation) {
+    coords <- matrix(unlist(poly), ncol = 2, byrow = TRUE)
+    polygon(coords[, 1], coords[, 2], col = "white", border = NA)
+  }
+  dev.off()
+
+  gray <- magick::image_data(mask_img, channels = "gray")
+
+  if (length(dim(gray)) == 3) {
+    mask_matrix <- t(as.matrix(gray[1, , ]))
+  } else if (length(dim(gray)) == 2) {
+    mask_matrix <- t(as.matrix(gray))
+  } else {
+    gray_vec <- as.vector(gray)
+    mask_matrix <- matrix(gray_vec, nrow = height, ncol = width, byrow = TRUE)
+  }
+
+  if (nrow(mask_matrix) != height || ncol(mask_matrix) != width) {
+    stop(sprintf("Mask matrix dimensions (%d x %d) don't match expected (%d x %d)",
+                 nrow(mask_matrix), ncol(mask_matrix), height, width))
+  }
+
+  # Convert to logical and then to tensor
+  mask_logical <- mask_matrix > 0
+  mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
+
+  return(mask_tensor)
+}
+
+
 #' Draw segmentation masks
 #'
 #' Draw segmentation masks with their respective colors on top of a given RGB tensor image
@@ -216,7 +278,12 @@ draw_bounding_boxes <- function(image,
 #' }
 #' @family image display
 #' @export
-draw_segmentation_masks  <-  function(image,
+draw_segmentation_masks <- function(x, ...) {
+  UseMethod("draw_segmentation_masks")
+}
+
+#' @export
+draw_segmentation_masks.default  <-  function(image,
                                       masks,
                                       alpha = 0.8,
                                       colors = NULL) {
@@ -273,6 +340,15 @@ draw_segmentation_masks  <-  function(image,
   )
   out <- img_to_draw * (1 - alpha) + torch::torch_sum(colored_mask_stack, dim = 1) * alpha
   return(out$to(out_dtype))
+}
+
+#' @export
+draw_segmentation_masks.coco_detection_sample <- function(x, ...) {
+  draw_segmentation_masks(
+    image = x$image,
+    masks = x$masks,
+    ...
+  )
 }
 
 

@@ -4,7 +4,7 @@
 \alias{draw_segmentation_masks}
 \title{Draw segmentation masks}
 \usage{
-draw_segmentation_masks(image, masks, alpha = 0.8, colors = NULL)
+draw_segmentation_masks(x, ...)
 }
 \arguments{
 \item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.

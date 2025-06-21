@@ -108,3 +108,32 @@ test_that("tensor_image_browse works", {
 
 })
 
+# ==== COCO sample drawing ====
+
+test_that("draw_bounding_boxes works with coco_detection_sample", {
+  skip_if_not(torch::torch_is_installed())
+  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
+
+  ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = FALSE)
+  item <- ds[3]
+
+  expect_silent({
+    out <- draw_bounding_boxes(item)
+    expect_tensor(out)
+    expect_equal(out$ndim, 3)
+  })
+})
+
+test_that("draw_segmentation_masks works with coco_detection_sample", {
+  skip_if_not(torch::torch_is_installed())
+  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
+
+  ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = FALSE)
+  item <- ds[3]
+
+  expect_silent({
+    out <- draw_segmentation_masks(item)
+    expect_tensor(out)
+    expect_equal(out$ndim, 3)
+  })
+})
