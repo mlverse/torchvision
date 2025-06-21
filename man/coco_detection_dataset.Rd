@@ -53,6 +53,10 @@ areas, crowd indicators, and segmentation masks from the official COCO annotatio
 }
 \examples{
 \dontrun{
+library(torch)
+library(torchvision)
+
+# Load the COCO detection dataset
 ds <- coco_detection_dataset(
   root = "~/data",
   train = FALSE,
@@ -60,21 +64,16 @@ ds <- coco_detection_dataset(
   download = TRUE
 )
 
-example <- ds[1]
+# Access a sample from the dataset
+item <- ds[3]  # Change index if needed
 
-# Get back target label IDs of the example from COCO category names
-label_ids <- as.integer(torch::as_array(example$target$labels))
-label_names <- ds$category_names[as.character(label_ids)]
+# Draw segmentation masks
+masked_image <- draw_segmentation_masks(item)
+tensor_image_browse(masked_image)
 
-# Draw bounding boxes with label names
-output <- draw_bounding_boxes(
-  image = example$image,
-  boxes = example$target$boxes,
-  labels = label_names
-)
-
-# Display the result
-tensor_image_browse(output)
+# Draw bounding boxes
+boxed_image <- draw_bounding_boxes(item)
+tensor_image_browse(boxed_image)
 }
 
 }
