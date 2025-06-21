@@ -38,4 +38,5 @@ test_that("tests for the FER-2013 dataset", {
   expect_equal(as.character(batch$y[1]), "Angry")
   expect_equal(as.character(batch$y[3]), "Fear")
   expect_equal(as.character(batch$y[32]), "Neutral")
+
 })
