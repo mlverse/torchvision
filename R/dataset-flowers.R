@@ -81,16 +81,16 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download) {
-      cli::cli_inform("Oxford Flowers 102 (~350MB) will be downloaded and processed if not already cached.")
+      cli_inform("Oxford Flowers 102 (~350MB) will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$samples <- meta$samples
     self$labels <- meta$labels
-    cli::cli_inform("Split '{self$split}' loaded with {length(self$samples)} samples.")
+    cli_inform("Split '{self$split}' loaded with {length(self$samples)} samples.")
   },
 
   .getitem = function(index) {
@@ -98,9 +98,9 @@ flowers102_dataset <- dataset(
     label_idx <- self$labels[[index]]
     label <- self$classes[label_idx]
 
-    img <- magick::image_read(img_path)
-    img <- magick::image_data(img, channels = "rgb")
-    img <- as.integer(img)
+    img <- jpeg::readJPEG(img_path)
+    img <- img * 255
+    img <- aperm(img, c(3, 1, 2))
 
     if (!is.null(self$transform))
       img <- self$transform(img)
@@ -117,7 +117,7 @@ flowers102_dataset <- dataset(
 
   download = function() {
     if (self$check_exists(self$split)) {
-      cli::cli_inform("Split '{self$split}' is already processed and cached.")
+      cli_inform("Split '{self$split}' is already processed and cached.")
       return(NULL)
     }
     fs::dir_create(self$raw_folder)
@@ -130,14 +130,14 @@ flowers102_dataset <- dataset(
       fs::file_copy(archive, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+        cli_abort("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    cli::cli_inform("Extracting images and processing dataset...")
+    cli_inform("Extracting images and processing dataset...")
     untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
     if (!requireNamespace("R.matlab", quietly = TRUE)) {
-      runtime_error("Package 'R.matlab' is needed for this dataset. Please install it.")
+      cli_abort("Package 'R.matlab' is needed for this dataset. Please install it.")
     }
     labels <- R.matlab::readMat(file.path(self$raw_folder, "imagelabels.mat"))$labels
     setids <- R.matlab::readMat(file.path(self$raw_folder, "setid.mat"))
