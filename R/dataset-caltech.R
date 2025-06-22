@@ -216,42 +216,42 @@ caltech256_dataset <- dataset(
   ),
   
   initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE) {
-    self$root <- fs::path(root, "caltech256")
-    self$transform <- transform
-    self$target_transform <- target_transform
+  self$root <- fs::path(root, "caltech256")
+  self$transform <- transform
+  self$target_transform <- target_transform
 
-    cli_inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
+  cli_inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
 
-    if (download) {
-      self$download()
-    }
-    if (!self$check_exists()) {
-      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
-    }
+  if (download) {
+    self$download()
+  }
+  if (!self$check_exists()) {
+    cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+  }
 
-    all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
-    self$classes <- sort(fs::path_file(all_dirs))
+  all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
+  self$classes <- sort(fs::path_file(all_dirs))
 
-    class_dirs <- fs::path(self$root, "256_ObjectCategories", self$classes)
-    images_per_class <- lapply(class_dirs, function(class_dir) {
-      imgs <- fs::dir_ls(class_dir, glob = "*.jpg")
-      sort(imgs)
-    })
-    self$samples <- unlist(images_per_class, use.names = FALSE)
-    self$labels <- unlist(
-      mapply(function(i, imgs) {
-        rep(i, length(imgs))
-      }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
-      use.names = FALSE
-    )
-    cli_inform("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
-  },
+  class_dirs <- fs::path(self$root, "256_ObjectCategories", self$classes)
+  self$classes <- sub("^\\d+\\.", "", self$classes)
+  images_per_class <- lapply(class_dirs, function(class_dir) {
+    imgs <- fs::dir_ls(class_dir, glob = "*.jpg")
+    sort(imgs)
+  })
+  self$samples <- unlist(images_per_class, use.names = FALSE)
+  self$labels <- unlist(
+    mapply(function(i, imgs) {
+      rep(i, length(imgs))
+    }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
+    use.names = FALSE
+  )
+  cli_inform("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
+},
+
   .getitem = function(index) {
     img_path <- self$samples[[index]]
-    label_idx <- self$labels[[index]]
-    label <- self$classes[label_idx]
-    label <- substring(label,5)
-
+    label <- self$labels[[index]]
+    
     img <- jpeg::readJPEG(img_path)
     img <- img * 255
     img <- aperm(img, c(3, 1, 2))
