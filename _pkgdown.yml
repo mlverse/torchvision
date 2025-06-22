@@ -44,8 +44,7 @@ reference:
 - title: Object Detection Datasets
   desc: Datasets for object detection tasks
   contents:
-    - caltech101_dataset
-    - caltech256_dataset
+   - ends_with("_detection_dataset")
 - title: Displaying
   desc: Show images
   contents:
