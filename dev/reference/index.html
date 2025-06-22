@@ -229,6 +229,10 @@
           <h2 id="models">Models <a href="#models" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Model architectures</p>
         </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="classification-models">Classification models <a href="#classification-models" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p>
+        </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="model_alexnet.html">model_alexnet()</a></code> </p>
         </td>
@@ -251,17 +255,13 @@
         <td><p>VGG implementation</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="datasets">Datasets <a href="#datasets" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Datasets readily available</p>
+          <p class="section-desc"></p><p>Datasets readily available. All have a <code>x</code> variable in each item being the input image.</p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="for-image-classification">for Image Classification <a href="#for-image-classification" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Dataset having items with “y” for target class identifier.</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="cifar10_dataset.html">cifar10_dataset()</a></code> <code><a href="cifar10_dataset.html">cifar100_dataset()</a></code> </p>
-        </td>
-        <td><p>Cifar datasets</p></td>
-      </tr><tr><td>
-          <p><code><a href="coco_detection_dataset.html">coco_detection_dataset()</a></code> </p>
-        </td>
-        <td><p>COCO Detection Dataset</p></td>
-      </tr><tr><td>
           <p><code><a href="emnist_dataset.html">emnist_dataset()</a></code> </p>
         </td>
         <td><p>EMNIST dataset</p></td>
@@ -278,10 +278,6 @@
         </td>
         <td><p>FGVC Aircraft dataset</p></td>
       </tr><tr><td>
-          <p><code><a href="image_folder_dataset.html">image_folder_dataset()</a></code> </p>
-        </td>
-        <td><p>Create an image folder dataset</p></td>
-      </tr><tr><td>
           <p><code><a href="kmnist_dataset.html">kmnist_dataset()</a></code> </p>
         </td>
         <td><p>Kuzushiji-MNIST</p></td>
@@ -297,6 +293,30 @@
           <p><code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset()</a></code> </p>
         </td>
         <td><p>Tiny ImageNet dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="cifar10_dataset.html">cifar10_dataset()</a></code> <code><a href="cifar10_dataset.html">cifar100_dataset()</a></code> </p>
+        </td>
+        <td><p>Cifar datasets</p></td>
+      </tr><tr><td>
+          <p><code><a href="image_folder_dataset.html">image_folder_dataset()</a></code> </p>
+        </td>
+        <td><p>Create an image folder dataset</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="for-object-detection">for Object Detection <a href="#for-object-detection" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Dataset having items with “y” as a named list of bounding-box and labels for object detection.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="coco_dataset.html">coco_detection_dataset()</a></code> <code><a href="coco_dataset.html">coco_caption_dataset()</a></code> </p>
+        </td>
+        <td><p>COCO Detection Dataset</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="for-image-captionning">for Image captionning <a href="#for-image-captionning" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Dataset having items with “y” as one or multiple captions of the image</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="coco_dataset.html">coco_detection_dataset()</a></code> <code><a href="coco_dataset.html">coco_caption_dataset()</a></code> </p>
+        </td>
+        <td><p>COCO Detection Dataset</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="displaying">Displaying <a href="#displaying" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Show images</p>
