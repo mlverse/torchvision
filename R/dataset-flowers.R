@@ -74,7 +74,14 @@ flowers102_dataset <- dataset(
     c("https://www.robots.ox.ac.uk/~vgg/data/flowers/102/setid.mat", "a5357ecc9cb78c4bef273ce3793fc85c")
   ),
 
-  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     self$root_path <- root
     self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform
