@@ -34,7 +34,7 @@ it is not downloaded again.}
 An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
 Each element is a named list:
 \itemize{
-\item \code{x}: a H x W x 3 numeric array representing an RGB image.
+\item \code{x}: a 3 x H x W numeric array representing an RGB image.
 \item \code{y}: an integer label indicating the class index.
 }
 }
@@ -58,14 +58,15 @@ flowers <- flowers102_dataset(split = "train", download = TRUE)
 # Define a custom collate function to resize images in the batch
 resize_collate_fn <- function(batch) {
   xs <- lapply(batch, function(sample) {
-    torchvision::transform_resize(sample$x, c(224, 224))
+    sample$x <- torch_tensor(sample$x)
+    transform_resize(sample$x, c(224, 224))
   })
-  xs <- torch::torch_stack(xs)
+  xs <- torch_stack(xs)
   ys <- sapply(batch, function(sample) sample$y)
   list(x = xs, y = ys)
 }
 
-dl <- torch::dataloader(dataset = flowers, batch_size = 4, collate_fn = resize_collate_fn)
+dl <- dataloader(dataset = flowers, batch_size = 4, collate_fn = resize_collate_fn)
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x  # batched image tensors resized to 224x224
 batch$y  # batched integer labels
