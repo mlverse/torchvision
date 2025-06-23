@@ -47,17 +47,15 @@ test_that("tests for the Flowers102 dataset for dataloader", {
 
   resize_collate_fn <- function(batch) {
     target_size <- c(224, 224)
-    xs <- lapply(batch, function(sample) {
-      img <- sample$x
-      img <- torch_tensor(img)
-      transform_resize(img, target_size)
+    xs <- lapply(batch, function(item) {
+      transform_resize(item$x, target_size)
     })
     xs <- torch_stack(xs)
-    ys <- lapply(batch, function(sample) sample$y)
+    ys <- lapply(batch, function(item) item$y)
     list(x = xs, y = ys)
   }
   dl <- dataloader(
-    dataset = flowers102_dataset(root = t),
+    dataset = flowers102_dataset(root = t, transform = transform_to_tensor),
     batch_size = 4,
     collate_fn = resize_collate_fn
   )
