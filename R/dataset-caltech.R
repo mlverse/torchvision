@@ -21,7 +21,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' caltech101 <- caltech101_dataset(download = TRUE)
+#' caltech101 <- caltech101_detection_dataset(download = TRUE)
 #' first_item <- caltech101[1]
 #'
 #' first_item$x <- torch_tensor(first_item$x, dtype = torch::torch_uint8())
@@ -37,7 +37,7 @@
 #'
 #' # Draw contour points as keypoints
 #' contour_points <- draw_keypoints(
-#'   image = image,
+#'   image = first_item$x,
 #'   keypoints = first_item$y$contour,
 #'   colors = "green",
 #'   radius = 2
@@ -45,12 +45,13 @@
 #' tensor_image_browse(contour_points)
 #' }
 #'
-#' @name caltech101_dataset
-#' @aliases caltech101_dataset
+#' @name caltech101_detection_dataset
+#' @aliases caltech101_detection_dataset
 #' @title Caltech-101 Dataset
 #' @export
-caltech101_dataset <- dataset(
-  name = "caltech101",
+caltech101_detection_dataset <- dataset(
+  name = "caltech-101",
+  subname = "101_ObjectCategories",
   resources = list(
     list(
       url = "https://data.caltech.edu/records/mzrjq-6wc02/files/caltech-101.zip",
@@ -65,7 +66,7 @@ caltech101_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-    self$root <- fs::path(root, "caltech101")
+    self$root <- fs::path(root, class(self)[[1]])
     self$transform <- transform
     self$target_transform <- target_transform
 
@@ -77,7 +78,7 @@ caltech101_dataset <- dataset(
     if (!self$check_exists())
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
-    obj_dir <- fs::path(self$root, "caltech-101", "101_ObjectCategories")
+    obj_dir <- fs::path(self$root, class(self)[[1]], self$subname)
     all_dirs <- fs::dir_ls(obj_dir, type = "directory")
     self$classes <- sort(base::basename(all_dirs))
     self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
@@ -85,23 +86,23 @@ caltech101_dataset <- dataset(
     name_map <- list("Faces" = "Faces_2", "Faces_easy" = "Faces_3", "Motorbikes" = "Motorbikes_16", "airplanes" = "Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
 
-    self$samples <- list()
+    self$img_path <- list()
     self$labels <- c()
     self$image_indices <- c()
 
     for (i in seq_along(self$classes)) {
       img_dir <- fs::path(obj_dir, self$classes[[i]])
       imgs <- sort(fs::dir_ls(img_dir, glob = "*.jpg"))
-      self$samples <- append(self$samples, imgs)
+      self$img_path <- append(self$img_path, imgs)
       self$labels <- c(self$labels, rep(i, length(imgs)))
       self$image_indices <- c(self$image_indices, seq_along(imgs))
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
-    img_path <- self$samples[[index]]
+    img_path <- self$img_path[[index]]
     label_idx <- self$labels[[index]]
 
     img <- jpeg::readJPEG(img_path)
@@ -110,7 +111,7 @@ caltech101_dataset <- dataset(
 
     ann_class <- self$annotation_classes[[label_idx]]
     index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
-    ann_file <- fs::path(self$root, "caltech-101", "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
+    ann_file <- fs::path(self$root, class(self)[[1]], "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
 
     if (!fs::file_exists(ann_file))
       cli_abort("Annotation file not found: {ann_file}")
@@ -119,14 +120,18 @@ caltech101_dataset <- dataset(
       cli_abort("Please install 'R.matlab' to read annotation files.")
 
     mat_data <- R.matlab::readMat(as.character(ann_file))
-    coords <- as.numeric(mat_data[["box.coord"]])
-    box_coord <- torch_tensor(c(coords[1], coords[3], coords[2], coords[4]), dtype = torch_float())$unsqueeze(1)
-    box_coord <- box_convert(box_coord, in_fmt = "xywh", out_fmt = "xyxy")
+    boxes <- mat_data[["box.coord"]][c(1, 3, 2, 4)]
+    boxes <- matrix(boxes, nrow = 1)
+    boxes[, 3] <- boxes[, 3] * 2
+    boxes <- box_convert(torch_tensor(boxes), in_fmt = "xywh", out_fmt = "xyxy")
+    height <- dim(img)[2]
+    width <- dim(img)[3]
+    boxes <- clip_boxes_to_image(boxes, size = c(height, width))
 
     contour <- torch_tensor(t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric)), dtype = torch_float())$unsqueeze(1)
 
     target <- list(
-      boxes = box_coord,
+      boxes = boxes,
       labels = label_idx,
       contour = contour
     )
@@ -141,29 +146,35 @@ caltech101_dataset <- dataset(
   },
 
   .length = function() {
-    length(self$samples)
+    length(self$img_path)
   },
 
   check_exists = function() {
-    fs::dir_exists(fs::path(self$root, "caltech-101", "101_ObjectCategories"))
+    fs::dir_exists(fs::path(self$root, class(self)[[1]], self$subname))
   },
 
   download = function() {
-    if (self$check_exists()) return()
+
+    if (self$check_exists()) 
+      return()
+
     fs::dir_create(self$root)
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     invisible(lapply(self$resources, function(res) {
-      archive <- download_and_cache(res$url, prefix = "caltech101")
+      archive <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(archive, dest, overwrite = TRUE)
       md5 <- tools::md5sum(dest)[[1]]
       if (md5 != res$md5)
         cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
-      utils::unzip(dest, exdir = self$root)
+      if(class(self)[1] == "caltech-101")
+        utils::unzip(dest, exdir = self$root)
+      else
+        utils::untar(dest, exdir = self$root)
 
-      extracted <- fs::path(self$root, "caltech-101")
+      extracted <- fs::path(self$root, class(self)[[1]])
       if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
         utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
       if (fs::file_exists(fs::path(extracted, "Annotations.tar")))
@@ -184,7 +195,7 @@ caltech101_dataset <- dataset(
 #' @param target_transform Optional function to transform the target label.
 #' @param download Logical. If `TRUE`, downloads and extracts the dataset if it's not already present. Default is `FALSE`.
 #'
-#' @return An object of class \code{caltech256_dataset}, which behaves like a torch dataset.
+#' @return An object of class \code{caltech256_detection_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' \describe{
 #'   \item{x}{A 3 x W x H integer array representing an RGB image.}
@@ -193,19 +204,21 @@ caltech101_dataset <- dataset(
 #'
 #' @examples
 #' \dontrun{
-#' caltech256 <- caltech256_dataset(download = TRUE)
+#' caltech256 <- caltech256_detection_dataset(download = TRUE)
 #' 
 #' first_item <- caltech256[1]
 #' first_item$x  # Image array
 #' first_item$y  # Class label, e.g., "ak47"
 #' }
 #'
-#' @name caltech256_dataset
-#' @aliases caltech256_dataset
+#' @name caltech256_detection_dataset
+#' @aliases caltech256_detection_dataset
 #' @title Caltech-256 Object Category Dataset
 #' @export
-caltech256_dataset <- dataset(
+caltech256_detection_dataset <- dataset(
   name = "caltech256",
+  subname = "256_ObjectCategories",
+  inherit = caltech101_detection_dataset,
   classes = NULL,
   resources = list(
     list(
@@ -216,11 +229,11 @@ caltech256_dataset <- dataset(
   ),
   
   initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE) {
-  self$root <- fs::path(root, "caltech256")
+  self$root <- fs::path(root, class(self)[[1]])
   self$transform <- transform
   self$target_transform <- target_transform
 
-  cli_inform("Caltech256 Dataset (~1.2GB) will be downloaded and processed if not already cached.")
+  cli_inform("{.cls {class(self)[[1]]}} Dataset (~1.2GB) will be downloaded and processed if not already cached.")
 
   if (download) {
     self$download()
@@ -229,27 +242,27 @@ caltech256_dataset <- dataset(
     cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
   }
 
-  all_dirs <- fs::dir_ls(fs::path(self$root, "256_ObjectCategories"), type = "directory")
+  all_dirs <- fs::dir_ls(fs::path(self$root, self$subname), type = "directory")
   self$classes <- sort(fs::path_file(all_dirs))
 
-  class_dirs <- fs::path(self$root, "256_ObjectCategories", self$classes)
+  class_dirs <- fs::path(self$root, self$subname, self$classes)
   self$classes <- sub("^\\d+\\.", "", self$classes)
   images_per_class <- lapply(class_dirs, function(class_dir) {
     imgs <- fs::dir_ls(class_dir, glob = "*.jpg")
     sort(imgs)
   })
-  self$samples <- unlist(images_per_class, use.names = FALSE)
+  self$img_path <- unlist(images_per_class, use.names = FALSE)
   self$labels <- unlist(
     mapply(function(i, imgs) {
       rep(i, length(imgs))
     }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
     use.names = FALSE
   )
-  cli_inform("Caltech256 dataset loaded with {length(self$samples)} images across {length(self$classes)} classes.")
+  cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
 },
 
   .getitem = function(index) {
-    img_path <- self$samples[[index]]
+    img_path <- self$img_path[[index]]
     label <- self$labels[[index]]
     
     img <- jpeg::readJPEG(img_path)
@@ -264,25 +277,39 @@ caltech256_dataset <- dataset(
     list(x = img, y = label)
   },
   .length = function() {
-    length(self$samples)
+    length(self$img_path)
+  },
+  check_exists = function() {
+    fs::dir_exists(fs::path(self$root, self$subname))
   },
   download = function() {
-    if (self$check_exists()) return()
+
+    if (self$check_exists()) 
+      return()
+
     fs::dir_create(self$root)
-    lapply(self$resources, function(res) {
+
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
+    invisible(lapply(self$resources, function(res) {
       archive <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
       fs::file_copy(archive, dest, overwrite = TRUE)
-      md5_actual <- tools::md5sum(dest)[[1]]
-      if (md5_actual != res$md5) {
-        cli_abort("Corrupt file! Delete the file in {archive} and try again.")
-      }
+      md5 <- tools::md5sum(dest)[[1]]
+      if (md5 != res$md5)
+        cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
+      if(class(self)[1] == "caltech-101")
+        utils::unzip(dest, exdir = self$root)
+      else
+        utils::untar(dest, exdir = self$root)
 
-      utils::untar(dest, exdir = self$root)
-    })
-    cli_inform("Caltech256 dataset downloaded and extracted successfully!")
-  },
-  check_exists = function() {
-    fs::dir_exists(fs::path(self$root, "256_ObjectCategories"))
+      extracted <- fs::path(self$root, class(self)[[1]])
+      if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
+        utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
+      if (fs::file_exists(fs::path(extracted, "Annotations.tar")))
+        utils::untar(fs::path(extracted, "Annotations.tar"), exdir = extracted)
+    }))
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )
