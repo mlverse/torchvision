@@ -35,16 +35,31 @@ reference:
     - starts_with("transform_")
 - title: Models
   desc: Model architectures
+- subtitle: Classification models
   contents:
    - starts_with("model_")
 - title: Datasets
-  desc: Datasets readily available
+  desc: >
+    Datasets readily available. All have a `x` variable in each item
+    being the input image.
+- subtitle: for Image Classification
+  descr: Dataset having items with "y" for target class identifier.
   contents:
-   - ends_with("_dataset")
-- title: Object Detection Datasets
-  desc: Datasets for object detection tasks
+   - ends_with("t_dataset")
+   - ends_with("s_dataset")
+   - ends_with("0_dataset")
+   - ends_with("r_dataset")
+- subtitle: for Object Detection
+  descr: >
+    Dataset having items with "y" as a named list of bounding-box and
+    labels for object detection.
   contents:
-   - ends_with("_detection_dataset")
+   - ends_with("detection_dataset")
+- subtitle: for Image captionning
+  descr: >
+    Dataset having items with "y" as one or multiple captions of the image
+  contents:
+   - ends_with("caption_dataset")
 - title: Displaying
   desc: Show images
   contents:

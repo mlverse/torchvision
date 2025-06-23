@@ -14,6 +14,7 @@
 - Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
 - Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
 - Added `caltech101_dataset()` and `caltech256_dataset()` – dataset loaders for the Caltech101 and Caltech256 datasets. (#158, @DerrickUnleashed)
+- Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
