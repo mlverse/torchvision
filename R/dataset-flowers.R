@@ -96,31 +96,29 @@ flowers102_dataset <- dataset(
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
-    self$samples <- meta$samples
+    self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("Split '{self$split}' loaded with {length(self$samples)} samples.")
+    cli_inform("Split '{self$split}' loaded with {length(self$img_path)} samples.")
   },
 
   .getitem = function(index) {
-    img_path <- self$samples[[index]]
-    label_idx <- self$labels[[index]]
-    label <- self$classes[label_idx]
+    img_path <- self$img_path[[index]]
+    y <- self$labels[[index]]
 
-    img <- jpeg::readJPEG(img_path)
-    img <- img * 255
-    img <- aperm(img, c(3, 1, 2))
+    x <- jpeg::readJPEG(img_path) * 255
+    x <- aperm(x, c(3, 1, 2))
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      label <- self$target_transform(label)
+      y <- self$target_transform(y)
 
-    list(x = img, y = label_idx)
+    list(x = x, y = y)
   },
 
   .length = function() {
-    length(self$samples)
+    length(self$img_path)
   },
 
   download = function() {
@@ -131,24 +129,18 @@ flowers102_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    for (r in self$resources) {
-      filename <- basename(r[1])
-      destpath <- file.path(self$raw_folder, filename)
+    archives <- lapply(self$resources, function(r) {
       archive <- download_and_cache(r[1], prefix = class(self)[1])
-      fs::file_copy(archive, destpath, overwrite = TRUE)
-
-      if (!tools::md5sum(destpath) == r[2])
+      if (!tools::md5sum(archive) == r[2])
         cli_abort("Corrupt file! Delete the file in {archive} and try again.")
-    }
+      archive
+    })
 
     cli_inform("Extracting images and processing dataset...")
-    untar(file.path(self$raw_folder, "102flowers.tgz"), exdir = self$raw_folder)
 
-    if (!requireNamespace("R.matlab", quietly = TRUE)) {
-      cli_abort("Package 'R.matlab' is needed for this dataset. Please install it.")
-    }
-    labels <- R.matlab::readMat(file.path(self$raw_folder, "imagelabels.mat"))$labels
-    setids <- R.matlab::readMat(file.path(self$raw_folder, "setid.mat"))
+    untar(archives[[1]], exdir = self$raw_folder)
+    labels <- R.matlab::readMat(archives[[2]])$labels
+    setids <- R.matlab::readMat(archives[[3]])
 
     set_map <- list(
       train = as.integer(setids$trnid),
@@ -161,7 +153,7 @@ flowers102_dataset <- dataset(
     jpg_dir <- file.path(self$raw_folder, "jpg")
     paths <- file.path(jpg_dir, glue::glue("image_{sprintf('%05d', idxs)}.jpg"))
     lbls <- as.integer(labels[idxs])
-    saveRDS(list(samples = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
+    saveRDS(list(img_path = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
   },
 
   check_exists = function(split) {
