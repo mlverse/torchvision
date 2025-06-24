@@ -49,7 +49,7 @@
 #' @aliases caltech101_detection_dataset
 #' @title Caltech-101 Dataset
 #' @export
-caltech101_detection_dataset <- dataset(
+caltech101_detection_dataset <- torch::dataset(
   name = "caltech-101",
   subname = "101_ObjectCategories",
   resources = list(
@@ -208,7 +208,7 @@ caltech101_detection_dataset <- dataset(
 #' @aliases caltech256_detection_dataset
 #' @title Caltech-256 Object Category Dataset
 #' @export
-caltech256_detection_dataset <- dataset(
+caltech256_detection_dataset <- torch::dataset(
   name = "caltech256",
   subname = "256_ObjectCategories",
   inherit = caltech101_detection_dataset,
@@ -267,40 +267,8 @@ caltech256_detection_dataset <- dataset(
 
     list(x = x, y = y)
   },
-  .length = function() {
-    length(self$img_path)
-  },
+
   check_exists = function() {
     fs::dir_exists(fs::path(self$root, self$subname))
-  },
-  download = function() {
-
-    if (self$check_exists()) 
-      return()
-
-    fs::dir_create(self$root)
-
-    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
-
-    invisible(lapply(self$resources, function(res) {
-      archive <- download_and_cache(res$url, prefix = class(self)[1])
-      dest <- fs::path(self$root, fs::path_file(res$filename))
-      fs::file_copy(archive, dest, overwrite = TRUE)
-      md5 <- tools::md5sum(dest)[[1]]
-      if (md5 != res$md5)
-        cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
-      if(class(self)[1] == "caltech-101")
-        utils::unzip(dest, exdir = self$root)
-      else
-        utils::untar(dest, exdir = self$root)
-
-      extracted <- fs::path(self$root, class(self)[[1]])
-      if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
-        utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
-      if (fs::file_exists(fs::path(extracted, "Annotations.tar")))
-        utils::untar(fs::path(extracted, "Annotations.tar"), exdir = extracted)
-    }))
-
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )
