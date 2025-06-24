@@ -78,8 +78,3 @@ reference:
    - clip_boxes_to_image
    - generalized_box_iou
    - remove_small_boxes
-- title: COCO
-  desc: MS COCO datasets for object detection and image captioning
-  contents:
-  - coco_detection_dataset
-  - coco_caption_dataset
