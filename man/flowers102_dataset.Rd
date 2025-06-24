@@ -49,34 +49,23 @@ The dataset is split into:
 }
 \examples{
 \dontrun{
-# Define a resize collate function
-resize_collate_fn <- function(batch) {
-  xs <- lapply(batch, function(item) {
-    transform_resize(item$x, c(224, 224))
-  })
-  xs <- torch_stack(xs)
-  ys <- lapply(batch, function(item) item$y)
-  list(x = xs, y = ys)
-}
-
-# Load the dataset and apply transforms
+# Load the dataset with inline transforms
 flowers <- flowers102_dataset(
   split = "train",
-  transform = transform_to_tensor,
-  download = TRUE
+  download = TRUE,
+  transform = . \%>\% transform_to_tensor() \%>\% transform_resize(c(224, 224))
 )
 
 # Create a dataloader
 dl <- dataloader(
-  dataset = flowers, 
-  batch_size = 4, 
-  collate_fn = resize_collate_fn
+  dataset = flowers,
+  batch_size = 4
 )
 
 # Access a batch
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x  # Tensor of shape (4, 3, 224, 224)
-batch$y  # List of 4 integer labels
+batch$y  # Tensor of shape (4,) with numeric class labels
 }
 
 }

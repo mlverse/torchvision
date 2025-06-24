@@ -45,19 +45,14 @@ test_that("tests for the Flowers102 dataset for validation split", {
 
 test_that("tests for the Flowers102 dataset for dataloader", {
 
-  resize_collate_fn <- function(batch) {
-    target_size <- c(224, 224)
-    xs <- lapply(batch, function(item) {
-      transform_resize(item$x, target_size)
-    })
-    xs <- torch_stack(xs)
-    ys <- lapply(batch, function(item) item$y)
-    list(x = xs, y = ys)
-  }
+  flowers <- flowers102_dataset(
+    transform = function(x) {
+      x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
+    }
+  )
   dl <- dataloader(
-    dataset = flowers102_dataset(root = t, transform = transform_to_tensor),
-    batch_size = 4,
-    collate_fn = resize_collate_fn
+    dataset = flowers,
+    batch_size = 4
   )
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
@@ -66,10 +61,12 @@ test_that("tests for the Flowers102 dataset for dataloader", {
   expect_length(batch$x,602112)
   expect_tensor_shape(batch$x,c(4,3,224,224))
   expect_tensor_dtype(batch$x,torch_float())
-  expect_type(batch$y,"list")
+  expect_tensor(batch$y)
+  expect_tensor_shape(batch$y,4)
+  expect_tensor_dtype(batch$y,torch_long())
   expect_length(batch$y, 4)
-  expect_equal(batch$y[[1]],1)
-  expect_equal(batch$y[[2]],1)
-  expect_equal(batch$y[[3]],1)
-  expect_equal(batch$y[[4]],1)
+  expect_equal_to_r(batch$y[1],1)
+  expect_equal_to_r(batch$y[2],1)
+  expect_equal_to_r(batch$y[3],1)
+  expect_equal_to_r(batch$y[4],1)
 })

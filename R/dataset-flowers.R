@@ -37,7 +37,7 @@
 #' # Access a batch
 #' batch <- dataloader_next(dataloader_make_iter(dl))
 #' batch$x  # Tensor of shape (4, 3, 224, 224)
-#' batch$y  # List of 4 integer labels
+#' batch$y  # Tensor of shape (4,) with numeric class labels
 #' }
 #'
 #' @name flowers102_dataset
