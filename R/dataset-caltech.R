@@ -9,7 +9,7 @@
 #' @return
 #' A torch dataset. Each item is a list with two elements:
 #' \describe{
-#'   \item{x}{A 3D \code{torch_tensor} of shape \code{(3, H, W)} representing the image in RGB format.}
+#'   \item{x}{A 3D \code{torch_tensor} of shape \code{(H, W, C)} representing the image in RGB format.}
 #'   \item{y}{A list with:
 #'     \describe{
 #'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(1, 4)} containing the bounding box in \code{xywh} format.}
@@ -105,9 +105,7 @@ caltech101_detection_dataset <- dataset(
     img_path <- self$img_path[[index]]
     label_idx <- self$labels[[index]]
 
-    img <- jpeg::readJPEG(img_path)
-    img <- img * 255
-    img <- aperm(img, c(3, 1, 2))
+    x <- jpeg::readJPEG(img_path)
 
     ann_class <- self$annotation_classes[[label_idx]]
     index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
@@ -124,25 +122,22 @@ caltech101_detection_dataset <- dataset(
     boxes <- matrix(boxes, nrow = 1)
     boxes[, 3] <- boxes[, 3] * 2
     boxes <- box_convert(torch_tensor(boxes), in_fmt = "xywh", out_fmt = "xyxy")
-    height <- dim(img)[2]
-    width <- dim(img)[3]
-    boxes <- clip_boxes_to_image(boxes, size = c(height, width))
 
     contour <- torch_tensor(t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric)), dtype = torch_float())$unsqueeze(1)
 
-    target <- list(
+    y <- list(
       boxes = boxes,
       labels = label_idx,
       contour = contour
     )
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -263,18 +258,16 @@ caltech256_detection_dataset <- dataset(
 
   .getitem = function(index) {
     img_path <- self$img_path[[index]]
-    label <- self$labels[[index]]
+    y <- self$labels[[index]]
     
-    img <- jpeg::readJPEG(img_path)
-    img <- img * 255
-    img <- aperm(img, c(3, 1, 2))
+    x <- jpeg::readJPEG(img_path)
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
     if (!is.null(self$target_transform))
-      label <- self$target_transform(label)
+      y <- self$target_transform(y)
 
-    list(x = img, y = label)
+    list(x = x, y = y)
   },
   .length = function() {
     length(self$img_path)
