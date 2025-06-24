@@ -13,22 +13,15 @@ flowers102_dataset(
 )
 }
 \arguments{
-\item{root}{(string, optional): Root directory for dataset storage,
-the dataset will be stored under \code{root/flowers102}.}
+\item{root}{Root directory for dataset storage. The dataset will be stored under \code{root/flowers102}.}
 
-\item{split}{(string, optional): One of \code{"train"}, \code{"val"}, or \code{"test"},
-defines which subset of the data to load. Default is \code{"train"}.}
+\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
 
-\item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g,
-\code{\link[=transform_random_crop]{transform_random_crop()}}.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
@@ -42,7 +35,10 @@ Each element is a named list:
 Oxford Flowers 102 Dataset
 }
 \details{
-Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, with between 40 and 258 images per class.
+Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories,
+with between 40 and 258 images per class. Images in this dataset are of variable sizes.
+
+This is a \strong{classification} dataset where the goal is to assign each image to one of the 102 flower categories.
 
 The dataset is split into:
 \itemize{

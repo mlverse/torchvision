@@ -1,17 +1,18 @@
 #' Oxford Flowers 102 Dataset
 #'
-#' Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, with between 40 and 258 images per class. 
+#' Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, 
+#' with between 40 and 258 images per class. Images in this dataset are of variable sizes.
+#'
+#' This is a **classification** dataset where the goal is to assign each image to one of the 102 flower categories.
 #'
 #' The dataset is split into:
 #' - `"train"`: training subset with labels.
 #' - `"val"`: validation subset with labels.
 #' - `"test"`: test subset with labels (used for evaluation).
 #'
-#' @inheritParams mnist_dataset
-#' @param root (string, optional): Root directory for dataset storage,
-#' the dataset will be stored under `root/flowers102`.
-#' @param split (string, optional): One of `"train"`, `"val"`, or `"test"`,
-#' defines which subset of the data to load. Default is `"train"`.
+#' @inheritParams fgvc_aircraft_dataset
+#' @param root Root directory for dataset storage. The dataset will be stored under `root/flowers102`.
+#' @param split One of `"train"`, `"val"`, or `"test"`. Default is `"train"`.
 #'
 #' @return An object of class \code{flowers102_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
@@ -20,28 +21,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Define a resize collate function
-#' resize_collate_fn <- function(batch) {
-#'   xs <- lapply(batch, function(item) {
-#'     transform_resize(item$x, c(224, 224))
-#'   })
-#'   xs <- torch_stack(xs)
-#'   ys <- lapply(batch, function(item) item$y)
-#'   list(x = xs, y = ys)
-#' }
-#'
-#' # Load the dataset and apply transforms
+#' # Load the dataset with inline transforms
 #' flowers <- flowers102_dataset(
 #'   split = "train",
-#'   transform = transform_to_tensor,
-#'   download = TRUE
+#'   download = TRUE,
+#'   transform = . %>% transform_to_tensor() %>% transform_resize(c(224, 224))
 #' )
 #'
 #' # Create a dataloader
 #' dl <- dataloader(
-#'   dataset = flowers, 
-#'   batch_size = 4, 
-#'   collate_fn = resize_collate_fn
+#'   dataset = flowers,
+#'   batch_size = 4
 #' )
 #'
 #' # Access a batch
