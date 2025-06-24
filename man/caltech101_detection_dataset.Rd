@@ -12,18 +12,18 @@ caltech101_detection_dataset(
 )
 }
 \arguments{
-\item{root}{Root directory where the dataset is stored or will be downloaded to.}
+\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech-101}.}
 
-\item{transform}{Optional transform function applied to the image.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
-\item{download}{Logical. If TRUE, downloads and extracts the dataset if not already present in \code{root}.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 A torch dataset. Each item is a list with two elements:
 \describe{
-\item{x}{A 3D \code{torch_tensor} of shape \code{(3, H, W)} representing the image in RGB format.}
+\item{x}{A 3D \code{torch_tensor} of shape \code{(H, W, C)} representing the image in RGB format.}
 \item{y}{A list with:
 \describe{
 \item{boxes}{A 2D \code{torch_tensor} of shape \code{(1, 4)} containing the bounding box in \code{xywh} format.}
@@ -37,7 +37,8 @@ A torch dataset. Each item is a list with two elements:
 Caltech-101 Detection Dataset
 }
 \details{
-Loads the Caltech-101 dataset with image-level labels, bounding boxes, and object contours.
+Loads the Caltech-101 dataset for object detection, including image-level labels, bounding boxes, and object contours.
+The dataset contains images of varying sizes across 101 object categories.
 }
 \examples{
 \dontrun{

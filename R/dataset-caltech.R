@@ -1,10 +1,10 @@
 #' Caltech-101 Detection Dataset
 #'
-#' Loads the Caltech-101 dataset with image-level labels, bounding boxes, and object contours.
+#' Loads the Caltech-101 dataset for object detection, including image-level labels, bounding boxes, and object contours.
+#' The dataset contains images of varying sizes across 101 object categories.
 #'
-#' @inheritParams coco_detection_dataset
-#' @param transform Optional transform function applied to the image.
-#' @param download Logical. If TRUE, downloads and extracts the dataset if not already present in \code{root}.
+#' @inheritParams fgvc_aircraft_dataset
+#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech-101`.
 #'
 #' @return
 #' A torch dataset. Each item is a list with two elements:
@@ -158,7 +158,7 @@ caltech101_detection_dataset <- torch::dataset(
     invisible(lapply(self$resources, function(res) {
       archive <- download_and_cache(res$url, prefix = class(self)[1])
       dest <- fs::path(self$root, fs::path_file(res$filename))
-      fs::file_copy(archive, dest, overwrite = TRUE)
+      fs::file_move(archive, dest)
       md5 <- tools::md5sum(dest)[[1]]
       if (md5 != res$md5)
         cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
@@ -180,18 +180,16 @@ caltech101_detection_dataset <- torch::dataset(
 
 #' Caltech-256 Dataset
 #'
-#' Loads the Caltech-256 Object Category Dataset, which consists of 30,607 images from 256 distinct object categories.
-#' Each category has at least 80 images, with significant variability in object position, scale, and background.
-#' #'
+#' Loads the Caltech-256 Object Category Dataset for image classification. It consists of 30,607 images across 256 distinct object categories. 
+#' Each category has at least 80 images, with significant variability in object position, scale, background, and image size.
+#'
+#' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech256`.
-#' @param transform Optional function to apply to each image after loading (e.g., resizing, normalization).
-#' @param target_transform Optional function to transform the target label.
-#' @param download Logical. If `TRUE`, downloads and extracts the dataset if it's not already present. Default is `FALSE`.
 #'
 #' @return An object of class \code{caltech256_detection_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' \describe{
-#'   \item{x}{A 3 x W x H integer array representing an RGB image.}
+#'   \item{x}{A H x W x 3 integer array representing an RGB image.}
 #'   \item{y}{A character string representing the class label.}
 #' }
 #'

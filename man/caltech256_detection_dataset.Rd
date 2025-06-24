@@ -2,9 +2,10 @@
 % Please edit documentation in R/dataset-caltech.R
 \name{caltech256_detection_dataset}
 \alias{caltech256_detection_dataset}
+\alias{caltech256_dataset}
 \title{Caltech-256 Object Category Dataset}
 \usage{
-caltech256_detection_dataset(
+caltech256_dataset(
   root = tempdir(),
   transform = NULL,
   target_transform = NULL,
@@ -14,17 +15,17 @@ caltech256_detection_dataset(
 \arguments{
 \item{root}{Character. Root directory for dataset storage. The dataset will be stored under \code{root/caltech256}.}
 
-\item{transform}{Optional function to apply to each image after loading (e.g., resizing, normalization).}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{Optional function to transform the target label.}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
-\item{download}{Logical. If \code{TRUE}, downloads and extracts the dataset if it's not already present. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 An object of class \code{caltech256_detection_dataset}, which behaves like a torch dataset.
 Each element is a named list:
 \describe{
-\item{x}{A 3 x W x H integer array representing an RGB image.}
+\item{x}{A H x W x 3 integer array representing an RGB image.}
 \item{y}{A character string representing the class label.}
 }
 }
@@ -32,9 +33,8 @@ Each element is a named list:
 Caltech-256 Dataset
 }
 \details{
-Loads the Caltech-256 Object Category Dataset, which consists of 30,607 images from 256 distinct object categories.
-Each category has at least 80 images, with significant variability in object position, scale, and background.
-#'
+Loads the Caltech-256 Object Category Dataset for image classification. It consists of 30,607 images across 256 distinct object categories.
+Each category has at least 80 images, with significant variability in object position, scale, background, and image size.
 }
 \examples{
 \dontrun{
