@@ -208,7 +208,7 @@ caltech101_detection_dataset <- torch::dataset(
 #' @aliases caltech256_detection_dataset
 #' @title Caltech-256 Object Category Dataset
 #' @export
-caltech256_detection_dataset <- torch::dataset(
+caltech256_dataset <- torch::dataset(
   name = "caltech256",
   subname = "256_ObjectCategories",
   inherit = caltech101_detection_dataset,
@@ -221,7 +221,12 @@ caltech256_detection_dataset <- torch::dataset(
     )
   ),
   
-  initialize = function(root = tempdir(), transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
   self$root <- fs::path(root, class(self)[[1]])
   self$transform <- transform
   self$target_transform <- target_transform
@@ -235,8 +240,10 @@ caltech256_detection_dataset <- torch::dataset(
     cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
   }
 
-  all_dirs <- fs::dir_ls(fs::path(self$root, self$subname), type = "directory")
-  self$classes <- sort(fs::path_file(all_dirs))
+  obj_dir <- fs::path(self$root, self$subname) #1
+  all_dirs <- fs::dir_ls(obj_dir, type = "directory")
+  self$classes <- sort(base::basename(all_dirs))
+  self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
 
   class_dirs <- fs::path(self$root, self$subname, self$classes)
   self$classes <- sub("^\\d+\\.", "", self$classes)
@@ -252,7 +259,7 @@ caltech256_detection_dataset <- torch::dataset(
     use.names = FALSE
   )
   cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
-},
+  },
 
   .getitem = function(index) {
     img_path <- self$img_path[[index]]
