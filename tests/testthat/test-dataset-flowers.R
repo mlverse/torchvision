@@ -46,6 +46,7 @@ test_that("tests for the Flowers102 dataset for validation split", {
 test_that("tests for the Flowers102 dataset for dataloader", {
 
   flowers <- flowers102_dataset(
+    root = t,
     transform = function(x) {
       x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
     }
