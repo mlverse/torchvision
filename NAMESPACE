@@ -2,9 +2,6 @@
 
 S3method(draw_bounding_boxes,default)
 S3method(draw_bounding_boxes,image_with_bounding_box)
-S3method(draw_bounding_boxes,coco_detection_item)
-S3method(draw_bounding_boxes,default)
-S3method(draw_bounding_boxes,image_with_bounding_box)
 S3method(draw_segmentation_masks,default)
 S3method(draw_segmentation_masks,image_with_segmentation_mask)
 S3method(transform_adjust_brightness,default)
