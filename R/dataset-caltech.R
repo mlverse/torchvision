@@ -118,10 +118,8 @@ caltech101_detection_dataset <- dataset(
       cli_abort("Please install 'R.matlab' to read annotation files.")
 
     mat_data <- R.matlab::readMat(as.character(ann_file))
-    boxes <- mat_data[["box.coord"]][c(1, 3, 2, 4)]
-    boxes <- matrix(boxes, nrow = 1)
-    boxes[, 3] <- boxes[, 3] * 2
-    boxes <- box_convert(torch_tensor(boxes), in_fmt = "xywh", out_fmt = "xyxy")
+    boxes <- torch_tensor(mat_data[["box.coord"]])[,c(1,3,2,4)]
+    boxes <- box_convert(boxes, in_fmt = "xywh", out_fmt = "xyxy")
 
     contour <- torch_tensor(t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric)), dtype = torch_float())$unsqueeze(1)
 
