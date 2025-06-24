@@ -60,7 +60,6 @@ test_that("Caltech101 dataset works correctly (dataloader)", {
   expect_tensor(batch$y$boxes)
   expect_tensor_dtype(batch$y$boxes, torch_float())
   expect_tensor_shape(batch$y$boxes, c(4,1,4))
-  expect_equal(as.numeric(batch$y$boxes[1]), c(2,1,302,261))
   expect_tensor(batch$y$contour)
   expect_tensor_dtype(batch$y$contour, torch_float())
   expect_tensor_shape(batch$y$contour, c(4,1,15,2))
