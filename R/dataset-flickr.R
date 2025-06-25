@@ -63,14 +63,14 @@ flickr8k_dataset <- dataset(
     self$train <- train
     self$split <- if (train) "train" else "test"
 
-    rlang::inform(glue::glue("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached."))
+    cli_inform("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached.")
     
     if (download) {
       self$download()
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      cli_abort("Dataset not found. Use `download = TRUE` to fetch it.")
     }
 
     file <- if (self$train) self$training_file else self$test_file
@@ -78,7 +78,7 @@ flickr8k_dataset <- dataset(
 
     self$images <- data$images
     self$captions <- data$captions
-    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$images)} samples."))
+    cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
   },
 
   download = function() {
@@ -86,15 +86,15 @@ flickr8k_dataset <- dataset(
       return()
     }
 
-    rlang::inform(glue::glue("Downloading Flickr8k split: '{self$split}' (~1GB)"))
+    cli_inform("Downloading Flickr8k split: '{self$split}' (~1GB)")
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
     for (r in self$resources) {
       zip_path <- download_and_cache(r[1], prefix = class(self)[1])
-      md5_actual <- tools::md5sum(zip_path)
-      if (md5_actual != r[2]) {
-        runtime_error("Corrupt file! Delete the file in {zip_path} and try again.")
+
+      if (tools::md5sum(zip_path) != r[2]) {
+        cli_abort("Corrupt file! Delete the file at {zip_path} and try again.")
       }
       dest_zip <- file.path(self$raw_folder, basename(zip_path))
       fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
@@ -220,14 +220,14 @@ flickr30k_dataset <- dataset(
     self$train <- train
 
     self$split <- if (self$train) "train" else "test"
-    rlang::inform("Flickr30k Dataset (~4.1GB) will be downloaded and processed if not already cached.")
+    cli_inform("Flickr30k Dataset (~4.1GB) will be downloaded and processed if not already cached.")
 
     if (download) {
       self$download()
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      cli_abort("Dataset not found. Use `download = TRUE` to fetch it.")
     }
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
@@ -250,7 +250,7 @@ flickr30k_dataset <- dataset(
       self$captions_map[[filename]] <- captions
     }
 
-    rlang::inform(glue::glue("Split '{self$split}' loaded with {length(self$filenames)} samples."))
+    cli_inform("Split '{self$split}' loaded with {length(self$filenames)} samples.")
   },
 
   download = function() {
@@ -258,15 +258,14 @@ flickr30k_dataset <- dataset(
       return()
     }
 
-    rlang::inform(glue::glue("Downloading Flickr30k split: '{self$split}' (~4.1GB)"))
+    cli_inform("Downloading Flickr30k split: '{self$split}' (~4.1GB)")
     fs::dir_create(self$raw_folder)
 
     for (r in self$resources) {
       archive_path <- download_and_cache(r[1], prefix = class(self)[1])
-      md5_actual <- tools::md5sum(archive_path)
 
-      if (md5_actual != r[2]) {
-        runtime_error(glue::glue("MD5 mismatch: expected {r[2]}, got {md5_actual}"))
+      if (tools::md5sum(archive_path) != r[2]) {
+        cli_abort("Corrupt file! Delete the file at {archive_path} and try again.")
       }
 
       dest_path <- file.path(self$raw_folder, basename(archive_path))
