@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-caltech.R
 \name{caltech256_dataset}
 \alias{caltech256_dataset}
-\title{Caltech-256 Object Category Dataset}
+\title{Caltech-256 Dataset}
 \usage{
 caltech256_dataset(
   root = tempdir(),

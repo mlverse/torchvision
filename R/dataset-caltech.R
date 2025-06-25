@@ -153,7 +153,7 @@ caltech101_dataset <- torch::dataset(
 #'
 #' @name caltech256_dataset
 #' @aliases caltech256_dataset
-#' @title Caltech-256 Object Category Dataset
+#' @title Caltech-256 Dataset
 #' @export
 caltech256_dataset <- torch::dataset(
   name = "caltech256",
