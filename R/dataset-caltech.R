@@ -1,48 +1,25 @@
 #' Caltech-101 Detection Dataset
 #'
-#' Loads the Caltech-101 dataset for object detection, including image-level labels, bounding boxes, and object contours.
+#' Loads the Caltech-101 dataset for image classification with RGB images and integer labels.
 #' The dataset contains images of varying sizes across 101 object categories.
 #'
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech-101`.
 #'
-#' @return
-#' A torch dataset. Each item is a list with two elements:
+#' @return An object of class \code{caltech101_dataset}, which behaves like a torch dataset.
+#' Each element is a named list:
 #' \describe{
-#'   \item{x}{A 3D \code{torch_tensor} of shape \code{(H, W, C)} representing the image in RGB format.}
-#'   \item{y}{A list with:
-#'     \describe{
-#'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(1, 4)} containing the bounding box in \code{xywh} format.}
-#'       \item{labels}{A character scalar giving the class label for the image.}
-#'       \item{contour}{A 2D \code{torch_tensor} of shape \code{(N, 2)} with the object contour coordinates.}
-#'     }
-#'   }
+#'   \item{x}{A H x W x 3 integer array representing an RGB image.}
+#'   \item{y}{An Integer representing the label.}
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' caltech101 <- caltech101_dataset(download = TRUE)
+#' 
 #' first_item <- caltech101[1]
-#'
-#' first_item$x <- torch_tensor(first_item$x, dtype = torch::torch_uint8())
-#'
-#' # Draw bounding box
-#' bboxes <- draw_bounding_boxes(
-#'   image = first_item$x,
-#'   boxes = first_item$y$boxes,
-#'   labels = caltech101$classes[first_item$y$labels],
-#'   colors = "red"
-#' )
-#' tensor_image_browse(bboxes)
-#'
-#' # Draw contour points as keypoints
-#' contour_points <- draw_keypoints(
-#'   image = first_item$x,
-#'   keypoints = first_item$y$contour,
-#'   colors = "green",
-#'   radius = 2
-#' )
-#' tensor_image_browse(contour_points)
+#' first_item$x  # Image array
+#' first_item$y  # Integer label
 #' }
 #'
 #' @name caltech101_dataset
@@ -153,7 +130,7 @@ caltech101_dataset <- torch::dataset(
 #' Caltech-256 Dataset
 #'
 #' Loads the Caltech-256 Object Category Dataset for image classification. It consists of 30,607 images across 256 distinct object categories. 
-#' Each category has at least 80 images, with significant variability in object position, scale, background, and image size.
+#' Each category has at least 80 images, with variability in image size.
 #'
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech256`.
@@ -162,7 +139,7 @@ caltech101_dataset <- torch::dataset(
 #' Each element is a named list:
 #' \describe{
 #'   \item{x}{A H x W x 3 integer array representing an RGB image.}
-#'   \item{y}{A character string representing the class label.}
+#'   \item{y}{An Integer representing the label.}
 #' }
 #'
 #' @examples
@@ -171,7 +148,7 @@ caltech101_dataset <- torch::dataset(
 #' 
 #' first_item <- caltech256[1]
 #' first_item$x  # Image array
-#' first_item$y  # Class label, e.g., "ak47"
+#' first_item$y  # Integer Label
 #' }
 #'
 #' @name caltech256_dataset
