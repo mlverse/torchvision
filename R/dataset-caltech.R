@@ -21,7 +21,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' caltech101 <- caltech101_detection_dataset(download = TRUE)
+#' caltech101 <- caltech101_dataset(download = TRUE)
 #' first_item <- caltech101[1]
 #'
 #' first_item$x <- torch_tensor(first_item$x, dtype = torch::torch_uint8())
@@ -45,11 +45,11 @@
 #' tensor_image_browse(contour_points)
 #' }
 #'
-#' @name caltech101_detection_dataset
-#' @aliases caltech101_detection_dataset
+#' @name caltech101_dataset
+#' @aliases caltech101_dataset
 #' @title Caltech-101 Dataset
 #' @export
-caltech101_detection_dataset <- torch::dataset(
+caltech101_dataset <- torch::dataset(
   name = "caltech-101",
   subname = "101_ObjectCategories",
   resources = list(
@@ -86,10 +86,6 @@ caltech101_detection_dataset <- torch::dataset(
     name_map <- list("Faces" = "Faces_2", "Faces_easy" = "Faces_3", "Motorbikes" = "Motorbikes_16", "airplanes" = "Airplanes_Side_2")
     self$annotation_classes <- vapply(self$classes, function(x) if (x %in% names(name_map)) name_map[[x]] else x, character(1))
 
-    self$img_path <- list()
-    self$labels <- c()
-    self$image_indices <- c()
-
     for (i in seq_along(self$classes)) {
       img_dir <- fs::path(obj_dir, self$classes[[i]])
       imgs <- sort(fs::dir_ls(img_dir, glob = "*.jpg"))
@@ -103,31 +99,9 @@ caltech101_detection_dataset <- torch::dataset(
 
   .getitem = function(index) {
     img_path <- self$img_path[[index]]
-    label_idx <- self$labels[[index]]
+    y <- self$labels[[index]]
 
     x <- jpeg::readJPEG(img_path)
-
-    ann_class <- self$annotation_classes[[label_idx]]
-    index_str <- formatC(self$image_indices[[index]], width = 4, flag = "0")
-    ann_file <- fs::path(self$root, class(self)[[1]], "Annotations", ann_class, glue::glue("annotation_{index_str}.mat"))
-
-    if (!fs::file_exists(ann_file))
-      cli_abort("Annotation file not found: {ann_file}")
-
-    if (!requireNamespace("R.matlab", quietly = TRUE))
-      cli_abort("Please install 'R.matlab' to read annotation files.")
-
-    mat_data <- R.matlab::readMat(as.character(ann_file))
-    boxes <- torch_tensor(mat_data[["box.coord"]])[,c(1,3,2,4)]
-    boxes <- box_convert(boxes, in_fmt = "xywh", out_fmt = "xyxy")
-
-    contour <- torch_tensor(t(apply(as.matrix(mat_data[["obj.contour"]]), 2, as.numeric)), dtype = torch_float())$unsqueeze(1)
-
-    y <- list(
-      boxes = boxes,
-      labels = label_idx,
-      contour = contour
-    )
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -170,8 +144,6 @@ caltech101_detection_dataset <- torch::dataset(
       extracted <- fs::path(self$root, class(self)[[1]])
       if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
         utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
-      if (fs::file_exists(fs::path(extracted, "Annotations.tar")))
-        utils::untar(fs::path(extracted, "Annotations.tar"), exdir = extracted)
     }))
 
     cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
@@ -186,7 +158,7 @@ caltech101_detection_dataset <- torch::dataset(
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech256`.
 #'
-#' @return An object of class \code{caltech256_detection_dataset}, which behaves like a torch dataset.
+#' @return An object of class \code{caltech256_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' \describe{
 #'   \item{x}{A H x W x 3 integer array representing an RGB image.}
@@ -195,21 +167,21 @@ caltech101_detection_dataset <- torch::dataset(
 #'
 #' @examples
 #' \dontrun{
-#' caltech256 <- caltech256_detection_dataset(download = TRUE)
+#' caltech256 <- caltech256_dataset(download = TRUE)
 #' 
 #' first_item <- caltech256[1]
 #' first_item$x  # Image array
 #' first_item$y  # Class label, e.g., "ak47"
 #' }
 #'
-#' @name caltech256_detection_dataset
-#' @aliases caltech256_detection_dataset
+#' @name caltech256_dataset
+#' @aliases caltech256_dataset
 #' @title Caltech-256 Object Category Dataset
 #' @export
 caltech256_dataset <- torch::dataset(
   name = "caltech256",
   subname = "256_ObjectCategories",
-  inherit = caltech101_detection_dataset,
+  inherit = caltech101_dataset,
   classes = NULL,
   resources = list(
     list(
@@ -238,7 +210,7 @@ caltech256_dataset <- torch::dataset(
     cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
   }
 
-  obj_dir <- fs::path(self$root, self$subname) #1
+  obj_dir <- fs::path(self$root, self$subname)
   all_dirs <- fs::dir_ls(obj_dir, type = "directory")
   self$classes <- sort(base::basename(all_dirs))
   self$classes <- self$classes[self$classes != "BACKGROUND_Google"]
@@ -257,20 +229,6 @@ caltech256_dataset <- torch::dataset(
     use.names = FALSE
   )
   cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
-  },
-
-  .getitem = function(index) {
-    img_path <- self$img_path[[index]]
-    y <- self$labels[[index]]
-    
-    x <- jpeg::readJPEG(img_path)
-
-    if (!is.null(self$transform))
-      x <- self$transform(x)
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
-
-    list(x = x, y = y)
   },
 
   check_exists = function() {
