@@ -41,13 +41,14 @@
 #' @aliases flickr8k_dataset
 #' @title Flickr8k Dataset
 #' @export
-flickr8k_dataset <- dataset(
+flickr8k_dataset <- torch::dataset(
   name = "flickr8k",
   training_file = "train.rds",
   test_file = "test.rds",
+  class_index_file = "classes.rds",
   resources = list(
-    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip","bf6c1abcb8e4a833b7f922104de18627"),
-    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip","f18a1e2920de5bd84dae7cf08ec78978")
+    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip", "bf6c1abcb8e4a833b7f922104de18627"),
+    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip", "f18a1e2920de5bd84dae7cf08ec78978")
   ),
 
   initialize = function(
@@ -63,7 +64,7 @@ flickr8k_dataset <- dataset(
     self$train <- train
     self$split <- if (train) "train" else "test"
 
-    cli_inform("Flickr8k Dataset (~1GB) will be downloaded and processed if not already cached.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~1GB) will be downloaded and processed if not already cached.")
     
     if (download) {
       self$download()
@@ -78,26 +79,29 @@ flickr8k_dataset <- dataset(
 
     self$images <- data$images
     self$captions <- data$captions
+    self$classes <- readRDS(file.path(self$processed_folder, self$class_index_file))
+
     cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
   },
 
   download = function() {
+
     if (self$check_exists()){
       return()
     }
 
-    cli_inform("Downloading Flickr8k split: '{self$split}' (~1GB)")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} split: '{self$split}' (~1GB)")
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
     for (r in self$resources) {
-      zip_path <- download_and_cache(r[1], prefix = class(self)[1])
+      archive <- download_and_cache(r[1], prefix = class(self)[1])
 
-      if (tools::md5sum(zip_path) != r[2]) {
-        cli_abort("Corrupt file! Delete the file at {zip_path} and try again.")
+      if (tools::md5sum(archive) != r[2]) {
+        cli_abort("Corrupt file! Delete the file at {archive} and try again.")
       }
-      dest_zip <- file.path(self$raw_folder, basename(zip_path))
-      fs::file_copy(zip_path, dest_zip, overwrite = TRUE)
+      dest_zip <- file.path(self$raw_folder, basename(archive))
+      fs::file_move(archive, dest_zip)
       utils::unzip(dest_zip, exdir = self$raw_folder)
     }
 
@@ -112,42 +116,57 @@ flickr8k_dataset <- dataset(
       captions_map[[img_id]] <- c(captions_map[[img_id]], caption)
     }
 
+    merged_caption_map <- vapply(names(captions_map), function(id) {
+      paste(captions_map[[id]], collapse = " ")  # or " || "
+    }, character(1))
+
+    unique_merged_captions <- unique(merged_caption_map)
+    caption_to_index <- setNames(seq_along(unique_merged_captions), unique_merged_captions)
+
+    saveRDS(unique_merged_captions, file.path(self$processed_folder, self$class_index_file))
+
     train_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.trainImages.txt"))
     test_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.testImages.txt"))
 
-    process_split <- function(ids, split_name) {
+    process_split <- function(ids) {
       img_paths <- file.path(self$raw_folder, "Flicker8k_Dataset", ids)
       img_paths <- img_paths[file.exists(img_paths)]
-      captions <- lapply(ids, function(id) captions_map[[id]])
-      list(images = img_paths, captions = captions)
+
+      caption_indices <- vapply(ids, function(id) {
+        merged_caption <- merged_caption_map[[id]]
+        caption_to_index[[merged_caption]]
+      }, integer(1))
+
+      list(images = img_paths, captions = caption_indices)
     }
 
-    train_data <- process_split(train_ids, "train")
-    test_data <- process_split(test_ids, "test")
+    train_data <- process_split(train_ids)
+    test_data <- process_split(test_ids)
 
     saveRDS(train_data, file.path(self$processed_folder, self$training_file))
     saveRDS(test_data, file.path(self$processed_folder, self$test_file))
   },
 
   check_exists = function() {
-    fs::file_exists(file.path(self$processed_folder, self$training_file)) && fs::file_exists(file.path(self$processed_folder, self$test_file))
+    fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
+    fs::file_exists(file.path(self$processed_folder, self$test_file)) &&
+    fs::file_exists(file.path(self$processed_folder, self$class_index_file))
   },
 
   .getitem = function(index) {
     img_path <- self$images[[index]]
-    img <- magick::image_read(img_path)
-    img <- magick::image_data(img, channels = "rgb")
-    img <- as.integer(img)
-    target <- self$captions[[index]]
+    x <- jpeg::readJPEG(img_path)
+    y <- self$captions[[index]]
 
     if (!is.null(self$transform)) {
-      img <- self$transform(img)
+      x <- self$transform(x)
     }
 
     if (!is.null(self$target_transform)) {
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
     }
-    list(x = img, y = target)
+
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -200,7 +219,7 @@ flickr8k_dataset <- dataset(
 #' @aliases flickr30k_dataset
 #' @title Flickr30k Dataset
 #' @export
-flickr30k_dataset <- dataset(
+flickr30k_dataset <- torch::dataset(
   name = "flickr30k",
   resources = list(
     c("https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz","985ac761bbb52ca49e0c474ae806c07c"),
@@ -218,9 +237,9 @@ flickr30k_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-
     self$split <- if (self$train) "train" else "test"
-    cli_inform("Flickr30k Dataset (~4.1GB) will be downloaded and processed if not already cached.")
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~4.1GB) will be downloaded and processed if not already cached.")
 
     if (download) {
       self$download()
@@ -254,22 +273,23 @@ flickr30k_dataset <- dataset(
   },
 
   download = function() {
+
     if (self$check_exists()){
       return()
     }
 
-    cli_inform("Downloading Flickr30k split: '{self$split}' (~4.1GB)")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} split: '{self$split}' (~4.1GB)")
     fs::dir_create(self$raw_folder)
 
     for (r in self$resources) {
-      archive_path <- download_and_cache(r[1], prefix = class(self)[1])
+      archive <- download_and_cache(r[1], prefix = class(self)[1])
 
-      if (tools::md5sum(archive_path) != r[2]) {
-        cli_abort("Corrupt file! Delete the file at {archive_path} and try again.")
+      if (tools::md5sum(archive) != r[2]) {
+        cli_abort("Corrupt file! Delete the file at {archive} and try again.")
       }
 
-      dest_path <- file.path(self$raw_folder, basename(archive_path))
-      fs::file_copy(archive_path, dest_path, overwrite = TRUE)
+      dest_path <- file.path(self$raw_folder, basename(archive))
+      fs::file_move(archive, dest_path)
 
       if (grepl("\\.zip$", dest_path)) {
         utils::unzip(dest_path, exdir = self$raw_folder)
