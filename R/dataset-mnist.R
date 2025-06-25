@@ -64,11 +64,11 @@ mnist_dataset <- dataset(
       filename <- tail(strsplit(r[1], "/")[[1]], 1)
       destpath <- file.path(self$raw_folder, filename)
 
-      p <- download_and_cache(r[1], prefix = class(self)[1])
-      fs::file_copy(p, destpath)
+      archive <- download_and_cache(r[1], prefix = class(self)[1])
+      fs::file_copy(archive, destpath)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error("MD5 sums are not identical for file: {r[1]}.")
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     }
 
@@ -220,7 +220,7 @@ qmnist_dataset <- dataset(
       self$download()
 
     if (!self$check_exists())
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     data_file <- self$files[[split]]
     data <- readRDS(file.path(self$processed_folder, data_file))
@@ -240,11 +240,11 @@ qmnist_dataset <- dataset(
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
 
-      p <- download_and_cache(r[1], prefix = glue::glue("qmnist-{self$split}"))
-      fs::file_copy(p, destpath, overwrite = TRUE)
+      archive <- download_and_cache(r[1], prefix = glue::glue("qmnist-{self$split}"))
+      fs::file_copy(archive, destpath, overwrite = TRUE)
 
       if (!tools::md5sum(destpath) == r[2])
-        runtime_error(paste("MD5 mismatch for:", r[1]))
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
     rlang::inform("Processing...")
@@ -463,7 +463,7 @@ emnist_dataset <- dataset(
       self$download()
 
     if (!self$check_exists())
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     file_to_load_train <- self$training_file(split)
     file_to_load_test <- self$test_file(split)
@@ -487,16 +487,14 @@ emnist_dataset <- dataset(
     fs::dir_create(self$processed_folder)
 
     url <- self$resources[[1]][1]
-    expected_md5 <- self$resources[[1]][2]
-    zip_path <- download_and_cache(url, prefix = class(self)[1])
+    archive <- download_and_cache(url, prefix = class(self)[1])
 
-    actual_md5 <- digest::digest(file = zip_path, algo = "md5")
-    if (!identical(actual_md5, expected_md5))
-      runtime_error("Downloaded EMNIST archive has incorrect checksum.")
+    if (!tools::md5sum(archive) == self$resources[[1]][2])
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     unzip_dir <- file.path(self$raw_folder, "unzipped")
     fs::dir_create(unzip_dir)
-    unzip(zip_path, exdir = unzip_dir)
+    unzip(archive, exdir = unzip_dir)
 
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 

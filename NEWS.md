@@ -5,10 +5,17 @@
 - fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
 - add message translation in french (#112, @cregouby)
 - Added the Fashion-MNIST dataset. (#148, @koshtiakanksha)
-- Added 3 EuroSAT datasets (#126)
+- Added 3 EuroSAT datasets (#126 @cregouby)
 - Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
 - Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
 - Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
+- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
+- add tiff image support to `folder_dataset()` (#169, @cregouby)
+- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
+- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
+- Added `caltech101_dataset()` and `caltech256_dataset()` – for the Caltech 101 and 256 datasets. (#158, @DerrickUnleashed)
+- Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
+- Added `flowers102_dataset()` – a dataset loader for the Flowers102 dataset. (#157, @DerrickUnleashed)
 
 # torchvision 0.6.0
 
