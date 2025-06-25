@@ -49,6 +49,9 @@ reference:
    - ends_with("s_dataset")
    - ends_with("0_dataset")
    - ends_with("r_dataset")
+   - ends_with("6_dataset")
+   - ends_with("1_dataset")
+   - ends_with("2_dataset")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and
