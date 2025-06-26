@@ -2,9 +2,16 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_bounding_boxes}
 \alias{draw_bounding_boxes}
+\alias{draw_bounding_boxes.default}
+\alias{draw_bounding_boxes.torch_tensor}
+\alias{draw_bounding_boxes.image_with_bounding_box}
 \title{Draws bounding boxes on image.}
 \usage{
-draw_bounding_boxes(
+draw_bounding_boxes(x, ...)
+
+\method{draw_bounding_boxes}{default}(x, ...)
+
+\method{draw_bounding_boxes}{torch_tensor}(
   x,
   boxes,
   labels = NULL,
@@ -15,8 +22,16 @@ draw_bounding_boxes(
   font_size = 10,
   ...
 )
+
+\method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
 }
 \arguments{
+\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+C value for channel can only be 1 (grayscale) or 3 (RGB).}
+
+\item{...}{Additional arguments passed to methods.}
+
 \item{boxes}{Tensor of size (N, 4) containing N bounding boxes in
 c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
 format. Note that the boxes coordinates are absolute with respect
@@ -36,12 +51,6 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 \item{font}{NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
 
 \item{font_size}{The requested font size in points.}
-
-\item{...}{Additional arguments passed to methods.}
-
-\item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-C value for channel can only be 1 (grayscale) or 3 (RGB).}
 }
 \value{
 torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
@@ -52,11 +61,11 @@ Draws bounding boxes on top of one image tensor
 \examples{
 if (torch::torch_is_installed()) {
 \dontrun{
-image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+x <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-bboxed <- draw_bounding_boxes(image, boxes, colors = "black", fill = TRUE)
+bboxed <- draw_bounding_boxes(x, boxes, colors = "black", fill = TRUE)
 tensor_image_browse(bboxed)
 }
 }

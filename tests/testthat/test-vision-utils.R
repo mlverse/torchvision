@@ -115,7 +115,7 @@ test_that("draw_bounding_boxes works with coco_detection_sample", {
   skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
 
   ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
-  item <- ds[1]
+  item <- ds[3]
 
   out <- draw_bounding_boxes(item)
   expect_tensor(out)
@@ -130,7 +130,7 @@ test_that("draw_segmentation_masks works with coco_detection_sample", {
   skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
 
   ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
-  item <- ds[1]
+  item <- ds[3]
 
   if (item$y$masks$size(1) > 0) {
     out <- draw_segmentation_masks(item)
