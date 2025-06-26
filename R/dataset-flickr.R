@@ -12,14 +12,14 @@
 #' @param target_transform Optional function to transform the captions. Default is `NULL`.
 #' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
 #'
-#' @return An object of class \code{flickr8k_dataset}, which behaves like a torch dataset.
+#' @return An object of class \code{flickr8k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
 #' - `y`: a character vector of captions for the image.
 #'
 #' @examples
 #' \dontrun{
-#' flickr <- flickr8k_dataset(train = TRUE, download = TRUE)
+#' flickr <- flickr8k_caption_dataset(train = TRUE, download = TRUE)
 #'
 #' # Define a custom collate function to resize images in the batch
 #' resize_collate_fn <- function(batch) {
@@ -37,18 +37,18 @@
 #' batch$y  # list of caption vectors
 #' }
 #'
-#' @name flickr8k_dataset
-#' @aliases flickr8k_dataset
+#' @name flickr8k_caption_dataset
+#' @aliases flickr8k_caption_dataset
 #' @title Flickr8k Dataset
 #' @export
-flickr8k_dataset <- torch::dataset(
+flickr8k_caption_dataset <- torch::dataset(
   name = "flickr8k",
   training_file = "train.rds",
   test_file = "test.rds",
   class_index_file = "classes.rds",
   resources = list(
     c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip", "bf6c1abcb8e4a833b7f922104de18627"),
-    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip", "f18a1e2920de5bd84dae7cf08ec78978")
+    c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/flickr8k_caption_dataset.zip", "f18a1e2920de5bd84dae7cf08ec78978")
   ),
 
   initialize = function(
@@ -187,17 +187,17 @@ flickr8k_dataset <- torch::dataset(
 #' - `"train"`: training subset with captions.
 #' - `"test"`: test subset with captions.
 #'
-#' @inheritParams flickr8k_dataset
+#' @inheritParams flickr8k_caption_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.
 #'
-#' @return An object of class \code{flickr30k_dataset}, which behaves like a torch dataset.
+#' @return An object of class \code{flickr30k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
 #' - `y`: a character vector of captions for the image.
 #'
 #' @examples
 #' \dontrun{
-#' flickr <- flickr30k_dataset(train = TRUE, download = TRUE)
+#' flickr <- flickr30k_caption_dataset(train = TRUE, download = TRUE)
 #'
 #' # Define a custom collate function to resize images in the batch
 #' resize_collate_fn <- function(batch) {
@@ -215,11 +215,11 @@ flickr8k_dataset <- torch::dataset(
 #' batch$y  # list of caption vectors
 #' }
 #'
-#' @name flickr30k_dataset
-#' @aliases flickr30k_dataset
+#' @name flickr30k_caption_dataset
+#' @aliases flickr30k_caption_dataset
 #' @title Flickr30k Dataset
 #' @export
-flickr30k_dataset <- torch::dataset(
+flickr30k_caption_dataset <- torch::dataset(
   name = "flickr30k",
   resources = list(
     c("https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz","985ac761bbb52ca49e0c474ae806c07c"),
