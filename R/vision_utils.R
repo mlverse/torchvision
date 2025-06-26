@@ -83,6 +83,7 @@ vision_make_grid <- function(tensor,
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 # ' The first element of the vector selects a typeface and the second element selects a style.
 #' @param font_size The requested font size in points.
+#' @param ... Additional arguments passed to methods.
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
@@ -99,7 +100,7 @@ vision_make_grid <- function(tensor,
 #' }
 #' @family image display
 #' @export
-draw_bounding_boxes <- function(x, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
+draw_bounding_boxes <- function(image, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
@@ -111,7 +112,7 @@ draw_bounding_boxes.default <- function(image,
                                 fill = FALSE,
                                 width = 1,
                                 font = c("serif", "plain"),
-                                font_size = 10) {
+                                font_size = 10, ...) {
   rlang::check_installed("magick")
 
   if (!inherits(image, "torch_tensor")) {
@@ -197,20 +198,20 @@ draw_bounding_boxes.default <- function(image,
 }
 
 #' @export
-draw_bounding_boxes.image_with_bounding_box <- function(x,
+draw_bounding_boxes.image_with_bounding_box <- function(image,
                                                         colors = NULL,
                                                         fill = FALSE,
                                                         width = 1,
                                                         font = c("serif", "plain"),
-                                                        font_size = 10) {
-  labels <- x$y$labels
+                                                        font_size = 10, ...) {
+  labels <- image$y$labels
   if (inherits(labels, "torch_tensor")) {
     labels <- as.character(as_array(labels))
   }
 
   draw_bounding_boxes(
-    image = x$x,
-    boxes = x$y$boxes,
+    image = image$x,
+    boxes = image$y$boxes,
     labels = labels,
     colors = colors,
     fill = fill,
@@ -292,6 +293,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
+#' @param ... Additional arguments passed to methods.
+#'
+#' @importFrom graphics polygon
+#' @importFrom grDevices dev.off
+#' @importFrom torch as_array
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
@@ -304,7 +310,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' }
 #' @family image display
 #' @export
-draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
+draw_segmentation_masks <- function(image, masks, alpha = 0.5, colors = NULL, ...) {
   UseMethod("draw_segmentation_masks")
 }
 
@@ -312,7 +318,7 @@ draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
 draw_segmentation_masks.default  <-  function(image,
                                       masks,
                                       alpha = 0.8,
-                                      colors = NULL) {
+                                      colors = NULL, ...) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
@@ -369,12 +375,12 @@ draw_segmentation_masks.default  <-  function(image,
 }
 
 #' @export
-draw_segmentation_masks.image_with_segmentation_mask <- function(x,
+draw_segmentation_masks.image_with_segmentation_mask <- function(image,
                                                                  colors = NULL,
-                                                                 alpha = 0.5) {
+                                                                 alpha = 0.5, ...) {
   draw_segmentation_masks(
-    image = x$x,
-    masks = x$y$masks,
+    image = image$x,
+    masks = image$y$masks,
     colors = colors,
     alpha = alpha
   )
