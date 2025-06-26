@@ -75,3 +75,4 @@ box_xyxy_to_xywh <- function(boxes) {
   boxes = torch::torch_stack(list(x1, y1, w, h), dim=-1)
   return(boxes)
 }
+

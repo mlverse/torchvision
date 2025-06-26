@@ -2,14 +2,25 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_segmentation_masks}
 \alias{draw_segmentation_masks}
+\alias{draw_segmentation_masks.default}
+\alias{draw_segmentation_masks.torch_tensor}
+\alias{draw_segmentation_masks.image_with_segmentation_mask}
 \title{Draw segmentation masks}
 \usage{
-draw_segmentation_masks(image, masks, alpha = 0.8, colors = NULL)
+draw_segmentation_masks(x, ...)
+
+\method{draw_segmentation_masks}{default}(x, ...)
+
+\method{draw_segmentation_masks}{torch_tensor}(x, masks, alpha = 0.8, colors = NULL, ...)
+
+\method{draw_segmentation_masks}{image_with_segmentation_mask}(x, alpha = 0.5, colors = NULL, ...)
 }
 \arguments{
-\item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
 In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
+
+\item{...}{Additional arguments passed to methods.}
 
 \item{masks}{torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.}
 
@@ -27,9 +38,9 @@ Draw segmentation masks with their respective colors on top of a given RGB tenso
 }
 \examples{
 if (torch::torch_is_installed()) {
-image <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+x <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
-masked_image <- draw_segmentation_masks(image, mask, alpha = 0.2)
+masked_image <- draw_segmentation_masks(x, mask, alpha = 0.2)
 tensor_image_browse(masked_image)
 }
 }
