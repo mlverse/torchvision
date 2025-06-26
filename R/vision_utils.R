@@ -100,7 +100,7 @@ vision_make_grid <- function(tensor,
 #' }
 #' @family image display
 #' @export
-draw_bounding_boxes <- function(image, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
+draw_bounding_boxes <- function(x, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
@@ -198,20 +198,20 @@ draw_bounding_boxes.default <- function(image,
 }
 
 #' @export
-draw_bounding_boxes.image_with_bounding_box <- function(image,
+draw_bounding_boxes.image_with_bounding_box <- function(x,
                                                         colors = NULL,
                                                         fill = FALSE,
                                                         width = 1,
                                                         font = c("serif", "plain"),
                                                         font_size = 10, ...) {
-  labels <- image$y$labels
+  labels <- x$y$labels
   if (inherits(labels, "torch_tensor")) {
     labels <- as.character(as_array(labels))
   }
 
   draw_bounding_boxes(
-    image = image$x,
-    boxes = image$y$boxes,
+    image = x$x,
+    boxes = x$y$boxes,
     labels = labels,
     colors = colors,
     fill = fill,
@@ -310,7 +310,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' }
 #' @family image display
 #' @export
-draw_segmentation_masks <- function(image, masks, alpha = 0.5, colors = NULL, ...) {
+draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
   UseMethod("draw_segmentation_masks")
 }
 
@@ -375,12 +375,12 @@ draw_segmentation_masks.default  <-  function(image,
 }
 
 #' @export
-draw_segmentation_masks.image_with_segmentation_mask <- function(image,
+draw_segmentation_masks.image_with_segmentation_mask <- function(x,
                                                                  colors = NULL,
                                                                  alpha = 0.5, ...) {
   draw_segmentation_masks(
-    image = image$x,
-    masks = image$y$masks,
+    image = x$x,
+    masks = x$y$masks,
     colors = colors,
     alpha = alpha
   )
