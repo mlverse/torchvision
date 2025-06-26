@@ -89,11 +89,11 @@ vision_make_grid <- function(tensor,
 #' @examples
 #' if (torch::torch_is_installed()) {
 #' \dontrun{
-#' x <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+#' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 #' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-#' bboxed <- draw_bounding_boxes(x, boxes, colors = "black", fill = TRUE)
+#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", fill = TRUE)
 #' tensor_image_browse(bboxed)
 #' }
 #' }
@@ -292,9 +292,9 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'
 #' @examples
 #' if (torch::torch_is_installed()) {
-#' x <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+#' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
-#' masked_image <- draw_segmentation_masks(x, mask, alpha = 0.2)
+#' masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
 #' tensor_image_browse(masked_image)
 #' }
 #' @family image display
