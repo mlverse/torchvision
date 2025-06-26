@@ -84,17 +84,30 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image</span>, <span class="va">masks</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, colors <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'torch_tensor'</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">masks</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, colors <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'image_with_segmentation_mask'</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, colors <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-image">image<a class="anchor" aria-label="anchor" href="#arg-image"></a></dt>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>Tensor of shape (C x H x W) and dtype <code>uint8</code> or dtype <code>float</code>.
 In case of dtype float, values are assumed to be in range \([0, 1]\).
 C value for channel can only be 1 (grayscale) or 3 (RGB).</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to methods.</p></dd>
 
 
 <dt id="arg-masks">masks<a class="anchor" aria-label="anchor" href="#arg-masks"></a></dt>
@@ -128,9 +141,9 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for ma
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="va">image</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randint.html" class="external-link">torch_randint</a></span><span class="op">(</span><span class="fl">170</span>, <span class="fl">250</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">image_tensor</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randint.html" class="external-link">torch_randint</a></span><span class="op">(</span><span class="fl">170</span>, <span class="fl">250</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_tril.html" class="external-link">torch_tril</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_ones.html" class="external-link">torch_ones</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_bool</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">masked_image</span> <span class="op">&lt;-</span> <span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image</span>, <span class="va">mask</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">masked_image</span> <span class="op">&lt;-</span> <span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image_tensor</span>, <span class="va">mask</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">masked_image</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
