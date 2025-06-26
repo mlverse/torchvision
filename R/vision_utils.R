@@ -66,7 +66,7 @@ vision_make_grid <- function(tensor,
 #'
 #' Draws bounding boxes on top of one image tensor
 #'
-#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
 #' @param boxes Tensor of size (N, 4) containing N bounding boxes in
@@ -83,7 +83,6 @@ vision_make_grid <- function(tensor,
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 # ' The first element of the vector selects a typeface and the second element selects a style.
 #' @param font_size The requested font size in points.
-#' @param ... Additional arguments passed to methods.
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
@@ -99,56 +98,51 @@ vision_make_grid <- function(tensor,
 #' }
 #' }
 #' @family image display
-#' @importFrom graphics rect text
-#' @importFrom grDevices dev.off
 #' @export
 draw_bounding_boxes <- function(x, boxes, labels = NULL, colors = NULL, fill = FALSE, width = 1, font = c("serif", "plain"), font_size = 10, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
 #' @export
-draw_bounding_boxes.default <- function(x,
-                                        boxes,
-                                        labels = NULL,
-                                        colors = NULL,
-                                        fill = FALSE,
-                                        width = 1,
-                                        font = c("serif", "plain"),
-                                        font_size = 10, ...) {
+draw_bounding_boxes.default <- function(image,
+                                boxes,
+                                labels = NULL,
+                                colors = NULL,
+                                fill = FALSE,
+                                width = 1,
+                                font = c("serif", "plain"),
+                                font_size = 10) {
   rlang::check_installed("magick")
 
-  if (!inherits(x, "torch_tensor")) {
-    type_error("`x` should be a torch_tensor")
+  if (!inherits(image, "torch_tensor")) {
+    type_error("`image` should be a torch_tensor")
   }
-  if (x$ndim != 3) {
+  if (image$ndim != 3) {
     value_error("Pass individual `image`, not batches")
   }
-  if (!x$size(1) %in% c(1, 3)) {
+  if (!image$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
   }
-  if (x$dtype == torch::torch_uint8()) {
-    img_to_draw <- x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
-  } else if (x$dtype == torch::torch_float()) {
-    img_to_draw <- x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  if (image$dtype == torch::torch_uint8()) {
+    img_to_draw <- image$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+  } else if (image$dtype == torch::torch_float()) {
+    img_to_draw <- image$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
   } else {
-    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
+    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
   }
-
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
     value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
   }
-
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
     cli_warn("boxes doesn't contain any box. No box was drawn")
-    return(x)
+    return(image)
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     cli_abort(
       "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
     )
   }
-
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_boxes)
   }
@@ -156,26 +150,36 @@ draw_bounding_boxes.default <- function(x,
     value_error("colors vector cannot be broadcasted on boxes")
   }
 
-  fill_col <- if (!fill) NA else colors
+  if (!fill) {
+    fill_col <- NA
+  } else {
+    fill_col <- colors
+  }
 
   if (is.null(font)) {
     vfont <- c("serif", "plain")
   } else {
-    if (is.null(font_size)) font_size <- 10
+    if (is.null(font_size)) {
+      font_size <- 10
+    }
   }
-
-  if (x$size(1) == 1) {
-    x <- x$tile(c(4, 2, 2))
+  # Handle Grayscale images
+  if (image$size(1) == 1) {
+    image <- image$tile(c(4, 2, 2))
   }
 
   img_bb <- boxes$to(torch::torch_int64()) %>% as.array
 
+
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
-
-  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors)
-
+  graphics::rect(img_bb[, 1],
+                 img_bb[, 2],
+                 img_bb[, 3],
+                 img_bb[, 4],
+                 col = fill_col,
+                 border = colors)
   if (!is.null(labels)) {
     graphics::text(
       img_bb[, 1] + width,
@@ -186,26 +190,36 @@ draw_bounding_boxes.default <- function(x,
       cex = font_size / 10
     )
   }
-
   grDevices::dev.off()
-
-  draw_tt <- draw %>%
-    magick::image_data(channels = "rgb") %>%
-    as.integer() %>%
-    torch::torch_tensor(dtype = torch::torch_uint8())
-
+  draw_tt <-
+    draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
 #' @export
-draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
-  draw_bounding_boxes.default(
-    x = x$x,
+draw_bounding_boxes.image_with_bounding_box <- function(x,
+                                                        colors = NULL,
+                                                        fill = FALSE,
+                                                        width = 1,
+                                                        font = c("serif", "plain"),
+                                                        font_size = 10) {
+  labels <- x$y$labels
+  if (inherits(labels, "torch_tensor")) {
+    labels <- as.character(as_array(labels))
+  }
+
+  draw_bounding_boxes(
+    image = x$x,
     boxes = x$y$boxes,
-    labels = x$y$labels,
-    ...
+    labels = labels,
+    colors = colors,
+    fill = fill,
+    width = width,
+    font = font,
+    font_size = font_size
   )
 }
+
 
 
 #' Convert COCO polygon to mask tensor (Robust Version)
@@ -223,12 +237,23 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
   rlang::check_installed("magick")
 
   mask_img <- magick::image_blank(width = width, height = height, color = "black")
-
   mask_img <- magick::image_draw(mask_img)
+
   for (poly in segmentation) {
-    coords <- matrix(unlist(poly), ncol = 2, byrow = TRUE)
-    polygon(coords[, 1], coords[, 2], col = "white", border = NA)
+    flat <- unlist(poly)
+    n_coords <- length(flat)
+
+    # Ensure number of coordinates is even (x, y) pairs
+    if (n_coords %% 2 != 0) {
+      flat <- flat[-n_coords]  # Drop the last element if odd
+    }
+
+    if (length(flat) >= 6) {  # At least 3 points to form a polygon
+      coords <- matrix(flat, ncol = 2, byrow = TRUE)
+      polygon(coords[, 1], coords[, 2], col = "white", border = NA)
+    }
   }
+
   dev.off()
 
   gray <- magick::image_data(mask_img, channels = "gray")
@@ -247,7 +272,6 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
                  nrow(mask_matrix), ncol(mask_matrix), height, width))
   }
 
-  # Convert to logical and then to tensor
   mask_logical <- mask_matrix > 0
   mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
 
@@ -259,16 +283,15 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'
 #' Draw segmentation masks with their respective colors on top of a given RGB tensor image
 #'
-#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
+#' @param image Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
-#' @param masks A boolean tensor of shape (N, H, W), typically derived from COCO polygon annotations.
+#' @param masks torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
 #' @param alpha number between 0 and 1 denoting the transparency of the masks.
 #   0 means full transparency, 1 means no transparency.
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
-#' @param ... Additional arguments passed to methods.
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
@@ -280,37 +303,34 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' tensor_image_browse(masked_image)
 #' }
 #' @family image display
-#' @importFrom graphics polygon
-#' @importFrom grDevices dev.off
 #' @export
 draw_segmentation_masks <- function(x, masks, alpha = 0.5, colors = NULL, ...) {
   UseMethod("draw_segmentation_masks")
 }
 
 #' @export
-draw_segmentation_masks.default  <-  function(x,
-                                              masks,
-                                              alpha = 0.8,
-                                              colors = NULL,
-                                              ...) {
+draw_segmentation_masks.default  <-  function(image,
+                                      masks,
+                                      alpha = 0.8,
+                                      colors = NULL) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
-  if (!inherits(x, "torch_tensor")) {
-    type_error("`x` should be a torch_tensor")
+  if (!inherits(image, "torch_tensor")) {
+    type_error("`image` should be a torch_tensor")
   }
-  if (x$ndim != 3) {
-    value_error("Pass individual `x`, not batches")
+  if (image$ndim != 3) {
+    value_error("Pass individual `image`, not batches")
   }
-  if (!x$size(1) %in% c(1, 3)) {
+  if (!image$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
   }
-  if (x$dtype == out_dtype) {
-    img_to_draw <- x$detach()$clone()
-  } else if (x$dtype == torch::torch_float()) {
-    img_to_draw <- x$detach()$clone()$mul(255)$to(dtype = out_dtype)
+  if (image$dtype == out_dtype) {
+    img_to_draw <- image$detach()$clone()
+  } else if (image$dtype == torch::torch_float()) {
+    img_to_draw <- image$detach()$clone()$mul(255)$to(dtype = out_dtype)
   } else {
-    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
+    type_error("`image` should be of dtype `torch_uint8` or `torch_float`")
   }
   if (masks$ndim == 2) {
     masks <- masks$unsqueeze(1)
@@ -322,12 +342,12 @@ draw_segmentation_masks.default  <-  function(x,
     type_error("`masks` is expected to be of dtype torch_bool")
   }
   if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
-    value_error("`masks` and `x` must have the same height and width")
+    value_error("`masks` and `image` must have the same height and width")
   }
   num_masks <- masks$size(1)
   if (num_masks == 0) {
     cli_warn("masks doesn't contain any mask. No mask was drawn")
-    return(x)
+    return(image)
   }
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_masks)
@@ -349,15 +369,16 @@ draw_segmentation_masks.default  <-  function(x,
 }
 
 #' @export
-draw_segmentation_masks.image_with_segmentation_mask <- function(x, ...) {
-  draw_segmentation_masks.default(
-    x = x$x,
+draw_segmentation_masks.image_with_segmentation_mask <- function(x,
+                                                                 colors = NULL,
+                                                                 alpha = 0.5) {
+  draw_segmentation_masks(
+    image = x$x,
     masks = x$y$masks,
-    ...
+    colors = colors,
+    alpha = alpha
   )
 }
-
-
 
 #' Draws Keypoints
 #'

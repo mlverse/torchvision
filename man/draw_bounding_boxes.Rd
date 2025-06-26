@@ -17,10 +17,6 @@ draw_bounding_boxes(
 )
 }
 \arguments{
-\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-C value for channel can only be 1 (grayscale) or 3 (RGB).}
-
 \item{boxes}{Tensor of size (N, 4) containing N bounding boxes in
 c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
 format. Note that the boxes coordinates are absolute with respect
@@ -41,7 +37,9 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 
 \item{font_size}{The requested font size in points.}
 
-\item{...}{Additional arguments passed to methods.}
+\item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+C value for channel can only be 1 (grayscale) or 3 (RGB).}
 }
 \value{
 torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.

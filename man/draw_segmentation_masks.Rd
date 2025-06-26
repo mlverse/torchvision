@@ -7,11 +7,7 @@
 draw_segmentation_masks(x, masks, alpha = 0.5, colors = NULL, ...)
 }
 \arguments{
-\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-C value for channel can only be 1 (grayscale) or 3 (RGB).}
-
-\item{masks}{A boolean tensor of shape (N, H, W), typically derived from COCO polygon annotations.}
+\item{masks}{torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.}
 
 \item{alpha}{number between 0 and 1 denoting the transparency of the masks.}
 
@@ -19,7 +15,9 @@ C value for channel can only be 1 (grayscale) or 3 (RGB).}
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks}
 
-\item{...}{Additional arguments passed to methods.}
+\item{image}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+C value for channel can only be 1 (grayscale) or 3 (RGB).}
 }
 \value{
 torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.

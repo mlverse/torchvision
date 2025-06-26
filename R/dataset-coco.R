@@ -24,9 +24,13 @@
 #'       \item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
 #'       \item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
 #'       \item{segmentation}{A list of segmentation polygons for each object.}
+#'       \item{masks}{A 3D \code{torch_tensor} of shape \code{(N, H, W)} containing binary segmentation masks.}
 #'     }
 #'   }
 #' }
+#' The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
+#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
+#'
 #' @details
 #' The returned image is in CHW format (channels, height, width), matching the torch convention.
 #' The dataset `y` offers object detection annotations such as bounding boxes, labels,
@@ -112,11 +116,10 @@ coco_detection_dataset <- torch::dataset(
 
     if (nrow(anns) > 0) {
       boxes_wh <- torch::torch_tensor(do.call(rbind, anns$bbox), dtype = torch::torch_float())
-      boxes <- torchvision::ops$box_xywh_to_xyxy(boxes_wh)
+      boxes <- box_xywh_to_xyxy(boxes_wh)
 
       label_ids <- anns$category_id
-      label_names <- self$categories$name[match(label_ids, self$categories$id)]
-      labels <- torch::torch_tensor(label_ids, dtype = torch::torch_int())
+      labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
 
       area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
@@ -129,31 +132,30 @@ coco_detection_dataset <- torch::dataset(
         }
         NULL
       })
-      masks <- Filter(Negate(is.null), masks)
+
+      masks <- Filter(function(m) inherits(m, "torch_tensor") && m$ndim == 2, masks)
 
       if (length(masks) > 0) {
-        masks_tensor <- tryCatch({
-          torch::torch_stack(masks)
-        }, error = function(e) {
-          arr <- array(0, dim = c(length(masks), H, W))
-          for (i in seq_along(masks)) arr[i, , ] <- as.array(masks[[i]])
-          torch::torch_tensor(arr, dtype = torch::torch_bool())
-        })
+        masks_tensor <- torch::torch_stack(masks)
       } else {
         masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
       }
+
     } else {
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- torch::torch_empty(0, dtype = torch::torch_int())
-      label_names <- character()
+      labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
       masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+      anns$segmentation <- list()
     }
 
     y <- list(
       boxes = boxes,
-      labels = label_names,
+      labels = labels,
+      area = area,
+      iscrowd = iscrowd,
+      segmentation = anns$segmentation,
       masks = masks_tensor
     )
 

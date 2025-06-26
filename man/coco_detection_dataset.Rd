@@ -39,9 +39,12 @@ in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
 \item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
 \item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
 \item{segmentation}{A list of segmentation polygons for each object.}
+\item{masks}{A 3D \code{torch_tensor} of shape \code{(N, H, W)} containing binary segmentation masks.}
 }
 }
 }
+The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 }
 \description{
 Loads the MS COCO dataset for object detection and segmentation.

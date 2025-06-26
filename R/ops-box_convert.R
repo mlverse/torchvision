@@ -76,15 +76,3 @@ box_xyxy_to_xywh <- function(boxes) {
   return(boxes)
 }
 
-
-#' Torchvision ops
-#'
-#' Provides access to common bounding box conversion utilities.
-#'
-#' @export
-ops <- list(
-  box_cxcywh_to_xyxy = box_cxcywh_to_xyxy,
-  box_xyxy_to_cxcywh = box_xyxy_to_cxcywh,
-  box_xywh_to_xyxy = box_xywh_to_xyxy,
-  box_xyxy_to_xywh = box_xyxy_to_xywh
-)

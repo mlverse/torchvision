@@ -16,7 +16,7 @@ test_that("coco_detection_dataset handles missing files gracefully", {
 })
 
 test_that("coco_detection_dataset loads a single example correctly", {
-  skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
+  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1", "Set COCO_DATASET_TEST=1 to run")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
@@ -30,20 +30,25 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_tensor(x)
   expect_equal(x$ndim, 3)
 
-  expect_true(is.list(y))
-  expect_setequal(names(y), c("boxes", "labels", "masks"))
+  expect_type(y, "list")
+  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
 
   expect_tensor(y$boxes)
   expect_equal(y$boxes$ndim, 2)
   expect_equal(y$boxes$size(2), 4)
 
-  expect_true(is.character(y$labels))
+  expect_type(y$labels, "character")
+  expect_gt(length(y$labels), 0)
+
+  expect_tensor(y$area)
+  expect_tensor(y$iscrowd)
+  expect_true(is.list(y$segmentation))
   expect_tensor(y$masks)
   expect_equal(y$masks$ndim, 3)
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
-  skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
+  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1", "Set COCO_DATASET_TEST=1 to run")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
@@ -55,7 +60,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
   expect_type(batch$y, "list")
-  expect_setequal(names(batch$y[[1]]), c("boxes", "labels", "masks"))
+  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
   expect_tensor(batch$y[[1]]$boxes)
   expect_equal(batch$y[[1]]$boxes$ndim, 2)
   expect_equal(batch$y[[1]]$boxes$size(2), 4)
