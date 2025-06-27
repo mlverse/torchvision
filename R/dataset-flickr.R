@@ -248,7 +248,6 @@ flickr30k_caption_dataset <- torch::dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
@@ -256,7 +255,7 @@ flickr30k_caption_dataset <- torch::dataset(
     self$split <- if (train) "train" else "test"
 
     cli_inform("{.cls {class(self)[[1]]}} Dataset (~4.1GB) will be downloaded and processed if not already cached.")
-    
+
     if (download)
       self$download()
 
@@ -271,24 +270,16 @@ flickr30k_caption_dataset <- torch::dataset(
     self$filenames <- filtered$filename
 
     captions_map <- setNames(
-      lapply(filtered$sentences, function(x) vapply(x, `[[`, "", "raw")),
+      lapply(filtered$sentences, function(s) unname(vapply(s$raw, identity, character(1)))),
       filtered$filename
     )
 
-    self$filenames <- trimws(filtered$filename)
-    captions_map <- captions_map[self$filenames]
-
-    caption_to_index <- setNames(seq_along(self$filenames), self$filenames)
-    unique_merged <- captions_map
-
-    missing <- setdiff(self$filenames, names(caption_to_index))
-    if (length(missing) > 0) {
-      cli_abort("Missing captions for: {paste(missing, collapse=', ')}")
-    }
+    all_ids <- names(captions_map)
+    caption_to_index <- setNames(seq_along(all_ids), all_ids)
 
     self$images <- file.path(self$raw_folder, "flickr30k-images", self$filenames)
     self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
-    self$classes <- unique_merged
+    self$classes <- captions_map
 
     cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
   },
