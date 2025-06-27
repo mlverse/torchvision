@@ -85,7 +85,12 @@ flickr8k_caption_dataset <- torch::dataset(
         col.names = c("file_id", "caption"),
         stringsAsFactors = FALSE
       )
-      caption_df[c("file", "id")] <- do.call(rbind, strsplit(caption_df$file_id, "#"))
+      caption_df[c("file", "id")] <- read.delim(
+        text = caption_df$file,
+        sep = "#",
+        header = FALSE
+      )
+
       caption_df$file_id <- NULL
       caption_df$file <- trimws(caption_df$file)
       captions_map <- split(caption_df$caption, caption_df$file)
@@ -143,7 +148,7 @@ flickr8k_caption_dataset <- torch::dataset(
         utils::unzip(archive, exdir = self$raw_folder)
       } else if (tools::file_ext(archive) == "gz") {
         tar_path <- sub("\\.gz$", "", archive)
-        R.utils::gunzip(archive, tar_path)
+        R.utils::gunzip(archive, tar_path, overwrite = TRUE)
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
