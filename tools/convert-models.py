@@ -1,5 +1,6 @@
-import torchvision
+# import torchvision
 import torch
+from torch.hub import load_state_dict_from_url
 from google.cloud import storage
 import os
 
@@ -61,13 +62,21 @@ models = {
   'deeplabv3_resnet50_coco': 'https://download.pytorch.org/models/deeplabv3_resnet50_coco-cd0a2569.pth',
   'deeplabv3_resnet101_coco': 'https://download.pytorch.org/models/deeplabv3_resnet101_coco-586e9e4e.pth',
   'casia-webface': 'https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180408-102900-casia-webface.pt',
-  'vggface2': 'https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt'
+  'vggface2': 'https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt',
+  'efficientnet_b0': 'https://download.pytorch.org/models/efficientnet_b0_rwightman-3dd342df.pth',
+  'efficientnet_b1': 'https://download.pytorch.org/models/efficientnet_b1_rwightman-533bc792.pth',
+  'efficientnet_b2': 'https://download.pytorch.org/models/efficientnet_b2_rwightman-bcdf34b7.pth',
+  'efficientnet_b3': 'https://download.pytorch.org/models/efficientnet_b3_rwightman-cf984f9c.pth',
+  'efficientnet_b4': 'https://download.pytorch.org/models/efficientnet_b4_rwightman-7eb33cd5.pth',
+  'efficientnet_b5': 'https://download.pytorch.org/models/efficientnet_b5_rwightman-4c8d6900.pth',
+  'efficientnet_b6': 'https://download.pytorch.org/models/efficientnet_b6_rwightman-cf52900d.pth',
+  'efficientnet_b7': 'https://download.pytorch.org/models/efficientnet_b7_rwightman-7f6fddf5.pth'
 }
 
-os.mkdir("models/")
+os.makedirs("models", exist_ok=True)
 
 for name, url in models.items():
-  m = torchvision.models.utils.load_state_dict_from_url(url, progress=False)
+  m = load_state_dict_from_url(url, progress=False)
   converted = {}
   for nm, par in m.items():
     converted.update([(nm, par.clone())])
