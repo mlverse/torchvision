@@ -20,7 +20,6 @@
 #' \dontrun{
 #' # Load the Flickr8k caption dataset with inline transformation
 #' flickr8k <- flickr8k_caption_dataset(
-#'   root = t,
 #'   transform = function(x) {
 #'     x %>%
 #'       transform_to_tensor() %>%
@@ -212,7 +211,6 @@ flickr8k_caption_dataset <- torch::dataset(
 #' \dontrun{
 #' # Load the Flickr30k caption dataset with transformation
 #' flickr30k <- flickr30k_caption_dataset(
-#'   root = t,
 #'   transform = function(x) {
 #'     x %>%
 #'       transform_to_tensor() %>%

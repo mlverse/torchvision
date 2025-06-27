@@ -48,7 +48,6 @@ The dataset is split into:
 \dontrun{
 # Load the Flickr30k caption dataset with transformation
 flickr30k <- flickr30k_caption_dataset(
-  root = t,
   transform = function(x) {
     x \%>\%
       transform_to_tensor() \%>\%
