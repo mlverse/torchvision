@@ -77,16 +77,13 @@ flickr8k_caption_dataset <- torch::dataset(
     if (!self$check_processed_exists()) {
       fs::dir_create(self$processed_folder)
 
-      captions_file <- file.path(self$raw_folder, "Flickr8k.token.txt")
-      captions_lines <- readLines(captions_file)
-      captions_map <- list()
+      captions_lines <- readLines(file.path(self$raw_folder, "Flickr8k.token.txt"))
 
-      for (line in captions_lines) {
-        parts <- strsplit(line, "\t")[[1]]
-        img_id <- strsplit(parts[1], "#")[[1]][1]
-        caption <- parts[2]
-        captions_map[[img_id]] <- c(captions_map[[img_id]], caption)
-      }
+      parts <- strsplit(captions_lines, "\t")
+      img_ids <- vapply(parts, function(p) strsplit(p[1], "#")[[1]][1], character(1))
+      captions <- vapply(parts, `[[`, character(1), 2)
+
+      split(captions, img_ids) -> captions_map
 
       merged_caption_map <- vapply(names(captions_map), function(id) {
         glue::glue_collapse(captions_map[[id]], sep = " ")
@@ -265,11 +262,14 @@ flickr30k_caption_dataset <- torch::dataset(
     filtered <- imgs_df[imgs_df$split == self$split, ]
     self$filenames <- filtered$filename
 
-    captions_map <- list()
-    for (i in seq_len(nrow(filtered))) {
-      sents <- filtered$sentences[[i]]$raw
-      captions_map[[filtered$filename[[i]]]] <- glue::glue_collapse(sents, sep = " ")
-    }
+    captions_map <- setNames(
+      vapply(
+        filtered$sentences, 
+        function(x) glue::glue_collapse(x$raw, sep = " "), 
+        character(1)
+      ),
+      filtered$filename
+    )
 
     merged_captions <- unname(unlist(captions_map))
     unique_merged <- unique(merged_captions)
