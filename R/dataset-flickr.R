@@ -1,6 +1,7 @@
 #' Flickr8k Dataset
 #'
-#' Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image.
+#' Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image. 
+#' The images in this dataset are in RGB format and vary in spatial resolution.
 #'
 #' The dataset is split into:
 #' - `"train"`: training subset with captions.
@@ -13,26 +14,27 @@
 #' @return An object of class \code{flickr8k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: a character vector of captions for the image.
+#' - `y`: an integer label indicating the caption index.
 #'
 #' @examples
 #' \dontrun{
-#' flickr <- flickr8k_caption_dataset(train = TRUE, download = TRUE)
+#' # Load the Flickr8k caption dataset with inline transformation
+#' flickr8k <- flickr8k_caption_dataset(
+#'   root = t,
+#'   transform = function(x) {
+#'     x %>%
+#'       transform_to_tensor() %>%
+#'       transform_resize(c(224, 224))
+#'   }
+#' )
 #'
-#' # Define a custom collate function to resize images in the batch
-#' resize_collate_fn <- function(batch) {
-#'   xs <- lapply(batch, function(sample) {
-#'     torchvision::transform_resize(sample$x, c(224, 224))
-#'   })
-#'   xs <- torch::torch_stack(xs)
-#'   ys <- sapply(batch, function(sample) sample$y)
-#'   list(x = xs, y = ys)
-#' }
-#'
-#' dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+#' # Create a dataloader and retrieve a batch
+#' dl <- dataloader(flickr8k, batch_size = 4)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
-#' batch$x  # batched image tensors resized to 224x224
-#' batch$y  # list of caption vectors
+#'
+#' # Access images and captions
+#' batch$x  # batched image tensors with shape (4, 3, 224, 224)
+#' batch$y  # tensor of caption indices
 #' }
 #'
 #' @name flickr8k_caption_dataset
@@ -87,7 +89,7 @@ flickr8k_caption_dataset <- torch::dataset(
       }
 
       merged_caption_map <- vapply(names(captions_map), function(id) {
-        paste(captions_map[[id]], collapse = " ")
+        glue::glue_collapse(captions_map[[id]], sep = " ")
       }, character(1))
 
       unique_merged_captions <- unique(merged_caption_map)
@@ -186,6 +188,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #' Flickr30k Dataset
 #'
 #' Loads the Flickr30k dataset consisting of 30,000 images with five human-annotated captions per image.
+#' The images in this dataset are in RGB format and vary in spatial resolution.
 #'
 #' The dataset is split into:
 #' - `"train"`: training subset with captions.
@@ -197,26 +200,27 @@ flickr8k_caption_dataset <- torch::dataset(
 #' @return An object of class \code{flickr30k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: a character vector of captions for the image.
+#' - `y`: an integer label indicating the caption index.
 #'
 #' @examples
 #' \dontrun{
-#' flickr <- flickr30k_caption_dataset(train = TRUE, download = TRUE)
+#' # Load the Flickr30k caption dataset with transformation
+#' flickr30k <- flickr30k_caption_dataset(
+#'   root = t,
+#'   transform = function(x) {
+#'     x %>%
+#'       transform_to_tensor() %>%
+#'       transform_resize(c(224, 224))
+#'   }
+#' )
 #'
-#' # Define a custom collate function to resize images in the batch
-#' resize_collate_fn <- function(batch) {
-#'   xs <- lapply(batch, function(sample) {
-#'     torchvision::transform_resize(sample$x, c(224, 224))
-#'   })
-#'   xs <- torch::torch_stack(xs)
-#'   ys <- sapply(batch, function(sample) sample$y)
-#'   list(x = xs, y = ys)
-#' }
-#'
-#' dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+#' # Create a dataloader and retrieve a batch
+#' dl <- dataloader(flickr30k, batch_size = 4)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
-#' batch$x  # batched image tensors resized to 224x224
-#' batch$y  # list of caption vectors
+#'
+#' # Access images and captions
+#' batch$x  # batched image tensors with shape (4, 3, 224, 224)
+#' batch$y  # tensor of caption indices
 #' }
 #'
 #' @name flickr30k_caption_dataset
@@ -263,7 +267,7 @@ flickr30k_caption_dataset <- torch::dataset(
     captions_map <- list()
     for (i in seq_len(nrow(filtered))) {
       sents <- filtered$sentences[[i]]$raw
-      captions_map[[filtered$filename[[i]]]] <- paste(sents, collapse = " ")
+      captions_map[[filtered$filename[[i]]]] <- glue::glue_collapse(sents, sep = " ")
     }
 
     merged_captions <- unname(unlist(captions_map))

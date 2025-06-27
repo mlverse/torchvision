@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-flickr.R
 \name{flickr8k_caption_dataset}
 \alias{flickr8k_caption_dataset}
-\title{Flickr8k Dataset}
+\title{Flickr8k Caption Dataset}
 \usage{
 flickr8k_caption_dataset(
   root = tempdir(),
@@ -17,18 +17,18 @@ flickr8k_caption_dataset(
 
 \item{train}{Logical. If \code{TRUE}, loads the training set. If \code{FALSE}, loads the test set. Default is \code{TRUE}.}
 
-\item{transform}{Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{Optional function to transform the captions. Default is \code{NULL}.}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
-\item{download}{Logical. Whether to download and process the dataset if it's not already available. Default is \code{FALSE}.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 An object of class \code{flickr8k_caption_dataset}, which behaves like a torch dataset.
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 integer array representing an RGB image.
-\item \code{y}: a character vector of captions for the image.
+\item \code{y}: an integer label indicating the caption index.
 }
 }
 \description{
@@ -36,6 +36,7 @@ Flickr8k Dataset
 }
 \details{
 Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image.
+The images in this dataset are in RGB format and vary in spatial resolution.
 
 The dataset is split into:
 \itemize{
@@ -45,22 +46,23 @@ The dataset is split into:
 }
 \examples{
 \dontrun{
-flickr <- flickr8k_caption_dataset(train = TRUE, download = TRUE)
+# Load the Flickr8k caption dataset with inline transformation
+flickr8k <- flickr8k_caption_dataset(
+  root = t,
+  transform = function(x) {
+    x \%>\%
+      transform_to_tensor() \%>\%
+      transform_resize(c(224, 224))
+  }
+)
 
-# Define a custom collate function to resize images in the batch
-resize_collate_fn <- function(batch) {
-  xs <- lapply(batch, function(sample) {
-    torchvision::transform_resize(sample$x, c(224, 224))
-  })
-  xs <- torch::torch_stack(xs)
-  ys <- sapply(batch, function(sample) sample$y)
-  list(x = xs, y = ys)
-}
-
-dl <- torch::dataloader(dataset = flickr, batch_size = 4, collate_fn = resize_collate_fn)
+# Create a dataloader and retrieve a batch
+dl <- dataloader(flickr8k, batch_size = 4)
 batch <- dataloader_next(dataloader_make_iter(dl))
-batch$x  # batched image tensors resized to 224x224
-batch$y  # list of caption vectors
+
+# Access images and captions
+batch$x  # batched image tensors with shape (4, 3, 224, 224)
+batch$y  # tensor of caption indices
 }
 
 }
