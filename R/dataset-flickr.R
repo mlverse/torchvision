@@ -14,7 +14,7 @@
 #' @return A torch dataset of class \code{flickr8k_caption_dataset}.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: a character string containing all five captions associated with the image, concatenated into one.
+#' - `y`: a character vector containing all five captions associated with the image.
 #'
 #' @examples
 #' \dontrun{
@@ -25,7 +25,8 @@
 #'     x %>%
 #'       transform_to_tensor() %>%
 #'       transform_resize(c(224, 224))
-#'   }
+#'   },
+#'   download = TRUE
 #' )
 #'
 #' # Create a dataloader and retrieve a batch
@@ -86,26 +87,29 @@ flickr8k_caption_dataset <- torch::dataset(
       )
       caption_df[c("file", "id")] <- do.call(rbind, strsplit(caption_df$file_id, "#"))
       caption_df$file_id <- NULL
+      caption_df$file <- trimws(caption_df$file)
       captions_map <- split(caption_df$caption, caption_df$file)
+      all_ids <- sort(unique(caption_df$file))
 
-      merged_caption_map <- vapply(names(captions_map), function(id) {
-        glue::glue_collapse(captions_map[[id]], sep = " ")
-      }, character(1))
+      caption_to_index <- setNames(seq_along(all_ids), all_ids)
+      unique_merged_captions <- captions_map[all_ids]
 
-      unique_merged_captions <- unique(merged_caption_map)
-      caption_to_index <- setNames(seq_along(unique_merged_captions), unique_merged_captions)
       saveRDS(unique_merged_captions, file.path(self$processed_folder, self$class_index_file))
 
       train_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.trainImages.txt"))
       test_ids <- readLines(file.path(self$raw_folder, "Flickr_8k.testImages.txt"))
 
       process_split <- function(ids) {
+        ids <- trimws(ids)
         img_paths <- file.path(self$raw_folder, "Flicker8k_Dataset", ids)
         img_paths <- img_paths[file.exists(img_paths)]
-        caption_indices <- vapply(ids, function(id) {
-          merged_caption <- merged_caption_map[[id]]
-          caption_to_index[[merged_caption]]
-        }, integer(1))
+
+        missing <- setdiff(ids, names(caption_to_index))
+        if (length(missing) > 0) {
+          cli_abort("The following IDs are missing captions: {paste(missing, collapse=', ')}")
+        }
+
+        caption_indices <- vapply(ids, function(id) caption_to_index[[id]], integer(1))
         list(images = img_paths, captions = caption_indices)
       }
 
@@ -163,8 +167,8 @@ flickr8k_caption_dataset <- torch::dataset(
 
   .getitem = function(index) {
     x <- jpeg::readJPEG(self$images[[index]])
-    y <- self$captions[[index]]
-    y <- self$classes[y]
+    caption_index <- self$captions[[index]]
+    y <- self$classes[[caption_index]]
 
     if (!is.null(self$transform)) 
       x <- self$transform(x)
@@ -201,7 +205,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #' @return A torch dataset of class \code{flickr30k_caption_dataset}.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: a character string containing all five captions associated with the image, concatenated into one.
+#' - `y`: a character vector containing all five captions associated with the image.
 #'
 #' @examples
 #' \dontrun{
@@ -212,7 +216,8 @@ flickr8k_caption_dataset <- torch::dataset(
 #'     x %>%
 #'       transform_to_tensor() %>%
 #'       transform_resize(c(224, 224))
-#'   }
+#'   },
+#'   download = TRUE
 #' )
 #'
 #' # Create a dataloader and retrieve a batch
@@ -266,20 +271,23 @@ flickr30k_caption_dataset <- torch::dataset(
     self$filenames <- filtered$filename
 
     captions_map <- setNames(
-      vapply(
-        filtered$sentences, 
-        function(x) glue::glue_collapse(x$raw, sep = " "), 
-        character(1)
-      ),
+      lapply(filtered$sentences, function(x) vapply(x, `[[`, "", "raw")),
       filtered$filename
     )
 
-    merged_captions <- unname(unlist(captions_map))
-    unique_merged <- unique(merged_captions)
-    caption_to_index <- setNames(seq_along(unique_merged), unique_merged)
+    self$filenames <- trimws(filtered$filename)
+    captions_map <- captions_map[self$filenames]
+
+    caption_to_index <- setNames(seq_along(self$filenames), self$filenames)
+    unique_merged <- captions_map
+
+    missing <- setdiff(self$filenames, names(caption_to_index))
+    if (length(missing) > 0) {
+      cli_abort("Missing captions for: {paste(missing, collapse=', ')}")
+    }
 
     self$images <- file.path(self$raw_folder, "flickr30k-images", self$filenames)
-    self$captions <- vapply(self$filenames, function(f) caption_to_index[[captions_map[[f]]]], integer(1))
+    self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
     self$classes <- unique_merged
 
     cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
