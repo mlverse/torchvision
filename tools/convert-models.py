@@ -85,5 +85,5 @@ for name, url in models.items():
   upload_blob(
     "torchvision-models",
     fpath,
-    "v3/" + fpath
+    "vision/v3/" + fpath
   )
