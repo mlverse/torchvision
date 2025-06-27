@@ -3,7 +3,7 @@
 \name{cifar10_dataset}
 \alias{cifar10_dataset}
 \alias{cifar100_dataset}
-\title{Cifar datasets}
+\title{CIFAR datasets}
 \usage{
 cifar10_dataset(
   root,
@@ -38,8 +38,39 @@ target and transforms it.}
 puts it in root directory. If dataset is already downloaded, it is not
 downloaded again.}
 }
-\description{
-\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10} Dataset.
-
-Downloads and prepares the CIFAR100 dataset.
+\value{
+An object of class \code{cifar10_dataset}. Each item is a list with:
+\itemize{
+\item \code{x}: a 32x32x3 integer array
+\item \code{y}: the class label
 }
+}
+\description{
+Downloads and prepares the
+\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10} dataset.
+
+Downloads and prepares the
+\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR100} dataset.
+}
+\examples{
+\dontrun{
+ds <- cifar10_dataset(root = tempdir(), download = TRUE)
+item <- ds[1]
+item$x
+item$y
+}
+\dontrun{
+ds <- cifar100_dataset(root = tempdir(), download = TRUE)
+item <- ds[1]
+item$x
+item$y
+}
+}
+\seealso{
+Other datasets: 
+\code{\link{image_folder_dataset}()}
+
+Other datasets: 
+\code{\link{image_folder_dataset}()}
+}
+\concept{datasets}

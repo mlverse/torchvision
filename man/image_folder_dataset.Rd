@@ -46,4 +46,8 @@ root/cat/nsdf3.png
 root/cat/asd932_.png
 }\if{html}{\out{</div>}}
 }
+\seealso{
+Other datasets: 
+\code{\link{cifar10_dataset}()}
+}
 \concept{datasets}

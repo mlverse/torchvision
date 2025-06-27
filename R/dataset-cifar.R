@@ -1,7 +1,9 @@
-
-#' Cifar datasets
+#' CIFAR datasets
 #'
-#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) Dataset.
+#' Downloads and prepares the
+#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
+#'
+#' @rdname cifar_datasets
 #'
 #' @param root (string): Root directory of dataset where directory
 #'   `cifar-10-batches-bin` exists or will be saved to if download is set to TRUE.
@@ -14,6 +16,18 @@
 #' @param download (bool, optional): If true, downloads the dataset from the internet and
 #'   puts it in root directory. If dataset is already downloaded, it is not
 #'   downloaded again.
+#' @return An object of class `cifar10_dataset`. Each item is a list with:
+#' * `x`: a 32x32x3 integer array
+#' * `y`: the class label
+#'
+#' @examples
+#' \dontrun{
+#' ds <- cifar10_dataset(root = tempdir(), download = TRUE)
+#' item <- ds[1]
+#' item$x
+#' item$y
+#' }
+#' @family datasets
 #'
 #' @export
 cifar10_dataset <- torch::dataset(
@@ -126,11 +140,20 @@ cifar10_dataset <- torch::dataset(
   }
 )
 
-#' Cifar 100 dataset
+#' CIFAR100 dataset
 #'
-#' Downloads and prepares the CIFAR100 dataset.
+#' Downloads and prepares the
+#' [CIFAR100](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
 #'
-#' @rdname cifar10_dataset
+#' @rdname cifar_datasets
+#' @examples
+#' \dontrun{
+#' ds <- cifar100_dataset(root = tempdir(), download = TRUE)
+#' item <- ds[1]
+#' item$x
+#' item$y
+#' }
+#' @family datasets
 #' @export
 cifar100_dataset <- torch::dataset(
   name = "cifar100_dataset",
