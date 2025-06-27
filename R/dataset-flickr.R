@@ -8,13 +8,13 @@
 #' - `"test"`: test subset with captions.
 #'
 #' @inheritParams fgvc_aircraft_dataset
-#' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
-#' @param train Logical. If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
+#' @param root : Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
+#' @param train : If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
 #'
 #' @return An object of class \code{flickr8k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: an integer label indicating the caption index.
+#' - `y`: a character string containing all five captions associated with the image, concatenated into one.
 #'
 #' @examples
 #' \dontrun{
@@ -34,7 +34,7 @@
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # tensor of caption indices
+#' batch$y  # character vector of concatenated captions
 #' }
 #'
 #' @name flickr8k_caption_dataset
@@ -201,7 +201,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #' @return An object of class \code{flickr30k_caption_dataset}, which behaves like a torch dataset.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
-#' - `y`: an integer label indicating the caption index.
+#' - `y`: a character string containing all five captions associated with the image, concatenated into one.
 #'
 #' @examples
 #' \dontrun{
@@ -221,7 +221,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # tensor of caption indices
+#' batch$y  # character vector of concatenated captions
 #' }
 #'
 #' @name flickr30k_caption_dataset
