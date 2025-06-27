@@ -48,6 +48,8 @@ root/cat/asd932_.png
 }
 \seealso{
 Other datasets: 
-\code{\link{cifar10_dataset}()}
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_datasets}}
 }
 \concept{datasets}

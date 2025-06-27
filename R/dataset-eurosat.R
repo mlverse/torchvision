@@ -5,8 +5,9 @@
 #'  satellite images. Images are openly and freely made available by the Earth
 #'  observation program Copernicus. Images are organized into 10 classes.
 #'
+#' @name eurosat_datasets
 #' @details
-#'  `eurostat_dataset()` provides a total of 27,000 RGB labeled images.
+#' `eurosat_dataset()` provides a total of 27,000 RGB labeled images.
 #'
 #' @param root (Optional) Character. The root directory where the dataset will be stored.
 #'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
@@ -15,7 +16,9 @@
 #' @param transform Function. Optional transformation to be applied to the images.
 #' @param target_transform Function. Optional transformation to be applied to the labels.
 #'
-#' @return A `torch::dataset` object named x and y with x, a 64x64 image with 3 or 13 layers, and y, the label .
+#' @return An object of class `eurosat_dataset`. Each item is a list with:
+#' * `x`: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
+#' * `y`: the class label
 #'
 #' @examples
 #' \dontrun{
@@ -27,6 +30,7 @@
 #' print(head$x) # Image
 #' print(head$y) # Label
 #' }
+#' @family datasets
 #' @export
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
@@ -135,12 +139,12 @@ eurosat_dataset <- torch::dataset(
 )
 
 
-#' EuroSAT All Bands Dataset
+#' EuroSAT All Bands dataset
 #'
-#' @details
-#'  `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
+#' Downloads and prepares the EuroSAT dataset with 13 spectral bands.
 #'
-#' @rdname eurosat_dataset
+#' @rdname eurosat_datasets
+#' @details `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
 #'
 #' @export
 eurosat_all_bands_dataset <- torch::dataset(
@@ -154,12 +158,12 @@ eurosat_all_bands_dataset <- torch::dataset(
 
 
 
-#' EuroSAT-100 Dataset
+#' EuroSAT-100 dataset
 #'
-#' @details
-#'  `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands, intended for workshops and demos.
+#' A subset of 100 images with 13 spectral bands useful for workshops and demos.
 #'
-#' @rdname eurosat_dataset
+#' @rdname eurosat_datasets
+#' @details `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands.
 #'
 #' @export
 eurosat100_dataset <- torch::dataset(

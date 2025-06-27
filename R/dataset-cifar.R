@@ -146,14 +146,6 @@ cifar10_dataset <- torch::dataset(
 #' [CIFAR100](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
 #'
 #' @rdname cifar_datasets
-#' @examples
-#' \dontrun{
-#' ds <- cifar100_dataset(root = tempdir(), download = TRUE)
-#' item <- ds[1]
-#' item$x
-#' item$y
-#' }
-#' @family datasets
 #' @export
 cifar100_dataset <- torch::dataset(
   name = "cifar100_dataset",

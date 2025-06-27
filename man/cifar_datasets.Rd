@@ -59,18 +59,11 @@ item <- ds[1]
 item$x
 item$y
 }
-\dontrun{
-ds <- cifar100_dataset(root = tempdir(), download = TRUE)
-item <- ds[1]
-item$x
-item$y
-}
 }
 \seealso{
 Other datasets: 
-\code{\link{image_folder_dataset}()}
-
-Other datasets: 
+\code{\link{caltech_dataset}},
+\code{\link{eurosat_datasets}},
 \code{\link{image_folder_dataset}()}
 }
 \concept{datasets}
