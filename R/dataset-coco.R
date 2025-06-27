@@ -2,7 +2,6 @@
 #'
 #' Loads the MS COCO dataset for object detection and segmentation.
 #'
-#' @name coco_detection_dataset
 #' @rdname coco_detection_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
 #' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
@@ -11,23 +10,14 @@
 #' @param transforms Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
-#' @return
-#' A torch dataset. Each example is a list with two elements:
-#'
-#' \describe{
-#'   \item{x}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
-#'   \item{y}{A list containing:
-#'     \describe{
-#'       \item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes
-#'       in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
-#'       \item{labels}{A 1D \code{torch_tensor} of type integer, representing the class label for each object.}
-#'       \item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
-#'       \item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
-#'       \item{segmentation}{A list of segmentation polygons for each object.}
-#'       \item{masks}{A 3D \code{torch_tensor} of shape \code{(N, H, W)} containing binary segmentation masks.}
-#'     }
-#'   }
-#' }
+#' @return An object of class `coco_detection_dataset`. Each item is a list:
+#' - `x`: a `(C, H, W)` `torch_tensor` representing the image.
+#' - `y$boxes`: a `(N, 4)` `torch_tensor` of bounding boxes in the format `c(x_min, y_min, x_max, y_max)`.
+#' - `y$labels`: an integer `torch_tensor` with the class label for each object.
+#' - `y$area`: a float `torch_tensor` indicating the area of each object.
+#' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
+#' - `y$segmentation`: a list of segmentation polygons for each object.
+#' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks.
 #' The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
 #' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 #'
@@ -55,6 +45,7 @@
 #' masked <- draw_segmentation_masks(item)
 #' tensor_image_browse(masked)
 #' }
+#' @family datasets
 #' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
@@ -235,13 +226,16 @@ coco_detection_dataset <- torch::dataset(
 #'
 #' Loads the MS COCO dataset for image captioning.
 #'
-#' @name coco_caption_dataset
 #' @rdname coco_caption_dataset
 #' @inheritParams coco_detection_dataset
 #'
+#' @return An object of class `coco_caption_dataset`. Each item is a list:
+#' - `x`: an `(H, W, C)` numeric array containing the RGB image.
+#' - `y`: a character string with the image caption.
+#'
 #' @examples
 #' \dontrun{
-#' ds <- coco_dataset(
+#' ds <- coco_caption_dataset(
 #'   root = "~/data",
 #'   train = FALSE,
 #'   download = TRUE
@@ -259,6 +253,7 @@ coco_detection_dataset <- torch::dataset(
 #' plot(as.raster(image_array))
 #' title(main = y, col.main = "black")
 #' }
+#' @family datasets
 #' @export
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",

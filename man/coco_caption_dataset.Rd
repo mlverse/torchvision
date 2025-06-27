@@ -15,12 +15,19 @@ coco_caption_dataset(root, train = TRUE, year = c("2014"), download = FALSE)
 
 \item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 }
+\value{
+An object of class \code{coco_caption_dataset}. Each item is a list:
+\itemize{
+\item \code{x}: an \verb{(H, W, C)} numeric array containing the RGB image.
+\item \code{y}: a character string with the image caption.
+}
+}
 \description{
 Loads the MS COCO dataset for image captioning.
 }
 \examples{
 \dontrun{
-ds <- coco_dataset(
+ds <- coco_caption_dataset(
   root = "~/data",
   train = FALSE,
   download = TRUE
@@ -39,3 +46,12 @@ plot(as.raster(image_array))
 title(main = y, col.main = "black")
 }
 }
+\seealso{
+Other datasets: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{coco_detection_dataset}()},
+\code{\link{eurosat_datasets}},
+\code{\link{image_folder_dataset}()}
+}
+\concept{datasets}
