@@ -35,7 +35,7 @@
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # character vector of concatenated captions
+#' batch$y  # batched character vector containing all five captions associated with the image.
 #' }
 #'
 #' @name flickr8k_caption_dataset
@@ -226,7 +226,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # character vector of concatenated captions
+#' batch$y  # batched character vector containing all five captions associated with the image.
 #' }
 #'
 #' @name flickr30k_caption_dataset

@@ -28,7 +28,7 @@ A torch dataset of class \code{flickr8k_caption_dataset}.
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 integer array representing an RGB image.
-\item \code{y}: a character string containing all five captions associated with the image, concatenated into one.
+\item \code{y}: a character vector containing all five captions associated with the image.
 }
 }
 \description{
@@ -53,7 +53,8 @@ flickr8k <- flickr8k_caption_dataset(
     x \%>\%
       transform_to_tensor() \%>\%
       transform_resize(c(224, 224))
-  }
+  },
+  download = TRUE
 )
 
 # Create a dataloader and retrieve a batch
@@ -62,7 +63,7 @@ batch <- dataloader_next(dataloader_make_iter(dl))
 
 # Access images and captions
 batch$x  # batched image tensors with shape (4, 3, 224, 224)
-batch$y  # character vector of concatenated captions
+batch$y  # batched character vector containing all five captions associated with the image.
 }
 
 }
