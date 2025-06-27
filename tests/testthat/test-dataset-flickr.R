@@ -17,7 +17,11 @@ test_that("tests for the flickr8k dataset for train split", {
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"character")
   expect_length(first_item$x,598500)
-  expect_equal(first_item$y,"A black dog is running after a white dog in the snow . Black dog chasing brown dog through snow Two dogs chase each other across the snowy ground . Two dogs play together in the snow . Two dogs running through a low lying body of water .")
+  expect_equal(first_item$y[1],"A black dog is running after a white dog in the snow .")
+  expect_equal(first_item$y[2],"Black dog chasing brown dog through snow")
+  expect_equal(first_item$y[3],"Two dogs chase each other across the snowy ground .")
+  expect_equal(first_item$y[4],"Two dogs play together in the snow .")
+  expect_equal(first_item$y[5],"Two dogs running through a low lying body of water .")
 })
 
 test_that("tests for the flickr8k dataset for test split", {
@@ -30,7 +34,11 @@ test_that("tests for the flickr8k dataset for test split", {
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"character")
   expect_length(first_item$x,502500)
-  expect_equal(first_item$y,"The dogs are in the snow in front of a fence . The dogs play on the snow . Two brown dogs playfully fight in the snow . Two brown dogs wrestle in the snow . Two dogs playing in the snow .")
+  expect_equal(first_item$y[1], "The dogs are in the snow in front of a fence .")
+  expect_equal(first_item$y[2], "The dogs play on the snow .")
+  expect_equal(first_item$y[3], "Two brown dogs playfully fight in the snow .")
+  expect_equal(first_item$y[4], "Two brown dogs wrestle in the snow .")
+  expect_equal(first_item$y[5], "Two dogs playing in the snow .")
 })
 
 test_that("tests for the flickr8k dataset for dataloader", {
@@ -40,7 +48,8 @@ test_that("tests for the flickr8k dataset for dataloader", {
     root = t,
     transform = function(x) {
       x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
-    }
+    },
+    target_transform = function(y) glue::glue_collapse(y, sep = " ")
   )
   dl <- dataloader(flickr8k, batch_size = 4)
   iter <- dataloader_make_iter(dl)
@@ -73,7 +82,12 @@ test_that("tests for the flickr30k dataset for train split", {
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"character")
   expect_length(first_item$x,499500)
-  expect_equal(first_item$y,"Two young guys with shaggy hair look at their hands while hanging out in the yard. Two young, White males are outside near many bushes. Two men in green shirts are standing in a yard. A man in a blue shirt standing in a garden. Two friends enjoy time spent together.")
+  expect_equal(first_item$y[1], "Two young guys with shaggy hair look at their hands while hanging out in the yard.")
+  expect_equal(first_item$y[2], "Two young, White males are outside near many bushes.")
+  expect_equal(first_item$y[3], "Two men in green shirts are standing in a yard.")
+  expect_equal(first_item$y[4], "A man in a blue shirt standing in a garden.")
+  expect_equal(first_item$y[5], "Two friends enjoy time spent together.")
+
 })
 
 test_that("tests for the flickr30k dataset for test split", {
@@ -86,7 +100,11 @@ test_that("tests for the flickr30k dataset for test split", {
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"character")
   expect_length(first_item$x,691500)
-  expect_equal(first_item$y,"The man with pierced ears is wearing glasses and an orange hat. A man with glasses is wearing a beer can crocheted hat. A man with gauges and glasses is wearing a Blitz hat. A man in an orange hat starring at something. A man wears an orange hat and glasses.")
+  expect_equal(first_item$y[1], "The man with pierced ears is wearing glasses and an orange hat.")
+  expect_equal(first_item$y[2], "A man with glasses is wearing a beer can crocheted hat.")
+  expect_equal(first_item$y[3], "A man with gauges and glasses is wearing a Blitz hat.")
+  expect_equal(first_item$y[4], "A man in an orange hat starring at something.")
+  expect_equal(first_item$y[5], "A man wears an orange hat and glasses.")
 })
 
 test_that("tests for the flickr30k dataset for dataloader", {
@@ -96,7 +114,8 @@ test_that("tests for the flickr30k dataset for dataloader", {
     root = t,
     transform = function(x) {
       x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
-    }
+    },
+    target_transform = function(y) glue::glue_collapse(y, sep = " ")
   )
   dl <- dataloader(flickr30k, batch_size = 4)
   iter <- dataloader_make_iter(dl)
