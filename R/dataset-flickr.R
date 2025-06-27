@@ -77,13 +77,16 @@ flickr8k_caption_dataset <- torch::dataset(
     if (!self$check_processed_exists()) {
       fs::dir_create(self$processed_folder)
 
-      captions_lines <- readLines(file.path(self$raw_folder, "Flickr8k.token.txt"))
-
-      parts <- strsplit(captions_lines, "\t")
-      img_ids <- vapply(parts, function(p) strsplit(p[1], "#")[[1]][1], character(1))
-      captions <- vapply(parts, `[[`, character(1), 2)
-
-      split(captions, img_ids) -> captions_map
+      caption_df <- read.delim(
+        file.path(self$raw_folder, "Flickr8k.token.txt"),
+        sep = "\t",
+        header = FALSE,
+        col.names = c("file_id", "caption"),
+        stringsAsFactors = FALSE
+      )
+      caption_df[c("file", "id")] <- do.call(rbind, strsplit(caption_df$file_id, "#"))
+      caption_df$file_id <- NULL
+      captions_map <- split(caption_df$caption, caption_df$file)
 
       merged_caption_map <- vapply(names(captions_map), function(id) {
         glue::glue_collapse(captions_map[[id]], sep = " ")
