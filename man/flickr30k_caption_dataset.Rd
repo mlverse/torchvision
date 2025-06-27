@@ -24,7 +24,7 @@ flickr30k_caption_dataset(
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
-An object of class \code{flickr30k_caption_dataset}, which behaves like a torch dataset.
+A torch dataset of class \code{flickr30k_caption_dataset}.
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 integer array representing an RGB image.

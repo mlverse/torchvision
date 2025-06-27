@@ -11,7 +11,7 @@
 #' @param root : Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
 #' @param train : If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
 #'
-#' @return An object of class \code{flickr8k_caption_dataset}, which behaves like a torch dataset.
+#' @return A torch dataset of class \code{flickr8k_caption_dataset}.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
 #' - `y`: a character string containing all five captions associated with the image, concatenated into one.
@@ -198,7 +198,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #' @inheritParams flickr8k_caption_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.
 #'
-#' @return An object of class \code{flickr30k_caption_dataset}, which behaves like a torch dataset.
+#' @return A torch dataset of class \code{flickr30k_caption_dataset}.
 #' Each element is a named list:
 #' - `x`: a H x W x 3 integer array representing an RGB image.
 #' - `y`: a character string containing all five captions associated with the image, concatenated into one.
