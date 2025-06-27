@@ -139,14 +139,11 @@ flickr8k_caption_dataset <- torch::dataset(
       if (tools::md5sum(archive) != r[2]) {
         cli_abort("Corrupt file! Delete the file at {archive} and try again.")
       }
-      dest_zip <- file.path(self$raw_folder, basename(archive))
-      fs::file_move(archive, dest_zip)
-
-      if (tools::file_ext(dest_zip) == "zip") {
-        utils::unzip(dest_zip, exdir = self$raw_folder)
-      } else if (tools::file_ext(dest_zip) == "gz") {
-        tar_path <- sub("\\.gz$", "", dest_zip)
-        R.utils::gunzip(dest_zip, tar_path)
+      if (tools::file_ext(archive) == "zip") {
+        utils::unzip(archive, exdir = self$raw_folder)
+      } else if (tools::file_ext(archive) == "gz") {
+        tar_path <- sub("\\.gz$", "", archive)
+        R.utils::gunzip(archive, tar_path)
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
