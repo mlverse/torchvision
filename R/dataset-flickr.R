@@ -139,7 +139,7 @@ flickr8k_caption_dataset <- torch::dataset(
         utils::unzip(dest_zip, exdir = self$raw_folder)
       } else if (tools::file_ext(dest_zip) == "gz") {
         tar_path <- sub("\\.gz$", "", dest_zip)
-        gunzip_base(dest_zip, tar_path)
+        R.utils::gunzip(dest_zip, tar_path)
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
