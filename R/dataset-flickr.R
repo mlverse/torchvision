@@ -26,6 +26,7 @@
 #'       transform_to_tensor() %>%
 #'       transform_resize(c(224, 224))
 #'   },
+#'   target_transform = function(y) glue::glue_collapse(y, sep = " "),
 #'   download = TRUE
 #' )
 #'
@@ -35,7 +36,7 @@
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # batched character vector containing all five captions associated with the image.
+#' batch$y  # batched character vector containing all five captions concatenated.
 #' }
 #'
 #' @name flickr8k_caption_dataset
@@ -217,6 +218,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #'       transform_to_tensor() %>%
 #'       transform_resize(c(224, 224))
 #'   },
+#'   target_transform = function(y) glue::glue_collapse(y, sep = " "),
 #'   download = TRUE
 #' )
 #'
@@ -226,7 +228,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #'
 #' # Access images and captions
 #' batch$x  # batched image tensors with shape (4, 3, 224, 224)
-#' batch$y  # batched character vector containing all five captions associated with the image.
+#' batch$y  # batched character vector containing all five captions concatenated.
 #' }
 #'
 #' @name flickr30k_caption_dataset
