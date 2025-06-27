@@ -348,4 +348,3 @@ model_efficientnet_b7 <- function(pretrained = FALSE, progress = TRUE, ...) {
   config <- efficientnet_config_b7()
   .efficientnet("efficientnet_b7", config, pretrained, progress, ...)
 }
-
