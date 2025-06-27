@@ -82,6 +82,8 @@ print(head$y) # Label
 Other datasets: 
 \code{\link{caltech_dataset}},
 \code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
 \code{\link{image_folder_dataset}()}
 }
 \concept{datasets}

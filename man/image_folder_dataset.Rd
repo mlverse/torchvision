@@ -50,6 +50,8 @@ root/cat/asd932_.png
 Other datasets: 
 \code{\link{caltech_dataset}},
 \code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
 \code{\link{eurosat_datasets}}
 }
 \concept{datasets}

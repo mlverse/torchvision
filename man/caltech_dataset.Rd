@@ -67,6 +67,8 @@ first_item$y  # Integer label
 \seealso{
 Other datasets: 
 \code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
 \code{\link{eurosat_datasets}},
 \code{\link{image_folder_dataset}()}
 }
