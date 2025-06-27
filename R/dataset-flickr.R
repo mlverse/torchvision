@@ -164,6 +164,7 @@ flickr8k_caption_dataset <- torch::dataset(
   .getitem = function(index) {
     x <- jpeg::readJPEG(self$images[[index]])
     y <- self$captions[[index]]
+    y <- self$classes[y]
 
     if (!is.null(self$transform)) 
       x <- self$transform(x)
