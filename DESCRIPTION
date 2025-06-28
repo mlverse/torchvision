@@ -44,9 +44,12 @@ Imports:
     abind,
     jsonlite,
     withr,
-    glue
+    cli,
+    glue,
+    zeallot
 Suggests:
     magick,
     testthat,
-    coro
+    coro,
+    R.matlab
 BugReports: https://github.com/mlverse/torchvision/issues

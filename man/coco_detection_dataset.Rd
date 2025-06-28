@@ -27,11 +27,11 @@ coco_detection_dataset(
 \item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
 \value{
-A torch dataset. Each item is a list with two elements:
+A torch dataset. Each example is a list with two elements:
 
 \describe{
-\item{image}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
-\item{target}{A list containing:
+\item{x}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
+\item{y}{A list containing:
 \describe{
 \item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes
 in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
@@ -39,16 +39,19 @@ in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
 \item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
 \item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
 \item{segmentation}{A list of segmentation polygons for each object.}
+\item{masks}{A 3D \code{torch_tensor} of shape \code{(N, H, W)} containing binary segmentation masks.}
 }
 }
 }
+The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 }
 \description{
 Loads the MS COCO dataset for object detection and segmentation.
 }
 \details{
 The returned image is in CHW format (channels, height, width), matching the torch convention.
-The dataset \code{target} offers object detection annotations such as bounding boxes, labels,
+The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
 areas, crowd indicators, and segmentation masks from the official COCO annotations.
 }
 \examples{
@@ -60,29 +63,14 @@ ds <- coco_detection_dataset(
   download = TRUE
 )
 
-example <- ds[1]
-image <- example$image
-target <- example$target
+item <- ds[1]
 
-# Convert image to uint8
-image_uint8 <- image$mul(255)$clamp(0, 255)$to(dtype = torch::torch_uint8())
+# Visualize bounding boxes
+boxed <- draw_bounding_boxes(item)
+tensor_image_browse(boxed)
 
-# Access the bounding boxes tensor from the target
-boxes <- target$boxes
-
-# Map label IDs to category names
-label_ids <- as.integer(torch::as_array(target$labels))
-label_names <- ds$category_names[as.character(label_ids)]
-
-# Draw bounding boxes with label names
-output <- draw_bounding_boxes(
-  image = image_uint8,
-  boxes = boxes,
-  labels = label_names
-)
-
-# Display the result
-tensor_image_browse(output)
+# Visualize segmentation masks (if present)
+masked <- draw_segmentation_masks(item)
+tensor_image_browse(masked)
 }
-
 }
