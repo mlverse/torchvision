@@ -68,9 +68,9 @@ models = {
   'efficientnet_b2': 'https://download.pytorch.org/models/efficientnet_b2_rwightman-bcdf34b7.pth',
   'efficientnet_b3': 'https://download.pytorch.org/models/efficientnet_b3_rwightman-cf984f9c.pth',
   'efficientnet_b4': 'https://download.pytorch.org/models/efficientnet_b4_rwightman-7eb33cd5.pth',
-  'efficientnet_b5': 'https://download.pytorch.org/models/efficientnet_b5_rwightman-4c8d6900.pth',
-  'efficientnet_b6': 'https://download.pytorch.org/models/efficientnet_b6_rwightman-cf52900d.pth',
-  'efficientnet_b7': 'https://download.pytorch.org/models/efficientnet_b7_rwightman-7f6fddf5.pth'
+  'efficientnet_b5': 'https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/adv-efficientnet-b5-86493f6b.pth',
+  'efficientnet_b6': 'https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/adv-efficientnet-b6-ac80338e.pth',
+  'efficientnet_b7': 'https://github.com/lukemelas/EfficientNet-PyTorch/releases/download/1.0/adv-efficientnet-b8-22a8fe65.pth'
 }
 
 os.makedirs("models", exist_ok=True)
@@ -82,8 +82,8 @@ for name, url in models.items():
     converted.update([(nm, par.clone())])
   fpath = "models/" + name + ".pth"
   torch.save(converted, fpath, _use_new_zipfile_serialization=True)
-  upload_blob(
-    "torchvision-models",
-    fpath,
-    "vision/v3/" + fpath
-  )
+  # upload_blob(
+  #   "torchvision-models",
+  #   fpath,
+  #   "v2/" + fpath
+  # )
