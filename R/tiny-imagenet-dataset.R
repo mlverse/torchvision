@@ -8,7 +8,7 @@
 #' @param download whether to download or not the dataset.
 #' @param ... other arguments passed to [image_folder_dataset()].
 #'
-#' @family dataset
+#' @family datasets
 #'
 #' @export
 tiny_imagenet_dataset <- torch::dataset(
@@ -40,12 +40,12 @@ tiny_imagenet_dataset <- torch::dataset(
 
     raw_path <- fs::path_join(c(self$root_path, "tiny-imagenet-200.zip"))
 
-    rlang::inform("Downloading tiny imagenet dataset!")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
 
     p <- download_and_cache(self$url)
     fs::file_copy(p, raw_path)
 
-    rlang::inform("Download complete. Now unzipping.")
+    cli_inform("{.cls {class(self)[[1]]}} Download complete. Now unzipping.")
 
     utils::unzip(raw_path, exdir = self$root_path)
 
@@ -64,7 +64,7 @@ tiny_imagenet_dataset <- torch::dataset(
 
     fs::dir_delete(fs::path(val_path, "images"))
 
-    rlang::inform("Done!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
 
   }
 )

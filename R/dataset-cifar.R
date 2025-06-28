@@ -5,18 +5,10 @@
 #'
 #' @rdname cifar_datasets
 #'
+#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where directory
 #'   `cifar-10-batches-bin` exists or will be saved to if download is set to TRUE.
-#' @param train (bool, optional): If TRUE, creates dataset from training set, otherwise
-#'   creates from test set.
-#' @param transform (callable, optional): A function/transform that takes in an PIL image
-#'   and returns a transformed version. E.g, [transform_random_crop()]
-#' @param target_transform (callable, optional): A function/transform that takes in the
-#'   target and transforms it.
-#' @param download (bool, optional): If true, downloads the dataset from the internet and
-#'   puts it in root directory. If dataset is already downloaded, it is not
-#'   downloaded again.
-#' @return An object of class `cifar10_dataset`. Each item is a list with:
+#' @return A torch::dataset object. Each item is a list with:
 #' * `x`: a 32x32x3 integer array
 #' * `y`: the class label
 #'
@@ -43,6 +35,8 @@ cifar10_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     if (download)
       self$download()
 
@@ -68,6 +62,8 @@ cifar10_dataset <- torch::dataset(
 
     self$x <- data$imgs
     self$y <- data$labels + 1L
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$y)} images across {length(self$classes)} classes.")
   },
   .load_meta = function() {
     cl <- readLines(fs::path(self$root, self$fname, self$label_fname))
@@ -94,12 +90,16 @@ cifar10_dataset <- torch::dataset(
     if(self$check_files())
       return()
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+
     archive <- download_and_cache(self$url)
 
     if (!tools::md5sum(archive) == self$md5)
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     utils::untar(archive, exdir = self$root)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
   check_files = function() {
 

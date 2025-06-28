@@ -9,11 +9,14 @@ coco_caption_dataset(root, train = TRUE, year = c("2014"), download = FALSE)
 \arguments{
 \item{root}{Root directory where the dataset is stored or will be downloaded to.}
 
-\item{train}{Logical. If TRUE, loads the training split; otherwise, loads the validation split.}
+\item{train}{(bool, optional): If True, creates dataset from
+\code{training.pt}, otherwise from \code{test.pt}.}
 
 \item{year}{Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.}
 
-\item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 }
 \value{
 An object of class \code{coco_caption_dataset}. Each item is a list:
@@ -52,6 +55,10 @@ Other datasets:
 \code{\link{cifar10_dataset}()},
 \code{\link{coco_detection_dataset}()},
 \code{\link{eurosat_datasets}},
-\code{\link{image_folder_dataset}()}
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
 }
 \concept{datasets}

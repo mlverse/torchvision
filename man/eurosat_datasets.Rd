@@ -37,14 +37,19 @@ if empty, will use the default \code{rappdirs::user_cache_dir("torch")}.}
 
 \item{split}{Character. Must be one of \code{train}, \code{val}, or \code{test}.}
 
-\item{download}{Logical. If \code{TRUE}, downloads the dataset rows from the API if not already present.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 
-\item{transform}{Function. Optional transformation to be applied to the images.}
+\item{transform}{(callable, optional): A function/transform that  takes in an
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
-\item{target_transform}{Function. Optional transformation to be applied to the labels.}
+\item{target_transform}{(callable, optional): A function/transform that takes
+in the target and transforms it.}
 }
 \value{
-An object of class \code{eurosat_dataset}. Each item is a list with:
+A \code{torch::dataset} object. Each item is a list with:
 \itemize{
 \item \code{x}: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
 \item \code{y}: the class label
@@ -84,6 +89,10 @@ Other datasets:
 \code{\link{cifar10_dataset}()},
 \code{\link{coco_caption_dataset}()},
 \code{\link{coco_detection_dataset}()},
-\code{\link{image_folder_dataset}()}
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
 }
 \concept{datasets}

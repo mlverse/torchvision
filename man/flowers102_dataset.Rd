@@ -32,12 +32,10 @@ Each element is a named list:
 }
 }
 \description{
-Oxford Flowers 102 Dataset
-}
-\details{
 Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories,
 with between 40 and 258 images per class. Images in this dataset are of variable sizes.
-
+}
+\details{
 This is a \strong{classification} dataset where the goal is to assign each image to one of the 102 flower categories.
 
 The dataset is split into:
@@ -69,3 +67,16 @@ batch$y  # Tensor of shape (4,) with numeric class labels
 }
 
 }
+\seealso{
+Other datasets: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
+\code{\link{eurosat_datasets}},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{datasets}

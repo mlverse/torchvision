@@ -9,14 +9,12 @@
 #' @details
 #' `eurosat_dataset()` provides a total of 27,000 RGB labeled images.
 #'
+#' @inheritParams mnist_dataset
 #' @param root (Optional) Character. The root directory where the dataset will be stored.
 #'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
 #' @param split Character. Must be one of `train`, `val`, or `test`.
-#' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
-#' @param transform Function. Optional transformation to be applied to the images.
-#' @param target_transform Function. Optional transformation to be applied to the labels.
 #'
-#' @return An object of class `eurosat_dataset`. Each item is a list with:
+#' @return A `torch::dataset` object. Each item is a list with:
 #' * `x`: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
 #' * `y`: the class label
 #'
@@ -48,6 +46,8 @@ eurosat_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
@@ -62,6 +62,8 @@ eurosat_dataset <- torch::dataset(
 
     self$data <- suppressWarnings(readLines(self$split_file))
     self$load_meta()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$data)} images across {length(self$classes)} classes.")
   },
 
   load_meta = function() {
@@ -73,6 +75,8 @@ eurosat_dataset <- torch::dataset(
     if (self$check_exists())
       return(NULL)
 
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
     fs::dir_create(self$root, recurse = TRUE, showWarnings = FALSE)
 
     # Download and extract the dataset archive
@@ -82,18 +86,19 @@ eurosat_dataset <- torch::dataset(
 
 
     if (!dir.exists(self$images_dir)) {
-      message("Extracting archive...")
+      cli_inform("{.cls {class(self)[[1]]}} Extracting archive...")
       utils::unzip(archive, exdir = self$images_dir)
-      message("Extraction complete.")
+      cli_inform("{.cls {class(self)[[1]]}} Extraction complete.")
     }
 
     # Download the split-specific text file
-    message("Downloading split text file: ", self$split_url)
+    cli_inform("{.cls {class(self)[[1]]}} Downloading split text file: {self$split_url}")
     p <- download_and_cache(self$split_url, prefix = class(self)[1])
     fs::file_copy(p, self$split_file, overwrite = TRUE)
     if (file.size(self$split_file) == 0) {
       runtime_error("Downloaded split file `{self$split_file}` is empty.")
     }
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
   check_exists = function() {
     fs::file_exists(self$split_file) &&

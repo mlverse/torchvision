@@ -16,11 +16,12 @@ kmnist_dataset(
 \item{root}{(string): Root directory of dataset where
 \code{KMNIST/processed/training.pt} and  \code{KMNIST/processed/test.pt} exist.}
 
-\item{train}{(bool, optional): If TRUE, creates dataset from \code{training.pt},
-otherwise from \code{test.pt}.}
+\item{train}{(bool, optional): If True, creates dataset from
+\code{training.pt}, otherwise from \code{test.pt}.}
 
 \item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g, \code{\link[=transform_random_crop]{transform_random_crop()}}.}
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
 \item{target_transform}{(callable, optional): A function/transform that takes
 in the target and transforms it.}

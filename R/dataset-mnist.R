@@ -35,6 +35,8 @@ mnist_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     self$train <- train
 
     if (download)
@@ -51,7 +53,10 @@ mnist_dataset <- dataset(
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$data <- data[[1]]
     self$targets <- data[[2]] + 1L
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$targets)} images.")
   },
+
   download = function() {
 
     if (self$check_exists())
@@ -72,7 +77,8 @@ mnist_dataset <- dataset(
 
     }
 
-    rlang::inform("Processing...")
+        cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
 
     training_set <- list(
       read_sn3_pascalvincent(file.path(self$raw_folder, 'train-images-idx3-ubyte.gz')),
@@ -87,7 +93,7 @@ mnist_dataset <- dataset(
     saveRDS(training_set, file.path(self$processed_folder, self$training_file))
     saveRDS(test_set, file.path(self$processed_folder, self$test_file))
 
-    rlang::inform("Done!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
 
   },
   check_exists = function() {
@@ -113,6 +119,7 @@ mnist_dataset <- dataset(
     raw_folder = function() {
       file.path(self$root_path, "mnist", "raw")
     },
+
     processed_folder = function() {
       file.path(self$root_path, "mnist", "processed")
     }
@@ -124,17 +131,9 @@ mnist_dataset <- dataset(
 #' Prepares the [Kuzushiji-MNIST](https://github.com/rois-codh/kmnist) dataset
 #'   and optionally downloads it.
 #'
+#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where
 #'   `KMNIST/processed/training.pt` and  `KMNIST/processed/test.pt` exist.
-#' @param train (bool, optional): If TRUE, creates dataset from `training.pt`,
-#'   otherwise from `test.pt`.
-#' @param download (bool, optional): If true, downloads the dataset from the
-#'   internet and puts it in root directory. If dataset is already downloaded,
-#'   it is not downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an
-#'   PIL image and returns a transformed version. E.g, [transform_random_crop()].
-#' @param target_transform (callable, optional): A function/transform that takes
-#'   in the target and transforms it.
 #'
 #' @export
 kmnist_dataset <- dataset(
@@ -247,7 +246,9 @@ qmnist_dataset <- dataset(
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    rlang::inform("Processing...")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+
 
     if (self$split == "train") {
       saveRDS(
@@ -279,7 +280,7 @@ qmnist_dataset <- dataset(
       )
     }
 
-    rlang::inform("Done!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -346,17 +347,9 @@ read_sn3_pascalvincent <- function(path) {
 #'   download = FALSE
 #' )
 #'
+#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where
 #' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
-#' @param train (bool, optional): If TRUE, creates dataset from \code{training.pt},
-#' otherwise from \code{test.pt}.
-#' @param transform (callable, optional): A function/transform that takes in an
-#' image and returns a transformed version. E.g., \code{\link[=transform_random_crop]{transform_random_crop()}}.
-#' @param target_transform (callable, optional): A function/transform that takes
-#' in the target and transforms it.
-#' @param download (bool, optional): If TRUE, downloads the dataset from the
-#' internet and puts it in root directory. If dataset is already downloaded,
-#' it is not downloaded again.
 #'
 #' @description
 #' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
@@ -393,11 +386,9 @@ fashion_mnist_dataset <- dataset(
 #' - "digits": 10 digit classes only
 #' - "mnist": classic 10 digit classes like the original MNIST dataset
 #'
+#' @inheritParams mnist_dataset
 #' @param root Character. Root directory for dataset storage (default folder: `root/emnist/processed/`).
 #' @param split Character. Dataset split to use. One of `"byclass"`, `"bymerge"`, `"balanced"`, `"letters"`, `"digits"`, or `"mnist"`. Default is `"balanced"`.
-#' @param download Logical. Whether to download the dataset if it is not found locally. Default is `FALSE`.
-#' @param transform Optional function to transform input images.
-#' @param target_transform Optional function to transform labels.
 #'
 #' @return An EMNIST dataset object.
 #'
@@ -447,7 +438,7 @@ emnist_dataset <- dataset(
 
   initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
-    rlang::inform(glue::glue(
+    cli_inform(glue::glue(
       "Preparing to download EMNIST dataset. Archive size is ~0.5GB\n",
       "You may have to increase the download timeout in your session with `options()` in case of failure\n",
       "- Will extract and convert for all {length(self$classes_list)} splits\n"
@@ -477,7 +468,7 @@ emnist_dataset <- dataset(
     self$test_targets <- test_data[[2]] + 1L
 
     self$is_train <- TRUE
-    rlang::inform("EMNIST dataset processed successfully!")
+    cli_inform("{.cls {class(self)[[1]]}} EMNIST dataset processed successfully!")
   },
 
   download = function() {

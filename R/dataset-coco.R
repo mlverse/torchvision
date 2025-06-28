@@ -3,12 +3,9 @@
 #' Loads the MS COCO dataset for object detection and segmentation.
 #'
 #' @rdname coco_detection_dataset
+#' @inheritParams mnist_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
-#' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
 #' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
-#' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
-#' @param transforms Optional transform function applied to the image.
-#' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
 #' - `x`: a `(C, H, W)` `torch_tensor` representing the image.
@@ -62,6 +59,8 @@ coco_detection_dataset <- torch::dataset(
     self$year <- year
     self$split <- split
 
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     self$transforms <- transforms
     self$target_transform <- target_transform
 
@@ -81,6 +80,8 @@ coco_detection_dataset <- torch::dataset(
     }
 
     self$load_annotations()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
   },
 
   check_exists = function() {
@@ -166,6 +167,8 @@ coco_detection_dataset <- torch::dataset(
   download = function() {
     info <- self$get_resource_info()
 
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
     ann_zip <- download_and_cache(info$ann_url)
     archive <- download_and_cache(info$img_url)
 
@@ -175,6 +178,8 @@ coco_detection_dataset <- torch::dataset(
 
     utils::unzip(ann_zip, exdir = self$data_dir)
     utils::unzip(archive, exdir = self$data_dir)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   get_resource_info = function() {
@@ -271,6 +276,9 @@ coco_caption_dataset <- torch::dataset(
     self$root <- root
     self$split <- split
     self$year <- year
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
@@ -283,6 +291,8 @@ coco_caption_dataset <- torch::dataset(
     }
 
     self$load_annotations()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
   },
 
   load_annotations = function() {

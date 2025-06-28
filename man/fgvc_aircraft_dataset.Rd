@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-fgvc.R
 \name{fgvc_aircraft_dataset}
 \alias{fgvc_aircraft_dataset}
-\title{FGVC Aircraft dataset}
+\title{FGVC Aircraft Dataset}
 \usage{
 fgvc_aircraft_dataset(
   root = tempdir(),
@@ -37,9 +37,6 @@ for multi-level annotation (\code{"all"}): a vector of three integers \code{c(ma
 }
 }
 \description{
-FGVC Aircraft Dataset
-}
-\details{
 The FGVC-Aircraft dataset supports the following official splits:
 \itemize{
 \item \code{"train"}: training subset with labels.
@@ -47,7 +44,8 @@ The FGVC-Aircraft dataset supports the following official splits:
 \item \code{"trainval"}: combined training and validation set with labels.
 \item \code{"test"}: test set with labels (used for evaluation).
 }
-
+}
+\details{
 The \code{annotation_level} determines the granularity of labels used for classification and supports four values:
 \itemize{
 \item \code{"variant"}: the most fine-grained level, e.g., \code{"Boeing 737-700"}. There are 100 visually distinguishable variants.
@@ -96,3 +94,16 @@ fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 }
 
 }
+\seealso{
+Other datasets: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
+\code{\link{eurosat_datasets}},
+\code{\link{fer_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{datasets}

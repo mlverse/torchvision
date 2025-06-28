@@ -64,9 +64,7 @@
 #' fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 #' }
 #'
-#' @name fgvc_aircraft_dataset
-#' @aliases fgvc_aircraft_dataset
-#' @title FGVC Aircraft dataset
+#' @family datasets
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
@@ -79,8 +77,8 @@ fgvc_aircraft_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-    
-    rlang::inform("FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
+
+    cli_inform("{.cls {class(self)[[1]]}} FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
@@ -126,7 +124,7 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
     self$labels_df <- merged_df[, levels]
 
-    rlang::inform(glue::glue(
+    cli_inform(glue::glue(
       "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
     ))
   },
@@ -168,11 +166,15 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
+    acli_inform("{.cls {class(self)[[1]]}} Downloading...")
+
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
       runtime_error("Corrupt file! Delete the file at {archive} and try again.")
     }
 
     untar(archive, exdir = self$root)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )

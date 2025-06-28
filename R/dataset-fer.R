@@ -26,9 +26,7 @@
 #' fer$classes[first_item$y]  # "Happy"
 #' }
 #'
-#' @name fer_dataset
-#' @aliases fer_dataset
-#' @title FER-2013 Facial Expression Dataset
+#' @family datasets
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
@@ -53,7 +51,7 @@ fer_dataset <- dataset(
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    cli::cli_inform("Preparing FER-2013 dataset ({self$split})...")
+    cli_inform("{.cls {class(self)[[1]]}} Preparing FER-2013 dataset ({self$split})...")
 
     if (download) {
       self$download()
@@ -72,7 +70,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    cli::cli_inform("Parsing image data into 48x48 grayscale arrays...")
+    cli_inform("{.cls {class(self)[[1]]}} Parsing image data into 48x48 grayscale arrays...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- parsed$emotion + 1L
@@ -80,9 +78,7 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    cli::cli_inform(
-      "FER-2013 ({self$split}) loaded: {length(self$x)} images, 48x48 grayscale, {length(self$classes)} classes."
-    )
+    cli_inform("{.cls {class(self)[[1]]}} Parsing image data into 48x48 grayscale arrays...")
   },
 
   .getitem = function(i) {
@@ -107,14 +103,14 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      cli::cli_inform("FER-2013 already exists. Skipping download.")
+      cli_inform("{.cls {class(self)[[1]]}} FER-2013 already exists. Skipping download.")
       return()
     }
 
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    cli::cli_inform("Downloading FER-2013 dataset... (Size: ~100MB)")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading FER-2013 dataset... (Size: ~100MB)")
 
     archive <- download_and_cache(self$url)
 
@@ -122,6 +118,7 @@ fer_dataset <- dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     untar(archive, exdir = self$root)
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_files = function() {

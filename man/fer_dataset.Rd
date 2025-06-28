@@ -39,13 +39,11 @@ Each element is a named list:
 }
 }
 \description{
-FER-2013 Facial Expression Dataset
-}
-\details{
 Loads the FER-2013 dataset for facial expression recognition. The dataset contains grayscale images
 (48x48) of human faces, each labeled with one of seven emotion categories:
 \code{"Angry"}, \code{"Disgust"}, \code{"Fear"}, \code{"Happy"}, \code{"Sad"}, \code{"Surprise"}, and \code{"Neutral"}.
-
+}
+\details{
 The dataset is split into:
 \itemize{
 \item \code{"Train"}: training images labeled as \code{"Training"} in the original CSV.
@@ -62,3 +60,16 @@ fer$classes[first_item$y]  # "Happy"
 }
 
 }
+\seealso{
+Other datasets: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{coco_caption_dataset}()},
+\code{\link{coco_detection_dataset}()},
+\code{\link{eurosat_datasets}},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{datasets}

@@ -17,11 +17,16 @@ emnist_dataset(
 
 \item{split}{Character. Dataset split to use. One of \code{"byclass"}, \code{"bymerge"}, \code{"balanced"}, \code{"letters"}, \code{"digits"}, or \code{"mnist"}. Default is \code{"balanced"}.}
 
-\item{transform}{Optional function to transform input images.}
+\item{transform}{(callable, optional): A function/transform that  takes in an
+PIL image and returns a transformed version. E.g,
+\code{\link[=transform_random_crop]{transform_random_crop()}}.}
 
-\item{target_transform}{Optional function to transform labels.}
+\item{target_transform}{(callable, optional): A function/transform that takes
+in the target and transforms it.}
 
-\item{download}{Logical. Whether to download the dataset if it is not found locally. Default is \code{FALSE}.}
+\item{download}{(bool, optional): If true, downloads the dataset from the
+internet and puts it in root directory. If dataset is already downloaded,
+it is not downloaded again.}
 }
 \value{
 An EMNIST dataset object.
