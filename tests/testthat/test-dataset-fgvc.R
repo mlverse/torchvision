@@ -1,8 +1,9 @@
 context("dataset-fgvc")
 
-test_that("tests for the FGVC-Aircraft dataset", {
-  t <- tempdir()
+t <- withr::local_tempdir()
 
+test_that("tests for the FGVC-Aircraft dataset", {
+  
   expect_error(
     fgvc_aircraft_dataset(root = tempfile(), split = "train", annotation_level = "variant", download = FALSE),
     class = "runtime_error"
@@ -128,6 +129,4 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal_to_r(batch$y[1],c(22,5))
   expect_equal_to_r(batch$y[2],c(58,14))
   expect_equal_to_r(batch$y[3],c(86,42))
-
-  unlink(file.path(t, "fgvc-aircraft-2013b"), recursive = TRUE)
 })
