@@ -15,6 +15,11 @@ Authors@R: c(
     person(given = "Akanksha", 
            family = "Koshti", 
            role = c("ctb")),
+    person(given = "Derrick",
+           family = "Richard",
+           role = c("ctb"),
+           email = "derrickrds@gmail.com"
+           ),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing
@@ -33,13 +38,18 @@ Imports:
     rappdirs,
     utils,
     jpeg,
+    tiff,
     magrittr,
     png,
     abind,
+    jsonlite,
     withr,
-    glue
+    cli,
+    glue,
+    zeallot
 Suggests:
     magick,
     testthat,
-    coro
+    coro,
+    R.matlab
 BugReports: https://github.com/mlverse/torchvision/issues

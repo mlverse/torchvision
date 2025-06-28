@@ -80,12 +80,12 @@ cifar10_dataset <- torch::dataset(
     if(self$check_files())
       return()
 
-    p <- download_and_cache(self$url)
+    archive <- download_and_cache(self$url)
 
-    if (!tools::md5sum(p) == self$md5)
-      runtime_error("Corrupt file! Delete the file in {p} and try again.")
+    if (!tools::md5sum(archive) == self$md5)
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
-    utils::untar(p, exdir = self$root)
+    utils::untar(archive, exdir = self$root)
   },
   check_files = function() {
 
