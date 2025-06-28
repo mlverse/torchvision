@@ -46,24 +46,13 @@ The dataset is split into:
 }
 \examples{
 \dontrun{
-# Load the Flickr30k caption dataset with transformation
-flickr30k <- flickr30k_caption_dataset(
-  transform = function(x) {
-    x \%>\%
-      transform_to_tensor() \%>\%
-      transform_resize(c(224, 224))
-  },
-  target_transform = function(y) glue::glue_collapse(y, sep = " "),
-  download = TRUE
-)
+# Load the Flickr30k caption dataset
+flickr30k <- flickr30k_caption_dataset(download = TRUE)
 
-# Create a dataloader and retrieve a batch
-dl <- dataloader(flickr30k, batch_size = 4)
-batch <- dataloader_next(dataloader_make_iter(dl))
-
-# Access images and captions
-batch$x  # batched image tensors with shape (4, 3, 224, 224)
-batch$y  # batched character vector containing all five captions concatenated.
+# Access the first item
+first_item <- flickr30k[1]
+first_item$x  # image array with shape {3, H, W}
+first_item$y  # character vector containing five captions.
 }
 
 }
