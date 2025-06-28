@@ -54,7 +54,7 @@ test_that("tests for the kmnist dataset", {
 test_that("fashion_mnist_dataset loads correctly", {
 
   ds <- fashion_mnist_dataset(
-    root = tempfile(),
+    root = dir,
     train = TRUE,
     download = TRUE
   )
