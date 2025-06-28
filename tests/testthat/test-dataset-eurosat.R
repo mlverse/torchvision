@@ -1,3 +1,5 @@
+context("dataset-eurosat")
+
 temp_root <- withr::local_tempdir()
 
 test_that("eurosat_dataset downloads correctly whatever the split", {

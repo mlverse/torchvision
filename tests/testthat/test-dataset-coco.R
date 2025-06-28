@@ -1,8 +1,11 @@
+context("dataset-coco")
+
+tmp <- withr::local_tempdir()
+
 test_that("coco_detection_dataset handles missing files gracefully", {
-  tmp <- tempfile()
 
   expect_error(
-    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    coco_detection_dataset(root = tempfile(), train = TRUE, year = "2017", download = FALSE),
     class = "runtime_error"
   )
 })
@@ -55,7 +58,6 @@ collate_fn <- function(batch) {
 test_that("coco_detection_dataset batches correctly using dataloader", {
   skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
 
-  tmp <- tempfile()
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
   collate_fn <- function(batch) {
