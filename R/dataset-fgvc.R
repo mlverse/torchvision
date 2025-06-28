@@ -166,7 +166,7 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
-    acli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
 
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
