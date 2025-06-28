@@ -1,9 +1,11 @@
+context("dataset-cifar")
+
+t <- withr::local_tempdir()
+
 test_that("cifar10", {
 
-  t <- tempfile()
-
   expect_error(
-    ds <- cifar10_dataset(root = t, train = TRUE),
+    ds <- cifar10_dataset(root = tempfile(), train = TRUE),
     class = "runtime_error"
   )
 
@@ -26,10 +28,8 @@ test_that("cifar10", {
 
 test_that("cifar100", {
 
-  t <- tempfile()
-
   expect_error(
-    ds <- cifar100_dataset(root = t, train = TRUE),
+    ds <- cifar100_dataset(root = tempfile(), train = TRUE),
     class = "runtime_error"
   )
 
