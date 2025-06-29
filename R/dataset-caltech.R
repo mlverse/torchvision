@@ -46,8 +46,9 @@ caltech101_dataset <- torch::dataset(
     self$root <- fs::path(root, class(self)[[1]])
     self$transform <- transform
     self$target_transform <- target_transform
+    self$archive_size <- 0.13
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~130MB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
@@ -177,8 +178,9 @@ caltech256_dataset <- torch::dataset(
   self$root <- fs::path(root, class(self)[[1]])
   self$transform <- transform
   self$target_transform <- target_transform
+  self$archive_size <- 1.2
 
-  cli_inform("{.cls {class(self)[[1]]}} Dataset (~1.2GB) will be downloaded and processed if not already cached.")
+  cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already cached.")
 
   if (download) {
     self$download()
