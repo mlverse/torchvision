@@ -70,9 +70,11 @@ coco_detection_dataset <- torch::dataset(
     self$root <- root
     self$year <- year
     self$split <- split
-
     self$transforms <- transforms
     self$target_transform <- target_transform
+    self$archive_size <- 1.12
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
