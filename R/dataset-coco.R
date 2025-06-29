@@ -59,7 +59,10 @@
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
-  archive_size = 1.12,
+  archive_size_table = list(
+    "2017" = list(train = 18.44, val = 0.77),
+    "2014" = list(train = 12.88, val = 6.34)
+  ),
   initialize = function(root, train = TRUE, year = c("2017", "2016", "2014"),
                         download = FALSE, transforms = NULL, target_transform = NULL) {
 
@@ -72,9 +75,9 @@ coco_detection_dataset <- torch::dataset(
     self$split <- split
     self$transforms <- transforms
     self$target_transform <- target_transform
-    self$
+    self$archive_size <- self$archive_size_table[[year]][[split]]
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
