@@ -70,6 +70,7 @@
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
+  archive_size = 2.77,
 
   initialize = function(
     root = tempdir(),
@@ -80,15 +81,15 @@ fgvc_aircraft_dataset <- dataset(
     download = FALSE
   ) {
     
-    rlang::inform("FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
     self$transform <- transform
     self$target_transform <- target_transform
-
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     if (download){
       self$download()
