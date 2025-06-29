@@ -268,6 +268,9 @@ coco_detection_dataset <- torch::dataset(
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",
   inherit = coco_detection_dataset,
+  archive_size_table = list(
+    "2014" = list(train = 12.88, val = 6.34)
+  ),
 
   initialize = function(root,
                         train = TRUE,
@@ -284,6 +287,9 @@ coco_caption_dataset <- torch::dataset(
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
+    self$archive_size <- self$archive_size_table[[year]][[split]]
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
