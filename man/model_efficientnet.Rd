@@ -10,7 +10,7 @@
 \alias{model_efficientnet_b5}
 \alias{model_efficientnet_b6}
 \alias{model_efficientnet_b7}
-\title{EfficientNet implementation}
+\title{EfficientNet Models}
 \usage{
 model_efficientnet_b0(pretrained = FALSE, progress = TRUE, ...)
 
@@ -34,11 +34,11 @@ model_efficientnet_b7(pretrained = FALSE, progress = TRUE, ...)
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{...}{Other parameters passed to the EfficientNet implementation.}
+\item{...}{Other parameters passed to the model implementation.}
 }
 \description{
-EfficientNet models are based on the architecture described in
-\href{https://arxiv.org/abs/1905.11946}{EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks}.
+Constructs EfficientNet model architectures as described in
+\emph{EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks}.
 }
 \section{Functions}{
 \itemize{

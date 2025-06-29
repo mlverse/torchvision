@@ -1,144 +1,242 @@
-# EfficientNet R implementation that mirrors PyTorch structure
-# This version is designed to load PyTorch .pth files directly without key remapping
+#' EfficientNet Models
+#'
+#' Constructs EfficientNet model architectures as described in
+#' \emph{EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks}.
+#'
+#' @inheritParams model_resnet18
+#' @param ... Other parameters passed to the model implementation.
+#'
+#' @family models
+#'
+#' @name model_efficientnet
+NULL
 
-library(torch)
-
-# Helper function for MBConv block
-mbconv_block <- nn_module(
-  initialize = function(in_channels, out_channels, expand_ratio, stride, kernel_size, se_ratio, norm_layer = NULL) {
-    self$use_residual <- stride == 1 && in_channels == out_channels
-
+conv_norm_act <- torch::nn_module(
+  inherit = torch::nn_sequential,
+  initialize = function(in_channels, out_channels, kernel_size = 3, stride = 1,
+                        groups = 1, norm_layer = NULL, activation_layer = NULL) {
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
+      norm_layer <- torch::nn_batch_norm2d
+    if (is.null(activation_layer))
+      activation_layer <- torch::nn_silu
+    padding <- (kernel_size - 1) %/% 2
+    super$initialize(
+      torch::nn_conv2d(in_channels, out_channels, kernel_size, stride, padding,
+                       groups = groups, bias = FALSE),
+      norm_layer(out_channels),
+      activation_layer(inplace = TRUE)
+    )
+    self$out_channels <- out_channels
+  }
+)
 
+se_block <- torch::nn_module(
+  initialize = function(in_channels, squeeze_channels) {
+    self$avg_pool <- nn_adaptive_avg_pool2d(output_size = 1)
+    self$squeeze <- nn_conv2d(in_channels, squeeze_channels, kernel_size = 1)
+    self$relu <- nn_relu()
+    self$expand <- nn_conv2d(squeeze_channels, in_channels, kernel_size = 1)
+    self$sigmoid <- nn_sigmoid()
+  },
+  forward = function(x) {
+    scale <- self$avg_pool(x)
+    scale <- self$squeeze(scale)
+    scale <- self$relu(scale)
+    scale <- self$expand(scale)
+    scale <- self$sigmoid(scale)
+    x * scale
+  }
+)
+
+
+
+mbconv_block <- torch::nn_module(
+  initialize = function(in_channels, out_channels, kernel_size, stride,
+                        expand_ratio, se_ratio = 0.25, norm_layer = NULL) {
+    if (is.null(norm_layer))
+      norm_layer <- torch::nn_batch_norm2d
     hidden_dim <- in_channels * expand_ratio
+    self$use_res_connect <- stride == 1 && in_channels == out_channels
     layers <- list()
 
+    # Expand
     if (expand_ratio != 1) {
-      layers[[length(layers)+1]] <- nn_conv2d(in_channels, hidden_dim, 1, bias = FALSE)
-      layers[[length(layers)+1]] <- norm_layer(hidden_dim)
-      layers[[length(layers)+1]] <- nn_silu()
+      layers[[length(layers) + 1]] <- conv_norm_act(
+        in_channels, hidden_dim, kernel_size = 1,
+        norm_layer = norm_layer, activation_layer = torch::nn_silu
+      )
     }
 
-    layers[[length(layers)+1]] <- nn_conv2d(hidden_dim, hidden_dim, kernel_size, stride = stride,
-                                            padding = (kernel_size - 1) %/% 2,
-                                            groups = hidden_dim, bias = FALSE)
-    layers[[length(layers)+1]] <- norm_layer(hidden_dim)
-    layers[[length(layers)+1]] <- nn_silu()
-
-    squeeze_channels <- as.integer(in_channels * se_ratio)
-    self$se <- nn_sequential(
-      nn_adaptive_avg_pool2d(1),
-      nn_conv2d(hidden_dim, squeeze_channels, 1),
-      nn_silu(),
-      nn_conv2d(squeeze_channels, hidden_dim, 1),
-      nn_sigmoid()
+    # Depthwise
+    layers[[length(layers) + 1]] <- conv_norm_act(
+      hidden_dim, hidden_dim, kernel_size = kernel_size, stride = stride,
+      groups = hidden_dim, norm_layer = norm_layer,
+      activation_layer = torch::nn_silu
     )
 
-    layers[[length(layers)+1]] <- nn_conv2d(hidden_dim, out_channels, 1, bias = FALSE)
-    layers[[length(layers)+1]] <- norm_layer(out_channels)
-
-    self$block <- nn_sequential(!!!layers)
-  },
-
-  forward = function(x) {
-    identity <- x
-    out <- x
-    for (layer in self$block) {
-      out <- layer(out)
+    # SE Block
+    if (!is.null(se_ratio) && se_ratio > 0) {
+      squeeze_channels <- max(1L, hidden_dim %/% as.integer(1 / se_ratio))
+      layers[[length(layers) + 1]] <- se_block(hidden_dim, squeeze_channels = squeeze_channels)
     }
-    se_weight <- self$se(out)
-    out <- out * se_weight
-    if (self$use_residual)
-      out <- out + identity
+
+    # Projection (fix: wrap in sequential to get block.2.0 / block.2.1)
+    layers[[length(layers) + 1]] <- torch::nn_sequential(
+      torch::nn_conv2d(hidden_dim, out_channels, 1, bias = FALSE),
+      norm_layer(out_channels)
+    )
+
+    self$block <- torch::nn_sequential(!!!layers)
+  },
+  forward = function(x) {
+    out <- self$block(x)
+    if (self$use_res_connect)
+      out <- out + x
     out
   }
 )
 
-# Full EfficientNet backbone
-efficientnet_backbone <- nn_module(
-  initialize = function(cfg, dropout, num_classes = 1000, norm_layer = NULL) {
+efficientnet <- torch::nn_module(
+  "efficientnet",
+  initialize = function(width_coefficient = 1, depth_coefficient = 1,
+                        dropout = 0.2, num_classes = 1000, norm_layer = NULL) {
     if (is.null(norm_layer))
-      norm_layer <- nn_batch_norm2d
-
-    self$features <- nn_sequential(
-      nn_conv2d(3, cfg$stem_out, kernel_size = 3, stride = 2, padding = 1, bias = FALSE),
-      norm_layer(cfg$stem_out),
-      nn_silu()
+      norm_layer <- torch::nn_batch_norm2d
+    b0_cfg <- list(
+      list(expand = 1, channels = 16, repeats = 1, stride = 1, kernel = 3),
+      list(expand = 6, channels = 24, repeats = 2, stride = 2, kernel = 3),
+      list(expand = 6, channels = 40, repeats = 2, stride = 2, kernel = 5),
+      list(expand = 6, channels = 80, repeats = 3, stride = 2, kernel = 3),
+      list(expand = 6, channels = 112, repeats = 3, stride = 1, kernel = 5),
+      list(expand = 6, channels = 192, repeats = 4, stride = 2, kernel = 5),
+      list(expand = 6, channels = 320, repeats = 1, stride = 1, kernel = 3)
     )
+    round_filters <- function(filters) {
+      divisor <- 8
+      filters <- filters * width_coefficient
+      new_filters <- max(divisor, as.integer(filters + divisor/2) %/% divisor * divisor)
+      if (new_filters < 0.9 * filters)
+        new_filters <- new_filters + divisor
+      as.integer(new_filters)
+    }
+    round_repeats <- function(repeats) {
+      as.integer(ceiling(depth_coefficient * repeats))
+    }
+    out_channels <- round_filters(32)
+    features <- list(conv_norm_act(3, out_channels, stride = 2, norm_layer = norm_layer, activation_layer = torch::nn_silu))
+    in_channels <- out_channels
 
-    in_channels <- cfg$stem_out
-    for (stage in cfg$stages) {
-      for (block in stage) {
-        mb <- mbconv_block(
-          in_channels = in_channels,
-          out_channels = block$out,
-          expand_ratio = block$expand,
-          stride = block$stride,
-          kernel_size = block$kernel,
-          se_ratio = block$se,
-          norm_layer = norm_layer
-        )
-        block_name <- paste0("mbconv_", length(self$features))
-        self$features$add_module(block_name, mb)
-
-        in_channels <- block$out
+    for (cfg in b0_cfg) {
+      oc <- round_filters(cfg$channels)
+      r <- round_repeats(cfg$repeats)
+      stage_blocks <- list()
+      for (i in 1:r) {
+        s <- if (i == 1) cfg$stride else 1
+        stage_blocks[[i]] <- mbconv_block(in_channels, oc,
+                                          kernel_size = cfg$kernel, stride = s, expand_ratio = cfg$expand,
+                                          se_ratio = 0.25, norm_layer = norm_layer)
+        in_channels <- oc
       }
+      features[[length(features) + 1]] <- torch::nn_sequential(!!!stage_blocks)
     }
 
-    self$features$add_module("final_conv",
-                             nn_conv2d(in_channels, cfg$final_out, kernel_size = 1, bias = FALSE))
-    self$features$add_module("final_bn", norm_layer(cfg$final_out))
-    self$features$add_module("final_act", nn_silu())
-
-    self$avgpool <- nn_adaptive_avg_pool2d(1)
-    self$classifier <- nn_sequential(
-      nn_dropout(p = dropout),
-      nn_linear(cfg$final_out, num_classes)
+    final_channels <- round_filters(1280)
+    features[[length(features) + 1]] <- conv_norm_act(in_channels, final_channels,
+                                                      kernel_size = 1, norm_layer = norm_layer, activation_layer = torch::nn_silu)
+    self$features <- torch::nn_sequential(!!!features)
+    self$avgpool <- torch::nn_adaptive_avg_pool2d(c(1, 1))
+    self$classifier <- torch::nn_sequential(
+      torch::nn_dropout(dropout),
+      torch::nn_linear(final_channels, num_classes)
     )
   },
-
   forward = function(x) {
     x <- self$features(x)
     x <- self$avgpool(x)
-    x <- torch_flatten(x, start_dim = 2)
-    x <- self$classifier(x)
-    x
+    x <- torch::torch_flatten(x, start_dim = 2)
+    self$classifier(x)
   }
 )
 
-# EfficientNet-B0 config
-efficientnet_b0_config <- list(
-  stem_out = 32,
-  final_out = 1280,
-  stages = list(
-    list(list(out=16,  expand=1,  stride=1, kernel=3, se=0.25)),
-    list(list(out=24,  expand=6,  stride=2, kernel=3, se=0.25),
-         list(out=24,  expand=6,  stride=1, kernel=3, se=0.25)),
-    list(list(out=40,  expand=6,  stride=2, kernel=5, se=0.25),
-         list(out=40,  expand=6,  stride=1, kernel=5, se=0.25)),
-    list(list(out=80,  expand=6,  stride=2, kernel=3, se=0.25),
-         list(out=80,  expand=6,  stride=1, kernel=3, se=0.25),
-         list(out=80,  expand=6,  stride=1, kernel=3, se=0.25)),
-    list(list(out=112, expand=6,  stride=1, kernel=5, se=0.25),
-         list(out=112, expand=6,  stride=1, kernel=5, se=0.25)),
-    list(list(out=192, expand=6,  stride=2, kernel=5, se=0.25),
-         list(out=192, expand=6,  stride=1, kernel=5, se=0.25),
-         list(out=192, expand=6,  stride=1, kernel=5, se=0.25)),
-    list(list(out=320, expand=6,  stride=1, kernel=3, se=0.25))
-  )
-)
-
-# Model constructor
-model_efficientnet_b0 <- function(pretrained = FALSE, path = NULL, ...) {
-  model <- efficientnet_backbone(cfg = efficientnet_b0_config, dropout = 0.2, ...)
+effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
+  args <- rlang::list2(...)
+  model <- do.call(efficientnet, append(args, list(
+    width_coefficient = width,
+    depth_coefficient = depth,
+    dropout = dropout
+  )))
 
   if (pretrained) {
-    if (is.null(path))
-      stop("Please provide path to pretrained PyTorch .pth file")
-    state_dict <- torch::load_state_dict(path)
-    model$load_state_dict(state_dict)
+    local_path <- here::here("tools", "models", paste0(arch, ".pth"))
+    message("Using local weights: ", local_path)
+
+    state_dict <- torch::load_state_dict(local_path)
+    state_dict <- state_dict[!grepl("num_batches_tracked", names(state_dict))]
+
   }
 
   model
 }
+
+
+# Individual model variants
+
+#' @describeIn model_efficientnet EfficientNet B0 model
+#' @export
+model_efficientnet_b0 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b0", 1.0, 1.0, 0.2, pretrained, progress, ...)
+}
+
+
+#' @describeIn model_efficientnet EfficientNet B1 model
+#' @export
+model_efficientnet_b1 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b1", 1.0, 1.1, 0.2, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B2 model
+#' @export
+model_efficientnet_b2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b2", 1.1, 1.2, 0.3, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B3 model
+#' @export
+model_efficientnet_b3 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b3", 1.2, 1.4, 0.3, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B4 model
+#' @export
+model_efficientnet_b4 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b4", 1.4, 1.8, 0.4, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B5 model
+#' @export
+model_efficientnet_b5 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b5", 1.6, 2.2, 0.4, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B6 model
+#' @export
+model_efficientnet_b6 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b6", 1.8, 2.6, 0.5, pretrained, progress, ...)
+}
+
+#' @describeIn model_efficientnet EfficientNet B7 model
+#' @export
+model_efficientnet_b7 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  effnet("efficientnet_b7", 2.0, 3.1, 0.5, pretrained, progress, ...)
+}
+
+efficientnet_model_urls <- c(
+  efficientnet_b0 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b0.pth",
+  efficientnet_b1 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b1.pth",
+  efficientnet_b2 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b2.pth",
+  efficientnet_b3 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b3.pth",
+  efficientnet_b4 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b4.pth",
+  efficientnet_b5 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b5.pth",
+  efficientnet_b6 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b6.pth",
+  efficientnet_b7 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b7.pth"
+)
