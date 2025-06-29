@@ -78,7 +78,7 @@ fgvc_aircraft_dataset <- dataset(
     download = FALSE
   ) {
 
-    cli_inform("{.cls {class(self)[[1]]}} FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
@@ -124,9 +124,9 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
     self$labels_df <- merged_df[, levels]
 
-    cli_inform(glue::glue(
-      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
-    ))
+    cli_inform(
+      "{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes[[annotation_level]])} classes."
+    )
   },
 
   .getitem = function(index) {

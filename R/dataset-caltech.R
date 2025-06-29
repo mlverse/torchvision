@@ -1,7 +1,9 @@
 #' Caltech Datasets
 #'
-#' Loads the Caltech-101 dataset for image classification with RGB images and integer labels.
-#' The dataset contains images of varying sizes across 101 object categories.
+#' The Caltech-101 and Caltech-256 collections are **classification** datasets
+#' made of color images with varying sizes. They cover 101 and 256 object
+#' categories respectively and are commonly used for evaluating visual
+#' recognition models.
 #'
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory for dataset storage. The dataset will be stored under `root/caltech-101`.
@@ -10,6 +12,14 @@
 #' Each element is a named list with:
 #' - `x`: A H x W x 3 integer array representing an RGB image.
 #' - `y`: An Integer representing the label.
+#'
+#' @details
+#' The Caltech-101 dataset contains around 9,000 images
+#' spread over 101 object categories plus a background class. Images
+#' have varying sizes.
+#'
+#' Caltech-256 extends this to about 30,000 images
+#' across 256 categories.
 #'
 #' @examples
 #' \dontrun{
@@ -23,7 +33,7 @@
 #' @name caltech_dataset
 #' @title Caltech Datasets
 #' @rdname caltech_dataset
-#' @family datasets
+#' @family classification_dataset
 #' @export
 caltech101_dataset <- torch::dataset(
   name = "caltech-101",

@@ -36,9 +36,10 @@ An object of class \code{coco_detection_dataset}. Each item is a list:
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
 \item \code{y$segmentation}: a list of segmentation polygons for each object.
 \item \code{y$masks}: a \verb{(N, H, W)} boolean \code{torch_tensor} containing binary segmentation masks.
+}
+
 The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
 to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
-}
 }
 \description{
 Loads the MS COCO dataset for object detection and segmentation.
@@ -70,10 +71,7 @@ tensor_image_browse(masked)
 }
 \seealso{
 Other datasets: 
-\code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
 \code{\link{coco_caption_dataset}()},
-\code{\link{eurosat_datasets}},
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},

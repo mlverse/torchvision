@@ -15,6 +15,8 @@
 #' @param target_transform (callable, optional): A function/transform that takes
 #'   in the target and transforms it.
 #'
+#' @name mnist_dataset
+#' @rdname mnist_dataset
 #' @export
 mnist_dataset <- dataset(
   name = "mnist",
@@ -131,10 +133,10 @@ mnist_dataset <- dataset(
 #' Prepares the [Kuzushiji-MNIST](https://github.com/rois-codh/kmnist) dataset
 #'   and optionally downloads it.
 #'
-#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where
 #'   `KMNIST/processed/training.pt` and  `KMNIST/processed/test.pt` exist.
 #'
+#' @rdname mnist_dataset
 #' @export
 kmnist_dataset <- dataset(
   name = "kminst_dataset",
@@ -157,7 +159,6 @@ kmnist_dataset <- dataset(
 #' information. It is suitable for benchmarking modern machine learning models and can serve as a
 #' drop-in replacement for MNIST in most image classification tasks.
 #'
-#' @inheritParams mnist_dataset
 #' @param split (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
 #'   Defaults to `"train"`. The `"nist"` option loads the full NIST digits set.
 #'
@@ -181,6 +182,7 @@ kmnist_dataset <- dataset(
 #' first_item$y
 #' }
 #'
+#' @rdname mnist_dataset
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
@@ -235,6 +237,7 @@ qmnist_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
     for (r in self$resources[[self$split]]) {
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
@@ -246,7 +249,6 @@ qmnist_dataset <- dataset(
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
     cli_inform("{.cls {class(self)[[1]]}} Processing...")
 
 
@@ -347,7 +349,6 @@ read_sn3_pascalvincent <- function(path) {
 #'   download = FALSE
 #' )
 #'
-#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where
 #' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
 #'
@@ -360,6 +361,7 @@ read_sn3_pascalvincent <- function(path) {
 #' @name fashion_mnist_dataset
 #' @aliases fashion_mnist_dataset
 #' @title Fashion-MNIST dataset
+#' @rdname mnist_dataset
 #' @export
 fashion_mnist_dataset <- dataset(
   name = "fashion_mnist_dataset",
@@ -386,7 +388,6 @@ fashion_mnist_dataset <- dataset(
 #' - "digits": 10 digit classes only
 #' - "mnist": classic 10 digit classes like the original MNIST dataset
 #'
-#' @inheritParams mnist_dataset
 #' @param root Character. Root directory for dataset storage (default folder: `root/emnist/processed/`).
 #' @param split Character. Dataset split to use. One of `"byclass"`, `"bymerge"`, `"balanced"`, `"letters"`, `"digits"`, or `"mnist"`. Default is `"balanced"`.
 #'
@@ -407,6 +408,7 @@ fashion_mnist_dataset <- dataset(
 #' @name emnist_dataset
 #' @aliases emnist_dataset
 #' @title EMNIST dataset
+#' @rdname mnist_dataset
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",
@@ -438,11 +440,7 @@ emnist_dataset <- dataset(
 
   initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
                         download = FALSE) {
-    cli_inform(glue::glue(
-      "Preparing to download EMNIST dataset. Archive size is ~0.5GB\n",
-      "You may have to increase the download timeout in your session with `options()` in case of failure\n",
-      "- Will extract and convert for all {length(self$classes_list)} splits\n"
-    ))
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
     self$root_path <- root

@@ -18,6 +18,7 @@
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
 #' - `y$segmentation`: a list of segmentation polygons for each object.
 #' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks.
+#'
 #' The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
 #' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 #'

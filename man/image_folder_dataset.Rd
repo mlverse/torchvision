@@ -48,11 +48,8 @@ root/cat/asd932_.png
 }
 \seealso{
 Other datasets: 
-\code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
 \code{\link{coco_caption_dataset}()},
 \code{\link{coco_detection_dataset}()},
-\code{\link{eurosat_datasets}},
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},

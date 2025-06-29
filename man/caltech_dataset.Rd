@@ -51,8 +51,17 @@ Loads the Caltech-256 Object Category Dataset for image classification. It consi
 Each category has at least 80 images, with variability in image size.
 }
 \details{
-Loads the Caltech-101 dataset for image classification with RGB images and integer labels.
-The dataset contains images of varying sizes across 101 object categories.
+The Caltech-101 and Caltech-256 collections are \strong{classification} datasets
+made of color images with varying sizes. They cover 101 and 256 object
+categories respectively and are commonly used for evaluating visual
+recognition models.
+
+The Caltech-101 dataset contains around 9,000 images
+spread over 101 object categories plus a background class. Images
+have varying sizes.
+
+Caltech-256 extends this to about 30,000 images
+across 256 categories.
 }
 \examples{
 \dontrun{
@@ -65,15 +74,8 @@ first_item$y  # Integer label
 
 }
 \seealso{
-Other datasets: 
+Other classification_dataset: 
 \code{\link{cifar10_dataset}()},
-\code{\link{coco_caption_dataset}()},
-\code{\link{coco_detection_dataset}()},
-\code{\link{eurosat_datasets}},
-\code{\link{fer_dataset}()},
-\code{\link{fgvc_aircraft_dataset}()},
-\code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
-\code{\link{tiny_imagenet_dataset}()}
+\code{\link{eurosat_dataset}()}
 }
-\concept{datasets}
+\concept{classification_dataset}

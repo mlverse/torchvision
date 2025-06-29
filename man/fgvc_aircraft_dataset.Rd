@@ -96,11 +96,8 @@ fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 }
 \seealso{
 Other datasets: 
-\code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
 \code{\link{coco_caption_dataset}()},
 \code{\link{coco_detection_dataset}()},
-\code{\link{eurosat_datasets}},
 \code{\link{fer_dataset}()},
 \code{\link{flowers102_dataset}()},
 \code{\link{image_folder_dataset}()},

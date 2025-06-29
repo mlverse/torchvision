@@ -87,10 +87,10 @@ flowers102_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes
 
-    cli_inform("{.cls {class(self)[[1]]}} Oxford Flowers 102 dataset will be downloaded and processed if not already cached.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
 
     if (download) {
-      cli_inform("{.cls {class(self)[[1]]}} Oxford Flowers 102 (~350MB) will be downloaded and processed if not already cached.")
+      cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))

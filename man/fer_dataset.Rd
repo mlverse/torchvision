@@ -62,11 +62,8 @@ fer$classes[first_item$y]  # "Happy"
 }
 \seealso{
 Other datasets: 
-\code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
 \code{\link{coco_caption_dataset}()},
 \code{\link{coco_detection_dataset}()},
-\code{\link{eurosat_datasets}},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
 \code{\link{image_folder_dataset}()},

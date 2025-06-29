@@ -47,11 +47,17 @@ A torch::dataset object. Each item is a list with:
 }
 }
 \description{
-Downloads and prepares the
-\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10} dataset.
+The CIFAR datasets are benchmark \strong{classification} datasets composed of
+60,000 RGB thumbnail images of size 32x32 pixels. The
+\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10} variant contains
+10 classes while CIFAR100 provides 100 classes. Images are split into
+50,000 training samples and 10,000 test samples.
 
 Downloads and prepares the
 \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR100} dataset.
+}
+\details{
+Downloads and prepares the CIFAR archives.
 }
 \examples{
 \dontrun{
@@ -62,15 +68,8 @@ item$y
 }
 }
 \seealso{
-Other datasets: 
+Other classification_dataset: 
 \code{\link{caltech_dataset}},
-\code{\link{coco_caption_dataset}()},
-\code{\link{coco_detection_dataset}()},
-\code{\link{eurosat_datasets}},
-\code{\link{fer_dataset}()},
-\code{\link{fgvc_aircraft_dataset}()},
-\code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
-\code{\link{tiny_imagenet_dataset}()}
+\code{\link{eurosat_dataset}()}
 }
-\concept{datasets}
+\concept{classification_dataset}

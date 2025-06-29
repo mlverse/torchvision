@@ -51,7 +51,7 @@ fer_dataset <- dataset(
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    cli_inform("{.cls {class(self)[[1]]}} Preparing FER-2013 dataset ({self$split})...")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 
     if (download) {
       self$download()
@@ -70,7 +70,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Parsing image data into 48x48 grayscale arrays...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- parsed$emotion + 1L
@@ -78,7 +78,7 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    cli_inform("{.cls {class(self)[[1]]}} Parsing image data into 48x48 grayscale arrays...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
   },
 
   .getitem = function(i) {
@@ -103,14 +103,14 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      cli_inform("{.cls {class(self)[[1]]}} FER-2013 already exists. Skipping download.")
+      cli_inform("{.cls {class(self)[[1]]}} Dataset already exists. Skipping download.")
       return()
     }
 
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading FER-2013 dataset... (Size: ~100MB)")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
 
     archive <- download_and_cache(self$url)
 

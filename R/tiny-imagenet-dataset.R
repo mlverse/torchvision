@@ -45,7 +45,7 @@ tiny_imagenet_dataset <- torch::dataset(
     p <- download_and_cache(self$url)
     fs::file_copy(p, raw_path)
 
-    cli_inform("{.cls {class(self)[[1]]}} Download complete. Now unzipping.")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
 
     utils::unzip(raw_path, exdir = self$root_path)
 

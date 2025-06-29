@@ -2,6 +2,10 @@
 % Please edit documentation in R/dataset-mnist.R
 \name{mnist_dataset}
 \alias{mnist_dataset}
+\alias{kmnist_dataset}
+\alias{qmnist_dataset}
+\alias{fashion_mnist_dataset}
+\alias{emnist_dataset}
 \title{MNIST dataset}
 \usage{
 mnist_dataset(
@@ -11,10 +15,41 @@ mnist_dataset(
   target_transform = NULL,
   download = FALSE
 )
+
+kmnist_dataset(
+  root = tempdir(),
+  train = TRUE,
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+qmnist_dataset(
+  root = tempdir(),
+  split = "train",
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+fashion_mnist_dataset(
+  root,
+  train = TRUE,
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+emnist_dataset(
+  root = tempdir(),
+  split = "balanced",
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
 }
 \arguments{
-\item{root}{(string): Root directory of dataset where
-\code{MNIST/processed/training.pt} and  \code{MNIST/processed/test.pt} exist.}
+\item{root}{Character. Root directory for dataset storage (default folder: \verb{root/emnist/processed/}).}
 
 \item{train}{(bool, optional): If True, creates dataset from
 \code{training.pt}, otherwise from \code{test.pt}.}
@@ -29,7 +64,79 @@ in the target and transforms it.}
 \item{download}{(bool, optional): If true, downloads the dataset from the
 internet and puts it in root directory. If dataset is already downloaded,
 it is not downloaded again.}
+
+\item{split}{Character. Dataset split to use. One of \code{"byclass"}, \code{"bymerge"}, \code{"balanced"}, \code{"letters"}, \code{"digits"}, or \code{"mnist"}. Default is \code{"balanced"}.}
+}
+\value{
+An R6 dataset object compatible with the \code{{torch}} package, providing indexed access
+to (image, label) pairs from the specified QMNIST subset.
+
+An EMNIST dataset object.
 }
 \description{
 Prepares the MNIST dataset and optionally downloads it.
+
+Prepares the \href{https://github.com/rois-codh/kmnist}{Kuzushiji-MNIST} dataset
+and optionally downloads it.
+
+Loads and preprocesses the \href{https://github.com/facebookresearch/qmnist}{QMNIST dataset},
+including optional support for the NIST digit subset.
+
+Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
+and optionally downloads it.
+
+EMNIST Dataset
+}
+\details{
+This dataset is an extended version of the original MNIST, offering more samples and precise label
+information. It is suitable for benchmarking modern machine learning models and can serve as a
+drop-in replacement for MNIST in most image classification tasks.
+
+Fashion-MNIST dataset
+
+Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
+\itemize{
+\item "byclass": 62 classes (digits + uppercase + lowercase)
+\item "bymerge": 47 classes (merged uppercase and lowercase letters)
+\item "balanced": 47 classes balanced between digits and letters
+\item "letters": 26 letter classes only
+\item "digits": 10 digit classes only
+\item "mnist": classic 10 digit classes like the original MNIST dataset
+}
+}
+\section{Supported Subsets}{
+
+\itemize{
+\item \code{"train"}: 60,000 training examples (compatible with MNIST)
+\item \code{"test"}: 60,000 test examples (extended QMNIST test set)
+\item \code{"nist"}: Entire NIST digit dataset (for advanced benchmarking)
+}
+}
+
+\examples{
+\dontrun{
+qmnist <- qmnist_dataset(split = "train", download = TRUE)
+first_item <- qmnist[1]
+# image in item 1
+first_item$x
+# label of item 1
+first_item$y
+}
+
+\dontrun{
+emnist <- emnist_dataset(split = "balanced", download = TRUE)
+first_item <- emnist[1]
+# image in item 1
+first_item$x
+# label of item 1
+first_item$y
+}
+
+}
+\seealso{
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
+
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}
+
+\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
 }

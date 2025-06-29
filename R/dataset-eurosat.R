@@ -1,11 +1,11 @@
-#' EuroSAT Dataset
+#' EuroSAT datasets
 #'
-#' Downloads and prepare the EuroSAT dataset from Hugging Face datasets.
-#' The dataset consists of Land Use and Land Cover Classification with Sentinel-2
-#'  satellite images. Images are openly and freely made available by the Earth
-#'  observation program Copernicus. Images are organized into 10 classes.
+#' A collection of Sentinel-2 satellite images for land-use **classification**.
+#' The standard version contains 27,000 RGB thumbnails (64x64) across 10
+#' classes. Variants include the full 13 spectral bands and a small 100-image
+#' subset useful for demos.
 #'
-#' @name eurosat_datasets
+#' @name eurosat_dataset
 #' @details
 #' `eurosat_dataset()` provides a total of 27,000 RGB labeled images.
 #'
@@ -28,7 +28,7 @@
 #' print(head$x) # Image
 #' print(head$y) # Label
 #' }
-#' @family datasets
+#' @family classification_dataset
 #' @export
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
@@ -148,7 +148,7 @@ eurosat_dataset <- torch::dataset(
 #'
 #' Downloads and prepares the EuroSAT dataset with 13 spectral bands.
 #'
-#' @rdname eurosat_datasets
+#' @rdname eurosat_dataset
 #' @details `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
 #'
 #' @export
@@ -167,7 +167,7 @@ eurosat_all_bands_dataset <- torch::dataset(
 #'
 #' A subset of 100 images with 13 spectral bands useful for workshops and demos.
 #'
-#' @rdname eurosat_datasets
+#' @rdname eurosat_dataset
 #' @details `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands.
 #'
 #' @export

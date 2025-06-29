@@ -1,7 +1,12 @@
 #' CIFAR datasets
 #'
-#' Downloads and prepares the
-#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
+#' The CIFAR datasets are benchmark **classification** datasets composed of
+#' 60,000 RGB thumbnail images of size 32x32 pixels. The
+#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) variant contains
+#' 10 classes while CIFAR100 provides 100 classes. Images are split into
+#' 50,000 training samples and 10,000 test samples.
+#'
+#' Downloads and prepares the CIFAR archives.
 #'
 #' @rdname cifar_datasets
 #'
@@ -19,7 +24,7 @@
 #' item$x
 #' item$y
 #' }
-#' @family datasets
+#' @family classification_dataset
 #'
 #' @export
 cifar10_dataset <- torch::dataset(
