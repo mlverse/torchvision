@@ -6,7 +6,7 @@
 #' @rdname coco_detection_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
 #' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
-#' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
+#' @param year Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.
 #' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
 #' @param transforms Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
@@ -63,7 +63,7 @@ coco_detection_dataset <- torch::dataset(
     "2017" = list(train = 18.44, val = 0.77),
     "2014" = list(train = 12.88, val = 6.34)
   ),
-  initialize = function(root, train = TRUE, year = c("2017", "2016", "2014"),
+  initialize = function(root, train = TRUE, year = c("2017", "2014"),
                         download = FALSE, transforms = NULL, target_transform = NULL) {
 
     year <- match.arg(year)
@@ -200,12 +200,6 @@ coco_detection_dataset <- torch::dataset(
         img_url = glue::glue("http://images.cocodataset.org/zips/{split}2017.zip"),
         img_md5 = if (split == "train") "cced6f7f71b7629ddf16f17bbcfab6b2" else "442b8da7639aecaf257c1dceb8ba8c80"
       ),
-      "2016" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2016.zip",
-        ann_md5 = "0572d6c4f6e1b4efb6191f6b3b344b2a",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2014.zip"),
-        img_md5 = if (split == "train") "0da8cfa0e090c266b78f30e2d2874f1a" else "a3d79f5ed8d289b7a7554ce06a5782b3"
-      ),
       "2014" = list(
         ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip",
         ann_md5 = "d3e24dc9f5bda3e7887a1e6a5ff34c0c",
@@ -243,6 +237,7 @@ coco_detection_dataset <- torch::dataset(
 #' @name coco_caption_dataset
 #' @rdname coco_caption_dataset
 #' @inheritParams coco_detection_dataset
+#' @param year Character. Dataset version year. One of \code{"2014"}.
 #'
 #' @examples
 #' \dontrun{

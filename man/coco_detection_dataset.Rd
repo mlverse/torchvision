@@ -7,7 +7,7 @@
 coco_detection_dataset(
   root,
   train = TRUE,
-  year = c("2017", "2016", "2014"),
+  year = c("2017", "2014"),
   download = FALSE,
   transforms = NULL,
   target_transform = NULL
@@ -18,7 +18,7 @@ coco_detection_dataset(
 
 \item{train}{Logical. If TRUE, loads the training split; otherwise, loads the validation split.}
 
-\item{year}{Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.}
+\item{year}{Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 
