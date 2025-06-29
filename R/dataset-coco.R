@@ -3,9 +3,12 @@
 #' Loads the MS COCO dataset for object detection and segmentation.
 #'
 #' @rdname coco_detection_dataset
-#' @inheritParams mnist_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
+#' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
 #' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
+#' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
+#' @param transforms Optional transform function applied to the image.
+#' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
 #' - `x`: a `(C, H, W)` `torch_tensor` representing the image.

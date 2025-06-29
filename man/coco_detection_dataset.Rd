@@ -16,17 +16,15 @@ coco_detection_dataset(
 \arguments{
 \item{root}{Root directory where the dataset is stored or will be downloaded to.}
 
-\item{train}{(bool, optional): If True, creates dataset from
-\code{training.pt}, otherwise from \code{test.pt}.}
+\item{train}{Logical. If TRUE, loads the training split; otherwise, loads the validation split.}
 
 \item{year}{Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{transforms}{Optional transform function applied to the image.}
+
+\item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
 \value{
 An object of class \code{coco_detection_dataset}. Each item is a list:
