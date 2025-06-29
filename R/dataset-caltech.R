@@ -178,7 +178,7 @@ caltech256_dataset <- torch::dataset(
   self$root <- fs::path(root, class(self)[[1]])
   self$transform <- transform
   self$target_transform <- target_transform
-  self$archive_size <- 1.2
+  self$archive_size <- 1.12
 
   cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already cached.")
 

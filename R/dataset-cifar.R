@@ -28,6 +28,9 @@ cifar10_dataset <- torch::dataset(
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
+    self$archive_size <- 0.16
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
