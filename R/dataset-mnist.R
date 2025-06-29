@@ -18,6 +18,7 @@
 #' @export
 mnist_dataset <- dataset(
   name = "mnist",
+  archive_size = 0.01,
   resources = list(
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
@@ -34,8 +35,10 @@ mnist_dataset <- dataset(
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
-
     self$train <- train
+    self$archive_size <- if (self$archive_size >= 0.1) self$archive_size else "<0.1"
+
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
