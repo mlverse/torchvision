@@ -3,6 +3,9 @@ context("dataset-fgvc")
 test_that("tests for the FGVC-Aircraft dataset", {
   t <- tempdir()
 
+  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
+        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+
   expect_error(
     fgvc_aircraft_dataset(root = tempfile(), split = "train", annotation_level = "variant", download = FALSE),
     class = "runtime_error"
