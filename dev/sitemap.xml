@@ -20,9 +20,8 @@
 <url><loc>/reference/box_xywh_to_xyxy.html</loc></url>
 <url><loc>/reference/box_xyxy_to_cxcywh.html</loc></url>
 <url><loc>/reference/box_xyxy_to_xywh.html</loc></url>
-<url><loc>/reference/caltech101_dataset.html</loc></url>
-<url><loc>/reference/caltech256_dataset.html</loc></url>
-<url><loc>/reference/cifar10_dataset.html</loc></url>
+<url><loc>/reference/caltech_dataset.html</loc></url>
+<url><loc>/reference/cifar_datasets.html</loc></url>
 <url><loc>/reference/clip_boxes_to_image.html</loc></url>
 <url><loc>/reference/coco_caption_dataset.html</loc></url>
 <url><loc>/reference/coco_detection_dataset.html</loc></url>
@@ -30,16 +29,13 @@
 <url><loc>/reference/draw_bounding_boxes.html</loc></url>
 <url><loc>/reference/draw_keypoints.html</loc></url>
 <url><loc>/reference/draw_segmentation_masks.html</loc></url>
-<url><loc>/reference/emnist_dataset.html</loc></url>
 <url><loc>/reference/eurosat_dataset.html</loc></url>
-<url><loc>/reference/fashion_mnist_dataset.html</loc></url>
 <url><loc>/reference/fer_dataset.html</loc></url>
 <url><loc>/reference/fgvc_aircraft_dataset.html</loc></url>
 <url><loc>/reference/flowers102_dataset.html</loc></url>
 <url><loc>/reference/generalized_box_iou.html</loc></url>
 <url><loc>/reference/image_folder_dataset.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/kmnist_dataset.html</loc></url>
 <url><loc>/reference/magick_loader.html</loc></url>
 <url><loc>/reference/mnist_dataset.html</loc></url>
 <url><loc>/reference/model_alexnet.html</loc></url>
@@ -48,7 +44,6 @@
 <url><loc>/reference/model_resnet.html</loc></url>
 <url><loc>/reference/model_vgg.html</loc></url>
 <url><loc>/reference/nms.html</loc></url>
-<url><loc>/reference/qmnist_dataset.html</loc></url>
 <url><loc>/reference/remove_small_boxes.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>

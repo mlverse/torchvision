@@ -124,35 +124,14 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A torch dataset. Each example is a list with two elements:</p>
-<dl><dt>x</dt>
-<dd><p>A 3D <code>torch_tensor</code> of shape <code>(C, H, W)</code> representing the image.</p></dd>
-
-<dt>y</dt>
-<dd><p>A list containing:</p><dl><dt>boxes</dt>
-<dd><p>A 2D <code>torch_tensor</code> of shape <code>(N, 4)</code> containing bounding boxes
-in the format c(\(x_{min}\), \(y_{min}\), \(x_{max}\), \(y_{max}\)).</p></dd>
-
-<dt>labels</dt>
-<dd><p>A 1D <code>torch_tensor</code> of type integer, representing the class label for each object.</p></dd>
-
-<dt>area</dt>
-<dd><p>A 1D <code>torch_tensor</code> of type float, indicating the area of each object.</p></dd>
-
-<dt>iscrowd</dt>
-<dd><p>A 1D <code>torch_tensor</code> of type boolean, where <code>TRUE</code> indicates the object is part of a crowd.</p></dd>
-
-<dt>segmentation</dt>
-<dd><p>A list of segmentation polygons for each object.</p></dd>
-
-<dt>masks</dt>
-<dd><p>A 3D <code>torch_tensor</code> of shape <code>(N, H, W)</code> containing binary segmentation masks.</p></dd>
-
-
-</dl></dd>
-
-
-</dl><p>The returned object has S3 classes <code>"image_with_bounding_box"</code> and <code>"image_with_segmentation_mask"</code>
+    <p>An object of class <code>coco_detection_dataset</code>. Each item is a list:</p><ul><li><p><code>x</code>: a <code>(C, H, W)</code> <code>torch_tensor</code> representing the image.</p></li>
+<li><p><code>y$boxes</code>: a <code>(N, 4)</code> <code>torch_tensor</code> of bounding boxes in the format <code>c(x_min, y_min, x_max, y_max)</code>.</p></li>
+<li><p><code>y$labels</code>: an integer <code>torch_tensor</code> with the class label for each object.</p></li>
+<li><p><code>y$area</code>: a float <code>torch_tensor</code> indicating the area of each object.</p></li>
+<li><p><code>y$iscrowd</code>: a boolean <code>torch_tensor</code>, where <code>TRUE</code> marks the object as part of a crowd.</p></li>
+<li><p><code>y$segmentation</code>: a list of segmentation polygons for each object.</p></li>
+<li><p><code>y$masks</code>: a <code>(N, H, W)</code> boolean <code>torch_tensor</code> containing binary segmentation masks.</p></li>
+</ul><p>The returned object has S3 classes <code>"image_with_bounding_box"</code> and <code>"image_with_segmentation_mask"</code>
 to enable automatic dispatch by visualization functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code> and <code><a href="draw_segmentation_masks.html">draw_segmentation_masks()</a></code>.</p>
     </div>
     <div id="details">
