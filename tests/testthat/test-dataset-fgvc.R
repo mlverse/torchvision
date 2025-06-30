@@ -1,7 +1,8 @@
 context("dataset-fgvc")
 
+t <- withr::local_tempdir()
+
 test_that("tests for the FGVC-Aircraft dataset", {
-  t <- tempdir()
 
   skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
         "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
@@ -132,5 +133,4 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_equal_to_r(batch$y[2],c(58,14))
   expect_equal_to_r(batch$y[3],c(86,42))
 
-  unlink(file.path(t, "fgvc-aircraft-2013b"), recursive = TRUE)
 })

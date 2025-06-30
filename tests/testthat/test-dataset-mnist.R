@@ -1,11 +1,11 @@
 context("dataset-mnist")
 
+dir <- withr::local_tempdir()
+
 test_that("tests for the mnist dataset", {
 
-  dir <- tempfile(fileext = "/")
-
   expect_error(
-    ds <- mnist_dataset(dir)
+    ds <- mnist_dataset(tempfile())
   )
 
   ds <- mnist_dataset(dir, download = TRUE)
@@ -29,17 +29,15 @@ test_that("tests for the mnist dataset", {
 
 test_that("tests for the kmnist dataset", {
 
-  dir <- tempfile(fileext = "/")
-
   expect_error(
-    ds <- kmnist_dataset(dir)
+    ds <- kmnist_dataset(tempfile())
   )
 
   ds <- kmnist_dataset(dir, download = TRUE)
 
   i <- ds[1]
   expect_equal(dim(i[[1]]), c(28, 28))
-  expect_equal(i[[2]], 9)
+  expect_equal(i[[2]], 6)
   expect_equal(length(ds), 60000)
 
   ds <- kmnist_dataset(dir, transform = transform_to_tensor)
@@ -54,7 +52,6 @@ test_that("tests for the kmnist dataset", {
 })
 
 test_that("fashion_mnist_dataset loads correctly", {
-  dir <- tempfile()
 
   ds <- fashion_mnist_dataset(
     root = dir,
@@ -83,7 +80,9 @@ test_that("tests for the emnist dataset", {
   skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
         "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
 
-  dir <- tempdir()
+  expect_error(
+    ds <- emnist_dataset(root = tempfile())
+  )
 
   emnist <- emnist_dataset(dir, split = "balanced", download = TRUE)
   expect_equal(length(emnist), 112800)
@@ -142,10 +141,9 @@ test_that("tests for the emnist dataset", {
 
 
 test_that("tests for the qmnist dataset", {
-  dir <- tempfile(fileext = "/")
 
   expect_error(
-      ds <- qmnist_dataset(dir, split = "nist"),
+      ds <- qmnist_dataset(tempfile()),
       "Dataset not found."
   )
 

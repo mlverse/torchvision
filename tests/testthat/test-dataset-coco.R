@@ -1,6 +1,6 @@
-tmp <- tempfile()
-dir.create(tmp)
-withr::defer(unlink(tmp, recursive = TRUE), teardown_env())
+context("dataset-coco")
+
+tmp <- withr::local_tempdir()
 
 collate_fn <- function(batch) {
   x <- lapply(batch, function(x) x$x)
@@ -10,7 +10,7 @@ collate_fn <- function(batch) {
 
 test_that("coco_detection_dataset handles missing files gracefully", {
   expect_error(
-    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    coco_detection_dataset(root = tempfile(), train = TRUE, year = "2017", download = FALSE),
     class = "runtime_error"
   )
 })
@@ -71,7 +71,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
 
 test_that("coco_caption_dataset handles missing files gracefully", {
   expect_error(
-    coco_caption_dataset(root = tmp, train = TRUE, download = FALSE),
+    coco_caption_dataset(root = tempfile(), train = TRUE, download = FALSE),
     class = "rlang_error"
   )
 })
