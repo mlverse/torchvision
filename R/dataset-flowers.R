@@ -1,6 +1,6 @@
 #' Oxford Flowers 102 Dataset
 #'
-#' Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories, 
+#' Loads the Oxford 102 Category Flower Dataset. This dataset consists of 102 flower categories,
 #' with between 40 and 258 images per class. Images in this dataset are of variable sizes.
 #'
 #' This is a **classification** dataset where the goal is to assign each image to one of the 102 flower categories.
@@ -40,9 +40,7 @@
 #' batch$y  # Tensor of shape (4,) with numeric class labels
 #' }
 #'
-#' @name flowers102_dataset
-#' @aliases flowers102_dataset
-#' @title Oxford Flowers 102 Dataset
+#' @family classification_dataset
 #' @export
 flowers102_dataset <- dataset(
   name = "flowers102",
@@ -90,7 +88,7 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download) {
-      cli_inform("Oxford Flowers 102 (~350MB) will be downloaded and processed if not already cached.")
+      cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))
@@ -99,7 +97,7 @@ flowers102_dataset <- dataset(
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("Split '{self$split}' loaded with {length(self$img_path)} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self$img_path)} samples.")
   },
 
   .getitem = function(index) {
@@ -123,11 +121,12 @@ flowers102_dataset <- dataset(
 
   download = function() {
     if (self$check_exists(self$split)) {
-      cli_inform("Split '{self$split}' is already processed and cached.")
-      return(NULL)
+      cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' is already processed and cached.")
     }
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
+
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
 
     archives <- lapply(self$resources, function(r) {
       archive <- download_and_cache(r[1], prefix = class(self)[1])
@@ -136,7 +135,7 @@ flowers102_dataset <- dataset(
       archive
     })
 
-    cli_inform("Extracting images and processing dataset...")
+    cli_inform("{.cls {class(self)[[1]]}} Extracting images and processing dataset...")
 
     untar(archives[[1]], exdir = self$raw_folder)
     labels <- R.matlab::readMat(archives[[2]])$labels
@@ -154,6 +153,7 @@ flowers102_dataset <- dataset(
     paths <- file.path(jpg_dir, glue::glue("image_{sprintf('%05d', idxs)}.jpg"))
     lbls <- as.integer(labels[idxs])
     saveRDS(data.frame(img_path = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_exists = function(split) {
