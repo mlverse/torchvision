@@ -5,16 +5,16 @@ on:
 
 jobs:
   upload:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: 'Set up Cloud SDK'
-       uses: 'google-github-actions/setup-gcloud@v2'
-       with:
-          version: '290.0.1'
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+           version: '290.0.1'
+           project_id: ${{ secrets.GCP_PROJECT_ID }}
+           service_account_key: ${{ secrets.GCP_SA_KEY }}
+           export_default_credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: 3.10
