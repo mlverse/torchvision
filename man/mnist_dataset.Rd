@@ -2,7 +2,11 @@
 % Please edit documentation in R/dataset-mnist.R
 \name{mnist_dataset}
 \alias{mnist_dataset}
-\title{MNIST dataset}
+\alias{kmnist_dataset}
+\alias{qmnist_dataset}
+\alias{fashion_mnist_dataset}
+\alias{emnist_dataset}
+\title{MNIST and Derived Datasets}
 \usage{
 mnist_dataset(
   root = tempdir(),
@@ -11,25 +15,130 @@ mnist_dataset(
   target_transform = NULL,
   download = FALSE
 )
+
+kmnist_dataset(
+  root = tempdir(),
+  train = TRUE,
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+qmnist_dataset(
+  root = tempdir(),
+  split = "train",
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+fashion_mnist_dataset(
+  root = tempdir(),
+  train = TRUE,
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+emnist_dataset(
+  root = tempdir(),
+  split = "balanced",
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
 }
 \arguments{
-\item{root}{(string): Root directory of dataset where
-\code{MNIST/processed/training.pt} and  \code{MNIST/processed/test.pt} exist.}
+\item{root}{Root directory for dataset storage. The dataset will be stored under \verb{root/<dataset-name>}. Defaults to \code{tempdir()}.}
 
-\item{train}{(bool, optional): If True, creates dataset from
-\code{training.pt}, otherwise from \code{test.pt}.}
+\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
 
-\item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g,
-\code{\link[=transform_random_crop]{transform_random_crop()}}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
+
+\item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
+}
+\value{
+A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
 }
 \description{
-Prepares the MNIST dataset and optionally downloads it.
+Prepares various MNIST-style image classification datasets and optionally downloads them.
+Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as integer.
 }
+\details{
+\itemize{
+\item \strong{MNIST}: Original handwritten digit dataset.
+\item \strong{Fashion-MNIST}: Clothing item images for classification.
+\item \strong{Kuzushiji-MNIST}: Japanese cursive character dataset.
+\item \strong{QMNIST}: Extended MNIST with high-precision NIST data.
+\item \strong{EMNIST}: Letters and digits with multiple label splits.
+}
+}
+\section{Functions}{
+\itemize{
+\item \code{kmnist_dataset()}: Kuzushiji-MNIST cursive Japanese character dataset.
+
+\item \code{qmnist_dataset()}: Extended MNIST dataset with high-precision test data (QMNIST).
+
+\item \code{fashion_mnist_dataset()}: Fashion-MNIST clothing image dataset.
+
+\item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
+
+}}
+\section{Supported Splits for \code{emnist_dataset()}}{
+
+\itemize{
+\item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
+\item \code{"bymerge"}: 47 classes (merged uppercase and lowercase)
+\item \code{"balanced"}: 47 classes, balanced digits and letters
+\item \code{"letters"}: 26 uppercase letters
+\item \code{"digits"}: 10 digit classes
+\item \code{"mnist"}: Standard MNIST digit classes
+}
+}
+
+\section{Supported Splits for \code{qmnist_dataset()}}{
+
+\itemize{
+\item \code{"train"}: 60,000 training samples (MNIST-compatible)
+\item \code{"test"}: Extended test set
+\item \code{"nist"}: Full NIST digit set
+}
+}
+
+\examples{
+\dontrun{
+ds <- mnist_dataset(download = TRUE)
+item <- ds[1]
+item$x  # image
+item$y  # label
+
+qmnist <- qmnist_dataset(split = "train", download = TRUE)
+item <- qmnist[1]
+item$x
+item$y
+
+emnist <- emnist_dataset(split = "balanced", download = TRUE)
+item <- emnist[1]
+item$x
+item$y
+
+kmnist <- kmnist_dataset(download = TRUE)
+fmnist <- fashion_mnist_dataset(download = TRUE)
+}
+
+}
+\seealso{
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{classification_dataset}
