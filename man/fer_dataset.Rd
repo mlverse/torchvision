@@ -16,19 +16,13 @@ fer_dataset(
 \item{root}{(string, optional): Root directory for dataset storage,
 the dataset will be stored under \code{root/fer2013}.}
 
-\item{train}{(bool, optional): If True, creates dataset from
-\code{training.pt}, otherwise from \code{test.pt}.}
+\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
 
-\item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g,
-\code{\link[=transform_random_crop]{transform_random_crop()}}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
 A torch dataset of class \code{fer_dataset}.
@@ -61,12 +55,13 @@ fer$classes[first_item$y]  # "Happy"
 
 }
 \seealso{
-Other datasets: 
-\code{\link{coco_caption_dataset}()},
-\code{\link{coco_detection_dataset}()},
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
+\code{\link{mnist_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
 }
-\concept{datasets}
+\concept{classification_dataset}

@@ -8,7 +8,7 @@
 #' @param download whether to download or not the dataset.
 #' @param ... other arguments passed to [image_folder_dataset()].
 #'
-#' @family datasets
+#' @family classification_dataset
 #'
 #' @export
 tiny_imagenet_dataset <- torch::dataset(

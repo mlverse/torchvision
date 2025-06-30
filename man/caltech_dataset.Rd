@@ -76,6 +76,11 @@ first_item$y  # Integer label
 \seealso{
 Other classification_dataset: 
 \code{\link{cifar10_dataset}()},
-\code{\link{eurosat_dataset}()}
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{mnist_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}

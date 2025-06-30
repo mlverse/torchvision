@@ -40,7 +40,7 @@
 #' batch$y  # Tensor of shape (4,) with numeric class labels
 #' }
 #'
-#' @family datasets
+#' @family classification_dataset
 #' @export
 flowers102_dataset <- dataset(
   name = "flowers102",
@@ -86,8 +86,6 @@ flowers102_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$classes <- self$classes
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
 
     if (download) {
       cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")

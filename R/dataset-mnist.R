@@ -1,20 +1,58 @@
-#' MNIST dataset
+#' MNIST and Derived Datasets
 #'
-#' Prepares the MNIST dataset and optionally downloads it.
+#' Prepares various MNIST-style datasets and optionally downloads them.
 #'
-#' @param root (string): Root directory of dataset where
-#'   `MNIST/processed/training.pt` and  `MNIST/processed/test.pt` exist.
-#' @param train (bool, optional): If True, creates dataset from
-#'   `training.pt`, otherwise from `test.pt`.
-#' @param download (bool, optional): If true, downloads the dataset from the
-#'   internet and puts it in root directory. If dataset is already downloaded,
-#'   it is not downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an
-#'   PIL image and returns a transformed version. E.g,
-#'   [transform_random_crop()].
-#' @param target_transform (callable, optional): A function/transform that takes
-#'   in the target and transforms it.
+#' Includes:
+#' - **MNIST**: Original handwritten digit dataset.
+#' - **Fashion-MNIST**: Clothing item images for classification.
+#' - **Kuzushiji-MNIST**: Japanese cursive character dataset.
+#' - **QMNIST**: Extended MNIST with high-precision NIST data.
+#' - **EMNIST**: Letters and digits with multiple label splits.
 #'
+#' @param root Root directory for dataset storage. The dataset will be stored under `root/<dataset-name>`. Defaults to `tempdir()`.
+#' @param train Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.
+#' @param split Character. Used in `emnist_dataset()` and `qmnist_dataset()` to specify the subset. See individual descriptions for valid values.
+#' @param download Logical. If TRUE, downloads the dataset to `root/`. If the dataset is already present, download is skipped.
+#' @param transform Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).
+#' @param target_transform Optional. A function that transforms the label.
+#'
+#' @return An R6 dataset object compatible with the `{torch}` package, returning items as a list with `x` (image) and `y` (label).
+#'
+#' @section Supported Splits for `emnist_dataset()`:
+#' - `"byclass"`: 62 classes (digits + uppercase + lowercase)
+#' - `"bymerge"`: 47 classes (merged uppercase and lowercase)
+#' - `"balanced"`: 47 classes, balanced digits and letters
+#' - `"letters"`: 26 uppercase letters
+#' - `"digits"`: 10 digit classes
+#' - `"mnist"`: Standard MNIST digit classes
+#'
+#' @section Supported Splits for `qmnist_dataset()`:
+#' - `"train"`: 60,000 training samples (MNIST-compatible)
+#' - `"test"`: Extended test set
+#' - `"nist"`: Full NIST digit set
+#'
+#' @examples
+#' \dontrun{
+#' ds <- mnist_dataset(download = TRUE)
+#' item <- ds[1]
+#' item$x  # image
+#' item$y  # label
+#'
+#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
+#' item <- qmnist[1]
+#' item$x
+#' item$y
+#'
+#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
+#' item <- emnist[1]
+#' item$x
+#' item$y
+#'
+#' kmnist <- kmnist_dataset(download = TRUE)
+#' fmnist <- fashion_mnist_dataset(download = TRUE)
+#' }
+#'
+#' @family classification_dataset
 #' @name mnist_dataset
 #' @rdname mnist_dataset
 #' @export
@@ -128,15 +166,7 @@ mnist_dataset <- dataset(
   )
 )
 
-#' Kuzushiji-MNIST
-#'
-#' Prepares the [Kuzushiji-MNIST](https://github.com/rois-codh/kmnist) dataset
-#'   and optionally downloads it.
-#'
-#' @param root (string): Root directory of dataset where
-#'   `KMNIST/processed/training.pt` and  `KMNIST/processed/test.pt` exist.
-#'
-#' @rdname mnist_dataset
+#' @describeIn mnist_dataset Kuzushiji-MNIST cursive Japanese character dataset.
 #' @export
 kmnist_dataset <- dataset(
   name = "kminst_dataset",
@@ -150,39 +180,7 @@ kmnist_dataset <- dataset(
   classes = c('o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo')
 )
 
-#' QMNIST Dataset
-#'
-#' Loads and preprocesses the [QMNIST dataset](https://github.com/facebookresearch/qmnist),
-#' including optional support for the NIST digit subset.
-#'
-#' This dataset is an extended version of the original MNIST, offering more samples and precise label
-#' information. It is suitable for benchmarking modern machine learning models and can serve as a
-#' drop-in replacement for MNIST in most image classification tasks.
-#'
-#' @param split (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
-#'   Defaults to `"train"`. The `"nist"` option loads the full NIST digits set.
-#'
-#' @return An R6 dataset object compatible with the `{torch}` package, providing indexed access
-#'   to (image, label) pairs from the specified QMNIST subset.
-#'
-#' @section Supported Subsets:
-#' - `"train"`: 60,000 training examples (compatible with MNIST)
-#' - `"test"`: 60,000 test examples (extended QMNIST test set)
-#' - `"nist"`: Entire NIST digit dataset (for advanced benchmarking)
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
-#'
-#' @examples
-#' \dontrun{
-#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
-#' first_item <- qmnist[1]
-#' # image in item 1
-#' first_item$x
-#' # label of item 1
-#' first_item$y
-#' }
-#'
-#' @rdname mnist_dataset
+#' @describeIn mnist_dataset Extended MNIST dataset with high-precision test data (QMNIST).
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
@@ -338,30 +336,7 @@ read_sn3_pascalvincent <- function(path) {
   a
 }
 
-#' Fashion-MNIST dataset
-#'
-#' @usage
-#' fashion_mnist_dataset(
-#'   root,
-#'   train = TRUE,
-#'   transform = NULL,
-#'   target_transform = NULL,
-#'   download = FALSE
-#' )
-#'
-#' @param root (string): Root directory of dataset where
-#' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
-#'
-#' @description
-#' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
-#' and optionally downloads it.
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()]
-#'
-#' @name fashion_mnist_dataset
-#' @aliases fashion_mnist_dataset
-#' @title Fashion-MNIST dataset
-#' @rdname mnist_dataset
+#' @describeIn mnist_dataset Fashion-MNIST clothing image dataset.
 #' @export
 fashion_mnist_dataset <- dataset(
   name = "fashion_mnist_dataset",
@@ -378,37 +353,7 @@ fashion_mnist_dataset <- dataset(
   )
 )
 
-#' EMNIST Dataset
-#'
-#' Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
-#' - "byclass": 62 classes (digits + uppercase + lowercase)
-#' - "bymerge": 47 classes (merged uppercase and lowercase letters)
-#' - "balanced": 47 classes balanced between digits and letters
-#' - "letters": 26 letter classes only
-#' - "digits": 10 digit classes only
-#' - "mnist": classic 10 digit classes like the original MNIST dataset
-#'
-#' @param root Character. Root directory for dataset storage (default folder: `root/emnist/processed/`).
-#' @param split Character. Dataset split to use. One of `"byclass"`, `"bymerge"`, `"balanced"`, `"letters"`, `"digits"`, or `"mnist"`. Default is `"balanced"`.
-#'
-#' @return An EMNIST dataset object.
-#'
-#' @examples
-#' \dontrun{
-#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
-#' first_item <- emnist[1]
-#' # image in item 1
-#' first_item$x
-#' # label of item 1
-#' first_item$y
-#' }
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
-#'
-#' @name emnist_dataset
-#' @aliases emnist_dataset
-#' @title EMNIST dataset
-#' @rdname mnist_dataset
+#' @describeIn mnist_dataset EMNIST dataset with digits and letters and multiple split modes.
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",

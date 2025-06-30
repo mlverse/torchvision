@@ -36,16 +36,11 @@ if empty, will use the default \code{rappdirs::user_cache_dir("torch")}.}
 
 \item{split}{Character. Must be one of \code{train}, \code{val}, or \code{test}.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
-\item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g,
-\code{\link[=transform_random_crop]{transform_random_crop()}}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{target_transform}{Optional. A function that transforms the label.}
 }
 \value{
 A \code{torch::dataset} object. Each item is a list with:
@@ -85,6 +80,11 @@ print(head$y) # Label
 \seealso{
 Other classification_dataset: 
 \code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()}
+\code{\link{cifar10_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{mnist_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}

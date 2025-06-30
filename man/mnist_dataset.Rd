@@ -6,7 +6,7 @@
 \alias{qmnist_dataset}
 \alias{fashion_mnist_dataset}
 \alias{emnist_dataset}
-\title{MNIST dataset}
+\title{MNIST and Derived Datasets}
 \usage{
 mnist_dataset(
   root = tempdir(),
@@ -33,7 +33,7 @@ qmnist_dataset(
 )
 
 fashion_mnist_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -49,94 +49,96 @@ emnist_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage (default folder: \verb{root/emnist/processed/}).}
+\item{root}{Root directory for dataset storage. The dataset will be stored under \verb{root/<dataset-name>}. Defaults to \code{tempdir()}.}
 
-\item{train}{(bool, optional): If True, creates dataset from
-\code{training.pt}, otherwise from \code{test.pt}.}
+\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
 
-\item{transform}{(callable, optional): A function/transform that  takes in an
-PIL image and returns a transformed version. E.g,
-\code{\link[=transform_random_crop]{transform_random_crop()}}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{(callable, optional): A function/transform that takes
-in the target and transforms it.}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{(bool, optional): If true, downloads the dataset from the
-internet and puts it in root directory. If dataset is already downloaded,
-it is not downloaded again.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
-\item{split}{Character. Dataset split to use. One of \code{"byclass"}, \code{"bymerge"}, \code{"balanced"}, \code{"letters"}, \code{"digits"}, or \code{"mnist"}. Default is \code{"balanced"}.}
+\item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
 }
 \value{
-An R6 dataset object compatible with the \code{{torch}} package, providing indexed access
-to (image, label) pairs from the specified QMNIST subset.
-
-An EMNIST dataset object.
+An R6 dataset object compatible with the \code{{torch}} package, returning items as a list with \code{x} (image) and \code{y} (label).
 }
 \description{
-Prepares the MNIST dataset and optionally downloads it.
-
-Prepares the \href{https://github.com/rois-codh/kmnist}{Kuzushiji-MNIST} dataset
-and optionally downloads it.
-
-Loads and preprocesses the \href{https://github.com/facebookresearch/qmnist}{QMNIST dataset},
-including optional support for the NIST digit subset.
-
-Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
-and optionally downloads it.
-
-EMNIST Dataset
+Prepares various MNIST-style datasets and optionally downloads them.
 }
 \details{
-This dataset is an extended version of the original MNIST, offering more samples and precise label
-information. It is suitable for benchmarking modern machine learning models and can serve as a
-drop-in replacement for MNIST in most image classification tasks.
-
-Fashion-MNIST dataset
-
-Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
+Includes:
 \itemize{
-\item "byclass": 62 classes (digits + uppercase + lowercase)
-\item "bymerge": 47 classes (merged uppercase and lowercase letters)
-\item "balanced": 47 classes balanced between digits and letters
-\item "letters": 26 letter classes only
-\item "digits": 10 digit classes only
-\item "mnist": classic 10 digit classes like the original MNIST dataset
+\item \strong{MNIST}: Original handwritten digit dataset.
+\item \strong{Fashion-MNIST}: Clothing item images for classification.
+\item \strong{Kuzushiji-MNIST}: Japanese cursive character dataset.
+\item \strong{QMNIST}: Extended MNIST with high-precision NIST data.
+\item \strong{EMNIST}: Letters and digits with multiple label splits.
 }
 }
-\section{Supported Subsets}{
+\section{Functions}{
+\itemize{
+\item \code{kmnist_dataset()}: Kuzushiji-MNIST cursive Japanese character dataset.
+
+\item \code{qmnist_dataset()}: Extended MNIST dataset with high-precision test data (QMNIST).
+
+\item \code{fashion_mnist_dataset()}: Fashion-MNIST clothing image dataset.
+
+\item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
+
+}}
+\section{Supported Splits for \code{emnist_dataset()}}{
 
 \itemize{
-\item \code{"train"}: 60,000 training examples (compatible with MNIST)
-\item \code{"test"}: 60,000 test examples (extended QMNIST test set)
-\item \code{"nist"}: Entire NIST digit dataset (for advanced benchmarking)
+\item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
+\item \code{"bymerge"}: 47 classes (merged uppercase and lowercase)
+\item \code{"balanced"}: 47 classes, balanced digits and letters
+\item \code{"letters"}: 26 uppercase letters
+\item \code{"digits"}: 10 digit classes
+\item \code{"mnist"}: Standard MNIST digit classes
+}
+}
+
+\section{Supported Splits for \code{qmnist_dataset()}}{
+
+\itemize{
+\item \code{"train"}: 60,000 training samples (MNIST-compatible)
+\item \code{"test"}: Extended test set
+\item \code{"nist"}: Full NIST digit set
 }
 }
 
 \examples{
 \dontrun{
-qmnist <- qmnist_dataset(split = "train", download = TRUE)
-first_item <- qmnist[1]
-# image in item 1
-first_item$x
-# label of item 1
-first_item$y
-}
+ds <- mnist_dataset(download = TRUE)
+item <- ds[1]
+item$x  # image
+item$y  # label
 
-\dontrun{
+qmnist <- qmnist_dataset(split = "train", download = TRUE)
+item <- qmnist[1]
+item$x
+item$y
+
 emnist <- emnist_dataset(split = "balanced", download = TRUE)
-first_item <- emnist[1]
-# image in item 1
-first_item$x
-# label of item 1
-first_item$y
+item <- emnist[1]
+item$x
+item$y
+
+kmnist <- kmnist_dataset(download = TRUE)
+fmnist <- fashion_mnist_dataset(download = TRUE)
 }
 
 }
 \seealso{
-\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
-
-\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}
-
-\code{\link[=mnist_dataset]{mnist_dataset()}}, \code{\link[=kmnist_dataset]{kmnist_dataset()}}, \code{\link[=fashion_mnist_dataset]{fashion_mnist_dataset()}}
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
 }
+\concept{classification_dataset}

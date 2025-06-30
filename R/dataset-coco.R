@@ -46,7 +46,7 @@
 #' masked <- draw_segmentation_masks(item)
 #' tensor_image_browse(masked)
 #' }
-#' @family datasets
+#' @family detection_dataset
 #' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
@@ -262,7 +262,7 @@ coco_detection_dataset <- torch::dataset(
 #' plot(as.raster(image_array))
 #' title(main = y, col.main = "black")
 #' }
-#' @family datasets
+#' @family caption_dataset
 #' @export
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",

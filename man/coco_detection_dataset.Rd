@@ -69,13 +69,4 @@ masked <- draw_segmentation_masks(item)
 tensor_image_browse(masked)
 }
 }
-\seealso{
-Other datasets: 
-\code{\link{coco_caption_dataset}()},
-\code{\link{fer_dataset}()},
-\code{\link{fgvc_aircraft_dataset}()},
-\code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
-\code{\link{tiny_imagenet_dataset}()}
-}
-\concept{datasets}
+\concept{detection_dataset}

@@ -64,7 +64,7 @@
 #' fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 #' }
 #'
-#' @family datasets
+#' @family classification_dataset
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",

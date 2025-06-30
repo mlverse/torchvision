@@ -26,7 +26,7 @@
 #' fer$classes[first_item$y]  # "Happy"
 #' }
 #'
-#' @family datasets
+#' @family classification_dataset
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
