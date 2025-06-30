@@ -1,8 +1,8 @@
 #' MNIST and Derived Datasets
 #'
-#' Prepares various MNIST-style datasets and optionally downloads them.
+#' Prepares various MNIST-style image classification datasets and optionally downloads them.
+#' Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as integer.
 #'
-#' Includes:
 #' - **MNIST**: Original handwritten digit dataset.
 #' - **Fashion-MNIST**: Clothing item images for classification.
 #' - **Kuzushiji-MNIST**: Japanese cursive character dataset.
@@ -16,7 +16,7 @@
 #' @param transform Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).
 #' @param target_transform Optional. A function that transforms the label.
 #'
-#' @return An R6 dataset object compatible with the `{torch}` package, returning items as a list with `x` (image) and `y` (label).
+#' @return A torch dataset object, where each items is a list of `x` (image) and `y` (label).
 #'
 #' @section Supported Splits for `emnist_dataset()`:
 #' - `"byclass"`: 62 classes (digits + uppercase + lowercase)

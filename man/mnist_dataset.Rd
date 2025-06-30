@@ -62,13 +62,13 @@ emnist_dataset(
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
 }
 \value{
-An R6 dataset object compatible with the \code{{torch}} package, returning items as a list with \code{x} (image) and \code{y} (label).
+A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
 }
 \description{
-Prepares various MNIST-style datasets and optionally downloads them.
+Prepares various MNIST-style image classification datasets and optionally downloads them.
+Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as integer.
 }
 \details{
-Includes:
 \itemize{
 \item \strong{MNIST}: Original handwritten digit dataset.
 \item \strong{Fashion-MNIST}: Clothing item images for classification.
