@@ -89,13 +89,6 @@ B7 \tab 2.0 \tab 3.1
 }
 
 \examples{
-if (torch::cuda_is_available()) {
-  model <- model_efficientnet_b0(pretrained = FALSE)
-  input <- torch::torch_randn(1, 3, 224, 224)
-  output <- model(input)
-  print(output$shape)  # Should be (1, 1000) by default
-}
-
 \dontrun{
 model <- model_efficientnet_b0()
 input <- torch::torch_randn(1, 3, 224, 224)
