@@ -2,14 +2,45 @@
 #'
 #' Constructs EfficientNet model architectures as described in
 #' \emph{EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks}.
+#' These models are designed for image classification tasks and provide a balance
+#' between accuracy and computational efficiency through compound scaling.
+#'
+#' @section Task:
+#' Image classification with 1000 output classes by default (ImageNet).
+#'
+#' @section Input Format:
+#' The models expect input tensors of shape \code{(batch_size, 3, H, W)}, where H and W
+#' should typically be 224 for B0 and scaled versions for B1–B7 (e.g., B7 uses 600x600).
+#'
+#' @section Variants and Scaling:
+#' \tabular{lll}{
+#'   \strong{Model} \tab \strong{Width} \tab \strong{Depth} \cr
+#'   B0 \tab 1.0 \tab 1.0 \cr
+#'   B1 \tab 1.0 \tab 1.1 \cr
+#'   B2 \tab 1.1 \tab 1.2 \cr
+#'   B3 \tab 1.2 \tab 1.4 \cr
+#'   B4 \tab 1.4 \tab 1.8 \cr
+#'   B5 \tab 1.6 \tab 2.2 \cr
+#'   B6 \tab 1.8 \tab 2.6 \cr
+#'   B7 \tab 2.0 \tab 3.1
+#' }
 #'
 #' @inheritParams model_resnet18
-#' @param ... Other parameters passed to the model implementation.
+#' @param ... Other parameters passed to the model implementation, such as
+#' \code{num_classes} to change the output dimension.
+#'
+#' @examples
+#' if (torch::cuda_is_available()) {
+#'   model <- model_efficientnet_b0(pretrained = FALSE)
+#'   input <- torch::torch_randn(1, 3, 224, 224)
+#'   output <- model(input)
+#'   print(output$shape)  # Should be (1, 1000) by default
+#' }
 #'
 #' @family models
-#'
 #' @name model_efficientnet
 NULL
+
 
 conv_norm_act <- torch::nn_module(
   inherit = torch::nn_sequential,
