@@ -91,7 +91,6 @@ flowers102_dataset <- dataset(
     cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download) {
-      cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
       self$download()
     }
     if (!self$check_exists(self$split))
