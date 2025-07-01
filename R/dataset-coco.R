@@ -297,9 +297,6 @@ coco_caption_dataset <- torch::dataset(
     self$year <- year
     self$transform <- transform
     self$target_transform <- target_transform
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
