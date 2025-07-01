@@ -7,7 +7,7 @@
 #' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
 #' @param year Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.
 #' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
-#' @param transforms Optional transform function applied to the image.
+#' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
@@ -30,7 +30,6 @@
 #' @examples
 #' \dontrun{
 #' ds <- coco_detection_dataset(
-#'   root = "~/data",
 #'   train = FALSE,
 #'   year = "2017",
 #'   download = TRUE
@@ -60,7 +59,7 @@ coco_detection_dataset <- torch::dataset(
     train = TRUE,
     year = c("2017", "2014"),
     download = FALSE,
-    transforms = NULL,
+    transform = NULL,
     target_transform = NULL
   ) {
 
@@ -71,7 +70,7 @@ coco_detection_dataset <- torch::dataset(
     self$root <- root
     self$year <- year
     self$split <- split
-    self$transforms <- transforms
+    self$transform <- transform
     self$target_transform <- target_transform
     self$archive_size <- self$archive_size_table[[year]][[split]]
 
@@ -107,15 +106,15 @@ coco_detection_dataset <- torch::dataset(
 
     img_path <- fs::path(self$image_dir, image_info$file_name)
 
-    img_array <- jpeg::readJPEG(img_path)
-    if (length(dim(img_array)) == 2) {
-      img_array <- array(rep(img_array, 3), dim = c(dim(img_array), 3))
+    x <- jpeg::readJPEG(img_path)
+    if (length(dim(x)) == 2) {
+      x <- array(rep(x, 3), dim = c(dim(x), 3))
     }
-    img_array <- aperm(img_array, c(3, 1, 2))
-    img_tensor <- torch::torch_tensor(img_array, dtype = torch::torch_float())
+    x <- aperm(x, c(3, 1, 2))
+    x <- torch::torch_tensor(x, dtype = torch::torch_float())
 
-    H <- as.integer(img_tensor$shape[2])
-    W <- as.integer(img_tensor$shape[3])
+    H <- as.integer(x$shape[2])
+    W <- as.integer(x$shape[3])
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -164,9 +163,15 @@ coco_detection_dataset <- torch::dataset(
       masks = masks_tensor
     )
 
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
     structure(
       list(
-        x = img_tensor,
+        x = x,
         y = y
       ),
       class = c("image_with_bounding_box", "image_with_segmentation_mask")
@@ -249,7 +254,6 @@ coco_detection_dataset <- torch::dataset(
 #' @examples
 #' \dontrun{
 #' ds <- coco_caption_dataset(
-#'   root = "~/data",
 #'   train = FALSE,
 #'   download = TRUE
 #' )
