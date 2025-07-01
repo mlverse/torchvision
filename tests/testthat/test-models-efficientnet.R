@@ -1,5 +1,5 @@
 test_that("efficientnet models produce correct output shapes", {
-  skip_on_os(c("windows", "mac"))
+
 
   variants <- list(
     b0 = model_efficientnet_b0,

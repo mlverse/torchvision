@@ -38,6 +38,15 @@
 #' }
 #'
 #' @family models
+#'
+#' @examples
+#' \dontrun{
+#' model <- model_efficientnet_b0()
+#' input <- torch::torch_randn(1, 3, 224, 224)
+#' output <- model(input)
+#' dim(output)
+#' }
+#'
 #' @name model_efficientnet
 NULL
 
@@ -63,11 +72,13 @@ conv_norm_act <- torch::nn_module(
 
 se_block <- torch::nn_module(
   initialize = function(in_channels, squeeze_channels) {
-    self$avg_pool <- nn_adaptive_avg_pool2d(output_size = 1)
-    self$squeeze <- nn_conv2d(in_channels, squeeze_channels, kernel_size = 1)
-    self$relu <- nn_relu()
-    self$expand <- nn_conv2d(squeeze_channels, in_channels, kernel_size = 1)
-    self$sigmoid <- nn_sigmoid()
+    self$avg_pool <- torch::nn_adaptive_avg_pool2d(output_size = 1)
+    self$squeeze <- torch::nn_conv2d(in_channels, squeeze_channels,
+                                     kernel_size = 1)
+    self$relu <- torch::nn_relu()
+    self$expand <- torch::nn_conv2d(squeeze_channels, in_channels,
+                                    kernel_size = 1)
+    self$sigmoid <- torch::nn_sigmoid()
   },
   forward = function(x) {
     scale <- self$avg_pool(x)
