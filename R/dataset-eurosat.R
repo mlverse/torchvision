@@ -49,9 +49,6 @@ eurosat_dataset <- torch::dataset(
     self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
