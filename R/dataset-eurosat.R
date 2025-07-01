@@ -1,21 +1,22 @@
-#' EuroSAT Dataset
+#' EuroSAT datasets
 #'
-#' Downloads and prepare the EuroSAT dataset from Hugging Face datasets.
-#' The dataset consists of Land Use and Land Cover Classification with Sentinel-2
-#'  satellite images. Images are openly and freely made available by the Earth
-#'  observation program Copernicus. Images are organized into 10 classes.
+#' A collection of Sentinel-2 satellite images for land-use **classification**.
+#' The standard version contains 27,000 RGB thumbnails (64x64) across 10
+#' classes. Variants include the full 13 spectral bands and a small 100-image
+#' subset useful for demos.
 #'
+#' @name eurosat_dataset
 #' @details
-#'  `eurostat_dataset()` provides a total of 27,000 RGB labeled images.
+#' `eurosat_dataset()` provides a total of 27,000 RGB labeled images.
 #'
+#' @inheritParams mnist_dataset
 #' @param root (Optional) Character. The root directory where the dataset will be stored.
 #'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
 #' @param split Character. Must be one of `train`, `val`, or `test`.
-#' @param download Logical. If `TRUE`, downloads the dataset rows from the API if not already present.
-#' @param transform Function. Optional transformation to be applied to the images.
-#' @param target_transform Function. Optional transformation to be applied to the labels.
 #'
-#' @return A `torch::dataset` object named x and y with x, a 64x64 image with 3 or 13 layers, and y, the label .
+#' @return A `torch::dataset` object. Each item is a list with:
+#' * `x`: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
+#' * `y`: the class label
 #'
 #' @examples
 #' \dontrun{
@@ -27,6 +28,7 @@
 #' print(head$x) # Image
 #' print(head$y) # Label
 #' }
+#' @family classification_dataset
 #' @export
 eurosat_dataset <- torch::dataset(
   name = "eurosat",
@@ -44,6 +46,8 @@ eurosat_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
@@ -58,6 +62,8 @@ eurosat_dataset <- torch::dataset(
 
     self$data <- suppressWarnings(readLines(self$split_file))
     self$load_meta()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$data)} images across {length(self$classes)} classes.")
   },
 
   load_meta = function() {
@@ -69,6 +75,8 @@ eurosat_dataset <- torch::dataset(
     if (self$check_exists())
       return(NULL)
 
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
     fs::dir_create(self$root, recurse = TRUE, showWarnings = FALSE)
 
     # Download and extract the dataset archive
@@ -78,18 +86,19 @@ eurosat_dataset <- torch::dataset(
 
 
     if (!dir.exists(self$images_dir)) {
-      message("Extracting archive...")
+      cli_inform("{.cls {class(self)[[1]]}} Extracting archive...")
       utils::unzip(archive, exdir = self$images_dir)
-      message("Extraction complete.")
+      cli_inform("{.cls {class(self)[[1]]}} Extraction complete.")
     }
 
     # Download the split-specific text file
-    message("Downloading split text file: ", self$split_url)
+    cli_inform("{.cls {class(self)[[1]]}} Downloading split text file: {self$split_url}")
     p <- download_and_cache(self$split_url, prefix = class(self)[1])
     fs::file_copy(p, self$split_file, overwrite = TRUE)
     if (file.size(self$split_file) == 0) {
       runtime_error("Downloaded split file `{self$split_file}` is empty.")
     }
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
   check_exists = function() {
     fs::file_exists(self$split_file) &&
@@ -135,12 +144,12 @@ eurosat_dataset <- torch::dataset(
 )
 
 
-#' EuroSAT All Bands Dataset
+#' EuroSAT All Bands dataset
 #'
-#' @details
-#'  `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
+#' Downloads and prepares the EuroSAT dataset with 13 spectral bands.
 #'
 #' @rdname eurosat_dataset
+#' @details `eurosat_all_bands_dataset()` provides a total of 27,000 labeled images with 13 spectral channel bands.
 #'
 #' @export
 eurosat_all_bands_dataset <- torch::dataset(
@@ -154,12 +163,12 @@ eurosat_all_bands_dataset <- torch::dataset(
 
 
 
-#' EuroSAT-100 Dataset
+#' EuroSAT-100 dataset
 #'
-#' @details
-#'  `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands, intended for workshops and demos.
+#' A subset of 100 images with 13 spectral bands useful for workshops and demos.
 #'
 #' @rdname eurosat_dataset
+#' @details `eurosat100_dataset()` provides a subset of 100 labeled images with 13 spectral channel bands.
 #'
 #' @export
 eurosat100_dataset <- torch::dataset(
