@@ -126,10 +126,6 @@ eurosat_dataset <- torch::dataset(
       x <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
     }
 
-    if (!is.null(self$transform)) {
-      x <- self$transform(x)
-    }
-
     # Ensure label exists in class_to_idx
     label <- sub("_.*", "", filename)  # Ensure label is a character string
     if (!label %in% names(self$class_to_idx)) {
@@ -137,9 +133,14 @@ eurosat_dataset <- torch::dataset(
     }
 
     # Convert label index to torch tensor with dtype = torch_long()
-    y <- torch::torch_tensor(
-        as.integer(self$class_to_idx[[label]]), dtype = torch_long()
-      )$squeeze()
+    y <- self$class_to_idx[[label]]
+
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
 
     list(x = x, y = y)
   },
