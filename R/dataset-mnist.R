@@ -216,7 +216,14 @@ qmnist_dataset <- dataset(
     '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
   ),
 
-  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     split <- match.arg(split, c("train", "test", "nist"))
     self$split <- split
     self$root_path <- root

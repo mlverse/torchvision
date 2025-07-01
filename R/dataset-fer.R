@@ -39,6 +39,7 @@ fer_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
+
     self$root <- root
     self$train <- train
     self$transform <- transform

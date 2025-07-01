@@ -37,11 +37,14 @@ eurosat_dataset <- torch::dataset(
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
   archive_size = "<0.1 GB",
 
-  initialize = function(root,
-                        split = "train",
-                        download = FALSE,
-                        transform = NULL,
-                        target_transform = NULL) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
+  ) {
+
     self$root <- normalizePath(root, mustWork = FALSE)
     self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform

@@ -55,8 +55,14 @@ coco_detection_dataset <- torch::dataset(
     "2017" = list(train = "18 GB", val = "770 MB"),
     "2014" = list(train = "13 GB", val = "6.3 GB")
   ),
-  initialize = function(root, train = TRUE, year = c("2017", "2014"),
-                        download = FALSE, transforms = NULL, target_transform = NULL) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    year = c("2017", "2014"),
+    download = FALSE,
+    transforms = NULL,
+    target_transform = NULL
+  ) {
 
     year <- match.arg(year)
     split <- if (train) "train" else "val"

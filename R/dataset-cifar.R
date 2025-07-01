@@ -35,8 +35,14 @@ cifar10_dataset <- torch::dataset(
   type = 10,
   label_fname = "batches.meta.txt",
   archive_size = "160 MB",
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
-                        download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
