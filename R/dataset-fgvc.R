@@ -68,7 +68,7 @@
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
-  archive_size = 2.77,
+  archive_size = "2.8 GB",
 
   initialize = function(
     root = tempdir(),
@@ -87,7 +87,7 @@ fgvc_aircraft_dataset <- dataset(
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download){
       self$download()

@@ -34,14 +34,14 @@ cifar10_dataset <- torch::dataset(
   fname = "cifar-10-batches-bin",
   type = 10,
   label_fname = "batches.meta.txt",
-  archive_size = 0.16,
+  archive_size = "160 MB",
   initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
                         download = FALSE) {
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
@@ -161,7 +161,7 @@ cifar100_dataset <- torch::dataset(
   fname = "cifar-100-binary",
   type = 100,
   label_fname = "fine_label_names.txt",
-  archive_size = 0.16
+  archive_size = "160 MB"
 )
 
 read_batch <- function(path, type = 10) {

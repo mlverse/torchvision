@@ -58,7 +58,7 @@
 #' @export
 mnist_dataset <- dataset(
   name = "mnist",
-  archive_size = 0.01,
+  archive_size = "<0.1 GB",
   resources = list(
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
@@ -81,9 +81,8 @@ mnist_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-    self$archive_size <- if (self$archive_size >= 0.1) self$archive_size else "<0.1"
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
@@ -177,7 +176,7 @@ mnist_dataset <- dataset(
 kmnist_dataset <- dataset(
   name = "kminst_dataset",
   inherit = mnist_dataset,
-  archive_size = 0.02,
+  archive_size = "<0.1 GB",
   resources = list(
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-images-idx3-ubyte.gz", "bdb82020997e1d708af4cf47b453dcf7"),
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-labels-idx1-ubyte.gz", "e144d726b3acfaa3e44228e80efcd344"),
@@ -191,11 +190,8 @@ kmnist_dataset <- dataset(
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
-  archive_size_table = list(
-    "train" = 0.01,
-    "test" = 0.01,
-    "nist" = 0.05
-  ),
+  archive_size = "<0.1 GB",
+
   resources = list(
     train = list(
       c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-train-images-idx3-ubyte.gz", "ed72d4157d28c017586c42bc6afe6370"),
@@ -226,9 +222,8 @@ qmnist_dataset <- dataset(
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
-    self$archive_size <- if (self$archive_size_table[[split]] >= 0.1) self$archive_size_table[[split]] else "<0.1"
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
@@ -356,7 +351,7 @@ read_sn3_pascalvincent <- function(path) {
 fashion_mnist_dataset <- dataset(
   name = "fashion_mnist_dataset",
   inherit = mnist_dataset,
-  archive_size = 0.03,
+  archive_size = "<0.1 GB",
   resources = list(
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz", "8d4fb7e6c68d591d4c3dfef9ec88bf0d"),
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz", "25c81989df183df01b3e8a0aad5dffbe"),
@@ -373,7 +368,7 @@ fashion_mnist_dataset <- dataset(
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",
-  archive_size = 0.54,
+  archive_size = "540 MB",
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
@@ -415,7 +410,7 @@ emnist_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes_list[[split]]
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
     cli_inform("You may have to increase the download timeout in your session with `options()` in case of failure")
 
     if (download)

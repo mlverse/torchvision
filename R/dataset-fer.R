@@ -30,7 +30,7 @@
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
-  archive_size = 0.09,
+  archive_size = "<0.1 GB",
 
   initialize = function(
     root = tempdir(),
@@ -49,9 +49,8 @@ fer_dataset <- dataset(
     self$md5 <- "ca95d94fe42f6ce65aaae694d18c628a"
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
-    self$archive_size <- if (self$archive_size >= 0.1) self$archive_size else "<0.1"
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 

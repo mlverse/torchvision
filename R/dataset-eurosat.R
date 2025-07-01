@@ -35,7 +35,7 @@ eurosat_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
   archive_md5 = "c8fa014336c82ac7804f0398fcb19387",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
-  archive_size = 0.08,
+  archive_size = "<0.1 GB",
 
   initialize = function(root,
                         split = "train",
@@ -52,9 +52,8 @@ eurosat_dataset <- torch::dataset(
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
-    self$archive_size <- if (self$archive_size >= 0.1) self$archive_size else "<0.1"
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
 
     if (download) {
       self$download()
@@ -162,7 +161,7 @@ eurosat_all_bands_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSATallBands.zip?download=true",
   archive_md5 = "5ac12b3b2557aa56e1826e981e8e200e",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
-  archive_size = 1.97
+  archive_size = "2 GB"
 )
 
 
@@ -182,7 +181,7 @@ eurosat100_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
   archive_md5 = "c21c649ba747e86eda813407ef17d596",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true",
-  archive_size = 0.00
+  archive_size = "<0.1 GB"
 )
 
 
