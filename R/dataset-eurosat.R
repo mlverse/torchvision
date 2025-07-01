@@ -35,7 +35,7 @@ eurosat_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
   archive_md5 = "c8fa014336c82ac7804f0398fcb19387",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
-  archive_size = "<0.1 GB",
+  archive_size = "90 MB",
 
   initialize = function(
     root = tempdir(),
@@ -182,7 +182,7 @@ eurosat100_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
   archive_md5 = "c21c649ba747e86eda813407ef17d596",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true",
-  archive_size = "<0.1 GB"
+  archive_size = "7 MB"
 )
 
 

@@ -30,7 +30,7 @@
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
-  archive_size = "<0.1 GB",
+  archive_size = "90 MB",
 
   initialize = function(
     root = tempdir(),
