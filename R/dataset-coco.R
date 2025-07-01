@@ -283,7 +283,9 @@ coco_caption_dataset <- torch::dataset(
     root = tempdir(),
     train = TRUE,
     year = c("2014"),
-    download = FALSE
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
   ) {
 
     year <- match.arg(year)
@@ -293,6 +295,8 @@ coco_caption_dataset <- torch::dataset(
     self$root <- root
     self$split <- split
     self$year <- year
+    self$transform <- transform
+    self$target_transform <- target_transform
 
     cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 
@@ -327,14 +331,20 @@ coco_caption_dataset <- torch::dataset(
 
     ann <- self$annotations[index, ]
     image_id <- ann$image_id
-    caption <- ann$caption
+    y <- ann$caption
 
     prefix <- if (self$split == "train") "COCO_train2014_" else "COCO_val2014_"
     filename <- paste0(prefix, sprintf("%012d", image_id), ".jpg")
     image_path <- fs::path(self$image_dir, filename)
 
-    image_array <- jpeg::readJPEG(image_path)
+    x <- jpeg::readJPEG(image_path)
 
-    list(x = image_array, y = caption)
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
   }
 )
