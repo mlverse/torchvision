@@ -57,10 +57,10 @@ caltech101_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
@@ -176,11 +176,13 @@ caltech256_dataset <- torch::dataset(
   self$transform <- transform
   self$target_transform <- target_transform
 
-  cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
+  
 
   if (download) {
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
     self$download()
   }
+
   if (!self$check_exists()) {
     cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
   }

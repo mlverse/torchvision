@@ -82,10 +82,10 @@ mnist_dataset <- dataset(
     self$target_transform <- target_transform
     self$train <- train
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -230,10 +230,10 @@ qmnist_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -417,10 +417,10 @@ emnist_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes_list[[split]]
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")

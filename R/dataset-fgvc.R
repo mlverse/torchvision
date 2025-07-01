@@ -87,9 +87,8 @@ fgvc_aircraft_dataset <- dataset(
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
     if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 

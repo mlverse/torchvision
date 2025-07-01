@@ -74,8 +74,6 @@ coco_detection_dataset <- torch::dataset(
     self$target_transform <- target_transform
     self$archive_size <- self$archive_size_table[[year]][[split]]
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
     image_year <- if (year == "2016") "2014" else year
@@ -83,7 +81,8 @@ coco_detection_dataset <- torch::dataset(
     self$annotation_file <- fs::path(self$data_dir, "annotations",
                                      glue::glue("instances_{split}{year}.json"))
 
-    if (download) {
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -302,10 +301,10 @@ coco_caption_dataset <- torch::dataset(
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
     self$archive_size <- self$archive_size_table[[year]][[split]]
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
