@@ -30,6 +30,7 @@ cli_inform <- function(..., env = rlang::caller_env()) {
   cli::cli_inform(gettext(..., domain = "R-torchvision")[[1]], .envir = env)
 }
 
+
 stop_iteration_error <- function(..., env = rlang::caller_env()) {
   rlang::abort(glue::glue(gettext(..., domain = "R-torchvision")[[1]], .envir = env), class = "stop_iteration_error")
 }

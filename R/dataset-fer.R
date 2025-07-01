@@ -26,9 +26,7 @@
 #' fer$classes[first_item$y]  # "Happy"
 #' }
 #'
-#' @name fer_dataset
-#' @aliases fer_dataset
-#' @title FER-2013 Facial Expression Dataset
+#' @family classification_dataset
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
@@ -55,7 +53,7 @@ fer_dataset <- dataset(
 
     cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}} GB) will be downloaded and processed if not already available.")
 
-    cli::cli_inform("Preparing FER-2013 dataset ({self$split})...")
+    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 
     if (download) {
       self$download()
@@ -74,7 +72,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    cli::cli_inform("Parsing image data into 48x48 grayscale arrays...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- parsed$emotion + 1L
@@ -82,9 +80,7 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    cli::cli_inform(
-      "FER-2013 ({self$split}) loaded: {length(self$x)} images, 48x48 grayscale, {length(self$classes)} classes."
-    )
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
   },
 
   .getitem = function(i) {
@@ -109,14 +105,14 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      cli::cli_inform("FER-2013 already exists. Skipping download.")
+      cli_inform("{.cls {class(self)[[1]]}} Dataset already exists. Skipping download.")
       return()
     }
 
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    cli::cli_inform("Downloading FER-2013 dataset... (Size: ~100MB)")
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
 
     archive <- download_and_cache(self$url)
 
@@ -124,6 +120,7 @@ fer_dataset <- dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     untar(archive, exdir = self$root)
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_files = function() {

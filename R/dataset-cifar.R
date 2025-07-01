@@ -1,19 +1,30 @@
-
-#' Cifar datasets
+#' CIFAR datasets
 #'
-#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) Dataset.
+#' The CIFAR datasets are benchmark **classification** datasets composed of
+#' 60,000 RGB thumbnail images of size 32x32 pixels. The
+#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) variant contains
+#' 10 classes while CIFAR100 provides 100 classes. Images are split into
+#' 50,000 training samples and 10,000 test samples.
 #'
+#' Downloads and prepares the CIFAR archives.
+#'
+#' @rdname cifar_datasets
+#'
+#' @inheritParams mnist_dataset
 #' @param root (string): Root directory of dataset where directory
 #'   `cifar-10-batches-bin` exists or will be saved to if download is set to TRUE.
-#' @param train (bool, optional): If TRUE, creates dataset from training set, otherwise
-#'   creates from test set.
-#' @param transform (callable, optional): A function/transform that takes in an PIL image
-#'   and returns a transformed version. E.g, [transform_random_crop()]
-#' @param target_transform (callable, optional): A function/transform that takes in the
-#'   target and transforms it.
-#' @param download (bool, optional): If true, downloads the dataset from the internet and
-#'   puts it in root directory. If dataset is already downloaded, it is not
-#'   downloaded again.
+#' @return A torch::dataset object. Each item is a list with:
+#' * `x`: a 32x32x3 integer array
+#' * `y`: the class label
+#'
+#' @examples
+#' \dontrun{
+#' ds <- cifar10_dataset(root = tempdir(), download = TRUE)
+#' item <- ds[1]
+#' item$x
+#' item$y
+#' }
+#' @family classification_dataset
 #'
 #' @export
 cifar10_dataset <- torch::dataset(
@@ -57,6 +68,8 @@ cifar10_dataset <- torch::dataset(
 
     self$x <- data$imgs
     self$y <- data$labels + 1L
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$y)} images across {length(self$classes)} classes.")
   },
   .load_meta = function() {
     cl <- readLines(fs::path(self$root, self$fname, self$label_fname))
@@ -83,12 +96,16 @@ cifar10_dataset <- torch::dataset(
     if(self$check_files())
       return()
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+
     archive <- download_and_cache(self$url)
 
     if (!tools::md5sum(archive) == self$md5)
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     utils::untar(archive, exdir = self$root)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
   check_files = function() {
 
@@ -129,11 +146,12 @@ cifar10_dataset <- torch::dataset(
   }
 )
 
-#' Cifar 100 dataset
+#' CIFAR100 dataset
 #'
-#' Downloads and prepares the CIFAR100 dataset.
+#' Downloads and prepares the
+#' [CIFAR100](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
 #'
-#' @rdname cifar10_dataset
+#' @rdname cifar_datasets
 #' @export
 cifar100_dataset <- torch::dataset(
   name = "cifar100_dataset",

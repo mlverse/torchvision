@@ -64,9 +64,7 @@
 #' fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 #' }
 #'
-#' @name fgvc_aircraft_dataset
-#' @aliases fgvc_aircraft_dataset
-#' @title FGVC Aircraft dataset
+#' @family classification_dataset
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
@@ -127,9 +125,9 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
     self$labels_df <- merged_df[, levels]
 
-    rlang::inform(glue::glue(
-      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
-    ))
+    cli_inform(
+      "{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes[[annotation_level]])} classes."
+    )
   },
 
   .getitem = function(index) {
@@ -169,11 +167,15 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
       runtime_error("Corrupt file! Delete the file at {archive} and try again.")
     }
 
     untar(archive, exdir = self$root)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )

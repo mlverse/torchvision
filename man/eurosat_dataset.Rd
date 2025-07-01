@@ -4,7 +4,7 @@
 \alias{eurosat_dataset}
 \alias{eurosat_all_bands_dataset}
 \alias{eurosat100_dataset}
-\title{EuroSAT Dataset}
+\title{EuroSAT datasets}
 \usage{
 eurosat_dataset(
   root,
@@ -36,27 +36,35 @@ if empty, will use the default \code{rappdirs::user_cache_dir("torch")}.}
 
 \item{split}{Character. Must be one of \code{train}, \code{val}, or \code{test}.}
 
-\item{download}{Logical. If \code{TRUE}, downloads the dataset rows from the API if not already present.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
-\item{transform}{Function. Optional transformation to be applied to the images.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{Function. Optional transformation to be applied to the labels.}
+\item{target_transform}{Optional. A function that transforms the label.}
 }
 \value{
-A \code{torch::dataset} object named x and y with x, a 64x64 image with 3 or 13 layers, and y, the label .
+A \code{torch::dataset} object. Each item is a list with:
+\itemize{
+\item \code{x}: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
+\item \code{y}: the class label
+}
 }
 \description{
-Downloads and prepare the EuroSAT dataset from Hugging Face datasets.
-The dataset consists of Land Use and Land Cover Classification with Sentinel-2
-satellite images. Images are openly and freely made available by the Earth
-observation program Copernicus. Images are organized into 10 classes.
+A collection of Sentinel-2 satellite images for land-use \strong{classification}.
+The standard version contains 27,000 RGB thumbnails (64x64) across 10
+classes. Variants include the full 13 spectral bands and a small 100-image
+subset useful for demos.
+
+Downloads and prepares the EuroSAT dataset with 13 spectral bands.
+
+A subset of 100 images with 13 spectral bands useful for workshops and demos.
 }
 \details{
-\code{eurostat_dataset()} provides a total of 27,000 RGB labeled images.
+\code{eurosat_dataset()} provides a total of 27,000 RGB labeled images.
 
 \code{eurosat_all_bands_dataset()} provides a total of 27,000 labeled images with 13 spectral channel bands.
 
-\code{eurosat100_dataset()} provides a subset of 100 labeled images with 13 spectral channel bands, intended for workshops and demos.
+\code{eurosat100_dataset()} provides a subset of 100 labeled images with 13 spectral channel bands.
 }
 \examples{
 \dontrun{
@@ -69,3 +77,14 @@ print(head$x) # Image
 print(head$y) # Label
 }
 }
+\seealso{
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{mnist_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{classification_dataset}
