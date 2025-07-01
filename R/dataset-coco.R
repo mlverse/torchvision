@@ -275,11 +275,13 @@ coco_caption_dataset <- torch::dataset(
     "2014" = list(train = "13 GB", val = "6.3 GB")
   ),
 
-  initialize = function(root,
-                        train = TRUE,
-                        year = c("2014"),
-                        download = FALSE
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    year = c("2014"),
+    download = FALSE
   ) {
+
     year <- match.arg(year)
     split <- if (train) "train" else "val"
 
