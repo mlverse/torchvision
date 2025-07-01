@@ -129,8 +129,8 @@ eurosat_dataset <- torch::dataset(
       value_error("Label `{label}` not found in class_to_idx." )
     }
 
-    # Convert label index to torch tensor with dtype = torch_long()
-    y <- self$class_to_idx[[label]]
+    # Convert label
+    y <- self$class_to_idx[[label]] + 1
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
