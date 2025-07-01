@@ -5,11 +5,11 @@
 \title{COCO Detection Dataset}
 \usage{
 coco_detection_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   year = c("2017", "2014"),
   download = FALSE,
-  transforms = NULL,
+  transform = NULL,
   target_transform = NULL
 )
 }
@@ -22,7 +22,7 @@ coco_detection_dataset(
 
 \item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 
-\item{transforms}{Optional transform function applied to the image.}
+\item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
@@ -52,7 +52,6 @@ areas, crowd indicators, and segmentation masks from the official COCO annotatio
 \examples{
 \dontrun{
 ds <- coco_detection_dataset(
-  root = "~/data",
   train = FALSE,
   year = "2017",
   download = TRUE

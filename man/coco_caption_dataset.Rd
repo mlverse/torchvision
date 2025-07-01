@@ -4,7 +4,14 @@
 \alias{coco_caption_dataset}
 \title{COCO Caption Dataset}
 \usage{
-coco_caption_dataset(root, train = TRUE, year = c("2014"), download = FALSE)
+coco_caption_dataset(
+  root = tempdir(),
+  train = TRUE,
+  year = c("2014"),
+  download = FALSE,
+  transform = NULL,
+  target_transform = NULL
+)
 }
 \arguments{
 \item{root}{Root directory where the dataset is stored or will be downloaded to.}
@@ -14,6 +21,10 @@ coco_caption_dataset(root, train = TRUE, year = c("2014"), download = FALSE)
 \item{year}{Character. Dataset version year. One of \code{"2014"}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
+
+\item{transform}{Optional transform function applied to the image.}
+
+\item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
 \value{
 An object of class \code{coco_caption_dataset}. Each item is a list:
@@ -28,7 +39,6 @@ Loads the MS COCO dataset for image captioning.
 \examples{
 \dontrun{
 ds <- coco_caption_dataset(
-  root = "~/data",
   train = FALSE,
   download = TRUE
 )
