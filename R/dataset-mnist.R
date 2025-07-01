@@ -418,7 +418,6 @@ emnist_dataset <- dataset(
     self$classes <- self$classes_list[[split]]
 
     cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-    cli_inform("You may have to increase the download timeout in your session with `options()` in case of failure")
 
     if (download)
       self$download()
