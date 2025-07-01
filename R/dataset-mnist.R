@@ -146,16 +146,16 @@ mnist_dataset <- dataset(
       fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
   .length = function() {
     dim(self$data)[1]
@@ -305,16 +305,16 @@ qmnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -490,16 +490,16 @@ emnist_dataset <- dataset(
     data_set <- if (self$is_train) self$data else self$test_data
     targets_set <- if (self$is_train) self$targets else self$test_targets
 
-    img <- data_set[index, , ]
-    target <- targets_set[index]
+    x <- data_set[index, , ]
+    y <- targets_set[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {

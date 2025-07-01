@@ -131,23 +131,23 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- jpeg::readJPEG(self$image_paths[index]) * 255
+    x <- jpeg::readJPEG(self$image_paths[index]) * 255
 
-    label <- if (self$annotation_level == "all") {
+    y <- if (self$annotation_level == "all") {
       as.integer(self$labels_df[index, ])
     } else {
       self$labels_df[[self$annotation_level]][index]
     }
 
     if (!is.null(self$transform)) {
-      img <- self$transform(img)
+      x <- self$transform(x)
     }
 
     if (!is.null(self$target_transform)) {
-      label <- self$target_transform(label)
+      y <- self$target_transform(y)
     }
 
-    list(x = img, y = label)
+    list(x = x, y = y)
   },
 
   .length = function() {

@@ -121,13 +121,13 @@ eurosat_dataset <- torch::dataset(
     }
     image_ext <- fs::path_ext(image_path)
     if (image_ext == "jpg") {
-      img_array <- jpeg::readJPEG(image_path)
+      x <- jpeg::readJPEG(image_path)
     } else {
-      img_array <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
+      x <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
     }
 
     if (!is.null(self$transform)) {
-      img_array <- self$transform(img_array)
+      x <- self$transform(x)
     }
 
     # Ensure label exists in class_to_idx
@@ -137,11 +137,11 @@ eurosat_dataset <- torch::dataset(
     }
 
     # Convert label index to torch tensor with dtype = torch_long()
-    label_idx <- torch::torch_tensor(
+    y <- torch::torch_tensor(
         as.integer(self$class_to_idx[[label]]), dtype = torch_long()
       )$squeeze()
 
-    list(x = img_array, y = label_idx)
+    list(x = x, y = y)
   },
 
   .length = function() {
