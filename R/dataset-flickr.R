@@ -1,11 +1,10 @@
 #' Flickr8k Dataset
 #'
-#' Loads the Flickr8k dataset consisting of 8,000 images with five human-annotated captions per image. 
-#' The images in this dataset are in RGB format and vary in spatial resolution.
-#'
-#' The dataset is split into:
-#' - `"train"`: training subset with captions.
-#' - `"test"`: test subset with captions.
+#' The Flickr8k and Flickr30k collections are **image captionning** datasets
+#' composed of 8,000 and 30,000 color images respectively, each paired with five
+#' human-annotated captions. The images are in RGB format with varying spatial
+#' resolutions, and these datasets are widely used for training and evaluating
+#' vision-language models.
 #'
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root : Root directory for dataset storage. The dataset will be stored under `root/flickr8k`.
@@ -25,11 +24,20 @@
 #' first_item <- flickr8k[1]
 #' first_item$x  # image array with shape {3, H, W}
 #' first_item$y  # character vector containing five captions.
+#'
+#' # Load the Flickr30k caption dataset
+#' flickr30k <- flickr30k_caption_dataset(download = TRUE)
+#'
+#' # Access the first item
+#' first_item <- flickr30k[1]
+#' first_item$x  # image array with shape {3, H, W}
+#' first_item$y  # character vector containing five captions.
 #' }
 #'
-#' @name flickr8k_caption_dataset
-#' @aliases flickr8k_caption_dataset
-#' @title Flickr8k Caption Dataset
+#' @name flickr_caption_dataset
+#' @title Flickr Caption Datasets
+#' @rdname flickr_caption_dataset
+#' @family caption_dataset
 #' @export
 flickr8k_caption_dataset <- torch::dataset(
   name = "flickr8k",
@@ -187,13 +195,6 @@ flickr8k_caption_dataset <- torch::dataset(
 
 #' Flickr30k Dataset
 #'
-#' Loads the Flickr30k dataset consisting of 30,000 images with five human-annotated captions per image.
-#' The images in this dataset are in RGB format and vary in spatial resolution.
-#'
-#' The dataset is split into:
-#' - `"train"`: training subset with captions.
-#' - `"test"`: test subset with captions.
-#'
 #' @inheritParams flickr8k_caption_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/flickr30k`.
 #'
@@ -202,20 +203,7 @@ flickr8k_caption_dataset <- torch::dataset(
 #' - `x`: a H x W x 3 integer array representing an RGB image.
 #' - `y`: a character vector containing all five captions associated with the image.
 #'
-#' @examples
-#' \dontrun{
-#' # Load the Flickr30k caption dataset
-#' flickr30k <- flickr30k_caption_dataset(download = TRUE)
-#'
-#' # Access the first item
-#' first_item <- flickr30k[1]
-#' first_item$x  # image array with shape {3, H, W}
-#' first_item$y  # character vector containing five captions.
-#' }
-#'
-#' @name flickr30k_caption_dataset
-#' @aliases flickr30k_caption_dataset
-#' @title Flickr30k Caption Dataset
+#' @rdname flickr_caption_dataset
 #' @export
 flickr30k_caption_dataset <- torch::dataset(
   name = "flickr30k",
