@@ -47,8 +47,8 @@ test_that("Caltech101 dataset works correctly (dataloader)", {
 
 test_that("Caltech256 dataset works correctly", {
 
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
     caltech256_dataset(root = tempfile(), download = FALSE),
@@ -67,8 +67,8 @@ test_that("Caltech256 dataset works correctly", {
 
 test_that("Caltech256 dataset works correctly (dataloader)", {
 
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   caltech256 <- caltech256_dataset(
     root = t,

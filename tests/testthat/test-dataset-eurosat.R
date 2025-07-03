@@ -93,8 +93,8 @@ test_that("eurosat_all_bands_dataset derivatives download and prepare correctly"
   skip_on_cran()
   skip_if_not_installed("torch")
 
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
     eurosat_all_bands_dataset(root = tempfile(), split = "test", download = FALSE),

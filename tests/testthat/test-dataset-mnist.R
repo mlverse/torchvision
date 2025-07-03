@@ -77,8 +77,8 @@ test_that("fashion_mnist_dataset loads correctly", {
 test_that("tests for the emnist dataset", {
   skip_on_cran()
 
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
     ds <- emnist_dataset(root = tempfile())

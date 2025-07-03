@@ -16,8 +16,8 @@ test_that("coco_detection_dataset handles missing files gracefully", {
 })
 
 test_that("coco_detection_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
@@ -49,8 +49,8 @@ test_that("coco_detection_dataset loads a single example correctly", {
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
@@ -77,8 +77,8 @@ test_that("coco_caption_dataset handles missing files gracefully", {
 })
 
 test_that("coco_caption_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
@@ -98,8 +98,8 @@ test_that("coco_caption_dataset loads a single example correctly", {
 })
 
 test_that("coco_caption_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TORCHVISION_ALLOW_LARGE_TESTS") != "1",
-        "Skipping test: set TORCHVISION_ALLOW_LARGE_TESTS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
