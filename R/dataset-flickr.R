@@ -36,6 +36,7 @@ flickr8k_caption_dataset <- torch::dataset(
   training_file = "train.rds",
   test_file = "test.rds",
   class_index_file = "classes.rds",
+  archive_size = "1 GB",
 
   resources = list(
     c("https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip", "bf6c1abcb8e4a833b7f922104de18627"),
@@ -55,10 +56,9 @@ flickr8k_caption_dataset <- torch::dataset(
     self$target_transform <- target_transform
     self$train <- train
     self$split <- if (train) "train" else "test"
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~1GB) will be downloaded and processed if not already cached.")
     
     if (download)
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
 
     if (!self$check_exists())
@@ -117,7 +117,7 @@ flickr8k_caption_dataset <- torch::dataset(
     self$captions <- data$captions
     self$classes <- readRDS(file.path(self$processed_folder, self$class_index_file))
 
-    cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -125,7 +125,8 @@ flickr8k_caption_dataset <- torch::dataset(
     if (self$check_exists()) 
       return()
 
-    cli_inform("Downloading {.cls {class(self)[[1]]}} split: '{self$split}'")
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
     fs::dir_create(self$raw_folder)
 
     for (r in self$resources) {
@@ -141,6 +142,9 @@ flickr8k_caption_dataset <- torch::dataset(
         utils::untar(tar_path, exdir = self$raw_folder)
       }
     }
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+
   },
 
   check_processed_exists = function() {
@@ -216,6 +220,7 @@ flickr8k_caption_dataset <- torch::dataset(
 flickr30k_caption_dataset <- torch::dataset(
   name = "flickr30k",
   inherit = flickr8k_caption_dataset,
+  archive_size = "4.1 GB",
   resources = list(
     c("https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz", "985ac761bbb52ca49e0c474ae806c07c"),
     c("https://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip", "4fa8c08369d22fe16e41dc124bd1adc2")
@@ -234,9 +239,8 @@ flickr30k_caption_dataset <- torch::dataset(
     self$train <- train
     self$split <- if (train) "train" else "test"
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~4.1GB) will be downloaded and processed if not already cached.")
-
     if (download)
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
 
     if (!self$check_exists()) 
@@ -261,7 +265,7 @@ flickr30k_caption_dataset <- torch::dataset(
     self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
     self$classes <- captions_map
 
-    cli_inform("Split '{self$split}' loaded with {length(self$images)} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {

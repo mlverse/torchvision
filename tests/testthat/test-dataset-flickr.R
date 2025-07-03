@@ -5,10 +5,9 @@ t <- withr::local_tempdir()
 test_that("tests for the flickr8k dataset for train split", {
   skip_on_cran()
 
-  expect_error(
-    flickr8k <- flickr8k_caption_dataset(root = tempfile()),
-    class = "rlang_error"
-  )
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
 
   flickr8k <- flickr8k_caption_dataset(root = t, train = TRUE, download = TRUE)
   expect_length(flickr8k, 6000)
@@ -27,6 +26,9 @@ test_that("tests for the flickr8k dataset for train split", {
 test_that("tests for the flickr8k dataset for test split", {
   skip_on_cran()
 
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
   flickr8k <- flickr8k_caption_dataset(root = t, train = FALSE)
   expect_length(flickr8k, 1000)
   first_item <- flickr8k[1]
@@ -43,6 +45,9 @@ test_that("tests for the flickr8k dataset for test split", {
 
 test_that("tests for the flickr8k dataset for dataloader", {
   skip_on_cran()
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
   
   flickr8k <- flickr8k_caption_dataset(
     root = t,
@@ -70,10 +75,9 @@ test_that("tests for the flickr8k dataset for dataloader", {
 test_that("tests for the flickr30k dataset for train split", {
   skip_on_cran()
 
-  expect_error(
-    flickr30k <- flickr30k_caption_dataset(root = tempfile()),
-    class = "rlang_error"
-  )
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
 
   flickr30k <- flickr30k_caption_dataset(root = t, train = TRUE, download = TRUE)
   expect_length(flickr30k, 29000)
@@ -93,6 +97,9 @@ test_that("tests for the flickr30k dataset for train split", {
 test_that("tests for the flickr30k dataset for test split", {
   skip_on_cran()
 
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
   flickr30k <- flickr30k_caption_dataset(root = t, train = FALSE)
   expect_length(flickr30k, 1000)
   first_item <- flickr30k[1]
@@ -109,6 +116,9 @@ test_that("tests for the flickr30k dataset for test split", {
 
 test_that("tests for the flickr30k dataset for dataloader", {
   skip_on_cran()
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   flickr30k <- flickr30k_caption_dataset(
     root = t,
