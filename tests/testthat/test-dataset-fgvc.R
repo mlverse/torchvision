@@ -4,7 +4,7 @@ t <- withr::local_tempdir()
 
 test_that("tests for the FGVC-Aircraft dataset", {
 
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(

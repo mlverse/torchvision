@@ -4,7 +4,7 @@ t <- withr::local_tempdir()
 
 test_that("tests for the Flowers102 dataset for train split", {
 
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
@@ -24,7 +24,7 @@ test_that("tests for the Flowers102 dataset for train split", {
 
 test_that("tests for the Flowers102 dataset for test split", {
 
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   flowers <- flowers102_dataset(root = t, split = "test", download = TRUE)
@@ -39,7 +39,7 @@ test_that("tests for the Flowers102 dataset for test split", {
 
 test_that("tests for the Flowers102 dataset for validation split", {
 
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   flowers <- flowers102_dataset(root = t, split = "val", download = TRUE)
@@ -54,7 +54,7 @@ test_that("tests for the Flowers102 dataset for validation split", {
 
 test_that("tests for the Flowers102 dataset for dataloader", {
 
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS") != "1",
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   flowers <- flowers102_dataset(
