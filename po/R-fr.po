@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-06-15 16:10+0200\n"
-"PO-Revision-Date: 2025-06-15 23:24+0200\n"
+"POT-Creation-Date: 2025-07-03 23:50+0200\n"
+"PO-Revision-Date: 2025-07-03 23:58+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -27,212 +27,349 @@ msgstr ""
 msgid "not_implemented_error"
 msgstr ""
 
-#: dataset-cifar.R:38
-msgid "Files not found. Use download = TRUE"
-msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
+#: conditions.R:18
+msgid "warning"
+msgstr ""
 
-#: dataset-cifar.R:86 dataset-fgvc.R:168 dataset-mnist.R:71 dataset-mnist.R:247
-#: dataset-mnist.R:493
-msgid "Corrupt file! Delete the file in {archive} and try again."
-msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
+#: conditions.R:35
+msgid "stop_iteration_error"
+msgstr ""
 
-#: dataset-eurosat.R:56 dataset-fgvc.R:89 dataset-mnist.R:44
-#: dataset-mnist.R:223 dataset-mnist.R:466
+#: conditions.R:41
+msgid "deprecated"
+msgstr ""
+
+#: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:85 dataset-coco.R:305
+#: dataset-eurosat.R:57 dataset-fer.R:55 dataset-fgvc.R:91 dataset-flickr.R:69
+#: dataset-flickr.R:231 dataset-flowers.R:92 dataset-mnist.R:86
+#: dataset-mnist.R:234 dataset-mnist.R:421
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
+"downloaded and processed if not already available."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} de taille (~{.emph "
+"{self$archive_size}}) sera téléchargé et traité s'il n'est pas déjà "
+"disponible."
+
+#: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:90
+#: dataset-coco.R:310 dataset-eurosat.R:64 dataset-fer.R:60
+#: dataset-flowers.R:97 dataset-mnist.R:91 dataset-mnist.R:239
+#: dataset-mnist.R:426
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 "Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
 "télécharger."
 
-#: dataset-eurosat.R:76
-msgid "Extracting archive..."
-msgstr "Extraction de l'archive..."
+#: dataset-caltech.R:84 dataset-caltech.R:208
+msgid ""
+"{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images "
+"across {length(self$classes)} classes."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$img_path)} "
+"images réparties en {length(self$classes)} classes."
 
-#: dataset-eurosat.R:78
-msgid "Extraction complete."
-msgstr "Extraction réussie."
+#: dataset-caltech.R:117 dataset-coco.R:187 dataset-eurosat.R:81
+#: dataset-flickr.R:136
+msgid "Downloading {.cls {class(self)[[1]]}}..."
+msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
 
-#: dataset-eurosat.R:82
-msgid "Downloading split text file:"
-msgstr "Téléchargement du fichier texte de `split:"
+#: dataset-caltech.R:125
+msgid "Corrupt file! Delete the file in {.file {archive}} and try again."
+msgstr ""
+"Fichier corrompu. Supprimez le fichier dans {.file {archive}} et réessayez."
 
-#: dataset-eurosat.R:86
+#: dataset-caltech.R:136 dataset-cifar.R:115 dataset-coco.R:199
+#: dataset-eurosat.R:104 dataset-fer.R:119 dataset-fgvc.R:178
+#: dataset-flickr.R:154 dataset-flowers.R:158 dataset-mnist.R:141
+#: dataset-mnist.R:300 tiny-imagenet-dataset.R:67
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} a été téléchargé et extrait avec "
+"succès."
+
+#: dataset-caltech.R:182
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
+"downloaded and processed if not already cached."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} de taille (~{.emph "
+"{self$archive_size}}) sera téléchargé et traité s'il n'est pas déjà "
+"disponible."
+
+#: dataset-cifar.R:59
+msgid "Files not found. Use download = TRUE"
+msgstr "Fichier introuvable. Veuillez utiliser `download = TRUE`"
+
+#: dataset-cifar.R:79
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} loaded with {length(self$y)} images across "
+"{length(self$classes)} classes."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$img_path)} "
+"images réparties en {length(self$classes)} classes."
+
+#: dataset-cifar.R:106 dataset-fer.R:111 dataset-fgvc.R:169
+#: dataset-flowers.R:131 dataset-mnist.R:125 dataset-mnist.R:255
+#: tiny-imagenet-dataset.R:43
+msgid "Downloading {.cls {class(self)[[1]]}} ..."
+msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
+
+#: dataset-cifar.R:111 dataset-coco.R:193 dataset-eurosat.R:88
+#: dataset-fer.R:116 dataset-flowers.R:136 dataset-mnist.R:121
+#: dataset-mnist.R:264 dataset-mnist.R:453
+msgid "Corrupt file! Delete the file in {archive} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
+
+#: dataset-coco.R:95 dataset-coco.R:315
+msgid ""
+"{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} "
+"images."
+msgstr ""
+"Jeu de données {.cls {class(self)[[1]]}} chargé avec "
+"{length(self$image_ids)} images."
+
+#: dataset-coco.R:326
+msgid "Index out of bounds"
+msgstr "Index hors limites."
+
+#: dataset-eurosat.R:69
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} loaded with {length(self$data)} images "
+"across {length(self$classes)} classes."
+msgstr ""
+"Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$data)} "
+"images réparties en {length(self$classes)} classes."
+
+#: dataset-eurosat.R:92
+msgid "Extracting {.cls {class(self)[[1]]}} archive..."
+msgstr "Extraction de l'archive de {.cls {class(self)[[1]]}}..."
+
+#: dataset-eurosat.R:94
+msgid "Extraction of {.cls {class(self)[[1]]}} is complete."
+msgstr "Extraction de l'archive {.cls {class(self)[[1]]}} terminée..."
+
+#: dataset-eurosat.R:98
+msgid "Downloading {.cls {class(self)[[1]]}} split file: {self$split_url}"
+msgstr ""
+"Téléchargement du fichier de split de {.cls {class(self)[[1]]}} depuis "
+"{self$split_url} ..."
+
+#: dataset-eurosat.R:102
 msgid "Downloaded split file `{self$split_file}` is empty."
 msgstr "Le fichier téléchargé `{self$split_file}` est vide."
 
-#: dataset-eurosat.R:100
+#: dataset-eurosat.R:117
 msgid "Image file `{filename}` not found."
 msgstr "Fichier d'image `{filename}` introuvable."
 
-#: dataset-eurosat.R:116
+#: dataset-eurosat.R:129
 msgid "Label `{label}` not found in class_to_idx."
-msgstr "Le label `{label}` ne fait pas partie de `class_to_idx`"
+msgstr "Le label `{label}` ne fait pas partie de `class_to_idx`."
 
-#: dataset-fgvc.R:70
-msgid "Initializing FGVC-Aircraft dataset..."
-msgstr "Initialisation du jeu de données FGVC-Aircraft..."
+#: dataset-fer.R:72 dataset-fer.R:80 dataset-mnist.R:267
+#: tiny-imagenet-dataset.R:48
+msgid "Processing {.cls {class(self)[[1]]}} ..."
+msgstr "Préparation de {.cls {class(self)[[1]]}} ..."
 
-#: dataset-fgvc.R:83
-msgid "Downloading and extracting FGVC-Aircraft dataset (Size: ~2.6 GB)..."
+#: dataset-fgvc.R:96 dataset-flickr.R:73 dataset-flickr.R:235
+msgid "Dataset not found. Use `download = TRUE` to download it."
 msgstr ""
-"Téléchargement et extraction du jeu de données FGVC-Aircraft (Taille : ~2.6 "
-"GB)..."
+"Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
+"télécharger."
 
-#: dataset-fgvc.R:104
-msgid "Invalid annotation_level"
-msgstr "`annotation_level` invalide."
-
-#: dataset-fgvc.R:130
+#: dataset-fgvc.R:128
 msgid ""
-"FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} "
-"samples ({split}, {annotation_level}-level)."
+"{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} "
+"images across {length(self$classes[[annotation_level]])} classes."
 msgstr ""
-"Le jeu de données FGVC-Aircraft a été chargé avec succès avec "
-"{length(self$image_paths)} échantillons ({split}, niveau {annotation_level})."
+"Le jeu de données {.cls {class(self)[[1]]}} a été chargé avec "
+"{length(self$image_paths)} images réparties en "
+"{length(self$classes[[annotation_level]])} classes."
 
-#: dataset-fgvc.R:173
-msgid "FGVC-Aircraft dataset downloaded and extracted successfully."
+#: dataset-fgvc.R:173 dataset-flickr.R:143
+msgid "Corrupt file! Delete the file at {archive} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
+
+#: dataset-flickr.R:111
+msgid "The following IDs are missing captions: {paste(missing, collapse=', ')}"
 msgstr ""
-"Le jeu de données FGVC-Aircraft a été téléchargé et extrait avec succès."
 
-#: dataset-mnist.R:75 dataset-mnist.R:250
-msgid "Processing..."
-msgstr "Traitement en cours..."
-
-#: dataset-mnist.R:90 dataset-mnist.R:282 tiny-imagenet-dataset.R:67
-msgid "Done!"
-msgstr "Terminé!"
-
-#: dataset-mnist.R:451
-msgid "Preparing to download EMNIST dataset. Archive size is ~0.5GB"
-msgstr ""
-"Préparation du téléchargement du jeu de données EMNIST. La taille de "
-"l'archive est de ~0.5GB"
-
-#: dataset-mnist.R:452
+#: dataset-flickr.R:128 dataset-flickr.R:256
 msgid ""
-"You may have to increase the download timeout in your session with "
-"`options()` in case of failure"
+"{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images "
+"across {length(self$classes)} classes."
 msgstr ""
-"Le délai de téléchargement dans votre session peut être augmenté avec "
-"`options()` en cas d'échec"
+"Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$data)} "
+"images réparties en {length(self$classes)} classes."
 
-#: dataset-mnist.R:453
-msgid "- Will extract and convert for all {length(self$classes_list)} splits"
+#: dataset-flowers.R:102
+msgid ""
+"{.cls {class(self)[[1]]}} Split '{self$split}' loaded with "
+"{length(self$img_path)} samples."
 msgstr ""
-"- Extraction et conversion de l'ensemble des {length(self$classes_list)} "
-"classes du sous-ensemble de donnée."
+"Le split '{self$split}' de {.cls {class(self)[[1]]}} a été chargé avec "
+"{length(self$img_path)} échantillons."
 
-#: dataset-mnist.R:480
-msgid "EMNIST dataset processed successfully!"
-msgstr "L'ensemble de données EMNIST a été traité avec succès !"
+#: dataset-flowers.R:126
+msgid ""
+"{.cls {class(self)[[1]]}} Split '{self$split}' is already processed and "
+"cached."
+msgstr ""
+"Le split '{self$split}' de {.cls {class(self)[[1]]}} a déja été préparé et "
+"mis en cache."
+
+#: dataset-flowers.R:140
+msgid "{.cls {class(self)[[1]]}} Extracting images and processing dataset..."
+msgstr ""
+"Extraction d'image et préparation du dataset {.cls {class(self)[[1]]}}..."
+
+#: dataset-mnist.R:102
+msgid ""
+"Dataset {.cls {class(self)[[1]]}} loaded with {length(self$targets)} images."
+msgstr ""
+"Jeu de données {.cls {class(self)[[1]]}} chargé avec "
+"{length(self$image_ids)} images."
+
+#: dataset-mnist.R:126
+msgid "Processing {.cls {class(self)[[1]]}}..."
+msgstr "Préparation de {.cls {class(self)[[1]]}}..."
+
+#: dataset-mnist.R:440
+msgid "{.cls {class(self)[[1]]}} dataset processed successfully!"
+msgstr "Le jeu de données {.cls {class(self)[[1]]}} a été préparé avec succès."
+
+#: extension.R:2
+msgid ""
+"has_ops() Not implemented yet. https://github.com/pytorch/vision/blob/"
+"b266c2f1a5c10f5caf22f5aea7418acc392a5075/torchvision/extension.py#L60"
+msgstr ""
+
+#: extension.R:8
+msgid ""
+"Couldn't load custom C++ ops. This can happen if your torch and torchvision\n"
+"       versions are incompatible, or if you had errors while compiling "
+"torchvision\n"
+"       from source. Please reinstall torchvision so that it matches your "
+"torch install."
+msgstr ""
+"La librairie spécifique C++ ops ne peut être chargée. C'est peut êtr ele "
+"symptôme de \n"
+"    version de torch et de torchvision incompatibles, ou si vous avez eu des "
+"erreurs lors de\n"
+"    la compilation de torchvision depuis les sources. Veuillez réinstaller "
+"torchvision pour qu'il\n"
+"    corresponde à la version de torch."
 
 #: folder-dataset.R:19
 msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
 msgstr ""
-"Les deux paramètres `extensions` et `is_valid_file` ne peuvent ni être "
-"`None`, ni être différents de `None` ensemble."
+"Vous pouvez configurer `extensions` ou `is_valid_files` mais pas les deux."
 
-#: folder-dataset.R:138
+#: folder-dataset.R:140
 msgid "unknown extension {ext} in path {path}"
-msgstr "Extension de fichier {ext} inconnue pour {path}."
+msgstr "Extension {ext} inconnue dans le répertoire {path}."
 
 #: model-detection-anchor-utils.R:83
-msgid "cell_anchors should not be NULL"
-msgstr "les ancres de cellules ne doivent pas être NULL"
+msgid "{.var cell_anchors} should not be NULL"
+msgstr "{.var cell_anchors} ne peuvent pas être NULL."
 
 #: model-detection-anchor-utils.R:86
-msgid "Anchors should be Tuple[Tuple[int]] because each feature"
-msgstr "Les ancres doivent être des Tuple[Tuple[int]] car chaque carte de"
+msgid "Anchors should be a list(list(int)) because each feature"
+msgstr "`anchors` doivent être une `list(list(integer))` car chaque feature"
 
 #: model-detection-anchor-utils.R:87
 msgid "map could potentially have different sizes and aspect ratios."
 msgstr ""
-"caractéristique peut potentiellement avoir des tailles et des rapports "
-"d'aspet différents."
+"caractéristique peut potentiellement avoir des tailles et des rapports de "
+"taille différents."
 
 #: model-detection-anchor-utils.R:88
 msgid "There needs to be a match between the number of"
-msgstr "Il faut qu'il y ait une adéquation entre le nombre de"
+msgstr "Le nombre de feature map et le nombre de tailles / rapport de forme"
 
 #: model-detection-anchor-utils.R:89
 msgid "feature maps passed and the number of sizes / aspect ratios specified."
-msgstr ""
-"carte de caractéristiques et le nombre de tailles/rapports d'aspect "
-"spécifiés."
+msgstr "doivent être identiques"
 
 #: model-detection-anchor-utils.R:164
-msgid "aspect_ratios and steps should have the same length"
-msgstr "les aspects_ratios et les étapes doivent avoir la même longueur"
+msgid "{.var aspect_ratios} and {.var steps} should have the same length"
+msgstr "{.var aspect_ratios} et {.var steps} doivent être de même taille."
 
 #: models-inception.R:16
 msgid ""
 "The default weight initialization of inception_v3 will be changed in future "
 "releases of"
 msgstr ""
-"L'initialisation des poids par défaut de inception_v3 sera modifiée dans les "
-"prochaines versions de"
+"L'initialisation des poids par défaut d' `inception_v3` sera changé dans les "
+"prochaines version de"
 
 #: models-inception.R:17
 msgid ""
 "torchvision. If you wish to keep the old behavior (which leads to long "
 "initialization times"
 msgstr ""
-"torchvision. Si vous souhaitez garder le comportement précédent (qui conduit "
-"à des temps d'initialisation plus long"
+"torchvision. Pour garder les anciens poids (qui provoquent un long temps "
+"d'initialisation"
 
 #: models-inception.R:18
 msgid "due to scipy/scipy#11299), please set init_weights={.val TRUE}."
 msgstr ""
-"du fait du problème scipy/scipy#11299), veuillez utiliser set init_weights={."
-"val TRUE}."
+"de fait de l'issue #11299 de scipy), veuillez configurer {.val init_weights "
+"= TRUE}"
 
 #: models-inception.R:24
 msgid ""
 "length of {.arg inception_blocks} should be 7 instead of "
 "{length(inception_blocks)}"
 msgstr ""
-"La longueur de {.arg inception_blocks} doit être 7 et non "
+"la longueur de {.arg inception_blocks} doit être 7 et non "
 "{length(inception_blocks)}."
 
 #: models-mobilenetv2.R:58
-msgid "inverted_residual_setting should be non-empty"
-msgstr "`inverted_residual_setting` doit être non-vide "
-
-#: models-mobilenetv2.R:59
-msgid "or a 4-element list, got {inverted_residual_setting}"
+msgid ""
+"{.var inverted_residual_setting} should be non-empty or a 4-element list, "
+"got {.val {inverted_residual_setting}}"
 msgstr ""
-"ou une liste de vecteurs, chacun de longeur 4. Ici, c'est "
-"{inverted_residual_setting}"
+"{.var inverted_residual_setting} doit être non vide ou une liste de 4 "
+"éléments, et non {.val {inverted_residual_setting}}."
 
 #: models-resnet.R:34
 msgid "basic_block only supports groups=1 and base_width=64"
-msgstr ""
-"`basic_block` n'est compatible qu'avec `groups = 1` et `base_width = 64`."
+msgstr "`basic_block` ne fonctionne qu'avec `groups=1` et `base_width=64`."
 
 #: models-resnet.R:37
 msgid "Dilation > 1 not supported in basic_block"
-msgstr "`dilation > 1` non compatible avec le `basic_block`"
+msgstr "Pas de `dilation` > 1 dans le `basic_block`."
 
 #: models-resnet.R:145
 msgid "replace_stride_with_dilation should be NULL"
-msgstr "`replace_stride_with_dilation` doit être `NULL`"
+msgstr "`replace_stride_with_dilation` devrait être NULL"
 
 #: models-resnet.R:146
 msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
-msgstr "ou un triplet. Ici c'est {lenght(replace_stride_with_dilation)}"
+msgstr ""
+"ou une liste de 3 éléments, et non pas "
+"{length(replace_stride_with_dilation)} éléments."
 
-#: tiny-imagenet-dataset.R:43
-msgid "Downloading tiny imagenet dataset!"
-msgstr "Téléchargement d'un mini jeu de données imagenet en cours!"
+#: ops-boxes.R:178
+msgid "Unsupported Bounding Box Conversions for given in_fmt and out_fmt"
+msgstr ""
+"Le type de conversion demandé pour la boite englobante n'existe pas pour "
+"`in_fmt` et `out_fmt`."
 
-#: tiny-imagenet-dataset.R:48
-msgid "Download complete. Now unzipping."
-msgstr "Téléchargement terminé. Décompression en cours."
+#: ops-boxes.R:291
+msgid "(boxes1[, 3:N] >= boxes1[, 1:2])$all() not TRUE"
+msgstr ""
+
+#: ops-boxes.R:293
+msgid "(boxes2[, 3:N] >= boxes2[, 1:2])$all() not TRUE"
+msgstr ""
 
 #: transforms-defaults.R:298
 msgid "must be positive if a single number"
-msgstr "`value` doit être positif quand c'est une valeur unitaire."
+msgstr "doit être positif si un unique nombre"
 
 #: transforms-defaults.R:308
 msgid "out of bounds."
@@ -240,157 +377,230 @@ msgstr "hors limites."
 
 #: transforms-defaults.R:346 transforms-defaults.R:402
 msgid "degrees must be positive if it's a single value"
-msgstr "`degrees` doit être positif quand c'est une valeur unique."
+msgstr "`degrees` doit être positif, si c'est une valeur isolée."
 
 #: transforms-defaults.R:351 transforms-defaults.R:407
 msgid "degrees must be length 1 or 2"
-msgstr "La longueur de `degrees` doit être 1 ou 2."
+msgstr "`degrees` doit être de longueur 1 ou 2"
 
 #: transforms-defaults.R:414
 msgid "translate must be length 2"
-msgstr "La longueur de `translate` doit être 2."
+msgstr "`translate` doit être de longueur 2."
 
 #: transforms-defaults.R:417
 msgid "translate must be between 0 and 1"
-msgstr "La valeur de `translate` doit être entre 0 et 1."
+msgstr "`translate` doit être pris entre 0 et 1."
 
 #: transforms-defaults.R:424
 msgid "scale must be length 2"
-msgstr "La longueur de `scale` doit être 2."
+msgstr "`scale` doit être de longueur 2."
 
 #: transforms-defaults.R:427
 msgid "scale must be positive"
-msgstr "`scale` doit être positive."
+msgstr "`scale` doit être positif."
 
 #: transforms-defaults.R:436
 msgid "shear must be positive if it's a single value"
-msgstr "`shear` doit être positif quand c'est une valeur unique."
+msgstr ""
 
 #: transforms-defaults.R:441
 msgid "shear's length must be 1, 2, or 4"
-msgstr "La longueur de `shear` doit être 1, 2 ou 4."
+msgstr ""
 
 #: transforms-defaults.R:579
 msgid "not implemented for {class(x)}"
-msgstr "n'est pas supporté pour {class(x)}."
+msgstr ""
 
 #: transforms-tensor.R:18
 msgid "The cast from {img$dtype} to {dtype} cannot be performed safely."
 msgstr ""
-"La conversion de {img$dtype} en {dtype} ne peut pas être faite sans risque."
 
 #: transforms-tensor.R:72
 msgid ""
 "std evaluated to zero after conversion to {dtype}, leading to division by "
 "zero."
 msgstr ""
-"Après conversion en {dtype}, l'écart-type est à zéro, ce qui conduit à une "
-"division par zéro."
 
 #: transforms-tensor.R:98
 msgid "This interpolation mode is unsupported with Tensor input"
 msgstr ""
-"Ce mode d'interpolation n'est pas supporté avec des tenseurs en entrée."
 
 #: transforms-tensor.R:101
 msgid "Size must be a numeric vector of length 1 or 2."
-msgstr "La longueur de `size` doit être 1 ou 2."
+msgstr ""
 
 #: transforms-tensor.R:184
 msgid "Padding must be an int or a 1, 2, or 4 element numeric vector"
 msgstr ""
-"`padding` doit être un entier, ou un vecteur numérique de taille 1, 2 ou 4."
 
 #: transforms-tensor.R:187
 msgid "Padding mode should be either constant, edge, reflect or symmetric"
 msgstr ""
-"Le bourrage `padding_mode` doit être pris parmi `constant`, `edge`, "
-"`reflect` ou `symmetric`."
 
 #: transforms-tensor.R:208
 msgid "Padding can not be negative for symmetric padding_mode"
 msgstr ""
-"le bourrage `padding` ne peut pas être négatif avec le mode `symmetric`."
 
 #: transforms-tensor.R:246 transforms-tensor.R:272
 msgid "Please provide only 2 dimensions (h, w) for size."
 msgstr ""
-"Le vecteur de `size` doit contenir seulement les deux dimensions (h, w)."
 
 #: transforms-tensor.R:255
 msgid "Requested crop size is bigger than input size."
 msgstr ""
-"Le détourage demandée avec `crop` est de taille plus grande que l'entrée."
 
 #: transforms-tensor.R:320
 msgid "brightness factor is negative"
-msgstr "`brightness_factor` doit être positif."
+msgstr ""
 
 #: transforms-tensor.R:331
 msgid "contrast must be positive"
-msgstr "`contrast` doit être positif."
+msgstr ""
 
 #: transforms-tensor.R:344
 msgid "hue_factor must be between -0.5 and 0.5."
-msgstr "`hue_factor` doit être pris entre -0.5 et 0.5"
+msgstr ""
 
 #: transforms-tensor.R:369
 msgid "saturation factor must be positive."
-msgstr "`saturation_factor` doit être positif."
+msgstr ""
 
 #: transforms-tensor.R:401
 msgid "Argument angle should be int or float"
-msgstr "`angle` doit être un entier ou un réel."
+msgstr ""
 
 #: transforms-tensor.R:404
-#, fuzzy
-#| msgid "translate must be length 2"
 msgid "translate should be length 2"
-msgstr "La longueur de `translate` doit être 2."
+msgstr ""
 
 #: transforms-tensor.R:407
 msgid "Argument scale should be positive"
-msgstr "`scale` doit être positif."
+msgstr ""
 
 #: transforms-tensor.R:410
 msgid "Shear should be either a single value or a sequence of 2 values"
 msgstr ""
-"`shear` doit être une valeur simple ou un vecteur de deux valeurs numériques."
 
 #: transforms-tensor.R:424
 msgid "transform perspective is not implemented yet."
-msgstr "`transform_perspective` n'est pas encore implémenté."
+msgstr ""
 
 #: transforms-tensor.R:441
 msgid "tensor is not a torch image."
-msgstr "Le tenseur n'est pas une image torch."
+msgstr ""
 
 #: transforms-tensor.R:725
 msgid "Symmetric padding of N-D tensors are not supported yet"
 msgstr ""
-"Le bourrage en mode `symmetric` de tenseurs de dimension N n'est pas encore "
-"implémenté."
 
 #: transforms-tensor.R:734
 msgid "gamma must be non-negative"
-msgstr "`gamma` doit être positif."
+msgstr ""
 
-#: vision_utils.R:105 vision_utils.R:204 vision_utils.R:276
+#: vision_utils.R:109
+msgid "The provided x class {.class {class(x)}} is not supported"
+msgstr ""
+
+#: vision_utils.R:122 vision_utils.R:227 vision_utils.R:318 vision_utils.R:423
 msgid "magick"
 msgstr ""
 
-#: vision_utils.R:117
-msgid "boxes doesn't contain any box. No box was drawn"
-msgstr "`boxes` ne contient aucun cadre. Aucun cadre n'a été tracé."
-
-#: vision_utils.R:122
-msgid ""
-"Number of labels {length(labels)} cannot be broadcasted on number of boxes "
-"{num_boxes}"
+#: vision_utils.R:125
+msgid "Pass individual `x`, not batches"
 msgstr ""
-"Le nombre de labels ({length(labels)}) n'est pas un multiple du nombre de "
-"cadres ({num_boxes}) et ne peut pas être broadcasté."
 
-#: vision_utils.R:217
+#: vision_utils.R:128 vision_utils.R:325 vision_utils.R:431 vision_utils.R:493
+#: vision_utils.R:523
+msgid "Only grayscale and RGB images are supported"
+msgstr ""
+
+#: vision_utils.R:135
+msgid "`x` should be of dtype `torch_uint8` or `torch_float`"
+msgstr ""
+
+#: vision_utils.R:138
+msgid ""
+"Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use "
+"torchvision$ops$box_convert to convert them"
+msgstr ""
+
+#: vision_utils.R:142
+msgid "boxes doesn't contain any box. No box was drawn"
+msgstr ""
+
+#: vision_utils.R:147
+msgid ""
+"Number of labels {.val {length(labels)}} cannot be broadcasted on number of "
+"boxes {.val {num_boxes}}"
+msgstr ""
+
+#: vision_utils.R:154
+msgid "colors vector cannot be broadcasted on boxes"
+msgstr ""
+
+#: vision_utils.R:261
+msgid "Mask matrix dimensions (%d x %d) don't match expected (%d x %d)"
+msgstr ""
+
+#: vision_utils.R:309
+msgid ""
+"The provided object of class {.cls {class(x)}} is not supported by "
+"draw_segmentation_masks."
+msgstr ""
+
+#: vision_utils.R:322 vision_utils.R:428 vision_utils.R:490 vision_utils.R:520
+msgid "Pass individual `image`, not batches"
+msgstr ""
+
+#: vision_utils.R:332
+msgid "`x` (image) should be of dtype `torch_uint8` or `torch_float`"
+msgstr ""
+
+#: vision_utils.R:339
+msgid "`masks` must be of shape (H, W) or (num_masks, H, W)"
+msgstr ""
+
+#: vision_utils.R:342
+msgid "`masks` is expected to be of dtype torch_bool"
+msgstr ""
+
+#: vision_utils.R:345
+msgid "`masks` and `image` must have the same height and width"
+msgstr ""
+
+#: vision_utils.R:350
 msgid "masks doesn't contain any mask. No mask was drawn"
-msgstr "`masks` ne contient pas de masque. Aucun masque n'a été tracé."
+msgstr ""
+
+#: vision_utils.R:358
+msgid ""
+"colors vector of size {.value {length(colors)}} cannot be broadcasted on {."
+"value {num_masks}} masks"
+msgstr ""
+
+#: vision_utils.R:425
+msgid "`image` should be a torch_tensor"
+msgstr ""
+
+#: vision_utils.R:438
+msgid "`image` should be of dtype `torch_uint8` or `torch_float`"
+msgstr ""
+
+#: vision_utils.R:442
+msgid ""
+"{.var keypoints} must be of shape (num_instances, K, 2), but is current "
+"shape is {.value {keypoints$shape}}"
+msgstr ""
+
+#~ msgid "inverted_residual_setting should be non-empty"
+#~ msgstr "inverted_residual_setting ne peut pas être vide"
+
+#~ msgid "Dataset not found. Use `download = TRUE` to fetch it."
+#~ msgstr ""
+#~ "Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
+#~ "télécharger."
+
+#, fuzzy
+#~| msgid "Extraction complete."
+#~ msgid "{.cls {class(self)[[1]]}} Extraction complete."
+#~ msgstr "Extraction réussie."

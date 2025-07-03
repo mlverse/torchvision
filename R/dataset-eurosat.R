@@ -54,7 +54,7 @@ eurosat_dataset <- torch::dataset(
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -66,7 +66,7 @@ eurosat_dataset <- torch::dataset(
     self$data <- suppressWarnings(readLines(self$split_file))
     self$load_meta()
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$data)} images across {length(self$classes)} classes.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$data)} images across {length(self$classes)} classes.")
   },
 
   load_meta = function() {
@@ -89,19 +89,19 @@ eurosat_dataset <- torch::dataset(
 
 
     if (!dir.exists(self$images_dir)) {
-      cli_inform("{.cls {class(self)[[1]]}} Extracting archive...")
+      cli_inform("Extracting {.cls {class(self)[[1]]}} archive...")
       utils::unzip(archive, exdir = self$images_dir)
-      cli_inform("{.cls {class(self)[[1]]}} Extraction complete.")
+      cli_inform("Extraction of {.cls {class(self)[[1]]}} is complete.")
     }
 
     # Download the split-specific text file
-    cli_inform("{.cls {class(self)[[1]]}} Downloading split text file: {self$split_url}")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} split file: {self$split_url}")
     p <- download_and_cache(self$split_url, prefix = class(self)[1])
     fs::file_copy(p, self$split_file, overwrite = TRUE)
     if (file.size(self$split_file) == 0) {
       runtime_error("Downloaded split file `{self$split_file}` is empty.")
     }
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
   check_exists = function() {
     fs::file_exists(self$split_file) &&

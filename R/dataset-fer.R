@@ -52,7 +52,7 @@ fer_dataset <- dataset(
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -69,7 +69,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- parsed$emotion + 1L
@@ -77,7 +77,7 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
   },
 
   .getitem = function(i) {
@@ -102,14 +102,13 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      cli_inform("{.cls {class(self)[[1]]}} Dataset already exists. Skipping download.")
       return()
     }
 
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- download_and_cache(self$url)
 
@@ -117,7 +116,7 @@ fer_dataset <- dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     untar(archive, exdir = self$root)
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_files = function() {
