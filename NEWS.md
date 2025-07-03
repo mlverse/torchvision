@@ -1,21 +1,29 @@
-# torchvision (development version)
+# torchvision 0.7.0
 
-- fix `transform_rotation` wrongly using w x w for image size (@114, cregouby)
-- `tensor_image_display` and `tensor_image_browse` now accept all tensor_image dtypes. (#115, @cregouby) 
-- fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
-- add message translation in french (#112, @cregouby)
-- Added the Fashion-MNIST dataset. (#148, @koshtiakanksha)
-- Added 3 EuroSAT datasets (#126 @cregouby)
-- Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
-- Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
-- Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
-- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
-- add tiff image support to `folder_dataset()` (#169, @cregouby)
-- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
-- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
-- Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
-- Added `flowers102_dataset()` – a dataset loader for the Flowers102 dataset. (#157, @DerrickUnleashed)
-- Added `flickr8k_caption_dataset()` and `flickr30k_caption_dataset()` – dataset loaders for the Flickr8k and Flickr30k dataset. (#159, @DerrickUnleashed)
+## New datasets
+
+* Added `fashion_mnist_dataset()` for loading the Fashion-MNIST dataset (@koshtiakanksha, #148).
+* Added `eurosat_dataset()`, `eurosat_all_bands_dataset()`, and `eurosat100_dataset()` for loading RGB, all-band, and small-subset variants of the EuroSAT dataset (@cregouby, #126).
+* Added `qmnist_dataset()` for loading the QMNIST dataset (@DerrickUnleashed, #153).
+* Added `emnist_dataset()` for loading the EMNIST dataset (@DerrickUnleashed, #152).
+* Added `fgvc_aircraft_dataset()` for loading the FGVC-Aircraft dataset (@DerrickUnleashed, #156).
+* Added `coco_detection_dataset()` and `coco_caption_dataset()` for loading the MS COCO detection and captions datasets (@koshtiakanksha, #161, #172).
+* Added `caltech101_dataset()` and `caltech256_dataset()` for loading the Caltech 101 and 256 datasets (@DerrickUnleashed, #158).
+* Added `fer_dataset()` for loading the FER-2013 dataset (@DerrickUnleashed, #154).
+* Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
+
+## New features
+
+* `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
+* `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
+* `folder_dataset()` now supports TIFF image formats (@cregouby, #169).
+* New `nms()` and `batched_nms()` functions provide Non-Maximum Suppression utilities. Added `box_convert()` to convert between bounding box formats (@Athospd, #40).
+
+## Minor bug fixes and improvements
+
+* `transform_rotation()` now correctly uses width × height for image size instead of width × width (@cregouby, #114).
+* Clarified documentation for `transform_affine()` to reduce confusion with `transform_random_affine()` (@cregouby, #116).
+* Added French translations for message outputs (@cregouby, #112).
 
 # torchvision 0.6.0
 

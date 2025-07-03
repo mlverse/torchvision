@@ -18,4 +18,14 @@ tiny_imagenet_dataset(root, split = "train", download = FALSE, ...)
 \description{
 Prepares the Tiny ImageNet dataset and optionally downloads it.
 }
-\concept{dataset}
+\seealso{
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{mnist_dataset}()}
+}
+\concept{classification_dataset}
