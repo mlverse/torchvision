@@ -32,6 +32,8 @@
 <url><loc>/reference/eurosat_dataset.html</loc></url>
 <url><loc>/reference/fer_dataset.html</loc></url>
 <url><loc>/reference/fgvc_aircraft_dataset.html</loc></url>
+<url><loc>/reference/flickr30k_caption_dataset.html</loc></url>
+<url><loc>/reference/flickr8k_caption_dataset.html</loc></url>
 <url><loc>/reference/flowers102_dataset.html</loc></url>
 <url><loc>/reference/generalized_box_iou.html</loc></url>
 <url><loc>/reference/image_folder_dataset.html</loc></url>
