@@ -35,26 +35,29 @@ eurosat_dataset <- torch::dataset(
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip?download=true",
   archive_md5 = "c8fa014336c82ac7804f0398fcb19387",
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
+  archive_size = "90 MB",
 
-  initialize = function(root,
-                        split = "train",
-                        download = FALSE,
-                        transform = NULL,
-                        target_transform = NULL) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
+  ) {
+
     self$root <- normalizePath(root, mustWork = FALSE)
     self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
     self$split_url <- glue::glue(self$split_url)
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
 
-    if (download) {
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
+
     self$img_files <- list.files(self$images_dir, pattern = "\\.(tif|jpg)", recursive = TRUE, full.names = TRUE)
 
     if (!self$check_exists())
@@ -115,13 +118,9 @@ eurosat_dataset <- torch::dataset(
     }
     image_ext <- fs::path_ext(image_path)
     if (image_ext == "jpg") {
-      img_array <- jpeg::readJPEG(image_path)
+      x <- jpeg::readJPEG(image_path)
     } else {
-      img_array <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
-    }
-
-    if (!is.null(self$transform)) {
-      img_array <- self$transform(img_array)
+      x <- suppressWarnings(tiff::readTIFF(image_path)) %>% aperm(c(3,1,2))
     }
 
     # Ensure label exists in class_to_idx
@@ -130,12 +129,17 @@ eurosat_dataset <- torch::dataset(
       value_error("Label `{label}` not found in class_to_idx." )
     }
 
-    # Convert label index to torch tensor with dtype = torch_long()
-    label_idx <- torch::torch_tensor(
-        as.integer(self$class_to_idx[[label]]), dtype = torch_long()
-      )$squeeze()
+    # Convert label
+    y <- self$class_to_idx[[label]] + 1
 
-    list(x = img_array, y = label_idx)
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -157,7 +161,8 @@ eurosat_all_bands_dataset <- torch::dataset(
   inherit = eurosat_dataset,
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSATallBands.zip?download=true",
   archive_md5 = "5ac12b3b2557aa56e1826e981e8e200e",
-  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true"
+  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-{split}.txt?download=true",
+  archive_size = "2 GB"
 )
 
 
@@ -176,7 +181,8 @@ eurosat100_dataset <- torch::dataset(
   inherit = eurosat_dataset,
   archive_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT100.zip?download=true",
   archive_md5 = "c21c649ba747e86eda813407ef17d596",
-  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true"
+  split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true",
+  archive_size = "7 MB"
 )
 
 

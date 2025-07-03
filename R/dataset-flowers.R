@@ -44,6 +44,7 @@
 #' @export
 flowers102_dataset <- dataset(
   name = "flowers102",
+  archive_size = "330 MB",
   classes = c(
     "pink primrose", "hard-leaved pocket orchid", "canterbury bells", "sweet pea", "english marigold",
     "tiger lily", "moon orchid", "bird of paradise", "monkshood", "globe thistle",
@@ -87,10 +88,11 @@ flowers102_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes
 
-    if (download) {
-      cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already cached.")
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
+
     if (!self$check_exists(self$split))
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 

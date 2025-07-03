@@ -5,9 +5,9 @@
 #' @rdname coco_detection_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
 #' @param train Logical. If TRUE, loads the training split; otherwise, loads the validation split.
-#' @param year Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.
+#' @param year Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.
 #' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
-#' @param transforms Optional transform function applied to the image.
+#' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
@@ -30,7 +30,6 @@
 #' @examples
 #' \dontrun{
 #' ds <- coco_detection_dataset(
-#'   root = "~/data",
 #'   train = FALSE,
 #'   year = "2017",
 #'   download = TRUE
@@ -51,9 +50,18 @@
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
-
-  initialize = function(root, train = TRUE, year = c("2017", "2016", "2014"),
-                        download = FALSE, transforms = NULL, target_transform = NULL) {
+  archive_size_table = list(
+    "2017" = list(train = "18 GB", val = "770 MB"),
+    "2014" = list(train = "13 GB", val = "6.3 GB")
+  ),
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    year = c("2017", "2014"),
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
+  ) {
 
     year <- match.arg(year)
     split <- if (train) "train" else "val"
@@ -62,11 +70,9 @@ coco_detection_dataset <- torch::dataset(
     self$root <- root
     self$year <- year
     self$split <- split
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
-    self$transforms <- transforms
+    self$transform <- transform
     self$target_transform <- target_transform
+    self$archive_size <- self$archive_size_table[[year]][[split]]
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
@@ -75,7 +81,8 @@ coco_detection_dataset <- torch::dataset(
     self$annotation_file <- fs::path(self$data_dir, "annotations",
                                      glue::glue("instances_{split}{year}.json"))
 
-    if (download) {
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -98,15 +105,15 @@ coco_detection_dataset <- torch::dataset(
 
     img_path <- fs::path(self$image_dir, image_info$file_name)
 
-    img_array <- jpeg::readJPEG(img_path)
-    if (length(dim(img_array)) == 2) {
-      img_array <- array(rep(img_array, 3), dim = c(dim(img_array), 3))
+    x <- jpeg::readJPEG(img_path)
+    if (length(dim(x)) == 2) {
+      x <- array(rep(x, 3), dim = c(dim(x), 3))
     }
-    img_array <- aperm(img_array, c(3, 1, 2))
-    img_tensor <- torch::torch_tensor(img_array, dtype = torch::torch_float())
+    x <- aperm(x, c(3, 1, 2))
+    x <- torch::torch_tensor(x, dtype = torch::torch_float())
 
-    H <- as.integer(img_tensor$shape[2])
-    W <- as.integer(img_tensor$shape[3])
+    H <- as.integer(x$shape[2])
+    W <- as.integer(x$shape[3])
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -155,9 +162,15 @@ coco_detection_dataset <- torch::dataset(
       masks = masks_tensor
     )
 
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
     structure(
       list(
-        x = img_tensor,
+        x = x,
         y = y
       ),
       class = c("image_with_bounding_box", "image_with_segmentation_mask")
@@ -195,12 +208,6 @@ coco_detection_dataset <- torch::dataset(
         img_url = glue::glue("http://images.cocodataset.org/zips/{split}2017.zip"),
         img_md5 = if (split == "train") "cced6f7f71b7629ddf16f17bbcfab6b2" else "442b8da7639aecaf257c1dceb8ba8c80"
       ),
-      "2016" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2016.zip",
-        ann_md5 = "0572d6c4f6e1b4efb6191f6b3b344b2a",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2014.zip"),
-        img_md5 = if (split == "train") "0da8cfa0e090c266b78f30e2d2874f1a" else "a3d79f5ed8d289b7a7554ce06a5782b3"
-      ),
       "2014" = list(
         ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip",
         ann_md5 = "d3e24dc9f5bda3e7887a1e6a5ff34c0c",
@@ -237,6 +244,7 @@ coco_detection_dataset <- torch::dataset(
 #'
 #' @rdname coco_caption_dataset
 #' @inheritParams coco_detection_dataset
+#' @param year Character. Dataset version year. One of \code{"2014"}.
 #'
 #' @return An object of class `coco_caption_dataset`. Each item is a list:
 #' - `x`: an `(H, W, C)` numeric array containing the RGB image.
@@ -245,7 +253,6 @@ coco_detection_dataset <- torch::dataset(
 #' @examples
 #' \dontrun{
 #' ds <- coco_caption_dataset(
-#'   root = "~/data",
 #'   train = FALSE,
 #'   download = TRUE
 #' )
@@ -267,12 +274,19 @@ coco_detection_dataset <- torch::dataset(
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",
   inherit = coco_detection_dataset,
+  archive_size_table = list(
+    "2014" = list(train = "13 GB", val = "6.3 GB")
+  ),
 
-  initialize = function(root,
-                        train = TRUE,
-                        year = c("2014"),
-                        download = FALSE
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    year = c("2014"),
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
   ) {
+
     year <- match.arg(year)
     split <- if (train) "train" else "val"
 
@@ -280,15 +294,17 @@ coco_caption_dataset <- torch::dataset(
     self$root <- root
     self$split <- split
     self$year <- year
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
+    self$transform <- transform
+    self$target_transform <- target_transform
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
+    self$archive_size <- self$archive_size_table[[year]][[split]]
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -311,14 +327,20 @@ coco_caption_dataset <- torch::dataset(
 
     ann <- self$annotations[index, ]
     image_id <- ann$image_id
-    caption <- ann$caption
+    y <- ann$caption
 
     prefix <- if (self$split == "train") "COCO_train2014_" else "COCO_val2014_"
     filename <- paste0(prefix, sprintf("%012d", image_id), ".jpg")
     image_path <- fs::path(self$image_dir, filename)
 
-    image_array <- jpeg::readJPEG(image_path)
+    x <- jpeg::readJPEG(image_path)
 
-    list(x = image_array, y = caption)
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
   }
 )

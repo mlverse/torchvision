@@ -7,7 +7,7 @@
 \title{EuroSAT datasets}
 \usage{
 eurosat_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,
@@ -15,7 +15,7 @@ eurosat_dataset(
 )
 
 eurosat_all_bands_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,
@@ -23,7 +23,7 @@ eurosat_all_bands_dataset(
 )
 
 eurosat100_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,

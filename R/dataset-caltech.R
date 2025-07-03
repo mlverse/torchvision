@@ -38,6 +38,7 @@
 caltech101_dataset <- torch::dataset(
   name = "caltech-101",
   subname = "101_ObjectCategories",
+  archive_size = "130 MB",
   resources = list(
     list(
       url = "https://data.caltech.edu/records/mzrjq-6wc02/files/caltech-101.zip",
@@ -56,10 +57,10 @@ caltech101_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~130MB) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
@@ -156,6 +157,7 @@ caltech256_dataset <- torch::dataset(
   subname = "256_ObjectCategories",
   inherit = caltech101_dataset,
   classes = NULL,
+  archive_size = "1.1 GB",
   resources = list(
     list(
       url = "https://data.caltech.edu/records/nyy15-4j048/files/256_ObjectCategories.tar",
@@ -174,11 +176,13 @@ caltech256_dataset <- torch::dataset(
   self$transform <- transform
   self$target_transform <- target_transform
 
-  cli_inform("{.cls {class(self)[[1]]}} Dataset (~1.2GB) will be downloaded and processed if not already cached.")
+  
 
   if (download) {
+    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
     self$download()
   }
+
   if (!self$check_exists()) {
     cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
   }
