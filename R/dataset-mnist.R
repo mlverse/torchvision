@@ -58,6 +58,7 @@
 #' @export
 mnist_dataset <- dataset(
   name = "mnist",
+  archive_size = "12 MB",
   resources = list(
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
@@ -68,19 +69,23 @@ mnist_dataset <- dataset(
   test_file = 'test.rds',
   classes = c('0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
              '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'),
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL,
-                        download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
 
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
     self$train <- train
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -141,16 +146,16 @@ mnist_dataset <- dataset(
       fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
   .length = function() {
     dim(self$data)[1]
@@ -171,6 +176,7 @@ mnist_dataset <- dataset(
 kmnist_dataset <- dataset(
   name = "kminst_dataset",
   inherit = mnist_dataset,
+  archive_size = "21 MB",
   resources = list(
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-images-idx3-ubyte.gz", "bdb82020997e1d708af4cf47b453dcf7"),
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-labels-idx1-ubyte.gz", "e144d726b3acfaa3e44228e80efcd344"),
@@ -184,6 +190,8 @@ kmnist_dataset <- dataset(
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
+  archive_size = "70 MB",
+
   resources = list(
     train = list(
       c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-train-images-idx3-ubyte.gz", "ed72d4157d28c017586c42bc6afe6370"),
@@ -208,15 +216,24 @@ qmnist_dataset <- dataset(
     '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
   ),
 
-  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     split <- match.arg(split, c("train", "test", "nist"))
     self$split <- split
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -288,16 +305,16 @@ qmnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -341,6 +358,7 @@ read_sn3_pascalvincent <- function(path) {
 fashion_mnist_dataset <- dataset(
   name = "fashion_mnist_dataset",
   inherit = mnist_dataset,
+  archive_size = "30 MB",
   resources = list(
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz", "8d4fb7e6c68d591d4c3dfef9ec88bf0d"),
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz", "25c81989df183df01b3e8a0aad5dffbe"),
@@ -357,6 +375,7 @@ fashion_mnist_dataset <- dataset(
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",
+  archive_size = "540 MB",
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
@@ -383,9 +402,14 @@ emnist_dataset <- dataset(
     mnist = as.character(0:9)
   ),
 
-  initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
-                        download = FALSE) {
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+  initialize = function(
+    root = tempdir(),
+    split = "balanced",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
     self$root_path <- root
@@ -393,8 +417,10 @@ emnist_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes_list[[split]]
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -463,16 +489,16 @@ emnist_dataset <- dataset(
     data_set <- if (self$is_train) self$data else self$test_data
     targets_set <- if (self$is_train) self$targets else self$test_targets
 
-    img <- data_set[index, , ]
-    target <- targets_set[index]
+    x <- data_set[index, , ]
+    y <- targets_set[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {

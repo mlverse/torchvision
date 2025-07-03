@@ -30,6 +30,7 @@
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
+  archive_size = "90 MB",
 
   initialize = function(
     root = tempdir(),
@@ -38,22 +39,20 @@ fer_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
+
     self$root <- root
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
     self$split <- if (train) "Train" else "Test"
-
     self$folder_name <- "fer2013"
     self$url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz"
     self$md5 <- "ca95d94fe42f6ce65aaae694d18c628a"
-
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
-    if (download) {
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 

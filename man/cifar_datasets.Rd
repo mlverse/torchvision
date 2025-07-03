@@ -6,7 +6,7 @@
 \title{CIFAR datasets}
 \usage{
 cifar10_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -14,7 +14,7 @@ cifar10_dataset(
 )
 
 cifar100_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
