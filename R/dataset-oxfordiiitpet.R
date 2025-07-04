@@ -5,7 +5,7 @@
 #' trimap segmentation mask, identifying pet, background, and outline regions.
 #' It is commonly used for evaluating models on object segmentation tasks.
 #'
-#' @inheritParams fgvc_aircraft_dataset
+#' @inheritParams mnist_dataset
 #' @param root Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under `root/oxfordiiitpet`.
 #' @param target_type Character. One of \code{"category"} or \code{"binary-category"} (default: \code{"category"}).
 #'
@@ -159,7 +159,7 @@ oxfordiiitpet_segmentation_dataset <- dataset(
 
     seg_name <- basename(self$image_paths[index])
     mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
-    mask <- png::readPNG(mask_path)
+    mask <- png::readPNG(mask_path) * 255
 
     if (self$target_type == "binary-category") {
       self$classes <- names(self$class_to_idx)[label]

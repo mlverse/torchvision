@@ -16,13 +16,15 @@ oxfordiiitpet_segmentation_dataset(
 \arguments{
 \item{root}{Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under \code{root/oxfordiiitpet}.}
 
+\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
+
 \item{target_type}{Character. One of \code{"category"} or \code{"binary-category"} (default: \code{"category"}).}
 
-\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
 A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
