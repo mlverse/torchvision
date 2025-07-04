@@ -164,7 +164,7 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     mask1 <- (masks==1)
     mask2 <- (masks==2)
     mask3 <- (masks==3)
-    masks <- torch_stack(list(mask_1, mask_2, mask_3))$to(dtype = torch_bool())
+    masks <- torch_stack(list(mask1, mask2, mask3))$to(dtype = torch_bool())
 
     if (self$target_type == "binary-category") {
       self$classes <- names(self$class_to_idx)[label]
