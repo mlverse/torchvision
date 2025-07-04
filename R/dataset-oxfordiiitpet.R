@@ -7,18 +7,16 @@
 #'
 #' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under `root/oxfordiiitpet`.
-#' @param target_type Character. One of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"} (default: \code{"category"}).
+#' @param target_type Character. One of \code{"category"} or \code{"binary-category"} (default: \code{"category"}).
 #'
-#' @return A dataset object of class \code{oxfordiiitpet_dataset}, where each item is a named list:
-#' \describe{
-#'   \item{\code{x}}{a H x W x 3 integer array representing an RGB image.}
-#'   \item{\code{y}}{
-#'     The target value, depending on \code{target_type}:
-#'     \code{"category"} – class index (1–37);
-#'     \code{"binary-category"} – 1 for Cat, 2 for Dog;
-#'     \code{"segmentation"} – integer mask with values: 1 (pet), 2 (background), 3 (outline).
-#'   }
-#' }
+#' @return A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
+#' - \code{x}: a H x W x 3 integer array representing an RGB image.
+#' - \code{y$mask}: an integer array with the same height and width as \code{x}, representing
+#'   the segmentation trimap. Pixel values are: 1 (pet), 2 (background), 3 (outline). This is
+#'   always returned by default.
+#' - \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
+#'   - \code{"category"}: an integer in 1–37 indicating the pet breed.
+#'   - \code{"binary-category"}: 1 for Cat, 2 for Dog.
 #'
 #' @examples
 #' \dontrun{
@@ -45,13 +43,15 @@ oxfordiiitpet_segmentation_dataset <- dataset(
   ),
   training_file = "trainval.rds",
   test_file = "test.rds",
+  archive_size = "800 MB",
   initialize = function(
     root = tempdir(),
     train = TRUE,
     target_type = "category",
     transform = NULL,
     target_transform = NULL,
-    download = FALSE) {
+    download = FALSE
+  ) {
 
     self$root_path <- root
     self$transform <- transform
@@ -59,24 +59,22 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     self$train <- train
     self$target_type <- target_type
     self$split <- if (train) "train" else "test"
+    data_file <- if (train) self$training_file else self$test_file
+    data <- readRDS(file.path(self$processed_folder, data_file))
+    self$image_paths <- data$image_paths
+    self$labels <- data$labels
+    self$class_to_idx <- data$class_to_idx
+    self$classes <- if (self$target_type == "category") names(self$class_to_idx) else c("Cat", "Dog")
 
-    cli_inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
-
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
-    data_file <- if (train) self$training_file else self$test_file
-    data <- readRDS(file.path(self$processed_folder, data_file))
-
-    self$image_paths <- data$image_paths
-    self$labels <- data$labels
-    self$class_to_idx <- data$class_to_idx
-    self$classes <- names(self$class_to_idx)
-
-    cli_inform("Loaded {length(self$labels)} valid samples for split: '{self$split}'")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -87,13 +85,15 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
+
     for (r in self$resources) {
       url <- r[1]
-      p <- download_and_cache(url)
+      archive <- download_and_cache(url)
       actual_md5 <- tools::md5sum(p)
 
       if (actual_md5 != r[2]) {
-        cli_abort(glue::glue("Corrupt file! Delete the file in {p} and try again."))
+        cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
       }
 
       utils::untar(p, exdir = self$raw_folder)
@@ -113,9 +113,9 @@ oxfordiiitpet_segmentation_dataset <- dataset(
       valid <- file.exists(img_paths) & file.exists(seg_paths)
       
       if (any(!valid)) {
-        rlang::warn(glue::glue("Some files are missing in {split} split and will be skipped."))
+        cli_warn("Some files are missing in {split} split and will be skipped.")
         for (id in img_ids[!valid]) {
-          rlang::warn(glue::glue("Missing files for: {id}"))
+          cli_warn("Missing files for: {id}")
         }
       }
       
@@ -136,6 +136,8 @@ oxfordiiitpet_segmentation_dataset <- dataset(
         file.path(self$processed_folder, glue::glue("{split}.rds"))
       )
     }
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -143,36 +145,36 @@ oxfordiiitpet_segmentation_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- magick::image_read(self$image_paths[index])
-    img <- magick::image_data(img, channels = "rgb")
-    img <- as.integer(img)
+    x <- jpeg::readJPEG(self$image_paths[index])
+
     label <- self$labels[index]
 
-    if (!is.null(self$transform))
-      img <- self$transform(img)
+    seg_name <- basename(self$image_paths[index])
+    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
+    mask <- png::readPNG(mask_path)
 
-    if (self$target_type == "segmentation") {
-      seg_name <- basename(self$image_paths[index])
-      mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
-      mask <- magick::image_read(mask_path)
-      mask <- magick::image_data(mask, channels = "gray")
-      mask <- as.integer(mask)
-      label <- mask
-    } else if (self$target_type == "binary-category") {
+    if (self$target_type == "binary-category") {
       self$classes <- names(self$class_to_idx)[label]
-      if (grepl("^[A-Z]", self$classes)) {
+      if (substr(self$classes, 1, 1) %in% LETTERS) {
         label <- 1
-        self$classes <- "Cat"
       } else {
         label <- 2
-        self$classes <- "Dog"
       }
+      self$classes <- c("Cat","Dog")
     }
 
-    if (!is.null(self$target_transform))
-      label <- self$target_transform(label)
+    y <- list(
+      mask = mask,
+      label = label
+    )
 
-    list(x = img, y = label)
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
   },
 
   .length = function() {
