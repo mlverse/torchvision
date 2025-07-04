@@ -49,14 +49,58 @@ places365_dataset <- function(root = tempdir(),
     if (!fs::dir_exists(split_dir))
       cli_abort("Training folder not found at '{split_dir}'")
 
-    ds <- image_folder_dataset(
-      root = split_dir,
-      transform = transform,
-      target_transform = target_transform
+    # Get all image paths
+    files <- fs::dir_ls(split_dir, recurse = TRUE, type = "file", glob = "*.jpg")
+
+    # Parse into samples with class names from folder structure
+    samples <- lapply(files, function(path) {
+      # Extract folder name (e.g., .../a/airfield/00000001.jpg → airfield)
+      parts <- fs::path_split(path)[[1]]
+      label <- parts[length(parts) - 1]  # second-to-last is the class
+      list(path = path, label = label)
+    })
+
+    # Create class-to-index mapping
+    class_names <- sort(unique(vapply(samples, function(s) s$label, character(1))))
+    class_to_idx <- setNames(seq_along(class_names), class_names)
+
+    dataset <- torch::dataset(
+      name = "places365_dataset",
+      initialize = function() {
+        self$samples <- samples
+        self$class_to_idx <- class_to_idx
+        self$transform <- transform
+        self$target_transform <- target_transform
+      },
+      .length = function() length(self$samples),
+      .getitem = function(index) {
+        s <- self$samples[[index]]
+        path <- s$path
+        class_name <- s$label
+        label <- self$class_to_idx[[class_name]]
+
+        img <- magick::image_read(path)
+
+        if (!inherits(img, "magick-image")) {
+          cli::cli_abort("Expected magick-image, got {class(img)} for path: {path}")
+        }
+
+        if (!is.null(self$transform)) {
+          img <- self$transform(img)
+        }
+
+        if (!is.null(self$target_transform)) {
+          label <- self$target_transform(label)
+        }
+
+        list(x = img, y = label)
+      }
     )
-    class(ds) <- c("places365_dataset", class(ds))
-    return(ds)
+
+    return(dataset())
   }
+
+
 
   if (split == "val") {
     annotation_file <- file.path(base_dir, "places365_val.txt")
@@ -129,11 +173,25 @@ places365_dataset <- function(root = tempdir(),
       .length = function() length(self$files),
       .getitem = function(index) {
         path <- self$files[[index]]
-        img <- base_loader(path)
-        if (!is.null(self$transform))
+
+        if (!fs::file_exists(path)) {
+          cli_abort("Image file does not exist: {path}")
+        }
+
+        img <- magick::image_read(path)
+
+        if (!inherits(img, "magick-image")) {
+          cli_abort("Expected magick-image, got {class(img)} for path: {path}")
+        }
+
+        # Apply transform (e.g., transform_to_tensor)
+        if (!is.null(self$transform)) {
           img <- self$transform(img)
+        }
+
         list(x = img)
       }
+
     )
 
     return(dataset())
