@@ -51,3 +51,32 @@ visualize_tensor_image <- function(img_tensor) {
   grid::grid.raster(img_array)
 }
 
+#' Auto-orient an image based on EXIF metadata
+#'
+#' Some images contain orientation metadata that causes them to display rotated
+#' when loaded. This helper inspects the EXIF orientation tag and applies the
+#' corresponding rotation and/or flip so that the image is returned in the
+#' standard orientation.
+#'
+#' @param img A `magick-image` object as returned by [magick::image_read()].
+#'
+#' @return The reoriented `magick-image`.
+#' @export
+image_auto_orient <- function(img) {
+  attrs <- magick::image_attributes(img)
+  ori <- attrs$value[attrs$property == "exif:Orientation"]
+  ori <- if (length(ori)) as.integer(ori) else 1L
+
+  switch(ori,
+         img,
+         magick::image_flop(img),            # 2
+         magick::image_rotate(img, 180),     # 3
+         magick::image_flip(img),            # 4
+         magick::image_transpose(img),       # 5
+         magick::image_rotate(img, 90),      # 6
+         magick::image_transverse(img),      # 7
+         magick::image_rotate(img, 270),     # 8
+         img
+  )
+}
+

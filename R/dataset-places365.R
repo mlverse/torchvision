@@ -31,174 +31,83 @@
 #'
 #' @family classification_dataset
 #' @export
-places365_dataset <- function(root = tempdir(),
-                              split = c("train", "val", "test"),
-                              transform = NULL,
-                              target_transform = NULL,
-                              download = FALSE) {
-  split <- match.arg(split)
-  root <- normalizePath(root, mustWork = FALSE)
-  base_dir <- file.path(root, "places365")
 
-  # Download if needed
-  if (download)
-    places365_download(base_dir, split)
+places365_dataset <- torch::dataset(
+  name = "places365_dataset",
+  initialize = function(
+    root = tempdir(),
+    split = c("train", "val", "test"),
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+    self$split <- match.arg(split)
+    self$root <- normalizePath(root, mustWork = FALSE)
+    self$base_dir <- file.path(self$root, "places365")
+    self$transform <- transform
+    self$target_transform <- target_transform
+    if (download)
+      places365_download(self$base_dir, self$split)
 
-  if (split == "train") {
-    split_dir <- file.path(base_dir, "data_256")
-    if (!fs::dir_exists(split_dir))
-      cli_abort("Training folder not found at '{split_dir}'")
+    if (self$split == "train") {
+      split_dir <- file.path(self$base_dir, "data_256")
+      if (!fs::dir_exists(split_dir))
+        cli_abort("Training folder not found at '{split_dir}'")
+      files <- fs::dir_ls(split_dir, recurse = TRUE, type = "file", glob = "*.jpg")
+      self$samples <- lapply(files, function(p) {
+        parts <- fs::path_split(p)[[1]]
+        list(path = p, label = parts[length(parts) - 1])
+      })
+      classes <- sort(unique(vapply(self$samples, function(s) s$label, character(1))))
+      self$class_to_idx <- setNames(seq_along(classes), classes)
+    } else if (self$split == "val") {
+      ann <- file.path(self$base_dir, "places365_val.txt")
+      val_dir <- file.path(self$base_dir, "val_256")
+      if (!fs::file_exists(ann) || !fs::dir_exists(val_dir))
+        cli_abort("Missing validation files. Use `download = TRUE` to fetch them.")
+      lines <- suppressWarnings(readLines(ann))
+      parsed <- strsplit(lines, " ")
+      self$samples <- lapply(parsed, function(x) list(path = file.path(val_dir, x[[1]]), label = as.integer(x[[2]]) + 1))
+    } else if (self$split == "test") {
+      test_dir <- file.path(self$base_dir, "test_256")
+      if (!fs::dir_exists(test_dir))
+        cli_abort("Test folder not found at '{test_dir}'")
+      self$files <- fs::dir_ls(test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
+    } else {
+      cli_abort("Unknown split '{self$split}'")
+    }
+  },
 
-    # Get all image paths
-    files <- fs::dir_ls(split_dir, recurse = TRUE, type = "file", glob = "*.jpg")
+  .length = function() {
+    if (self$split == "test")
+      length(self$files)
+    else
+      length(self$samples)
+  },
 
-    # Parse into samples with class names from folder structure
-    samples <- lapply(files, function(path) {
-      # Extract folder name (e.g., .../a/airfield/00000001.jpg → airfield)
-      parts <- fs::path_split(path)[[1]]
-      label <- parts[length(parts) - 1]  # second-to-last is the class
-      list(path = path, label = label)
-    })
-
-    # Create class-to-index mapping
-    class_names <- sort(unique(vapply(samples, function(s) s$label, character(1))))
-    class_to_idx <- setNames(seq_along(class_names), class_names)
-
-    dataset <- torch::dataset(
-      name = "places365_dataset",
-      initialize = function() {
-        self$samples <- samples
-        self$class_to_idx <- class_to_idx
-        self$transform <- transform
-        self$target_transform <- target_transform
-      },
-      .length = function() length(self$samples),
-      .getitem = function(index) {
-        s <- self$samples[[index]]
-        path <- s$path
-        class_name <- s$label
-        label <- self$class_to_idx[[class_name]]
-
-        img <- magick::image_read(path)
-
-        if (!inherits(img, "magick-image")) {
-          cli::cli_abort("Expected magick-image, got {class(img)} for path: {path}")
-        }
-
-        if (!is.null(self$transform)) {
-          img <- self$transform(img)
-        }
-
-        if (!is.null(self$target_transform)) {
-          label <- self$target_transform(label)
-        }
-
-        list(x = img, y = label)
-      }
-    )
-
-    return(dataset())
+  .getitem = function(index) {
+    if (self$split == "test") {
+      path <- self$files[[index]]
+      if (!fs::file_exists(path))
+        cli_abort("Image file does not exist: {path}")
+      img <- magick::image_read(path) %>% image_auto_orient()
+      if (!is.null(self$transform))
+        img <- self$transform(img)
+      list(x = img)
+    } else {
+      s <- self$samples[[index]]
+      if (!fs::file_exists(s$path))
+        cli_abort("Image file does not exist: {s$path}")
+      img <- magick::image_read(s$path) %>% image_auto_orient()
+      if (!is.null(self$transform))
+        img <- self$transform(img)
+      label <- if (self$split == "train") self$class_to_idx[[s$label]] else s$label
+      if (!is.null(self$target_transform))
+        label <- self$target_transform(label)
+      list(x = img, y = label)
+    }
   }
-
-
-
-  if (split == "val") {
-    annotation_file <- file.path(base_dir, "places365_val.txt")
-    val_dir <- file.path(base_dir, "val_256")
-
-    if (!fs::file_exists(annotation_file) || !fs::dir_exists(val_dir))
-      cli_abort("Missing validation files. Use `download = TRUE` to fetch them.")
-
-    lines <- suppressWarnings(readLines(annotation_file))
-    parsed <- strsplit(lines, " ")
-    samples <- lapply(parsed, function(x) list(
-      path = file.path(val_dir, x[[1]]),
-      label = as.integer(x[[2]]) + 1
-    ))
-
-    dataset <- torch::dataset(
-      name = "places365_dataset",
-      initialize = function() {
-        self$samples <- samples
-        self$transform <- transform
-        self$target_transform <- target_transform
-      },
-      .length = function() length(self$samples),
-      .getitem = function(index) {
-        s <- self$samples[[index]]
-        path <- s$path
-
-        if (!fs::file_exists(path)) {
-          cli_abort("Image file does not exist: {path}")
-        }
-
-        img <- magick::image_read(path)
-
-        if (!inherits(img, "magick-image")) {
-          cli_abort("Expected magick-image, got {class(img)} for path: {path}")
-        }
-
-        # Apply transform (e.g. transform_to_tensor)
-        if (!is.null(self$transform)) {
-          img <- self$transform(img)
-        }
-
-        label <- s$label
-
-        if (!is.null(self$target_transform)) {
-          label <- self$target_transform(label)
-        }
-
-        list(x = img, y = label)
-      }
-
-    )
-
-    return(dataset())
-  }
-
-  if (split == "test") {
-    test_dir <- file.path(base_dir, "test_256")
-    if (!fs::dir_exists(test_dir))
-      cli_abort("Test folder not found at '{test_dir}'")
-
-    files <- fs::dir_ls(test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
-
-    dataset <- torch::dataset(
-      name = "places365_dataset",
-      initialize = function() {
-        self$files <- files
-        self$transform <- transform
-      },
-      .length = function() length(self$files),
-      .getitem = function(index) {
-        path <- self$files[[index]]
-
-        if (!fs::file_exists(path)) {
-          cli_abort("Image file does not exist: {path}")
-        }
-
-        img <- magick::image_read(path)
-
-        if (!inherits(img, "magick-image")) {
-          cli_abort("Expected magick-image, got {class(img)} for path: {path}")
-        }
-
-        # Apply transform (e.g., transform_to_tensor)
-        if (!is.null(self$transform)) {
-          img <- self$transform(img)
-        }
-
-        list(x = img)
-      }
-
-    )
-
-    return(dataset())
-  }
-
-  cli_abort("Unknown split '{split}'")
-}
+)
 
 
 places365_download <- function(base_dir, split) {
