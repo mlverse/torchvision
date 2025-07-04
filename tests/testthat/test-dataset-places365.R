@@ -1,9 +1,13 @@
 test_that("places365_dataset loads and returns valid items", {
-  skip_on_cran()
-  skip_on_os("windows")  # Optional: comment this if you want to run locally on Windows
 
-  # Use val split (smallest)
-  ds <- places365_dataset(split = "val", download = TRUE)
+  skip_on_cran()
+  skip_on_os("windows")
+
+  ds <- places365_dataset(
+    split = "val",
+    download = TRUE,
+    transform = transform_to_tensor
+  )
 
   expect_s3_class(ds, "places365_dataset")
   expect_length(ds, 36500)
@@ -14,7 +18,7 @@ test_that("places365_dataset loads and returns valid items", {
   expect_named(item, c("x", "y"))
 
   # Check image
-  expect_true(torch::is_tensor(item$x))
+  expect_s3_class(item$x, "torch_tensor")
   expect_equal(item$x$dim(), 3)
   expect_equal(item$x$size(1), 3)  # Channel
   expect_true(item$x$size(2) > 0)  # Height
@@ -32,7 +36,7 @@ test_that("places365 categories are correctly mapped", {
   ann_path <- file.path(tempdir(), "places365", "categories_places365.txt")
   skip_if_not(file.exists(ann_path), message = "Category file missing")
 
-  categories <- readLines(ann_path)
+  categories <- suppressWarnings(readLines(ann_path))
   expect_length(categories, 365)
 
   ds <- places365_dataset(split = "val", download = FALSE)

@@ -50,7 +50,11 @@ ds <- places365_dataset(
   transform = transform_to_tensor
 )
 item <- ds[1]
-item$x
+tensor_image_browse(item$x)
+
+dl <- dataloader(ds, batch_size = 2)
+batch <- dataloader_next(dataloader_make_iter(dl))
+batch$x
 }
 
 }
