@@ -1,17 +1,13 @@
 #' Oxford-IIIT Pet Dataset
 #'
-#' Loads the Oxford-IIIT Pet Dataset, consisting of images of 37 pet breeds (cats and dogs).
+#' The Oxford-IIIT Pet Dataset is a **segmentation** dataset consisting of color images
+#' of 37 pet breeds (cats and dogs). Each image is annotated with a pixel-level
+#' trimap segmentation mask, identifying pet, background, and ambiguous regions.
+#' It is commonly used for evaluating models on object segmentation tasks.
 #'
-#' The dataset is split into:
-#' - `"train"`: training subset with labels.
-#' - `"test"`: test subset with labels.
-#'
+#' @inheritParams fgvc_aircraft_dataset
 #' @param root Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under `root/oxfordiiitpet`.
-#' @param train Logical. If `TRUE`, loads the training set. If `FALSE`, loads the test set. Default is `TRUE`.
-#' @param transform Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.
-#' @param target_transform Optional function to transform the target. Default is `NULL`.
 #' @param target_type Character. One of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"} (default: \code{"category"}).
-#' @param download Logical. Whether to download and process the dataset if it's not already available. Default is `FALSE`.
 #'
 #' @return A dataset object of class \code{oxfordiiitpet_dataset}, where each item is a named list:
 #' \describe{
@@ -39,11 +35,9 @@
 #' first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
 #' }
 #'
-#' @name oxfordiiitpet_dataset
-#' @aliases oxfordiiitpet_dataset
-#' @title Oxford-IIIT Pet Dataset
+#' @family segmentation_dataset
 #' @export
-oxfordiiitpet_dataset <- dataset(
+oxfordiiitpet_segmentation_dataset <- dataset(
   name = "oxfordiiitpet",
   resources = list(
     c("https://www.robots.ox.ac.uk/~vgg/data/pets/data/images.tar.gz", "5c4f3ee8e5d25df40f4fd59a7f44e54c"),
@@ -54,9 +48,9 @@ oxfordiiitpet_dataset <- dataset(
   initialize = function(
     root = tempdir(),
     train = TRUE,
+    target_type = "category",
     transform = NULL,
     target_transform = NULL,
-    target_type = "category",
     download = FALSE) {
 
     self$root_path <- root

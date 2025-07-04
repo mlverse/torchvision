@@ -7,24 +7,22 @@
 oxfordiiitpet_dataset(
   root = tempdir(),
   train = TRUE,
+  target_type = "category",
   transform = NULL,
   target_transform = NULL,
-  target_type = "category",
   download = FALSE
 )
 }
 \arguments{
 \item{root}{Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under \code{root/oxfordiiitpet}.}
 
-\item{train}{Logical. If \code{TRUE}, loads the training set. If \code{FALSE}, loads the test set. Default is \code{TRUE}.}
-
-\item{transform}{Optional function to apply to each image (e.g., resize, normalization). Images are RGB of varied dimensions.}
-
-\item{target_transform}{Optional function to transform the target. Default is \code{NULL}.}
-
 \item{target_type}{Character. One of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"} (default: \code{"category"}).}
 
-\item{download}{Logical. Whether to download and process the dataset if it's not already available. Default is \code{FALSE}.}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
+
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
+
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 A dataset object of class \code{oxfordiiitpet_dataset}, where each item is a named list:
@@ -39,16 +37,10 @@ The target value, depending on \code{target_type}:
 }
 }
 \description{
-Oxford-IIIT Pet Dataset
-}
-\details{
-Loads the Oxford-IIIT Pet Dataset, consisting of images of 37 pet breeds (cats and dogs).
-
-The dataset is split into:
-\itemize{
-\item \code{"train"}: training subset with labels.
-\item \code{"test"}: test subset with labels.
-}
+The Oxford-IIIT Pet Dataset is a \strong{segmentation} dataset consisting of color images
+of 37 pet breeds (cats and dogs). Each image is annotated with a pixel-level
+trimap segmentation mask, identifying pet, background, and ambiguous regions.
+It is commonly used for evaluating models on object segmentation tasks.
 }
 \examples{
 \dontrun{
@@ -66,3 +58,4 @@ first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = ou
 }
 
 }
+\concept{segmentation_dataset}
