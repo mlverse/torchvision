@@ -66,13 +66,13 @@ oxfordiiitpet_dataset <- dataset(
     self$target_type <- target_type
     self$split <- if (train) "train" else "test"
 
-    rlang::inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
+    cli_inform("Oxford-IIIT Pet Dataset (~811MB) will be downloaded and processed if not already available.")
 
     if (download)
       self$download()
 
     if (!self$check_exists())
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
@@ -82,7 +82,7 @@ oxfordiiitpet_dataset <- dataset(
     self$class_to_idx <- data$class_to_idx
     self$classes <- names(self$class_to_idx)
 
-    rlang::inform(glue::glue("Loaded {length(self$labels)} valid samples for split: '{self$split}'"))
+    cli_inform("Loaded {length(self$labels)} valid samples for split: '{self$split}'")
   },
 
   download = function() {
@@ -99,7 +99,7 @@ oxfordiiitpet_dataset <- dataset(
       actual_md5 <- tools::md5sum(p)
 
       if (actual_md5 != r[2]) {
-        runtime_error(glue::glue("Corrupt file! Delete the file in {p} and try again."))
+        cli_abort(glue::glue("Corrupt file! Delete the file in {p} and try again."))
       }
 
       utils::untar(p, exdir = self$raw_folder)
