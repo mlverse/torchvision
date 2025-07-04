@@ -13,26 +13,56 @@ places365_dataset(
 )
 }
 \arguments{
-\item{root}{Character. Root directory for dataset storage. The dataset will be stored under \verb{root/fgvc-aircraft-2013b}.}
+\item{root}{Root directory for dataset storage. The dataset will be stored under \code{root/places365}.}
 
 \item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}.}
 
 \item{transform}{Optional image transform.}
 
-\item{target_transform}{Optional label transform (ignored for test split).}
+\item{target_transform}{Optional label transform (ignored for the test split).}
 
-\item{download}{Whether to download the required files.}
+\item{download}{Logical. Whether to download the required files.}
 }
 \value{
-A torch dataset object.
+An object of class \code{places365_dataset}. Each element is a named
+list with:
+\itemize{
+\item \code{x}: the image as loaded (or transformed if \code{transform} is set).
+\item \code{y}: the integer class label (not returned for the test split).
+}
 }
 \description{
-Loads the Places365 dataset for scene classification.
+Loads the MIT Places365 dataset for scene classification.
 }
 \details{
+The dataset is split into:
 \itemize{
-\item For \code{split = "train"}: images are organized by class folder.
-\item For \code{split = "val"}: images are in a flat directory and matched with a label file.
-\item For \code{split = "test"}: images are in a flat directory with no labels.
+\item \code{"train"}: images are organized by class folder.
+\item \code{"val"}: images are in a flat directory and matched with a label file.
+\item \code{"test"}: images are in a flat directory with no labels.
 }
 }
+\examples{
+\dontrun{
+ds <- places365_dataset(
+  split = "val",
+  download = TRUE,
+  transform = transform_to_tensor
+)
+item <- ds[1]
+item$x
+}
+
+}
+\seealso{
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{mnist_dataset}()},
+\code{\link{tiny_imagenet_dataset}()}
+}
+\concept{classification_dataset}

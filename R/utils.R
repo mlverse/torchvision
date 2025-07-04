@@ -25,3 +25,29 @@ download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
 
   path
 }
+
+
+#' Convert a magick image to a (3, H, W) torch_tensor
+#'
+#' Converts an image read with magick::image_read() into a normalized torch tensor
+#' in channel-first (CHW) format with values in [0,1].
+#'
+#' @param img A magick image object
+#'
+#' @return A torch_tensor of shape (3, H, W)
+#' @export
+transform_to_tensor <- function(img) {
+  img_data <- magick::image_data(img, channels = "rgb")
+  arr <- as.numeric(img_data)
+  arr <- arr / 255  # only ONCE
+  arr <- aperm(arr, c(3, 2, 1))  # HWC to CHW
+  torch::torch_tensor(arr, dtype = torch::torch_float())
+}
+
+visualize_tensor_image <- function(img_tensor) {
+  img_array <- as.array(img_tensor$permute(c(2, 3, 1)))
+  img_array <- img_array / max(img_array)
+  img_array <- pmin(pmax(img_array, 0), 1)
+  grid::grid.raster(img_array)
+}
+

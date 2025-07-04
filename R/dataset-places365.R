@@ -1,18 +1,35 @@
 #' Places365 Dataset
 #'
-#' Loads the Places365 dataset for scene classification.
+#' Loads the MIT Places365 dataset for scene classification.
 #'
-#' - For `split = "train"`: images are organized by class folder.
-#' - For `split = "val"`: images are in a flat directory and matched with a label file.
-#' - For `split = "test"`: images are in a flat directory with no labels.
+#' The dataset is split into:
+#' - `"train"`: images are organized by class folder.
+#' - `"val"`: images are in a flat directory and matched with a label file.
+#' - `"test"`: images are in a flat directory with no labels.
 #'
-#' @inheritParams fgvc_aircraft_dataset
+#' @param root Root directory for dataset storage. The dataset will be stored under `root/places365`.
 #' @param split One of `"train"`, `"val"`, or `"test"`.
 #' @param transform Optional image transform.
-#' @param target_transform Optional label transform (ignored for test split).
-#' @param download Whether to download the required files.
+#' @param target_transform Optional label transform (ignored for the test split).
+#' @param download Logical. Whether to download the required files.
 #'
-#' @return A torch dataset object.
+#' @return An object of class \code{places365_dataset}. Each element is a named
+#'   list with:
+#'   - `x`: the image as loaded (or transformed if `transform` is set).
+#'   - `y`: the integer class label (not returned for the test split).
+#'
+#' @examples
+#' \dontrun{
+#' ds <- places365_dataset(
+#'   split = "val",
+#'   download = TRUE,
+#'   transform = transform_to_tensor
+#' )
+#' item <- ds[1]
+#' item$x
+#' }
+#'
+#' @family classification_dataset
 #' @export
 places365_dataset <- function(root = tempdir(),
                               split = c("train", "val", "test"),
@@ -32,11 +49,13 @@ places365_dataset <- function(root = tempdir(),
     if (!fs::dir_exists(split_dir))
       cli_abort("Training folder not found at '{split_dir}'")
 
-    return(image_folder_dataset(
+    ds <- image_folder_dataset(
       root = split_dir,
       transform = transform,
       target_transform = target_transform
-    ))
+    )
+    class(ds) <- c("places365_dataset", class(ds))
+    return(ds)
   }
 
   if (split == "val") {
@@ -54,7 +73,7 @@ places365_dataset <- function(root = tempdir(),
     ))
 
     dataset <- torch::dataset(
-      name = "places365_val_dataset",
+      name = "places365_dataset",
       initialize = function() {
         self$samples <- samples
         self$transform <- transform
@@ -63,15 +82,32 @@ places365_dataset <- function(root = tempdir(),
       .length = function() length(self$samples),
       .getitem = function(index) {
         s <- self$samples[[index]]
-        img <- magick::image_read(s$path)
-        img <- transform_to_tensor(img)
-        if (!is.null(self$transform))
+        path <- s$path
+
+        if (!fs::file_exists(path)) {
+          cli_abort("Image file does not exist: {path}")
+        }
+
+        img <- magick::image_read(path)
+
+        if (!inherits(img, "magick-image")) {
+          cli_abort("Expected magick-image, got {class(img)} for path: {path}")
+        }
+
+        # Apply transform (e.g. transform_to_tensor)
+        if (!is.null(self$transform)) {
           img <- self$transform(img)
+        }
+
         label <- s$label
-        if (!is.null(self$target_transform))
+
+        if (!is.null(self$target_transform)) {
           label <- self$target_transform(label)
+        }
+
         list(x = img, y = label)
       }
+
     )
 
     return(dataset())
@@ -85,7 +121,7 @@ places365_dataset <- function(root = tempdir(),
     files <- fs::dir_ls(test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
 
     dataset <- torch::dataset(
-      name = "places365_test_dataset",
+      name = "places365_dataset",
       initialize = function() {
         self$files <- files
         self$transform <- transform
@@ -93,8 +129,7 @@ places365_dataset <- function(root = tempdir(),
       .length = function() length(self$files),
       .getitem = function(index) {
         path <- self$files[[index]]
-        img <- magick::image_read(path)
-        img <- transform_to_tensor(img)
+        img <- base_loader(path)
         if (!is.null(self$transform))
           img <- self$transform(img)
         list(x = img)
@@ -119,27 +154,6 @@ places365_download <- function(base_dir, split) {
       devkit_tar <- file.path(base_dir, "filelist_places365-standard.tar")
       download.file(devkit_url, devkit_tar, mode = "wb", quiet = TRUE)
       utils::untar(devkit_tar, exdir = base_dir)
-    }
-
-    # Download val images
-    val_dir <- file.path(base_dir, "val_256")
-    if (!fs::dir_exists(val_dir)) {
-      val_url <- "http://data.csail.mit.edu/places/places365/val_256.tar"
-      val_tar <- download_and_cache(val_url, prefix = "places365")
-      utils::untar(val_tar, exdir = base_dir)
-    }
-  }
-
-  if (split == "train") {
-    train_dir <- file.path(base_dir, "data_256")
-    if (!fs::dir_exists(train_dir)) {
-      train_url <- "http://data.csail.mit.edu/places/places365/train_256_places365standard.tar"
-      train_tar <- withr::with_options(
-        list(timeout = 6000),
-        download_and_cache(train_url, prefix = "places365")
-      )
-
-      utils::untar(train_tar, exdir = base_dir)
     }
   }
 
