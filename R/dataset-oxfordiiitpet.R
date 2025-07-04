@@ -2,7 +2,7 @@
 #'
 #' The Oxford-IIIT Pet Dataset is a **segmentation** dataset consisting of color images
 #' of 37 pet breeds (cats and dogs). Each image is annotated with a pixel-level
-#' trimap segmentation mask, identifying pet, background, and ambiguous regions.
+#' trimap segmentation mask, identifying pet, background, and outline regions.
 #' It is commonly used for evaluating models on object segmentation tasks.
 #'
 #' @inheritParams fgvc_aircraft_dataset
@@ -12,25 +12,32 @@
 #' @return A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 #' - \code{x}: a H x W x 3 integer array representing an RGB image.
 #' - \code{y$mask}: an integer array with the same height and width as \code{x}, representing
-#'   the segmentation trimap. Pixel values are: 1 (pet), 2 (background), 3 (outline). This is
-#'   always returned by default.
+#'   the segmentation trimap.
 #' - \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
 #'   - \code{"category"}: an integer in 1–37 indicating the pet breed.
 #'   - \code{"binary-category"}: 1 for Cat, 2 for Dog.
 #'
 #' @examples
 #' \dontrun{
-#' # Load training data with class labels (1 to 37)
-#' oxfordiiitpet <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
-#' first_item <- oxfordiiitpet[1]
-#' first_item$x  # image tensor
-#' first_item$y  # class index
+#' # Load the Oxford-IIIT Pet segmentation dataset with image and mask transforms
+#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(
+#'   transform = function(x) {
+#'     x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
+#'   },
+#'   target_transform = function(y) {
+#'     y$mask <- y$mask %>% transform_to_tensor() %>% transform_resize(c(224, 224))
+#'     y
+#'   }
+#' )
 #'
-#' # Load with segmentation masks
-#' oxfordiiitpet <- oxfordiiitpet_dataset(root = root_dir, target_type = "segmentation")
-#' first_item <- oxfordiiitpet[1]
-#' first_item$x  # image tensor
-#' first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
+#' # Create a dataloader and fetch one batch
+#' dl <- dataloader(oxfordiiitpet, batch_size = 4)
+#' batch <- dataloader_next(dataloader_make_iter(dl))
+#'
+#' # Access batch data
+#' batch$x             # Tensor of shape (4, 3, 224, 224)
+#' batch$y$mask        # Tensor of shape (4, 1, 224, 224)
+#' batch$y$label       # Tensor of shape (4,) with class labels
 #' }
 #'
 #' @family segmentation_dataset
@@ -59,17 +66,18 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     self$train <- train
     self$target_type <- target_type
     self$split <- if (train) "train" else "test"
+
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
+    }
+
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$image_paths <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- if (self$target_type == "category") names(self$class_to_idx) else c("Cat", "Dog")
-
-    if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-      self$download()
-    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
@@ -90,13 +98,13 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     for (r in self$resources) {
       url <- r[1]
       archive <- download_and_cache(url)
-      actual_md5 <- tools::md5sum(p)
+      actual_md5 <- tools::md5sum(archive)
 
       if (actual_md5 != r[2]) {
         cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
       }
 
-      utils::untar(p, exdir = self$raw_folder)
+      utils::untar(archive, exdir = self$raw_folder)
     }
 
     for (split in c("trainval", "test")) {
@@ -156,9 +164,9 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     if (self$target_type == "binary-category") {
       self$classes <- names(self$class_to_idx)[label]
       if (substr(self$classes, 1, 1) %in% LETTERS) {
-        label <- 1
+        label <- as.integer(1)
       } else {
-        label <- 2
+        label <- as.integer(2)
       }
       self$classes <- c("Cat","Dog")
     }

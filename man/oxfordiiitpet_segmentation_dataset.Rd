@@ -16,7 +16,7 @@ oxfordiiitpet_segmentation_dataset(
 \arguments{
 \item{root}{Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under \code{root/oxfordiiitpet}.}
 
-\item{target_type}{Character. One of \code{"category"}, \code{"binary-category"}, or \code{"segmentation"} (default: \code{"category"}).}
+\item{target_type}{Character. One of \code{"category"} or \code{"binary-category"} (default: \code{"category"}).}
 
 \item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
@@ -25,12 +25,11 @@ oxfordiiitpet_segmentation_dataset(
 \item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
-A dataset object of class \code{oxfordiiitpet_dataset}. Each item is a named list:
+A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 integer array representing an RGB image.
 \item \code{y$mask}: an integer array with the same height and width as \code{x}, representing
-the segmentation trimap. Pixel values are: 1 (pet), 2 (background), 3 (outline). This is
-always returned by default.
+the segmentation trimap.
 \item \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
 \itemize{
 \item \code{"category"}: an integer in 1–37 indicating the pet breed.
@@ -41,22 +40,30 @@ always returned by default.
 \description{
 The Oxford-IIIT Pet Dataset is a \strong{segmentation} dataset consisting of color images
 of 37 pet breeds (cats and dogs). Each image is annotated with a pixel-level
-trimap segmentation mask, identifying pet, background, and ambiguous regions.
+trimap segmentation mask, identifying pet, background, and outline regions.
 It is commonly used for evaluating models on object segmentation tasks.
 }
 \examples{
 \dontrun{
-# Load training data with class labels (1 to 37)
-oxfordiiitpet <- oxfordiiitpet_dataset(train = TRUE, download = TRUE)
-first_item <- oxfordiiitpet[1]
-first_item$x  # image tensor
-first_item$y  # class index
+# Load the Oxford-IIIT Pet segmentation dataset with image and mask transforms
+oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(
+  transform = function(x) {
+    x \%>\% transform_to_tensor() \%>\% transform_resize(c(224, 224))
+  },
+  target_transform = function(y) {
+    y$mask <- y$mask \%>\% transform_to_tensor() \%>\% transform_resize(c(224, 224))
+    y
+  }
+)
 
-# Load with segmentation masks
-oxfordiiitpet <- oxfordiiitpet_dataset(root = root_dir, target_type = "segmentation")
-first_item <- oxfordiiitpet[1]
-first_item$x  # image tensor
-first_item$y  # segmentation mask tensor (1 = foreground, 2 = background, 3 = outline)
+# Create a dataloader and fetch one batch
+dl <- dataloader(oxfordiiitpet, batch_size = 4)
+batch <- dataloader_next(dataloader_make_iter(dl))
+
+# Access batch data
+batch$x             # Tensor of shape (4, 3, 224, 224)
+batch$y$mask        # Tensor of shape (4, 1, 224, 224)
+batch$y$label       # Tensor of shape (4,) with class labels
 }
 
 }
