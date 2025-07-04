@@ -11,7 +11,7 @@
 #'
 #' @return A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 #' - \code{x}: a H x W x 3 integer array representing an RGB image.
-#' - \code{y$mask}: an integer array with the same height and width as \code{x}, representing
+#' - \code{y$masks}: an integer array with the same height and width as \code{x}, representing
 #'   the segmentation trimap.
 #' - \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
 #'   - \code{"category"}: an integer in 1–37 indicating the pet breed.
@@ -25,7 +25,7 @@
 #'     x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
 #'   },
 #'   target_transform = function(y) {
-#'     y$mask <- y$mask %>% transform_to_tensor() %>% transform_resize(c(224, 224))
+#'     y$masks <- y$masks %>% transform_to_tensor() %>% transform_resize(c(224, 224))
 #'     y
 #'   }
 #' )
@@ -36,7 +36,7 @@
 #'
 #' # Access batch data
 #' batch$x             # Tensor of shape (4, 3, 224, 224)
-#' batch$y$mask        # Tensor of shape (4, 1, 224, 224)
+#' batch$y$masks        # Tensor of shape (4, 1, 224, 224)
 #' batch$y$label       # Tensor of shape (4,) with class labels
 #' }
 #'
@@ -159,7 +159,12 @@ oxfordiiitpet_segmentation_dataset <- dataset(
 
     seg_name <- basename(self$image_paths[index])
     mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
-    mask <- png::readPNG(mask_path) * 255
+    masks <- png::readPNG(mask_path) * 255
+    masks <- torch_tensor(masks)
+    mask1 <- (masks==1)
+    mask2 <- (masks==2)
+    mask3 <- (masks==3)
+    masks <- torch_stack(list(mask_1, mask_2, mask_3))$to(dtype = torch_bool())
 
     if (self$target_type == "binary-category") {
       self$classes <- names(self$class_to_idx)[label]
@@ -172,7 +177,7 @@ oxfordiiitpet_segmentation_dataset <- dataset(
     }
 
     y <- list(
-      mask = mask,
+      masks = masks,
       label = label
     )
 
