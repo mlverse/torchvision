@@ -1,79 +1,116 @@
-test_that("coco_detection_dataset handles missing files gracefully", {
-  tmp <- tempfile()
+context("dataset-coco")
 
+tmp <- withr::local_tempdir()
+
+collate_fn <- function(batch) {
+  x <- lapply(batch, function(x) x$x)
+  y <- lapply(batch, function(x) x$y)
+  list(x = x, y = y)
+}
+
+test_that("coco_detection_dataset handles missing files gracefully", {
   expect_error(
-    coco_detection_dataset(root = tmp, train = TRUE, year = "2017", download = FALSE),
+    coco_detection_dataset(root = tempfile(), train = TRUE, year = "2017", download = FALSE),
     class = "runtime_error"
   )
 })
 
-test_that("coco_detection_dataset loads a single sample correctly", {
-  skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
+test_that("coco_detection_dataset loads a single example correctly", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  tmp <- tempfile()
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
   expect_s3_class(ds, "coco_detection_dataset")
   expect_gt(length(ds), 0)
 
-  sample <- ds[1]
-  expect_type(sample, "list")
-  expect_named(sample, c("image", "target"))
+  example <- ds[1]
+  x <- example$x
+  y <- example$y
 
-  img <- sample$image
-  target <- sample$target
+  expect_tensor(x)
+  expect_equal(x$ndim, 3)
 
-  expect_tensor(img)
-  expect_equal(img$ndim, 3)
+  expect_type(y, "list")
+  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
 
-  expect_true(is.list(target))
-  expect_setequal(names(target), c("boxes", "labels", "area", "iscrowd", "segmentation"))
+  expect_tensor(y$boxes)
+  expect_equal(y$boxes$ndim, 2)
+  expect_equal(y$boxes$size(2), 4)
 
-  if (!inherits(target$boxes, "torch_tensor")) {
-    expect_true(is.matrix(target$boxes))
-    expect_equal(ncol(target$boxes), 4)
-    expect_equal(colnames(target$boxes), c("x1", "y1", "x2", "y2"))
-  }
+  expect_type(y$labels, "character")
+  expect_gt(length(y$labels), 0)
 
-  expect_tensor(target$labels)
-  expect_tensor_dtype(target$labels, torch::torch_int())
-
-  expect_tensor(target$area)
-  expect_tensor_dtype(target$area, torch::torch_float())
-
-  expect_tensor(target$iscrowd)
-  expect_tensor_dtype(target$iscrowd, torch::torch_bool())
-
+  expect_tensor(y$area)
+  expect_tensor(y$iscrowd)
+  expect_true(is.list(y$segmentation))
+  expect_tensor(y$masks)
+  expect_equal(y$masks$ndim, 3)
 })
 
-collate_fn <- function(batch) {
-  images <- lapply(batch, function(x) x$image)
-  targets <- lapply(batch, function(x) x$target)
-  list(image = images, target = targets)
-}
-
 test_that("coco_detection_dataset batches correctly using dataloader", {
-  skip_if(identical(Sys.getenv("COCO_DATASET_TEST"), ""), "Set COCO_DATASET_TEST=1 to run")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  tmp <- tempfile()
+
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
-
-  collate_fn <- function(batch) {
-    images <- lapply(batch, function(x) x$image)
-    targets <- lapply(batch, function(x) x$target)
-    list(image = images, target = targets)
-  }
 
   dl <- dataloader(ds, batch_size = 2, collate_fn = collate_fn)
   iter <- dataloader_make_iter(dl)
   batch <- dataloader_next(iter)
 
-  expect_type(batch$image, "list")
-  expect_true(all(vapply(batch$image, is_torch_tensor, logical(1))))
+  expect_type(batch$x, "list")
+  expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
-  expect_type(batch$target, "list")
-  expect_setequal(names(batch$target[[1]]), c("boxes", "labels", "area", "iscrowd", "segmentation"))
-  expect_tensor(batch$target[[1]]$boxes)
-  expect_equal(dim(batch$target[[1]]$boxes)[2], 4)
+  expect_type(batch$y, "list")
+  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
+  expect_tensor(batch$y[[1]]$boxes)
+  expect_equal(batch$y[[1]]$boxes$ndim, 2)
+  expect_equal(batch$y[[1]]$boxes$size(2), 4)
 })
 
+test_that("coco_caption_dataset handles missing files gracefully", {
+  expect_error(
+    coco_caption_dataset(root = tempfile(), train = TRUE, download = FALSE),
+    class = "rlang_error"
+  )
+})
+
+test_that("coco_caption_dataset loads a single example correctly", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
+
+  expect_s3_class(ds, "coco_caption_dataset")
+  expect_gt(length(ds), 0)
+
+  example <- ds[1]
+  x <- example$x
+  y <- example$y
+
+  expect_true(is.array(x))
+  expect_equal(length(dim(x)), 3)
+  expect_equal(dim(x)[3], 3)
+
+  expect_true(is.character(y))
+  expect_gt(nchar(y), 0)
+})
+
+test_that("coco_caption_dataset batches correctly using dataloader", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
+
+  dl <- dataloader(ds, batch_size = 2, collate_fn = collate_fn)
+  iter <- dataloader_make_iter(dl)
+  batch <- dataloader_next(iter)
+
+  expect_type(batch$x, "list")
+  expect_true(all(vapply(batch$x, is.array, logical(1))))
+  expect_true(all(vapply(batch$x, function(x) length(dim(x)) == 3, logical(1))))
+
+  expect_type(batch$y, "list")
+  expect_true(all(vapply(batch$y, is.character, logical(1))))
+})

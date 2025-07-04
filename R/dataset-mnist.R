@@ -1,23 +1,64 @@
-#' MNIST dataset
+#' MNIST and Derived Datasets
 #'
-#' Prepares the MNIST dataset and optionally downloads it.
+#' Prepares various MNIST-style image classification datasets and optionally downloads them.
+#' Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as integer.
 #'
-#' @param root (string): Root directory of dataset where
-#'   `MNIST/processed/training.pt` and  `MNIST/processed/test.pt` exist.
-#' @param train (bool, optional): If True, creates dataset from
-#'   `training.pt`, otherwise from `test.pt`.
-#' @param download (bool, optional): If true, downloads the dataset from the
-#'   internet and puts it in root directory. If dataset is already downloaded,
-#'   it is not downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an
-#'   PIL image and returns a transformed version. E.g,
-#'   [transform_random_crop()].
-#' @param target_transform (callable, optional): A function/transform that takes
-#'   in the target and transforms it.
+#' - **MNIST**: Original handwritten digit dataset.
+#' - **Fashion-MNIST**: Clothing item images for classification.
+#' - **Kuzushiji-MNIST**: Japanese cursive character dataset.
+#' - **QMNIST**: Extended MNIST with high-precision NIST data.
+#' - **EMNIST**: Letters and digits with multiple label splits.
 #'
+#' @param root Root directory for dataset storage. The dataset will be stored under `root/<dataset-name>`. Defaults to `tempdir()`.
+#' @param train Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.
+#' @param split Character. Used in `emnist_dataset()` and `qmnist_dataset()` to specify the subset. See individual descriptions for valid values.
+#' @param download Logical. If TRUE, downloads the dataset to `root/`. If the dataset is already present, download is skipped.
+#' @param transform Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).
+#' @param target_transform Optional. A function that transforms the label.
+#'
+#' @return A torch dataset object, where each items is a list of `x` (image) and `y` (label).
+#'
+#' @section Supported Splits for `emnist_dataset()`:
+#' - `"byclass"`: 62 classes (digits + uppercase + lowercase)
+#' - `"bymerge"`: 47 classes (merged uppercase and lowercase)
+#' - `"balanced"`: 47 classes, balanced digits and letters
+#' - `"letters"`: 26 uppercase letters
+#' - `"digits"`: 10 digit classes
+#' - `"mnist"`: Standard MNIST digit classes
+#'
+#' @section Supported Splits for `qmnist_dataset()`:
+#' - `"train"`: 60,000 training samples (MNIST-compatible)
+#' - `"test"`: Extended test set
+#' - `"nist"`: Full NIST digit set
+#'
+#' @examples
+#' \dontrun{
+#' ds <- mnist_dataset(download = TRUE)
+#' item <- ds[1]
+#' item$x  # image
+#' item$y  # label
+#'
+#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
+#' item <- qmnist[1]
+#' item$x
+#' item$y
+#'
+#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
+#' item <- emnist[1]
+#' item$x
+#' item$y
+#'
+#' kmnist <- kmnist_dataset(download = TRUE)
+#' fmnist <- fashion_mnist_dataset(download = TRUE)
+#' }
+#'
+#' @family classification_dataset
+#' @name mnist_dataset
+#' @rdname mnist_dataset
 #' @export
 mnist_dataset <- dataset(
   name = "mnist",
+  archive_size = "12 MB",
   resources = list(
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-images-idx3-ubyte.gz", "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
     c("https://torch-cdn.mlverse.org/datasets/mnist/train-labels-idx1-ubyte.gz", "d53e105ee54ea40749a09fcbcd1e9432"),
@@ -28,17 +69,23 @@ mnist_dataset <- dataset(
   test_file = 'test.rds',
   classes = c('0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
              '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'),
-  initialize = function(root = tempdir(), train = TRUE, transform = NULL, target_transform = NULL,
-                        download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
 
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
-
     self$train <- train
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -51,7 +98,10 @@ mnist_dataset <- dataset(
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$data <- data[[1]]
     self$targets <- data[[2]] + 1L
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$targets)} images.")
   },
+
   download = function() {
 
     if (self$check_exists())
@@ -72,7 +122,8 @@ mnist_dataset <- dataset(
 
     }
 
-    rlang::inform("Processing...")
+        cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
 
     training_set <- list(
       read_sn3_pascalvincent(file.path(self$raw_folder, 'train-images-idx3-ubyte.gz')),
@@ -87,7 +138,7 @@ mnist_dataset <- dataset(
     saveRDS(training_set, file.path(self$processed_folder, self$training_file))
     saveRDS(test_set, file.path(self$processed_folder, self$test_file))
 
-    rlang::inform("Done!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
 
   },
   check_exists = function() {
@@ -95,16 +146,16 @@ mnist_dataset <- dataset(
       fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
   .length = function() {
     dim(self$data)[1]
@@ -113,33 +164,19 @@ mnist_dataset <- dataset(
     raw_folder = function() {
       file.path(self$root_path, "mnist", "raw")
     },
+
     processed_folder = function() {
       file.path(self$root_path, "mnist", "processed")
     }
   )
 )
 
-#' Kuzushiji-MNIST
-#'
-#' Prepares the [Kuzushiji-MNIST](https://github.com/rois-codh/kmnist) dataset
-#'   and optionally downloads it.
-#'
-#' @param root (string): Root directory of dataset where
-#'   `KMNIST/processed/training.pt` and  `KMNIST/processed/test.pt` exist.
-#' @param train (bool, optional): If TRUE, creates dataset from `training.pt`,
-#'   otherwise from `test.pt`.
-#' @param download (bool, optional): If true, downloads the dataset from the
-#'   internet and puts it in root directory. If dataset is already downloaded,
-#'   it is not downloaded again.
-#' @param transform (callable, optional): A function/transform that  takes in an
-#'   PIL image and returns a transformed version. E.g, [transform_random_crop()].
-#' @param target_transform (callable, optional): A function/transform that takes
-#'   in the target and transforms it.
-#'
+#' @describeIn mnist_dataset Kuzushiji-MNIST cursive Japanese character dataset.
 #' @export
 kmnist_dataset <- dataset(
   name = "kminst_dataset",
   inherit = mnist_dataset,
+  archive_size = "21 MB",
   resources = list(
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-images-idx3-ubyte.gz", "bdb82020997e1d708af4cf47b453dcf7"),
     c("http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-labels-idx1-ubyte.gz", "e144d726b3acfaa3e44228e80efcd344"),
@@ -149,42 +186,12 @@ kmnist_dataset <- dataset(
   classes = c('o', 'ki', 'su', 'tsu', 'na', 'ha', 'ma', 'ya', 're', 'wo')
 )
 
-#' QMNIST Dataset
-#'
-#' Loads and preprocesses the [QMNIST dataset](https://github.com/facebookresearch/qmnist),
-#' including optional support for the NIST digit subset.
-#'
-#' This dataset is an extended version of the original MNIST, offering more samples and precise label
-#' information. It is suitable for benchmarking modern machine learning models and can serve as a
-#' drop-in replacement for MNIST in most image classification tasks.
-#'
-#' @inheritParams mnist_dataset
-#' @param split (string, optional) Which subset to load: one of `"train"`, `"test"`, or `"nist"`.
-#'   Defaults to `"train"`. The `"nist"` option loads the full NIST digits set.
-#'
-#' @return An R6 dataset object compatible with the `{torch}` package, providing indexed access
-#'   to (image, label) pairs from the specified QMNIST subset.
-#'
-#' @section Supported Subsets:
-#' - `"train"`: 60,000 training examples (compatible with MNIST)
-#' - `"test"`: 60,000 test examples (extended QMNIST test set)
-#' - `"nist"`: Entire NIST digit dataset (for advanced benchmarking)
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
-#'
-#' @examples
-#' \dontrun{
-#' qmnist <- qmnist_dataset(split = "train", download = TRUE)
-#' first_item <- qmnist[1]
-#' # image in item 1
-#' first_item$x
-#' # label of item 1
-#' first_item$y
-#' }
-#'
+#' @describeIn mnist_dataset Extended MNIST dataset with high-precision test data (QMNIST).
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
+  archive_size = "70 MB",
+
   resources = list(
     train = list(
       c("https://raw.githubusercontent.com/facebookresearch/qmnist/master/qmnist-train-images-idx3-ubyte.gz", "ed72d4157d28c017586c42bc6afe6370"),
@@ -209,15 +216,24 @@ qmnist_dataset <- dataset(
     '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine'
   ),
 
-  initialize = function(root = tempdir(), split = "train", transform = NULL, target_transform = NULL, download = FALSE) {
+  initialize = function(
+    root = tempdir(),
+    split = "train",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     split <- match.arg(split, c("train", "test", "nist"))
     self$split <- split
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -236,6 +252,7 @@ qmnist_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
     for (r in self$resources[[self$split]]) {
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
@@ -247,7 +264,8 @@ qmnist_dataset <- dataset(
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    rlang::inform("Processing...")
+    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+
 
     if (self$split == "train") {
       saveRDS(
@@ -279,7 +297,7 @@ qmnist_dataset <- dataset(
       )
     }
 
-    rlang::inform("Done!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -287,16 +305,16 @@ qmnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- self$data[index, ,]
-    target <- self$targets[index]
+    x <- self$data[index, ,]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -335,42 +353,12 @@ read_sn3_pascalvincent <- function(path) {
   a
 }
 
-#' Fashion-MNIST dataset
-#'
-#' @usage
-#' fashion_mnist_dataset(
-#'   root,
-#'   train = TRUE,
-#'   transform = NULL,
-#'   target_transform = NULL,
-#'   download = FALSE
-#' )
-#'
-#' @param root (string): Root directory of dataset where
-#' \code{FashionMNIST/processed/training.pt} and \code{FashionMNIST/processed/test.pt} exist.
-#' @param train (bool, optional): If TRUE, creates dataset from \code{training.pt},
-#' otherwise from \code{test.pt}.
-#' @param transform (callable, optional): A function/transform that takes in an
-#' image and returns a transformed version. E.g., \code{\link[=transform_random_crop]{transform_random_crop()}}.
-#' @param target_transform (callable, optional): A function/transform that takes
-#' in the target and transforms it.
-#' @param download (bool, optional): If TRUE, downloads the dataset from the
-#' internet and puts it in root directory. If dataset is already downloaded,
-#' it is not downloaded again.
-#'
-#' @description
-#' Prepares the \href{https://github.com/zalandoresearch/fashion-mnist}{Fashion-MNIST} dataset
-#' and optionally downloads it.
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()]
-#'
-#' @name fashion_mnist_dataset
-#' @aliases fashion_mnist_dataset
-#' @title Fashion-MNIST dataset
+#' @describeIn mnist_dataset Fashion-MNIST clothing image dataset.
 #' @export
 fashion_mnist_dataset <- dataset(
   name = "fashion_mnist_dataset",
   inherit = mnist_dataset,
+  archive_size = "30 MB",
   resources = list(
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz", "8d4fb7e6c68d591d4c3dfef9ec88bf0d"),
     c("http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz", "25c81989df183df01b3e8a0aad5dffbe"),
@@ -383,42 +371,11 @@ fashion_mnist_dataset <- dataset(
   )
 )
 
-#' EMNIST Dataset
-#'
-#' Loads the EMNIST dataset, a set of handwritten digits and letters with multiple splits:
-#' - "byclass": 62 classes (digits + uppercase + lowercase)
-#' - "bymerge": 47 classes (merged uppercase and lowercase letters)
-#' - "balanced": 47 classes balanced between digits and letters
-#' - "letters": 26 letter classes only
-#' - "digits": 10 digit classes only
-#' - "mnist": classic 10 digit classes like the original MNIST dataset
-#'
-#' @param root Character. Root directory for dataset storage (default folder: `root/emnist/processed/`).
-#' @param split Character. Dataset split to use. One of `"byclass"`, `"bymerge"`, `"balanced"`, `"letters"`, `"digits"`, or `"mnist"`. Default is `"balanced"`.
-#' @param download Logical. Whether to download the dataset if it is not found locally. Default is `FALSE`.
-#' @param transform Optional function to transform input images.
-#' @param target_transform Optional function to transform labels.
-#'
-#' @return An EMNIST dataset object.
-#'
-#' @examples
-#' \dontrun{
-#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
-#' first_item <- emnist[1]
-#' # image in item 1
-#' first_item$x
-#' # label of item 1
-#' first_item$y
-#' }
-#'
-#' @seealso [mnist_dataset()], [kmnist_dataset()], [fashion_mnist_dataset()]
-#'
-#' @name emnist_dataset
-#' @aliases emnist_dataset
-#' @title EMNIST dataset
+#' @describeIn mnist_dataset EMNIST dataset with digits and letters and multiple split modes.
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",
+  archive_size = "540 MB",
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
@@ -445,13 +402,14 @@ emnist_dataset <- dataset(
     mnist = as.character(0:9)
   ),
 
-  initialize = function(root = tempdir(), split = "balanced", transform = NULL, target_transform = NULL,
-                        download = FALSE) {
-    rlang::inform(glue::glue(
-      "Preparing to download EMNIST dataset. Archive size is ~0.5GB\n",
-      "You may have to increase the download timeout in your session with `options()` in case of failure\n",
-      "- Will extract and convert for all {length(self$classes_list)} splits\n"
-    ))
+  initialize = function(
+    root = tempdir(),
+    split = "balanced",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     split <- match.arg(split, choices = names(self$classes_list))
     self$split <- split
     self$root_path <- root
@@ -459,8 +417,10 @@ emnist_dataset <- dataset(
     self$target_transform <- target_transform
     self$classes <- self$classes_list[[split]]
 
-    if (download)
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
@@ -477,7 +437,7 @@ emnist_dataset <- dataset(
     self$test_targets <- test_data[[2]] + 1L
 
     self$is_train <- TRUE
-    rlang::inform("EMNIST dataset processed successfully!")
+    cli_inform("{.cls {class(self)[[1]]}} EMNIST dataset processed successfully!")
   },
 
   download = function() {
@@ -529,16 +489,16 @@ emnist_dataset <- dataset(
     data_set <- if (self$is_train) self$data else self$test_data
     targets_set <- if (self$is_train) self$targets else self$test_targets
 
-    img <- data_set[index, , ]
-    target <- targets_set[index]
+    x <- data_set[index, , ]
+    y <- targets_set[index]
 
     if (!is.null(self$transform))
-      img <- self$transform(img)
+      x <- self$transform(x)
 
     if (!is.null(self$target_transform))
-      target <- self$target_transform(target)
+      y <- self$target_transform(y)
 
-    list(x = img, y = target)
+    list(x = x, y = y)
   },
 
   .length = function() {

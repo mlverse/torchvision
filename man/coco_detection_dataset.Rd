@@ -5,11 +5,11 @@
 \title{COCO Detection Dataset}
 \usage{
 coco_detection_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
-  year = c("2017", "2016", "2014"),
+  year = c("2017", "2014"),
   download = FALSE,
-  transforms = NULL,
+  transform = NULL,
   target_transform = NULL
 )
 }
@@ -18,63 +18,54 @@ coco_detection_dataset(
 
 \item{train}{Logical. If TRUE, loads the training split; otherwise, loads the validation split.}
 
-\item{year}{Character. Dataset version year. One of \code{"2014"}, \code{"2016"}, or \code{"2017"}.}
+\item{year}{Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.}
 
-\item{transforms}{Optional transform function applied to the image.}
+\item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
 }
 \value{
-A torch dataset. Each item is a list with two elements:
+An object of class \code{coco_detection_dataset}. Each item is a list:
+\itemize{
+\item \code{x}: a \verb{(C, H, W)} \code{torch_tensor} representing the image.
+\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format \code{c(x_min, y_min, x_max, y_max)}.
+\item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
+\item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
+\item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
+\item \code{y$segmentation}: a list of segmentation polygons for each object.
+\item \code{y$masks}: a \verb{(N, H, W)} boolean \code{torch_tensor} containing binary segmentation masks.
+}
 
-\describe{
-\item{image}{A 3D \code{torch_tensor} of shape \code{(C, H, W)} representing the image.}
-\item{target}{A list containing:
-\describe{
-\item{boxes}{A 2D \code{torch_tensor} of shape \code{(N, 4)} containing bounding boxes
-in the format c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).}
-\item{labels}{A 1D \code{torch_tensor} of type integer, representing the class label for each object.}
-\item{area}{A 1D \code{torch_tensor} of type float, indicating the area of each object.}
-\item{iscrowd}{A 1D \code{torch_tensor} of type boolean, where \code{TRUE} indicates the object is part of a crowd.}
-\item{segmentation}{A list of segmentation polygons for each object.}
-}
-}
-}
+The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 }
 \description{
 Loads the MS COCO dataset for object detection and segmentation.
 }
 \details{
 The returned image is in CHW format (channels, height, width), matching the torch convention.
-The dataset \code{target} offers object detection annotations such as bounding boxes, labels,
+The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
 areas, crowd indicators, and segmentation masks from the official COCO annotations.
 }
 \examples{
 \dontrun{
 ds <- coco_detection_dataset(
-  root = "~/data",
   train = FALSE,
   year = "2017",
   download = TRUE
 )
 
-example <- ds[1]
+item <- ds[1]
 
-# Get back target label IDs of the example from COCO category names
-label_ids <- as.integer(torch::as_array(example$target$labels))
-label_names <- ds$category_names[as.character(label_ids)]
+# Visualize bounding boxes
+boxed <- draw_bounding_boxes(item)
+tensor_image_browse(boxed)
 
-# Draw bounding boxes with label names
-output <- draw_bounding_boxes(
-  image = example$image,
-  boxes = example$target$boxes,
-  labels = label_names
-)
-
-# Display the result
-tensor_image_browse(output)
+# Visualize segmentation masks (if present)
+masked <- draw_segmentation_masks(item)
+tensor_image_browse(masked)
 }
-
 }
+\concept{detection_dataset}

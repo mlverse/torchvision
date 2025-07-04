@@ -64,12 +64,11 @@
 #' fgvc$classes$variant[item$y[3]]       # e.g., "707-320"
 #' }
 #'
-#' @name fgvc_aircraft_dataset
-#' @aliases fgvc_aircraft_dataset
-#' @title FGVC Aircraft dataset
+#' @family classification_dataset
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
+  archive_size = "2.8 GB",
 
   initialize = function(
     root = tempdir(),
@@ -80,17 +79,16 @@ fgvc_aircraft_dataset <- dataset(
     download = FALSE
   ) {
     
-    rlang::inform("FGVC-Aircraft dataset (Size: ~2.6 GB) will be downloaded and processed if not already available.")
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
     self$transform <- transform
     self$target_transform <- target_transform
-
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
 
     if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -126,29 +124,29 @@ fgvc_aircraft_dataset <- dataset(
     self$image_paths <- file.path(self$data_dir, "images", glue::glue("{merged_df$img_id}.jpg"))
     self$labels_df <- merged_df[, levels]
 
-    rlang::inform(glue::glue(
-      "FGVC-Aircraft dataset loaded successfully with {length(self$image_paths)} samples ({split}, {annotation_level}-level)."
-    ))
+    cli_inform(
+      "{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes[[annotation_level]])} classes."
+    )
   },
 
   .getitem = function(index) {
-    img <- jpeg::readJPEG(self$image_paths[index]) * 255
+    x <- jpeg::readJPEG(self$image_paths[index]) * 255
 
-    label <- if (self$annotation_level == "all") {
+    y <- if (self$annotation_level == "all") {
       as.integer(self$labels_df[index, ])
     } else {
       self$labels_df[[self$annotation_level]][index]
     }
 
     if (!is.null(self$transform)) {
-      img <- self$transform(img)
+      x <- self$transform(x)
     }
 
     if (!is.null(self$target_transform)) {
-      label <- self$target_transform(label)
+      y <- self$target_transform(y)
     }
 
-    list(x = img, y = label)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -168,11 +166,15 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
+    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
       runtime_error("Corrupt file! Delete the file at {archive} and try again.")
     }
 
     untar(archive, exdir = self$root)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
   }
 )
