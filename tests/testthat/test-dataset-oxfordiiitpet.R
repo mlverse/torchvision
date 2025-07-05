@@ -50,7 +50,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for test split with target type
   expect_type(first_item$x, "double")
   expect_type(first_item$y, "list")
   expect_tensor(first_item$y$mask)
-  expect_tensor_shape(first_item$y$mask,c(3,500,394))
+  expect_tensor_shape(first_item$y$mask,c(3,225,300))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label,"integer")
   expect_equal(first_item$y$label, 1)
@@ -68,7 +68,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for test split with target type
   expect_type(first_item$x, "double")
   expect_type(first_item$y, "list")
   expect_tensor(first_item$y$mask)
-  expect_tensor_shape(first_item$y$mask,c(3,500,394))
+  expect_tensor_shape(first_item$y$mask,c(3,225,300))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label,"integer")
   expect_equal(first_item$y$label, 1)
@@ -82,6 +82,10 @@ test_that("tests for the Oxford-IIIT Pet dataset for dataloader", {
     root = t,
     transform = function(x) {
       x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
+    },
+    target_transform = function(y) {
+      y$masks <- y$masks %>% transform_resize(c(224, 224))
+      y
     }
   )
   dl <- dataloader(oxfordiiitpet, batch_size = 4)
@@ -95,7 +99,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for dataloader", {
   expect_length(batch$y, 2)
   expect_type(batch$y[1], "list")
   expect_tensor(batch$y$mask)
-  expect_tensor_shape(batch$y$mask, c(4,3,500,394))
+  expect_tensor_shape(batch$y$mask, c(4,3,224,224))
   expect_tensor_dtype(batch$y$mask, torch_bool())
   expect_tensor(batch$y$label)
   expect_tensor_shape(batch$y$label, 4)
