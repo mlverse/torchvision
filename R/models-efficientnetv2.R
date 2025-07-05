@@ -28,18 +28,23 @@ fused_mbconv_block <- torch::nn_module(
     layers <- list()
 
     if (expand_ratio != 1) {
+      # Fused: expansion + spatial convolution in one step
       layers[[length(layers) + 1]] <- conv_norm_act(
         in_channels, hidden_dim, kernel_size = kernel_size, stride = stride,
         norm_layer = norm_layer, activation_layer = torch::nn_silu
       )
-      layers[[length(layers) + 1]] <- conv_norm_act(
-        hidden_dim, out_channels, kernel_size = 1, stride = 1,
-        norm_layer = norm_layer, activation_layer = torch::nn_silu
+      # Project back to output channels
+      layers[[length(layers) + 1]] <- torch::nn_sequential(
+        torch::nn_conv2d(hidden_dim, out_channels, kernel_size = 1, stride = 1, bias = FALSE),
+        norm_layer(out_channels)
       )
     } else {
-      layers[[length(layers) + 1]] <- conv_norm_act(
-        in_channels, out_channels, kernel_size = kernel_size, stride = stride,
-        norm_layer = norm_layer, activation_layer = torch::nn_silu
+      # When expand_ratio == 1, just do a single convolution
+      layers[[length(layers) + 1]] <- torch::nn_sequential(
+        torch::nn_conv2d(in_channels, out_channels, kernel_size = kernel_size,
+                         stride = stride, padding = (kernel_size - 1) %/% 2, bias = FALSE),
+        norm_layer(out_channels),
+        torch::nn_silu(inplace = TRUE)
       )
     }
 
@@ -73,10 +78,18 @@ efficientnet_v2 <- torch::nn_module(
       stage_blocks <- list()
       for (i in seq_len(r)) {
         s <- if (i == 1) cfg$stride else 1
-        stage_blocks[[i]] <- block_fn(
-          in_channels, oc, kernel_size = cfg$kernel, stride = s,
-          expand_ratio = cfg$expand, norm_layer = norm_layer
-        )
+        if (identical(cfg$block, "fused")) {
+          stage_blocks[[i]] <- block_fn(
+            in_channels, oc, kernel_size = cfg$kernel, stride = s,
+            expand_ratio = cfg$expand, norm_layer = norm_layer
+          )
+        } else {
+          # For mbconv blocks, use the v2 block with corrected SE calculation
+          stage_blocks[[i]] <- mbconv_block_v2(
+            in_channels, oc, kernel_size = cfg$kernel, stride = s,
+            expand_ratio = cfg$expand, se_ratio = 0.25, norm_layer = norm_layer
+          )
+        }
         in_channels <- oc
       }
       features[[length(features) + 1]] <- torch::nn_sequential(!!!stage_blocks)
@@ -102,6 +115,55 @@ efficientnet_v2 <- torch::nn_module(
   }
 )
 
+# mbconv_block for EfficientNetV2
+mbconv_block_v2 <- torch::nn_module(
+  initialize = function(in_channels, out_channels, kernel_size, stride,
+                        expand_ratio, se_ratio = 0.25, norm_layer = NULL) {
+    if (is.null(norm_layer))
+      norm_layer <- torch::nn_batch_norm2d
+    hidden_dim <- in_channels * expand_ratio
+    self$use_res_connect <- stride == 1 && in_channels == out_channels
+    layers <- list()
+
+    # Expand
+    if (expand_ratio != 1) {
+      layers[[length(layers) + 1]] <- conv_norm_act(
+        in_channels, hidden_dim, kernel_size = 1,
+        norm_layer = norm_layer, activation_layer = torch::nn_silu
+      )
+    }
+
+    # Depthwise
+    layers[[length(layers) + 1]] <- conv_norm_act(
+      hidden_dim, hidden_dim, kernel_size = kernel_size, stride = stride,
+      groups = hidden_dim, norm_layer = norm_layer,
+      activation_layer = torch::nn_silu
+    )
+
+    # SE block
+    if (!is.null(se_ratio) && se_ratio > 0) {
+      squeeze_channels <- max(1, as.integer(in_channels * se_ratio))
+      layers[[length(layers) + 1]] <- se_block(
+        hidden_dim, squeeze_channels = squeeze_channels
+      )
+    }
+
+    # Projection
+    layers[[length(layers) + 1]] <- torch::nn_sequential(
+      torch::nn_conv2d(hidden_dim, out_channels, 1, bias = FALSE),
+      norm_layer(out_channels)
+    )
+
+    self$block <- torch::nn_sequential(!!!layers)
+  },
+  forward = function(x) {
+    out <- self$block(x)
+    if (self$use_res_connect)
+      out <- out + x
+    out
+  }
+)
+
 effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, ...) {
   args <- rlang::list2(...)
 
@@ -112,7 +174,7 @@ effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, .
   )))
 
   if (pretrained) {
-    local_path <- file.path("tools", "models", paste0(arch, ".pth"))
+    local_path <- here::here("tools", "models", paste0(arch, ".pth"))
     print(local_path)
     state_dict <- torch::load_state_dict(local_path)
     model$load_state_dict(state_dict)
@@ -157,10 +219,10 @@ model_efficientnet_v2_l <- function(pretrained = FALSE, progress = TRUE, ...) {
     list(block = "fused", expand = 1, channels = 32, repeats = 4, stride = 1, kernel = 3),
     list(block = "fused", expand = 4, channels = 64, repeats = 7, stride = 2, kernel = 3),
     list(block = "fused", expand = 4, channels = 96, repeats = 7, stride = 2, kernel = 3),
-    list(block = "mbconv", expand = 4, channels = 176, repeats = 10, stride = 2, kernel = 3),
+    list(block = "mbconv", expand = 4, channels = 192, repeats = 10, stride = 2, kernel = 3),
     list(block = "mbconv", expand = 6, channels = 224, repeats = 19, stride = 1, kernel = 3),
     list(block = "mbconv", expand = 6, channels = 384, repeats = 25, stride = 2, kernel = 3),
-    list(block = "mbconv", expand = 6, channels = 512, repeats = 7, stride = 1, kernel = 3)
+    list(block = "mbconv", expand = 6, channels = 640, repeats = 7, stride = 1, kernel = 3)
   )
   effnetv2("efficientnet_v2_l", cfgs, 0.4, 32, pretrained, progress, ...)
 }

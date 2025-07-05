@@ -65,11 +65,9 @@ conv_norm_act <- torch::nn_module(
 se_block <- torch::nn_module(
   initialize = function(in_channels, squeeze_channels) {
     self$avgpool <- torch::nn_adaptive_avg_pool2d(output_size = 1)
-    self$fc1 <- torch::nn_conv2d(in_channels, squeeze_channels,
-                                 kernel_size = 1)
+    self$fc1 <- torch::nn_conv2d(in_channels, squeeze_channels, kernel_size = 1)
     self$activation <- torch::nn_relu()
-    self$fc2 <- torch::nn_conv2d(squeeze_channels, in_channels,
-                                 kernel_size = 1)
+    self$fc2 <- torch::nn_conv2d(squeeze_channels, in_channels, kernel_size = 1)
     self$scale_activation <- torch::nn_sigmoid()
   },
   forward = function(x) {
@@ -107,13 +105,15 @@ mbconv_block <- torch::nn_module(
       activation_layer = torch::nn_silu
     )
 
-    # SE Block
+    # Correct SE block with proper squeeze logic
     if (!is.null(se_ratio) && se_ratio > 0) {
-      squeeze_channels <- max(1L, hidden_dim %/% as.integer(1 / se_ratio))
-      layers[[length(layers) + 1]] <- se_block(hidden_dim, squeeze_channels = squeeze_channels)
+      squeeze_channels <- as.integer(hidden_dim * se_ratio)
+      layers[[length(layers) + 1]] <- se_block(
+        hidden_dim, squeeze_channels = squeeze_channels
+      )
     }
 
-    # Projection (fix: wrap in sequential to get block.2.0 / block.2.1)
+    # Projection
     layers[[length(layers) + 1]] <- torch::nn_sequential(
       torch::nn_conv2d(hidden_dim, out_channels, 1, bias = FALSE),
       norm_layer(out_channels)
@@ -128,6 +128,7 @@ mbconv_block <- torch::nn_module(
     out
   }
 )
+
 
 efficientnet <- torch::nn_module(
   "efficientnet",
@@ -205,7 +206,6 @@ effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
 
     state_dict <- torch::load_state_dict(local_path)
     state_dict <- state_dict[!grepl("num_batches_tracked", names(state_dict))]
-
   }
 
   model
