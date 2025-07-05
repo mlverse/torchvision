@@ -401,7 +401,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
     value_error("`angle` should be int or float")
 
   if (!length(translate) == 2)
-    value_error("`translate`` should be length 2")
+    value_error("`translate` should be length 2")
 
   if (scale < 0)
     value_error("`scale` should be positive")

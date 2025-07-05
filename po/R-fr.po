@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-07-05 13:19+0200\n"
-"PO-Revision-Date: 2025-07-05 13:43+0200\n"
+"POT-Creation-Date: 2025-07-05 13:51+0200\n"
+"PO-Revision-Date: 2025-07-05 13:52+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -481,8 +481,8 @@ msgid "`angle` should be int or float"
 msgstr "`angle` doit être un entier ou un réel."
 
 #: transforms-tensor.R:404
-msgid "`translate`` should be length 2"
-msgstr "La longueur de `translate` doit être 2."
+msgid "`translate` should be length 2"
+msgstr "`translate` devrait être de longueur 2."
 
 #: transforms-tensor.R:407
 msgid "`scale` should be positive"

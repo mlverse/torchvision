@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-07-05 13:19+0200\n"
+"POT-Creation-Date: 2025-07-05 13:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -395,7 +395,7 @@ msgid "`angle` should be int or float"
 msgstr ""
 
 #: transforms-tensor.R:404
-msgid "`translate`` should be length 2"
+msgid "`translate` should be length 2"
 msgstr ""
 
 #: transforms-tensor.R:407
