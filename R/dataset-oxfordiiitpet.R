@@ -61,7 +61,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     self$split <- if (train) "train" else "test"
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -94,7 +94,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       actual_md5 <- tools::md5sum(archive)
 
       if (actual_md5 != r[2]) {
-        cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
 
       utils::untar(archive, exdir = self$raw_folder)
@@ -107,27 +107,27 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       img_ids <- vapply(parts, `[[`, character(1), 1)
       labels <- vapply(parts, function(x) as.integer(x[2]), integer(1))
       bin_labels <- vapply(parts, function(x) as.integer(x[3]), integer(1))
-      
+
       img_paths <- file.path(self$raw_folder, "images", glue::glue("{img_ids}.jpg"))
       seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{img_ids}.png"))
-      
+
       valid <- file.exists(img_paths) & file.exists(seg_paths)
-      
+
       if (any(!valid)) {
         cli_warn("Some files are missing in {split} split and will be skipped.")
         for (id in img_ids[!valid]) {
           cli_warn("Missing files for: {id}")
         }
       }
-      
+
       image_paths <- img_paths[valid]
       labels <- labels[valid]
-      
+
       raw_classes <- sub("_\\d+$", "", img_ids[valid])
       self$classes <- unique(raw_classes)
       self$classes <- gsub("_", " ", self$classes, fixed = TRUE)
       class_to_idx <- setNames(seq_along(self$classes), self$classes)
-      
+
       saveRDS(
         list(
           image_paths = image_paths,
@@ -138,7 +138,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       )
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -258,7 +258,7 @@ oxfordiiitpet_dataset <- dataset(
     self$split <- if (train) "train" else "test"
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -311,7 +311,7 @@ oxfordiiitpet_binary_dataset <- dataset(
     self$split <- if (train) "train" else "test"
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
