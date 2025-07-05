@@ -64,24 +64,23 @@ conv_norm_act <- torch::nn_module(
 
 se_block <- torch::nn_module(
   initialize = function(in_channels, squeeze_channels) {
-    self$avg_pool <- torch::nn_adaptive_avg_pool2d(output_size = 1)
-    self$squeeze <- torch::nn_conv2d(in_channels, squeeze_channels,
-                                     kernel_size = 1)
-    self$relu <- torch::nn_relu()
-    self$expand <- torch::nn_conv2d(squeeze_channels, in_channels,
-                                    kernel_size = 1)
-    self$sigmoid <- torch::nn_sigmoid()
+    self$avgpool <- torch::nn_adaptive_avg_pool2d(output_size = 1)
+    self$fc1 <- torch::nn_conv2d(in_channels, squeeze_channels,
+                                 kernel_size = 1)
+    self$activation <- torch::nn_relu()
+    self$fc2 <- torch::nn_conv2d(squeeze_channels, in_channels,
+                                 kernel_size = 1)
+    self$scale_activation <- torch::nn_sigmoid()
   },
   forward = function(x) {
-    scale <- self$avg_pool(x)
-    scale <- self$squeeze(scale)
-    scale <- self$relu(scale)
-    scale <- self$expand(scale)
-    scale <- self$sigmoid(scale)
+    scale <- self$avgpool(x)
+    scale <- self$fc1(scale)
+    scale <- self$activation(scale)
+    scale <- self$fc2(scale)
+    scale <- self$scale_activation(scale)
     x * scale
   }
 )
-
 
 
 mbconv_block <- torch::nn_module(
