@@ -12,6 +12,7 @@
 * Added `fer_dataset()` for loading the FER-2013 dataset (@DerrickUnleashed, #154).
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
+* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 
 ## New features
 
