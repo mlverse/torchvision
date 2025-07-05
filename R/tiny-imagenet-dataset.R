@@ -40,12 +40,12 @@ tiny_imagenet_dataset <- torch::dataset(
 
     raw_path <- fs::path_join(c(self$root_path, "tiny-imagenet-200.zip"))
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     p <- download_and_cache(self$url)
     fs::file_copy(p, raw_path)
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
 
     utils::unzip(raw_path, exdir = self$root_path)
 
@@ -64,7 +64,7 @@ tiny_imagenet_dataset <- torch::dataset(
 
     fs::dir_delete(fs::path(val_path, "images"))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
 
   }
 )

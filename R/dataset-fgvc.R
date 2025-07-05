@@ -88,12 +88,12 @@ fgvc_aircraft_dataset <- dataset(
     self$data_dir <- file.path(self$base_dir, "data")
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      runtime_error("Dataset not found. Use `download = TRUE` to download it.")
     }
 
     self$classes <- list(
@@ -166,7 +166,7 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
@@ -175,6 +175,6 @@ fgvc_aircraft_dataset <- dataset(
 
     untar(archive, exdir = self$root)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   }
 )

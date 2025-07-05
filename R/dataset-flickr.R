@@ -66,11 +66,11 @@ flickr8k_caption_dataset <- torch::dataset(
     self$split <- if (train) "train" else "test"
     
     if (download)
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
 
     if (!self$check_exists())
-      cli_abort("Dataset not found. Use `download = TRUE` to fetch it.")
+      cli_abort("Dataset not found. Use `download = TRUE` to download it.")
 
     if (!self$check_processed_exists()) {
       fs::dir_create(self$processed_folder)
@@ -151,7 +151,7 @@ flickr8k_caption_dataset <- torch::dataset(
       }
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
 
   },
 
@@ -228,11 +228,11 @@ flickr30k_caption_dataset <- torch::dataset(
     self$split <- if (train) "train" else "test"
 
     if (download)
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
 
     if (!self$check_exists()) 
-      cli_abort("Dataset not found. Use `download = TRUE` to fetch it.")
+      cli_abort("Dataset not found. Use `download = TRUE` to download it.")
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
     captions_json <- jsonlite::fromJSON(captions_path)
