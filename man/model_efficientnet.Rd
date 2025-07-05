@@ -100,6 +100,7 @@ dim(output)
 \seealso{
 Other models: 
 \code{\link{model_alexnet}()},
+\code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
