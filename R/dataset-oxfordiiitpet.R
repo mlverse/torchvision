@@ -19,7 +19,7 @@
 #' @examples
 #' \dontrun{
 #' # Load the Oxford-IIIT Pet dataset with basic tensor transform
-#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor)
+#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor, download = TRUE)
 #'
 #' # Retrieve the image tensor, segmentation mask and label
 #' first_item <- oxfordiiitpet[1]
@@ -43,7 +43,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
   ),
   training_file = "trainval.rds",
   test_file = "test.rds",
-  archive_size = "800 MB",
+  archive_size = "750 MB",
   initialize = function(
     root = tempdir(),
     train = TRUE,
