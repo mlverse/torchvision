@@ -99,7 +99,7 @@ flowers102_dataset <- dataset(
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self$img_path)} samples.")
+    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {length(self$img_path)} samples.")
   },
 
   .getitem = function(index) {
@@ -123,7 +123,7 @@ flowers102_dataset <- dataset(
 
   download = function() {
     if (self$check_exists(self$split)) {
-      cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' is already processed and cached.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} is already processed and cached.")
     }
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)

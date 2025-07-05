@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-07-03 23:50+0200\n"
+"POT-Creation-Date: 2025-07-05 13:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -161,14 +161,14 @@ msgstr ""
 
 #: dataset-flowers.R:102
 msgid ""
-"{.cls {class(self)[[1]]}} Split '{self$split}' loaded with "
+"Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with "
 "{length(self$img_path)} samples."
 msgstr ""
 
 #: dataset-flowers.R:126
 msgid ""
-"{.cls {class(self)[[1]]}} Split '{self$split}' is already processed and "
-"cached."
+"Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} is already "
+"processed and cached."
 msgstr ""
 
 #: dataset-flowers.R:140
@@ -391,23 +391,23 @@ msgid "saturation factor must be positive."
 msgstr ""
 
 #: transforms-tensor.R:401
-msgid "Argument angle should be int or float"
+msgid "`angle` should be int or float"
 msgstr ""
 
 #: transforms-tensor.R:404
-msgid "translate should be length 2"
+msgid "`translate`` should be length 2"
 msgstr ""
 
 #: transforms-tensor.R:407
-msgid "Argument scale should be positive"
+msgid "`scale` should be positive"
 msgstr ""
 
 #: transforms-tensor.R:410
-msgid "Shear should be either a single value or a sequence of 2 values"
+msgid "`shear` should be either a single value or a sequence of 2 values"
 msgstr ""
 
 #: transforms-tensor.R:424
-msgid "transform perspective is not implemented yet."
+msgid "`transform_perspective` is not implemented yet."
 msgstr ""
 
 #: transforms-tensor.R:441
