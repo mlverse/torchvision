@@ -70,12 +70,12 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$image_paths <- data$image_paths
+    self$img_path <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- if (self$target_type == "category") names(self$class_to_idx) else c("Cat", "Dog")
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -90,7 +90,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     for (r in self$resources) {
       url <- r[1]
-      archive <- download_and_cache(url)
+      archive <- download_and_cache(r[1], prefix = class(self)[1])
       actual_md5 <- tools::md5sum(archive)
 
       if (actual_md5 != r[2]) {
@@ -112,13 +112,6 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{img_ids}.png"))
 
       valid <- file.exists(img_paths) & file.exists(seg_paths)
-
-      if (any(!valid)) {
-        cli_warn("Some files are missing in {split} split and will be skipped.")
-        for (id in img_ids[!valid]) {
-          cli_warn("Missing files for: {id}")
-        }
-      }
 
       image_paths <- img_paths[valid]
       labels <- labels[valid]
@@ -146,11 +139,11 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
-    x <- jpeg::readJPEG(self$image_paths[index])
+    x <- jpeg::readJPEG(self$img_path[index])
 
     label <- self$labels[index]
 
-    seg_name <- basename(self$image_paths[index])
+    seg_name <- basename(self$img_path[index])
     mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
     masks <- png::readPNG(mask_path) * 255
     masks <- torch_tensor(masks)
@@ -184,7 +177,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
   },
 
   .length = function() {
-    length(self$image_paths)
+    length(self$img_path)
   },
 
   active = list(
@@ -267,16 +260,16 @@ oxfordiiitpet_dataset <- dataset(
 
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$image_paths <- data$image_paths
+    self$img_path <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- names(self$class_to_idx)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
-    x <- jpeg::readJPEG(self$image_paths[index])
+    x <- jpeg::readJPEG(self$img_path[index])
 
     y <- self$labels[index]
 
@@ -320,16 +313,16 @@ oxfordiiitpet_binary_dataset <- dataset(
 
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$image_paths <- data$image_paths
+    self$img_path <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- c("Cat", "Dog")
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
-    x <- jpeg::readJPEG(self$image_paths[index])
+    x <- jpeg::readJPEG(self$img_path[index])
 
     label <- self$labels[index]
     class_name <- names(self$class_to_idx)[label]
