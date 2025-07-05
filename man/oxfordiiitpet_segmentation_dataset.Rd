@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataset-oxfordiiitpet.R
 \name{oxfordiiitpet_segmentation_dataset}
 \alias{oxfordiiitpet_segmentation_dataset}
-\title{Oxford-IIIT Pet Dataset}
+\title{Oxford-IIIT Pet Segmentation Dataset}
 \usage{
 oxfordiiitpet_segmentation_dataset(
   root = tempdir(),

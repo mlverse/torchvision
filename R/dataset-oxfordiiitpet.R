@@ -1,4 +1,4 @@
-#' Oxford-IIIT Pet Dataset
+#' Oxford-IIIT Pet Segmentation Dataset
 #'
 #' The Oxford-IIIT Pet Dataset is a **segmentation** dataset consisting of color images
 #' of 37 pet breeds (cats and dogs). Each image is annotated with a pixel-level
@@ -197,6 +197,47 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
   )
 )
 
+#' Oxford-IIIT Pet Datasets
+#'
+#' The Oxford-IIIT Pet collection is a **classification** dataset consisting of high-quality
+#' images of 37 cat and dog breeds. It includes two variants:
+#' - `oxfordiiitpet_dataset`: Multi-class classification across 37 pet breeds.
+#' - `oxfordiiitpet_binary_dataset`: Binary classification distinguishing cats vs dogs.
+#'
+#' @inheritParams oxfordiiitpet_segmentation_dataset
+#'
+#' @return A torch dataset object \code{oxfordiiitpet_dataset} or \code{oxfordiiitpet_binary_dataset}.
+#' Each element is a named list with:
+#' - `x`: A H x W x 3 integer array representing an RGB image.
+#' - `y`: An integer label:
+#'   - For `oxfordiiitpet_dataset`: a value from 1–37 representing the breed.
+#'   - For `oxfordiiitpet_binary_dataset`: 1 for Cat, 2 for Dog.
+#'
+#' @details
+#' The Oxford-IIIT Pet dataset contains over 7,000 images across 37 categories,
+#' with roughly 200 images per class. Each image is labeled with its breed and species (cat/dog).
+#'
+#' @examples
+#' \dontrun{
+#' # Multi-class version
+#' oxford <- oxfordiiitpet_dataset(download = TRUE)
+#' first_item <- oxford[1]
+#' first_item$x  # RGB image
+#' first_item$y  # Label in 1–37
+#' oxford$classes[first_item$y]  # Breed name
+#'
+#' # Binary version
+#' oxford_bin <- oxfordiiitpet_binary_dataset(download = TRUE)
+#' first_item <- oxford_bin[1]
+#' first_item$x  # RGB image
+#' first_item$y  # 1 for Cat, 2 for Dog
+#' oxford_bin$classes[first_item$y]  # "Cat" or "Dog"
+#' }
+#'
+#' @name oxfordiiitpet_dataset
+#' @title Oxford-IIIT Pet Classification Datasets
+#' @rdname oxfordiiitpet_dataset
+#' @family classification_dataset
 #' @export
 oxfordiiitpet_dataset <- dataset(
   inherit = oxfordiiitpet_segmentation_dataset,
@@ -249,6 +290,7 @@ oxfordiiitpet_dataset <- dataset(
   }
 )
 
+#' @rdname oxfordiiitpet_dataset
 #' @export
 oxfordiiitpet_binary_dataset <- dataset(
   inherit = oxfordiiitpet_segmentation_dataset,
