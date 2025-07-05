@@ -30,8 +30,7 @@ oxfordiiitpet_segmentation_dataset(
 A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 integer array representing an RGB image.
-\item \code{y$masks}: an integer array with the same height and width as \code{x}, representing
-the segmentation trimap.
+\item \code{y$masks}: a boolean tensor of shape (3, H, W), representing the segmentation trimap as one-hot masks.
 \item \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
 \itemize{
 \item \code{"category"}: an integer in 1–37 indicating the pet breed.
