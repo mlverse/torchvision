@@ -2,7 +2,7 @@ context("dataset-oxfordiiitpet")
 
 t = withr::local_tempdir()
 
-test_that("tests for the Oxford-IIIT Pet dataset for train split with target type category", {
+test_that("tests for the Oxford-IIIT Pet Segmentation dataset dataset for train split with target type category", {
 
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
@@ -21,7 +21,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for train split with target typ
   expect_equal(first_item$y$label, 1)
 })
 
-test_that("tests for the Oxford-IIIT Pet dataset for train split with target type binary category", {
+test_that("tests for the Oxford-IIIT Pet Segmentation dataset dataset for train split with target type binary category", {
 
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
@@ -40,7 +40,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for train split with target typ
   expect_equal(first_item$y$label, 1)
 })
 
-test_that("tests for the Oxford-IIIT Pet dataset for test split with target type category", {
+test_that("tests for the Oxford-IIIT Pet Segmentation dataset dataset for test split with target type category", {
 
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
@@ -59,7 +59,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for test split with target type
   expect_equal(first_item$y$label, 1)
 })
 
-test_that("tests for the Oxford-IIIT Pet dataset for test split with target type binary category", {
+test_that("tests for the Oxford-IIIT Pet Segmentation dataset dataset for test split with target type binary category", {
 
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
@@ -78,7 +78,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for test split with target type
   expect_equal(first_item$y$label, 1)
 })
 
-test_that("tests for the Oxford-IIIT Pet dataset for dataloader", {
+test_that("tests for the Oxford-IIIT Pet Segmentation dataset dataset for dataloader", {
 
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")

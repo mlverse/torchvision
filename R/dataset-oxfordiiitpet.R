@@ -35,8 +35,8 @@
 #'
 #' @family segmentation_dataset
 #' @export
-oxfordiiitpet_segmentation_dataset <- dataset(
-  name = "oxfordiiitpet",
+oxfordiiitpet_segmentation_dataset <- torch::dataset(
+  name = "oxfordiiitpet segmentation",
   resources = list(
     c("https://www.robots.ox.ac.uk/~vgg/data/pets/data/images.tar.gz", "5c4f3ee8e5d25df40f4fd59a7f44e54c"),
     c("https://www.robots.ox.ac.uk/~vgg/data/pets/data/annotations.tar.gz", "95a8c909bbe2e81eed6a22bccdf3f68f")
@@ -65,15 +65,15 @@ oxfordiiitpet_segmentation_dataset <- dataset(
       self$download()
     }
 
+    if (!self$check_exists())
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+
     data_file <- if (train) self$training_file else self$test_file
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$image_paths <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- if (self$target_type == "category") names(self$class_to_idx) else c("Cat", "Dog")
-
-    if (!self$check_exists())
-      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
   },
@@ -195,4 +195,110 @@ oxfordiiitpet_segmentation_dataset <- dataset(
       file.path(self$root_path, "oxfordiiitpet", "processed")
     }
   )
+)
+
+#' @export
+oxfordiiitpet_dataset <- dataset(
+  inherit = oxfordiiitpet_segmentation_dataset,
+  name = "oxfordiiitpet",
+
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
+    self$root_path <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+    self$train <- train
+    self$split <- if (train) "train" else "test"
+
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
+    }
+
+    if (!self$check_exists())
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+
+    data_file <- if (train) self$training_file else self$test_file
+    data <- readRDS(file.path(self$processed_folder, data_file))
+    self$image_paths <- data$image_paths
+    self$labels <- data$labels
+    self$class_to_idx <- data$class_to_idx
+    self$classes <- names(self$class_to_idx)
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
+  },
+
+  .getitem = function(index) {
+    x <- jpeg::readJPEG(self$image_paths[index])
+
+    y <- self$labels[index]
+
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
+  }
+)
+
+#' @export
+oxfordiiitpet_binary_dataset <- dataset(
+  inherit = oxfordiiitpet_segmentation_dataset,
+  name = "oxfordiiitpet binary",
+
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
+    self$root_path <- root
+    self$transform <- transform
+    self$target_transform <- target_transform
+    self$train <- train
+    self$split <- if (train) "train" else "test"
+
+    if (download){
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
+    }
+
+    if (!self$check_exists())
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+
+    data_file <- if (train) self$training_file else self$test_file
+    data <- readRDS(file.path(self$processed_folder, data_file))
+    self$image_paths <- data$image_paths
+    self$labels <- data$labels
+    self$class_to_idx <- data$class_to_idx
+    self$classes <- c("Cat", "Dog")
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_paths)} images across {length(self$classes)} classes.")
+  },
+
+  .getitem = function(index) {
+    x <- jpeg::readJPEG(self$image_paths[index])
+
+    label <- self$labels[index]
+    class_name <- names(self$class_to_idx)[label]
+    y <- if (substr(class_name, 1, 1) %in% LETTERS) 1L else 2L
+
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
+  }
 )
