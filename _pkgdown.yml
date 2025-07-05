@@ -63,6 +63,12 @@ reference:
     Dataset having items with "y" as one or multiple captions of the image
   contents:
    - ends_with("caption_dataset")
+- subtitle: for Image segmentation
+  descr: >
+    Dataset having items with "y" as a named list containing a segmentation 
+    mask and labels for image segmentation.
+  contents:
+   - ends_with("segmentation_dataset")
 - title: Displaying
   desc: Show images
   contents:
