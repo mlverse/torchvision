@@ -19,25 +19,19 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Load the Oxford-IIIT Pet segmentation dataset with image and mask transforms
-#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(
-#'   transform = function(x) {
-#'     x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
-#'   },
-#'   target_transform = function(y) {
-#'     y$masks <- y$masks %>% transform_to_tensor() %>% transform_resize(c(224, 224))
-#'     y
-#'   }
-#' )
+#' # Load the Oxford-IIIT Pet dataset with basic tensor transform
+#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor)
 #'
-#' # Create a dataloader and fetch one batch
-#' dl <- dataloader(oxfordiiitpet, batch_size = 4)
-#' batch <- dataloader_next(dataloader_make_iter(dl))
+#' # Retrieve the image tensor, segmentation mask and label
+#' first_item <- oxfordiiitpet[1]
+#' first_item$x  # RGB image tensor of shape (3, H, W)
+#' first_item$y$masks   # Segmentation mask tensor (1 = pet, 2 = background, 3 = outline)
+#' first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
+#' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
-#' # Access batch data
-#' batch$x             # Tensor of shape (4, 3, 224, 224)
-#' batch$y$masks        # Tensor of shape (4, 1, 224, 224)
-#' batch$y$label       # Tensor of shape (4,) with class labels
+#' # Visualize
+#' overlay <- draw_segmentation_masks(first_item$x, masks = first_item$y$masks)
+#' tensor_image_browse(overlay)
 #' }
 #'
 #' @family segmentation_dataset
