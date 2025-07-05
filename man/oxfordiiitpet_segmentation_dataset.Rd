@@ -47,7 +47,7 @@ It is commonly used for evaluating models on object segmentation tasks.
 \examples{
 \dontrun{
 # Load the Oxford-IIIT Pet dataset with basic tensor transform
-oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor)
+oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor, download = TRUE)
 
 # Retrieve the image tensor, segmentation mask and label
 first_item <- oxfordiiitpet[1]
@@ -57,7 +57,7 @@ first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
 oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 
 # Visualize
-overlay <- draw_segmentation_masks(first_item$x, masks = first_item$y$masks)
+overlay <- draw_segmentation_masks.image_with_segmentation_mask(first_item)
 tensor_image_browse(overlay)
 }
 

@@ -29,7 +29,7 @@
 #' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
 #' # Visualize
-#' overlay <- draw_segmentation_masks(first_item$x, masks = first_item$y$masks)
+#' overlay <- draw_segmentation_masks.image_with_segmentation_mask(first_item)
 #' tensor_image_browse(overlay)
 #' }
 #'
