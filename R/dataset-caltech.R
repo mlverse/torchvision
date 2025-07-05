@@ -58,7 +58,7 @@ caltech101_dataset <- torch::dataset(
     self$target_transform <- target_transform
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -133,7 +133,7 @@ caltech101_dataset <- torch::dataset(
         utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
     }))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   }
 )
 
@@ -179,7 +179,7 @@ caltech256_dataset <- torch::dataset(
   
 
   if (download) {
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
     self$download()
   }
 

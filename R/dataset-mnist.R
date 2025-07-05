@@ -83,7 +83,7 @@ mnist_dataset <- dataset(
     self$train <- train
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -99,7 +99,7 @@ mnist_dataset <- dataset(
     self$data <- data[[1]]
     self$targets <- data[[2]] + 1L
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$targets)} images.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$targets)} images.")
   },
 
   download = function() {
@@ -122,8 +122,8 @@ mnist_dataset <- dataset(
 
     }
 
-        cli_inform("{.cls {class(self)[[1]]}} Downloading...")
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+        cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
+    cli_inform("Processing {.cls {class(self)[[1]]}}...")
 
     training_set <- list(
       read_sn3_pascalvincent(file.path(self$raw_folder, 'train-images-idx3-ubyte.gz')),
@@ -138,7 +138,7 @@ mnist_dataset <- dataset(
     saveRDS(training_set, file.path(self$processed_folder, self$training_file))
     saveRDS(test_set, file.path(self$processed_folder, self$test_file))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
 
   },
   check_exists = function() {
@@ -231,7 +231,7 @@ qmnist_dataset <- dataset(
     self$target_transform <- target_transform
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -252,7 +252,7 @@ qmnist_dataset <- dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
     for (r in self$resources[[self$split]]) {
       filename <- basename(r[1])
       destpath <- file.path(self$raw_folder, filename)
@@ -264,7 +264,7 @@ qmnist_dataset <- dataset(
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
 
 
     if (self$split == "train") {
@@ -297,7 +297,7 @@ qmnist_dataset <- dataset(
       )
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -418,7 +418,7 @@ emnist_dataset <- dataset(
     self$classes <- self$classes_list[[split]]
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -437,7 +437,7 @@ emnist_dataset <- dataset(
     self$test_targets <- test_data[[2]] + 1L
 
     self$is_train <- TRUE
-    cli_inform("{.cls {class(self)[[1]]}} EMNIST dataset processed successfully!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset processed successfully!")
   },
 
   download = function() {

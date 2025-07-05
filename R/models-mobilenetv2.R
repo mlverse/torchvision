@@ -55,8 +55,7 @@ mobilenet_v2 <- torch::nn_module(
 
     # only check the first element, assuming user knows t,c,n,s are required
     if (length(inverted_residual_setting) == 0 || length(inverted_residual_setting[[1]]) != 4)
-      value_error(c("inverted_residual_setting should be non-empty ",
-                    "or a 4-element list, got {inverted_residual_setting}"))
+      cli_abort("{.var inverted_residual_setting} should be non-empty or a 4-element list, got {.val {inverted_residual_setting}}")
 
 
     # building first layer
