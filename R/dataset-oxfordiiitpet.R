@@ -19,7 +19,10 @@
 #' @examples
 #' \dontrun{
 #' # Load the Oxford-IIIT Pet dataset with basic tensor transform
-#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(transform = transform_to_tensor, download = TRUE)
+#' oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(
+#'    transform = transform_to_tensor,
+#'    download = TRUE
+#' )
 #'
 #' # Retrieve the image tensor, segmentation mask and label
 #' first_item <- oxfordiiitpet[1]
