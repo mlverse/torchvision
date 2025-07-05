@@ -25,7 +25,7 @@
 #' # Retrieve the image tensor, segmentation mask and label
 #' first_item <- oxfordiiitpet[1]
 #' first_item$x  # RGB image tensor of shape (3, H, W)
-#' first_item$y$masks   # Segmentation mask tensor (1 = pet, 2 = background, 3 = outline)
+#' first_item$y$masks   # Boolean tensor of shape (3, H, W); one-hot masks for pet, background, and outline respectively
 #' first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
 #' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
