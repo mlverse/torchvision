@@ -11,8 +11,7 @@
 #'
 #' @return A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 #' - \code{x}: a H x W x 3 integer array representing an RGB image.
-#' - \code{y$masks}: an integer array with the same height and width as \code{x}, representing
-#'   the segmentation trimap.
+#' - \code{y$masks}: a boolean tensor of shape (3, H, W), representing the segmentation trimap as one-hot masks.
 #' - \code{y$label}: an integer representing the class label, depending on the \code{target_type}:
 #'   - \code{"category"}: an integer in 1–37 indicating the pet breed.
 #'   - \code{"binary-category"}: 1 for Cat, 2 for Dog.
