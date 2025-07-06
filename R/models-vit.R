@@ -146,12 +146,13 @@ vit_model <- nn_module(
     x <- x + self$pos_embed
     x <- self$pos_drop(x)
 
-    for (blk in self$blocks$modules) {
+    for (i in seq_along(self$blocks)) {
+      blk <- model$blocks[[i]]
       x <- blk(x)
     }
 
     x <- self$norm(x)
-    self$head(x[ ,1, ])
+    return(self$head(x[ ,1, ]))
   }
 )
 
@@ -181,11 +182,9 @@ patch_embed <- nn_module(
 
 encoder_block <- nn_module(
   classname = "encoder_block",
-  initialize = function(embed_dim, num_heads, mlp_ratio, qkv_bias, dropout) {
+  initialize = function(embed_dim = 768, num_heads = 12, mlp_ratio = 4, qkv_bias = TRUE, dropout = 0.0) {
     self$norm1 <- nn_layer_norm(embed_dim)
     self$attn <- nn_multihead_attention(embed_dim, num_heads, bias = qkv_bias, dropout = dropout)
-    self$drop_path <- nn_identity()
-
     self$norm2 <- nn_layer_norm(embed_dim)
     self$mlp <- nn_sequential(
       nn_linear(embed_dim, as.integer(embed_dim * mlp_ratio)),
@@ -199,6 +198,6 @@ encoder_block <- nn_module(
   forward = function(x) {
     x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
     x <- x + self$mlp(self$norm2(x))
-    x
+    return(x)
   }
 )
