@@ -75,16 +75,18 @@ should typically be 224 for B0 and scaled versions for B1–B7 (e.g., B7 uses 60
 
 \section{Variants and Scaling}{
 
-\tabular{lll}{
-\strong{Model} \tab \strong{Width} \tab \strong{Depth} \cr
-B0 \tab 1.0 \tab 1.0 \cr
-B1 \tab 1.0 \tab 1.1 \cr
-B2 \tab 1.1 \tab 1.2 \cr
-B3 \tab 1.2 \tab 1.4 \cr
-B4 \tab 1.4 \tab 1.8 \cr
-B5 \tab 1.6 \tab 2.2 \cr
-B6 \tab 1.8 \tab 2.6 \cr
-B7 \tab 2.0 \tab 3.1
+\tabular{lllllll}{
+\strong{Model} \tab \strong{Width} \tab \strong{Depth} \tab
+\strong{Resolution} \tab \strong{Params (M)} \tab \strong{GFLOPs} \tab
+\strong{Top-1 Acc.} \cr
+B0 \tab 1.0 \tab 1.0 \tab 224 \tab 5.3 \tab 0.39 \tab 77.1 \cr
+B1 \tab 1.0 \tab 1.1 \tab 240 \tab 7.8 \tab 0.70 \tab 79.1 \cr
+B2 \tab 1.1 \tab 1.2 \tab 260 \tab 9.2 \tab 1.00 \tab 80.1 \cr
+B3 \tab 1.2 \tab 1.4 \tab 300 \tab 12.0 \tab 1.80 \tab 81.6 \cr
+B4 \tab 1.4 \tab 1.8 \tab 380 \tab 19.0 \tab 4.20 \tab 82.9 \cr
+B5 \tab 1.6 \tab 2.2 \tab 456 \tab 30.0 \tab 9.90 \tab 83.6 \cr
+B6 \tab 1.8 \tab 2.6 \tab 528 \tab 43.0 \tab 19.0 \tab 84.0 \cr
+B7 \tab 2.0 \tab 3.1 \tab 600 \tab 66.0 \tab 37.0 \tab 84.3
 }
 }
 
@@ -94,6 +96,16 @@ model <- model_efficientnet_b0()
 input <- torch::torch_randn(1, 3, 224, 224)
 output <- model(input)
 dim(output)
+}
+
+\dontrun{
+# Example of using EfficientNet-B5 with corresponding image size
+model <- model_efficientnet_b5()
+transform <- function(img) {
+  img \%>\%
+    transform_resize(c(456, 456)) \%>\%
+    transform_to_tensor()
+}
 }
 
 }

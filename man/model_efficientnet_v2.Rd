@@ -35,6 +35,29 @@ Constructs EfficientNetV2 model architectures as described in
 \item \code{model_efficientnet_v2_l()}: EfficientNetV2-L model
 
 }}
+\section{Task}{
+
+Image classification with 1000 output classes by default (ImageNet).
+}
+
+\section{Input Format}{
+
+The models expect input tensors of shape \code{(batch_size, 3, H, W)}.
+Typical values for \code{H} and \code{W} are 384 for V2-S, 480 for V2-M,
+and 512 for V2-L.
+}
+
+\section{Variants}{
+
+\tabular{lllll}{
+\strong{Model} \tab \strong{Resolution} \tab \strong{Params (M)} \tab
+\strong{GFLOPs} \tab \strong{Top-1 Acc.} \cr
+V2-S \tab 384 \tab 24 \tab 8.4 \tab 83.9 \cr
+V2-M \tab 480 \tab 55 \tab 24 \tab 85.1 \cr
+V2-L \tab 512 \tab 119 \tab 55 \tab 85.7
+}
+}
+
 \examples{
 \dontrun{
 model <- model_efficientnet_v2_s()

@@ -16,6 +16,8 @@
 - Added `caltech101_dataset()` and `caltech256_dataset()` – for the Caltech 101 and 256 datasets. (#158, @DerrickUnleashed)
 - Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
 - Added `flowers102_dataset()` – a dataset loader for the Flowers102 dataset. (#157, @DerrickUnleashed)
+- Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
+- Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
 
 # torchvision 0.6.0
 
