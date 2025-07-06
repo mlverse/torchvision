@@ -145,7 +145,7 @@ vit_model <- nn_module(
     x <- self$pos_drop(x)
 
     for (i in seq_along(self$blocks)) {
-      blk <- model$blocks[[i]]
+      blk <- self$blocks[[i]]
       x <- blk(x)
     }
 
