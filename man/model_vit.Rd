@@ -20,11 +20,12 @@ model_vit_l_32(pretrained = FALSE, progress = TRUE, ...)
 model_vit_h_14(pretrained = FALSE, progress = TRUE, ...)
 }
 \arguments{
-\item{pretrained}{Whether to load TorchScript weights.}
+\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
 
-\item{progress}{Show progress bar during download.}
+\item{progress}{(bool): If TRUE, displays a progress bar of the download to
+stderr.}
 
-\item{...}{Additional arguments passed to the model constructor.}
+\item{...}{Other parameters passed to the model implementation.}
 }
 \description{
 Vision Transformer models implementation on \href{https://arxiv.org/abs/2010.11929}{An Image is Worth 16x16 Words}

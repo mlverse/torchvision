@@ -1,13 +1,11 @@
-#' Vision Transformer Implementation 
+#' Vision Transformer Implementation
 #'
 #' Vision Transformer models implementation on [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929)
-#' 
-#' @param pretrained Whether to load TorchScript weights.
-#' @param progress Show progress bar during download.
-#' @param ... Additional arguments passed to the model constructor.
+#'
+#' @inheritParams model_mobilenet_v2
 #'
 #' @family models
-#'
+#' @rdname model_vit
 #' @name model_vit
 NULL
 
@@ -45,7 +43,7 @@ model_vit_base <- function(name, pretrained, progress, ...) {
       vit_b_32 = list(img_size = 224, patch_size = 32, embed_dim = 768, depth = 12, num_heads = 12, mlp_ratio = 4, num_classes = 1000),
       vit_l_16 = list(img_size = 224, patch_size = 16, embed_dim = 1024, depth = 24, num_heads = 16, mlp_ratio = 4, num_classes = 1000),
       vit_l_32 = list(img_size = 224, patch_size = 32, embed_dim = 1024, depth = 24, num_heads = 16, mlp_ratio = 4, num_classes = 1000),
-      vit_h_14 = list(img_size = 224, patch_size = 14, embed_dim = 1280, depth = 32, num_heads = 16, mlp_ratio = 4, num_classes = 1000),
+      vit_h_14 = list(img_size = 518, patch_size = 14, embed_dim = 1280, depth = 32, num_heads = 16, mlp_ratio = 4, num_classes = 1000),
     )
 
     config[names(args)] <- args
@@ -182,7 +180,14 @@ patch_embed <- nn_module(
 
 encoder_block <- nn_module(
   classname = "encoder_block",
-  initialize = function(embed_dim = 768, num_heads = 12, mlp_ratio = 4, qkv_bias = TRUE, dropout = 0.0) {
+  initialize = function(
+    embed_dim = 768,
+    num_heads = 12,
+    mlp_ratio = 4,
+    qkv_bias = TRUE,
+    dropout = 0.0
+  ) {
+
     self$norm1 <- nn_layer_norm(embed_dim)
     self$attn <- nn_multihead_attention(embed_dim, num_heads, bias = qkv_bias, dropout = dropout)
     self$norm2 <- nn_layer_norm(embed_dim)
