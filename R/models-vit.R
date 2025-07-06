@@ -29,7 +29,7 @@ load_vit_torchscript_model <- function(
 
   archive <- download_and_cache(r[1], prefix = name)
 
-  if (!tools::md5sum(archive) == r[2])
+  if (tools::md5sum(archive) != r[2])
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
   jit_load(archive)
@@ -39,64 +39,64 @@ load_vit_torchscript_model <- function(
 #' @rdname model_vit
 #' @export
 model_vit_b_16 <- function(
-    name,
+    name = "vit_b_16",
     pretrained = FALSE,
     progress = TRUE,
     ...
 ) {
 
   if (pretrained)
-    load_vit_torchscript_model("vit_b_16", pretrained, progress, ...)
+    load_vit_torchscript_model(name, pretrained, progress, ...)
 }
 
 #' @rdname model_vit
 #' @export
 model_vit_b_32 <- function(
-    name,
+    name = "vit_b_32",
     pretrained = FALSE,
     progress = TRUE,
     ...
 ) {
 
   if (pretrained)
-    load_vit_torchscript_model("vit_b_32", pretrained, progress, ...)
+    load_vit_torchscript_model(name, pretrained, progress, ...)
 }
 
 #' @rdname model_vit
 #' @export
 model_vit_l_16 <- function(
-    name,
+    name = "vit_l_16",
     pretrained = FALSE,
     progress = TRUE,
     ...
 ) {
 
   if (pretrained)
-    load_vit_torchscript_model("vit_l_16", pretrained, progress, ...)
+    load_vit_torchscript_model(name, pretrained, progress, ...)
 }
 
 #' @rdname model_vit
 #' @export
 model_vit_l_32 <- function(
-    name,
+    name = "vit_l_32",
     pretrained = FALSE,
     progress = TRUE,
     ...
 ) {
 
   if (pretrained)
-    load_vit_torchscript_model("vit_l_32", pretrained, progress, ...)
+    load_vit_torchscript_model(name, pretrained, progress, ...)
 }
 
 #' @rdname model_vit
 #' @export
 model_vit_h_14 <- function(
-    name,
+    name = "vit_h_14",
     pretrained = FALSE,
     progress = TRUE,
     ...
 ) {
 
   if (pretrained)
-    load_vit_torchscript_model("vit_h_14", pretrained, progress, ...)
+    load_vit_torchscript_model(name, pretrained, progress, ...)
 }
