@@ -31,8 +31,11 @@
 #' first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
 #' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
+#' # Tag with appropriate class for generic dispatch
+#' class(first_item) <- c("image_with_segmentation_mask", class(first_item))
+#'
 #' # Visualize
-#' overlay <- draw_segmentation_masks.image_with_segmentation_mask(first_item)
+#' overlay <- draw_segmentation_masks(first_item)
 #' tensor_image_browse(overlay)
 #' }
 #'
