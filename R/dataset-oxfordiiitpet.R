@@ -31,9 +31,6 @@
 #' first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
 #' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
-#' # Tag with appropriate class for generic dispatch
-#' class(first_item) <- c("image_with_segmentation_mask", class(first_item))
-#'
 #' # Visualize
 #' overlay <- draw_segmentation_masks(first_item)
 #' tensor_image_browse(overlay)
@@ -178,8 +175,10 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
-
-    list(x = x, y = y)
+    
+    item = list(x = x, y = y)
+    class(item) <- c("image_with_segmentation_mask", class(item))
+    item
   },
 
   .length = function() {
