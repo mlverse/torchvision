@@ -68,6 +68,7 @@
 #' @export
 fgvc_aircraft_dataset <- dataset(
   name = "fgvc_aircraft",
+  archive_size = "2.8 GB",
 
   initialize = function(
     root = tempdir(),
@@ -77,23 +78,22 @@ fgvc_aircraft_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
+    
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
     self$transform <- transform
     self$target_transform <- target_transform
-
     self$base_dir <- file.path(root, "fgvc-aircraft-2013b")
     self$data_dir <- file.path(self$base_dir, "data")
 
     if (download){
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. Use `download = TRUE` to fetch it.")
+      runtime_error("Dataset not found. Use `download = TRUE` to download it.")
     }
 
     self$classes <- list(
@@ -130,23 +130,23 @@ fgvc_aircraft_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    img <- jpeg::readJPEG(self$image_paths[index]) * 255
+    x <- jpeg::readJPEG(self$image_paths[index]) * 255
 
-    label <- if (self$annotation_level == "all") {
+    y <- if (self$annotation_level == "all") {
       as.integer(self$labels_df[index, ])
     } else {
       self$labels_df[[self$annotation_level]][index]
     }
 
     if (!is.null(self$transform)) {
-      img <- self$transform(img)
+      x <- self$transform(x)
     }
 
     if (!is.null(self$target_transform)) {
-      label <- self$target_transform(label)
+      y <- self$target_transform(y)
     }
 
-    list(x = img, y = label)
+    list(x = x, y = y)
   },
 
   .length = function() {
@@ -166,7 +166,7 @@ fgvc_aircraft_dataset <- dataset(
     url <- "https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/archives/fgvc-aircraft-2013b.tar.gz"
     md5 <- "d4acdd33327262359767eeaa97a4f732"
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- withr::with_options(list(timeout = 1200), download_and_cache(url))
     if (!tools::md5sum(archive) == md5) {
@@ -175,6 +175,6 @@ fgvc_aircraft_dataset <- dataset(
 
     untar(archive, exdir = self$root)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   }
 )

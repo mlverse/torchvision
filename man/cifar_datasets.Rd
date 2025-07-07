@@ -6,7 +6,7 @@
 \title{CIFAR datasets}
 \usage{
 cifar10_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -14,7 +14,7 @@ cifar10_dataset(
 )
 
 cifar100_dataset(
-  root,
+  root = tempdir(),
   train = TRUE,
   transform = NULL,
   target_transform = NULL,
@@ -69,6 +69,7 @@ Other classification_dataset:
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
 \code{\link{mnist_dataset}()},
+\code{\link{oxfordiiitpet_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}

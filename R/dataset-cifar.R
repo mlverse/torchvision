@@ -34,16 +34,24 @@ cifar10_dataset <- torch::dataset(
   fname = "cifar-10-batches-bin",
   type = 10,
   label_fname = "batches.meta.txt",
-  initialize = function(root, train = TRUE, transform = NULL, target_transform = NULL,
-                        download = FALSE) {
+  archive_size = "160 MB",
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
 
-    if (download)
+    if (download){
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     check <- self$check_files()
 
@@ -68,7 +76,7 @@ cifar10_dataset <- torch::dataset(
     self$x <- data$imgs
     self$y <- data$labels + 1L
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$y)} images across {length(self$classes)} classes.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$y)} images across {length(self$classes)} classes.")
   },
   .load_meta = function() {
     cl <- readLines(fs::path(self$root, self$fname, self$label_fname))
@@ -95,7 +103,7 @@ cifar10_dataset <- torch::dataset(
     if(self$check_files())
       return()
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- download_and_cache(self$url)
 
@@ -104,7 +112,7 @@ cifar10_dataset <- torch::dataset(
 
     utils::untar(archive, exdir = self$root)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
   check_files = function() {
 
@@ -159,7 +167,8 @@ cifar100_dataset <- torch::dataset(
   md5 = "03b5dce01913d631647c71ecec9e9cb8",
   fname = "cifar-100-binary",
   type = 100,
-  label_fname = "fine_label_names.txt"
+  label_fname = "fine_label_names.txt",
+  archive_size = "160 MB"
 )
 
 read_batch <- function(path, type = 10) {

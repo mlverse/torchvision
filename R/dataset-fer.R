@@ -30,6 +30,7 @@
 #' @export
 fer_dataset <- dataset(
   name = "fer_dataset",
+  archive_size = "90 MB",
 
   initialize = function(
     root = tempdir(),
@@ -38,22 +39,20 @@ fer_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
+
     self$root <- root
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
     self$split <- if (train) "Train" else "Test"
-
     self$folder_name <- "fer2013"
     self$url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz"
     self$md5 <- "ca95d94fe42f6ce65aaae694d18c628a"
-
     self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    cli_inform("{.cls {class(self)[[1]]}} Dataset will be downloaded and processed if not already available.")
-
-    if (download) {
+    if (download){
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -70,7 +69,7 @@ fer_dataset <- dataset(
       parsed <- parsed[parsed$Usage %in% c("PublicTest", "PrivateTest"), ]
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
     self$x <- lapply(strsplit(parsed$pixels, " "), as.integer)
 
     self$y <- parsed$emotion + 1L
@@ -78,7 +77,7 @@ fer_dataset <- dataset(
     file_size <- fs::file_info(csv_file)$size
     readable <- fs::fs_bytes(file_size)
 
-    cli_inform("{.cls {class(self)[[1]]}} Processing...")
+    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
   },
 
   .getitem = function(i) {
@@ -103,14 +102,13 @@ fer_dataset <- dataset(
 
   download = function() {
     if (self$check_files()) {
-      cli_inform("{.cls {class(self)[[1]]}} Dataset already exists. Skipping download.")
       return()
     }
 
     dest_dir <- file.path(self$root, self$folder_name)
     fs::dir_create(dest_dir)
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- download_and_cache(self$url)
 
@@ -118,7 +116,7 @@ fer_dataset <- dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     untar(archive, exdir = self$root)
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_files = function() {

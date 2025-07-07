@@ -7,7 +7,7 @@
 \title{EuroSAT datasets}
 \usage{
 eurosat_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,
@@ -15,7 +15,7 @@ eurosat_dataset(
 )
 
 eurosat_all_bands_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,
@@ -23,7 +23,7 @@ eurosat_all_bands_dataset(
 )
 
 eurosat100_dataset(
-  root,
+  root = tempdir(),
   split = "train",
   download = FALSE,
   transform = NULL,
@@ -85,6 +85,7 @@ Other classification_dataset:
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
 \code{\link{mnist_dataset}()},
+\code{\link{oxfordiiitpet_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}

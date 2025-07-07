@@ -112,7 +112,9 @@ test_that("tensor_image_browse works", {
 
 test_that("draw_bounding_boxes works with coco_detection_sample", {
   skip_if_not(torch::torch_is_installed())
-  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
   item <- ds[3]
@@ -127,7 +129,9 @@ test_that("draw_bounding_boxes works with coco_detection_sample", {
 
 test_that("draw_segmentation_masks works with coco_detection_sample", {
   skip_if_not(torch::torch_is_installed())
-  skip_if(Sys.getenv("COCO_DATASET_TEST") != "1")
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = "~/data", train = FALSE, year = "2017", download = TRUE)
   item <- ds[3]
