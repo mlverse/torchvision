@@ -132,6 +132,11 @@ vit_model <- torch::nn_module(
         nn_init_zeros_(m$bias)
         nn_init_ones_(m$weight)
       }
+      else if (inherits(m, "nn_multihead_attention")) {
+        nn_init_xavier_uniform_(m$in_proj_weight)
+        if (!is.null(m$in_proj_bias))
+          nn_init_zeros_(m$in_proj_bias)
+      }
     }
   },
 
@@ -173,7 +178,10 @@ patch_embed <- torch::nn_module(
   forward = function(x) {
     x <- self$proj(x)  # shape: (B, embed_dim, H/ps, W/ps)
     x <- torch_flatten(x, start_dim = 3, end_dim = 4)  # flatten spatial dimensions (H/ps, W/ps)
-    x <- x$transpose(2, 3)  # shape: (B, num_patches, embed_dim)
+    x <- x$transpose(2, 3) 
+    
+    # x <- torch_flatten(x, start_dim = 2)
+    # x <- x$transpose(2, 3) # shape: (B, num_patches, embed_dim)
     x
   }
 )
