@@ -13,18 +13,18 @@ places365_dataset(
 )
 }
 \arguments{
-\item{root}{Root directory for dataset storage. The dataset will be stored under \code{root/places365}.}
+\item{root}{Root directory for dataset storage. The dataset will be stored under \verb{root/<dataset-name>}. Defaults to \code{tempdir()}.}
 
 \item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}.}
 
-\item{transform}{Optional image transform.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{Optional label transform (ignored for the test split).}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{Logical. Whether to download the required files.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
-An object of class \code{places365_dataset}. Each element is a named
+A torch dataset of class \code{places365_dataset}. Each element is a named
 list with:
 \itemize{
 \item \code{x}: the image as loaded (or transformed if \code{transform} is set).

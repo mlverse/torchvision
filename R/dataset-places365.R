@@ -7,15 +7,12 @@
 #' - `"val"`: images are in a flat directory and matched with a label file.
 #' - `"test"`: images are in a flat directory with no labels.
 #'
-#' @param root Root directory for dataset storage. The dataset will be stored under `root/places365`.
+#' @inheritParams mnist_dataset
 #' @param split One of `"train"`, `"val"`, or `"test"`.
-#' @param transform Optional image transform.
-#' @param target_transform Optional label transform (ignored for the test split).
-#' @param download Logical. Whether to download the required files.
 #'
 #' @name places365_dataset
 #'
-#' @return An object of class \code{places365_dataset}. Each element is a named
+#' @return A torch dataset of class \code{places365_dataset}. Each element is a named
 #'   list with:
 #'   - `x`: the image as loaded (or transformed if `transform` is set).
 #'   - `y`: the integer class label (not returned for the test split).
@@ -40,7 +37,19 @@
 
 places365_dataset <- torch::dataset(
   name = "places365_dataset",
-  archive_size = "34 GB",
+  archive_size = "24 GB",
+
+  devkit_url = "http://data.csail.mit.edu/places/places365/filelist_places365-standard.tar",
+  devkit_md5 = "1a930ef26e7794c2c53d6c5f8c3c43d2",
+
+  val_url = "http://data.csail.mit.edu/places/places365/val_256.tar",
+  val_md5 = "c50ef2655c708abf8bfa9e523101c4ec",
+
+  train_url = "http://data.csail.mit.edu/places/places365/train_256_places365standard.tar",
+  train_md5 = "53ca1c756c3d1e7809517cc47c5561c5",
+
+  test_url = "http://data.csail.mit.edu/places/places365/test_256.tar",
+  test_md5 = "2c6e8f4d279c616dc1ce34a4490e8937",
 
   initialize = function(
     root = tempdir(),
@@ -55,35 +64,39 @@ places365_dataset <- torch::dataset(
     self$target_transform <- target_transform
 
     if (download) {
-      cli_inform("{.cls {class(self)[[1]]}} Downloading split '{self$split}' if needed.")
+      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
     if (!self$check_exists())
-      cli_abort("Missing {self$split} files. Use `download = TRUE` to fetch them.")
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
     if (self$split == "train") {
       files <- fs::dir_ls(self$train_dir, recurse = TRUE, type = "file", glob = "*.jpg")
-      self$samples <- lapply(files, function(p) {
+      self$items <- lapply(files, function(p) {
         parts <- fs::path_split(p)[[1]]
         list(path = p, label = parts[length(parts) - 1])
       })
-      classes <- sort(unique(vapply(self$samples, function(s) s$label, character(1))))
+      classes <- sort(unique(vapply(self$items, function(e) e$label, character(1))))
       self$class_to_idx <- setNames(seq_along(classes), classes)
     } else if (self$split == "val") {
-      lines <- suppressWarnings(readLines(self$val_ann))
-      parsed <- strsplit(lines, " ")
-      self$samples <- lapply(parsed, function(x) list(path = file.path(self$val_dir, x[[1]]), label = as.integer(x[[2]]) + 1))
+      ann <- read.delim(self$val_ann, header = FALSE, col.names = c("path", "label"), sep = " ")
+      ann$label <- ann$label + 1L
+      self$items <- lapply(seq_len(nrow(ann)), function(i) {
+        list(path = file.path(self$val_dir, ann$path[i]), label = ann$label[i])
+      })
     } else if (self$split == "test") {
       self$files <- fs::dir_ls(self$test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
     }
+
+    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self)} samples.")
   },
 
   .length = function() {
     if (self$split == "test")
       length(self$files)
     else
-      length(self$samples)
+      length(self$items)
   },
 
   .getitem = function(index) {
@@ -91,21 +104,21 @@ places365_dataset <- torch::dataset(
       path <- self$files[[index]]
       if (!fs::file_exists(path))
         cli_abort("Image file does not exist: {path}")
-      img <- magick::image_read(path)
+      x <- magick::image_read(path)
       if (!is.null(self$transform))
-        img <- self$transform(img)
-      list(x = img)
+        x <- self$transform(x)
+      list(x = x, y = NA_integer_)
     } else {
-      s <- self$samples[[index]]
-      if (!fs::file_exists(s$path))
-        cli_abort("Image file does not exist: {s$path}")
-      img <- magick::image_read(s$path)
+      item <- self$items[[index]]
+      if (!fs::file_exists(item$path))
+        cli_abort("Image file does not exist: {item$path}")
+      x <- magick::image_read(item$path)
       if (!is.null(self$transform))
-        img <- self$transform(img)
-      label <- if (self$split == "train") self$class_to_idx[[s$label]] else s$label
+        x <- self$transform(x)
+      y <- if (self$split == "train") self$class_to_idx[[item$label]] else item$label
       if (!is.null(self$target_transform))
-        label <- self$target_transform(label)
-      list(x = img, y = label)
+        y <- self$target_transform(y)
+      list(x = x, y = y)
     }
   },
 
@@ -113,38 +126,42 @@ places365_dataset <- torch::dataset(
     if (self$check_exists())
       return()
 
+    cli_inform("Downloading {.cls {class(self)[[1]]}} split: '{self$split}'")
     fs::dir_create(self$base_dir, recurse = TRUE)
 
     if (self$split == "val") {
       if (!fs::file_exists(self$val_ann)) {
-        devkit_url <- "http://data.csail.mit.edu/places/places365/filelist_places365-standard.tar"
-        devkit_tar <- file.path(self$base_dir, "filelist_places365-standard.tar")
-        download.file(devkit_url, devkit_tar, mode = "wb", quiet = TRUE)
+        devkit_tar <- download_and_cache(self$devkit_url, prefix = "places365")
+        if (!is.na(self$devkit_md5) && tools::md5sum(devkit_tar) != self$devkit_md5)
+          cli_abort("Corrupt file! Delete the file in {.file {devkit_tar}} and try again.")
         utils::untar(devkit_tar, exdir = self$base_dir)
       }
 
       if (!fs::dir_exists(self$val_dir)) {
-        val_url <- "http://data.csail.mit.edu/places/places365/val_256.tar"
-        val_tar <- download_and_cache(val_url, prefix = "places365")
+        val_tar <- download_and_cache(self$val_url, prefix = "places365")
+        if (!is.na(self$val_md5) && tools::md5sum(val_tar) != self$val_md5)
+          cli_abort("Corrupt file! Delete the file in {.file {val_tar}} and try again.")
         utils::untar(val_tar, exdir = self$base_dir)
       }
     }
 
     if (self$split == "train") {
       if (!fs::dir_exists(self$train_dir)) {
-        train_url <- "http://data.csail.mit.edu/places/places365/train_256_places365standard.tar"
         train_tar <- withr::with_options(
           list(timeout = 6000),
-          download_and_cache(train_url, prefix = "places365")
+          download_and_cache(self$train_url, prefix = "places365")
         )
+        if (!is.na(self$train_md5) && tools::md5sum(train_tar) != self$train_md5)
+          cli_abort("Corrupt file! Delete the file in {.file {train_tar}} and try again.")
         utils::untar(train_tar, exdir = self$base_dir)
       }
     }
 
     if (self$split == "test") {
       if (!fs::dir_exists(self$test_dir)) {
-        test_url <- "http://data.csail.mit.edu/places/places365/test_256.tar"
-        test_tar <- download_and_cache(test_url, prefix = "places365")
+        test_tar <- download_and_cache(self$test_url, prefix = "places365")
+        if (!is.na(self$test_md5) && tools::md5sum(test_tar) != self$test_md5)
+          cli_abort("Corrupt file! Delete the file in {.file {test_tar}} and try again.")
         utils::untar(test_tar, exdir = self$base_dir)
       }
     }
