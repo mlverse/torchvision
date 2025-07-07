@@ -61,30 +61,45 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     self$target_transform <- target_transform
     self$train <- train
     self$target_type <- target_type
-    self$split <- if (train) "train" else "test"
+    if (train) {
+      self$split <- "train"
+    } else {
+      self$split <- "test"
+    }
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
-    data_file <- if (train) self$training_file else self$test_file
+    if (train) {
+      data_file <- self$training_file
+    } else {
+      data_file <- self$test_file
+    }
+
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$img_path <- data$image_paths
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
-    self$classes <- if (self$target_type == "category") names(self$class_to_idx) else c("Cat", "Dog")
+    if (self$target_type == "category") {
+      self$classes <- names(self$class_to_idx)
+    } else {
+      self$classes <- c("Cat", "Dog")
+    }
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   download = function() {
 
-    if (self$check_exists())
+    if (self$check_exists()) {
       return()
+    }
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
@@ -93,7 +108,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     for (r in self$resources) {
       url <- r[1]
-      archive <- download_and_cache(r[1], prefix = class(self)[1])
+      archive <- download_and_cache(url, prefix = class(self)[1])
       actual_md5 <- tools::md5sum(archive)
 
       if (actual_md5 != r[2]) {
@@ -105,21 +120,23 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     for (split in c("trainval", "test")) {
       ann_file <- file.path(self$raw_folder, "annotations", glue::glue("{split}.txt"))
-      lines <- readLines(ann_file)
-      parts <- strsplit(lines, " ")
-      img_ids <- vapply(parts, `[[`, character(1), 1)
-      labels <- vapply(parts, function(x) as.integer(x[2]), integer(1))
-      bin_labels <- vapply(parts, function(x) as.integer(x[3]), integer(1))
 
-      img_paths <- file.path(self$raw_folder, "images", glue::glue("{img_ids}.jpg"))
-      seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{img_ids}.png"))
+      ann <- read.delim(
+        ann_file,
+        sep = " ",
+        header = FALSE,
+        col.names = c("img_id", "label", "bin_label", "other")
+      )
+
+      img_paths <- file.path(self$raw_folder, "images", glue::glue("{ann$img_id}.jpg"))
+      seg_paths <- file.path(self$raw_folder, "annotations", "trimaps", glue::glue("{ann$img_id}.png"))
 
       valid <- file.exists(img_paths) & file.exists(seg_paths)
 
       image_paths <- img_paths[valid]
-      labels <- labels[valid]
+      labels <- ann$label[valid]
 
-      raw_classes <- sub("_\\d+$", "", img_ids[valid])
+      raw_classes <- sub("_\\d+$", "", ann$img_id[valid])
       self$classes <- unique(raw_classes)
       self$classes <- gsub("_", " ", self$classes, fixed = TRUE)
       class_to_idx <- setNames(seq_along(self$classes), self$classes)
@@ -146,22 +163,19 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     label <- self$labels[index]
 
-    seg_name <- basename(self$img_path[index])
-    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
-    masks <- png::readPNG(mask_path) * 255
-    masks <- torch_tensor(masks)
-    mask1 <- (masks==1)
-    mask2 <- (masks==2)
-    mask3 <- (masks==3)
-    masks <- torch_stack(list(mask1, mask2, mask3))$to(dtype = torch_bool())
+    seg_name <- tools::file_path_sans_ext(self$img_path[index])
+    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", paste0(seg_name, ".png") )
+    mask_int <- torch_tensor(png::readPNG(mask_path) * 255)
+    masks <- torch_stack(list(mask_int == 1, mask_int == 2, mask_int == 3))
 
     if (self$target_type == "binary-category") {
-      self$classes <- names(self$class_to_idx)[label]
-      if (substr(self$classes, 1, 1) %in% LETTERS) {
-        label <- as.integer(1)
+      class_name <- names(self$class_to_idx)[label]
+      if (substr(class_name, 1, 1) %in% LETTERS) {
+        label <- 1L
       } else {
-        label <- as.integer(2)
+        label <- 2L
       }
+
       self$classes <- c("Cat","Dog")
     }
 
@@ -170,15 +184,21 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       label = label
     )
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
-    
-    item = list(x = x, y = y)
-    class(item) <- c("image_with_segmentation_mask", class(item))
-    item
+    }
+
+    structure(
+      list(
+        x = x,
+        y = y
+      ),
+      class = c("image_with_segmentation_mask")
+    )
   },
 
   .length = function() {
@@ -253,17 +273,26 @@ oxfordiiitpet_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-    self$split <- if (train) "train" else "test"
+    if (train) {
+      self$split <- "train"
+    } else {
+      self$split <- "test"
+    }
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
-    data_file <- if (train) self$training_file else self$test_file
+    if (train) {
+      data_file <- self$training_file
+    } else {
+      data_file <- self$test_file
+    }
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$img_path <- data$image_paths
     self$labels <- data$labels
@@ -278,11 +307,13 @@ oxfordiiitpet_dataset <- dataset(
 
     y <- self$labels[index]
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
+    }
 
     list(x = x, y = y)
   }
@@ -306,17 +337,26 @@ oxfordiiitpet_binary_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-    self$split <- if (train) "train" else "test"
+    if (train) {
+      self$split <- "train"
+    } else {
+      self$split <- "test"
+    }
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
-    if (!self$check_exists())
+    if (!self$check_exists()) {
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
-    data_file <- if (train) self$training_file else self$test_file
+    if (train) {
+      data_file <- self$training_file
+    } else {
+      data_file <- self$test_file
+    }
     data <- readRDS(file.path(self$processed_folder, data_file))
     self$img_path <- data$image_paths
     self$labels <- data$labels
@@ -331,13 +371,19 @@ oxfordiiitpet_binary_dataset <- dataset(
 
     label <- self$labels[index]
     class_name <- names(self$class_to_idx)[label]
-    y <- if (substr(class_name, 1, 1) %in% LETTERS) 1L else 2L
+    if (substr(class_name, 1, 1) %in% LETTERS) {
+      y <- 1L
+    } else {
+      y <- 2L
+    }
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
+    }
 
     list(x = x, y = y)
   }
