@@ -45,6 +45,8 @@
 <url><loc>/reference/model_resnet.html</loc></url>
 <url><loc>/reference/model_vgg.html</loc></url>
 <url><loc>/reference/nms.html</loc></url>
+<url><loc>/reference/oxfordiiitpet_dataset.html</loc></url>
+<url><loc>/reference/oxfordiiitpet_segmentation_dataset.html</loc></url>
 <url><loc>/reference/remove_small_boxes.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>
