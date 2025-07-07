@@ -163,8 +163,8 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     label <- self$labels[index]
 
-    seg_name <- tools::file_path_sans_ext(self$img_path[index])
-    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", paste0(seg_name, ".png") )
+    seg_name <- basename(self$img_path[index])
+    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
     mask_int <- torch_tensor(png::readPNG(mask_path) * 255)
     masks <- torch_stack(list(mask_int == 1, mask_int == 2, mask_int == 3))
 
