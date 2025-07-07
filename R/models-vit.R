@@ -81,7 +81,7 @@ model_vit_h_14 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_h_14", pretrained, progress, ...)
 }
 
-vit_model <- nn_module(
+vit_model <- torch::nn_module(
   classname = "vit_model",
   initialize = function(
     img_size = 224,
@@ -103,7 +103,7 @@ vit_model <- nn_module(
     self$pos_embed <- nn_parameter(torch_zeros(1, num_patches + 1, embed_dim))
     self$pos_drop <- nn_dropout(p = dropout)
 
-    self$blocks <- nn_module_list(
+    self$blocks <- torch::nn_module_list(
       lapply(1:depth, function(i) {
         encoder_block(embed_dim, num_heads, mlp_ratio, qkv_bias, dropout)
       })
@@ -154,7 +154,7 @@ vit_model <- nn_module(
   }
 )
 
-patch_embed <- nn_module(
+patch_embed <- torch::nn_module(
   classname = "patch_embed",
   initialize = function(img_size, patch_size, in_chans, embed_dim) {
     self$img_size <- img_size
@@ -178,7 +178,7 @@ patch_embed <- nn_module(
   }
 )
 
-encoder_block <- nn_module(
+encoder_block <- torch::nn_module(
   classname = "encoder_block",
   initialize = function(
     embed_dim = 768,
