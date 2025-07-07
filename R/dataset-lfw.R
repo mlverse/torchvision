@@ -1,3 +1,45 @@
+#' Labeled Faces in the Wild (LFW) Datasets
+#'
+#' The LFW dataset collection provides facial images for evaluating face recognition systems.
+#' It includes two variants:
+#' - `lfw_people_dataset`: A **multi-class classification** dataset where each image is labeled by person identity.
+#' - `lfw_pairs_dataset`: A **face verification** dataset containing image pairs with binary labels (same or different person). *(Coming soon)*
+#'
+#' @inheritParams oxfordiiitpet_dataset
+#' @param root Root directory for dataset storage. The dataset will be stored under `root/lfw_people` or `root/lfw_pairs`.
+#'
+#' @return A torch dataset object: `lfw_people_dataset` or `lfw_pairs_dataset`.
+#' Each element is a named list with:
+#' - `x`: A 250 x 250 x 3 numeric array representing an RGB image.
+#' - `y`: An integer class label:
+#'   - For `lfw_people_dataset`: An index in `1:length(dataset$classes)` representing a unique identity.
+#'   - For `lfw_pairs_dataset`: 1 if same person, 0 otherwise. *(Coming soon)*
+#'
+#' @details
+#' The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
+#' - Training split: 9525 images, 4038 identities
+#' - Test split: 3708 images, 1711 identities
+#' The dataset is downloaded from [Hugging Face](https://huggingface.co/datasets/JimmyUnleashed/LFW).
+#'
+#' @examples
+#' \dontrun{
+#' # Load training data
+#' lfw <- lfw_people_dataset(download = TRUE, train = TRUE)
+#' first_item <- lfw[1]
+#' dim(first_item$x)  # 250 x 250 x 3
+#' first_item$y       # class index
+#' lfw$classes[first_item$y]  # class name (e.g., "AJ_Cook")
+#'
+#' # Load test data
+#' lfw_test <- lfw_people_dataset(train = FALSE)
+#' test_item <- lfw_test[1]
+#' lfw_test$classes[test_item$y]  # e.g., "AJ_Lamas"
+#' }
+#'
+#' @name lfw_dataset
+#' @title LFW Datasets
+#' @rdname lfw_dataset
+#' @family classification_dataset
 #' @export
 lfw_people_dataset <- torch::dataset(
   name = "lfw_people",
