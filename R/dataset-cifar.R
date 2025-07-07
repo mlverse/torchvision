@@ -47,9 +47,9 @@ cifar10_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
 
-    
+
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -76,7 +76,7 @@ cifar10_dataset <- torch::dataset(
     self$x <- data$imgs
     self$y <- data$labels + 1L
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$y)} images across {length(self$classes)} classes.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$y)} images across {length(self$classes)} classes.")
   },
   .load_meta = function() {
     cl <- readLines(fs::path(self$root, self$fname, self$label_fname))
@@ -103,7 +103,7 @@ cifar10_dataset <- torch::dataset(
     if(self$check_files())
       return()
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archive <- download_and_cache(self$url)
 
@@ -112,7 +112,7 @@ cifar10_dataset <- torch::dataset(
 
     utils::untar(archive, exdir = self$root)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
   check_files = function() {
 

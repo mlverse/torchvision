@@ -82,7 +82,7 @@ coco_detection_dataset <- torch::dataset(
                                      glue::glue("instances_{split}{year}.json"))
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -196,7 +196,7 @@ coco_detection_dataset <- torch::dataset(
     utils::unzip(ann_zip, exdir = self$data_dir)
     utils::unzip(archive, exdir = self$data_dir)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   get_resource_info = function() {
@@ -302,7 +302,7 @@ coco_caption_dataset <- torch::dataset(
     self$archive_size <- self$archive_size_table[[year]][[split]]
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 

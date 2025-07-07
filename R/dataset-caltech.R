@@ -58,7 +58,7 @@ caltech101_dataset <- torch::dataset(
     self$target_transform <- target_transform
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -122,7 +122,7 @@ caltech101_dataset <- torch::dataset(
       fs::file_move(archive, dest)
       md5 <- tools::md5sum(dest)[[1]]
       if (md5 != res$md5)
-        cli_abort("Corrupt file! Delete the file in {.file {archive}} and try again.")
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       if(class(self)[1] == "caltech-101")
         utils::unzip(dest, exdir = self$root)
       else
@@ -133,7 +133,7 @@ caltech101_dataset <- torch::dataset(
         utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
     }))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   }
 )
 
@@ -176,10 +176,10 @@ caltech256_dataset <- torch::dataset(
   self$transform <- transform
   self$target_transform <- target_transform
 
-  
+
 
   if (download) {
-    cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already cached.")
     self$download()
   }
 

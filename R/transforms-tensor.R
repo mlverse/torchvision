@@ -398,16 +398,16 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
                                           resample = 0, fillcolor = NULL) {
 
   if (!is.numeric(angle))
-    value_error("Argument angle should be int or float")
+    value_error("`angle` should be int or float")
 
   if (!length(translate) == 2)
-    value_error("translate should be length 2")
+    value_error("`translate` should be length 2")
 
   if (scale < 0)
-    value_error("Argument scale should be positive")
+    value_error("`scale` should be positive")
 
   if (!is.numeric(shear))
-    type_error("Shear should be either a single value or a sequence of 2 values")
+    type_error("`shear` should be either a single value or a sequence of 2 values")
 
   if (length(shear) == 1)
     shear <- c(shear, 0)
@@ -421,7 +421,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
 #' @export
 transform_perspective.torch_tensor <- function(img, startpoints, endpoints, interpolation = 2,
                                                fill = NULL) {
-  not_implemented_error("transform perspective is not implemented yet.")
+  not_implemented_error("`transform_perspective` is not implemented yet.")
 }
 
 #' @export

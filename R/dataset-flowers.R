@@ -89,7 +89,7 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download){
-      cli_inform("{.cls {class(self)[[1]]}} Dataset (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -99,7 +99,7 @@ flowers102_dataset <- dataset(
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self$img_path)} samples.")
+    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {length(self$img_path)} samples.")
   },
 
   .getitem = function(index) {
@@ -123,12 +123,12 @@ flowers102_dataset <- dataset(
 
   download = function() {
     if (self$check_exists(self$split)) {
-      cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' is already processed and cached.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} is already processed and cached.")
     }
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    cli_inform("{.cls {class(self)[[1]]}} Downloading...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
 
     archives <- lapply(self$resources, function(r) {
       archive <- download_and_cache(r[1], prefix = class(self)[1])
@@ -155,7 +155,7 @@ flowers102_dataset <- dataset(
     paths <- file.path(jpg_dir, glue::glue("image_{sprintf('%05d', idxs)}.jpg"))
     lbls <- as.integer(labels[idxs])
     saveRDS(data.frame(img_path = paths, labels = lbls), file.path(self$processed_folder, glue::glue("{split_name}.rds")))
-    cli_inform("{.cls {class(self)[[1]]}} dataset downloaded and extracted successfully.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function(split) {

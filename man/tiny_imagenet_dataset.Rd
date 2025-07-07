@@ -28,5 +28,6 @@ Other classification_dataset:
 \code{\link{flowers102_dataset}()},
 \code{\link{mnist_dataset}()},
 \code{\link{places365_dataset}()}
+\code{\link{oxfordiiitpet_dataset}()}
 }
 \concept{classification_dataset}
