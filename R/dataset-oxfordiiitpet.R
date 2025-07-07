@@ -83,7 +83,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     }
 
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$img_path <- data$image_paths
+    self$img_path <- data$img_path
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     if (self$target_type == "category") {
@@ -133,7 +133,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
       valid <- file.exists(img_paths) & file.exists(seg_paths)
 
-      image_paths <- img_paths[valid]
+      img_path <- img_paths[valid]
       labels <- ann$label[valid]
 
       raw_classes <- sub("_\\d+$", "", ann$img_id[valid])
@@ -143,7 +143,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
       saveRDS(
         list(
-          image_paths = image_paths,
+          img_path = img_path,
           labels = labels,
           class_to_idx = class_to_idx
         ),
@@ -294,7 +294,7 @@ oxfordiiitpet_dataset <- dataset(
       data_file <- self$test_file
     }
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$img_path <- data$image_paths
+    self$img_path <- data$img_path
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- names(self$class_to_idx)
@@ -358,7 +358,7 @@ oxfordiiitpet_binary_dataset <- dataset(
       data_file <- self$test_file
     }
     data <- readRDS(file.path(self$processed_folder, data_file))
-    self$img_path <- data$image_paths
+    self$img_path <- data$img_path
     self$labels <- data$labels
     self$class_to_idx <- data$class_to_idx
     self$classes <- c("Cat", "Dog")
