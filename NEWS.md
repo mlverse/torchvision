@@ -13,6 +13,7 @@
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
+* Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 
 ## New features
 
