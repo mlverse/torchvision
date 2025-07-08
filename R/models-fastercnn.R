@@ -133,7 +133,7 @@ anchor_generator_module <- function(scales = c(32, 64, 128, 256),
   torch::nn_module(
     initialize = function() {
       self$scales <- scales
-      self$ratios <- ratios
+      self$ratios  <- ratios
       self$strides <- strides
 
       self$num_anchors <- length(ratios)
@@ -176,7 +176,7 @@ anchor_generator_module <- function(scales = c(32, 64, 128, 256),
 
         shifts <- torch::torch_stack(list(shift_x, shift_y, shift_x, shift_y), dim = 2)
 
-        anchors <- base_anchors$unsqueeze(2) + shifts$unsqueeze(1)
+        anchors <- base_anchors$unsqueeze(1) + shifts$unsqueeze(2)
         anchors <- anchors$reshape(c(-1, 4))
         anchors_per_level[[i]] <- anchors
       }
@@ -186,21 +186,131 @@ anchor_generator_module <- function(scales = c(32, 64, 128, 256),
   )
 }
 
-# Dummy proposal generator (replace with NMS and top-N selection)
-generate_proposals <- function(anchors, objectness, bbox_deltas, image_size) {
-  # Here we simply return anchors for now
+# Helper functions for proposal generation
+apply_deltas_to_anchors <- function(anchors, deltas) {
+  # Simple implementation - in practice you'd want proper box regression
+  # This is a placeholder that just returns the anchors
   anchors
 }
+
+remove_small_boxes <- function(boxes, min_size = 1) {
+  # Simple implementation - keep all boxes for now
+  torch::torch_arange(1, boxes$shape[1], dtype = torch::torch_long())
+}
+
+clip_boxes_to_image <- function(boxes, size) {
+  # Simple clipping implementation
+  boxes$clamp(min = 0, max = min(size))
+}
+
+nms <- function(boxes, scores, iou_threshold = 0.7) {
+  # Simple NMS implementation - in practice use torchvision::nms
+  # For now, just return top indices
+  num_keep <- min(100, scores$shape[1])
+  topk_result <- scores$topk(k = num_keep)
+  topk_result[[2]]  # Return indices
+}
+
+roi_align <- function(feature_maps, proposals, output_size) {
+  # Simplified ROI align - in practice you'd use proper implementation
+  # Return dummy pooled features for now
+  num_proposals <- proposals$shape[1]
+  num_channels <- feature_maps$p2$shape[2]
+  torch::torch_randn(c(num_proposals, num_channels, output_size[1], output_size[2]))
+}
+
+generate_proposals <- function(anchors, objectness, bbox_deltas, image_size) {
+  # Filter out any empty tensors
+  anchors <- Filter(function(x) x$numel() > 0 && x$ndim == 2 && x$shape[2] == 4, anchors)
+  objectness <- Filter(function(x) x$numel() > 0, objectness)
+  bbox_deltas <- Filter(function(x) x$numel() > 0, bbox_deltas)
+
+  # Reshape anchors if needed
+  anchors <- lapply(anchors, function(x) {
+    if (x$ndim == 1) x$reshape(c(-1, 4)) else x
+  })
+
+  # Reshape objectness: (1, A, H, W) → (N, 1)
+  objectness <- lapply(objectness, function(x) {
+    if (x$ndim == 4) {
+      x <- x$permute(c(1, 3, 4, 2))  # (1, H, W, A)
+      x <- x$reshape(c(-1, 1))
+    }
+    x
+  })
+
+  # Reshape bbox_deltas: (1, A*4, H, W) → (N, 4)
+  bbox_deltas <- lapply(bbox_deltas, function(x) {
+    if (x$ndim == 4) {
+      A4 <- x$shape[2]
+      A <- A4 %/% 4
+      x <- x$reshape(c(1, A, 4, x$shape[3], x$shape[4]))  # (1, A, 4, H, W)
+      x <- x$permute(c(1, 4, 5, 2, 3))                   # (1, H, W, A, 4)
+      x <- x$reshape(c(-1, 4))                           # (N, 4)
+    }
+    x
+  })
+
+  # Double check everything is still valid
+  if (length(anchors) == 0 || length(objectness) == 0 || length(bbox_deltas) == 0) {
+    stop("Empty input tensors after preprocessing.")
+  }
+
+  # Concatenate - FIX: Use dim = 1 for R's 1-based indexing
+  flat_anchors <- torch::torch_cat(anchors, dim = 1)
+  flat_objectness <- torch::torch_cat(objectness, dim = 1)$squeeze()
+  flat_deltas <- torch::torch_cat(bbox_deltas, dim = 1)
+
+  # Apply deltas
+  boxes <- apply_deltas_to_anchors(flat_anchors, flat_deltas)
+
+  # Remove small boxes
+  keep <- remove_small_boxes(boxes, min_size = 1)
+  boxes <- boxes[keep, ]
+  scores <- flat_objectness[keep]
+
+  # Clip to image
+  boxes <- clip_boxes_to_image(boxes, size = image_size)
+
+  # Pre-NMS top-k
+  num_topk <- min(6000, scores$shape[1])
+  if (num_topk > 0) {
+    topk <- scores$topk(k = num_topk)
+    indices <- topk[[2]]
+    boxes <- boxes[indices, ]
+    scores <- scores[indices]
+  }
+
+  # NMS
+  keep <- nms(boxes, scores, iou_threshold = 0.7)
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+
+  # Final topk after NMS
+  num_keep <- min(1000, scores$shape[1])
+  if (num_keep > 0) {
+    topk <- scores$topk(k = num_keep)
+    indices <- topk[[2]]
+    boxes <- boxes[indices, ]
+  }
+
+  # Add batch idx
+  N <- boxes$shape[1]
+  batch_indices <- torch::torch_zeros(N, dtype = torch::torch_long())
+  rois <- torch::torch_cat(list(batch_indices$unsqueeze(2), boxes), dim = 2)
+
+  return(rois)
+}
+
 
 # ROI heads module with proper structure for pretrained weights
 roi_heads_module <- function(num_classes = 91) {
   torch::nn_module(
     initialize = function() {
-      # Define box_head with named layers to match expected state dict structure
       self$box_head <- torch::nn_module(
         initialize = function() {
-          self$fc6 <- torch::nn_linear(256 * 7 * 7, 1024, bias = TRUE)
-          self$fc7 <- torch::nn_linear(1024, 1024, bias = TRUE)
+          self$fc6 <- torch::nn_linear(256 * 7 * 7, 1024)
+          self$fc7 <- torch::nn_linear(1024, 1024)
         },
         forward = function(x) {
           x <- torch::nnf_relu(self$fc6(x))
@@ -211,8 +321,8 @@ roi_heads_module <- function(num_classes = 91) {
 
       self$box_predictor <- torch::nn_module(
         initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+          self$cls_score <- torch::nn_linear(1024, num_classes)
+          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4)
         },
         forward = function(x) {
           list(
@@ -222,12 +332,16 @@ roi_heads_module <- function(num_classes = 91) {
         }
       )()
     },
+
     forward = function(features, proposals) {
-      # Extract feature maps
+      # Use feature maps from backbone
       feature_maps <- features[c("p2", "p3", "p4", "p5")]
 
-      # Placeholder for ROI pooling - in full implementation, you'd use roi_align
-      pooled <- torch::torch_randn(length(proposals), 256 * 7 * 7)
+      # Apply RoI Align
+      pooled <- roi_align(feature_maps, proposals, output_size = c(7, 7))
+
+      # Flatten for FC layers
+      pooled <- pooled$reshape(c(pooled$shape[1], -1))  # (N, C*7*7)
 
       x <- self$box_head(pooled)
       predictions <- self$box_predictor(x)
