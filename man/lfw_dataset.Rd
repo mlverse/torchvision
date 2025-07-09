@@ -3,9 +3,18 @@
 \name{lfw_dataset}
 \alias{lfw_dataset}
 \alias{lfw_people_dataset}
+\alias{lfw_pairs_dataset}
 \title{LFW Datasets}
 \usage{
 lfw_people_dataset(
+  root = tempdir(),
+  train = TRUE,
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE
+)
+
+lfw_pairs_dataset(
   root = tempdir(),
   train = TRUE,
   transform = NULL,
@@ -25,26 +34,30 @@ lfw_people_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
-A torch dataset object: \code{lfw_people_dataset} or \code{lfw_pairs_dataset}.
+A torch dataset object \code{lfw_people_dataset} or \code{lfw_pairs_dataset}.
 Each element is a named list with:
 \itemize{
-\item \code{x}: A 250 x 250 x 3 numeric array representing an RGB image.
-\item \code{y}: An integer class label:
+\item \code{x}:
 \itemize{
-\item For \code{lfw_people_dataset}: An index in \code{1:length(dataset$classes)} representing a unique identity.
-\item For \code{lfw_pairs_dataset}: 1 if same person, 0 otherwise. \emph{(Coming soon)}
+\item For \code{lfw_people_dataset}: a H x W x 3 numeric array representing a single RGB image.
+\item For \code{lfw_pairs_dataset}: a list of two H x W x 3 numeric arrays representing a pair of RGB images.
+}
+\item \code{y}:
+\itemize{
+\item For \code{lfw_people_dataset}: an integer index from 1 to the number of identities in the dataset.
+\item For \code{lfw_pairs_dataset}: 1 if the pair shows the same person, 2 if different people.
 }
 }
 }
 \description{
-Labeled Faces in the Wild (LFW) Datasets
+Labelled Faces in the Wild (LFW) Datasets
 }
 \details{
 The LFW dataset collection provides facial images for evaluating face recognition systems.
 It includes two variants:
 \itemize{
-\item \code{lfw_people_dataset}: A \strong{multi-class classification} dataset where each image is labeled by person identity.
-\item \code{lfw_pairs_dataset}: A \strong{face verification} dataset containing image pairs with binary labels (same or different person). \emph{(Coming soon)}
+\item \code{lfw_people_dataset}: A \strong{multi-class classification} dataset where each image is labelled by person identity.
+\item \code{lfw_pairs_dataset}: A \strong{face verification} dataset containing image pairs with binary labels (same or different person).
 }
 
 The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
@@ -56,17 +69,37 @@ The dataset is downloaded from \href{https://huggingface.co/datasets/JimmyUnleas
 }
 \examples{
 \dontrun{
-# Load training data
+# Load training data for LFW People Dataset
 lfw <- lfw_people_dataset(download = TRUE, train = TRUE)
 first_item <- lfw[1]
-dim(first_item$x)  # 250 x 250 x 3
-first_item$y       # class index
-lfw$classes[first_item$y]  # class name (e.g., "AJ_Cook")
+first_item$x  # RGB image
+first_item$y  # Label index
+lfw$classes[first_item$y]  # person's name (e.g., "AJ_Cook")
 
-# Load test data
-lfw_test <- lfw_people_dataset(train = FALSE)
-test_item <- lfw_test[1]
-lfw_test$classes[test_item$y]  # e.g., "AJ_Lamas"
+# Load test data for LFW People Dataset
+lfw_test <- lfw_people_dataset(download = TRUE, train = FALSE)
+first_item <- lfw_test[1]
+first_item$x  # RGB image
+first_item$y  # Label index
+lfw_test$classes[first_item$y]  # e.g., "AJ_Lamas"
+
+# Load training data for LFW Pairs Dataset
+lfw <- lfw_pairs_dataset(download = TRUE, train = TRUE)
+first_item <- lfw[1]
+first_item$x  # List of 2 RGB Images
+first_item$x[[1]]  # RGB Image
+first_item$x[[2]]  # RGB Image
+first_item$y  # Label index
+lfw$classes[first_item$y]  # Class Name
+
+# Load test data for LFW Pairs Dataset
+lfw <- lfw_pairs_dataset(download = TRUE, train = FALSE)
+first_item <- lfw[1]
+first_item$x  # List of 2 RGB Images
+first_item$x[[1]]  # RGB Image
+first_item$x[[2]]  # RGB Image
+first_item$y  # Label index
+lfw$classes[first_item$y]  # Class Name
 }
 
 }

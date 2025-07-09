@@ -1,19 +1,21 @@
-#' Labeled Faces in the Wild (LFW) Datasets
+#' Labelled Faces in the Wild (LFW) Datasets
 #'
 #' The LFW dataset collection provides facial images for evaluating face recognition systems.
 #' It includes two variants:
-#' - `lfw_people_dataset`: A **multi-class classification** dataset where each image is labeled by person identity.
-#' - `lfw_pairs_dataset`: A **face verification** dataset containing image pairs with binary labels (same or different person). *(Coming soon)*
+#' - `lfw_people_dataset`: A **multi-class classification** dataset where each image is labelled by person identity.
+#' - `lfw_pairs_dataset`: A **face verification** dataset containing image pairs with binary labels (same or different person).
 #'
 #' @inheritParams oxfordiiitpet_dataset
 #' @param root Root directory for dataset storage. The dataset will be stored under `root/lfw_people` or `root/lfw_pairs`.
 #'
-#' @return A torch dataset object: `lfw_people_dataset` or `lfw_pairs_dataset`.
+#' @return A torch dataset object \code{lfw_people_dataset} or \code{lfw_pairs_dataset}.
 #' Each element is a named list with:
-#' - `x`: A 250 x 250 x 3 numeric array representing an RGB image.
-#' - `y`: An integer class label:
-#'   - For `lfw_people_dataset`: An index in `1:length(dataset$classes)` representing a unique identity.
-#'   - For `lfw_pairs_dataset`: 1 if same person, 0 otherwise. *(Coming soon)*
+#' - \code{x}:
+#'   - For \code{lfw_people_dataset}: a H x W x 3 numeric array representing a single RGB image.
+#'   - For \code{lfw_pairs_dataset}: a list of two H x W x 3 numeric arrays representing a pair of RGB images.
+#' - \code{y}:
+#'   - For \code{lfw_people_dataset}: an integer index from 1 to the number of identities in the dataset.
+#'   - For \code{lfw_pairs_dataset}: 1 if the pair shows the same person, 2 if different people.
 #'
 #' @details
 #' The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
@@ -23,17 +25,37 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Load training data
+#' # Load training data for LFW People Dataset
 #' lfw <- lfw_people_dataset(download = TRUE, train = TRUE)
 #' first_item <- lfw[1]
-#' dim(first_item$x)  # 250 x 250 x 3
-#' first_item$y       # class index
-#' lfw$classes[first_item$y]  # class name (e.g., "AJ_Cook")
+#' first_item$x  # RGB image
+#' first_item$y  # Label index
+#' lfw$classes[first_item$y]  # person's name (e.g., "AJ_Cook")
 #'
-#' # Load test data
-#' lfw_test <- lfw_people_dataset(train = FALSE)
-#' test_item <- lfw_test[1]
-#' lfw_test$classes[test_item$y]  # e.g., "AJ_Lamas"
+#' # Load test data for LFW People Dataset
+#' lfw_test <- lfw_people_dataset(download = TRUE, train = FALSE)
+#' first_item <- lfw_test[1]
+#' first_item$x  # RGB image
+#' first_item$y  # Label index
+#' lfw_test$classes[first_item$y]  # e.g., "AJ_Lamas"
+#'
+#' # Load training data for LFW Pairs Dataset
+#' lfw <- lfw_pairs_dataset(download = TRUE, train = TRUE)
+#' first_item <- lfw[1]
+#' first_item$x  # List of 2 RGB Images
+#' first_item$x[[1]]  # RGB Image
+#' first_item$x[[2]]  # RGB Image
+#' first_item$y  # Label index
+#' lfw$classes[first_item$y]  # Class Name
+#'
+#' # Load test data for LFW Pairs Dataset
+#' lfw <- lfw_pairs_dataset(download = TRUE, train = FALSE)
+#' first_item <- lfw[1]
+#' first_item$x  # List of 2 RGB Images
+#' first_item$x[[1]]  # RGB Image
+#' first_item$x[[2]]  # RGB Image
+#' first_item$y  # Label index
+#' lfw$classes[first_item$y]  # Class Name
 #' }
 #'
 #' @name lfw_dataset
@@ -168,6 +190,7 @@ lfw_people_dataset <- torch::dataset(
   }
 )
 
+#' @rdname lfw_dataset
 #' @export
 lfw_pairs_dataset <- torch::dataset(
   inherit = lfw_people_dataset,
@@ -193,7 +216,7 @@ lfw_pairs_dataset <- torch::dataset(
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
-    self$classes <- c("Different", "Same")
+    self$classes <- c("Same", "Different")
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -227,7 +250,7 @@ lfw_pairs_dataset <- torch::dataset(
     mismatched <- data.frame(
       img1 = file.path(mismatch_df$name, sprintf("%s_%04d.jpg", mismatch_df$name, mismatch_df$imagenum1)),
       img2 = file.path(mismatch_df$name.1, sprintf("%s_%04d.jpg", mismatch_df$name.1, mismatch_df$imagenum2)),
-      same = 0
+      same = 2
     )
 
     self$pairs <- rbind(matched, mismatched)
