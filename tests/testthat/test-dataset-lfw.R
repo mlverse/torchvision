@@ -43,3 +43,53 @@ test_that("tests for the LFW People dataset for dataloader", {
   expect_equal_to_r(batch$y[2], 2)
   expect_equal_to_r(batch$y[32], 17)
 })
+
+test_that("tests for the LFW Pairs dataset for train split", {
+
+  lfw <- lfw_pairs_dataset(root = t, download = TRUE)
+  expect_length(lfw, 2200)
+  first_item <- lfw[1]
+  expect_named(first_item, c("x", "y"))
+  expect_length(first_item$x, 2)
+  expect_length(first_item$x[[1]], 187500)
+  expect_length(first_item$x[[2]], 187500)
+  expect_type(first_item$x, "list")
+  expect_type(first_item$y, "integer")
+  expect_equal(first_item$y, 1)
+})
+
+test_that("tests for the LFW Pairs dataset for test split", {
+
+  lfw <- lfw_pairs_dataset(root = t, train = FALSE)
+  expect_length(lfw, 1000)
+  first_item <- lfw[1]
+  expect_named(first_item, c("x", "y"))
+  expect_length(first_item$x, 2)
+  expect_length(first_item$x[[1]], 187500)
+  expect_length(first_item$x[[2]], 187500)
+  expect_type(first_item$x, "list")
+  expect_type(first_item$y, "integer")
+  expect_equal(first_item$y, 1)
+})
+
+test_that("tests for the LFW People dataset for dataloader", {
+
+  lfw <- lfw_pairs_dataset(
+    root = t,
+    transform = function(pair) {
+      pair[[1]] %>% transform_to_tensor()
+      pair[[2]] %>% transform_to_tensor()
+      pair
+    })
+  dl <- dataloader(lfw, batch_size = 32)
+  batch <- dataloader_next(dataloader_make_iter(dl))
+  expect_named(batch, c("x", "y"))
+  expect_length(batch$x, 2)
+  expect_type(batch$x, "list")
+  expect_tensor(batch$y)
+  expect_tensor_shape(batch$y, 32)
+  expect_tensor_dtype(batch$y, torch_long())
+  expect_equal_to_r(batch$y[1], 1)
+  expect_equal_to_r(batch$y[2], 1)
+  expect_equal_to_r(batch$y[32], 1)
+})
