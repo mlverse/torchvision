@@ -1,6 +1,20 @@
 #' Vision Transformer Implementation
 #'
-#' Vision Transformer models implementation on [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929)
+#' Vision Transformer (ViT) models implement the architecture proposed in the paper 
+#' [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929).
+#' These models are designed for image classification tasks and operate by treating 
+#' image patches as tokens in a Transformer model.
+#'
+#' ## Model Variants and Performance (ImageNet-1k)
+#' ```
+#' | Model            | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | Notes                                   |
+#' |------------------|-----------|-----------|---------|--------|-----------------------------------------|
+#' | vit_b_16         | 81.1%     | 95.3%     | 86.6M   | 17.56  | Base, 16x16 patches                     |
+#' | vit_b_32         | 75.9%     | 92.5%     | 88.2M   | 4.41   | Base, 32x32 patches                     |
+#' | vit_l_16         | 79.7%     | 94.6%     | 304.3M  | 61.55  | Large, 16x16 patches                    |
+#' | vit_l_32         | 77.0%     | 93.1%     | 306.5M  | 15.38  | Large, 32x32 patches                    |
+#' | vit_h_14         | 88.6%     | 98.7%     | 633.5M  | 1016.7 | Huge, 14x14 patches, pretrained on SWAG |
+#' ```
 #'
 #' @inheritParams model_mobilenet_v2
 #'
@@ -9,6 +23,7 @@
 #' @name model_vit
 NULL
 
+# NOTE: These repositories are temporary and will be replaced with the official MLverse repositories.
 vit_torchscript_urls <- list(
   vit_b_16 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_16.pt","463defcc1d7ea95f7258736904f895b7","330 MB"),
   vit_b_32 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_32.pt","8d3f0a714f3445fd8698987be7e83dcf","330 MB"),
