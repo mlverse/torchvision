@@ -50,7 +50,7 @@ load_vit_torchscript_model <- function(name) {
   if (tools::md5sum(archive) != r[2])
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
-  jit_load(archive)
+  torch::jit_load(archive)
 
 }
 
