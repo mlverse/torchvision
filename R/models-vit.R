@@ -7,15 +7,17 @@
 #'
 #' ## Model Variants and Performance (ImageNet-1k)
 #' ```
-#' | Model            | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | Notes                                   |
-#' |------------------|-----------|-----------|---------|--------|-----------------------------------------|
-#' | vit_b_16         | 81.1%     | 95.3%     | 86.6M   | 17.56  | Base, 16x16 patches                     |
-#' | vit_b_32         | 75.9%     | 92.5%     | 88.2M   | 4.41   | Base, 32x32 patches                     |
-#' | vit_l_16         | 79.7%     | 94.6%     | 304.3M  | 61.55  | Large, 16x16 patches                    |
-#' | vit_l_32         | 77.0%     | 93.1%     | 306.5M  | 15.38  | Large, 32x32 patches                    |
-#' | vit_h_14         | 88.6%     | 98.7%     | 633.5M  | 1016.7 | Huge, 14x14 patches, pretrained on SWAG |
+#' | Model     | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | File Size | Notes                                   |
+#' |-----------|-----------|-----------|---------|--------|-----------|-----------------------------------------|
+#' | vit_b_16  | 81.1%     | 95.3%     | 86.6M   | 17.56  | 346 MB    | Base, 16x16 patches                     |
+#' | vit_b_32  | 75.9%     | 92.5%     | 88.2M   | 4.41   | 353 MB    | Base, 32x32 patches                     |
+#' | vit_l_16  | 79.7%     | 94.6%     | 304.3M  | 61.55  | 1.22 GB   | Large, 16x16 patches                    |
+#' | vit_l_32  | 77.0%     | 93.1%     | 306.5M  | 15.38  | 1.23 GB   | Large, 32x32 patches                    |
+#' | vit_h_14  | 88.6%     | 98.7%     | 633.5M  | 1016.7 | 2.53 GB   | Huge, 14x14 patches, pretrained on SWAG |
 #' ```
-#'
+#' - **TorchVision Recipe**: <https://github.com/pytorch/vision/tree/main/references/classification>
+#' - **SWAG Recipe**: <https://github.com/facebookresearch/SWAG>
+#' 
 #' @inheritParams model_mobilenet_v2
 #'
 #' @family models
