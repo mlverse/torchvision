@@ -72,7 +72,12 @@ models = {
   'efficientnet_b7': 'https://download.pytorch.org/models/efficientnet_b7_lukemelas-c5b4e57e.pth',
   'efficientnet_v2_s': 'https://download.pytorch.org/models/efficientnet_v2_s-dd5fe13b.pth',
   'efficientnet_v2_m': 'https://download.pytorch.org/models/efficientnet_v2_m-dc08266a.pth',
-  'efficientnet_v2_l': 'https://download.pytorch.org/models/efficientnet_v2_l-59c71312.pth'
+  'efficientnet_v2_l': 'https://download.pytorch.org/models/efficientnet_v2_l-59c71312.pth',
+  'vit_b_16': 'https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_16.pt',
+  'vit_b_32': 'https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_32.pt',
+  'vit_l_16': 'https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_l_16.pt',
+  'vit_l_32': 'https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_l_32.pt',
+  'vit_h_14': 'https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_h_14.pt',
 }
 
 os.makedirs("models", exist_ok=True)
