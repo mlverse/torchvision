@@ -3,13 +3,15 @@ from torch.hub import load_state_dict_from_url # used to be in torchvision
 import os
 import boto3
 
-s3 = boto3.resource('s3')
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
     # bucket_name = "your-bucket-name"
     # source_file_name = "local/path/to/file"
     # destination_blob_name = "storage-object-name"
+
+    s3 = boto3.client('s3')
+
     s3.upload_file(
       source_file_name, 
       bucket_name, 
