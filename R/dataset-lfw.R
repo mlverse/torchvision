@@ -193,9 +193,7 @@ lfw_pairs_dataset <- torch::dataset(
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
-    self$classes <- c("Different","Same")
-
-    base_url <- self$base_url
+    self$classes <- c("Different", "Same")
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -246,7 +244,7 @@ lfw_pairs_dataset <- torch::dataset(
 
     x1 <- jpeg::readJPEG(img1_path)
     x2 <- jpeg::readJPEG(img2_path)
-    x <- list(x1,x2)
+    x <- list(x1, x2)
     y <- as.integer(pair$same)
 
     if (!is.null(self$transform)) {
