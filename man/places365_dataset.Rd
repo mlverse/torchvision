@@ -52,6 +52,11 @@ ds <- places365_dataset(
 item <- ds[1]
 tensor_image_browse(item$x)
 
+# Show class index and label
+label_idx <- item$y
+label_name <- ds$classes[label_idx]
+cat("Label index:", label_idx, "Class name:", label_name, "\n")
+
 dl <- dataloader(ds, batch_size = 2)
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x
