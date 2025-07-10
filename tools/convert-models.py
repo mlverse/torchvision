@@ -90,7 +90,7 @@ models = {
   'vit_l_16': 'https://download.pytorch.org/models/vit_l_16-852ce7e3.pth',
   'vit_l_32': 'https://download.pytorch.org/models/vit_l_32-c7638314.pth',
   'vit_h_14': 'https://download.pytorch.org/models/vit_h_14_swag-80465313.pth',
-}
+  }
 
 os.makedirs("models", exist_ok=True)
 
