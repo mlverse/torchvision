@@ -90,5 +90,7 @@ for name, url in models.items():
   upload_blob(
     "torch-pretrained-models",
     fpath,
+    "v2/" + fpath
+  )
     "models/vision/v2/" + fpath
   )
