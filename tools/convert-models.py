@@ -13,8 +13,8 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     s3 = boto3.client('s3')
 
     s3.upload_file(
-      source_file_name, 
-      bucket_name, 
+      source_file_name,
+      bucket_name,
       destination_blob_name
     )
 
@@ -23,15 +23,15 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
             source_file_name, destination_blob_name
         )
     )
-    
-def blob_exist(bucket_name, destination_blob_name):
-  """Check if file already exists in s3"""
-    s3 = boto3.client('s3')
+
+def blob_exist(bucket_name, blob_name):
+    """Check if file already exists in s3 bucket"""
+    s3 = boto3.client("s3")
     try:
-      s3.head_object(destination_blob_name)
-      return True
+        s3.head_object(bucket_name, blob_name)
+        return True
     except s3.exceptions.NoSuchKey:
-      return False
+        return False
 
 models = {
   'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
@@ -96,10 +96,10 @@ os.makedirs("models", exist_ok=True)
 
 for name, url in models.items():
   fpath = "models/" + name + ".pth"
-  
+
   if blob_exist("torch-pretrained-models", f"models/vision/v2/{fpath}"):
-    print(f"--- file {name}.pth is already in the bucket. Bypassing conversion")
-    
+    print(f"--- file {fpath} is already in the bucket. Bypassing conversion")
+
   else:
     # download from url, convert and upload the converted weights
     m = load_state_dict_from_url(url, progress=False)
