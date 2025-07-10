@@ -29,17 +29,15 @@
 #' @rdname model_vit
 #' @name model_vit
 NULL
-
-# NOTE: These repositories are temporary and will be replaced with the official MLverse repositories.
 vit_torchscript_urls <- list(
-  vit_b_16 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_16.pt","463defcc1d7ea95f7258736904f895b7","330 MB"),
-  vit_b_32 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_b_32.pt","8d3f0a714f3445fd8698987be7e83dcf","330 MB"),
-  vit_l_16 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_l_16.pt","a6331544b2a65d80a36789b7dfe7ca26","1.2 GB"),
-  vit_l_32 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_l_32.pt","a92dd74b52f94cf4fff1a855d83ec860","1.2 GB"),
-  vit_h_14 = c("https://huggingface.co/datasets/JimmyUnleashed/VisionTransformerModel/resolve/main/vit_h_14.pt","35493afb4d4ea402e7bb2581441d0bfc","2.4 GB")
+  vit_b_16 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/vit_b_16.pth", "dc04e8807c138d7ed4ae2754f59aec00", "330 MB"),
+  vit_b_32 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/vit_b_32.pth", "6ea9578eb4e1cf9ffe1eec998ffebe14", "330 MB"),
+  vit_l_16 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/vit_l_16.pth", "bc28a00cbcb48fb25318c7d542100915", "1.2 GB"),
+  vit_l_32 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/vit_l_32.pth", "fc44a3ff3f6905a6868f55070d6106af", "1.2 GB"),
+  vit_h_14 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/vit_h_14.pth", "1f8d098982a80ccbe8dab3a5ff45752b", "2.4 GB")
 )
 
-load_vit_torchscript_model <- function(name) {
+load_vit_torchscript_model <- function(name, ...) {
 
   r <- vit_torchscript_urls[[name]]
 
@@ -49,15 +47,28 @@ load_vit_torchscript_model <- function(name) {
 
   if (tools::md5sum(archive) != r[2])
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+  
+  model <- model_vit_base(name = name, pretrained = FALSE, progress = FALSE, ...)
+  state_dict <- torch::load_state_dict(archive)
 
-  torch::jit_load(archive)
+  names(state_dict) <- gsub("^conv_proj\\.", "patch_embed.proj.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_1\\.", "blocks.\\1.norm1.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.self_attention\\.", "blocks.\\1.attn.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_2\\.", "blocks.\\1.norm2.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_1\\.", "blocks.\\1.mlp.0.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_2\\.", "blocks.\\1.mlp.3.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.pos_embedding", "encoder.pos_embedding", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.ln\\.", "norm.", names(state_dict))
+  names(state_dict) <- gsub("^heads\\.head\\.", "head.", names(state_dict))
 
+  model$load_state_dict(state_dict)
+  model
 }
 
 model_vit_base <- function(name, pretrained, progress, ...) {
 
   if (pretrained) {
-    return(load_vit_torchscript_model(name))
+    return(load_vit_torchscript_model(name,...))
   } else {
     args <- list(...)
     config <- switch(name,
@@ -122,7 +133,7 @@ vit_model <- torch::nn_module(
     num_patches <- self$patch_embed$num_patches
 
     self$class_token <- nn_parameter(torch_zeros(1, 1, embed_dim))
-    self$pos_embed <- nn_parameter(torch_zeros(1, num_patches + 1, embed_dim))
+    self$encoder$pos_embedding <- nn_parameter(torch_zeros(1, num_patches + 1, embed_dim))
     self$pos_drop <- nn_dropout(p = dropout)
 
     self$blocks <- torch::nn_module_list(
@@ -143,7 +154,7 @@ vit_model <- torch::nn_module(
   },
 
   init_weights = function() {
-    nn_init_trunc_normal_(self$pos_embed, std = 0.02)
+    nn_init_trunc_normal_(self$encoder$pos_embedding, std = 0.02)
     nn_init_trunc_normal_(self$class_token, std = 0.02)
     for (m in self$modules) {
       if (inherits(m, "nn_linear")) {
@@ -168,7 +179,7 @@ vit_model <- torch::nn_module(
 
     cls_tokens <- self$class_token$expand(c(B, -1, -1))
     x <- torch_cat(list(cls_tokens, x), dim = 2)
-    x <- x + self$pos_embed
+    x <- x + self$encoder$pos_embedding
     x <- self$pos_drop(x)
 
     for (i in seq_along(self$blocks)) {
