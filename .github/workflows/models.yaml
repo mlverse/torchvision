@@ -6,19 +6,21 @@ on:
 jobs:
   upload:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - id: 'auth'
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          version: '290.0.1'
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.10
+          python-version: '3.10'
       - run: |
           python -m pip install --upgrade pip
-          pip install torch torchvision google-cloud-storage
+          pip install torch torchvision boto3
       - run: |
           python tools/convert-models.py
