@@ -97,3 +97,5 @@ for name, url in models.items():
     fpath,
     "models/vision/v2/" + fpath
   )
+  # free disk space
+  os.remove(fpath)
