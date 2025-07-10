@@ -93,19 +93,18 @@ B7 \tab 2.0 \tab 3.1 \tab 600 \tab 66.0 \tab 37.0 \tab 84.3
 \examples{
 \dontrun{
 model <- model_efficientnet_b0()
-input <- torch::torch_randn(1, 3, 224, 224)
-output <- model(input)
-dim(output)
+image_batch <- torch::torch_randn(1, 3, 224, 224)
+output <- model(image_batch)
+which.max(as.numeric(output))  # class 815 in ImageNet is a Egyptian cat (see
+                               # <https://image-net.org>)
 }
 
 \dontrun{
-# Example of using EfficientNet-B5 with corresponding image size
+# Example of using EfficientNet-B5 with its native image size
 model <- model_efficientnet_b5()
-transform <- function(img) {
-  img \%>\%
-    transform_resize(c(456, 456)) \%>\%
-    transform_to_tensor()
-}
+image_batch <- torch::torch_randn(1, 3, 456, 456)
+output <- model(image_batch)
+which.max(as.numeric(output))
 }
 
 }

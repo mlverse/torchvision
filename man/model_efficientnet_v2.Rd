@@ -63,6 +63,7 @@ V2-L \tab 512 \tab 119 \tab 55 \tab 85.7
 model <- model_efficientnet_v2_s()
 input <- torch::torch_randn(1, 3, 224, 224)
 output <- model(input)
+which.max(as.numeric(output)) (see <https://image-net.org> to find class.)
 }
 }
 \seealso{

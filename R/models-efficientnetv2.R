@@ -32,6 +32,7 @@
 #' model <- model_efficientnet_v2_s()
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
+#' which.max(as.numeric(output)) (see <https://image-net.org> to find class.)
 #' }
 NULL
 
@@ -191,9 +192,9 @@ effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, .
   )))
 
   if (pretrained) {
-    local_path <- here::here("tools", "models", paste0(arch, ".pth"))
-    print(local_path)
-    state_dict <- torch::load_state_dict(local_path)
+    cli_inform("Downloading pretrained weights for {.cls {arch}}")
+    state_dict_path <- download_and_cache(efficientnet_v2_model_urls[[arch]])
+    state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
 
