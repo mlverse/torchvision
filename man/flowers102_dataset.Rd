@@ -74,6 +74,7 @@ Other classification_dataset:
 \code{\link{eurosat_dataset}()},
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
+\code{\link{lfw_dataset}},
 \code{\link{mnist_dataset}()},
 \code{\link{oxfordiiitpet_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
