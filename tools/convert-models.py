@@ -28,7 +28,7 @@ def blob_exist(bucket_name, blob_name):
     """Check if file already exists in s3 bucket"""
     s3 = boto3.client("s3")
     try:
-        s3.head_object(bucket_name, blob_name)
+        s3.head_object(Bucket=bucket_name, Key=blob_name)
         return True
     except s3.exceptions.NoSuchKey:
         return False
