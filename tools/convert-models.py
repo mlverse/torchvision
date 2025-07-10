@@ -92,7 +92,6 @@ models = {
   'vit_h_14': 'https://download.pytorch.org/models/vit_h_14_swag-80465313.pth',
 }
 
-
 os.makedirs("models", exist_ok=True)
 
 for name, url in models.items():
