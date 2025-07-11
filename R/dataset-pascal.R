@@ -4,44 +4,23 @@ pascal_segmentation_dataset <- torch::dataset(
 
   resources = list(
     `2007` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar",
-        md5 = "c52e279531787c972589f7e41ab4ae64"
-      ),
-      test = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar",
-        md5 = "b6e924de25625d8de591ea690078ad9f"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar",md5 = "c52e279531787c972589f7e41ab4ae64"),
+      test = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar",md5 = "b6e924de25625d8de591ea690078ad9f")
     ),
     `2008` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2008/VOCtrainval_14-Jul-2008.tar",
-        md5 = "2629fa636546599198acfcfbfcf1904a"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2008/VOCtrainval_14-Jul-2008.tar",md5 = "2629fa636546599198acfcfbfcf1904a")
     ),
     `2009` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2009/VOCtrainval_11-May-2009.tar",
-        md5 = "a3e00b113cfcfebf17e343f59da3caa1"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2009/VOCtrainval_11-May-2009.tar",md5 = "a3e00b113cfcfebf17e343f59da3caa1")
     ),
     `2010` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2010/VOCtrainval_03-May-2010.tar",
-        md5 = "da459979d0c395079b5c75ee67908abb"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2010/VOCtrainval_03-May-2010.tar",md5 = "da459979d0c395079b5c75ee67908abb")
     ),
     `2011` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2011/VOCtrainval_25-May-2011.tar",
-        md5 = "6c3384ef61512963050cb5d687e5bf1e"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2011/VOCtrainval_25-May-2011.tar",md5 = "6c3384ef61512963050cb5d687e5bf1e")
     ),
     `2012` = list(
-      trainval = list(
-        url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar",
-        md5 = "6cd6e144f989b92b3379bac3b3de84fd"
-      )
+      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
     )
   ),
 
@@ -67,9 +46,12 @@ pascal_segmentation_dataset <- torch::dataset(
     self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
-
-    archive_key <- if (self$split == "test") "test" else "trainval"
-    self$archive_size <- self$archive_size_table[[self$year]][[archive_key]]
+    if (self$split == "test"){
+        self$archive_key <- "test"
+    } else {
+        self$archive_key <- "trainval"
+    }
+    self$archive_size <- self$archive_size_table[[self$year]][[self$archive_key]]
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -77,27 +59,34 @@ pascal_segmentation_dataset <- torch::dataset(
     }
 
     if (!self$check_exists()) {
-      cli_abort("Pascal VOC dataset for year {self$year} not found. Use `download = TRUE` to fetch it.")
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
     data_file <- file.path(self$processed_folder, paste0(self$split, ".rds"))
     data <- readRDS(data_file)
-    self$img_paths <- data$img_paths
+    self$image_ids <- data$image_ids
     self$mask_paths <- data$mask_paths
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
   },
 
   download = function() {
-    if (self$check_exists()) return()
+
+    if (self$check_exists()) {
+      return()
+    }
+
+    cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    archive_key <- if (self$split == "test") "test" else "trainval"
-    resource <- self$resources[[self$year]][[archive_key]]
+    resource <- self$resources[[self$year]][[self$archive_key]]
     archive <- download_and_cache(resource$url, prefix = class(self)[1])
     actual_md5 <- tools::md5sum(archive)
+
     if (actual_md5 != resource$md5) {
-      cli_abort("Downloaded archive has incorrect MD5. Please delete and retry.")
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
     utils::untar(archive, exdir = self$raw_folder)
@@ -111,20 +100,16 @@ pascal_segmentation_dataset <- torch::dataset(
 
     split_file <- file.path(voc_dir, "ImageSets", "Segmentation", paste0(self$split, ".txt"))
 
-    if (!fs::file_exists(split_file)) {
-      cli_abort("Split file not found: {split_file}")
-    }
-
     ids <- readLines(split_file)
-    img_paths <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
+    image_ids <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
     mask_paths <- file.path(voc_dir, "SegmentationClass", paste0(ids, ".png"))
 
     saveRDS(list(
-      img_paths = img_paths,
+      image_ids = image_ids,
       mask_paths = mask_paths
     ), file.path(self$processed_folder, paste0(self$split, ".rds")))
 
-    cli_inform("Pascal VOC {self$year} dataset extracted and preprocessed.")
+    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
@@ -132,7 +117,7 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
-    img_path <- self$img_paths[index]
+    img_path <- self$image_ids[index]
     mask_path <- self$mask_paths[index]
 
     x <- jpeg::readJPEG(img_path)
@@ -149,7 +134,7 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .length = function() {
-    length(self$img_paths)
+    length(self$image_ids)
   },
 
   active = list(
