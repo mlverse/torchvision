@@ -26,8 +26,7 @@ places365_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
 \item{small}{Logical, defaults to \code{TRUE}. If \code{TRUE}, uses the 256 x 256
-"small" images. High resolution images are currently unsupported and will
-trigger an error if \code{FALSE} is passed.}
+#'   "small" images (~30 GB total). If \code{FALSE}, uses the high-resolution version (~160 GB total).}
 
 \item{loader}{A function to load an image given its path. Defaults to
 \code{\link[=magick_loader]{magick_loader()}}, which uses the \code{{magick}} package.}
@@ -56,6 +55,7 @@ The dataset is split into:
 ds <- places365_dataset(
   split = "val",
   download = TRUE,
+  small = TRUE,
   transform = transform_to_tensor
 )
 item <- ds[1]
