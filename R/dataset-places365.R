@@ -9,6 +9,11 @@
 #'
 #' @inheritParams mnist_dataset
 #' @param split One of `"train"`, `"val"`, or `"test"`.
+#' @param small Logical, defaults to `TRUE`. If `TRUE`, uses the 256 x 256
+#'   "small" images. High resolution images are currently unsupported and will
+#'   trigger an error if `FALSE` is passed.
+#' @param loader A function to load an image given its path. Defaults to
+#'   [magick_loader()], which uses the `{magick}` package.
 #'
 #' @name places365_dataset
 #'
@@ -68,12 +73,19 @@ places365_dataset <- torch::dataset(
     split = c("train", "val", "test"),
     transform = NULL,
     target_transform = NULL,
-    download = FALSE
+    download = FALSE,
+    small = TRUE,
+    loader = magick_loader
   ) {
     self$split <- match.arg(split)
     self$root_path <- normalizePath(root, mustWork = FALSE)
     self$transform <- transform
     self$target_transform <- target_transform
+    self$small <- small
+    self$loader <- loader
+
+    if (!self$small)
+      cli_abort("`small = FALSE` (high resolution images) is not supported yet.")
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -116,13 +128,13 @@ places365_dataset <- torch::dataset(
   .getitem = function(index) {
     if (self$split == "test") {
       path <- self$files[[index]]
-      x <- magick::image_read(path)
+      x <- self$loader(path)
       if (!is.null(self$transform))
         x <- self$transform(x)
       list(x = x, y = NA_integer_)
     } else if (self$split %in% c("train", "val")) {
       item <- self$items[index, ]
-      x <- magick::image_read(item$path)
+      x <- self$loader(item$path)
       if (!is.null(self$transform))
         x <- self$transform(x)
       y <- item$label

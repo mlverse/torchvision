@@ -9,7 +9,9 @@ places365_dataset(
   split = c("train", "val", "test"),
   transform = NULL,
   target_transform = NULL,
-  download = FALSE
+  download = FALSE,
+  small = TRUE,
+  loader = magick_loader
 )
 }
 \arguments{
@@ -22,6 +24,13 @@ places365_dataset(
 \item{target_transform}{Optional. A function that transforms the label.}
 
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
+
+\item{small}{Logical, defaults to \code{TRUE}. If \code{TRUE}, uses the 256 x 256
+"small" images. High resolution images are currently unsupported and will
+trigger an error if \code{FALSE} is passed.}
+
+\item{loader}{A function to load an image given its path. Defaults to
+\code{\link[=magick_loader]{magick_loader()}}, which uses the \code{{magick}} package.}
 }
 \value{
 A torch dataset of class \code{places365_dataset}. Each element is a named
@@ -72,6 +81,7 @@ Other classification_dataset:
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
 \code{\link{mnist_dataset}()},
+\code{\link{oxfordiiitpet_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}
