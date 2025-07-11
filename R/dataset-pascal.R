@@ -121,7 +121,11 @@ pascal_segmentation_dataset <- torch::dataset(
     mask_path <- self$mask_paths[index]
 
     x <- jpeg::readJPEG(img_path)
-    y <- png::readPNG(mask_path)[, , 1]
+    masks <- png::readPNG(mask_path)*255
+
+    y <- list(
+      masks = masks
+    )
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
