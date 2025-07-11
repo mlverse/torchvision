@@ -46,13 +46,14 @@ pascal_segmentation_dataset <- torch::dataset(
   ),
 
   archive_size_table = list(
-    "2007" = list(trainval = "430 MB", test = "430 MB"),
-    "2008" = list(trainval = "1.0 GB"),
-    "2009" = list(trainval = "1.1 GB"),
-    "2010" = list(trainval = "1.1 GB"),
-    "2011" = list(trainval = "1.1 GB"),
-    "2012" = list(trainval = "2.0 GB")
+    "2007" = list(trainval = "430 MB", test = "440 MB"),
+    "2008" = list(trainval = "550 MB"),
+    "2009" = list(trainval = "890 MB"),
+    "2010" = list(trainval = "1.3 GB"),
+    "2011" = list(trainval = "1.7 GB"),
+    "2012" = list(trainval = "1.9 GB")
   ),
+
   initialize = function(
     root = tempdir(),
     year = "2012",
@@ -61,14 +62,14 @@ pascal_segmentation_dataset <- torch::dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-
     self$root_path <- root
     self$year <- match.arg(year, choices = names(self$resources))
-    valid_splits <- names(self$resources[[self$year]])
-    self$split <- match.arg(split, choices = valid_splits)
+    self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
-    self$archive_size <- self$archive_size_table[[self$year]][[self$split]]
+
+    archive_key <- if (self$split == "test") "test" else "trainval"
+    self$archive_size <- self$archive_size_table[[self$year]][[archive_key]]
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -91,7 +92,8 @@ pascal_segmentation_dataset <- torch::dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    resource <- self$resources[[self$year]][[self$split]]
+    archive_key <- if (self$split == "test") "test" else "trainval"
+    resource <- self$resources[[self$year]][[archive_key]]
     archive <- download_and_cache(resource$url, prefix = class(self)[1])
     actual_md5 <- tools::md5sum(archive)
     if (actual_md5 != resource$md5) {
@@ -101,6 +103,12 @@ pascal_segmentation_dataset <- torch::dataset(
     utils::untar(archive, exdir = self$raw_folder)
 
     voc_dir <- file.path(self$raw_folder, "VOCdevkit", paste0("VOC", self$year))
+    voc_root <- self$raw_folder
+    if (self$year == "2011") {
+    voc_root <- file.path(voc_root, "TrainVal")
+    }
+    voc_dir <- file.path(voc_root, "VOCdevkit", paste0("VOC", self$year))
+
     split_file <- file.path(voc_dir, "ImageSets", "Segmentation", paste0(self$split, ".txt"))
 
     if (!fs::file_exists(split_file)) {
