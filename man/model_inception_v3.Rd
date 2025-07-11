@@ -32,6 +32,7 @@ Other models:
 \code{\link{model_alexnet}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
-\code{\link{model_vgg}}
+\code{\link{model_vgg}},
+\code{\link{model_vit}}
 }
 \concept{models}
