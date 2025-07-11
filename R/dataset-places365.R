@@ -10,8 +10,7 @@
 #' @inheritParams mnist_dataset
 #' @param split One of `"train"`, `"val"`, or `"test"`.
 #' @param small Logical, defaults to `TRUE`. If `TRUE`, uses the 256 x 256
-#'   "small" images. High resolution images are currently unsupported and will
-#'   trigger an error if `FALSE` is passed.
+#'   #'   "small" images (~30 GB total). If `FALSE`, uses the high-resolution version (~160 GB total).
 #' @param loader A function to load an image given its path. Defaults to
 #'   [magick_loader()], which uses the `{magick}` package.
 #'
@@ -27,6 +26,7 @@
 #' ds <- places365_dataset(
 #'   split = "val",
 #'   download = TRUE,
+#'   small = TRUE,
 #'   transform = transform_to_tensor
 #' )
 #' item <- ds[1]
@@ -47,9 +47,12 @@
 
 places365_dataset <- torch::dataset(
   name = "places365_dataset",
-  archive_size = "24 GB",
+  archive_size_table = list(
+    small = "30 GB",
+    large = "160 GB"
+  ),
 
-  resources = list(
+  resources_small = list(
     devkit = c(
       "http://data.csail.mit.edu/places/places365/filelist_places365-standard.tar",
       "35a0585fee1fa656440f3ab298f8479c"
@@ -68,6 +71,25 @@ places365_dataset <- torch::dataset(
     )
   ),
 
+  resources_large = list(
+    devkit = c(
+      "http://data.csail.mit.edu/places/places365/filelist_places365-standard.tar",
+      "35a0585fee1fa656440f3ab298f8479c"
+    ),
+    val = c(
+      "http://data.csail.mit.edu/places/places365/val_large.tar",
+      "9b71c4993ad89d2d8bcbdc4aef38042f"
+    ),
+    train = c(
+      "http://data.csail.mit.edu/places/places365/train_large_places365standard.tar",
+      "67e186b496a84c929568076ed01a8aa1"
+    ),
+    test = c(
+      "http://data.csail.mit.edu/places/places365/test_large.tar",
+      "41a4b6b724b1d2cd862fb3871ed59913"
+    )
+  ),
+
   initialize = function(
     root = tempdir(),
     split = c("train", "val", "test"),
@@ -83,9 +105,11 @@ places365_dataset <- torch::dataset(
     self$target_transform <- target_transform
     self$small <- small
     self$loader <- loader
+    self$archive_size <- self$archive_size_table[[if (self$small) "small" else "large"]]
 
-    if (!self$small)
-      cli_abort("`small = FALSE` (high resolution images) is not supported yet.")
+    # Always use devkit from small (shared) for both modes
+    self$resources <- if (self$small) self$resources_small else self$resources_large
+    self$resources$devkit <- self$resources_small$devkit
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -95,9 +119,12 @@ places365_dataset <- torch::dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    classes_df <- read.delim(self$categories_file, header = FALSE, sep = " ", col.names = c("category", "index"))
-    self$classes <- sub(".*/", "", classes_df$category)
-    self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
+    # Only read categories if not test
+    if (self$split != "test") {
+      classes_df <- read.delim(self$categories_file, header = FALSE, sep = " ", col.names = c("category", "index"))
+      self$classes <- sub(".*/", "", classes_df$category)
+      self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
+    }
 
     if (self$split == "train") {
       ann <- read.delim(self$train_ann, header = FALSE, col.names = c("path", "label"), sep = " ")
@@ -156,21 +183,17 @@ places365_dataset <- torch::dataset(
     needed <- switch(
       self$split,
       train = c("devkit", "train"),
-      val = c("devkit", "val"),
-      test = "test"
+      val   = c("devkit", "val"),
+      test  = "test"
     )
 
     for (n in needed) {
       res <- self$resources[[n]]
 
-      # Use extended timeout only for the large train archive
-      tar <- if (n == "train") {
-        withr::with_options(list(timeout = 6000),
-                            download_and_cache(res[1], prefix = "places365")
-        )
-      } else {
+      # Apply extended timeout to all downloads
+      tar <- withr::with_options(list(timeout = 7200), {
         download_and_cache(res[1], prefix = "places365")
-      }
+      })
 
       if (!is.na(res[2]) && tools::md5sum(tar) != res[2])
         cli_abort("Corrupt file! Delete the file in {.file {tar}} and try again.")
@@ -192,9 +215,9 @@ places365_dataset <- torch::dataset(
 
   active = list(
     base_dir = function() file.path(self$root_path, "places365"),
-    train_dir = function() file.path(self$base_dir, "data_256"),
-    val_dir = function() file.path(self$base_dir, "val_256"),
-    test_dir = function() file.path(self$base_dir, "test_256"),
+    train_dir = function() file.path(self$base_dir, if (self$small) "data_256" else "data_large"),
+    val_dir = function() file.path(self$base_dir, if (self$small) "val_256" else "val_large"),
+    test_dir = function() file.path(self$base_dir, if (self$small) "test_256" else "test_large"),
     val_ann = function() file.path(self$base_dir, "places365_val.txt"),
     train_ann = function() file.path(self$base_dir, "places365_train_standard.txt"),
     categories_file = function() file.path(self$base_dir, "categories_places365.txt")
