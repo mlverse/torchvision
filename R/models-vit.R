@@ -175,7 +175,7 @@ vit_model <- torch::nn_module(
 
   forward = function(x) {
     B <- x$size(1)
-    x <- self$patch_embed(x)  # (B, num_patches, embed_dim)
+    x <- self$patch_embed(x)
 
     cls_tokens <- self$class_token$expand(c(B, -1, -1))
     x <- torch_cat(list(cls_tokens, x), dim = 2)
@@ -209,12 +209,9 @@ patch_embed <- torch::nn_module(
   },
 
   forward = function(x) {
-    x <- self$proj(x)  # shape: (B, embed_dim, H/ps, W/ps)
-    x <- torch_flatten(x, start_dim = 3, end_dim = 4)  # flatten spatial dimensions (H/ps, W/ps)
-    x <- x$transpose(2, 3) 
-    
-    # x <- torch_flatten(x, start_dim = 2)
-    # x <- x$transpose(2, 3) # shape: (B, num_patches, embed_dim)
+    x <- self$proj(x)
+    x <- torch_flatten(x, start_dim = 3, end_dim = 4)
+    x <- x$transpose(2, 3)
     x
   }
 )
