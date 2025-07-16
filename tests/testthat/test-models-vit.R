@@ -43,6 +43,9 @@ test_that("tests for non-pretrained model_vit_b_32", {
 
 test_that("tests for pretrained model_vit_b_32", {
 
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
   model <- model_vit_b_32(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
@@ -69,6 +72,9 @@ test_that("tests for non-pretrained model_vit_l_16", {
 })
 
 test_that("tests for pretrained model_vit_l_16", {
+
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_vit_l_16(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 224, 224)
@@ -97,6 +103,9 @@ test_that("tests for non-pretrained model_vit_l_32", {
 
 test_that("tests for pretrained model_vit_l_32", {
 
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
   model <- model_vit_l_32(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
@@ -124,6 +133,9 @@ test_that("tests for model_vit_h_14", {
 })
 
 test_that("tests for model_vit_h_14", {
+
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+      "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_vit_h_14(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 518, 518)
