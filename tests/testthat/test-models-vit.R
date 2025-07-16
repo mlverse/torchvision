@@ -6,7 +6,7 @@ test_that("tests for model_vit_b_16", {
   expect_tensor_shape(out, c(1, 1000))
 
   model <- model_vit_b_16(pretrained = TRUE)
-  torch_manual_seed(1)
+  
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
@@ -28,7 +28,7 @@ test_that("tests for model_vit_b_32", {
   expect_tensor_shape(out, c(1, 1000))
 
   model <- model_vit_b_32(pretrained = TRUE)
-  torch_manual_seed(1)
+  
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
@@ -50,7 +50,7 @@ test_that("tests for model_vit_l_16", {
   expect_tensor_shape(out, c(1, 1000))
 
   model <- model_vit_l_16(pretrained = TRUE)
-  torch_manual_seed(1)
+  
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
@@ -72,7 +72,7 @@ test_that("tests for model_vit_l_32", {
   expect_tensor_shape(out, c(1, 1000))
 
   model <- model_vit_l_32(pretrained = TRUE)
-  torch_manual_seed(1)
+  
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
@@ -94,7 +94,7 @@ test_that("tests for model_vit_h_14", {
   expect_tensor_shape(out, c(1, 1000))
 
   model <- model_vit_h_14(pretrained = TRUE)
-  torch_manual_seed(1)
+  
   input <- torch::torch_randn(1, 3, 518, 518)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
