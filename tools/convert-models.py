@@ -2,6 +2,7 @@ import torch
 from torch.hub import load_state_dict_from_url # used to be in torchvision
 import os
 import boto3
+from botocore.exceptions import ClientError
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -32,7 +33,7 @@ def blob_exist(bucket_name, blob_name):
         return True
     except s3.exceptions.NoSuchKey:
         return False
-    except botocore.exceptions.ClientError:
+    except ClientError:
         return False
 
 models = {
