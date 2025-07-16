@@ -2,6 +2,7 @@ import torch
 from torch.hub import load_state_dict_from_url # used to be in torchvision
 import os
 import boto3
+from botocore.exceptions import ClientError
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -31,6 +32,8 @@ def blob_exist(bucket_name, blob_name):
         s3.head_object(Bucket=bucket_name, Key=blob_name)
         return True
     except s3.exceptions.NoSuchKey:
+        return False
+    except ClientError:
         return False
 
 models = {
@@ -90,6 +93,12 @@ models = {
   'vit_l_16': 'https://download.pytorch.org/models/vit_l_16-852ce7e3.pth',
   'vit_l_32': 'https://download.pytorch.org/models/vit_l_32-c7638314.pth',
   'vit_h_14': 'https://download.pytorch.org/models/vit_h_14_swag-80465313.pth',
+  'convnext_tiny': 'https://download.pytorch.org/models/convnext_tiny-983f1562.pth',
+  'convnext_small': 'https://download.pytorch.org/models/convnext_small-0c510722.pth',
+  'convnext_base': 'https://download.pytorch.org/models/convnext_base-6075fbad.pth',
+  'convnext_large': 'https://download.pytorch.org/models/convnext_large-ea097f82.pth',
+  'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
+  'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
   }
 
 os.makedirs("models", exist_ok=True)
