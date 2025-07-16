@@ -32,6 +32,8 @@ def blob_exist(bucket_name, blob_name):
         return True
     except s3.exceptions.NoSuchKey:
         return False
+    except botocore.exceptions.ClientError:
+        return False
 
 models = {
   'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
