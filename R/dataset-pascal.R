@@ -122,6 +122,7 @@ pascal_segmentation_dataset <- torch::dataset(
 
     x <- jpeg::readJPEG(img_path)
     masks <- png::readPNG(mask_path)*255
+    masks <- torch_tensor(masks, dtype = torch_bool())$permute(c(3, 1, 2))
 
     y <- list(
       masks = masks
