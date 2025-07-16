@@ -90,6 +90,12 @@ models = {
   'vit_l_16': 'https://download.pytorch.org/models/vit_l_16-852ce7e3.pth',
   'vit_l_32': 'https://download.pytorch.org/models/vit_l_32-c7638314.pth',
   'vit_h_14': 'https://download.pytorch.org/models/vit_h_14_swag-80465313.pth',
+  'convnext_tiny': 'https://download.pytorch.org/models/convnext_tiny-983f1562.pth',
+  'convnext_small': 'https://download.pytorch.org/models/convnext_small-0c510722.pth',
+  'convnext_base': 'https://download.pytorch.org/models/convnext_base-6075fbad.pth',
+  'convnext_large': 'https://download.pytorch.org/models/convnext_large-ea097f82.pth',
+  'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
+  'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
   }
 
 os.makedirs("models", exist_ok=True)
