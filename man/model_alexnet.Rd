@@ -21,6 +21,7 @@ AlexNet model architecture from the
 }
 \seealso{
 Other models: 
+\code{\link{model_deeplabv3}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
