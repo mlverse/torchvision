@@ -16,21 +16,42 @@
 #'
 #' @inheritParams model_resnet18
 #' @param num_classes Number of output classes.
+#' @param aux_loss Logical or NULL. If `TRUE`, includes an auxiliary classifier branch.
+#'   If `NULL` (default), the presence of aux classifier is inferred from pretrained weights.
+#' @param pretrained_backbone If `TRUE` and `pretrained = FALSE`, loads
+#'   ImageNet weights for the ResNet backbone.
 #' @param ... Other parameters passed to the model implementation.
 #'
 #' @family models
 #'
 #' @examples
 #' \dontrun{
-#'   model <- model_deeplabv3_resnet50(num_classes = 21)
-#'   input <- torch::torch_randn(1, 3, 64, 64)
-#'   out <- model(input)
-#'   names(out)
+#' # VOC class names (used by default 21-class COCO/Pascal VOC models)
+#' voc_classes <- c(
+#'   "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+#'   "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
+#'   "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
+#' )
 #'
-#'   model <- model_deeplabv3_resnet101(num_classes = 21)
-#'   input <- torch::torch_randn(1, 3, 64, 64)
-#'   out <- model(input)
-#'   names(out)
+#' model <- model_deeplabv3_resnet50(pretrained = TRUE)
+#' model$eval()
+#' image_batch <- torch::torch_randn(1, 3, 520, 520)
+#' output <- model(image_batch)
+#' predicted_class <- output$out[1, , 260, 260]$argmax()$item() + 1
+#' class_label <- voc_classes[predicted_class]
+#' print(paste("Predicted class at (260, 260):", class_label))
+#'
+#'
+#' model <- model_deeplabv3_resnet101(
+#'   pretrained = FALSE,
+#'   num_classes = 3,
+#'   aux_loss = TRUE
+#' )
+#' image_batch <- torch::torch_randn(1, 3, 520, 520)
+#' output <- model(image_batch)
+#' # Check output shapes
+#' dim(output$out)  # e.g., (1, 3, 520, 520)
+#' dim(output$aux)  # e.g., (1, 3, 520, 520)
 #' }
 #' @name model_deeplabv3
 #' @rdname model_deeplabv3
@@ -76,18 +97,14 @@ aspp_module <- nn_module(
     )
   },
   forward = function(x) {
-    # Extract spatial dimensions (height, width) from input shape [batch, channels, height, width]
     input_size <- x$shape[3:4]  # Get height and width dimensions
     res <- list()
 
-    # Process all convolutions except the last one (global pooling)
     for (i in 1:(length(self$convs) - 1)) {
       res[[i]] <- self$convs[[i]](x)
     }
 
-    # Handle global pooling separately
     global_feat <- self$convs[[length(self$convs)]](x)
-    # Use as.integer to ensure proper format
     target_size <- as.integer(input_size)
     global_feat <- nnf_interpolate(global_feat, size = target_size, mode = "bilinear", align_corners = FALSE)
     res[[length(res) + 1]] <- global_feat
@@ -100,19 +117,10 @@ aspp_module <- nn_module(
 # Main classifier head
 deeplab_head <- function(in_channels, num_classes) {
   nn_sequential(
-    # classifier.0 = ASPP
     aspp_module(in_channels, 256, atrous_rates = c(12, 24, 36)),
-
-    # classifier.1 = conv3x3
     nn_conv2d(256, 256, kernel_size = 3, padding = 1, bias = FALSE),
-
-    # classifier.2 = batch norm
     nn_batch_norm2d(256),
-
-    # classifier.3 = relu
     nn_relu(),
-
-    # classifier.4 = final 1x1 conv
     nn_conv2d(256, num_classes, kernel_size = 1)
   )
 }
@@ -120,19 +128,10 @@ deeplab_head <- function(in_channels, num_classes) {
 # Auxiliary classifier head (simpler, operates on layer3 features)
 aux_classifier_head <- function(in_channels, num_classes) {
   nn_sequential(
-    # aux_classifier.0 = 3x3 conv
     nn_conv2d(in_channels, 256, kernel_size = 3, padding = 1, bias = FALSE),
-
-    # aux_classifier.1 = batch norm
     nn_batch_norm2d(256),
-
-    # aux_classifier.2 = relu
     nn_relu(),
-
-    # aux_classifier.3 = dropout
     nn_dropout(0.1),
-
-    # aux_classifier.4 = final 1x1 conv
     nn_conv2d(256, num_classes, kernel_size = 1)
   )
 }
@@ -156,7 +155,6 @@ DeepLabV3 <- nn_module(
     x <- self$backbone$layer2(x)
     x <- self$backbone$layer3(x)
 
-    # Store layer3 output for auxiliary classifier
     aux_x <- x
 
     x <- self$backbone$layer4(x)
@@ -179,20 +177,39 @@ DeepLabV3 <- nn_module(
   }
 )
 
-# Updated model constructor
-deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress, num_classes, ...) {
+# Model constructor
+deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
+                                     num_classes, aux_loss = NULL,
+                                     pretrained_backbone = FALSE, ...) {
   if (pretrained && num_classes != 21) {
-    cli::cli_abort("Pretrained weights require num_classes = 21.")
+    cli_abort("Pretrained weights require num_classes = 21.")
   }
 
-  backbone <- resnet(block, layers, replace_stride_with_dilation = c(FALSE, TRUE, TRUE), ...)
+  if (is.null(aux_loss))
+    aux_loss <- FALSE
+
+  if (pretrained && pretrained_backbone)
+    cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
+
+  backbone_arch <- sub("deeplabv3_", "", arch)
+
+  if (pretrained_backbone && !pretrained) {
+    backbone <- .resnet(backbone_arch, block, layers, pretrained = TRUE,
+                        progress = progress,
+                        replace_stride_with_dilation = c(FALSE, TRUE, TRUE), ...)
+  } else {
+    backbone <- resnet(block, layers,
+                       replace_stride_with_dilation = c(FALSE, TRUE, TRUE), ...)
+  }
   backbone$fc <- nn_identity()
   backbone$avgpool <- nn_identity()
 
   classifier <- deeplab_head(2048, num_classes)
 
-  # Add auxiliary classifier (operates on layer3 features, which has 1024 channels for ResNet50/101)
-  aux_classifier <- aux_classifier_head(1024, num_classes)
+  aux_classifier <- NULL
+  if (aux_loss) {
+    aux_classifier <- aux_classifier_head(1024, num_classes)
+  }
 
   model <- DeepLabV3(backbone, classifier, aux_classifier)
 
@@ -208,15 +225,21 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress, 
 #' @describeIn model_deeplabv3 DeepLabV3 with ResNet-50 backbone
 #' @export
 model_deeplabv3_resnet50 <- function(pretrained = FALSE, progress = TRUE,
-                                     num_classes = 21, ...) {
-  deeplabv3_resnet_factory("deeplabv3_resnet50", bottleneck, c(3, 4, 6, 3),
-                           pretrained, progress, num_classes, ...)
+                                     num_classes = 21, aux_loss = NULL,
+                                     pretrained_backbone = FALSE, ...) {
+  deeplabv3_resnet_factory(
+    "deeplabv3_resnet50", bottleneck, c(3, 4, 6, 3),
+    pretrained, progress, num_classes, aux_loss, pretrained_backbone, ...
+  )
 }
 
 #' @describeIn model_deeplabv3 DeepLabV3 with ResNet-101 backbone
 #' @export
 model_deeplabv3_resnet101 <- function(pretrained = FALSE, progress = TRUE,
-                                      num_classes = 21, ...) {
-  deeplabv3_resnet_factory("deeplabv3_resnet101", bottleneck, c(3, 4, 23, 3),
-                           pretrained, progress, num_classes, ...)
+                                      num_classes = 21, aux_loss = NULL,
+                                      pretrained_backbone = FALSE, ...) {
+  deeplabv3_resnet_factory(
+    "deeplabv3_resnet101", bottleneck, c(3, 4, 23, 3),
+    pretrained, progress, num_classes, aux_loss, pretrained_backbone, ...
+  )
 }

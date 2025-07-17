@@ -10,6 +10,8 @@ model_deeplabv3_resnet50(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 21,
+  aux_loss = NULL,
+  pretrained_backbone = FALSE,
   ...
 )
 
@@ -17,6 +19,8 @@ model_deeplabv3_resnet101(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 21,
+  aux_loss = NULL,
+  pretrained_backbone = FALSE,
   ...
 )
 }
@@ -27,6 +31,12 @@ model_deeplabv3_resnet101(
 stderr.}
 
 \item{num_classes}{Number of output classes.}
+
+\item{aux_loss}{Logical or NULL. If \code{TRUE}, includes an auxiliary classifier branch.
+If \code{NULL} (default), the presence of aux classifier is inferred from pretrained weights.}
+
+\item{pretrained_backbone}{If \code{TRUE} and \code{pretrained = FALSE}, loads
+ImageNet weights for the ResNet backbone.}
 
 \item{...}{Other parameters passed to the model implementation.}
 }
@@ -56,15 +66,32 @@ training uses 520x520 images.
 
 \examples{
 \dontrun{
-  model <- model_deeplabv3_resnet50(num_classes = 21)
-  input <- torch::torch_randn(1, 3, 64, 64)
-  out <- model(input)
-  names(out)
+# VOC class names (used by default 21-class COCO/Pascal VOC models)
+voc_classes <- c(
+  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
+  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
+)
 
-  model <- model_deeplabv3_resnet101(num_classes = 21)
-  input <- torch::torch_randn(1, 3, 64, 64)
-  out <- model(input)
-  names(out)
+model <- model_deeplabv3_resnet50(pretrained = TRUE)
+model$eval()
+image_batch <- torch::torch_randn(1, 3, 520, 520)
+output <- model(image_batch)
+predicted_class <- output$out[1, , 260, 260]$argmax()$item() + 1
+class_label <- voc_classes[predicted_class]
+print(paste("Predicted class at (260, 260):", class_label))
+
+
+model <- model_deeplabv3_resnet101(
+  pretrained = FALSE,
+  num_classes = 3,
+  aux_loss = TRUE
+)
+image_batch <- torch::torch_randn(1, 3, 520, 520)
+output <- model(image_batch)
+# Check output shapes
+dim(output$out)  # e.g., (1, 3, 520, 520)
+dim(output$aux)  # e.g., (1, 3, 520, 520)
 }
 }
 \seealso{
