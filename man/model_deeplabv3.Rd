@@ -4,7 +4,7 @@
 \alias{model_deeplabv3}
 \alias{model_deeplabv3_resnet50}
 \alias{model_deeplabv3_resnet101}
-\title{DeepLabV3 model family}
+\title{DeepLabV3 Models}
 \usage{
 model_deeplabv3_resnet50(
   pretrained = FALSE,
@@ -21,16 +21,20 @@ model_deeplabv3_resnet101(
 )
 }
 \arguments{
-\item{pretrained}{If TRUE, loads pretrained weights on COCO.}
+\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
 
-\item{progress}{Display download progress.}
+\item{progress}{(bool): If TRUE, displays a progress bar of the download to
+stderr.}
 
 \item{num_classes}{Number of output classes.}
 
-\item{...}{Extra args for backbone.}
+\item{...}{Other parameters passed to the model implementation.}
 }
 \description{
-DeepLabV3 model family
+Constructs DeepLabV3 semantic segmentation models with a ResNet backbone as
+described in \emph{Rethinking Atrous Convolution for Semantic Image
+Segmentation}. These models employ atrous spatial pyramid pooling to capture
+multi-scale context.
 }
 \section{Functions}{
 \itemize{
@@ -39,3 +43,36 @@ DeepLabV3 model family
 \item \code{model_deeplabv3_resnet101()}: DeepLabV3 with ResNet-101 backbone
 
 }}
+\section{Task}{
+
+Semantic image segmentation with 21 output classes by default (COCO).
+}
+
+\section{Input Format}{
+
+The models expect input tensors of shape \code{(batch_size, 3, H, W)}. Typical
+training uses 520x520 images.
+}
+
+\examples{
+\dontrun{
+  model <- model_deeplabv3_resnet50(num_classes = 21)
+  input <- torch::torch_randn(1, 3, 64, 64)
+  out <- model(input)
+  names(out)
+
+  model <- model_deeplabv3_resnet101(num_classes = 21)
+  input <- torch::torch_randn(1, 3, 64, 64)
+  out <- model(input)
+  names(out)
+}
+}
+\seealso{
+Other models: 
+\code{\link{model_alexnet}()},
+\code{\link{model_inception_v3}()},
+\code{\link{model_mobilenet_v2}()},
+\code{\link{model_resnet}},
+\code{\link{model_vgg}}
+}
+\concept{models}

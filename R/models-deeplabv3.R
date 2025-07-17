@@ -1,11 +1,37 @@
 # DeepLabV3 model family with auxiliary classifier
 
-#' DeepLabV3 model family
+#' DeepLabV3 Models
 #'
-#' @param pretrained If TRUE, loads pretrained weights on COCO.
-#' @param progress Display download progress.
+#' Constructs DeepLabV3 semantic segmentation models with a ResNet backbone as
+#' described in \emph{Rethinking Atrous Convolution for Semantic Image
+#' Segmentation}. These models employ atrous spatial pyramid pooling to capture
+#' multi-scale context.
+#'
+#' @section Task:
+#' Semantic image segmentation with 21 output classes by default (COCO).
+#'
+#' @section Input Format:
+#' The models expect input tensors of shape \code{(batch_size, 3, H, W)}. Typical
+#' training uses 520x520 images.
+#'
+#' @inheritParams model_resnet18
 #' @param num_classes Number of output classes.
-#' @param ... Extra args for backbone.
+#' @param ... Other parameters passed to the model implementation.
+#'
+#' @family models
+#'
+#' @examples
+#' \dontrun{
+#'   model <- model_deeplabv3_resnet50(num_classes = 21)
+#'   input <- torch::torch_randn(1, 3, 64, 64)
+#'   out <- model(input)
+#'   names(out)
+#'
+#'   model <- model_deeplabv3_resnet101(num_classes = 21)
+#'   input <- torch::torch_randn(1, 3, 64, 64)
+#'   out <- model(input)
+#'   names(out)
+#' }
 #' @name model_deeplabv3
 #' @rdname model_deeplabv3
 NULL
