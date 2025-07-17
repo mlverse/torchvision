@@ -4,13 +4,12 @@
 \alias{model_deeplabv3}
 \alias{model_deeplabv3_resnet50}
 \alias{model_deeplabv3_resnet101}
-\title{DeepLabV3 implementation}
+\title{DeepLabV3 model family}
 \usage{
 model_deeplabv3_resnet50(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 21,
-  aux_loss = NULL,
   ...
 )
 
@@ -18,38 +17,25 @@ model_deeplabv3_resnet101(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 21,
-  aux_loss = NULL,
   ...
 )
 }
 \arguments{
-\item{pretrained}{(bool): If TRUE, returns a model pre-trained on COCO.}
+\item{pretrained}{If TRUE, loads pretrained weights on COCO.}
 
-\item{progress}{(bool): If TRUE, displays a progress bar of the download to stderr.}
+\item{progress}{Display download progress.}
 
-\item{num_classes}{(int): number of output classes of the model.}
+\item{num_classes}{Number of output classes.}
 
-\item{aux_loss}{(bool): If TRUE, include an auxiliary classifier.}
-
-\item{...}{other parameters passed to the ResNet backbone.}
+\item{...}{Extra args for backbone.}
 }
 \description{
-DeepLabV3 model family based on
-\href{https://arxiv.org/abs/1706.05587}{Rethinking Atrous Convolution for Semantic Image Segmentation}.
+DeepLabV3 model family
 }
 \section{Functions}{
 \itemize{
-\item \code{model_deeplabv3_resnet50()}: DeepLabV3 model with a ResNet-50 backbone
+\item \code{model_deeplabv3_resnet50()}: DeepLabV3 with ResNet-50 backbone
 
-\item \code{model_deeplabv3_resnet101()}: DeepLabV3 model with a ResNet-101 backbone
+\item \code{model_deeplabv3_resnet101()}: DeepLabV3 with ResNet-101 backbone
 
 }}
-\seealso{
-Other models: 
-\code{\link{model_alexnet}()},
-\code{\link{model_inception_v3}()},
-\code{\link{model_mobilenet_v2}()},
-\code{\link{model_resnet}},
-\code{\link{model_vgg}}
-}
-\concept{models}

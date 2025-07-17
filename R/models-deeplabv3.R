@@ -50,11 +50,22 @@ aspp_module <- nn_module(
     )
   },
   forward = function(x) {
-    size <- x$shape[-1]
-    res <- lapply(self$convs, function(mod) mod(x))
+    # Extract spatial dimensions (height, width) from input shape [batch, channels, height, width]
+    input_size <- x$shape[3:4]  # Get height and width dimensions
+    res <- list()
+
+    # Process all convolutions except the last one (global pooling)
+    for (i in 1:(length(self$convs) - 1)) {
+      res[[i]] <- self$convs[[i]](x)
+    }
+
+    # Handle global pooling separately
     global_feat <- self$convs[[length(self$convs)]](x)
-    global_feat <- nnf_interpolate(global_feat, size = size, mode = "bilinear", align_corners = FALSE)
+    # Use as.integer to ensure proper format
+    target_size <- as.integer(input_size)
+    global_feat <- nnf_interpolate(global_feat, size = target_size, mode = "bilinear", align_corners = FALSE)
     res[[length(res) + 1]] <- global_feat
+
     x <- torch_cat(res, dim = 2)
     self$project(x)
   }
@@ -109,7 +120,7 @@ DeepLabV3 <- nn_module(
     self$aux_classifier <- aux_classifier
   },
   forward = function(x) {
-    input_shape <- x$shape[-1]
+    input_shape <- x$shape[3:4]  # Get height and width dimensions
 
     x <- self$backbone$conv1(x)
     x <- self$backbone$bn1(x)
@@ -126,14 +137,15 @@ DeepLabV3 <- nn_module(
 
     # Main classifier
     x <- self$classifier(x)
-    x <- nnf_interpolate(x, size = input_shape, mode = "bilinear", align_corners = FALSE)
+    target_size <- as.integer(input_shape)
+    x <- nnf_interpolate(x, size = target_size, mode = "bilinear", align_corners = FALSE)
 
     result <- list(out = x)
 
     # Auxiliary classifier (if present)
     if (!is.null(self$aux_classifier)) {
       aux_out <- self$aux_classifier(aux_x)
-      aux_out <- nnf_interpolate(aux_out, size = input_shape, mode = "bilinear", align_corners = FALSE)
+      aux_out <- nnf_interpolate(aux_out, size = target_size, mode = "bilinear", align_corners = FALSE)
       result$aux <- aux_out
     }
 
