@@ -1,5 +1,3 @@
-skip_on_os(c("windows", "mac"))
-
 test_that("deeplabv3_resnet50 works", {
   model <- model_deeplabv3_resnet50(num_classes = 21)
   input <- torch::torch_randn(1, 3, 32, 32)
