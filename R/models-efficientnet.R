@@ -27,9 +27,9 @@
 #'   B7 \tab 2.0 \tab 3.1 \tab 600 \tab 66.0 \tab 37.0 \tab 84.3
 #' }
 #'
+#' @param num_classes Number of output classes. Default is 1000 (ImageNet).
 #' @inheritParams model_resnet18
-#' @param ... Other parameters passed to the model implementation, such as
-#' \code{num_classes} to change the output dimension.
+#' @param ... Other parameters passed to the model implementation.
 #'
 #' @family models
 #'

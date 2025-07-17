@@ -34,8 +34,9 @@ model_efficientnet_b7(pretrained = FALSE, progress = TRUE, ...)
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{...}{Other parameters passed to the model implementation, such as
-\code{num_classes} to change the output dimension.}
+\item{...}{Other parameters passed to the model implementation.}
+
+\item{num_classes}{Number of output classes. Default is 1000 (ImageNet).}
 }
 \description{
 Constructs EfficientNet model architectures as described in

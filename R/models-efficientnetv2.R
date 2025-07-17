@@ -20,9 +20,9 @@
 #'   V2-L \tab 512 \tab 119 \tab 55 \tab 85.7
 #' }
 #'
+#' @param num_classes Number of output classes. Default is 1000 (ImageNet).
 #' @inheritParams model_resnet18
-#' @param ... Other parameters passed to the model implementation, such as
-#'   \code{num_classes} to change the output dimension.
+#' @param ... Other parameters passed to the model implementation.
 #'
 #' @family models
 #' @name model_efficientnet_v2
