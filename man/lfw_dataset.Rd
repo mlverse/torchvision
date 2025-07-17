@@ -60,11 +60,25 @@ It includes two variants:
 \item \code{lfw_pairs_dataset}: A \strong{face verification} dataset containing image pairs with binary labels (same or different person).
 }
 
+This R implementation of the LFW dataset is based on the \code{torchvision.datasets.LFWPeople} and \code{LFWPairs} classes in PyTorch,
+but deviates in a few key aspects due to dataset availability and R API conventions:
+\itemize{
+\item The \code{image_set} argument from Python (\code{original}, \code{funneled}, \code{deepfunneled}) has been removed. Only the
+\code{deepfunneled} version is supported in R, as the \code{original} and \code{funneled} versions are no longer accessible via
+the URLs used in the official PyTorch implementation.
+\item The \code{split} argument in Python (\code{train}, \code{test}, \verb{10fold}) is simplified to a \code{train} boolean flag in R.
+This follows existing conventions in the R \code{torchvision} dataset API. The \verb{10fold} split is not supported because the
+official file required for this split is unavailable or incompatible with a clean split into image-label pairs.
+\item The dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
+This ensures consistent image size and alignment, making it suitable for use in both classification and verification tasks.
+\item The data is downloaded from \href{https://huggingface.co/datasets/JimmyUnleashed/LFW}{Hugging Face},
+which provides consistent hosting for the deep funneled version.
+}
+
 The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
 \itemize{
 \item Training split: 9525 images, 4038 identities
 \item Test split: 3708 images, 1711 identities
-The dataset is downloaded from \href{https://huggingface.co/datasets/JimmyUnleashed/LFW}{Hugging Face}.
 }
 }
 \examples{
