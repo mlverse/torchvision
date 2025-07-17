@@ -17,6 +17,8 @@
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
+* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+  the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).
 * New `nms()` and `batched_nms()` functions provide Non-Maximum Suppression utilities. Added `box_convert()` to convert between bounding box formats (@Athospd, #40).
