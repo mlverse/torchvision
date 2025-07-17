@@ -22,6 +22,7 @@
 #'   ImageNet weights for the ResNet backbone.
 #' @param ... Other parameters passed to the model implementation.
 #'
+#' @importFrom torch nn_module
 #' @family models
 #'
 #' @examples
