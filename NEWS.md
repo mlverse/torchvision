@@ -35,6 +35,10 @@
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
 
+## New models
+
+* Added `model_vit_b_16()`, `model_vit_b_32()`, `model_vit_l_16()`, `model_vit_l_32()`, and `model_vit_h_14()` for loading Vision Transformer models (@DerrickUnleashed, #202).
+
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
