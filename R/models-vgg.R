@@ -78,21 +78,21 @@ vgg_make_layers <- function(cfg, batch_norm) {
 }
 
 vgg_cfgs <- list(
-  'A' = list(64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'),
-  'B' = list(64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'),
-  'D' = list(64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'),
-  'E' = list(64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M')
+  "A" = list(64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"),
+  "B" = list(64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"),
+  "D" = list(64, 64, "M", 128, 128, "M", 256, 256, 256, "M", 512, 512, 512, "M", 512, 512, 512, "M"),
+  "E" = list(64, 64, "M", 128, 128, "M", 256, 256, 256, 256, "M", 512, 512, 512, 512, "M", 512, 512, 512, 512, "M")
 )
 
 vgg_model_urls <- list(
-  'vgg11'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg11.pth',
-  'vgg13'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg13.pth',
-  'vgg16'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg16.pth',
-  'vgg19'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg19.pth',
-  'vgg11_bn'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg11_bn.pth',
-  'vgg13_bn'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg13_bn.pth',
-  'vgg16_bn'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg16_bn.pth',
-  'vgg19_bn'= 'https://torch-cdn.mlverse.org/models/vision/v2/models/vgg19_bn.pth'
+  "vgg11"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg11.pth", "3afa0c0e9eecb80c0f4ebc4303e19f68", "~510 MB"),
+  "vgg13"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg13.pth", "1733a72a8b22e37a57fb9cb9d4db3a74", "~510 MB"),
+  "vgg16"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg16.pth", "2329d5702a1d78713179f6127a280fcd", "~530 MB"),
+  "vgg19"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg19.pth", "6acea77a847bb1549171504b872efb96", "~575 MB"),
+  "vgg11_bn"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg11_bn.pth", "76ca955d0aa3e61152bdd726949d8fed", "~510 MB"),
+  "vgg13_bn"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg13_bn.pth", "612e11f29432ea79ae94a66b93db9109", "~510 MB"),
+  "vgg16_bn"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg16_bn.pth", "5ee7dc31de40677452eec2fdffce7e17", "~530 MB"),
+  "vgg19_bn"= c("https://torch-cdn.mlverse.org/models/vision/v2/models/vgg19_bn.pth", "7112c457070af40fdddda8e75f9b727b", "~575 MB")
 )
 
 vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
@@ -107,8 +107,12 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
   model <- do.call(VGG, args)
 
   if (pretrained) {
+    r <- vgg_model_urls[[arch]]
+    cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 
-    state_dict_path <- download_and_cache(vgg_model_urls[[arch]])
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
 
