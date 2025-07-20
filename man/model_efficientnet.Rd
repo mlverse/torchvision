@@ -106,12 +106,25 @@ transform <- function(img) {
     transform_resize(c(456, 456)) \%>\%
     transform_to_tensor()
 }
+image_batch <- torch::torch_randn(1, 3, 224, 224)
+output <- model(image_batch)
+which.max(as.numeric(output))  # class 815 in ImageNet is a Egyptian cat (see
+                               # <https://image-net.org>)
+}
+
+\dontrun{
+# Example of using EfficientNet-B5 with its native image size
+model <- model_efficientnet_b5()
+image_batch <- torch::torch_randn(1, 3, 456, 456)
+output <- model(image_batch)
+which.max(as.numeric(output))
 }
 
 }
 \seealso{
 Other models: 
 \code{\link{model_alexnet}()},
+\code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
