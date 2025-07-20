@@ -28,17 +28,23 @@
 #' model <- model_fcn_resnet50(pretrained = TRUE)
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
-#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
-#' segmented <- draw_segmentation_masks(img, mask)
+#' # extract predicted classes for the first element of the batch
+#' preds <- output$out$argmax(dim = 2)[1, ..]
+#' # build a boolean mask for the "dog" class
+#' dog_id <- which(voc_segmentation_classes == "dog")
+#' dog_mask <- preds$eq(dog_id)$unsqueeze(1)
+#' img <- input[1, ..]
+#' segmented <- draw_segmentation_masks(img, dog_mask)
 #' tensor_image_browse(segmented)
 #'
 #' model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
-#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
-#' segmented <- draw_segmentation_masks(img, mask)
+#' preds <- output$out$argmax(dim = 2)[1, ..]
+#' person_id <- which(voc_segmentation_classes == "person")
+#' person_mask <- preds$eq(person_id)$unsqueeze(1)
+#' img <- input[1, ..]
+#' segmented <- draw_segmentation_masks(img, person_mask)
 #' tensor_image_browse(segmented)
 #' }
 NULL
@@ -165,7 +171,8 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(state_dict)
+    strict_loading <- num_classes == 21 && aux_loss
+    model$load_state_dict(state_dict, strict = strict_loading)
   }
 
   model
@@ -203,7 +210,8 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(state_dict)
+    strict_loading <- num_classes == 21 && aux_loss
+    model$load_state_dict(state_dict, strict = strict_loading)
   }
 
   model
