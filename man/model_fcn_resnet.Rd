@@ -25,9 +25,10 @@ model_fcn_resnet101(
 )
 }
 \arguments{
-\item{pretrained}{If TRUE, returns a model pre-trained on COCO train2017.}
+\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
 
-\item{progress}{If TRUE, displays a progress bar of the download.}
+\item{progress}{(bool): If TRUE, displays a progress bar of the download to
+stderr.}
 
 \item{num_classes}{Number of output classes. Default: 21.}
 
@@ -45,16 +46,32 @@ Constructs an FCN (Fully Convolutional Network) model for semantic segmentation,
 based on a ResNet backbone as described in
 \href{https://arxiv.org/abs/1411.4038}{Fully Convolutional Networks for Semantic Segmentation}.
 }
+\details{
+The 21 output classes follow the PASCAL VOC convention:
+\code{background}, \code{aeroplane}, \code{bicycle}, \code{bird}, \code{boat},
+\code{bottle}, \code{bus}, \code{car}, \code{cat}, \code{chair},
+\code{cow}, \verb{dining table}, \code{dog}, \code{horse}, \code{motorbike},
+\code{person}, \verb{potted plant}, \code{sheep}, \code{sofa}, \code{train},
+\code{tv/monitor}.
+}
 \examples{
-model <- model_fcn_resnet50(pretrained = FALSE)
+\dontrun{
+model <- model_fcn_resnet50(pretrained = TRUE)
 input <- torch::torch_randn(1, 3, 224, 224)
 output <- model(input)
-str(output)
+mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
+img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
+segmented <- draw_segmentation_masks(img, mask)
+tensor_image_browse(segmented)
 
 model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
 input <- torch::torch_randn(1, 3, 224, 224)
 output <- model(input)
-str(output)
+mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
+img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
+segmented <- draw_segmentation_masks(img, mask)
+tensor_image_browse(segmented)
+}
 }
 \seealso{
 Other models: 

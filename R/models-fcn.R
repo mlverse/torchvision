@@ -4,8 +4,14 @@
 #' based on a ResNet backbone as described in
 #' \href{https://arxiv.org/abs/1411.4038}{Fully Convolutional Networks for Semantic Segmentation}.
 #'
-#' @param pretrained If TRUE, returns a model pre-trained on COCO train2017.
-#' @param progress If TRUE, displays a progress bar of the download.
+#' The 21 output classes follow the PASCAL VOC convention:
+#' `background`, `aeroplane`, `bicycle`, `bird`, `boat`,
+#' `bottle`, `bus`, `car`, `cat`, `chair`,
+#' `cow`, `dining table`, `dog`, `horse`, `motorbike`,
+#' `person`, `potted plant`, `sheep`, `sofa`, `train`,
+#' `tv/monitor`.
+#'
+#' @inheritParams model_resnet18
 #' @param num_classes Number of output classes. Default: 21.
 #' @param aux_loss If TRUE, includes the auxiliary classifier. If NULL, defaults to TRUE when `pretrained = TRUE`.
 #' @param pretrained_backbone If TRUE, uses a backbone pre-trained on ImageNet.
@@ -18,20 +24,40 @@
 #' @rdname model_fcn_resnet
 #'
 #' @examples
-#' model <- model_fcn_resnet50(pretrained = FALSE)
+#' \dontrun{
+#' model <- model_fcn_resnet50(pretrained = TRUE)
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' str(output)
+#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
+#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
+#' segmented <- draw_segmentation_masks(img, mask)
+#' tensor_image_browse(segmented)
 #'
 #' model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' str(output)
+#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
+#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
+#' segmented <- draw_segmentation_masks(img, mask)
+#' tensor_image_browse(segmented)
+#' }
 NULL
 
-fcn_model_urls <- c(
-  'fcn_resnet50_coco' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/fcn_resnet50_coco.pth',
-  'fcn_resnet101_coco' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/fcn_resnet101_coco.pth'
+voc_segmentation_classes <- c(
+  "background", "aeroplane", "bicycle", "bird", "boat",
+  "bottle", "bus", "car", "cat", "chair",
+  "cow", "dining table", "dog", "horse", "motorbike",
+  "person", "potted plant", "sheep", "sofa", "train",
+  "tv/monitor"
+)
+
+fcn_torchscript_urls <- list(
+  fcn_resnet50_coco = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet50_coco.pth",
+    "7ab41b12754b44d197d23dddb4a3505b", "160 MB"),
+  fcn_resnet101_coco = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet101_coco.pth",
+    "369109597fa68546df1231ae2fe0f66f", "170 MB")
 )
 
 fcn_head <- function(in_channels, channels, num_classes) {
@@ -130,13 +156,21 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
   model <- fcn(backbone, classifier, aux_classifier)
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(fcn_model_urls['fcn_resnet50_coco'])
+    r <- fcn_torchscript_urls$fcn_resnet50_coco
+    name <- "model_fcn_resnet50"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!is.na(r[2])) {
+      if (!tools::md5sum(state_dict_path) == r[2])
+        runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
 
   model
 }
+
 
 #' @rdname model_fcn_resnet
 #' @export
@@ -160,7 +194,14 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
   model <- fcn(backbone, classifier, aux_classifier)
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(fcn_model_urls['fcn_resnet101_coco'])
+    r <- fcn_torchscript_urls$fcn_resnet101_coco
+    name <- "model_fcn_resnet101"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!is.na(r[2])) {
+      if (!tools::md5sum(state_dict_path) == r[2])
+        runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
