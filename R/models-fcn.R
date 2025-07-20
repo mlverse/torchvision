@@ -30,8 +30,10 @@
 NULL
 
 fcn_model_urls <- c(
-  'fcn_resnet50_coco' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/fcn_resnet50_coco.pth',
-  'fcn_resnet101_coco' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/fcn_resnet101_coco.pth'
+  'fcn_resnet50_coco' = 'https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet50_coco.pth',
+  'fcn_resnet101_coco' = 'https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet101_coco.pth',
+  'resnet50' = 'https://torch-cdn.mlverse.org/models/vision/v2/models/resnet50.pth',
+  'resnet101' = 'https://torch-cdn.mlverse.org/models/vision/v2/models/resnet101.pth'
 )
 
 fcn_head <- function(in_channels, channels, num_classes) {
@@ -119,7 +121,7 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls['resnet50'])
+    state_dict_path <- download_and_cache(fcn_model_urls['resnet50'])
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }
@@ -149,7 +151,7 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls['resnet101'])
+    state_dict_path <- download_and_cache(fcn_model_urls['resnet101'])
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }

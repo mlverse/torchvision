@@ -22,6 +22,15 @@ test_that("model_fcn_resnet50 with aux classifier returns aux output", {
 })
 
 test_that("model_fcn_resnet50 loads pretrained weights", {
-  model <- model_fcn_resnet50(pretrained = TRUE)
+  model <- model_fcn_resnet50(pretrained = TRUE, num_classes = 12)
   expect_true(inherits(model, "fcn"))
+  model$eval()
+
+  input <- torch::torch_randn(2, 3, 224, 224)
+  output <- model(input)
+
+  expect_named(output, c("out", "aux"))
+  expect_tensor_shape(output$out, c(2, 12, 224, 224))
+  expect_tensor_shape(output$aux, c(2, 12, 224, 224))
 })
+
