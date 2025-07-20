@@ -34,7 +34,7 @@ release_bullets <- function() {
     "Update messages translation:",
     "",
     todo(
-      "Update `po/R-{project_name()}.pot` file with `potools::po_update()`"
+      "Update `po/R-torchvision.pot` file with `potools::po_update()`"
     ),
     todo("Contact translators to collect their translation `.po` files"),
     todo("Compile the translations with `potools::po_compile()`"),
