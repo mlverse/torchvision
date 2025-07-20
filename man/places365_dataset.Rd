@@ -2,6 +2,7 @@
 % Please edit documentation in R/dataset-places365.R
 \name{places365_dataset}
 \alias{places365_dataset}
+\alias{places365_dataset_large}
 \title{Places365 Dataset}
 \usage{
 places365_dataset(
@@ -10,7 +11,15 @@ places365_dataset(
   transform = NULL,
   target_transform = NULL,
   download = FALSE,
-  small = TRUE,
+  loader = magick_loader
+)
+
+places365_dataset_large(
+  root = tempdir(),
+  split = c("train", "val", "test"),
+  transform = NULL,
+  target_transform = NULL,
+  download = FALSE,
   loader = magick_loader
 )
 }
@@ -24,9 +33,6 @@ places365_dataset(
 \item{target_transform}{Optional. A function that transforms the label.}
 
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
-
-\item{small}{Logical, defaults to \code{TRUE}. If \code{TRUE}, uses the 256 x 256
-#'   "small" images (~30 GB total). If \code{FALSE}, uses the high-resolution version (~160 GB total).}
 
 \item{loader}{A function to load an image given its path. Defaults to
 \code{\link[=magick_loader]{magick_loader()}}, which uses the \code{{magick}} package.}
@@ -43,19 +49,24 @@ list with:
 Loads the MIT Places365 dataset for scene classification.
 }
 \details{
-The dataset is split into:
+The dataset provides three splits: \code{"train"}, \code{"val"}, and \code{"test"}.
+Folder structure and image layout on disk are handled internally by the loader.
+
+This function downloads and prepares the smaller 256x256 image version (~30 GB).
+For the high-resolution variant (~160 GB), use \code{\link[=places365_dataset_large]{places365_dataset_large()}}.
+Note that images in the large version come in varying sizes, so resizing may be
+needed before batching.
+}
+\section{Functions}{
 \itemize{
-\item \code{"train"}: images are organized by class folder.
-\item \code{"val"}: images are in a flat directory and matched with a label file.
-\item \code{"test"}: images are in a flat directory with no labels.
-}
-}
+\item \code{places365_dataset_large()}: High resolution variant (~160 GB).
+
+}}
 \examples{
 \dontrun{
 ds <- places365_dataset(
   split = "val",
   download = TRUE,
-  small = TRUE,
   transform = transform_to_tensor
 )
 item <- ds[1]
@@ -67,6 +78,23 @@ label_name <- ds$classes[label_idx]
 cat("Label index:", label_idx, "Class name:", label_name, "\n")
 
 dl <- dataloader(ds, batch_size = 2)
+batch <- dataloader_next(dataloader_make_iter(dl))
+batch$x
+
+ds_large <- places365_dataset_large(
+  split = "val",
+  download = TRUE,
+  transform = transform_to_tensor
+)
+resize_collate <- function(batch) {
+  xs <- lapply(batch, function(item) {
+    torchvision::transform_resize(item$x, c(256, 256))
+  })
+  xs <- torch::torch_stack(xs)
+  ys <- torch::torch_tensor(sapply(batch, function(it) it$y), dtype = torch::torch_long())
+  list(x = xs, y = ys)
+}
+dl <- torch::dataloader(dataset = ds_large, batch_size = 2, collate_fn = resize_collate)
 batch <- dataloader_next(dataloader_make_iter(dl))
 batch$x
 }
