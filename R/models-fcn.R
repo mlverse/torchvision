@@ -28,9 +28,12 @@
 #' model <- model_fcn_resnet50(pretrained = TRUE)
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
-#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
-#' segmented <- draw_segmentation_masks(img, mask)
+#' # extract the highest mask class identifier on first image of the batch
+#' mask_id <- output$out$argmax(dim = 2)
+#' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
+#' mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id$eq(x)))$squeeze(2)
+#' # visualize the result
+#' segmented <- draw_segmentation_masks(input, mask_bool)
 #' tensor_image_browse(segmented)
 #'
 #' model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
