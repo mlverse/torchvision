@@ -33,11 +33,9 @@ release_bullets <- function() {
   c(
     "Update messages translation:",
     "",
-    todo(
-      "Update `po/R-torchvision.pot` file with `potools::po_update()`"
-    ),
-    todo("Contact translators to collect their translation `.po` files"),
-    todo("Compile the translations with `potools::po_compile()`"),
+    cli::cli_bullet("*" = "Update `po/R-torchvision.pot` file with `potools::po_update()`"),
+    cli::cli_bullet("i" = "Contact translators to collect their translation `.po` files"),
+    cli::cli_bullet("*" = "Compile the translations with `potools::po_compile()`"),
     ""
   )
 }
