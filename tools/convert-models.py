@@ -105,6 +105,14 @@ os.makedirs("models", exist_ok=True)
 
 for name, url in models.items():
   fpath = "models/" + name + ".pth"
+  torch.save(converted, fpath, _use_new_zipfile_serialization=True)
+  upload_blob(
+    "torch-pretrained-models",
+    fpath,
+    "v2/" + fpath
+  )
+    "models/vision/v2/" + fpath
+  )
 
   if blob_exist("torch-pretrained-models", f"models/vision/v2/{fpath}"):
     print(f"--- file {fpath} is already in the bucket. Bypassing conversion")
