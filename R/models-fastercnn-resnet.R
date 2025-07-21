@@ -44,44 +44,6 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
   )
 }
 
-#' Faster R-CNN with MobileNet V3 Large FPN
-#'
-#' Constructs a Faster R-CNN model with a MobileNet V3 Large FPN backbone.
-#'
-#' @inheritParams model_fasterrcnn_resnet50_fpn
-#'
-#' @return A `fasterrcnn_model` nn_module.
-#' @export
-model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
-                                                    progress = TRUE,
-                                                    num_classes = 91, ...) {
-  model_fasterrcnn_resnet50_fpn(
-    pretrained = pretrained,
-    progress = progress,
-    num_classes = num_classes,
-    ...
-  )
-}
-
-#' Faster R-CNN with MobileNet V3 Large 320 FPN
-#'
-#' Constructs a Faster R-CNN model with a MobileNet V3 Large 320 FPN backbone.
-#'
-#' @inheritParams model_fasterrcnn_resnet50_fpn
-#'
-#' @return A `fasterrcnn_model` nn_module.
-#' @export
-model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
-                                                        progress = TRUE,
-                                                        num_classes = 91, ...) {
-  model_fasterrcnn_resnet50_fpn(
-    pretrained = pretrained,
-    progress = progress,
-    num_classes = num_classes,
-    ...
-  )
-}
-
 
 resnet_fpn_backbone <- function(pretrained = TRUE) {
   resnet <- model_resnet50(pretrained = pretrained)
@@ -178,63 +140,6 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
   backbone$out_channels <- 256
   backbone
 }
-
-mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained)
-
-  backbone <- torch::nn_module(
-    initialize = function() {
-      self$features <- mobilenet$features
-      self$fpn <- fpn_module(
-        in_channels = c(24, 40, 112, 160),
-        out_channels = 256
-      )()
-    },
-    forward = function(x) {
-      feats <- list()
-      for (i in seq_along(self$features)) {
-        x <- self$features[[i]](x)
-        if (i %in% c(4, 7, 12, 16)) {
-          feats[[length(feats) + 1]] <- x
-        }
-      }
-      self$fpn(feats)
-    }
-  )
-
-  backbone <- backbone()
-  backbone$out_channels <- 256
-  backbone
-}
-
-mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained)
-
-  backbone <- torch::nn_module(
-    initialize = function() {
-      self$features <- mobilenet$features
-      self$fpn <- fpn_module(
-        in_channels = c(24, 40, 112, 160),
-        out_channels = 256
-      )()
-    },
-    forward = function(x) {
-      feats <- list()
-      for (i in seq_along(self$features)) {
-        x <- self$features[[i]](x)
-        if (i %in% c(4, 7, 12, 16)) {
-          feats[[length(feats) + 1]] <- x
-        }
-      }
-      self$fpn(feats)
-    }
-  )
-
-  backbone <- backbone()
-  backbone$out_channels <- 256
-  backbone
-}
-
 
 fpn_module <- function(in_channels, out_channels) {
   torch::nn_module(
