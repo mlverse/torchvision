@@ -51,7 +51,7 @@ alexnet <- torch::nn_module(
 #'
 #' @export
 model_alexnet <- function(pretrained = FALSE, progress = TRUE, ...) {
-  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/alexnet.pth", "e9fdaf62a041c79c034de8d1867e80ee", "~245 MB" )
+  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/alexnet.pth", "41ac4efd60b7e72480c4b9ba75618507", "~235 MB" )
   model <- alexnet(...)
 
   if (pretrained) {
