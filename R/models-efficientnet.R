@@ -36,19 +36,6 @@
 #' @examples
 #' \dontrun{
 #' model <- model_efficientnet_b0()
-#' input <- torch::torch_randn(1, 3, 224, 224)
-#' output <- model(input)
-#' dim(output)
-#' }
-#'
-#' \dontrun{
-#' # Example of using EfficientNet-B5 with corresponding image size
-#' model <- model_efficientnet_b5()
-#' transform <- function(img) {
-#'   img %>%
-#'     transform_resize(c(456, 456)) %>%
-#'     transform_to_tensor()
-#' }
 #' image_batch <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(image_batch)
 #' which.max(as.numeric(output))  # class 815 in ImageNet is a Egyptian cat (see
@@ -141,7 +128,6 @@ mbconv_block <- torch::nn_module(
 
     # Correct SE block with proper squeeze logic
     if (!is.null(se_ratio) && se_ratio > 0) {
-      squeeze_channels <- as.integer(hidden_dim * se_ratio)
       squeeze_channels <- max(1, as.integer(in_channels * se_ratio))
       layers[[length(layers) + 1]] <- se_block(
         hidden_dim, squeeze_channels = squeeze_channels
@@ -236,11 +222,6 @@ effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
   )))
 
   if (pretrained) {
-    local_path <- here::here("tools", "models", paste0(arch, ".pth"))
-    message("Using local weights: ", local_path)
-
-    state_dict <- torch::load_state_dict(local_path)
-    state_dict <- state_dict[!grepl("num_batches_tracked", names(state_dict))]
     url <- efficientnet_model_urls[[arch]]
     if (is.null(url))
       value_error("Unknown EfficientNet architecture '{arch}'")
@@ -305,14 +286,3 @@ model_efficientnet_b6 <- function(pretrained = FALSE, progress = TRUE, ...) {
 model_efficientnet_b7 <- function(pretrained = FALSE, progress = TRUE, ...) {
   effnet("efficientnet_b7", 2.0, 3.1, 0.5, pretrained, progress, ...)
 }
-
-efficientnet_model_urls <- c(
-  efficientnet_b0 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b0.pth",
-  efficientnet_b1 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b1.pth",
-  efficientnet_b2 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b2.pth",
-  efficientnet_b3 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b3.pth",
-  efficientnet_b4 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b4.pth",
-  efficientnet_b5 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b5.pth",
-  efficientnet_b6 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b6.pth",
-  efficientnet_b7 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b7.pth"
-)
