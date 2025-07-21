@@ -92,8 +92,11 @@ test_that("places365_dataset test split returns image only", {
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
   expect_tensor_dtype(item$x, torch::torch_float())
-  expect_true(is.na(item$y))
+  expect_type(item$y, "integer")
+  expect_gte(item$y, 1)
+  expect_lte(item$y, 365)
 })
+
 
 # Tests for the high-resolution Places365 variant
 
@@ -173,7 +176,9 @@ test_that("places365_dataset_large test split returns image only", {
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
   expect_tensor_dtype(item$x, torch::torch_float())
-  expect_true(is.na(item$y))
+  expect_type(item$y, "integer")
+  expect_gte(item$y, 1)
+  expect_lte(item$y, 365)
 })
 
 test_that("places365_dataset_large can be batched with resize_collate_fn", {

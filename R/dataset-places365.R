@@ -42,17 +42,9 @@
 #' ds_large <- places365_dataset_large(
 #'   split = "val",
 #'   download = TRUE,
-#'   transform = transform_to_tensor
+#'   transform = . %>% transform_to_tensor() %>% transform_resize(c(256, 256))
 #' )
-#' resize_collate <- function(batch) {
-#'   xs <- lapply(batch, function(item) {
-#'     torchvision::transform_resize(item$x, c(256, 256))
-#'   })
-#'   xs <- torch::torch_stack(xs)
-#'   ys <- torch::torch_tensor(sapply(batch, function(it) it$y), dtype = torch::torch_long())
-#'   list(x = xs, y = ys)
-#' }
-#' dl <- torch::dataloader(dataset = ds_large, batch_size = 2, collate_fn = resize_collate)
+#' dl <- torch::dataloader(dataset = ds_large, batch_size = 2)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
 #' batch$x
 #' }
