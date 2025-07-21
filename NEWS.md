@@ -1,23 +1,12 @@
 # torchvision (development version)
 
-- fix `transform_rotation` wrongly using w x w for image size (@114, cregouby)
-- `tensor_image_display` and `tensor_image_browse` now accept all tensor_image dtypes. (#115, @cregouby) 
-- fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
-- add message translation in french (#112, @cregouby)
-- Added the Fashion-MNIST dataset. (#148, @koshtiakanksha)
-- Added 3 EuroSAT datasets (#126 @cregouby)
-- Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
-- Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
-- Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
-- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
-- add tiff image support to `folder_dataset()` (#169, @cregouby)
-- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
-- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
-- Added `caltech101_dataset()` and `caltech256_dataset()` – for the Caltech 101 and 256 datasets. (#158, @DerrickUnleashed)
-- Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
-- Added `flowers102_dataset()` – a dataset loader for the Flowers102 dataset. (#157, @DerrickUnleashed)
+## New datasets
+
+## New models
 - Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
 - Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
+
+## New features
 
 # torchvision 0.7.0
 
