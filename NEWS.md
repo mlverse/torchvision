@@ -1,13 +1,3 @@
-# torchvision (development version)
-
-## New datasets
-
-## New models
-- Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
-- Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
-
-## New features
-
 # torchvision 0.7.0
 
 ## New datasets
@@ -26,6 +16,8 @@
 
 ## New models
 
+* Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
+* Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
 * Added `model_vit_b_16()`, `model_vit_b_32()`, `model_vit_l_16()`, `model_vit_l_32()`, and `model_vit_h_14()` for loading Vision Transformer models (@DerrickUnleashed, #202).
 
 ## New features
