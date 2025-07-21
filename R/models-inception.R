@@ -393,7 +393,7 @@ BasicConv2d <- torch::nn_module(
 )
 
 inception_model_urls <- list(
-  inception_v3_google =c("https://torch-cdn.mlverse.org/models/vision/v2/models/inception_v3_google.pth", "961cad7697695cca7d9ca4814b17a88d", "~110 MB")
+  inception_v3_google =c("https://torch-cdn.mlverse.org/models/vision/v2/models/inception_v3_google.pth", "8d60b4fcf263f2a8d2ed21f0f9690e3b", "~110 MB")
 )
 
 #' Inception v3 model

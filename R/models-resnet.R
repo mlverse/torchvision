@@ -6,7 +6,7 @@ resnet_model_urls <- list(
   "resnet101" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet101.pth", "0898550c0f6156d18d83fc7454760827", "~170 MB"),
   "resnet152" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet152.pth", "cfe6cf55d97bdd838fe7c892c30788ef", "~230 MB"),
   "resnext50_32x4d" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnext50_32x4d.pth", "13f1b58b0694b634e43cf55e7208abc0", "~95 MB"),
-  "resnext101_32x8d" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnext101_32x8d.pth", "13f1b58b0694b634e43cf55e7208abc0", "~340 MB"),
+  "resnext101_32x8d" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnext101_32x8d.pth", "c79668937f01117ca74193a71b31557b", "~340 MB"),
   "wide_resnet50_2" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/wide_resnet50_2.pth", "b2d17fb9c5929ab96becf63b1403423d", "~130 MB"),
   "wide_resnet101_2" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/wide_resnet101_2.pth","7ccd7583b94e3f5fa0f231b4c134760e", "~240 MB")
 )

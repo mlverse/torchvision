@@ -8,7 +8,7 @@
 #' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   # resources
-  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth", "f20b50b44fdef367a225d41f747a0963", "~13 MB")
+  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth", "06af6062e42ad3c80e430219a6560ca0", "~13 MB")
   model <- mobilenet_v2(...)
 
   if (pretrained) {
