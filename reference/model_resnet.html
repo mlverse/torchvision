@@ -11,7 +11,7 @@ related papers (see Functions)"><!-- mathjax --><script src="https://cdnjs.cloud
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -25,7 +25,7 @@ related papers (see Functions)"><!-- mathjax --><script src="https://cdnjs.cloud
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
       </span>
     </div>
 
@@ -33,7 +33,7 @@ related papers (see Functions)"><!-- mathjax --><script src="https://cdnjs.cloud
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -64,20 +64,20 @@ related papers (see Functions)"><!-- mathjax --><script src="https://cdnjs.cloud
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>ResNet implementation</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/models-resnet.R" class="external-link"><code>R/models-resnet.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/models-resnet.R" class="external-link"><code>R/models-resnet.R</code></a></small>
     <div class="hidden name"><code>model_resnet.Rd</code></div>
     </div>
 
@@ -109,22 +109,24 @@ related papers (see Functions)</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>pretrained</dt>
+
+
+<dl><dt id="arg-pretrained">pretrained<a class="anchor" aria-label="anchor" href="#arg-pretrained"></a></dt>
 <dd><p>(bool): If TRUE, returns a model pre-trained on ImageNet.</p></dd>
 
 
-<dt>progress</dt>
+<dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
 <dd><p>(bool): If TRUE, displays a progress bar of the download to
 stderr.</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Other parameters passed to the resnet model.</p></dd>
 
 </dl></div>
     <div id="functions">
     <h2>Functions</h2>
-    
+
 <ul><li><p><code>model_resnet18()</code>: ResNet 18-layer model</p></li>
 <li><p><code>model_resnet34()</code>: ResNet 34-layer model</p></li>
 <li><p><code>model_resnet50()</code>: ResNet 50-layer model</p></li>
@@ -141,9 +143,14 @@ with width per group of 128.</p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other models: 
+    <div class="dont-index"><p>Other models:
 <code><a href="model_alexnet.html">model_alexnet</a>()</code>,
-<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code></p></div>
+<code><a href="model_efficientnet.html">model_efficientnet</a></code>,
+<code><a href="model_efficientnet_v2.html">model_efficientnet_v2</a></code>,
+<code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
+<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
+<code><a href="model_vgg.html">model_vgg</a></code>,
+<code><a href="model_vit.html">model_vit</a></code></p></div>
     </div>
 
   </div>
@@ -158,15 +165,15 @@ with width per group of 128.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

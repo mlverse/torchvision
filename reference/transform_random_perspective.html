@@ -10,7 +10,7 @@ probability"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -24,7 +24,7 @@ probability"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
       </span>
     </div>
 
@@ -32,7 +32,7 @@ probability"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -63,20 +63,20 @@ probability"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Random perspective transformation of an image with a given probability</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/transforms-generics.R" class="external-link"><code>R/transforms-generics.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/transforms-generics.R" class="external-link"><code>R/transforms-generics.R</code></a></small>
     <div class="hidden name"><code>transform_random_perspective.Rd</code></div>
     </div>
 
@@ -97,26 +97,28 @@ probability</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>img</dt>
+
+
+<dl><dt id="arg-img">img<a class="anchor" aria-label="anchor" href="#arg-img"></a></dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
 
 
-<dt>distortion_scale</dt>
+<dt id="arg-distortion-scale">distortion_scale<a class="anchor" aria-label="anchor" href="#arg-distortion-scale"></a></dt>
 <dd><p>(float): argument to control the degree of distortion
 and ranges from 0 to 1. Default is 0.5.</p></dd>
 
 
-<dt>p</dt>
+<dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
 <dd><p>(float): probability of the image being transformed. Default is 0.5.</p></dd>
 
 
-<dt>interpolation</dt>
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
 <dd><p>(int, optional) Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 
 
-<dt>fill</dt>
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
 <dd><p>(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.
@@ -125,7 +127,7 @@ Only int value is supported for Tensors.</p></dd>
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other transforms: 
+    <div class="dont-index"><p>Other transforms:
 <code><a href="transform_adjust_brightness.html">transform_adjust_brightness</a>()</code>,
 <code><a href="transform_adjust_contrast.html">transform_adjust_contrast</a>()</code>,
 <code><a href="transform_adjust_gamma.html">transform_adjust_gamma</a>()</code>,
@@ -175,15 +177,15 @@ Only int value is supported for Tensors.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

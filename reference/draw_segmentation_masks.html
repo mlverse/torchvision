@@ -9,7 +9,7 @@
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
       </span>
     </div>
 
@@ -31,7 +31,7 @@
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -62,20 +62,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Draw segmentation masks</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/vision_utils.R" class="external-link"><code>R/vision_utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/vision_utils.R" class="external-link"><code>R/vision_utils.R</code></a></small>
     <div class="hidden name"><code>draw_segmentation_masks.Rd</code></div>
     </div>
 
@@ -84,42 +84,66 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image</span>, <span class="va">masks</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, colors <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Default S3 method</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'torch_tensor'</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, <span class="va">masks</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, colors <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'image_with_segmentation_mask'</span></span>
+<span><span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, colors <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>image</dt>
-<dd><p>: torch_tensor of shape (3, H, W) and dtype uint8.</p></dd>
 
 
-<dt>masks</dt>
-<dd><p>: torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.</p></dd>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>Tensor of shape (C x H x W) and dtype <code>uint8</code> or dtype <code>float</code>.
+In case of dtype float, values are assumed to be in range \([0, 1]\).
+C value for channel can only be 1 (grayscale) or 3 (RGB).</p></dd>
 
 
-<dt>alpha</dt>
-<dd><p>: number between 0 and 1 denoting the transparency of the masks.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to methods.</p></dd>
 
 
-<dt>colors</dt>
-<dd><p>: character vector containing the colors
+<dt id="arg-masks">masks<a class="anchor" aria-label="anchor" href="#arg-masks"></a></dt>
+<dd><p>torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>number between 0 and 1 denoting the transparency of the masks.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.</p>
+    <p>torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other image display:
+<code><a href="draw_bounding_boxes.html">draw_bounding_boxes</a>()</code>,
+<code><a href="draw_keypoints.html">draw_keypoints</a>()</code>,
+<code><a href="tensor_image_browse.html">tensor_image_browse</a>()</code>,
+<code><a href="tensor_image_display.html">tensor_image_display</a>()</code>,
+<code><a href="vision_make_grid.html">vision_make_grid</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="va">image</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_randint.html" class="external-link">torch_randint</a></span><span class="op">(</span><span class="fl">170</span>, <span class="fl">250</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_tril.html" class="external-link">torch_tril</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_ones.html" class="external-link">torch_ones</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_dtype.html" class="external-link">torch_bool</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">masked_image</span> <span class="op">&lt;-</span> <span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image</span>, <span class="va">mask</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_is_installed.html" class="external-link">torch_is_installed</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">image_tensor</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randint.html" class="external-link">torch_randint</a></span><span class="op">(</span><span class="fl">170</span>, <span class="fl">250</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_tril.html" class="external-link">torch_tril</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_ones.html" class="external-link">torch_ones</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">360</span>, <span class="fl">360</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_bool</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">masked_image</span> <span class="op">&lt;-</span> <span class="fu">draw_segmentation_masks</span><span class="op">(</span><span class="va">image_tensor</span>, <span class="va">mask</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">masked_image</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
@@ -136,15 +160,15 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for ma
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

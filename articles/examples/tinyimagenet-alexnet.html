@@ -12,7 +12,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><meta property="og:title" content="tinyimagenet-alexnet">
-<meta property="og:description" content="torchvision">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -25,7 +24,7 @@
 </script>
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -39,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
       </span>
     </div>
 
@@ -48,7 +47,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -83,7 +82,7 @@
 <li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -94,7 +93,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -102,7 +101,7 @@
       <h1 data-toc-skip>tinyimagenet-alexnet</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/vignettes/examples/tinyimagenet-alexnet.Rmd" class="external-link"><code>vignettes/examples/tinyimagenet-alexnet.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/vignettes/examples/tinyimagenet-alexnet.Rmd" class="external-link"><code>vignettes/examples/tinyimagenet-alexnet.Rmd</code></a></small>
       <div class="hidden name"><code>tinyimagenet-alexnet.Rmd</code></div>
 
     </div>
@@ -120,7 +119,7 @@
 <span></span>
 <span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="st">"~/Downloads/tiny-imagenet"</span></span>
 <span></span>
-<span><span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/cuda_is_available.html" class="external-link">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span></span>
+<span><span class="va">device</span> <span class="op">&lt;-</span> <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/cuda_is_available.html" class="external-link">cuda_is_available</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="st">"cuda"</span> <span class="kw">else</span> <span class="st">"cpu"</span></span>
 <span></span>
 <span><span class="va">to_device</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">device</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span></span>
@@ -149,8 +148,8 @@
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">train_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span><span class="va">train_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">TRUE</span>, drop_last <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">valid_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span><span class="va">valid_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">FALSE</span>, drop_last <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">train_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span><span class="va">train_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">TRUE</span>, drop_last <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">valid_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/dataloader.html" class="external-link">dataloader</a></span><span class="op">(</span><span class="va">valid_ds</span>, batch_size <span class="op">=</span> <span class="fl">32</span>, shuffle <span class="op">=</span> <span class="cn">FALSE</span>, drop_last <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># Model -------------------------------------------------------------------</span></span>
@@ -158,9 +157,9 @@
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/model_alexnet.html">model_alexnet</a></span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, num_classes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">train_ds</span><span class="op">$</span><span class="va">classes</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">model</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/optim_adagrad.html" class="external-link">optim_adagrad</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">parameters</span>, lr <span class="op">=</span> <span class="fl">0.005</span><span class="op">)</span></span>
-<span><span class="va">scheduler</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/lr_step.html" class="external-link">lr_step</a></span><span class="op">(</span><span class="va">optimizer</span>, step_size <span class="op">=</span> <span class="fl">1</span>, <span class="fl">0.95</span><span class="op">)</span></span>
-<span><span class="va">loss_fn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/nn_cross_entropy_loss.html" class="external-link">nn_cross_entropy_loss</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">optimizer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/optim_adagrad.html" class="external-link">optim_adagrad</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">parameters</span>, lr <span class="op">=</span> <span class="fl">0.005</span><span class="op">)</span></span>
+<span><span class="va">scheduler</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/lr_step.html" class="external-link">lr_step</a></span><span class="op">(</span><span class="va">optimizer</span>, step_size <span class="op">=</span> <span class="fl">1</span>, <span class="fl">0.95</span><span class="op">)</span></span>
+<span><span class="va">loss_fn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/nn_cross_entropy_loss.html" class="external-link">nn_cross_entropy_loss</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># Training loop -----------------------------------------------------------</span></span>
@@ -177,11 +176,11 @@
 <span><span class="va">valid_step</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="va">device</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_topk.html" class="external-link">torch_topk</a></span><span class="op">(</span><span class="va">pred</span>, k <span class="op">=</span> <span class="fl">5</span>, dim <span class="op">=</span> <span class="fl">2</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_device.html" class="external-link">torch_device</a></span><span class="op">(</span><span class="st">"cpu"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_topk.html" class="external-link">torch_topk</a></span><span class="op">(</span><span class="va">pred</span>, k <span class="op">=</span> <span class="fl">5</span>, dim <span class="op">=</span> <span class="fl">2</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>device <span class="op">=</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_device.html" class="external-link">torch_device</a></span><span class="op">(</span><span class="st">"cpu"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">correct</span> <span class="op">&lt;-</span> <span class="va">batch</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">eq</span><span class="op">(</span><span class="va">pred</span><span class="op">)</span><span class="op">$</span><span class="fu">any</span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>  <span class="va">model</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="va">correct</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>dtype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/torch/man/torch_dtype.html" class="external-link">torch_float32</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">mean</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">correct</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>dtype <span class="op">=</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_float32</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">mean</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">epoch</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span> <span class="op">{</span></span>
@@ -192,15 +191,15 @@
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="fu">coro</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">train_dl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">coro</span><span class="fu">::</span><span class="fu"><a href="https://coro.r-lib.org/reference/collect.html" class="external-link">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">train_dl</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">loss</span> <span class="op">&lt;-</span> <span class="fu">train_step</span><span class="op">(</span><span class="va">b</span><span class="op">)</span></span>
 <span>    <span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">l</span>, <span class="va">loss</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">pb</span><span class="op">$</span><span class="fu">tick</span><span class="op">(</span>tokens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>loss <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">l</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/torch/man/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu">coro</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/coro/man/collect.html" class="external-link">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">valid_dl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu">coro</span><span class="fu">::</span><span class="fu"><a href="https://coro.r-lib.org/reference/collect.html" class="external-link">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">valid_dl</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="va">accuracy</span> <span class="op">&lt;-</span> <span class="fu">valid_step</span><span class="op">(</span><span class="va">b</span><span class="op">)</span></span>
 <span>      <span class="va">acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">acc</span>, <span class="va">accuracy</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span>
@@ -226,16 +225,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

@@ -1,12 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  mnist-cnn: examples/mnist-cnn.html
-  mnist-dcgan: examples/mnist-dcgan.html
-  mnist-mlp: examples/mnist-mlp.html
-  style-transfer: examples/style-transfer.html
-  texture-nca: examples/texture-nca.html
-  tinyimagenet-alexnet: examples/tinyimagenet-alexnet.html
-last_built: 2024-06-14T17:28Z
-
+  examples/mnist-cnn: examples/mnist-cnn.html
+  examples/mnist-dcgan: examples/mnist-dcgan.html
+  examples/mnist-mlp: examples/mnist-mlp.html
+  examples/style-transfer: examples/style-transfer.html
+  examples/texture-nca: examples/texture-nca.html
+  examples/tinyimagenet-alexnet: examples/tinyimagenet-alexnet.html
+last_built: 2025-07-21T15:10Z

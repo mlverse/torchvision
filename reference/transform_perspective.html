@@ -9,7 +9,7 @@
 
   gtag('config', 'G-HD24T4Z9Z3');
 </script></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
       </span>
     </div>
 
@@ -31,7 +31,7 @@
       <ul class="nav navbar-nav"><li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -62,20 +62,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/mlverse/torchvision/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Perspective transformation of an image</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/HEAD/R/transforms-generics.R" class="external-link"><code>R/transforms-generics.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/transforms-generics.R" class="external-link"><code>R/transforms-generics.R</code></a></small>
     <div class="hidden name"><code>transform_perspective.Rd</code></div>
     </div>
 
@@ -95,30 +95,32 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>img</dt>
+
+
+<dl><dt id="arg-img">img<a class="anchor" aria-label="anchor" href="#arg-img"></a></dt>
 <dd><p>A <code>magick-image</code>, <code>array</code> or <code>torch_tensor</code>.</p></dd>
 
 
-<dt>startpoints</dt>
+<dt id="arg-startpoints">startpoints<a class="anchor" aria-label="anchor" href="#arg-startpoints"></a></dt>
 <dd><p>(list of list of ints): List containing four lists of two
 integers corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the original image.</p></dd>
 
 
-<dt>endpoints</dt>
+<dt id="arg-endpoints">endpoints<a class="anchor" aria-label="anchor" href="#arg-endpoints"></a></dt>
 <dd><p>(list of list of ints): List containing four lists of two
 integers corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed
 image.</p></dd>
 
 
-<dt>interpolation</dt>
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
 <dd><p>(int, optional) Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 
 
-<dt>fill</dt>
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
 <dd><p>(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.
@@ -127,7 +129,7 @@ Only int value is supported for Tensors.</p></dd>
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other transforms: 
+    <div class="dont-index"><p>Other transforms:
 <code><a href="transform_adjust_brightness.html">transform_adjust_brightness</a>()</code>,
 <code><a href="transform_adjust_contrast.html">transform_adjust_contrast</a>()</code>,
 <code><a href="transform_adjust_gamma.html">transform_adjust_gamma</a>()</code>,
@@ -177,15 +179,15 @@ Only int value is supported for Tensors.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
