@@ -116,20 +116,19 @@ lfw_people_dataset <- torch::dataset(
     image_dir <- file.path(root, self$split_name)
 
     person_dirs <- list.dirs(image_dir, full.names = TRUE, recursive = FALSE)
-    all_imgs <- c()
-    all_labels <- c()
     class_names <- basename(person_dirs)
     class_to_idx <- setNames(seq_along(class_names), class_names)
 
-    for (person in person_dirs) {
+    df_list <- lapply(person_dirs, function(person) {
       images <- list.files(person, pattern = "\\.jpg$", full.names = TRUE)
       label <- class_to_idx[[basename(person)]]
-      all_imgs <- c(all_imgs, images)
-      all_labels <- c(all_labels, rep(label, length(images)))
-    }
+      data.frame(img_path = images, label = label, stringsAsFactors = FALSE)
+    })
 
-    self$img_path <- all_imgs
-    self$labels <- all_labels
+    df <- do.call(rbind, df_list)
+
+    self$img_path <- df$img_path
+    self$labels <- df$label
     self$classes <- class_names
     self$class_to_idx <- class_to_idx
 
