@@ -18,7 +18,13 @@
 #' @return A torch dataset of class \code{places365_dataset}. Each element is a named
 #' list with:
 #' - `x`: the image as loaded (or transformed if `transform` is set).
-#' - `y`: the integer class label (not returned for the test split).
+#' - `y`: the integer class label. For the `test` split, no labels are available
+#'   and `y` will always be `NA`.
+#'
+#' @details
+#' The `test` split corresponds to the \emph{private} evaluation set used in the
+#' Places365 challenge. Annotation files are not publicly released, so only the
+#' images are provided.
 #'
 #' @examples
 #' \dontrun{

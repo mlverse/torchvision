@@ -92,9 +92,7 @@ test_that("places365_dataset test split returns image only", {
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
   expect_tensor_dtype(item$x, torch::torch_float())
-  expect_type(item$y, "integer")
-  expect_gte(item$y, 1)
-  expect_lte(item$y, 365)
+  expect_true(is.na(item$y))
 })
 
 
@@ -158,6 +156,7 @@ test_that("places365_dataset_large train split loads an item", {
   expect_lte(item$y, 365)
 })
 
+
 test_that("places365_dataset_large test split returns image only", {
   skip_on_cran()
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
@@ -176,10 +175,9 @@ test_that("places365_dataset_large test split returns image only", {
   expect_named(item, c("x", "y"))
   expect_tensor(item$x)
   expect_tensor_dtype(item$x, torch::torch_float())
-  expect_type(item$y, "integer")
-  expect_gte(item$y, 1)
-  expect_lte(item$y, 365)
+  expect_true(is.na(item$y))
 })
+
 
 test_that("places365_dataset_large can be batched with resize_collate_fn", {
   skip_on_cran()

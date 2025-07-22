@@ -42,7 +42,8 @@ A torch dataset of class \code{places365_dataset}. Each element is a named
 list with:
 \itemize{
 \item \code{x}: the image as loaded (or transformed if \code{transform} is set).
-\item \code{y}: the integer class label (not returned for the test split).
+\item \code{y}: the integer class label. For the \code{test} split, no labels are available
+and \code{y} will always be \code{NA}.
 }
 }
 \description{
@@ -56,6 +57,10 @@ This function downloads and prepares the smaller 256x256 image version (~30 GB).
 For the high-resolution variant (~160 GB), use \code{\link[=places365_dataset_large]{places365_dataset_large()}}.
 Note that images in the large version come in varying sizes, so resizing may be
 needed before batching.
+
+The \code{test} split corresponds to the \emph{private} evaluation set used in the
+Places365 challenge. Annotation files are not publicly released, so only the
+images are provided.
 }
 \section{Functions}{
 \itemize{
