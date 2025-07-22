@@ -81,15 +81,20 @@
 #' @export
 lfw_people_dataset <- torch::dataset(
   name = "lfw_people",
-  archive_size = "170 MB",
+  archive_size_table = list(
+    "original" = "170 MB",
+    "funneled" = "230 MB"
+  ),
   base_url = "https://ndownloader.figshare.com/files/",
   resources = list(
-    lfw_images = c("5976018", "a17d05bd522c52d84eca14327a23d494")  # This is lfwfunneled.tgz
+    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
+    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad")
   ),
 
   initialize = function(
     root = tempdir(),
     transform = NULL,
+    split = "original",
     target_transform = NULL,
     download = FALSE
   ) {
@@ -97,6 +102,14 @@ lfw_people_dataset <- torch::dataset(
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
+    self$archive_size <- self$archive_size_table[[split]]
+
+    self$split <- split
+    if (split == "original"){
+      self$split_name <- "lfw"
+    } else {
+      self$split_name <- "lfw_funneled"
+    }
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -107,7 +120,7 @@ lfw_people_dataset <- torch::dataset(
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
-    image_dir <- file.path(root, "lfw")
+    image_dir <- file.path(root, self$split_name)
 
     person_dirs <- list.dirs(image_dir, full.names = TRUE, recursive = FALSE)
     all_imgs <- c()
@@ -140,26 +153,25 @@ lfw_people_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    for (res in self$resources) {
-      filename <- res[1]
-      expected_md5 <- res[2]
+    res <- self$resources[[self$split]]
+    filename <- res[1]
+    expected_md5 <- res[2]
 
-      url <- file.path(self$base_url, filename)
-      archive <- download_and_cache(url, prefix = class(self)[1])
-      actual_md5 <- tools::md5sum(archive)
+    url <- file.path(self$base_url, filename)
+    archive <- download_and_cache(url, prefix = class(self)[1])
+    actual_md5 <- tools::md5sum(archive)
 
-      if (actual_md5 != expected_md5) {
-        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-      }
-
-      untar(archive, exdir = self$root)
+    if (actual_md5 != expected_md5) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
+
+    untar(archive, exdir = self$root)
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
-    fs::dir_exists(file.path(self$root, "lfw"))
+    fs::dir_exists(file.path(self$root, self$split_name))
   },
 
   .getitem = function(index) {
