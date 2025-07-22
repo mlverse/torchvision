@@ -186,6 +186,13 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
+
+
+    if (num_classes != 21) {
+      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
+      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
+    }
+
     strict_loading <- num_classes == 21 && aux_loss
     model$load_state_dict(state_dict, strict = strict_loading)
   }
@@ -225,6 +232,13 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
+
+
+    if (num_classes != 21) {
+      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
+      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
+    }
+
     strict_loading <- num_classes == 21 && aux_loss
     model$load_state_dict(state_dict, strict = strict_loading)
   }
