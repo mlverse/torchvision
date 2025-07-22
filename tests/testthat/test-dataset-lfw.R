@@ -2,10 +2,10 @@ context("dataset-lfw")
 
 t <- withr::local_tempdir()
 
-test_that("tests for the LFW People dataset for train split", {
+test_that("tests for the LFW People dataset for original image_set", {
 
-  lfw <- lfw_people_dataset(root = t, download = TRUE)
-  expect_length(lfw, 9525)
+  lfw <- lfw_people_dataset(root = t, download = TRUE, split = "original")
+  expect_length(lfw, 13233)
   first_item <- lfw[1]
   expect_named(first_item, c("x", "y"))
   expect_length(first_item$x, 187500)
@@ -14,10 +14,10 @@ test_that("tests for the LFW People dataset for train split", {
   expect_equal(first_item$y, 1)
 })
 
-test_that("tests for the LFW People dataset for test split", {
+test_that("tests for the LFW People dataset for funneled image_set", {
 
-  lfw <- lfw_people_dataset(root = t, train = FALSE)
-  expect_length(lfw, 3708)
+  lfw <- lfw_people_dataset(root = t, download = TRUE, split = "funneled" )
+  expect_length(lfw, 13233)
   first_item <- lfw[1]
   expect_named(first_item, c("x", "y"))
   expect_length(first_item$x, 187500)
@@ -41,12 +41,12 @@ test_that("tests for the LFW People dataset for dataloader", {
   expect_tensor(batch$y)
   expect_equal_to_r(batch$y[1], 1)
   expect_equal_to_r(batch$y[2], 2)
-  expect_equal_to_r(batch$y[32], 17)
+  expect_equal_to_r(batch$y[32], 19)
 })
 
-test_that("tests for the LFW Pairs dataset for train split", {
+test_that("tests for the LFW Pairs dataset for original image_set train split", {
 
-  lfw <- lfw_pairs_dataset(root = t, download = TRUE)
+  lfw <- lfw_pairs_dataset(root = t, download = TRUE, split = "original", train = TRUE)
   expect_length(lfw, 2200)
   first_item <- lfw[1]
   expect_named(first_item, c("x", "y"))
@@ -58,9 +58,37 @@ test_that("tests for the LFW Pairs dataset for train split", {
   expect_equal(first_item$y, 1)
 })
 
-test_that("tests for the LFW Pairs dataset for test split", {
+test_that("tests for the LFW Pairs dataset for funneled image_set train split", {
 
-  lfw <- lfw_pairs_dataset(root = t, train = FALSE)
+  lfw <- lfw_pairs_dataset(root = t, train = TRUE, split = "funneled", download = TRUE)
+  expect_length(lfw, 2200)
+  first_item <- lfw[1]
+  expect_named(first_item, c("x", "y"))
+  expect_length(first_item$x, 2)
+  expect_length(first_item$x[[1]], 187500)
+  expect_length(first_item$x[[2]], 187500)
+  expect_type(first_item$x, "list")
+  expect_type(first_item$y, "integer")
+  expect_equal(first_item$y, 1)
+})
+
+test_that("tests for the LFW Pairs dataset for original image_set test split", {
+
+  lfw <- lfw_pairs_dataset(root = t, split = "original", train = FALSE)
+  expect_length(lfw, 1000)
+  first_item <- lfw[1]
+  expect_named(first_item, c("x", "y"))
+  expect_length(first_item$x, 2)
+  expect_length(first_item$x[[1]], 187500)
+  expect_length(first_item$x[[2]], 187500)
+  expect_type(first_item$x, "list")
+  expect_type(first_item$y, "integer")
+  expect_equal(first_item$y, 1)
+})
+
+test_that("tests for the LFW Pairs dataset for funneled image_set test split", {
+
+  lfw <- lfw_pairs_dataset(root = t, train = FALSE, split = "funneled")
   expect_length(lfw, 1000)
   first_item <- lfw[1]
   expect_named(first_item, c("x", "y"))
