@@ -167,6 +167,23 @@ lfw_people_dataset <- torch::dataset(
 
     untar(archive, exdir = self$root)
 
+    if (class(self)[[1]] == "lfw_pairs") {
+      for (name in c("pairsDevTrain.txt", "pairsDevTest.txt", "pairs.txt")) {
+        res <- self$resources[[name]]
+        filename <- res[1]
+        expected_md5 <- res[2]
+        url <- file.path(self$base_url, filename)
+        archive <- download_and_cache(url, prefix = class(self)[1])
+        actual_md5 <- tools::md5sum(archive)
+
+        if (actual_md5 != expected_md5) {
+          runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+        }
+        dest_path <- file.path(self$root, name)
+        fs::file_move(archive, dest_path)
+      }
+    }
+
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
@@ -199,20 +216,24 @@ lfw_people_dataset <- torch::dataset(
 lfw_pairs_dataset <- torch::dataset(
   inherit = lfw_people_dataset,
   name = "lfw_pairs",
-  archive_size = "120 MB",
-  base_url = "https://huggingface.co/datasets/JimmyUnleashed/LFW/resolve/main",
+  archive_size_table = list(
+    "original" = "170 MB",
+    "funneled" = "230 MB"
+  ),
+  base_url = "https://ndownloader.figshare.com/files/",
   resources = list(
-    lfw_images = c("lfw-deepfunneled.zip", "e782a3d6f143c8964f531d0a5af1201a"),
-    match_train = c("matchpairsDevTrain.csv", "f7502e5a6350c7d2b795acf71406bc33"),
-    mismatch_train = c("mismatchpairsDevTrain.csv", "80994187f484fdefb4713a96aa9ddeb6"),
-    match_test = c("matchpairsDevTest.csv", "e4470bc1288afccf7e5cecc3623271a4"),
-    mismatch_test = c("mismatchpairsDevTest.csv", "cb9f0975a0c19306cff2e6bdd7a7a7e3")
+    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
+    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad"),
+    pairsDevTrain.txt = c("5976012", "4f27cbf15b2da4a85c1907eb4181ad21"),
+    pairsDevTest.txt = c("5976009", "5132f7440eb68cf58910c8a45a2ac10b"),
+    pairs.txt = c("5976006", "9f1ba174e4e1c508ff7cdf10ac338a7d")
   ),
 
-    initialize = function(
+  initialize = function(
     root = tempdir(),
     train = TRUE,
     transform = NULL,
+    split = "original",
     target_transform = NULL,
     download = FALSE
   ) {
@@ -221,6 +242,13 @@ lfw_pairs_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$classes <- c("Same", "Different")
+    self$split <- split
+    if (split == "original"){
+      self$split_name <- "lfw"
+    } else {
+      self$split_name <- "lfw_funneled"
+    }
+    self$archive_size <- self$archive_size_table[[split]]
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -232,47 +260,50 @@ lfw_pairs_dataset <- torch::dataset(
     }
 
     if (train) {
-      match_file <- self$resources$match_train[1]
-      mismatch_file <- self$resources$mismatch_train[1]
+      pair_file <- file.path(root, "pairsDevTrain.txt")
     } else {
-      match_file <- self$resources$match_test[1]
-      mismatch_file <- self$resources$mismatch_test[1]
+      pair_file <- file.path(root, "pairsDevTest.txt")
     }
 
-    match_path <- file.path(root, match_file)
-    mismatch_path <- file.path(root, mismatch_file)
+    lines <- readLines(pair_file)
+    lines <- lines[-1]  
+    pair_list <- lapply(lines, function(line) {
+      parts <- strsplit(line, "\\s+")[[1]]
+      if (length(parts) == 3) {
+        name <- parts[1]
+        num1 <- as.integer(parts[2])
+        num2 <- as.integer(parts[3])
+        img1 <- file.path(name, sprintf("%s_%04d.jpg", name, num1))
+        img2 <- file.path(name, sprintf("%s_%04d.jpg", name, num2))
+        label <- 1
+      } else {
+        name1 <- parts[1]
+        num1 <- as.integer(parts[2])
+        name2 <- parts[3]
+        num2 <- as.integer(parts[4])
+        img1 <- file.path(name1, sprintf("%s_%04d.jpg", name1, num1))
+        img2 <- file.path(name2, sprintf("%s_%04d.jpg", name2, num2))
+        label <- 2
+      }
+      data.frame(img1 = img1, img2 = img2, label = label, stringsAsFactors = FALSE)
+    })
 
-    match_df <- read.csv(match_path)
-    mismatch_df <- read.csv(mismatch_path)
-
-    matched <- data.frame(
-      img1 = file.path(match_df$name, sprintf("%s_%04d.jpg", match_df$name, match_df$imagenum1)),
-      img2 = file.path(match_df$name, sprintf("%s_%04d.jpg", match_df$name, match_df$imagenum2)),
-      same = 1
-    )
-
-    mismatched <- data.frame(
-      img1 = file.path(mismatch_df$name, sprintf("%s_%04d.jpg", mismatch_df$name, mismatch_df$imagenum1)),
-      img2 = file.path(mismatch_df$name.1, sprintf("%s_%04d.jpg", mismatch_df$name.1, mismatch_df$imagenum2)),
-      same = 2
-    )
-
-    self$pairs <- rbind(matched, mismatched)
+    self$pairs <- do.call(rbind, pair_list)
     self$img_path <- c(self$pairs$img1, self$pairs$img2)
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
-
 
   .getitem = function(index) {
     pair <- self$pairs[index, ]
 
-    img1_path <- file.path(self$root, "lfw-deepfunneled", pair$img1)
-    img2_path <- file.path(self$root, "lfw-deepfunneled", pair$img2)
+    img1_path <- file.path(self$root, self$split_name, pair$img1)
+    img2_path <- file.path(self$root, self$split_name, pair$img2)
 
     x1 <- jpeg::readJPEG(img1_path)
     x2 <- jpeg::readJPEG(img2_path)
     x <- list(x1, x2)
-    y <- as.integer(pair$same)
+    y <- as.integer(pair$label)
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
@@ -290,12 +321,7 @@ lfw_pairs_dataset <- torch::dataset(
   },
 
   check_exists = function() {
-    required_files <- c(
-      self$resources$match_train[1],
-      self$resources$mismatch_train[1],
-      self$resources$match_test[1],
-      self$resources$mismatch_test[1]
-    )
-    fs::dir_exists(file.path(self$root, "lfw-deepfunneled")) && all(fs::file_exists(file.path(self$root, required_files)))
+    required_files <- c("pairs.txt", "pairsDevTest.txt", "pairsDevTrain.txt")
+    fs::dir_exists(file.path(self$root, self$split_name)) && all(fs::file_exists(file.path(self$root, required_files)))
   }
 )
