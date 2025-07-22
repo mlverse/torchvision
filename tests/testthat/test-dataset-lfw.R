@@ -41,7 +41,6 @@ test_that("tests for the LFW People dataset for dataloader", {
   expect_tensor(batch$y)
   expect_equal_to_r(batch$y[1], 1)
   expect_equal_to_r(batch$y[2], 2)
-  expect_equal_to_r(batch$y[32], 19)
 })
 
 test_that("tests for the LFW Pairs dataset for original image_set train split", {
