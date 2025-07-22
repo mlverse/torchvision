@@ -56,27 +56,42 @@ The 21 output classes follow the PASCAL VOC convention:
 }
 \examples{
 \dontrun{
-model <- model_fcn_resnet50(pretrained = TRUE)
-input <- torch::torch_randn(1, 3, 224, 224)
-output <- model(input)
-# extract predicted classes for the first element of the batch
-preds <- output$out$argmax(dim = 2)[1, ..]
-# build a boolean mask for the "dog" class
-dog_id <- which(voc_segmentation_classes == "dog")
-dog_mask <- preds$eq(dog_id)$unsqueeze(1)
-img <- input[1, ..]
-segmented <- draw_segmentation_masks(img, dog_mask)
-tensor_image_browse(segmented)
+norm_mean <- c(0.485, 0.456, 0.406) #ImageNet normalization constants
+norm_std  <- c(0.229, 0.224, 0.225)
+img <- magick::image_read("tests/testthat/assets/class/cat/cat.1.jpg")
+input <- transform_to_tensor(img)
+input <- transform_resize(input, c(520, 520))
+input <- transform_normalize(input, norm_mean, norm_std)
+input <- input$unsqueeze(1)
 
-model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
-input <- torch::torch_randn(1, 3, 224, 224)
+model <- model_fcn_resnet50(pretrained = TRUE)
+model$eval()
 output <- model(input)
-preds <- output$out$argmax(dim = 2)[1, ..]
-person_id <- which(voc_segmentation_classes == "person")
-person_mask <- preds$eq(person_id)$unsqueeze(1)
-img <- input[1, ..]
-segmented <- draw_segmentation_masks(img, person_mask)
-tensor_image_browse(segmented)
+
+# extract the highest mask class identifier on first image of the batch
+mask_id <- output$out$argmax(dim = 2)
+
+# turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
+mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+
+# visualize the result
+segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+tensor_image_display(segmented)
+
+
+model <- model_fcn_resnet101(pretrained = TRUE)
+model$eval()
+output <- model(input)
+
+# extract the highest mask class identifier on first image of the batch
+mask_id <- output$out$argmax(dim = 2)
+
+# turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
+mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+
+# visualize the result
+segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+tensor_image_display(segmented)
 }
 }
 \seealso{
