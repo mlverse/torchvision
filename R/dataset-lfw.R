@@ -81,24 +81,20 @@
 #' @export
 lfw_people_dataset <- torch::dataset(
   name = "lfw_people",
-  archive_size = "120 MB",
-  base_url = "https://huggingface.co/datasets/JimmyUnleashed/LFW/resolve/main",
+  archive_size = "170 MB",
+  base_url = "https://ndownloader.figshare.com/files/",
   resources = list(
-    lfw_images = c("lfw-deepfunneled.zip", "e782a3d6f143c8964f531d0a5af1201a"),
-    train = c("peopleDevTrain.csv", "ef0a2b842aa55831d7d55b6bb7d450be"),
-    test = c("peopleDevTest.csv", "f95f156446aaee28e8fdeb6c9883eee8")
+    lfw_images = c("5976018", "a17d05bd522c52d84eca14327a23d494")  # This is lfwfunneled.tgz
   ),
 
   initialize = function(
     root = tempdir(),
-    train = TRUE,
     transform = NULL,
     target_transform = NULL,
     download = FALSE
   ) {
 
     self$root <- root
-    self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
 
@@ -111,37 +107,24 @@ lfw_people_dataset <- torch::dataset(
       cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
-    if (train) {
-      csv_file <- self$resources$train[1]
-    } else {
-      csv_file <- self$resources$test[1]
-    }
+    image_dir <- file.path(root, "lfw")
 
-    csv_path <- file.path(root, csv_file)
-
-    df <- read.csv(csv_path)
-    colnames(df) <- c("identity", "num_images")
-
+    person_dirs <- list.dirs(image_dir, full.names = TRUE, recursive = FALSE)
     all_imgs <- c()
     all_labels <- c()
-    class_to_idx <- setNames(seq_len(nrow(df)), df$identity)
+    class_names <- basename(person_dirs)
+    class_to_idx <- setNames(seq_along(class_names), class_names)
 
-    for (i in seq_len(nrow(df))) {
-      name <- df$identity[i]
-      count <- df$num_images[i]
-      for (j in seq_len(count)) {
-        file_name <- sprintf("%s_%04d.jpg", name, j)
-        path <- file.path(root, "lfw-deepfunneled", name, file_name)
-        if (file.exists(path)) {
-          all_imgs <- c(all_imgs, path)
-          all_labels <- c(all_labels, class_to_idx[[name]])
-        }
-      }
+    for (person in person_dirs) {
+      images <- list.files(person, pattern = "\\.jpg$", full.names = TRUE)
+      label <- class_to_idx[[basename(person)]]
+      all_imgs <- c(all_imgs, images)
+      all_labels <- c(all_labels, rep(label, length(images)))
     }
 
     self$img_path <- all_imgs
     self$labels <- all_labels
-    self$classes <- names(class_to_idx)
+    self$classes <- class_names
     self$class_to_idx <- class_to_idx
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
@@ -169,25 +152,18 @@ lfw_people_dataset <- torch::dataset(
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
 
-      if (tools::file_ext(archive) == "zip") {
-        unzip(archive, exdir = self$root)
-      } else {
-        dest_path <- file.path(self$root, filename)
-        fs::file_move(archive, dest_path)
-      }
+      untar(archive, exdir = self$root)
     }
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
-    fs::dir_exists(file.path(self$root, "lfw-deepfunneled")) && fs::file_exists(file.path(self$root, self$resources$train[1])) && fs::file_exists(file.path(self$root, self$resources$test[1]))
+    fs::dir_exists(file.path(self$root, "lfw"))
   },
 
   .getitem = function(index) {
-
     x <- jpeg::readJPEG(self$img_path[index])
-
     y <- self$labels[index]
 
     if (!is.null(self$transform)) {
