@@ -8,8 +8,8 @@
 \usage{
 lfw_people_dataset(
   root = tempdir(),
-  train = TRUE,
   transform = NULL,
+  split = "original",
   target_transform = NULL,
   download = FALSE
 )
@@ -18,6 +18,7 @@ lfw_pairs_dataset(
   root = tempdir(),
   train = TRUE,
   transform = NULL,
+  split = "original",
   target_transform = NULL,
   download = FALSE
 )
@@ -25,13 +26,15 @@ lfw_pairs_dataset(
 \arguments{
 \item{root}{Root directory for dataset storage. The dataset will be stored under \code{root/lfw_people} or \code{root/lfw_pairs}.}
 
-\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
-
 \item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
+
+\item{split}{Which version of the dataset to use. One of \code{"original"} or \code{"funneled"}. Defaults to \code{"original"}.}
 
 \item{target_transform}{Optional. A function that transforms the label.}
 
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
+
+\item{train}{For \code{lfw_pairs_dataset}, whether to load the training (\code{pairsDevTrain.txt}) or test (\code{pairsDevTest.txt}) split.}
 }
 \value{
 A torch dataset object \code{lfw_people_dataset} or \code{lfw_pairs_dataset}.
@@ -60,42 +63,32 @@ It includes two variants:
 \item \code{lfw_pairs_dataset}: A \strong{face verification} dataset containing image pairs with binary labels (same or different person).
 }
 
-This R implementation of the LFW dataset is based on the \code{torchvision.datasets.LFWPeople} and \code{LFWPairs} classes in PyTorch,
+This R implementation of the LFW dataset is based on the \code{fetch_lfw_people()} and \code{fetch_lfw_pairs()} functions from the \code{scikit-learn} library,
 but deviates in a few key aspects due to dataset availability and R API conventions:
 \itemize{
-\item The \code{image_set} argument from Python (\code{original}, \code{funneled}, \code{deepfunneled}) has been removed. Only the
-\code{deepfunneled} version is supported in R, as the \code{original} and \code{funneled} versions are no longer accessible via
-the URLs used in the official PyTorch implementation.
-\item The \code{split} argument in Python (\code{train}, \code{test}, \verb{10fold}) is simplified to a \code{train} boolean flag in R.
-This follows existing conventions in the R \code{torchvision} dataset API. The \verb{10fold} split is not supported because the
-official file required for this split is unavailable or incompatible with a clean split into image-label pairs.
-\item The dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
-This ensures consistent image size and alignment, making it suitable for use in both classification and verification tasks.
-\item The data is downloaded from \href{https://huggingface.co/datasets/JimmyUnleashed/LFW}{Hugging Face},
-which provides consistent hosting for the deep funneled version.
-}
-
-The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
+\item The \code{color} and \code{resize} arguments from Python are not directly exposed. Instead, all images are RGB with a fixed size of 250x250.
+\item The \code{split} argument in Python (e.g., \code{train}, \code{test}, \verb{10fold}) is simplified to a \code{train} boolean flag in R.
+The \verb{10fold} split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.
+\item The \code{split} parameter in R controls which version of the dataset to use: \code{"original"} (unaligned) or \code{"funneled"} (aligned using funneling).
+The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
+\item The dataset is downloaded from \href{https://figshare.com/authors/_/3118605}{Figshare},
+which hosts the same files referenced in \code{scikit-learn}'s dataset utilities.
+\item \code{lfw_people_dataset}: 13,233 images across multiple identities (using either \code{"original"} or \code{"funneled"} splits)
+\item \code{lfw_pairs_dataset}:
 \itemize{
-\item Training split: 9525 images, 4038 identities
-\item Test split: 3708 images, 1711 identities
+\item Training split (\code{train = TRUE}): 2,200 image pairs
+\item Test split (\code{train = FALSE}): 1,000 image pairs
+}
 }
 }
 \examples{
 \dontrun{
-# Load training data for LFW People Dataset
-lfw <- lfw_people_dataset(download = TRUE, train = TRUE)
+# Load data for LFW People Dataset
+lfw <- lfw_people_dataset(download = TRUE)
 first_item <- lfw[1]
 first_item$x  # RGB image
 first_item$y  # Label index
-lfw$classes[first_item$y]  # person's name (e.g., "AJ_Cook")
-
-# Load test data for LFW People Dataset
-lfw_test <- lfw_people_dataset(download = TRUE, train = FALSE)
-first_item <- lfw_test[1]
-first_item$x  # RGB image
-first_item$y  # Label index
-lfw_test$classes[first_item$y]  # e.g., "AJ_Lamas"
+lfw$classes[first_item$y]  # person's name (e.g., "Aaron_Eckhart")
 
 # Load training data for LFW Pairs Dataset
 lfw <- lfw_pairs_dataset(download = TRUE, train = TRUE)
@@ -104,7 +97,7 @@ first_item$x  # List of 2 RGB Images
 first_item$x[[1]]  # RGB Image
 first_item$x[[2]]  # RGB Image
 first_item$y  # Label index
-lfw$classes[first_item$y]  # Class Name
+lfw$classes[first_item$y]  # Class Name (e.g., "Same" or "Different")
 
 # Load test data for LFW Pairs Dataset
 lfw <- lfw_pairs_dataset(download = TRUE, train = FALSE)
@@ -113,7 +106,7 @@ first_item$x  # List of 2 RGB Images
 first_item$x[[1]]  # RGB Image
 first_item$x[[2]]  # RGB Image
 first_item$y  # Label index
-lfw$classes[first_item$y]  # Class Name
+lfw$classes[first_item$y]  # Class Name (e.g., "Same" or "Different")
 }
 
 }

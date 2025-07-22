@@ -7,6 +7,8 @@
 #'
 #' @inheritParams oxfordiiitpet_dataset
 #' @param root Root directory for dataset storage. The dataset will be stored under `root/lfw_people` or `root/lfw_pairs`.
+#' @param split Which version of the dataset to use. One of `"original"` or `"funneled"`. Defaults to `"original"`.
+#' @param train For `lfw_pairs_dataset`, whether to load the training (`pairsDevTrain.txt`) or test (`pairsDevTest.txt`) split.
 #'
 #' @return A torch dataset object \code{lfw_people_dataset} or \code{lfw_pairs_dataset}.
 #' Each element is a named list with:
@@ -18,42 +20,33 @@
 #'   - For \code{lfw_pairs_dataset}: 1 if the pair shows the same person, 2 if different people.
 #'
 #' @details
-#' This R implementation of the LFW dataset is based on the `torchvision.datasets.LFWPeople` and `LFWPairs` classes in PyTorch,
+#' This R implementation of the LFW dataset is based on the `fetch_lfw_people()` and `fetch_lfw_pairs()` functions from the `scikit-learn` library,
 #' but deviates in a few key aspects due to dataset availability and R API conventions:
 #'
-#' - The \code{image_set} argument from Python (``original``, ``funneled``, ``deepfunneled``) has been removed. Only the
-#'   ``deepfunneled`` version is supported in R, as the ``original`` and ``funneled`` versions are no longer accessible via
-#'   the URLs used in the official PyTorch implementation.
+#' - The \code{color} and \code{resize} arguments from Python are not directly exposed. Instead, all images are RGB with a fixed size of 250x250.
 #'
-#' - The \code{split} argument in Python (``train``, ``test``, ``10fold``) is simplified to a \code{train} boolean flag in R.
-#'   This follows existing conventions in the R `torchvision` dataset API. The ``10fold`` split is not supported because the
-#'   official file required for this split is unavailable or incompatible with a clean split into image-label pairs.
+#' - The \code{split} argument in Python (e.g., ``train``, ``test``, ``10fold``) is simplified to a \code{train} boolean flag in R.
+#'   The ``10fold`` split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.
+#' 
+#' - The \code{split} parameter in R controls which version of the dataset to use: `"original"` (unaligned) or `"funneled"` (aligned using funneling).
+#'   The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
 #'
-#' - The dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
-#'   This ensures consistent image size and alignment, making it suitable for use in both classification and verification tasks.
+#' - The dataset is downloaded from [Figshare](https://figshare.com/authors/_/3118605),
+#'   which hosts the same files referenced in `scikit-learn`'s dataset utilities.
 #'
-#' - The data is downloaded from [Hugging Face](https://huggingface.co/datasets/JimmyUnleashed/LFW),
-#'   which provides consistent hosting for the deep funneled version.
-#'
-#' The LFW People dataset uses the "deep funneled" version of LFW, offering aligned and cropped RGB face images.
-#' - Training split: 9525 images, 4038 identities
-#' - Test split: 3708 images, 1711 identities
+#' - `lfw_people_dataset`: 13,233 images across multiple identities (using either `"original"` or `"funneled"` splits)
+#' - `lfw_pairs_dataset`:
+#'   - Training split (`train = TRUE`): 2,200 image pairs
+#'   - Test split (`train = FALSE`): 1,000 image pairs
 #'
 #' @examples
 #' \dontrun{
-#' # Load training data for LFW People Dataset
-#' lfw <- lfw_people_dataset(download = TRUE, train = TRUE)
+#' # Load data for LFW People Dataset
+#' lfw <- lfw_people_dataset(download = TRUE)
 #' first_item <- lfw[1]
 #' first_item$x  # RGB image
 #' first_item$y  # Label index
-#' lfw$classes[first_item$y]  # person's name (e.g., "AJ_Cook")
-#'
-#' # Load test data for LFW People Dataset
-#' lfw_test <- lfw_people_dataset(download = TRUE, train = FALSE)
-#' first_item <- lfw_test[1]
-#' first_item$x  # RGB image
-#' first_item$y  # Label index
-#' lfw_test$classes[first_item$y]  # e.g., "AJ_Lamas"
+#' lfw$classes[first_item$y]  # person's name (e.g., "Aaron_Eckhart")
 #'
 #' # Load training data for LFW Pairs Dataset
 #' lfw <- lfw_pairs_dataset(download = TRUE, train = TRUE)
@@ -62,7 +55,7 @@
 #' first_item$x[[1]]  # RGB Image
 #' first_item$x[[2]]  # RGB Image
 #' first_item$y  # Label index
-#' lfw$classes[first_item$y]  # Class Name
+#' lfw$classes[first_item$y]  # Class Name (e.g., "Same" or "Different")
 #'
 #' # Load test data for LFW Pairs Dataset
 #' lfw <- lfw_pairs_dataset(download = TRUE, train = FALSE)
@@ -71,7 +64,7 @@
 #' first_item$x[[1]]  # RGB Image
 #' first_item$x[[2]]  # RGB Image
 #' first_item$y  # Label index
-#' lfw$classes[first_item$y]  # Class Name
+#' lfw$classes[first_item$y]  # Class Name (e.g., "Same" or "Different")
 #' }
 #'
 #' @name lfw_dataset
