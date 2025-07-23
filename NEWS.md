@@ -1,3 +1,19 @@
+# torchvision (development version)
+
+## New datasets
+
+* Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
+* Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #162).
+* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
+
+## New models
+
+## New features
+
+## Bug fixes and improvements
+
+* Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
+
 # torchvision 0.7.0
 
 ## New datasets
@@ -14,9 +30,17 @@
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
 
+## New models
+
+* Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
+* Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
+* Added `model_vit_b_16()`, `model_vit_b_32()`, `model_vit_l_16()`, `model_vit_l_32()`, and `model_vit_h_14()` for loading Vision Transformer models (@DerrickUnleashed, #202).
+
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
+* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+  the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).
 * New `nms()` and `batched_nms()` functions provide Non-Maximum Suppression utilities. Added `box_convert()` to convert between bounding box formats (@Athospd, #40).
