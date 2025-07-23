@@ -1,14 +1,14 @@
 
-resnet_model_urls <- c(
-  'resnet18' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet18.pth',
-  'resnet34' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet34.pth',
-  'resnet50' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet50.pth',
-  'resnet101' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet101.pth',
-  'resnet152' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnet152.pth',
-  'resnext50_32x4d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext50_32x4d.pth',
-  'resnext101_32x8d' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/resnext101_32x8d.pth',
-  'wide_resnet50_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet50_2.pth',
-  'wide_resnet101_2' = 'https://torch-cdn.mlverse.org/models/vision/v1/models/wide_resnet101_2.pth'
+resnet_model_urls <- list(
+  "resnet18" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet18.pth", "b36d2ea3a4dbf3fbcb27552a410054f9", "~45 MB"),
+  "resnet34" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet34.pth", "cfd906d8f35b0256e1066ce970f65c50","~85 MB"),
+  "resnet50" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet50.pth", "9ee57c8355a4ad3759c3e91b0d9f6144", "~100 MB"),
+  "resnet101" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet101.pth", "0898550c0f6156d18d83fc7454760827", "~170 MB"),
+  "resnet152" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnet152.pth", "cfe6cf55d97bdd838fe7c892c30788ef", "~230 MB"),
+  "resnext50_32x4d" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnext50_32x4d.pth", "13f1b58b0694b634e43cf55e7208abc0", "~95 MB"),
+  "resnext101_32x8d" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/resnext101_32x8d.pth", "c79668937f01117ca74193a71b31557b", "~340 MB"),
+  "wide_resnet50_2" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/wide_resnet50_2.pth", "b2d17fb9c5929ab96becf63b1403423d", "~130 MB"),
+  "wide_resnet101_2" = c("https://torch-cdn.mlverse.org/models/vision/v2/models/wide_resnet101_2.pth","7ccd7583b94e3f5fa0f231b4c134760e", "~240 MB")
 )
 
 conv_3x3 <- function(in_planes, out_planes, stride = 1, groups = 1, dilation = 1) {
@@ -241,7 +241,12 @@ resnet <- torch::nn_module(
   model <- resnet(block, layers, ...)
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(resnet_model_urls[arch])
+    r <- resnet_model_urls[[arch]]
+    cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }

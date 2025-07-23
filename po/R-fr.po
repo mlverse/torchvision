@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-07-05 13:51+0200\n"
-"PO-Revision-Date: 2025-07-05 14:44+0200\n"
+"Project-Id-Version: torchvision 0.7.0\n"
+"POT-Creation-Date: 2025-07-22 00:35+0200\n"
+"PO-Revision-Date: 2025-07-22 00:43+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -42,7 +42,8 @@ msgstr ""
 #: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:85 dataset-coco.R:305
 #: dataset-eurosat.R:57 dataset-fer.R:55 dataset-fgvc.R:91 dataset-flickr.R:69
 #: dataset-flickr.R:231 dataset-flowers.R:92 dataset-mnist.R:86
-#: dataset-mnist.R:234 dataset-mnist.R:421
+#: dataset-mnist.R:234 dataset-mnist.R:421 dataset-oxfordiiitpet.R:71
+#: dataset-oxfordiiitpet.R:283 dataset-oxfordiiitpet.R:347
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
 "downloaded and processed if not already available."
@@ -54,13 +55,15 @@ msgstr ""
 #: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:90
 #: dataset-coco.R:310 dataset-eurosat.R:64 dataset-fer.R:60
 #: dataset-flowers.R:97 dataset-mnist.R:91 dataset-mnist.R:239
-#: dataset-mnist.R:426
+#: dataset-mnist.R:426 dataset-oxfordiiitpet.R:76 dataset-oxfordiiitpet.R:288
+#: dataset-oxfordiiitpet.R:352
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 "Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
 "télécharger."
 
-#: dataset-caltech.R:84 dataset-caltech.R:208
+#: dataset-caltech.R:84 dataset-caltech.R:208 dataset-oxfordiiitpet.R:95
+#: dataset-oxfordiiitpet.R:302 dataset-oxfordiiitpet.R:366
 msgid ""
 "{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images "
 "across {length(self$classes)} classes."
@@ -69,19 +72,21 @@ msgstr ""
 "images réparties en {length(self$classes)} classes."
 
 #: dataset-caltech.R:117 dataset-coco.R:187 dataset-eurosat.R:81
-#: dataset-flickr.R:136
+#: dataset-flickr.R:136 dataset-oxfordiiitpet.R:107
 msgid "Downloading {.cls {class(self)[[1]]}}..."
 msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
 
-#: dataset-caltech.R:125
-msgid "Corrupt file! Delete the file in {.file {archive}} and try again."
-msgstr ""
-"Fichier corrompu. Supprimez le fichier dans {.file {archive}} et réessayez."
+#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:193
+#: dataset-eurosat.R:88 dataset-fer.R:116 dataset-flowers.R:136
+#: dataset-mnist.R:121 dataset-mnist.R:264 dataset-mnist.R:453
+#: dataset-oxfordiiitpet.R:115 models-vit.R:49
+msgid "Corrupt file! Delete the file in {archive} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
 
 #: dataset-caltech.R:136 dataset-cifar.R:115 dataset-coco.R:199
 #: dataset-eurosat.R:104 dataset-fer.R:119 dataset-fgvc.R:178
 #: dataset-flickr.R:154 dataset-flowers.R:158 dataset-mnist.R:141
-#: dataset-mnist.R:300 tiny-imagenet-dataset.R:67
+#: dataset-mnist.R:300 dataset-oxfordiiitpet.R:154 tiny-imagenet-dataset.R:67
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
 msgstr ""
@@ -114,12 +119,6 @@ msgstr ""
 #: tiny-imagenet-dataset.R:43
 msgid "Downloading {.cls {class(self)[[1]]}} ..."
 msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
-
-#: dataset-cifar.R:111 dataset-coco.R:193 dataset-eurosat.R:88
-#: dataset-fer.R:116 dataset-flowers.R:136 dataset-mnist.R:121
-#: dataset-mnist.R:264 dataset-mnist.R:453
-msgid "Corrupt file! Delete the file in {archive} and try again."
-msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
 
 #: dataset-coco.R:95 dataset-coco.R:315
 msgid ""
@@ -299,6 +298,30 @@ msgstr "doivent être identiques"
 msgid "{.var aspect_ratios} and {.var steps} should have the same length"
 msgstr "{.var aspect_ratios} et {.var steps} doivent être de même taille."
 
+#: models-alexnet.R:58 models-inception.R:435 models-mobilenetv2.R:15
+msgid ""
+"Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be "
+"downloaded and processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {class(model)[1]}} ({.emph {r[3]}}) seront "
+"téléchargés et traités s'ils ne sont pas déjà disponibles."
+
+#: models-alexnet.R:61 models-efficientnet.R:229 models-efficientnetv2.R:199
+#: models-inception.R:438 models-mobilenetv2.R:18 models-resnet.R:248
+#: models-vgg.R:114
+msgid "Corrupt file! Delete the file in {state_dict_path} and try again."
+msgstr ""
+"Fichier corrompu. Supprimez le fichier {state_dict_path} et recommencez."
+
+#: models-efficientnet.R:226 models-efficientnetv2.R:196 models-resnet.R:245
+#: models-vgg.R:111
+msgid ""
+"Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and "
+"processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {arch}} ({.emph {r[3]}}) seront téléchargés "
+"et traités s'ils ne sont pas déjà disponibles."
+
 #: models-inception.R:16
 msgid ""
 "The default weight initialization of inception_v3 will be changed in future "
@@ -328,7 +351,7 @@ msgstr ""
 "La longueur de {.arg inception_blocks} doit être 7 et non "
 "{length(inception_blocks)}."
 
-#: models-mobilenetv2.R:58
+#: models-mobilenetv2.R:63
 msgid ""
 "{.var inverted_residual_setting} should be non-empty or a 4-element list, "
 "got {.val {inverted_residual_setting}}"
@@ -353,6 +376,14 @@ msgid "or a 3-element tuple, got {length(replace_stride_with_dilation)}"
 msgstr ""
 "ou une liste de 3 éléments, et non pas "
 "{length(replace_stride_with_dilation)} éléments."
+
+#: models-vit.R:44
+msgid ""
+"Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and "
+"processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {name}} (~{.emph {r[3]}}) seront téléchargés "
+"et traités s'ils ne sont pas déjà disponibles."
 
 #: ops-boxes.R:178
 msgid "Unsupported Bounding Box Conversions for given in_fmt and out_fmt"
@@ -619,3 +650,8 @@ msgid ""
 msgstr ""
 "{.var keypoints} doit être de taille (num_instances, K, 2), pourtant sa "
 "taille actuelle est {.value {keypoints$shape}}"
+
+#~ msgid "Corrupt file! Delete the file in {.file {archive}} and try again."
+#~ msgstr ""
+#~ "Fichier corrompu. Supprimez le fichier dans {.file {archive}} et "
+#~ "réessayez."
