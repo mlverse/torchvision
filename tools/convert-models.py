@@ -99,6 +99,9 @@ models = {
   'convnext_large': 'https://download.pytorch.org/models/convnext_large-ea097f82.pth',
   'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
   'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
+  'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
+  'mobilenet_v3_small': 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth',
+  'maxvit': 'https://download.pytorch.org/models/maxvit_t-bc5ab103.pth',
   }
 
 os.makedirs("models", exist_ok=True)
