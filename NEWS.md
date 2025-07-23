@@ -8,6 +8,8 @@
 
 ## Bug fixes and improvements
 
+* Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
+
 # torchvision 0.7.0
 
 ## New datasets

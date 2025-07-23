@@ -7,10 +7,16 @@
 #' @family models
 #' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  # resources
+  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth", "06af6062e42ad3c80e430219a6560ca0", "~13 MB")
   model <- mobilenet_v2(...)
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(mobilenet_v2_url)
+    cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
@@ -18,7 +24,6 @@ model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model
 }
 
-mobilenet_v2_url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth"
 
 mobilenet_v2 <- torch::nn_module(
   "mobilenet_v2",
