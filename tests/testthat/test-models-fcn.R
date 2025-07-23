@@ -59,7 +59,7 @@ test_that("model_fcn_resnet50 can segment a cat", {
 
   expect_gt(mask_table[["cat"]], 0)
   expect_gt(mask_table[["cat"]], mask_table[["dog"]])
-  expect_gt(mask_table[["cat"]], mask_table[["person"]])
+  expect_gt(mask_table[["cat"]], mask_table[["horse"]])
 
   expect_gt(mask_table[["background"]], 0)
 
