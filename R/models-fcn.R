@@ -25,24 +25,42 @@
 #'
 #' @examples
 #' \dontrun{
+#' norm_mean <- c(0.485, 0.456, 0.406) #ImageNet normalization constants
+#' norm_std  <- c(0.229, 0.224, 0.225)
+#' img <- magick::image_read("tests/testthat/assets/class/cat/cat.1.jpg")
+#' input <- transform_to_tensor(img)
+#' input <- transform_resize(input, c(520, 520))
+#' input <- transform_normalize(input, norm_mean, norm_std)
+#' input <- input$unsqueeze(1)
+#'
 #' model <- model_fcn_resnet50(pretrained = TRUE)
-#' input <- torch::torch_randn(1, 3, 224, 224)
+#' model$eval()
 #' output <- model(input)
+#'
 #' # extract the highest mask class identifier on first image of the batch
 #' mask_id <- output$out$argmax(dim = 2)
-#' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
-#' mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id$eq(x)))$squeeze(2)
-#' # visualize the result
-#' segmented <- draw_segmentation_masks(input, mask_bool)
-#' tensor_image_browse(segmented)
 #'
-#' model <- model_fcn_resnet101(pretrained = FALSE, aux_loss = TRUE)
-#' input <- torch::torch_randn(1, 3, 224, 224)
+#' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
+#' mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+#'
+#' # visualize the result
+#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+#' tensor_image_display(segmented)
+#'
+#'
+#' model <- model_fcn_resnet101(pretrained = TRUE)
+#' model$eval()
 #' output <- model(input)
-#' mask <- output$out[1]$argmax(dim = 1)$unsqueeze(1)$to(torch::torch_bool())
-#' img <- input[1]$mul(255)$to(dtype = torch::torch_uint8())
-#' segmented <- draw_segmentation_masks(img, mask)
-#' tensor_image_browse(segmented)
+#'
+#' # extract the highest mask class identifier on first image of the batch
+#' mask_id <- output$out$argmax(dim = 2)
+#'
+#' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
+#' mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+#'
+#' # visualize the result
+#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+#' tensor_image_display(segmented)
 #' }
 NULL
 
@@ -61,7 +79,7 @@ fcn_model_urls <- list(
   fcn_resnet101_coco = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet101_coco.pth",
     "369109597fa68546df1231ae2fe0f66f", "207 MB")
-  )
+)
 
 fcn_head <- function(in_channels, channels, num_classes) {
   torch::nn_sequential(
@@ -168,7 +186,15 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(state_dict)
+
+
+    if (num_classes != 21) {
+      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
+      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
+    }
+
+    strict_loading <- num_classes == 21 && aux_loss
+    model$load_state_dict(state_dict, strict = strict_loading)
   }
 
   model
@@ -206,7 +232,15 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(state_dict)
+
+
+    if (num_classes != 21) {
+      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
+      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
+    }
+
+    strict_loading <- num_classes == 21 && aux_loss
+    model$load_state_dict(state_dict, strict = strict_loading)
   }
 
   model
