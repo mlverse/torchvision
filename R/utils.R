@@ -30,12 +30,8 @@ download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
 # add additional checks to release issues created with usethis::use_release_issue()
 # https://usethis.r-lib.org/reference/use_release_issue.html
 release_bullets <- function() {
-  c(
-    "Update messages translation:",
-    "",
-    cli::cli_bullet("*" = "Update `po/R-torchvision.pot` file with `potools::po_update()`"),
-    cli::cli_bullet("i" = "Contact translators to collect their translation `.po` files"),
-    cli::cli_bullet("*" = "Compile the translations with `potools::po_compile()`"),
-    ""
+  c("Update `po/R-torchvision.pot` file with `potools::po_update()`",
+    "Contact translators to collect their translation `.po` files",
+    "Compile the translations with `potools::po_compile()`"
   )
 }
