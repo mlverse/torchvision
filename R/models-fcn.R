@@ -25,9 +25,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' norm_mean <- c(0.485, 0.456, 0.406) #ImageNet normalization constants
+#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+#' # https://pytorch.org/vision/stable/models.html
 #' norm_std  <- c(0.229, 0.224, 0.225)
-#' img <- magick::image_read("tests/testthat/assets/class/cat/cat.1.jpg")
+#' img <- magick::image_read("https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg")
 #' input <- transform_to_tensor(img)
 #' input <- transform_resize(input, c(520, 520))
 #' input <- transform_normalize(input, norm_mean, norm_std)
@@ -41,7 +42,7 @@
 #' mask_id <- output$out$argmax(dim = 2)
 #'
 #' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
-#' mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+#' mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id[1, ..]$eq(x)), dim = 1)
 #'
 #' # visualize the result
 #' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
@@ -56,13 +57,14 @@
 #' mask_id <- output$out$argmax(dim = 2)
 #'
 #' # turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
-#' mask_bool <- torch::torch_stack(lapply(0:20, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+#' mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id[1, ..]$eq(x)), dim = 1)
 #'
 #' # visualize the result
 #' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
 #' tensor_image_display(segmented)
 #' }
 NULL
+
 
 voc_segmentation_classes <- c(
   "background", "aeroplane", "bicycle", "bird", "boat",
