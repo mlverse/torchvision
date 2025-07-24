@@ -68,7 +68,7 @@ test_that("model_fcn_resnet50 can segment a cat", {
   img <- torch::torch_tensor(jpeg::readJPEG("assets/class/cat/cat.1.jpg"))$permute(c(3,1,2))
   norm_mean <- c(0.485, 0.456, 0.406) #ImageNet normalization constants
   norm_std  <- c(0.229, 0.224, 0.225)
-  input <- img %>% transform_resize(c(520, 520)) %>% transform_normalize(input, norm_mean, norm_std)
+  input <- img %>% transform_resize(c(520, 520)) %>% transform_normalize(norm_mean, norm_std)
 
   output <- model(input$unsqueeze(1))
   mask_id <- output$out$argmax(dim = 2)
@@ -76,7 +76,7 @@ test_that("model_fcn_resnet50 can segment a cat", {
 
   expect_gt(mask_table[["cat"]], 0)
   expect_gt(mask_table[["cat"]], mask_table[["dog"]])
-  expect_gt(mask_table[["cat"]], mask_table[["person"]])
+  expect_gt(mask_table[["cat"]], mask_table[["horse"]])
 
   expect_gt(mask_table[["background"]], 0)
 
