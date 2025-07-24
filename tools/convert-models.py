@@ -102,6 +102,9 @@ models = {
   'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
   'mobilenet_v3_small': 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth',
   'maxvit': 'https://download.pytorch.org/models/maxvit_t-bc5ab103.pth',
+  'retinanet_resnet50': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_v2_coco-5905b1c5.pth', # RetinaNet_ResNet50_FPN_V2_Weights
+  'ssd300_vgg16': 'https://download.pytorch.org/models/ssd300_vgg16_coco-b556d3b4.pth',
+  'ssdlite320_mobilenet_v3': 'https://download.pytorch.org/models/ssdlite320_mobilenet_v3_large_coco-a79551df.pth',
   }
 
 os.makedirs("models", exist_ok=True)
