@@ -343,15 +343,18 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
 fpn_module_v2 <- function(in_channels, out_channels) {
   torch::nn_module(
     initialize = function() {
-      # Match the expected structure: inner_blocks should have bias enabled
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(
-          nn_conv2d(c, out_channels, kernel_size = 1, bias = TRUE)
+          nn_conv2d(c, out_channels, kernel_size = 1, bias = TRUE),
+          nn_batch_norm2d(out_channels),
+          nn_relu()
         )
       }))
       self$layer_blocks <- nn_module_list(lapply(rep(out_channels, 4), function(i) {
         nn_sequential(
-          nn_conv2d(out_channels, out_channels, kernel_size = 3, padding = 1, bias = TRUE)
+          nn_conv2d(out_channels, out_channels, kernel_size = 3, padding = 1, bias = TRUE),
+          nn_batch_norm2d(out_channels),
+          nn_relu()
         )
       }))
     },
