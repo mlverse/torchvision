@@ -27,41 +27,71 @@
 #'
 #' @examples
 #' \dontrun{
-#' # VOC class names (used by default 21-class COCO/Pascal VOC models)
-#' voc_classes <- c(
-#'   "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-#'   "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
-#'   "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
-#' )
+#' # Use a publicly available image of an airplane
+#' img_url <- "https://upload.wikimedia.org/wikipedia/commons/3/36/United_Airlines_Boeing_777-200_Meulemans.jpg"
+#' img <- magick::image_read(img_url)
 #'
+#' input <- transform_to_tensor(img)
+#' input <- transform_resize(input, c(520, 520))
+#' input <- input$unsqueeze(1)  # Add batch dimension (1, 3, H, W)
+#'
+#' # DeepLabV3 with ResNet-50
 #' model <- model_deeplabv3_resnet50(pretrained = TRUE)
 #' model$eval()
-#' image_batch <- torch::torch_randn(1, 3, 520, 520)
-#' output <- model(image_batch)
-#' predicted_class <- output$out[1, , 260, 260]$argmax()$item() + 1
-#' class_label <- voc_classes[predicted_class]
-#' print(paste("Predicted class at (260, 260):", class_label))
+#' output <- model(input)
 #'
+#' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
 #'
-#' model <- model_deeplabv3_resnet101(
-#'   pretrained = FALSE,
-#'   num_classes = 3,
-#'   aux_loss = TRUE
-#' )
-#' image_batch <- torch::torch_randn(1, 3, 520, 520)
-#' output <- model(image_batch)
-#' # Check output shapes
-#' dim(output$out)  # e.g., (1, 3, 520, 520)
-#' dim(output$aux)  # e.g., (1, 3, 520, 520)
+#' # Show most frequent class
+#' top_class_index <- mask_id$view(-1)$mode()[[1]]$item() + 1
+#' cat("Most frequent class (ResNet-50):", model$classes[top_class_index], "\n")
+#'
+#' # Only highlight 'aeroplane' class
+#' mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["aeroplane"]])$unsqueeze(1)
+#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
+#' tensor_image_browse(segmented)
+#'
+#' # DeepLabV3 with ResNet-101 (same steps)
+#' model <- model_deeplabv3_resnet101(pretrained = TRUE)
+#' model$eval()
+#' output <- model(input)
+#'
+#' mask_id <- output$out$argmax(dim = 2)
+#' top_class_index <- mask_id$view(-1)$mode()[[1]]$item() + 1
+#' cat("Most frequent class (ResNet-101):", model$classes[top_class_index], "\n")
+#'
+#' mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["aeroplane"]])$unsqueeze(1)
+#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
+#' tensor_image_browse(segmented)
 #' }
 #' @name model_deeplabv3
 #' @rdname model_deeplabv3
 NULL
 
-deeplabv3_model_urls <- c(
-  "deeplabv3_resnet50_coco" = "https://torch-cdn.mlverse.org/models/vision/v1/models/deeplabv3_resnet50_coco.pth",
-  "deeplabv3_resnet101_coco" = "https://torch-cdn.mlverse.org/models/vision/v1/models/deeplabv3_resnet101_coco.pth"
+deeplabv3_model_urls <- list(
+  deeplabv3_resnet50_coco = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/deeplabv3_resnet50_coco.pth",
+    "9bc0953c76291fff296211b0eba04164",
+    "168 MB"
+  ),
+  deeplabv3_resnet101_coco = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/deeplabv3_resnet101_coco.pth",
+    "bb73d96704937621d782af73125e6282",
+    "172 MB"
+  )
 )
+
+voc_classes <- c(
+  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
+  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
+)
+
+deeplabv3_meta <- list(
+  classes = voc_classes,
+  class_to_idx = setNames(seq_along(voc_classes) - 1, voc_classes)
+)
+
 
 # ASPP module matching PyTorch
 aspp_module <- nn_module(
@@ -213,13 +243,18 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
   }
 
   model <- DeepLabV3(backbone, classifier, aux_classifier)
+  model$classes <- deeplabv3_meta$classes
+  model$class_to_idx <- deeplabv3_meta$class_to_idx
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(deeplabv3_model_urls[[paste0(arch, "_coco")]])
+    info <- deeplabv3_model_urls[[paste0(arch, "_coco")]]
+    cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
+    state_dict_path <- download_and_cache(info[1])
+    if (tools::md5sum(state_dict_path) != info[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
-
   model
 }
 
