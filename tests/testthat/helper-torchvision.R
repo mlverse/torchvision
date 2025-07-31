@@ -26,3 +26,9 @@ expect_tensor <- function(object) {
 expect_equal_to_r <- function(object, expected, ...) {
   expect_equal(torch::as_array(object), expected, ...)
 }
+
+unlink_model_file <- function() {
+  cache_path <- rappdirs::user_cache_dir("torch")
+  model_file <- list.files(cache_path, pattern = "*.pth", full.names = TRUE)
+  unlink(model_file)
+}
