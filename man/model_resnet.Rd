@@ -72,6 +72,7 @@ with width per group of 128.
 \seealso{
 Other models: 
 \code{\link{model_alexnet}()},
+\code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},
