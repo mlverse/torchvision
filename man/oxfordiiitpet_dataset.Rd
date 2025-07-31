@@ -84,7 +84,9 @@ Other classification_dataset:
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
+\code{\link{lfw_dataset}},
 \code{\link{mnist_dataset}()},
+\code{\link{places365_dataset}()},
 \code{\link{tiny_imagenet_dataset}()}
 }
 \concept{classification_dataset}
