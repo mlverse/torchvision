@@ -97,7 +97,7 @@ fcn_backbone <- torch::nn_module(
   "fcn_backbone",
   initialize = function(block, layers, replace_stride_with_dilation = c(FALSE, FALSE, FALSE), ...) {
     args <- list(...)
-    args$pretrained <- NULL  # remove if present
+    args$pretrained <- NULL
 
     resnet_model <- do.call(resnet, c(list(block = block, layers = layers,
                                            replace_stride_with_dilation = replace_stride_with_dilation),
