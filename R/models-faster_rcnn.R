@@ -32,8 +32,14 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
     initialize = function() {
       # Match expected structure: conv should have multiple layers
       self$conv <- nn_sequential(
-        nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
-        nn_relu()
+        `0` = nn_sequential(
+          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
+          nn_batch_norm2d(in_channels)
+        ),
+        `1` = nn_sequential(
+          nn_batch_norm2d(in_channels),
+          nn_relu()
+        )
       )
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1, bias = TRUE)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1, bias = TRUE)
@@ -125,16 +131,29 @@ roi_heads_module_v2 <- function(num_classes = 91) {
     initialize = function() {
       # Match expected structure for box_head
       self$box_head <- nn_sequential(
-        nn_sequential(
-          nn_linear(256 * 7 * 7, 1024, bias = TRUE),
+        `0` = nn_sequential(
+          nn_linear(256 * 7 * 7, 1024),
+          nn_batch_norm1d(1024),
           nn_relu()
         ),
-        nn_sequential(
-          nn_linear(1024, 1024, bias = TRUE),
+        `1` = nn_sequential(
+          nn_linear(1024, 1024),
+          nn_batch_norm1d(1024),
           nn_relu()
-        )
+        ),
+        `2` = nn_sequential(
+          nn_linear(1024, 1024),
+          nn_batch_norm1d(1024),
+          nn_relu()
+        ),
+        `3` = nn_sequential(
+          nn_linear(1024, 1024),
+          nn_batch_norm1d(1024),
+          nn_relu()
+        ),
+        `4` = nn_linear(1024, 1024),
+        `5` = nn_linear(1024, 1024)
       )
-
       self$box_predictor <- torch::nn_module(
         initialize = function() {
           self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
