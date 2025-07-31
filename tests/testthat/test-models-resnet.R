@@ -215,5 +215,5 @@ test_that("we can prune head of resnext101 moels", {
   out <- prune(input)
   expect_tensor_shape(out, c(1, 2048, 1, 1))
 
-
+  unlink_model_file()
 })
