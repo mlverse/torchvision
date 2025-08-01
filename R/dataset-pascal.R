@@ -199,10 +199,15 @@ pascal_detection_dataset <- torch::dataset(
     self$img_path <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
     self$annotation_paths <- file.path(voc_dir, "Annotations", paste0(ids, ".xml"))
 
+    if (!requireNamespace("xml2", quietly = TRUE)) {
+      install.packages("xml2")
+    }
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images.")
   },
 
   .getitem = function(index) {
+
     x <- jpeg::readJPEG(self$img_path[index])
     ann_path <- self$annotation_paths[index]
     y <- self$parse_voc_xml(xml2::read_xml(ann_path))
