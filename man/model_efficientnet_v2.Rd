@@ -71,11 +71,13 @@ which.max(as.numeric(output)) (see <https://image-net.org> to find class.)
 
 Other models: 
 \code{\link{model_alexnet}()},
+\code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet}},
 \code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
-\code{\link{model_vgg}}
+\code{\link{model_vgg}},
+\code{\link{model_vit}}
 }
 \concept{models}

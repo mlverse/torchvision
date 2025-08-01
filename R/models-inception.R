@@ -393,7 +393,7 @@ BasicConv2d <- torch::nn_module(
 )
 
 inception_model_urls <- list(
-  inception_v3_google = "https://torch-cdn.mlverse.org/models/vision/v1/models/inception_v3_google.pth"
+  inception_v3_google =c("https://torch-cdn.mlverse.org/models/vision/v2/models/inception_v3_google.pth", "8d60b4fcf263f2a8d2ed21f0f9690e3b", "~110 MB")
 )
 
 #' Inception v3 model
@@ -431,7 +431,12 @@ model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
     args$init_weights <- FALSE  # we are loading weights from a pretrained model
 
     model <- do.call(Inception3, args)
-    state_dict_path <- download_and_cache(inception_model_urls[['inception_v3_google']])
+    r <- inception_model_urls[['inception_v3_google']]
+    cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
     return(model)
