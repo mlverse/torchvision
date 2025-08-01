@@ -110,6 +110,11 @@ models = {
   'fasterrcnn_resnet50_v2': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth',
   'fasterrcnn_mobilenet_v3_large': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_fpn-fb6a3cc7.pth',
   'fasterrcnn_mobilenet_v3_large_320': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_320_fpn-907ea3f9.pth',
+  'ssd300_vgg16': 'https://download.pytorch.org/models/ssd300_vgg16_coco-b556d3b4.pth',
+  'ssdlite320_mobilenet_v3_large': 'https://download.pytorch.org/models/ssdlite320_mobilenet_v3_large_coco-a79551df.pth',
+  'retinanet_resnet50': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
+  'retinanet_resnet50_v2': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_v2_coco-5905b1c5.pth',
+  'fcos_resnet50': 'https://download.pytorch.org/models/fcos_resnet50_fpn_coco-99b0c9b7.pth',
   }
 
 os.makedirs("models", exist_ok=True)
