@@ -106,6 +106,10 @@ models = {
   'retinanet_resnet50_v2': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_v2_coco-5905b1c5.pth', # RetinaNet_ResNet50_FPN_V2_Weights
   'ssd300_vgg16': 'https://download.pytorch.org/models/ssd300_vgg16_coco-b556d3b4.pth',
   'ssdlite320_mobilenet_v3': 'https://download.pytorch.org/models/ssdlite320_mobilenet_v3_large_coco-a79551df.pth',
+  'fasterrcnn_resnet50': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth',
+  'fasterrcnn_resnet50_v2': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth',
+  'fasterrcnn_mobilenet_v3_large': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_fpn-fb6a3cc7.pth',
+  'fasterrcnn_mobilenet_v3_large_320': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_320_fpn-907ea3f9.pth',
   }
 
 os.makedirs("models", exist_ok=True)
