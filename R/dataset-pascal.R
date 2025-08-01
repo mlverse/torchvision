@@ -1,3 +1,51 @@
+#' Pascal VOC Segmentation Dataset
+#'
+#' The Pascal Visual Object Classes (VOC) dataset is a benchmark in object recognition and segmentation tasks.
+#' This dataset provides images with per-pixel class segmentation masks for 20 object categories across different years (2007–2012).
+#'
+#' @inheritParams oxfordiiitpet_dataset
+#' @param root Character. Root directory where the dataset will be stored under `root/pascal_voc_<year>`.
+#' @param year Character. VOC dataset version to use. One of `"2007"`, `"2008"`, `"2009"`, `"2010"`, `"2011"`, or `"2012"`. Default is `"2012"`.
+#' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Determines the dataset split. Default is `"train"`.
+#'
+#' @return A torch dataset of class \code{pascal_segmentation_dataset}.
+#' Each element is a named list:
+#' - `x`: a H x W x 3 array representing the RGB image.
+#' - `y`: a list with one item:
+#'     - `masks`: a torch boolean tensor of shape (3, H, W) representing the segmentation mask.
+#'
+#' @examples
+#' \dontrun{
+#' # Load Pascal VOC segmentation dataset (2012 train split)
+#' pascal_seg <- pascal_segmentation_dataset(transform = transform_to_tensor, download = TRUE)
+#'
+#' # Access the first image and its mask
+#' first_item <- pascal_seg[1]
+#' first_item$x  # Image
+#' first_item$y$masks  # Segmentation mask
+#'
+#' # Visualise the first image and its mask
+#' masked_img <- draw_segmentation_masks(first_item)
+#' tensor_image_browse(masked_img)
+#'
+#' # Load Pascal VOC detection dataset (2012 train split)
+#' pascal_det <- pascal_detection_dataset(transform = transform_to_tensor, download = TRUE)
+#'
+#' # Access the first image and its bounding boxes
+#' first_item <- pascal_det[1]
+#' first_item$x  # Image
+#' first_item$y$labels  # Object labels
+#' first_item$y$boxes  # Bounding box tensor
+#'
+#' # Visualise the first image with bounding boxes
+#' boxed_img <- draw_bounding_boxes(first_item)
+#' tensor_image_browse(boxed_img)
+#' }
+#'
+#' @name pascal_voc_datasets
+#' @title Pascal VOC Datasets
+#' @rdname pascal_voc_datasets
+#' @family segmentation_dataset
 #' @export
 pascal_segmentation_dataset <- torch::dataset(
   name = "pascal_segmentation_dataset",
@@ -152,6 +200,19 @@ pascal_segmentation_dataset <- torch::dataset(
   )
 )
 
+#' Pascal VOC Detection Dataset
+#'
+#' @inheritParams pascal_segmentation_dataset
+#'
+#' @return A torch dataset of class \code{pascal_detection_dataset}.
+#' Each element is a named list:
+#' - `x`: a H x W x 3 array representing the RGB image.
+#' - `y`: a list with:
+#'     - `labels`: a character vector with object class names.
+#'     - `boxes`: a tensor of shape (N, 4) with bounding box coordinates in `(xmin, ymin, xmax, ymax)` format.
+#'
+#' @rdname pascal_voc_datasets
+#' @family detection_dataset
 #' @export
 pascal_detection_dataset <- torch::dataset(
   name = "pascal_detection_dataset",
