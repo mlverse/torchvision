@@ -64,10 +64,10 @@ pascal_segmentation_dataset <- torch::dataset(
 
     data_file <- file.path(self$processed_folder, paste0(self$split, ".rds"))
     data <- readRDS(data_file)
-    self$image_ids <- data$image_ids
+    self$img_path <- data$img_path
     self$mask_paths <- data$mask_paths
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images.")
   },
 
   download = function() {
@@ -101,11 +101,11 @@ pascal_segmentation_dataset <- torch::dataset(
     split_file <- file.path(voc_dir, "ImageSets", "Segmentation", paste0(self$split, ".txt"))
 
     ids <- readLines(split_file)
-    image_ids <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
+    img_path <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
     mask_paths <- file.path(voc_dir, "SegmentationClass", paste0(ids, ".png"))
 
     saveRDS(list(
-      image_ids = image_ids,
+      img_path = img_path,
       mask_paths = mask_paths
     ), file.path(self$processed_folder, paste0(self$split, ".rds")))
 
@@ -117,7 +117,7 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
-    img_path <- self$image_ids[index]
+    img_path <- self$img_path[index]
     mask_path <- self$mask_paths[index]
 
     x <- jpeg::readJPEG(img_path)
@@ -139,7 +139,7 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .length = function() {
-    length(self$image_ids)
+    length(self$img_path)
   },
 
   active = list(
@@ -150,4 +150,99 @@ pascal_segmentation_dataset <- torch::dataset(
       file.path(self$root_path, paste0("pascal_voc_", self$year), "processed")
     }
   )
+)
+
+#' @export
+pascal_detection_dataset <- torch::dataset(
+  name = "pascal_detection_dataset",
+
+  inherit = pascal_segmentation_dataset,
+
+  initialize = function(
+    root = tempdir(),
+    year = "2012",
+    split = "train",
+    transform = NULL,
+    target_transform = NULL,
+    download = FALSE
+  ) {
+
+    self$root_path <- root
+    self$year <- match.arg(year, choices = names(self$resources))
+    self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
+    self$transform <- transform
+    self$target_transform <- target_transform
+    if (self$split == "test") {
+      self$archive_key <- "test"
+    } else {
+      self$archive_key <- "trainval"
+    }
+    self$archive_size <- self$archive_size_table[[self$year]][[self$archive_key]]
+
+    if (download) {
+      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
+    }
+
+    if (!self$check_exists()) {
+      cli_abort("Dataset not found. You can use `download = TRUE` to download it.")
+    }
+
+    voc_dir <- file.path(self$raw_folder, "VOCdevkit", paste0("VOC", self$year))
+    if (self$year == "2011") {
+      voc_dir <- file.path(self$raw_folder, "TrainVal", "VOCdevkit", paste0("VOC", self$year))
+    }
+
+    ids_file <- file.path(voc_dir, "ImageSets", "Main", paste0(self$split, ".txt"))
+    ids <- readLines(ids_file)
+
+    self$img_path <- file.path(voc_dir, "JPEGImages", paste0(ids, ".jpg"))
+    self$annotation_paths <- file.path(voc_dir, "Annotations", paste0(ids, ".xml"))
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images.")
+  },
+
+  .getitem = function(index) {
+    x <- jpeg::readJPEG(self$img_path[index])
+    ann_path <- self$annotation_paths[index]
+    y <- self$parse_voc_xml(xml2::read_xml(ann_path))
+
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+    if (!is.null(self$target_transform)) {
+      y <- self$target_transform(y)
+    }
+
+    structure(list(x = x, y = y), class = "image_with_bounding_box")
+  },
+
+  parse_voc_xml = function(xml) {
+    objects <- xml2::xml_find_all(xml, ".//object")
+
+    labels <- character(length(objects))
+    boxes <- vector("list", length(objects))
+
+    for (i in seq_along(objects)) {
+      obj <- objects[[i]]
+      print(obj)
+
+      labels[i] <- xml2::xml_text(xml2::xml_find_first(obj, "name"))
+
+      bbox <- xml2::xml_find_first(obj, "bndbox")
+      xmin <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "xmin")))
+      ymin <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "ymin")))
+      xmax <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "xmax")))
+      ymax <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "ymax")))
+
+      boxes[[i]] <- c(xmin, ymin, xmax, ymax)
+    }
+
+    boxes <- torch_tensor(do.call(rbind, boxes), dtype = torch_int64())
+
+    list(
+      labels = labels,
+      boxes = boxes
+    )
+  }
 )
