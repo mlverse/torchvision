@@ -44,22 +44,6 @@ test_that("model_fcn_resnet50 loads pretrained weights", {
   expect_tensor_shape(output$aux, c(2, 12, 224, 224))
 })
 
-test_that("model_fcn_resnet50 can segment a cat", {
-  voc_idx <- setNames(seq_along(torchvision:::voc_segmentation_classes), torchvision:::voc_segmentation_classes)
-
-  model <- model_fcn_resnet50(pretrained = TRUE)
-  input <- torch::torch_tensor(jpeg::readJPEG("assets/class/cat/cat.1.jpg"))$permute(c(3,1,2))
-  output <- model(input$unsqueeze(1))
-  mask_id <- output$out$argmax(dim = 2)
-  mask_table <- factor(mask_id |> torch::as_array(), levels = voc_idx, labels = names(voc_idx)) |> table()
-
-  expect_gt(mask_table[["cat"]], 0)
-  expect_gt(mask_table[["cat"]], mask_table[["dog"]])
-  expect_gt(mask_table[["cat"]], mask_table[["person"]])
-
-  expect_gt(mask_table[["background"]], 0)
-
-})
 
 test_that("model_fcn_resnet50 can segment a cat", {
   voc_idx <- setNames(seq_along(torchvision:::voc_segmentation_classes), torchvision:::voc_segmentation_classes)
