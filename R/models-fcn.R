@@ -28,7 +28,8 @@
 #' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 #' # https://pytorch.org/vision/stable/models.html
 #' norm_std  <- c(0.229, 0.224, 0.225)
-#' img <- magick::image_read("https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg")
+#' img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
+#' img <- jpeg::readJPG(img_url)
 #' input <- transform_to_tensor(img)
 #' input <- transform_resize(input, c(520, 520))
 #' input <- transform_normalize(input, norm_mean, norm_std)
@@ -168,7 +169,7 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls["resnet50"])
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet50"]][1])
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }
@@ -214,7 +215,7 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls["resnet101"])
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet101"]][1])
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }

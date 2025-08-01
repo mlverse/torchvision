@@ -59,7 +59,8 @@ The 21 output classes follow the PASCAL VOC convention:
 norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 # https://pytorch.org/vision/stable/models.html
 norm_std  <- c(0.229, 0.224, 0.225)
-img <- magick::image_read("https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg")
+img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
+img <- jpeg::readJPG(img_url)
 input <- transform_to_tensor(img)
 input <- transform_resize(input, c(520, 520))
 input <- transform_normalize(input, norm_mean, norm_std)
@@ -98,11 +99,13 @@ tensor_image_display(segmented)
 \seealso{
 Other models: 
 \code{\link{model_alexnet}()},
+\code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
-\code{\link{model_vgg}}
+\code{\link{model_vgg}},
+\code{\link{model_vit}}
 }
 \concept{models}
