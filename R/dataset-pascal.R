@@ -4,28 +4,28 @@ pascal_segmentation_dataset <- torch::dataset(
 
   resources = list(
     `2007` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar",md5 = "c52e279531787c972589f7e41ab4ae64"),
-      test = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar",md5 = "b6e924de25625d8de591ea690078ad9f")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_06-Nov-2007.tar",md5 = "c52e279531787c972589f7e41ab4ae64"),
+      test = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtest_06-Nov-2007.tar",md5 = "b6e924de25625d8de591ea690078ad9f")
     ),
     `2008` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2008/VOCtrainval_14-Jul-2008.tar",md5 = "2629fa636546599198acfcfbfcf1904a")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_14-Jul-2008.tar",md5 = "2629fa636546599198acfcfbfcf1904a")
     ),
     `2009` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2009/VOCtrainval_11-May-2009.tar",md5 = "a3e00b113cfcfebf17e343f59da3caa1")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2009.tar",md5 = "59065e4b188729180974ef6572f6a212")
     ),
     `2010` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2010/VOCtrainval_03-May-2010.tar",md5 = "da459979d0c395079b5c75ee67908abb")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_03-May-2010.tar",md5 = "da459979d0c395079b5c75ee67908abb")
     ),
     `2011` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2011/VOCtrainval_25-May-2011.tar",md5 = "6c3384ef61512963050cb5d687e5bf1e")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_25-May-2011.tar",md5 = "6c3384ef61512963050cb5d687e5bf1e")
     ),
     `2012` = list(
-      trainval = list(url = "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
+      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
     )
   ),
 
   archive_size_table = list(
-    "2007" = list(trainval = "430 MB", test = "440 MB"),
+    "2007" = list(trainval = "440 MB", test = "440 MB"),
     "2008" = list(trainval = "550 MB"),
     "2009" = list(trainval = "890 MB"),
     "2010" = list(trainval = "1.3 GB"),
