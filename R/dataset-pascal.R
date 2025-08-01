@@ -225,7 +225,6 @@ pascal_detection_dataset <- torch::dataset(
 
     for (i in seq_along(objects)) {
       obj <- objects[[i]]
-      print(obj)
 
       labels[i] <- xml2::xml_text(xml2::xml_find_first(obj, "name"))
 
