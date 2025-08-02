@@ -67,8 +67,8 @@ training uses 520x520 images.
 \examples{
 \dontrun{
 # Use a publicly available image of an airplane
-img_url <- "https://upload.wikimedia.org/wikipedia/commons/3/36/United_Airlines_Boeing_777-200_Meulemans.jpg"
-img <- magick::image_read(img_url)
+img_url <- "https://cdn.jetphotos.com/full/1/50847_1230239149.jpg"
+img <- jpeg::readJPEG(img_url)
 
 input <- transform_to_tensor(img)
 input <- transform_resize(input, c(520, 520))
@@ -109,6 +109,7 @@ Other models:
 \code{\link{model_alexnet}()},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
+\code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},

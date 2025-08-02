@@ -28,8 +28,8 @@
 #' @examples
 #' \dontrun{
 #' # Use a publicly available image of an airplane
-#' img_url <- "https://upload.wikimedia.org/wikipedia/commons/3/36/United_Airlines_Boeing_777-200_Meulemans.jpg"
-#' img <- magick::image_read(img_url)
+#' img_url <- "https://cdn.jetphotos.com/full/1/50847_1230239149.jpg"
+#' img <- jpeg::readJPEG(img_url)
 #'
 #' input <- transform_to_tensor(img)
 #' input <- transform_resize(input, c(520, 520))
@@ -94,37 +94,37 @@ deeplabv3_meta <- list(
 
 
 # ASPP module matching PyTorch
-aspp_module <- nn_module(
+aspp_module <- torch::nn_module(
   "ASPP",
   initialize = function(in_channels, out_channels, atrous_rates) {
-    self$convs <- nn_module_list()
+    self$convs <- torch::nn_module_list()
 
-    self$convs$append(nn_sequential(
-      nn_conv2d(in_channels, out_channels, kernel_size = 1, bias = FALSE),
-      nn_batch_norm2d(out_channels),
-      nn_relu()
+    self$convs$append(torch::nn_sequential(
+      torch::nn_conv2d(in_channels, out_channels, kernel_size = 1, bias = FALSE),
+      torch::nn_batch_norm2d(out_channels),
+      torch::nn_relu()
     ))
 
     for (rate in atrous_rates) {
-      self$convs$append(nn_sequential(
-        nn_conv2d(in_channels, out_channels, kernel_size = 3, padding = rate, dilation = rate, bias = FALSE),
-        nn_batch_norm2d(out_channels),
-        nn_relu()
+      self$convs$append(torch::nn_sequential(
+        torch::nn_conv2d(in_channels, out_channels, kernel_size = 3, padding = rate, dilation = rate, bias = FALSE),
+        torch::nn_batch_norm2d(out_channels),
+        torch::nn_relu()
       ))
     }
 
-    self$convs$append(nn_sequential(
-      nn_adaptive_avg_pool2d(output_size = c(1, 1)),
-      nn_conv2d(in_channels, out_channels, kernel_size = 1, bias = FALSE),
-      nn_batch_norm2d(out_channels),
-      nn_relu()
+    self$convs$append(torch::nn_sequential(
+      torch::nn_adaptive_avg_pool2d(output_size = c(1, 1)),
+      torch::nn_conv2d(in_channels, out_channels, kernel_size = 1, bias = FALSE),
+      torch::nn_batch_norm2d(out_channels),
+      torch::nn_relu()
     ))
 
-    self$project <- nn_sequential(
-      nn_conv2d((length(atrous_rates) + 2) * out_channels, out_channels, kernel_size = 1, bias = FALSE),
-      nn_batch_norm2d(out_channels),
-      nn_relu(),
-      nn_dropout(0.5)
+    self$project <- torch::nn_sequential(
+      torch::nn_conv2d((length(atrous_rates) + 2) * out_channels, out_channels, kernel_size = 1, bias = FALSE),
+      torch::nn_batch_norm2d(out_channels),
+      torch::nn_relu(),
+      torch::nn_dropout(0.5)
     )
   },
   forward = function(x) {
@@ -147,28 +147,28 @@ aspp_module <- nn_module(
 
 # Main classifier head
 deeplab_head <- function(in_channels, num_classes) {
-  nn_sequential(
+  torch::nn_sequential(
     aspp_module(in_channels, 256, atrous_rates = c(12, 24, 36)),
-    nn_conv2d(256, 256, kernel_size = 3, padding = 1, bias = FALSE),
-    nn_batch_norm2d(256),
-    nn_relu(),
-    nn_conv2d(256, num_classes, kernel_size = 1)
+    torch::nn_conv2d(256, 256, kernel_size = 3, padding = 1, bias = FALSE),
+    torch::nn_batch_norm2d(256),
+    torch::nn_relu(),
+    torch::nn_conv2d(256, num_classes, kernel_size = 1)
   )
 }
 
 # Auxiliary classifier head (simpler, operates on layer3 features)
 aux_classifier_head <- function(in_channels, num_classes) {
-  nn_sequential(
-    nn_conv2d(in_channels, 256, kernel_size = 3, padding = 1, bias = FALSE),
-    nn_batch_norm2d(256),
-    nn_relu(),
-    nn_dropout(0.1),
-    nn_conv2d(256, num_classes, kernel_size = 1)
+  torch::nn_sequential(
+    torch::nn_conv2d(in_channels, 256, kernel_size = 3, padding = 1, bias = FALSE),
+    torch::nn_batch_norm2d(256),
+    torch::nn_relu(),
+    torch::nn_dropout(0.1),
+    torch::nn_conv2d(256, num_classes, kernel_size = 1)
   )
 }
 
 # Updated DeepLabV3 wrapper with auxiliary classifier
-DeepLabV3 <- nn_module(
+DeepLabV3 <- torch::nn_module(
   "DeepLabV3",
   initialize = function(backbone, classifier, aux_classifier = NULL) {
     self$backbone <- backbone
@@ -232,8 +232,8 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
     backbone <- resnet(block, layers,
                        replace_stride_with_dilation = c(FALSE, TRUE, TRUE), ...)
   }
-  backbone$fc <- nn_identity()
-  backbone$avgpool <- nn_identity()
+  backbone$fc <- torch::nn_identity()
+  backbone$avgpool <- torch::nn_identity()
 
   classifier <- deeplab_head(2048, num_classes)
 
