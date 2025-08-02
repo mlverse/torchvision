@@ -79,6 +79,8 @@ pascal_seg <- pascal_segmentation_dataset(
 first_item <- pascal_seg[1]
 first_item$x  # Image
 first_item$y$masks  # Segmentation mask
+first_item$y$labels  # Unique class labels in the mask
+pascal_seg$classes[first_item$y$labels]  # Class names
 
 # Visualise the first image and its mask
 masked_img <- draw_segmentation_masks(first_item)
