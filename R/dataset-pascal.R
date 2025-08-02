@@ -16,8 +16,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Load Pascal VOC segmentation dataset (2012 train split)
-#' pascal_seg <- pascal_segmentation_dataset(transform = transform_to_tensor, download = TRUE)
+#' # Load Pascal VOC segmentation dataset (2007 train split)
+#' pascal_seg <- pascal_segmentation_dataset(
+#'  transform = transform_to_tensor,
+#'  download = TRUE,
+#'  year = "2007"
+#' )
 #'
 #' # Access the first image and its mask
 #' first_item <- pascal_seg[1]
@@ -28,8 +32,12 @@
 #' masked_img <- draw_segmentation_masks(first_item)
 #' tensor_image_browse(masked_img)
 #'
-#' # Load Pascal VOC detection dataset (2012 train split)
-#' pascal_det <- pascal_detection_dataset(transform = transform_to_tensor, download = TRUE)
+#' # Load Pascal VOC detection dataset (2007 train split)
+#' pascal_det <- pascal_detection_dataset(
+#'  transform = transform_to_tensor,
+#'  download = TRUE,
+#'  year = "2007"
+#' )
 #'
 #' # Access the first image and its bounding boxes
 #' first_item <- pascal_det[1]
