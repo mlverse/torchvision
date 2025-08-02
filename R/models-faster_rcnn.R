@@ -30,17 +30,15 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
   torch::nn_module(
     "rpn_head_v2",
     initialize = function() {
-      # Match expected structure: conv should have multiple layers
-      self$conv <- nn_sequential(
-        `0` = nn_sequential(
+      # The pretrained checkpoint stacks two Conv2d → ReLU blocks
+      # (with biases) so we mirror that layout here.
+      block <- function() {
+        nn_sequential(
           nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
-          nn_batch_norm2d(in_channels)
-        ),
-        `1` = nn_sequential(
-          nn_batch_norm2d(in_channels),
           nn_relu()
         )
-      )
+      }
+      self$conv <- nn_sequential(block(), block())
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1, bias = TRUE)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1, bias = TRUE)
     },
@@ -129,30 +127,26 @@ roi_heads_module <- function(num_classes = 91) {
 roi_heads_module_v2 <- function(num_classes = 91) {
   torch::nn_module(
     initialize = function() {
-      # Match expected structure for box_head
+      # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
+      # followed by a final linear layer at index "4".
+      block <- function() {
+        nn_sequential(
+          nn_linear(1024, 1024, bias = FALSE),
+          nn_batch_norm1d(1024),
+          nn_relu()
+        )
+      }
+
       self$box_head <- nn_sequential(
-        `0` = nn_sequential(
-          nn_linear(256 * 7 * 7, 1024),
+        nn_sequential(
+          nn_linear(256 * 7 * 7, 1024, bias = FALSE),
           nn_batch_norm1d(1024),
           nn_relu()
         ),
-        `1` = nn_sequential(
-          nn_linear(1024, 1024),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        `2` = nn_sequential(
-          nn_linear(1024, 1024),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        `3` = nn_sequential(
-          nn_linear(1024, 1024),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        `4` = nn_linear(1024, 1024),
-        `5` = nn_linear(1024, 1024)
+        block(),
+        block(),
+        block(),
+        nn_linear(1024, 1024, bias = TRUE)
       )
       self$box_predictor <- torch::nn_module(
         initialize = function() {
@@ -364,14 +358,14 @@ fpn_module_v2 <- function(in_channels, out_channels) {
     initialize = function() {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(
-          nn_conv2d(c, out_channels, kernel_size = 1, bias = TRUE),
+          nn_conv2d(c, out_channels, kernel_size = 1, bias = FALSE),
           nn_batch_norm2d(out_channels),
           nn_relu()
         )
       }))
       self$layer_blocks <- nn_module_list(lapply(rep(out_channels, 4), function(i) {
         nn_sequential(
-          nn_conv2d(out_channels, out_channels, kernel_size = 3, padding = 1, bias = TRUE),
+          nn_conv2d(out_channels, out_channels, kernel_size = 3, padding = 1, bias = FALSE),
           nn_batch_norm2d(out_channels),
           nn_relu()
         )
@@ -518,8 +512,17 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
   if (pretrained) {
     local_path <- "tools/models/fasterrcnn_resnet50_fpn_v2.pth"
     state_dict <- torch::load_state_dict(local_path)
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
+
+    model_state <- model$state_dict()
+    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
+    missing <- setdiff(names(model_state), names(state_dict))
+    if (length(missing) > 0) {
+      for (n in missing) {
+        state_dict[[n]] <- model_state[[n]]
+      }
+    }
+
+    model$load_state_dict(state_dict, strict = TRUE)
   }
 
   model
