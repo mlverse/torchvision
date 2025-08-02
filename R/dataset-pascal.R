@@ -294,24 +294,16 @@ pascal_detection_dataset <- torch::dataset(
   parse_voc_xml = function(xml) {
     objects <- xml2::xml_find_all(xml, ".//object")
 
-    labels <- character(length(objects))
-    boxes <- vector("list", length(objects))
+    labels <- xml2::xml_text(xml2::xml_find_all(objects, "name"))
 
-    for (i in seq_along(objects)) {
-      obj <- objects[[i]]
+    bboxes <- xml2::xml_find_all(objects, "bndbox")
 
-      labels[i] <- xml2::xml_text(xml2::xml_find_first(obj, "name"))
+    xmin <- xml2::xml_integer(xml2::xml_find_all(bboxes, "xmin"))
+    ymin <- xml2::xml_integer(xml2::xml_find_all(bboxes, "ymin"))
+    xmax <- xml2::xml_integer(xml2::xml_find_all(bboxes, "xmax"))
+    ymax <- xml2::xml_integer(xml2::xml_find_all(bboxes, "ymax"))
 
-      bbox <- xml2::xml_find_first(obj, "bndbox")
-      xmin <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "xmin")))
-      ymin <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "ymin")))
-      xmax <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "xmax")))
-      ymax <- as.integer(xml2::xml_text(xml2::xml_find_first(bbox, "ymax")))
-
-      boxes[[i]] <- c(xmin, ymin, xmax, ymax)
-    }
-
-    boxes <- torch_tensor(do.call(rbind, boxes), dtype = torch_int64())
+    boxes <- torch_tensor(data.frame(xmin, ymin, xmax, ymax) %>% as.matrix(), dtype = torch_int64())
 
     list(
       labels = labels,
