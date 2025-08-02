@@ -27,6 +27,8 @@
 #' first_item <- pascal_seg[1]
 #' first_item$x  # Image
 #' first_item$y$masks  # Segmentation mask
+#' first_item$y$labels  # Unique class labels in the mask
+#' pascal_seg$classes[first_item$y$labels]  # Class names
 #'
 #' # Visualise the first image and its mask
 #' masked_img <- draw_segmentation_masks(first_item)
@@ -79,7 +81,12 @@ pascal_segmentation_dataset <- torch::dataset(
       trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
     )
   ),
-
+  classes = c(
+    "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+    "bus", "car", "cat", "chair", "cow", "diningtable", "dog",
+    "horse", "motorbike", "person", "pottedplant", "sheep",
+    "sofa", "train", "tvmonitor"
+  ),
   archive_size_table = list(
     "2007" = list(trainval = "440 MB", test = "440 MB"),
     "2008" = list(trainval = "550 MB"),
@@ -123,7 +130,7 @@ pascal_segmentation_dataset <- torch::dataset(
     self$img_path <- data$img_path
     self$mask_paths <- data$mask_paths
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -173,14 +180,38 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
+    voc_colormap <- list(
+      c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
+      c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
+      c(64, 0, 0), c(192, 0, 0), c(64, 128, 0), c(192, 128, 0),
+      c(64, 0, 128), c(192, 0, 128), c(64, 128, 128), c(192, 128, 128),
+      c(0, 64, 0), c(128, 64, 0), c(0, 192, 0), c(128, 192, 0),
+      c(0, 64, 128)
+    )
     img_path <- self$img_path[index]
     mask_path <- self$mask_paths[index]
 
     x <- jpeg::readJPEG(img_path)
-    masks <- png::readPNG(mask_path)*255
-    masks <- torch_tensor(masks, dtype = torch_bool())$permute(c(3, 1, 2))
+    mask_data <- png::readPNG(mask_path)
+    mask_data <- mask_data * 255
+    flat_mask <- matrix(
+      c(as.vector(mask_data[, , 1]),
+        as.vector(mask_data[, , 2]),
+        as.vector(mask_data[, , 3])),
+      ncol = 3
+    )
+    colormap_mat <- do.call(rbind, voc_colormap)
+    match_indices <- apply(flat_mask, 1, function(px) {
+      matched <- which(colSums(abs(t(colormap_mat) - px)) == 0)
+      if (length(matched) > 0) matched[1] - 1 else NA_integer_
+    })
+    class_idx <- matrix(match_indices, nrow = dim(mask_data)[1], ncol = dim(mask_data)[2])
+    masks <- torch_tensor(class_idx, dtype = torch_long())$unsqueeze(1)
+    labels <- sort(unique(as.vector(as_array(masks)))+1)
+    masks <- masks$to(dtype = torch_bool())
 
     y <- list(
+      labels = labels,
       masks = masks
     )
 
@@ -272,7 +303,7 @@ pascal_detection_dataset <- torch::dataset(
       install.packages("xml2")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
