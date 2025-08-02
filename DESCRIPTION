@@ -51,5 +51,6 @@ Suggests:
     magick,
     testthat,
     coro,
-    R.matlab
+    R.matlab,
+    xml2
 BugReports: https://github.com/mlverse/torchvision/issues
