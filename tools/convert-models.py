@@ -115,6 +115,11 @@ models = {
   'yolo_v8_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt',
   'yolo_v8_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt',
   'yolo_v8_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8x.pt',
+  'yolo_v11_l': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11l.pt',
+  'yolo_v11_m': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt',
+  'yolo_v11_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt',
+  'yolo_v11_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s.pt',
+  'yolo_v11_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11x.pt',
   }
 
 os.makedirs("models", exist_ok=True)
