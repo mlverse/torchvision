@@ -80,7 +80,7 @@ voc_segmentation_classes <- c(
 fcn_model_urls <- list(
   fcn_resnet50_coco = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet50_coco.pth",
-    "7ab41b12754b44d197d23dddb4a3505b", "135 MB"),
+    "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
   fcn_resnet101_coco = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet101_coco.pth",
     "369109597fa68546df1231ae2fe0f66f", "207 MB")
