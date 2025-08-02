@@ -87,6 +87,14 @@ pascal_segmentation_dataset <- torch::dataset(
     "horse", "motorbike", "person", "pottedplant", "sheep",
     "sofa", "train", "tvmonitor"
   ),
+  voc_colormap = c(
+    c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
+    c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
+    c(64, 0, 0), c(192, 0, 0), c(64, 128, 0), c(192, 128, 0),
+    c(64, 0, 128), c(192, 0, 128), c(64, 128, 128), c(192, 128, 128),
+    c(0, 64, 0), c(128, 64, 0), c(0, 192, 0), c(128, 192, 0),
+    c(0, 64, 128)
+  ),
   archive_size_table = list(
     "2007" = list(trainval = "440 MB", test = "440 MB"),
     "2008" = list(trainval = "550 MB"),
@@ -180,34 +188,27 @@ pascal_segmentation_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
-    voc_colormap <- list(
-      c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
-      c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
-      c(64, 0, 0), c(192, 0, 0), c(64, 128, 0), c(192, 128, 0),
-      c(64, 0, 128), c(192, 0, 128), c(64, 128, 128), c(192, 128, 128),
-      c(0, 64, 0), c(128, 64, 0), c(0, 192, 0), c(128, 192, 0),
-      c(0, 64, 128)
-    )
+
     img_path <- self$img_path[index]
     mask_path <- self$mask_paths[index]
 
     x <- jpeg::readJPEG(img_path)
-    mask_data <- png::readPNG(mask_path)
-    mask_data <- mask_data * 255
+    mask_data <- png::readPNG(mask_path) * 255
+
     flat_mask <- matrix(
       c(as.vector(mask_data[, , 1]),
         as.vector(mask_data[, , 2]),
         as.vector(mask_data[, , 3])),
       ncol = 3
     )
-    colormap_mat <- do.call(rbind, voc_colormap)
-    match_indices <- apply(flat_mask, 1, function(px) {
-      matched <- which(colSums(abs(t(colormap_mat) - px)) == 0)
-      if (length(matched) > 0) matched[1] - 1 else NA_integer_
-    })
+    colormap_mat <- matrix(self$voc_colormap, ncol = 3, byrow = TRUE)
+    rgb_to_int <- function(mat) {
+      as.integer(mat[, 1]) * 256^2 + as.integer(mat[, 2]) * 256 + as.integer(mat[, 3])
+    }
+    match_indices <- match(rgb_to_int(flat_mask), rgb_to_int(colormap_mat)) - 1
     class_idx <- matrix(match_indices, nrow = dim(mask_data)[1], ncol = dim(mask_data)[2])
     masks <- torch_tensor(class_idx, dtype = torch_long())$unsqueeze(1)
-    labels <- sort(unique(as.vector(as_array(masks)))+1)
+    labels <- sort(unique(as.vector(as_array(masks))) + 1)
     masks <- masks$to(dtype = torch_bool())
 
     y <- list(
