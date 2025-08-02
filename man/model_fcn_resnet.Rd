@@ -53,6 +53,8 @@ The 21 output classes follow the PASCAL VOC convention:
 \code{cow}, \verb{dining table}, \code{dog}, \code{horse}, \code{motorbike},
 \code{person}, \verb{potted plant}, \code{sheep}, \code{sofa}, \code{train},
 \code{tv/monitor}.
+
+Pretrained weights require \code{num_classes = 21}.
 }
 \examples{
 \dontrun{

@@ -31,8 +31,8 @@ test_that("model_fcn_resnet50 with aux classifier returns aux output", {
   expect_tensor_shape(output$aux, c(1, 21, 224, 224))
 })
 
-test_that("model_fcn_resnet50 loads pretrained weights", {
-  model <- model_fcn_resnet50(pretrained = TRUE, num_classes = 12)
+test_that("model_fcn_resnet50 loads pretrained weights with 21 classes", {
+  model <- model_fcn_resnet50(pretrained = TRUE, num_classes = 21)
   expect_true(inherits(model, "fcn"))
   model$eval()
 
@@ -40,10 +40,9 @@ test_that("model_fcn_resnet50 loads pretrained weights", {
   output <- model(input)
 
   expect_named(output, c("out", "aux"))
-  expect_tensor_shape(output$out, c(2, 12, 224, 224))
-  expect_tensor_shape(output$aux, c(2, 12, 224, 224))
+  expect_tensor_shape(output$out, c(2, 21, 224, 224))
+  expect_tensor_shape(output$aux, c(2, 21, 224, 224))
 })
-
 
 test_that("model_fcn_resnet50 can segment a cat", {
   voc_idx <- setNames(seq_along(torchvision:::voc_segmentation_classes), torchvision:::voc_segmentation_classes)
@@ -104,5 +103,3 @@ test_that("model_fcn_resnet101 loads pretrained weights", {
   model <- model_fcn_resnet101(pretrained = TRUE)
   expect_true(inherits(model, "fcn"))
 })
-
-t
