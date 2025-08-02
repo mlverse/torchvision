@@ -207,14 +207,14 @@ pascal_segmentation_dataset <- torch::dataset(
     }
     match_indices <- match(rgb_to_int(flat_mask), rgb_to_int(colormap_mat)) - 1
     class_idx <- matrix(match_indices, nrow = dim(mask_data)[1], ncol = dim(mask_data)[2])
-    masks <- torch_tensor(class_idx, dtype = torch_long())$unsqueeze(1)
-    labels <- sort(unique(as.vector(as_array(masks))) + 1)
-    masks <- masks$to(dtype = torch_bool())
+    class_idx_tensor <- torch_tensor(class_idx, dtype = torch_long())
+    masks <- torch_zeros(21, dim(class_idx_tensor)[1], dim(class_idx_tensor)[2], dtype = torch_bool())
+    for (i in 0:20) {
+      masks[i + 1][class_idx_tensor == i] <- TRUE
+    }
+    labels <- which(as_array(masks$any(dim = c(2, 3))))
 
-    y <- list(
-      labels = labels,
-      masks = masks
-    )
+    y <- list(labels = labels, masks = masks)
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
