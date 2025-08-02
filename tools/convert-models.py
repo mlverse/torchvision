@@ -110,6 +110,11 @@ models = {
   'fasterrcnn_resnet50_v2': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth',
   'fasterrcnn_mobilenet_v3_large': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_fpn-fb6a3cc7.pth',
   'fasterrcnn_mobilenet_v3_large_320': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_320_fpn-907ea3f9.pth',
+  'yolo_v8_l': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8l.pt',
+  'yolo_v8_m': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8m.pt',
+  'yolo_v8_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt',
+  'yolo_v8_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt',
+  'yolo_v8_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8x.pt',
   }
 
 os.makedirs("models", exist_ok=True)
