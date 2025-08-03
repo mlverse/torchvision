@@ -83,9 +83,9 @@ pascal_segmentation_dataset <- torch::dataset(
   ),
   classes = c(
     "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-    "bus", "car", "cat", "chair", "cow", "diningtable", "dog",
-    "horse", "motorbike", "person", "pottedplant", "sheep",
-    "sofa", "train", "tvmonitor"
+    "bus", "car", "cat", "chair", "cow", "dining table", "dog",
+    "horse", "motorbike", "person", "potted plant", "sheep",
+    "sofa", "train", "tv"
   ),
   voc_colormap = c(
     c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
