@@ -39,16 +39,26 @@ pascal_detection_dataset(
 }
 \value{
 A torch dataset of class \code{pascal_segmentation_dataset}.
-Each element is a named list:
+
+The returned list inherits class \code{image_with_segmentation_mask}, which allows generic visualization
+utilities to be applied.
+
+Each element is a named list with the following structure:
 \itemize{
 \item \code{x}: a H x W x 3 array representing the RGB image.
-\item \code{y}: a list with one item:
+\item \code{y}: A named list containing:
 \itemize{
-\item \code{masks}: a torch boolean tensor of shape (3, H, W) representing the segmentation mask.
+\item \code{masks}: A \code{torch_tensor} of dtype \code{bool} and shape \verb{(21, H, W)}, representing a multi-channel segmentation mask.
+Each of the 21 channels corresponds to a Pascal VOC classes
+\item \code{labels}: An integer vector indicating the indices of the classes present in the mask.
 }
 }
 
 A torch dataset of class \code{pascal_detection_dataset}.
+
+The returned list inherits class \code{image_with_bounding_box}, which allows generic visualization
+utilities to be applied.
+
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 3 array representing the RGB image.
@@ -63,8 +73,18 @@ Each element is a named list:
 Pascal VOC Segmentation Dataset
 }
 \details{
-The Pascal Visual Object Classes (VOC) dataset is a benchmark in object recognition and segmentation tasks.
-This dataset provides images with per-pixel class segmentation masks for 20 object categories across different years (2007–2012).
+The Pascal Visual Object Classes (VOC) dataset is a widely used benchmark for object detection and semantic segmentation tasks in computer vision.
+
+This dataset provides RGB images along with per-pixel class segmentation masks for 20 object categories, plus a background class.
+Each pixel in the mask is labeled with a class index corresponding to one of the predefined semantic categories.
+
+The VOC dataset was released in yearly editions (2007 to 2012), with slight variations in data splits and annotation formats.
+Notably, only the 2007 edition includes a separate \code{test} split; all other years (2008–2012) provide only the \code{train}, \code{val}, and \code{trainval} splits.
+
+The dataset defines 21 semantic classes: \code{"background"}, \code{"aeroplane"}, \code{"bicycle"}, \code{"bird"}, \code{"boat"}, \code{"bottle"}, \code{"bus"}, \code{"car"}, \code{"cat"}, \code{"chair"},
+\code{"cow"}, \code{"dining table"}, \code{"dog"}, \code{"horse"}, \code{"motorbike"}, \code{"person"}, \code{"potted plant"}, \code{"sheep"}, \code{"sofa"}, \code{"train"}, and \code{"tv"}.
+
+This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 }
 \examples{
 \dontrun{

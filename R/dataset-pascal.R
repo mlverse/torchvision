@@ -1,7 +1,17 @@
 #' Pascal VOC Segmentation Dataset
 #'
-#' The Pascal Visual Object Classes (VOC) dataset is a benchmark in object recognition and segmentation tasks.
-#' This dataset provides images with per-pixel class segmentation masks for 20 object categories across different years (2007–2012).
+#' The Pascal Visual Object Classes (VOC) dataset is a widely used benchmark for object detection and semantic segmentation tasks in computer vision.
+#'
+#' This dataset provides RGB images along with per-pixel class segmentation masks for 20 object categories, plus a background class.
+#' Each pixel in the mask is labeled with a class index corresponding to one of the predefined semantic categories.
+#'
+#' The VOC dataset was released in yearly editions (2007 to 2012), with slight variations in data splits and annotation formats.
+#' Notably, only the 2007 edition includes a separate `test` split; all other years (2008–2012) provide only the `train`, `val`, and `trainval` splits.
+#'
+#' The dataset defines 21 semantic classes: `"background"`, `"aeroplane"`, `"bicycle"`, `"bird"`, `"boat"`, `"bottle"`, `"bus"`, `"car"`, `"cat"`, `"chair"`,
+#' `"cow"`, `"dining table"`, `"dog"`, `"horse"`, `"motorbike"`, `"person"`, `"potted plant"`, `"sheep"`, `"sofa"`, `"train"`, and `"tv"`.
+#'
+#' This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 #'
 #' @inheritParams oxfordiiitpet_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/pascal_voc_<year>`.
@@ -9,10 +19,16 @@
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Determines the dataset split. Default is `"train"`.
 #'
 #' @return A torch dataset of class \code{pascal_segmentation_dataset}.
-#' Each element is a named list:
+#' 
+#' The returned list inherits class \code{image_with_segmentation_mask}, which allows generic visualization
+#' utilities to be applied.
+#' 
+#' Each element is a named list with the following structure:
 #' - `x`: a H x W x 3 array representing the RGB image.
-#' - `y`: a list with one item:
-#'     - `masks`: a torch boolean tensor of shape (3, H, W) representing the segmentation mask.
+#' - `y`: A named list containing:
+#'     - `masks`: A `torch_tensor` of dtype `bool` and shape `(21, H, W)`, representing a multi-channel segmentation mask.
+#'       Each of the 21 channels corresponds to a Pascal VOC classes
+#'     - `labels`: An integer vector indicating the indices of the classes present in the mask.
 #'
 #' @examples
 #' \dontrun{
@@ -243,6 +259,10 @@ pascal_segmentation_dataset <- torch::dataset(
 #' @inheritParams pascal_segmentation_dataset
 #'
 #' @return A torch dataset of class \code{pascal_detection_dataset}.
+#' 
+#' The returned list inherits class \code{image_with_bounding_box}, which allows generic visualization
+#' utilities to be applied.
+#' 
 #' Each element is a named list:
 #' - `x`: a H x W x 3 array representing the RGB image.
 #' - `y`: a list with:
