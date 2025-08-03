@@ -47,25 +47,19 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 }
 \value{
 A \code{fasterrcnn_model} nn_module.
-
-A \code{fasterrcnn_model} nn_module.
-
-A \code{fasterrcnn_model} nn_module.
-
-A \code{fasterrcnn_model} nn_module.
 }
 \description{
-Constructs Faster R-CNN model variants for object detection tasks.
+Construct Faster R-CNN model variants for object detection tasks.
 }
 \section{Functions}{
 \itemize{
 \item \code{model_fasterrcnn_resnet50_fpn()}: Faster R-CNN with ResNet-50 FPN
 
-\item \code{model_fasterrcnn_resnet50_fpn_v2()}: Faster R-CNN with ResNet-50 FPN
+\item \code{model_fasterrcnn_resnet50_fpn_v2()}: Faster R-CNN with ResNet-50 FPN V2
 
-\item \code{model_fasterrcnn_mobilenet_v3_large_fpn()}: Faster R-CNN with ResNet-50 FPN
+\item \code{model_fasterrcnn_mobilenet_v3_large_fpn()}: Faster R-CNN with MobileNet V3 Large FPN
 
-\item \code{model_fasterrcnn_mobilenet_v3_large_320_fpn()}: Faster R-CNN with ResNet-50 FPN
+\item \code{model_fasterrcnn_mobilenet_v3_large_320_fpn()}: Faster R-CNN with MobileNet V3 Large 320 FPN
 
 }}
 \section{Task}{
@@ -76,7 +70,7 @@ Object detection over images with bounding boxes and class labels.
 \section{Input Format}{
 
 Input images should be \code{torch_tensor}s of shape
-\verb{\code{(batch_size, 3, H, W)}} where \code{H} and \code{W} are typically around 800.
+\verb{(batch_size, 3, H, W)} where \code{H} and \code{W} are typically around 800.
 }
 
 \section{Available Models}{
@@ -91,20 +85,35 @@ Input images should be \code{torch_tensor}s of shape
 
 \examples{
 \dontrun{
-model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
-img_path <- system.file("img", "Rlogo.png", package = "png")
-img <- png::readPNG(img_path)
-img <- torch::torch_tensor(aperm(img, c(3, 1, 2)))$unsqueeze(1)
-output <- model(img)
+model <- model_fasterrcnn_resnet50_fpn()
+images <- list(torch::torch_randn(3, 300, 300))
+boxes <- torch::torch_tensor(matrix(c(25, 25, 150, 200,
+                                      50, 50, 200, 250), ncol = 4, byrow = TRUE),
+                             dtype = torch::torch_float())
+labels <- torch::torch_tensor(c(1, 3), dtype = torch::torch_int64())
+targets <- list(list(boxes = boxes, labels = labels))
 
-scores <- output$detections$scores
-keep <- scores > 0.5
-boxes <- output$detections$boxes[keep, ]
+# training: returns a list of losses
+model(images, targets)
+
+# inference: returns detections
+model(images)
+
+model <- model_fasterrcnn_resnet50_fpn_v2()
+model(images, targets)
+model(images)
+
+model <- model_fasterrcnn_mobilenet_v3_large_fpn()
+model(images, targets)
+model(images)
+
+model <- model_fasterrcnn_mobilenet_v3_large_320_fpn()
+model(images, targets)
+model(images)
 }
+
 }
 \seealso{
-\code{\link{coco_detection_dataset}}
-
 Other models: 
 \code{\link{model_alexnet}()},
 \code{\link{model_efficientnet}},

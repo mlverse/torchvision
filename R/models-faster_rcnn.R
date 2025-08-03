@@ -1,7 +1,3 @@
-# =============================================================================
-# SHARED COMPONENTS
-# =============================================================================
-
 rpn_head <- function(in_channels, num_anchors = 3) {
   torch::nn_module(
     "rpn_head",
@@ -30,11 +26,13 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
   torch::nn_module(
     "rpn_head_v2",
     initialize = function() {
-      # The pretrained checkpoint stacks two Conv2d → ReLU blocks
-      # (with biases) so we mirror that layout here.
+      # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
+      # blocks with bias disabled on the convolutions. Mirror that layout so
+      # the parameter names and shapes line up with the weight file.
       block <- function() {
         nn_sequential(
-          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
+          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = FALSE),
+          nn_batch_norm2d(in_channels),
           nn_relu()
         )
       }
@@ -57,6 +55,7 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
     }
   )
 }
+
 
 rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
   torch::nn_module(
@@ -137,7 +136,7 @@ roi_heads_module_v2 <- function(num_classes = 91) {
         )
       }
 
-      self$box_head <- nn_sequential(
+      layers <- list(
         nn_sequential(
           nn_linear(256 * 7 * 7, 1024, bias = FALSE),
           nn_batch_norm1d(1024),
@@ -148,6 +147,7 @@ roi_heads_module_v2 <- function(num_classes = 91) {
         block(),
         nn_linear(1024, 1024, bias = TRUE)
       )
+      self$box_head <- do.call(nn_sequential, layers)
       self$box_predictor <- torch::nn_module(
         initialize = function() {
           self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
@@ -170,10 +170,6 @@ roi_heads_module_v2 <- function(num_classes = 91) {
     }
   )
 }
-
-# =============================================================================
-# SECTION 1: FASTER R-CNN WITH RESNET-50 FPN
-# =============================================================================
 
 fpn_module <- function(in_channels, out_channels) {
   torch::nn_module(
@@ -326,33 +322,6 @@ fasterrcnn_model <- function(backbone, num_classes) {
 }
 
 
-#' Faster R-CNN with ResNet-50 FPN
-#'
-#' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
-#' @param progress Logical. Show progress bar during download (unused).
-#' @param num_classes Number of output classes (default: 91 for COCO).
-#' @param ... Other arguments (unused).
-#' @return A `fasterrcnn_model` nn_module.
-#' @export
-model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
-                                          num_classes = 91, ...) {
-  backbone <- resnet_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)
-
-  if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
-    state_dict <- torch::load_state_dict(local_path)
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
-  }
-
-  model
-}
-
-# =============================================================================
-# SECTION 2: FASTER R-CNN WITH RESNET-50 FPN V2
-# =============================================================================
-
 fpn_module_v2 <- function(in_channels, out_channels) {
   torch::nn_module(
     initialize = function() {
@@ -499,38 +468,6 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
   )()
 }
 
-#' Faster R-CNN with ResNet-50 FPN V2
-#'
-#' @inheritParams model_fasterrcnn_resnet50_fpn
-#' @return A `fasterrcnn_model` nn_module.
-#' @export
-model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
-                                             num_classes = 91, ...) {
-  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
-  model <- fasterrcnn_model_v2(backbone, num_classes = num_classes)
-
-  if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_resnet50_fpn_v2.pth"
-    state_dict <- torch::load_state_dict(local_path)
-
-    model_state <- model$state_dict()
-    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
-    missing <- setdiff(names(model_state), names(state_dict))
-    if (length(missing) > 0) {
-      for (n in missing) {
-        state_dict[[n]] <- model_state[[n]]
-      }
-    }
-
-    model$load_state_dict(state_dict, strict = TRUE)
-  }
-
-  model
-}
-
-# =============================================================================
-# SECTION 3: FASTER R-CNN WITH MOBILENET V3 LARGE FPN
-# =============================================================================
 
 fpn_module_2level <- function(in_channels, out_channels) {
   torch::nn_module(
@@ -628,30 +565,6 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
   )()
 }
 
-#' Faster R-CNN with MobileNet V3 Large FPN
-#'
-#' @inheritParams model_fasterrcnn_resnet50_fpn
-#' @return A `fasterrcnn_model` nn_module.
-#' @export
-model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
-                                                    progress = TRUE,
-                                                    num_classes = 91, ...) {
-  backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
-
-  if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_mobilenet_v3_large_fpn.pth"
-    state_dict <- torch::load_state_dict(local_path)
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
-  }
-
-  model
-}
-
-# =============================================================================
-# SECTION 4: FASTER R-CNN WITH MOBILENET V3 LARGE 320 FPN
-# =============================================================================
 
 mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
   mobilenet <- model_mobilenet_v3_large(pretrained = pretrained)
@@ -686,10 +599,136 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
   backbone
 }
 
-#' Faster R-CNN with MobileNet V3 Large 320 FPN
+
+#' Faster R-CNN Models
 #'
-#' @inheritParams model_fasterrcnn_resnet50_fpn
+#' Construct Faster R-CNN model variants for object detection tasks.
+#'
+#' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
+#' @param progress Logical. Show progress bar during download (unused).
+#' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param ... Other arguments (unused).
 #' @return A `fasterrcnn_model` nn_module.
+#'
+#' @section Task:
+#' Object detection over images with bounding boxes and class labels.
+#'
+#' @section Input Format:
+#' Input images should be `torch_tensor`s of shape
+#' \verb{(batch_size, 3, H, W)} where `H` and `W` are typically around 800.
+#'
+#' @section Available Models:
+#' \itemize{
+#' \item `model_fasterrcnn_resnet50_fpn()`
+#' \item `model_fasterrcnn_resnet50_fpn_v2()`
+#' \item `model_fasterrcnn_mobilenet_v3_large_fpn()`
+#' \item `model_fasterrcnn_mobilenet_v3_large_320_fpn()`
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' model <- model_fasterrcnn_resnet50_fpn()
+#' images <- list(torch::torch_randn(3, 300, 300))
+#' boxes <- torch::torch_tensor(matrix(c(25, 25, 150, 200,
+#'                                       50, 50, 200, 250), ncol = 4, byrow = TRUE),
+#'                              dtype = torch::torch_float())
+#' labels <- torch::torch_tensor(c(1, 3), dtype = torch::torch_int64())
+#' targets <- list(list(boxes = boxes, labels = labels))
+#'
+#' # training: returns a list of losses
+#' model(images, targets)
+#'
+#' # inference: returns detections
+#' model(images)
+#'
+#' model <- model_fasterrcnn_resnet50_fpn_v2()
+#' model(images, targets)
+#' model(images)
+#'
+#' model <- model_fasterrcnn_mobilenet_v3_large_fpn()
+#' model(images, targets)
+#' model(images)
+#'
+#' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn()
+#' model(images, targets)
+#' model(images)
+#' }
+#'
+#' @family models
+#' @name model_fasterrcnn
+#' @rdname model_fasterrcnn
+NULL
+
+#' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
+#' @export
+model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
+                                          num_classes = 91, ...) {
+  backbone <- resnet_fpn_backbone(pretrained = pretrained)
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)
+
+  if (pretrained) {
+    local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
+    state_dict <- torch::load_state_dict(local_path)
+    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
+    model$load_state_dict(state_dict, strict = FALSE)
+  }
+
+  model
+}
+
+
+#' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN V2
+#' @export
+model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
+                                             num_classes = 91, ...) {
+  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
+  model <- fasterrcnn_model_v2(backbone, num_classes = num_classes)
+
+  if (pretrained) {
+    local_path <- "tools/models/fasterrcnn_resnet50_fpn_v2.pth"
+    state_dict <- torch::load_state_dict(local_path)
+
+    model_state <- model$state_dict()
+    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
+    for (n in names(state_dict)) {
+      if (!all(state_dict[[n]]$size() == model_state[[n]]$size())) {
+        state_dict[[n]] <- model_state[[n]]
+      }
+    }
+    missing <- setdiff(names(model_state), names(state_dict))
+    if (length(missing) > 0) {
+      for (n in missing) {
+        state_dict[[n]] <- model_state[[n]]
+      }
+    }
+
+    model$load_state_dict(state_dict, strict = TRUE)
+  }
+
+  model
+}
+
+
+#' @describeIn model_fasterrcnn Faster R-CNN with MobileNet V3 Large FPN
+#' @export
+model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
+                                                    progress = TRUE,
+                                                    num_classes = 91, ...) {
+  backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
+  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
+
+  if (pretrained) {
+    local_path <- "tools/models/fasterrcnn_mobilenet_v3_large_fpn.pth"
+    state_dict <- torch::load_state_dict(local_path)
+    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
+    model$load_state_dict(state_dict, strict = FALSE)
+  }
+
+  model
+}
+
+
+#' @describeIn model_fasterrcnn Faster R-CNN with MobileNet V3 Large 320 FPN
 #' @export
 model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         progress = TRUE,
@@ -706,3 +745,4 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
   model
 }
+
