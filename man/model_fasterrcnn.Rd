@@ -65,6 +65,9 @@ Construct Faster R-CNN model variants for object detection tasks.
 \section{Task}{
 
 Object detection over images with bounding boxes and class labels.
+
+
+Object detection over images with bounding boxes and class labels.
 }
 
 \section{Input Format}{
@@ -85,31 +88,62 @@ Input images should be \code{torch_tensor}s of shape
 
 \examples{
 \dontrun{
-model <- model_fasterrcnn_resnet50_fpn()
-images <- list(torch::torch_randn(3, 300, 300))
-boxes <- torch::torch_tensor(matrix(c(25, 25, 150, 200,
-                                      50, 50, 200, 250), ncol = 4, byrow = TRUE),
-                             dtype = torch::torch_float())
-labels <- torch::torch_tensor(c(1, 3), dtype = torch::torch_int64())
-targets <- list(list(boxes = boxes, labels = labels))
+# Visualize predictions for each Faster R-CNN variant on the same COCO sample
+ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+sample <- ds[1]
+image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
 
-# training: returns a list of losses
-model(images, targets)
+# ResNet-50 FPN
+model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
+model$eval()
+pred <- model(list(sample$x))$detections
+num_boxes <- as.integer(pred$boxes$size()[1])
+keep <- seq_len(min(5, num_boxes))
+boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+if (num_boxes > 0) {
+  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+  tensor_image_browse(boxed)
+}
 
-# inference: returns detections
-model(images)
+# ResNet-50 FPN V2
+model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+model$eval()
+pred <- model(list(sample$x))$detections
+num_boxes <- as.integer(pred$boxes$size()[1])
+keep <- seq_len(min(5, num_boxes))
+boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+if (num_boxes > 0) {
+  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+  tensor_image_browse(boxed)
+}
 
-model <- model_fasterrcnn_resnet50_fpn_v2()
-model(images, targets)
-model(images)
+# MobileNet V3 Large FPN
+model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
+model$eval()
+pred <- model(list(sample$x))$detections
+num_boxes <- as.integer(pred$boxes$size()[1])
+keep <- seq_len(min(5, num_boxes))
+boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+if (num_boxes > 0) {
+  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+  tensor_image_browse(boxed)
+}
 
-model <- model_fasterrcnn_mobilenet_v3_large_fpn()
-model(images, targets)
-model(images)
-
-model <- model_fasterrcnn_mobilenet_v3_large_320_fpn()
-model(images, targets)
-model(images)
+# MobileNet V3 Large 320 FPN
+model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
+model$eval()
+pred <- model(list(sample$x))$detections
+num_boxes <- as.integer(pred$boxes$size()[1])
+keep <- seq_len(min(5, num_boxes))
+boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+if (num_boxes > 0) {
+  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+  tensor_image_browse(boxed)
+}
 }
 
 }

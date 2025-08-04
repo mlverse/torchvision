@@ -79,6 +79,114 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
   )
 }
 
+generate_level_anchors <- function(h, w, stride, scales) {
+  anchors <- torch::torch_empty(h * w * length(scales), 4)
+  idx <- 1
+  for (y in seq_len(h)) {
+    for (x in seq_len(w)) {
+      cx <- (x - 0.5) * stride
+      cy <- (y - 0.5) * stride
+      for (s in scales) {
+        ws <- stride * s
+        hs <- stride * s
+        x1 <- cx - ws / 2
+        y1 <- cy - hs / 2
+        x2 <- cx + ws / 2
+        y2 <- cy + hs / 2
+        anchors[idx, ] <- torch::torch_tensor(c(x1, y1, x2, y2))
+        idx <- idx + 1
+      }
+    }
+  }
+  anchors
+}
+
+decode_boxes <- function(anchors, deltas) {
+  widths <- anchors[, 3] - anchors[, 1]
+  heights <- anchors[, 4] - anchors[, 2]
+  ctr_x <- anchors[, 1] + widths / 2
+  ctr_y <- anchors[, 2] + heights / 2
+
+  dx <- deltas[, 1]
+  dy <- deltas[, 2]
+  dw <- deltas[, 3]
+  dh <- deltas[, 4]
+
+  pred_ctr_x <- ctr_x + dx * widths
+  pred_ctr_y <- ctr_y + dy * heights
+  pred_w <- torch::torch_exp(dw) * widths
+  pred_h <- torch::torch_exp(dh) * heights
+
+  x1 <- pred_ctr_x - pred_w / 2
+  y1 <- pred_ctr_y - pred_h / 2
+  x2 <- pred_ctr_x + pred_w / 2
+  y2 <- pred_ctr_y + pred_h / 2
+
+  torch::torch_stack(list(x1, y1, x2, y2), dim = 2)
+}
+
+generate_proposals <- function(features, rpn_out, image_size, strides) {
+  all_proposals <- list()
+  all_scores <- list()
+  for (i in seq_along(features)) {
+    objectness <- rpn_out$objectness[[i]][1, , , ]
+    deltas <- rpn_out$bbox_deltas[[i]][1, , , ]
+
+    h <- dim(objectness)[2]
+    w <- dim(objectness)[3]
+    a <- dim(objectness)[1]
+
+    anchors <- generate_level_anchors(h, w, strides[i], scales = seq_len(a))
+
+    objectness <- objectness$sigmoid()$reshape(c(-1))
+    deltas <- deltas$permute(c(2, 3, 1))$reshape(c(-1, 4))
+
+    proposals <- decode_boxes(anchors, deltas)
+    proposals <- clip_boxes_to_image(proposals, image_size)
+
+    all_proposals[[i]] <- proposals
+    all_scores[[i]] <- objectness
+  }
+
+  proposals <- torch::torch_cat(all_proposals, dim = 1)
+  scores <- torch::torch_cat(all_scores, dim = 1)
+
+  keep <- scores > 0.05
+  proposals <- proposals[keep, ]
+  scores <- scores[keep]
+
+  if (proposals$shape[1] > 0) {
+    keep_idx <- nms(proposals, scores, 0.7)
+    proposals <- proposals[keep_idx, ]
+  } else {
+    proposals <- torch::torch_empty(c(0, 4))
+  }
+
+  list(proposals = proposals)
+}
+
+roi_align_stub <- function(feature_map, boxes, output_size = c(7, 7), stride = 4) {
+  pooled <- list()
+  if (boxes$shape[1] == 0) {
+    return(torch::torch_empty(c(0, feature_map$shape[1] * prod(output_size))))
+  }
+  for (i in seq_len(boxes$shape[1])) {
+    x1 <- floor(boxes[i, 1] / stride) + 1
+    y1 <- floor(boxes[i, 2] / stride) + 1
+    x2 <- ceiling(boxes[i, 3] / stride)
+    y2 <- ceiling(boxes[i, 4] / stride)
+    x1 <- max(1, min(x1, feature_map$shape[4]))
+    x2 <- max(1, min(x2, feature_map$shape[4]))
+    y1 <- max(1, min(y1, feature_map$shape[3]))
+    y2 <- max(1, min(y2, feature_map$shape[3]))
+    region <- feature_map[ , , y1:y2, x1:x2]
+    pooled_feat <- torch::nnf_adaptive_max_pool2d(region, output_size)
+    pooled[[i]] <- pooled_feat$reshape(-1)
+  }
+  torch::torch_stack(pooled)
+}
+
+
 roi_heads_module <- function(num_classes = 91) {
   torch::nn_module(
     initialize = function() {
@@ -109,16 +217,10 @@ roi_heads_module <- function(num_classes = 91) {
       )()
     },
     forward = function(features, proposals) {
-      # Extract feature maps
       feature_maps <- features[c("p2", "p3", "p4", "p5")]
-
-      # Placeholder for ROI pooling - in full implementation, you'd use roi_align
-      pooled <- torch::torch_randn(length(proposals), 256 * 7 * 7)
-
+      pooled <- roi_align_stub(feature_maps[[1]], proposals)
       x <- self$box_head(pooled)
-      predictions <- self$box_predictor(x)
-
-      predictions
+      self$box_predictor(x)
     }
   )
 }
@@ -162,11 +264,9 @@ roi_heads_module_v2 <- function(num_classes = 91) {
       )()
     },
     forward = function(features, proposals) {
-      # Placeholder for ROI pooling - in full implementation, use roi_align
-      pooled <- torch::torch_randn(length(proposals), 256 * 7 * 7)
+      pooled <- roi_align_stub(features[[1]], proposals)
       x <- self$box_head(pooled)
-      predictions <- self$box_predictor(x)
-      predictions
+      self$box_predictor(x)
     }
   )
 }
@@ -271,39 +371,41 @@ fasterrcnn_model <- function(backbone, num_classes) {
     },
 
     forward = function(images) {
+      images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      detections <- self$roi_heads(features, proposals)
+      image_size <- as.integer(images$shape[3:4])
+      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32))
 
-      # Postprocessing: get max scores and class labels
+      if (props$proposals$shape[1] == 0) {
+        empty <- list(
+          boxes = torch::torch_empty(c(0, 4)),
+          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
+          scores = torch::torch_empty(c(0))
+        )
+        return(list(features = features, detections = empty))
+      }
+
+      detections <- self$roi_heads(features, props$proposals)
+
       scores <- torch::nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch::torch_max(scores, dim = 2)
       final_scores <- max_scores$values
       final_labels <- max_scores$indices
 
-      # For simplicity, assume detections$boxes already contains the correct boxes
-      # In a full implementation, you'd need proper box regression decoding
-      final_boxes <- detections$boxes
+      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
+      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      # If boxes has more than 4 columns, take only the first 4
-      if (final_boxes$shape[2] > 4) {
-        final_boxes <- final_boxes[, 1:4]
-      }
-
-      # Fix: Ensure we're working with torch tensors throughout
-      keep <- final_scores > 0.5
-
-      # Use torch methods for sum and item operations
+      keep <- final_scores > 0.05
       num_detections <- torch::torch_sum(keep)$item()
 
-      # Handle case where no detections meet the threshold
       if (num_detections > 0) {
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
       } else {
-        # Return empty tensors if no detections
         final_boxes <- torch::torch_empty(c(0, 4))
         final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
         final_scores <- torch::torch_empty(c(0))
@@ -425,25 +527,34 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
       self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
     },
     forward = function(images) {
+      images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      # Dummy proposals for testing
-      proposals <- list(torch::torch_randn(100, 4))
-      detections <- self$roi_heads(features, proposals)
+      image_size <- as.integer(images$shape[3:4])
+      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32))
 
-      # Post-processing
+      if (props$proposals$shape[1] == 0) {
+        empty <- list(
+          boxes = torch::torch_empty(c(0, 4)),
+          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
+          scores = torch::torch_empty(c(0))
+        )
+        return(list(features = features, detections = empty))
+      }
+
+      detections <- self$roi_heads(features, props$proposals)
+
       scores <- torch::nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch::torch_max(scores, dim = 2)
       final_scores <- max_scores$values
       final_labels <- max_scores$indices
 
-      final_boxes <- detections$boxes
-      if (final_boxes$shape[2] > 4) {
-        final_boxes <- final_boxes[, 1:4]
-      }
+      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
+      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      keep <- final_scores > 0.5
+      keep <- final_scores > 0.05
       num_detections <- torch::torch_sum(keep)$item()
 
       if (num_detections > 0) {
@@ -544,26 +655,50 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
       self$roi_heads <- roi_heads_module(num_classes = num_classes)()
     },
     forward = function(images) {
+      images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      proposals <- list(torch_randn(100, 4))  # dummy proposals for testing
-      detections <- self$roi_heads(features, proposals)
+      image_size <- as.integer(images$shape[3:4])
+      props <- generate_proposals(features, rpn_out, image_size, c(8, 16))
+
+      if (props$proposals$shape[1] == 0) {
+        empty <- list(
+          boxes = torch::torch_empty(c(0, 4)),
+          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
+          scores = torch::torch_empty(c(0))
+        )
+        return(list(features = features, detections = empty))
+      }
+
+      detections <- self$roi_heads(features, props$proposals)
 
       scores <- nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch_max(scores, dim = 2)
-      keep <- max_scores$values > 0.5
+      final_scores <- max_scores$values
+      final_labels <- max_scores$indices
 
-      final <- list(
-        boxes = detections$boxes[, 1:4][keep, , drop = FALSE],
-        labels = max_scores$indices[keep],
-        scores = max_scores$values[keep]
-      )
+      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
+      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
+      keep <- final_scores > 0.05
+      if (torch::torch_sum(keep)$item() > 0) {
+        final_boxes <- final_boxes[keep, ]
+        final_labels <- final_labels[keep]
+        final_scores <- final_scores[keep]
+      } else {
+        final_boxes <- torch::torch_empty(c(0, 4))
+        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
+        final_scores <- torch::torch_empty(c(0))
+      }
+
+      final <- list(boxes = final_boxes, labels = final_labels, scores = final_scores)
       list(features = features, detections = final)
     }
   )()
 }
+
 
 
 mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
@@ -613,6 +748,10 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' @section Task:
 #' Object detection over images with bounding boxes and class labels.
 #'
+#'
+#' @section Task:
+#' Object detection over images with bounding boxes and class labels.
+#'
 #' @section Input Format:
 #' Input images should be `torch_tensor`s of shape
 #' \verb{(batch_size, 3, H, W)} where `H` and `W` are typically around 800.
@@ -627,31 +766,62 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'
 #' @examples
 #' \dontrun{
-#' model <- model_fasterrcnn_resnet50_fpn()
-#' images <- list(torch::torch_randn(3, 300, 300))
-#' boxes <- torch::torch_tensor(matrix(c(25, 25, 150, 200,
-#'                                       50, 50, 200, 250), ncol = 4, byrow = TRUE),
-#'                              dtype = torch::torch_float())
-#' labels <- torch::torch_tensor(c(1, 3), dtype = torch::torch_int64())
-#' targets <- list(list(boxes = boxes, labels = labels))
+#' # Visualize predictions for each Faster R-CNN variant on the same COCO sample
+#' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+#' sample <- ds[1]
+#' image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
 #'
-#' # training: returns a list of losses
-#' model(images, targets)
+#' # ResNet-50 FPN
+#' model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
+#' model$eval()
+#' pred <- model(list(sample$x))$detections
+#' num_boxes <- as.integer(pred$boxes$size()[1])
+#' keep <- seq_len(min(5, num_boxes))
+#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+#' if (num_boxes > 0) {
+#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#'   tensor_image_browse(boxed)
+#' }
 #'
-#' # inference: returns detections
-#' model(images)
+#' # ResNet-50 FPN V2
+#' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+#' model$eval()
+#' pred <- model(list(sample$x))$detections
+#' num_boxes <- as.integer(pred$boxes$size()[1])
+#' keep <- seq_len(min(5, num_boxes))
+#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+#' if (num_boxes > 0) {
+#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#'   tensor_image_browse(boxed)
+#' }
 #'
-#' model <- model_fasterrcnn_resnet50_fpn_v2()
-#' model(images, targets)
-#' model(images)
+#' # MobileNet V3 Large FPN
+#' model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
+#' model$eval()
+#' pred <- model(list(sample$x))$detections
+#' num_boxes <- as.integer(pred$boxes$size()[1])
+#' keep <- seq_len(min(5, num_boxes))
+#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+#' if (num_boxes > 0) {
+#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#'   tensor_image_browse(boxed)
+#' }
 #'
-#' model <- model_fasterrcnn_mobilenet_v3_large_fpn()
-#' model(images, targets)
-#' model(images)
-#'
-#' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn()
-#' model(images, targets)
-#' model(images)
+#' # MobileNet V3 Large 320 FPN
+#' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
+#' model$eval()
+#' pred <- model(list(sample$x))$detections
+#' num_boxes <- as.integer(pred$boxes$size()[1])
+#' keep <- seq_len(min(5, num_boxes))
+#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+#' if (num_boxes > 0) {
+#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#'   tensor_image_browse(boxed)
+#' }
 #' }
 #'
 #' @family models
