@@ -186,6 +186,31 @@ roi_align_stub <- function(feature_map, boxes, output_size = c(7, 7), stride = 4
   torch::torch_stack(pooled)
 }
 
+roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
+  h <- as.integer(feature_map$shape[[3]])
+  w <- as.integer(feature_map$shape[[4]])
+
+  n <- proposals$size(1)
+  pooled <- vector("list", n)
+
+  for (i in seq_len(n)) {
+    x1 <- max(1, min(as.numeric(proposals[i, 1]), w))
+    y1 <- max(1, min(as.numeric(proposals[i, 2]), h))
+    x2 <- max(x1 + 1, min(as.numeric(proposals[i, 3]), w))
+    y2 <- max(y1 + 1, min(as.numeric(proposals[i, 4]), h))
+
+    region <- feature_map[1, , y1:y2, x1:x2]
+    pooled[[i]] <- torch::nnf_interpolate(
+      region$unsqueeze(1),
+      size = output_size,
+      mode = "bilinear",
+      align_corners = FALSE
+    )[1, , , ]
+  }
+
+  torch::torch_stack(pooled, dim = 1)
+}
+
 
 roi_heads_module <- function(num_classes = 91) {
   torch::nn_module(
