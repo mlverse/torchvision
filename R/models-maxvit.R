@@ -163,6 +163,34 @@ maxvit_impl <- nn_module(
   }
 )
 
+# Helper to adapt PyTorch weight names to the R implementation
+.rename_maxvit_state_dict <- function(state_dict) {
+  renamed <- list()
+  for (nm in names(state_dict)) {
+    # skip parameters that do not exist in this implementation
+    if (grepl("MBconv\\.layers\\.pre_norm", nm))
+      next
+
+    new_nm <- nm
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv",
+      "stages.\\1.blocks.\\2",
+      new_nm
+    )
+    new_nm <- sub("\\.proj\\.0", ".layers.7", new_nm)
+    new_nm <- sub("\\.proj\\.1", ".layers.8", new_nm)
+    new_nm <- sub("\\.layers\\.conv_a\\.0", ".layers.0", new_nm)
+    new_nm <- sub("\\.layers\\.conv_a\\.1", ".layers.1", new_nm)
+    new_nm <- sub("\\.layers\\.conv_b\\.0", ".layers.3", new_nm)
+    new_nm <- sub("\\.layers\\.conv_b\\.1", ".layers.4", new_nm)
+    new_nm <- sub("\\.layers\\.se\\.fc1", ".layers.6.fc1", new_nm)
+    new_nm <- sub("\\.layers\\.se\\.fc2", ".layers.6.fc2", new_nm)
+
+    renamed[[new_nm]] <- state_dict[[nm]]
+  }
+  renamed
+}
+
 #' Constructs a MaxViT classification model
 #'
 #' This implementation is based on the "MaxViT: Multi-Axis Vision Transformer" paper.
@@ -178,6 +206,7 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
   if (pretrained) {
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
+    state_dict <- .rename_maxvit_state_dict(state_dict)
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }
