@@ -1,20 +1,20 @@
 # R/model-maxvit.R
 
-conv_norm_act <- function(in_channels, out_channels, kernel_size = 3, stride = 1, padding = 1) {
+conv_norm_act <- function(in_channels, mid_channels = 64, out_channels = 64, ...) {
   nn_sequential(
     "stem.0" = nn_sequential(
-      "0" = nn_conv2d(in_channels, out_channels, kernel_size, stride, padding, bias = FALSE),
-      "1" = nn_batch_norm2d(out_channels, track_running_stats = TRUE),
+      "0" = nn_conv2d(in_channels, mid_channels, ..., bias = FALSE),
+      "1" = nn_batch_norm2d(mid_channels, track_running_stats = TRUE),
       "2" = nn_gelu()
     ),
     "stem.1" = nn_sequential(
-      "0" = nn_conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias = TRUE)
+      "0" = nn_conv2d(mid_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias = TRUE)
     )
   )
 }
 
 se_block <- nn_module(
-  initialize = function(in_channels, squeeze_factor = 4) {
+  initialize = function(in_channels, squeeze_factor = 16) {
     squeeze_channels <- max(1L, as.integer(in_channels / squeeze_factor))
     self$fc1 <- nn_conv2d(in_channels, squeeze_channels, 1)
     self$act1 <- nn_gelu()
@@ -31,10 +31,10 @@ se_block <- nn_module(
 mbconv_block <- nn_module(
   initialize = function(in_channels, out_channels, expansion = 4, stride = 1) {
     hidden_dim <- in_channels * expansion
-    self$expand <- if (expansion != 1) nn_conv2d(in_channels, hidden_dim, 1) else NULL
+    self$expand <- if (expansion != 1) nn_conv2d(in_channels, hidden_dim, 1, bias = FALSE) else NULL
     self$bn1 <- nn_batch_norm2d(hidden_dim)
     self$act1 <- nn_gelu()
-    self$dwconv <- nn_conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups = hidden_dim)
+    self$dwconv <- nn_conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups = hidden_dim, bias = FALSE)
     self$bn2 <- nn_batch_norm2d(hidden_dim)
     self$act2 <- nn_gelu()
     self$se <- se_block(hidden_dim)
@@ -142,10 +142,10 @@ maxvit_stage <- nn_module(
 
 maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
-    self$stem <- conv_norm_act(3, 64, kernel_size = 3, stride = 2, padding = 1)
+    self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
 
     self$stages <- nn_sequential(
-      maxvit_stage(64, 96, 2),
+      maxvit_stage(16, 96, 2),
       maxvit_stage(96, 192, 2),
       maxvit_stage(192, 384, 4),
       maxvit_stage(384, 768, 2)
@@ -167,24 +167,24 @@ maxvit_impl <- nn_module(
 .rename_maxvit_state_dict <- function(state_dict) {
   renamed <- list()
   for (nm in names(state_dict)) {
-    # skip parameters that do not exist in this implementation
     if (grepl("MBconv\\.layers\\.pre_norm", nm))
       next
 
     new_nm <- nm
+    # Match blocks.X.layers.Y.layers.MBconv -> stages.X.blocks.Y
     new_nm <- sub(
       "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv",
-      "stages.\\1.blocks.\\2",
-      new_nm
+      "stages.\\1.blocks.\\2", new_nm
     )
-    new_nm <- sub("\\.proj\\.0", ".layers.7", new_nm)
-    new_nm <- sub("\\.proj\\.1", ".layers.8", new_nm)
-    new_nm <- sub("\\.layers\\.conv_a\\.0", ".layers.0", new_nm)
-    new_nm <- sub("\\.layers\\.conv_a\\.1", ".layers.1", new_nm)
-    new_nm <- sub("\\.layers\\.conv_b\\.0", ".layers.3", new_nm)
-    new_nm <- sub("\\.layers\\.conv_b\\.1", ".layers.4", new_nm)
-    new_nm <- sub("\\.layers\\.se\\.fc1", ".layers.6.fc1", new_nm)
-    new_nm <- sub("\\.layers\\.se\\.fc2", ".layers.6.fc2", new_nm)
+    # Remaining replacements
+    new_nm <- sub("\\.proj\\.1", ".bn3", new_nm)
+    new_nm <- sub("\\.layers\\.conv_a\\.0", ".expand", new_nm)
+    new_nm <- sub("\\.layers\\.conv_a\\.1", ".bn1", new_nm)
+    new_nm <- sub("\\.layers\\.conv_b\\.0", ".dwconv", new_nm)
+    new_nm <- sub("\\.layers\\.conv_b\\.1", ".bn2", new_nm)
+    new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc1", ".se.fc1", new_nm)
+    new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc2", ".se.fc2", new_nm)
+    new_nm <- sub("\\.layers\\.conv_c", ".project", new_nm)
 
     renamed[[new_nm]] <- state_dict[[nm]]
   }
@@ -207,8 +207,21 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
     state_dict <- .rename_maxvit_state_dict(state_dict)
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
+
+    for (k in names(model_state)) {
+      if (!k %in% names(renamed)) {
+        cat("[MISSING]", k, "\n")
+        next
+      }
+      old <- renamed[[k]]
+      new <- model_state[[k]]
+      if (!all(dim(old) == dim(new))) {
+        cat("SHAPE MISMATCH:", k, "\n")
+        cat("Expected:", toString(dim(new)), "\n")
+        cat("Found   :", toString(dim(old)), "\n\n")
+      }
+    }
   }
 
   model
