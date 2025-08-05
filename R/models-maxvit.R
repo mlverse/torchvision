@@ -39,7 +39,7 @@ mbconv_block <- nn_module(
     self$act2 <- nn_gelu()
     self$se <- se_block(hidden_dim)
     self$project <- nn_conv2d(hidden_dim, out_channels, 1)
-    self$bn3 <- nn_batch_norm2d(out_channels, track_running_stats = FALSE)
+    self$bn3 <- nn_batch_norm2d(out_channels)
     self$use_res_connect <- stride == 1 && in_channels == out_channels
   },
   forward = function(x) {
@@ -168,37 +168,106 @@ maxvit_impl <- nn_module(
 # Helper to adapt PyTorch weight names to the R implementation
 .rename_maxvit_state_dict <- function(state_dict) {
   renamed <- list()
+
   for (nm in names(state_dict)) {
-    if (grepl("MBconv\\.layers\\.pre_norm", nm))
-      next
+    # Skip irrelevant keys from Swin-like models
+    if (grepl("window_attention|attn_layer|relative_position", nm)) next
 
     new_nm <- nm
-    # Match blocks.X.layers.Y.layers.MBconv -> stages.X.blocks.Y
+
+    # === MBConv block mapping ===
+    # blocks.X.layers.Y.layers.MBconv.layers.* → stages.X.blocks.Y.*
     new_nm <- sub(
-      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv",
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv\\.layers",
       "stages.\\1.blocks.\\2", new_nm
     )
-    # Attention blocks
-    new_nm <- sub(
-      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.blocks\\.([0-9]+)",
-      "stages.\\1.attn_blocks.\\3", new_nm
-    )
-    # Remaining replacements
-    new_nm <- sub("\\.layers\\.conv_a\\.0", ".expand", new_nm)
-    new_nm <- sub("\\.layers\\.conv_a\\.1", ".bn1", new_nm)
-    new_nm <- sub("\\.layers\\.conv_b\\.0", ".dwconv", new_nm)
-    new_nm <- sub("\\.layers\\.conv_b\\.1", ".bn2", new_nm)
-    new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc1", ".se.fc1", new_nm)
-    new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc2", ".se.fc2", new_nm)
-    new_nm <- sub("\\.layers\\.conv_c", ".project", new_nm)
-    new_nm <- sub("attn\\.", "attn_block.", new_nm)
-    new_nm <- sub("mlp\\.fc1", "mlp.0", new_nm)
-    new_nm <- sub("mlp\\.fc2", "mlp.2", new_nm)
 
+    # blocks.X.layers.Y.layers.MBconv.* → stages.X.blocks.Y.*
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv\\.",
+      "stages.\\1.blocks.\\2.", new_nm
+    )
+
+    # === Pre-normalization ===
+    new_nm <- sub("\\.pre_norm", ".bn3", new_nm)
+
+    # === conv_a (expand) ===
+    new_nm <- sub("\\.conv_a\\.0", ".expand", new_nm)
+    new_nm <- sub("\\.conv_a\\.1", ".bn1", new_nm)
+
+    # === conv_b (depthwise conv) ===
+    new_nm <- sub("\\.conv_b\\.0", ".dwconv", new_nm)
+    new_nm <- sub("\\.conv_b\\.1", ".bn2", new_nm)
+
+    # === squeeze_excitation ===
+    new_nm <- sub("\\.squeeze_excitation", ".se", new_nm)
+
+    # === conv_c (projection) ===
+    new_nm <- sub("\\.conv_c", ".project", new_nm)
+
+    # === Fix incorrect proj.1 naming ===
+    new_nm <- sub("\\.proj\\.1", ".project", new_nm)
+
+    # === Attention blocks ===
+    # Handle grid_attention -> attn_blocks
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.grid_attention\\.mlp_layer\\.0",
+      "stages.\\1.attn_blocks.\\2.norm1", new_nm
+    )
+
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.grid_attention\\.mlp_layer\\.1",
+      "stages.\\1.attn_blocks.\\2.attn_block", new_nm
+    )
+
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.grid_attention\\.mlp_layer\\.3",
+      "stages.\\1.attn_blocks.\\2.norm2", new_nm
+    )
+
+    # window_attention.attn_layer.1 → attn_block
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.window_attention\\.attn_layer\\.1",
+      "stages.\\1.attn_blocks.\\2.attn_block", new_nm
+    )
+
+    # Swin-style attention projection mappings
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.window_attention\\.attn_layer\\.1\\.to_qkv\\.weight",
+      "stages.\\1.attn_blocks.\\2.attn_block.in_proj_weight", new_nm
+    )
+
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.window_attention\\.attn_layer\\.1\\.to_qkv\\.bias",
+      "stages.\\1.attn_blocks.\\2.attn_block.in_proj_bias", new_nm
+    )
+
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.window_attention\\.attn_layer\\.1\\.merge\\.weight",
+      "stages.\\1.attn_blocks.\\2.attn_block.out_proj.weight", new_nm
+    )
+
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.window_attention\\.attn_layer\\.1\\.merge\\.bias",
+      "stages.\\1.attn_blocks.\\2.attn_block.out_proj.bias", new_nm
+    )
+
+
+
+
+
+    # === MLP ===
+    new_nm <- sub("\\.mlp\\.fc1", ".mlp.0", new_nm)
+    new_nm <- sub("\\.mlp\\.fc2", ".mlp.2", new_nm)
+
+    # Store renamed key
     renamed[[new_nm]] <- state_dict[[nm]]
   }
+
   renamed
 }
+
+
 
 #' Constructs a MaxViT classification model
 #'
@@ -217,20 +286,6 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
     state_dict <- torch::load_state_dict(path)
     state_dict <- .rename_maxvit_state_dict(state_dict)
     model$load_state_dict(state_dict, strict = FALSE)
-
-    for (k in names(model_state)) {
-      if (!k %in% names(renamed)) {
-        cat("[MISSING]", k, "\n")
-        next
-      }
-      old <- renamed[[k]]
-      new <- model_state[[k]]
-      if (!all(dim(old) == dim(new))) {
-        cat("SHAPE MISMATCH:", k, "\n")
-        cat("Expected:", toString(dim(new)), "\n")
-        cat("Found   :", toString(dim(old)), "\n\n")
-      }
-    }
   }
 
   model
