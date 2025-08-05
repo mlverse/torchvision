@@ -39,7 +39,7 @@ mbconv_block <- nn_module(
     self$act2 <- nn_gelu()
     self$se <- se_block(hidden_dim)
     self$project <- nn_conv2d(hidden_dim, out_channels, 1)
-    self$bn3 <- nn_batch_norm2d(out_channels)
+    self$bn3 <- nn_batch_norm2d(out_channels, track_running_stats = FALSE)
     self$use_res_connect <- stride == 1 && in_channels == out_channels
   },
   forward = function(x) {
@@ -117,11 +117,13 @@ grid_attention <- nn_module(
 )
 
 maxvit_stage <- nn_module(
-  initialize = function(in_channels, out_channels, depth) {
+  initialize = function(in_channels, out_channels, depth, expansions = rep(4, depth)) {
     self$blocks <- nn_module_list()
-    self$blocks$append(mbconv_block(in_channels, out_channels, stride = 2))
-    for (i in 2:depth) {
-      self$blocks$append(mbconv_block(out_channels, out_channels))
+    self$blocks$append(mbconv_block(in_channels, out_channels, expansion = expansions[1], stride = 2))
+    if (depth > 1) {
+      for (i in 2:depth) {
+        self$blocks$append(mbconv_block(out_channels, out_channels, expansion = expansions[i]))
+      }
     }
     self$attn_blocks <- nn_module_list()
     for (i in 1:depth) {
@@ -145,14 +147,14 @@ maxvit_impl <- nn_module(
     self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
 
     self$stages <- nn_sequential(
-      maxvit_stage(16, 96, 2),
-      maxvit_stage(96, 192, 2),
-      maxvit_stage(192, 384, 4),
-      maxvit_stage(384, 768, 2)
+      maxvit_stage(64, 64, 2, expansions = c(4, 4)),
+      maxvit_stage(64, 128, 2, expansions = c(8, 4)),
+      maxvit_stage(128, 256, 4, expansions = c(8, 4, 4, 4)),
+      maxvit_stage(256, 512, 2, expansions = c(8, 4))
     )
 
     self$pool <- nn_adaptive_avg_pool2d(c(1, 1))
-    self$fc <- nn_linear(768, num_classes)
+    self$fc <- nn_linear(512, num_classes)
   },
   forward = function(x) {
     x <- self$stem(x)
@@ -176,8 +178,12 @@ maxvit_impl <- nn_module(
       "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.layers\\.MBconv",
       "stages.\\1.blocks.\\2", new_nm
     )
+    # Attention blocks
+    new_nm <- sub(
+      "^blocks\\.([0-9]+)\\.layers\\.([0-9]+)\\.blocks\\.([0-9]+)",
+      "stages.\\1.attn_blocks.\\3", new_nm
+    )
     # Remaining replacements
-    new_nm <- sub("\\.proj\\.1", ".bn3", new_nm)
     new_nm <- sub("\\.layers\\.conv_a\\.0", ".expand", new_nm)
     new_nm <- sub("\\.layers\\.conv_a\\.1", ".bn1", new_nm)
     new_nm <- sub("\\.layers\\.conv_b\\.0", ".dwconv", new_nm)
@@ -185,6 +191,9 @@ maxvit_impl <- nn_module(
     new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc1", ".se.fc1", new_nm)
     new_nm <- sub("\\.layers\\.squeeze_excitation\\.fc2", ".se.fc2", new_nm)
     new_nm <- sub("\\.layers\\.conv_c", ".project", new_nm)
+    new_nm <- sub("attn\\.", "attn_block.", new_nm)
+    new_nm <- sub("mlp\\.fc1", "mlp.0", new_nm)
+    new_nm <- sub("mlp\\.fc2", "mlp.2", new_nm)
 
     renamed[[new_nm]] <- state_dict[[nm]]
   }
