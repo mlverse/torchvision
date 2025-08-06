@@ -147,36 +147,23 @@ maxvit_block <- nn_module(
   }
 )
 
-maxvit_stage <- nn_module(
-  initialize = function(in_channels, out_channels, depth, expansions = rep(4, depth)) {
-    self$layers <- nn_module_list()
-    self$layers$append(maxvit_block(in_channels, out_channels, expansions[1], stride = 2))
-    if (depth > 1) {
-      for (i in 2:depth) {
-        self$layers$append(maxvit_block(out_channels, out_channels, expansions[i], stride = 1))
-      }
-    }
-  },
-
-  forward = function(x) {
-    for (layer in self$layers) {
-      x <- layer(x)
-    }
-    x
-  }
-)
-
 maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
     self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
     self$blocks <- nn_sequential(
-      "0" = maxvit_stage(64, 128, 2, expansions = c(4, 4)),
-      "1" = maxvit_stage(128, 256, 2, expansions = c(4, 4)),
-      "2" = maxvit_stage(256, 512, 4, expansions = c(4, 4, 4, 4)),
-      "3" = maxvit_stage(512, 1024, 2, expansions = c(4, 4))
+      "0" = maxvit_block(64, 64, expansion = 4, stride = 2),
+      "1" = maxvit_block(64, 64, expansion = 4, stride = 1),
+      "2" = maxvit_block(64, 64, expansion = 8, stride = 2),
+      "3" = maxvit_block(64, 128, expansion = 8, stride = 1),
+      "4" = maxvit_block(128, 128, expansion = 8, stride = 2),
+      "5" = maxvit_block(128, 256, expansion = 8, stride = 1),
+      "6" = maxvit_block(256, 256, expansion = 4, stride = 1),
+      "7" = maxvit_block(256, 256, expansion = 4, stride = 1),
+      "8" = maxvit_block(256, 256, expansion = 8, stride = 2),
+      "9" = maxvit_block(256, 512, expansion = 8, stride = 1)
     )
     self$pool <- nn_adaptive_avg_pool2d(c(1, 1))
-    self$fc <- nn_linear(1024, num_classes)
+    self$fc <- nn_linear(512, num_classes)
   },
 
   forward = function(x) {
@@ -194,20 +181,14 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
   if (pretrained) {
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
+
+    # Optionally filter num_batches_tracked if needed
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
 
-    model_state <- model$state_dict()
-    for (name in names(state_dict)) {
-      if (!name %in% names(model_state)) next
-      a <- state_dict[[name]]
-      b <- model_state[[name]]
-      if (!all(dim(a) == dim(b))) {
-        cat("❌ SHAPE MISMATCH: ", name, "\n")
-        cat("Expected: ", paste(dim(b), collapse = ", "), "\n")
-        cat("Found   : ", paste(dim(a), collapse = ", "), "\n\n")
-      }
-    }
+    # Actually load the weights
+    model$load_state_dict(state_dict, strict = FALSE)
   }
 
   model
 }
+
