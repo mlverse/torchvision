@@ -151,16 +151,16 @@ maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
     self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
     self$blocks <- nn_sequential(
-      "0" = maxvit_block(64, 64, expansion = 4, stride = 2),
-      "1" = maxvit_block(64, 64, expansion = 4, stride = 1),
-      "2" = maxvit_block(64, 64, expansion = 8, stride = 2),
-      "3" = maxvit_block(64, 128, expansion = 8, stride = 1),
-      "4" = maxvit_block(128, 128, expansion = 8, stride = 2),
-      "5" = maxvit_block(128, 256, expansion = 8, stride = 1),
-      "6" = maxvit_block(256, 256, expansion = 4, stride = 1),
-      "7" = maxvit_block(256, 256, expansion = 4, stride = 1),
-      "8" = maxvit_block(256, 256, expansion = 8, stride = 2),
-      "9" = maxvit_block(256, 512, expansion = 8, stride = 1)
+      "0" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 4, stride = 2))),
+      "1" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 4, stride = 1))),
+      "2" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 8, stride = 2))),
+      "3" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 128, expansion = 8, stride = 1))),
+      "4" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(128, 128, expansion = 8, stride = 2))),
+      "5" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(128, 256, expansion = 8, stride = 1))),
+      "6" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 4, stride = 1))),
+      "7" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 4, stride = 1))),
+      "8" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 8, stride = 2))),
+      "9" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 512, expansion = 8, stride = 1)))
     )
     self$pool <- nn_adaptive_avg_pool2d(c(1, 1))
     self$fc <- nn_linear(512, num_classes)
@@ -191,4 +191,3 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
 
   model
 }
-
