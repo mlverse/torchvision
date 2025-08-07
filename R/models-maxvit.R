@@ -36,7 +36,7 @@ create_relative_position_params <- function(window_size, heads) {
   relative_position_index <- torch_zeros(window_size * window_size, window_size * window_size, dtype = torch_long())
 
   # Create bias table
-  num_relative_distance <- (2 * window_size - 1) * (2 * window_size - 1) + 3
+  num_relative_distance <- (2 * window_size - 1) * (2 * window_size - 1)
   relative_position_bias_table <- torch_zeros(num_relative_distance, heads)
 
   list(
@@ -108,9 +108,10 @@ window_attention <- nn_module(
 )
 
 grid_attention <- nn_module(
-  initialize = function(dim, heads = 4) {
+  initialize = function(dim, heads = 2, grid_size = 7) {
     self$dim <- dim
     self$heads <- heads
+    self$grid_size <- grid_size
 
     # Layer structure to match expected keys
     self$attn_layer <- nn_module_dict(list(
@@ -123,7 +124,7 @@ grid_attention <- nn_module(
     ))
 
     # Add relative position parameters as buffers/parameters
-    rel_pos_params <- create_relative_position_params(2, heads)  # 2x2 grid
+    rel_pos_params <- create_relative_position_params(grid_size, heads)
     self$attn_layer[["1"]][["relative_position_bias_table"]] <- nn_parameter(rel_pos_params$relative_position_bias_table)
     self$register_buffer("attn_layer.1.relative_position_index", rel_pos_params$relative_position_index)
 
@@ -137,8 +138,9 @@ grid_attention <- nn_module(
 
   forward = function(x) {
     b <- x$size(1); c <- x$size(2); h <- x$size(3); w <- x$size(4)
-    gh <- h %/% 2; gw <- w %/% 2
-    x <- x$reshape(c(b, c, gh, 2, gw, 2))$permute(c(1, 3, 5, 4, 6, 2))$reshape(c(b * gh * gw, 4, c))
+    gs <- self$grid_size
+    gh <- h %/% gs; gw <- w %/% gs
+    x <- x$reshape(c(b, c, gh, gs, gw, gs))$permute(c(1, 3, 5, 4, 6, 2))$reshape(c(b * gh * gw, gs * gs, c))
 
     # Attention path
     normed <- self$attn_layer[["0"]](x)
@@ -164,7 +166,7 @@ grid_attention <- nn_module(
     mlp_out <- self$mlp_layer[["3"]](mlp_out)
     x <- x + mlp_out
 
-    x <- x$reshape(c(b, gh, gw, 2, 2, c))$permute(c(1, 6, 2, 4, 3, 5))$reshape(c(b, c, h, w))
+    x <- x$reshape(c(b, gh, gw, gs, gs, c))$permute(c(1, 6, 2, 4, 3, 5))$reshape(c(b, c, h, w))
     x
   }
 )
@@ -189,11 +191,18 @@ mbconv <- nn_module(
       conv_c = nn_conv2d(hidden_dim, out_channels, 1, bias = TRUE)
     ))
 
-    # Fixed projection layer structure
-    self$proj <- nn_sequential(
-      "0" = nn_identity(),
-      "1" = nn_conv2d(out_channels, out_channels, 1, bias = TRUE)  # Changed to conv2d with proper shape
-    )
+    # Only add projection layer for blocks that change dimensions
+    self$has_proj <- (stride != 1 || in_channels != out_channels)
+    if (self$has_proj) {
+      self$proj <- nn_sequential(
+        "0" = nn_identity(),
+        "1" = nn_conv2d(in_channels, out_channels, 1, bias = TRUE)
+      )
+    } else {
+      self$proj <- nn_sequential(
+        "0" = nn_identity()
+      )
+    }
 
     self$use_res_connect <- stride == 1 && in_channels == out_channels
   },
@@ -209,6 +218,14 @@ mbconv <- nn_module(
 
     if (self$use_res_connect) {
       out <- out + identity
+    } else if (self$has_proj) {
+      # For dimension-changing blocks, apply projection to identity
+      identity <- self$proj[["1"]](identity)
+      # Handle stride mismatch with pooling if needed
+      if (identity$size(3) != out$size(3) || identity$size(4) != out$size(4)) {
+        identity <- torch_nn_functional_avg_pool2d(identity, kernel_size = 2, stride = 2)
+      }
+      out <- out + identity
     }
 
     out
@@ -216,11 +233,11 @@ mbconv <- nn_module(
 )
 
 maxvit_block <- nn_module(
-  initialize = function(in_channels, out_channels, expansion = 4, stride = 1) {
+  initialize = function(in_channels, out_channels, expansion = 4, stride = 1, num_heads = 2) {
     self$layers <- nn_module_dict(list(
       MBconv = mbconv(in_channels, out_channels, expansion, stride),
-      window_attention = window_attention(out_channels),
-      grid_attention = grid_attention(out_channels)
+      window_attention = window_attention(out_channels, heads = num_heads),
+      grid_attention = grid_attention(out_channels, heads = num_heads)
     ))
   },
 
@@ -249,28 +266,28 @@ maxvit_impl <- nn_module(
     )
 
     self$blocks <- nn_module_list(list(
-      # stage 0
+      # stage 0 - 2 heads (default)
       maxvit_stage(
-        "0" = maxvit_block(64, 64, expansion = 4, stride = 2),
-        "1" = maxvit_block(64, 64, expansion = 4, stride = 1)
+        "0" = maxvit_block(64, 64, expansion = 4, stride = 2, num_heads = 2),
+        "1" = maxvit_block(64, 64, expansion = 4, stride = 1, num_heads = 2)
       ),
-      # stage 1
+      # stage 1 - 4 heads
       maxvit_stage(
-        "0" = maxvit_block(64, 128, expansion = 8, stride = 2),
-        "1" = maxvit_block(128, 128, expansion = 4, stride = 1)
+        "0" = maxvit_block(64, 128, expansion = 8, stride = 2, num_heads = 4),
+        "1" = maxvit_block(128, 128, expansion = 4, stride = 1, num_heads = 4)
       ),
-      # stage 2
+      # stage 2 - 8 heads
       maxvit_stage(
-        "0" = maxvit_block(128, 256, expansion = 8, stride = 2),
-        "1" = maxvit_block(256, 256, expansion = 4, stride = 1),
-        "2" = maxvit_block(256, 256, expansion = 4, stride = 1),
-        "3" = maxvit_block(256, 256, expansion = 4, stride = 1),
-        "4" = maxvit_block(256, 256, expansion = 4, stride = 1)
+        "0" = maxvit_block(128, 256, expansion = 8, stride = 2, num_heads = 8),
+        "1" = maxvit_block(256, 256, expansion = 4, stride = 1, num_heads = 8),
+        "2" = maxvit_block(256, 256, expansion = 4, stride = 1, num_heads = 8),
+        "3" = maxvit_block(256, 256, expansion = 4, stride = 1, num_heads = 8),
+        "4" = maxvit_block(256, 256, expansion = 4, stride = 1, num_heads = 8)
       ),
-      # stage 3
+      # stage 3 - 16 heads
       maxvit_stage(
-        "0" = maxvit_block(256, 512, expansion = 8, stride = 2),
-        "1" = maxvit_block(512, 512, expansion = 4, stride = 1)
+        "0" = maxvit_block(256, 512, expansion = 8, stride = 2, num_heads = 16),
+        "1" = maxvit_block(512, 512, expansion = 4, stride = 1, num_heads = 16)
       )
     ))
 
@@ -280,22 +297,24 @@ maxvit_impl <- nn_module(
     self$classifier <- nn_sequential(
       "0" = nn_identity(),
       "1" = nn_identity(),
-      "2" = nn_linear(512, 512, bias = TRUE),
+      "2" = nn_layer_norm(512),
       "3" = nn_linear(512, 512, bias = TRUE),
       "4" = nn_identity(),
-      "5" = nn_linear(512, 512, bias = FALSE)  # Additional classifier layer
+      "5" = nn_linear(512, num_classes, bias = FALSE)  # Additional classifier layer
     )
   },
 
   forward = function(x) {
     x <- self$stem(x)
-    for (stage in self$blocks) {
+
+    for (i in seq_along(self$blocks)) {
+      stage <- self$blocks[[i]]
       x <- stage(x)
     }
+
     x <- self$pool(x)
     x <- x$flatten(start_dim = 2)
-    x <- self$classifier[["3"]](x)  # Use only the main classifier
-    x
+    self$fc(x)
   }
 )
 
@@ -346,9 +365,6 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
 
     model_state <- model$state_dict()
     model_state <- model_state[!grepl("num_batches_tracked$", names(model_state))]
-
-    # Compare shapes before loading
-    compare_state_dict_shapes(model_state, state_dict)
 
     model$load_state_dict(state_dict, strict = FALSE)
   }
