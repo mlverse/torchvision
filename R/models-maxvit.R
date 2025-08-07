@@ -179,7 +179,7 @@ maxvit_impl <- nn_module(
     ))
 
     self$pool <- nn_adaptive_avg_pool2d(c(1, 1))
-    self$fc <- nn_linear(512, num_classes)
+    self$fc <- nn_linear(512, 512)
   },
 
   forward = function(x) {
@@ -197,10 +197,13 @@ maxvit_impl <- nn_module(
   renamed <- list()
 
   for (nm in names(state_dict)) {
-    # Skip relative position bias
-    if (grepl("relative_position", nm)) next
 
     new_nm <- nm
+
+    # MBConv projection layers
+    if (grepl("\\.proj\\.0\\.(weight|bias)$", new_nm)) {
+      new_nm <- sub("\\.proj\\.0\\.", ".layers.conv_c.", new_nm)
+    }
 
     # Attention + MLP layer renaming
     new_nm <- sub("attn_layer\\.0\\.", "norm1.", new_nm)
@@ -211,12 +214,10 @@ maxvit_impl <- nn_module(
     new_nm <- sub("mlp_layer\\.3\\.", "mlp.2.", new_nm)
 
     # Classifier replacements
-    if (startsWith(new_nm, "classifier.2.")) {
-      new_nm <- sub("^classifier\\.2\\.", "fc.", new_nm)
-    }
-
-    if (startsWith(new_nm, "classifier.3.") || startsWith(new_nm, "classifier.5.")) {
-      next  # Skip these
+    if (startsWith(new_nm, "classifier.3.")) {
+      new_nm <- sub("^classifier\\.3\\.", "fc.", new_nm)
+    } else if (startsWith(new_nm, "classifier.2.") || startsWith(new_nm, "classifier.5.")) {
+      next
     }
 
     renamed[[new_nm]] <- state_dict[[nm]]
