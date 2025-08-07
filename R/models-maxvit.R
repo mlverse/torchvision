@@ -32,46 +32,39 @@ squeeze_excitation <- nn_module(
 mbconv <- nn_module(
   initialize = function(in_channels, out_channels, expansion = 4, stride = 1) {
     hidden_dim <- in_channels * expansion
-    self$use_expansion <- expansion != 1
 
-    layers_list <- list()
-    if (self$use_expansion) {
-      layers_list[["conv_a"]] <- nn_sequential(
+    self$layers <- nn_module_dict(list(
+      pre_norm = nn_batch_norm2d(in_channels, track_running_stats = TRUE),
+      conv_a = nn_sequential(
         "0" = nn_conv2d(in_channels, hidden_dim, 1, bias = FALSE),
-        "1" = nn_batch_norm2d(hidden_dim, track_running_stats = TRUE)
-      )
-    }
+        "1" = nn_batch_norm2d(hidden_dim, track_running_stats = TRUE),
+        "2" = nn_gelu()
+      ),
+      conv_b = nn_sequential(
+        "0" = nn_conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups = hidden_dim, bias = FALSE),
+        "1" = nn_batch_norm2d(hidden_dim, track_running_stats = TRUE),
+        "2" = nn_gelu()
+      ),
+      squeeze_excitation = squeeze_excitation(hidden_dim),
+      conv_c = nn_conv2d(hidden_dim, out_channels, 1, bias = TRUE)
+    ))
 
-    layers_list[["conv_b"]] <- nn_sequential(
-      "0" = nn_conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups = hidden_dim, bias = FALSE),
-      "1" = nn_batch_norm2d(hidden_dim, track_running_stats = TRUE)
+    self$proj <- nn_sequential(
+      "0" = nn_identity(),
+      "1" = nn_batch_norm2d(out_channels, track_running_stats = TRUE)
     )
-
-    layers_list[["squeeze_excitation"]] <- squeeze_excitation(hidden_dim)
-    layers_list[["pre_norm"]] <- nn_batch_norm2d(out_channels, track_running_stats = TRUE)
-    self$layers <- nn_module_dict(layers_list)
-
-    proj_dict <- list()
-    proj_dict[["1"]] <- nn_conv2d(hidden_dim, out_channels, 1)
-    self$proj <- nn_module_dict(proj_dict)
 
     self$use_res_connect <- stride == 1 && in_channels == out_channels
   },
 
   forward = function(x) {
     identity <- x
-    out <- x
-
-    if (self$use_expansion) {
-      out <- self$layers[["conv_a"]](out)
-      out <- torch_gelu(out)
-    }
-
-    out <- self$layers[["conv_b"]](out)
-    out <- torch_gelu(out)
-    out <- self$layers[["squeeze_excitation"]](out)
-    out <- self$proj[["1"]](out)
-    out <- self$layers[["pre_norm"]](out)
+    out <- self$layers$pre_norm(x)
+    out <- self$layers$conv_a(out)
+    out <- self$layers$conv_b(out)
+    out <- self$layers$squeeze_excitation(out)
+    out <- self$layers$conv_c(out)
+    out <- self$proj(out)
 
     if (self$use_res_connect) {
       out <- out + identity
@@ -83,23 +76,21 @@ mbconv <- nn_module(
 
 window_attention <- nn_module(
   initialize = function(dim, heads = 4) {
-    self$attn_layer <- nn_sequential(
-      "0" = nn_layer_norm(dim),
-      "1" = nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
+    self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
+    self$norm1 <- nn_layer_norm(dim)
+    self$mlp <- nn_sequential(
+      nn_linear(dim, dim * 4),
+      nn_gelu(),
+      nn_linear(dim * 4, dim)
     )
-    self$mlp_layer <- nn_sequential(
-      "0" = nn_layer_norm(dim),
-      "1" = nn_linear(dim, dim * 4),
-      "2" = nn_gelu(),
-      "3" = nn_linear(dim * 4, dim)
-    )
+    self$norm2 <- nn_layer_norm(dim)
   },
 
   forward = function(x) {
     b <- x$size(1); c <- x$size(2); h <- x$size(3); w <- x$size(4)
     x <- x$permute(c(1, 3, 4, 2))$reshape(c(b, h * w, c))
-    x <- x + self$attn_layer[[2]](self$attn_layer[[1]](x), x, x)[[1]]
-    x <- x + self$mlp_layer(x)
+    x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
+    x <- x + self$mlp(self$norm2(x))
     x <- x$reshape(c(b, h, w, c))$permute(c(1, 4, 2, 3))
     x
   }
@@ -107,24 +98,22 @@ window_attention <- nn_module(
 
 grid_attention <- nn_module(
   initialize = function(dim, heads = 4) {
-    self$attn_layer <- nn_sequential(
-      "0" = nn_layer_norm(dim),
-      "1" = nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
+    self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
+    self$norm1 <- nn_layer_norm(dim)
+    self$mlp <- nn_sequential(
+      nn_linear(dim, dim * 4),
+      nn_gelu(),
+      nn_linear(dim * 4, dim)
     )
-    self$mlp_layer <- nn_sequential(
-      "0" = nn_layer_norm(dim),
-      "1" = nn_linear(dim, dim * 4),
-      "2" = nn_gelu(),
-      "3" = nn_linear(dim * 4, dim)
-    )
+    self$norm2 <- nn_layer_norm(dim)
   },
 
   forward = function(x) {
     b <- x$size(1); c <- x$size(2); h <- x$size(3); w <- x$size(4)
     gh <- h %/% 2; gw <- w %/% 2
     x <- x$reshape(c(b, c, gh, 2, gw, 2))$permute(c(1, 3, 5, 4, 6, 2))$reshape(c(b * gh * gw, 4, c))
-    x <- x + self$attn_layer[[2]](self$attn_layer[[1]](x), x, x)[[1]]
-    x <- x + self$mlp_layer(x)
+    x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
+    x <- x + self$mlp(self$norm2(x))
     x <- x$reshape(c(b, gh, gw, 2, 2, c))$permute(c(1, 6, 2, 4, 3, 5))$reshape(c(b, c, h, w))
     x
   }
@@ -147,50 +136,62 @@ maxvit_block <- nn_module(
   }
 )
 
+maxvit_stage <- nn_module(
+  initialize = function(...) {
+    self$layers <- nn_sequential(...)
+  },
+  forward = function(x) {
+    self$layers(x)
+  }
+)
+
 maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
-    self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
-    self$blocks <- nn_sequential(
-      "0" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 4, stride = 2))),
-      "1" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 8, stride = 1))),
-      "2" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 8, stride = 2))),
-      "3" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 128, expansion = 8, stride = 1))),
-      "4" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(128, 128, expansion = 8, stride = 2))),
-      "5" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(128, 256, expansion = 8, stride = 1))),
-      "6" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 4, stride = 1))),
-      "7" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 4, stride = 1))),
-      "8" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 256, expansion = 8, stride = 2))),
-      "9" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(256, 512, expansion = 8, stride = 1)))
+    self$stem <- conv_norm_act(
+      3, mid_channels = 64, out_channels = 64,
+      kernel_size = 3, stride = 2, padding = 1
     )
+
+    self$blocks <- nn_module_list(list(
+      # stage 0
+      maxvit_stage(
+        "0" = maxvit_block(64, 64, expansion = 4, stride = 2),
+        "1" = maxvit_block(64, 64, expansion = 4, stride = 1)
+      ),
+      # stage 1
+      maxvit_stage(
+        "0" = maxvit_block(64, 128, expansion = 8, stride = 2),
+        "1" = maxvit_block(128, 128, expansion = 4, stride = 1)
+      ),
+      # stage 2
+      maxvit_stage(
+        "0" = maxvit_block(128, 256, expansion = 8, stride = 2),
+        "1" = maxvit_block(256, 256, expansion = 4, stride = 1),
+        "2" = maxvit_block(256, 256, expansion = 4, stride = 1),
+        "3" = maxvit_block(256, 256, expansion = 4, stride = 1),
+        "4" = maxvit_block(256, 256, expansion = 4, stride = 1)
+      ),
+      # stage 3
+      maxvit_stage(
+        "0" = maxvit_block(256, 512, expansion = 8, stride = 2),
+        "1" = maxvit_block(512, 512, expansion = 4, stride = 1)
+      )
+    ))
+
     self$pool <- nn_adaptive_avg_pool2d(c(1, 1))
     self$fc <- nn_linear(512, num_classes)
   },
 
   forward = function(x) {
     x <- self$stem(x)
-    x <- self$blocks(x)
+    for (stage in self$blocks) {
+      x <- stage(x)
+    }
     x <- self$pool(x)
     x <- x$flatten(start_dim = 2)
     self$fc(x)
   }
 )
-
-.rename_maxvit_state_dict <- function(state_dict) {
-  renamed <- list()
-
-  for (nm in names(state_dict)) {
-    new_nm <- nm
-
-    # Convert blocks.<block>.layers.<layer> → blocks.<block>.<layer>.0
-    new_nm <- sub("^blocks\\.([0-9]+)\\.layers\\.([0-9]+)", "blocks.\\1.\\2.0", new_nm)
-
-    renamed[[new_nm]] <- state_dict[[nm]]
-  }
-
-  renamed
-}
-
-
 model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...) {
   model <- maxvit_impl(num_classes = num_classes)
 
@@ -198,10 +199,12 @@ model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    state_dict <- .rename_maxvit_state_dict(state_dict)
+
+    model_state <- model$state_dict()
+    model_state <- model_state[!grepl("num_batches_tracked$", names(model_state))]
 
     # Compare shapes before loading
-    compare_state_dict_shapes(model$state_dict(), state_dict)
+    compare_state_dict_shapes(model_state, state_dict)
 
     model$load_state_dict(state_dict, strict = FALSE)
   }
