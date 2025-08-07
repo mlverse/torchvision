@@ -152,7 +152,7 @@ maxvit_impl <- nn_module(
     self$stem <- conv_norm_act(3, mid_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding = 1)
     self$blocks <- nn_sequential(
       "0" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 4, stride = 2))),
-      "1" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 4, stride = 1))),
+      "1" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 8, stride = 1))),
       "2" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 64, expansion = 8, stride = 2))),
       "3" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(64, 128, expansion = 8, stride = 1))),
       "4" = nn_sequential("layers" = nn_sequential("0" = maxvit_block(128, 128, expansion = 8, stride = 2))),
@@ -175,17 +175,34 @@ maxvit_impl <- nn_module(
   }
 )
 
+.rename_maxvit_state_dict <- function(state_dict) {
+  renamed <- list()
+
+  for (nm in names(state_dict)) {
+    new_nm <- nm
+
+    # Convert blocks.<block>.layers.<layer> → blocks.<block>.<layer>.0
+    new_nm <- sub("^blocks\\.([0-9]+)\\.layers\\.([0-9]+)", "blocks.\\1.\\2.0", new_nm)
+
+    renamed[[new_nm]] <- state_dict[[nm]]
+  }
+
+  renamed
+}
+
+
 model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...) {
   model <- maxvit_impl(num_classes = num_classes)
 
   if (pretrained) {
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
-
-    # Optionally filter num_batches_tracked if needed
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
+    state_dict <- .rename_maxvit_state_dict(state_dict)
 
-    # Actually load the weights
+    # Compare shapes before loading
+    compare_state_dict_shapes(model$state_dict(), state_dict)
+
     model$load_state_dict(state_dict, strict = FALSE)
   }
 
