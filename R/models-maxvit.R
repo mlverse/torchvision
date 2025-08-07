@@ -78,7 +78,7 @@ window_attention <- nn_module(
   initialize = function(dim, heads = 4) {
     self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
     self$norm1 <- nn_layer_norm(dim)
-    self$mlp_layer <- nn_sequential(
+    self$mlp <- nn_sequential(
       nn_linear(dim, dim * 4),
       nn_gelu(),
       nn_linear(dim * 4, dim)
@@ -90,7 +90,7 @@ window_attention <- nn_module(
     b <- x$size(1); c <- x$size(2); h <- x$size(3); w <- x$size(4)
     x <- x$permute(c(1, 3, 4, 2))$reshape(c(b, h * w, c))
     x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
-    x <- x + self$mlp_layer(self$norm2(x))
+    x <- x + self$mlp(self$norm2(x))
     x <- x$reshape(c(b, h, w, c))$permute(c(1, 4, 2, 3))
     x
   }
@@ -100,7 +100,7 @@ grid_attention <- nn_module(
   initialize = function(dim, heads = 4) {
     self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
     self$norm1 <- nn_layer_norm(dim)
-    self$mlp_layer <- nn_sequential(
+    self$mlp <- nn_sequential(
       nn_linear(dim, dim * 4),
       nn_gelu(),
       nn_linear(dim * 4, dim)
@@ -113,7 +113,7 @@ grid_attention <- nn_module(
     gh <- h %/% 2; gw <- w %/% 2
     x <- x$reshape(c(b, c, gh, 2, gw, 2))$permute(c(1, 3, 5, 4, 6, 2))$reshape(c(b * gh * gw, 4, c))
     x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
-    x <- x + self$mlp_layer(self$norm2(x))
+    x <- x + self$mlp(self$norm2(x))
     x <- x$reshape(c(b, gh, gw, 2, 2, c))$permute(c(1, 6, 2, 4, 3, 5))$reshape(c(b, c, h, w))
     x
   }
