@@ -51,7 +51,7 @@ mbconv <- nn_module(
 
     self$proj <- nn_sequential(
       "0" = nn_identity(),
-      "1" = nn_batch_norm2d(out_channels, track_running_stats = TRUE)
+      "1" = nn_batch_norm2d(out_channels, track_running_stats = FALSE)
     )
 
     self$use_res_connect <- stride == 1 && in_channels == out_channels
@@ -78,7 +78,7 @@ window_attention <- nn_module(
   initialize = function(dim, heads = 4) {
     self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
     self$norm1 <- nn_layer_norm(dim)
-    self$mlp <- nn_sequential(
+    self$mlp_layer <- nn_sequential(
       nn_linear(dim, dim * 4),
       nn_gelu(),
       nn_linear(dim * 4, dim)
@@ -90,7 +90,7 @@ window_attention <- nn_module(
     b <- x$size(1); c <- x$size(2); h <- x$size(3); w <- x$size(4)
     x <- x$permute(c(1, 3, 4, 2))$reshape(c(b, h * w, c))
     x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
-    x <- x + self$mlp(self$norm2(x))
+    x <- x + self$mlp_layer(self$norm2(x))
     x <- x$reshape(c(b, h, w, c))$permute(c(1, 4, 2, 3))
     x
   }
@@ -100,7 +100,7 @@ grid_attention <- nn_module(
   initialize = function(dim, heads = 4) {
     self$attn <- nn_multihead_attention(embed_dim = dim, num_heads = heads, batch_first = TRUE)
     self$norm1 <- nn_layer_norm(dim)
-    self$mlp <- nn_sequential(
+    self$mlp_layer <- nn_sequential(
       nn_linear(dim, dim * 4),
       nn_gelu(),
       nn_linear(dim * 4, dim)
@@ -113,7 +113,7 @@ grid_attention <- nn_module(
     gh <- h %/% 2; gw <- w %/% 2
     x <- x$reshape(c(b, c, gh, 2, gw, 2))$permute(c(1, 3, 5, 4, 6, 2))$reshape(c(b * gh * gw, 4, c))
     x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
-    x <- x + self$mlp(self$norm2(x))
+    x <- x + self$mlp_layer(self$norm2(x))
     x <- x$reshape(c(b, gh, gw, 2, 2, c))$permute(c(1, 6, 2, 4, 3, 5))$reshape(c(b, c, h, w))
     x
   }
@@ -192,12 +192,46 @@ maxvit_impl <- nn_module(
     self$fc(x)
   }
 )
+
+.rename_maxvit_state_dict <- function(state_dict) {
+  renamed <- list()
+
+  for (nm in names(state_dict)) {
+    # Skip relative position bias
+    if (grepl("relative_position", nm)) next
+
+    new_nm <- nm
+
+    # Attention + MLP layer renaming
+    new_nm <- sub("attn_layer\\.0\\.", "norm1.", new_nm)
+    new_nm <- sub("attn_layer\\.1\\.to_qkv\\.", "attn.in_proj_", new_nm)
+    new_nm <- sub("attn_layer\\.1\\.merge\\.", "attn.out_proj.", new_nm)
+    new_nm <- sub("mlp_layer\\.0\\.", "norm2.", new_nm)
+    new_nm <- sub("mlp_layer\\.1\\.", "mlp.0.", new_nm)
+    new_nm <- sub("mlp_layer\\.3\\.", "mlp.2.", new_nm)
+
+    # Classifier replacements
+    if (startsWith(new_nm, "classifier.2.")) {
+      new_nm <- sub("^classifier\\.2\\.", "fc.", new_nm)
+    }
+
+    if (startsWith(new_nm, "classifier.3.") || startsWith(new_nm, "classifier.5.")) {
+      next  # Skip these
+    }
+
+    renamed[[new_nm]] <- state_dict[[nm]]
+  }
+
+  renamed
+}
+
 model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...) {
   model <- maxvit_impl(num_classes = num_classes)
 
   if (pretrained) {
     path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/maxvit.pth")
     state_dict <- torch::load_state_dict(path)
+    state_dict <- .rename_maxvit_state_dict(state_dict)
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
 
     model_state <- model$state_dict()
