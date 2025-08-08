@@ -22,7 +22,7 @@ squeeze_excitation <- nn_module(
   forward = function(x) {
     scale <- x$mean(dim = c(3, 4), keepdim = TRUE)
     scale <- self$fc1(scale)
-    scale <- torch_gelu(scale)
+    scale <- nnf_gelu(scale)
     scale <- self$fc2(scale)
     scale <- torch_sigmoid(scale)
     x * scale
@@ -89,7 +89,7 @@ window_attention <- nn_module(
     # Simplified attention computation
     scale <- 1.0 / sqrt(c / self$heads)
     attn <- torch_matmul(q, k$transpose(-2, -1)) * scale
-    attn <- torch_softmax(attn, dim = -1)
+    attn <- nnf_softmax(attn, dim = -1)
     out <- torch_matmul(attn, v)
     out <- self$attn_layer[["1"]][["merge"]](out)
 
@@ -153,7 +153,7 @@ grid_attention <- nn_module(
     # Simplified attention computation
     scale <- 1.0 / sqrt(c / self$heads)
     attn <- torch_matmul(q, k$transpose(-2, -1)) * scale
-    attn <- torch_softmax(attn, dim = -1)
+    attn <- nnf_softmax(attn, dim = -1)
     out <- torch_matmul(attn, v)
     out <- self$attn_layer[["1"]][["merge"]](out)
 
@@ -214,16 +214,13 @@ mbconv <- nn_module(
     out <- self$layers$conv_b(out)
     out <- self$layers$squeeze_excitation(out)
     out <- self$layers$conv_c(out)
-    out <- self$proj(out)
 
     if (self$use_res_connect) {
       out <- out + identity
     } else if (self$has_proj) {
-      # For dimension-changing blocks, apply projection to identity
-      identity <- self$proj[["1"]](identity)
-      # Handle stride mismatch with pooling if needed
+      identity <- self$proj(identity)
       if (identity$size(3) != out$size(3) || identity$size(4) != out$size(4)) {
-        identity <- torch_nn_functional_avg_pool2d(identity, kernel_size = 2, stride = 2)
+        identity <- nnf_avg_pool2d(identity, kernel_size = 2, stride = 2)
       }
       out <- out + identity
     }
@@ -314,7 +311,7 @@ maxvit_impl <- nn_module(
 
     x <- self$pool(x)
     x <- x$flatten(start_dim = 2)
-    self$fc(x)
+    self$classifier(x)
   }
 )
 
@@ -354,6 +351,68 @@ maxvit_impl <- nn_module(
   renamed
 }
 
+#' MaxViT Model
+#'
+#' Implementation of the MaxViT architecture described in
+#' [MaxViT: Multi-Axis Vision Transformer](https://arxiv.org/abs/2204.01697).
+#' The model performs image classification and by default returns logits for
+#' 1000 ImageNet classes.
+#'
+#' @inheritParams model_resnet18
+#' @param num_classes (integer) Number of output classes.
+#' @param ... Additional parameters passed to the model initializer.
+#'
+#' @family models
+#'
+#' @examples
+#' \dontrun{
+#' # 1. Load the basketball image
+#' img_url <- "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
+#' img <- image_read(img_url)
+#'
+#' # 2. Define normalization (ImageNet)
+#' norm_mean <- c(0.485, 0.456, 0.406)
+#' norm_std <- c(0.229, 0.224, 0.225)
+#'
+#' # 3. Preprocess: convert to tensor and resize
+#' input <- transform_to_tensor(img)
+#' input <- transform_resize(input, size = c(224, 224))
+#'
+#' # Display the image before normalization
+#' tensor_image_browse(input)
+#'
+#' # 4. Normalize and add batch dimension
+#' input <- transform_normalize(input, mean = norm_mean, std = norm_std)
+#' input <- input$unsqueeze(1)  # -> [1, 3, 224, 224]
+#'
+#' # 5. Load MaxViT model
+#' model <- model_maxvit(pretrained = TRUE)
+#' model$eval()
+#'
+#' # 6. Run inference
+#' output <- model(input)
+#' topk <- output$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#'
+#' # 7. Download and read ImageNet labels
+#' labels_url <- "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+#' labels_path <- tempfile(fileext = ".txt")
+#' if (file.exists(labels_path)) unlink(labels_path)
+#' download.file(labels_url, labels_path, quiet = TRUE, mode = "wb")
+#' imagenet_labels <- suppressWarnings(readLines(labels_path, warn = FALSE))
+#' imagenet_labels <- imagenet_labels[nzchar(imagenet_labels)]
+#'
+#' # 8. Print Top-5 predictions
+#' cat("Top-5 Predictions for the basketball image:\n")
+#' for (i in seq_along(indices)) {
+#'   label <- imagenet_labels[indices[i]]
+#'   score <- round(scores[i], 2)
+#'   cat(sprintf("  %d. %s (%.2f%%)\n", i, label, score))
+#' }
+#' }
+#'
+#' @export
 model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...) {
   model <- maxvit_impl(num_classes = num_classes)
 

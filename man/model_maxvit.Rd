@@ -4,21 +4,84 @@
 \alias{model_maxvit}
 \title{MaxViT Model}
 \usage{
-model_maxvit(pretrained = FALSE, progress = TRUE, ...)
+model_maxvit(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...)
 }
 \arguments{
-\item{pretrained}{(bool): If TRUE, the pre-trained weights are downloaded.
-Currently only a pre-trained TorchScript model is available and this
-argument is ignored.}
+\item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
 
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{...}{Not used.}
+\item{num_classes}{(integer) Number of output classes.}
+
+\item{...}{Additional parameters passed to the model initializer.}
 }
 \description{
-Loads a pre-trained MaxViT classification model as described in
+Implementation of the MaxViT architecture described in
 \href{https://arxiv.org/abs/2204.01697}{MaxViT: Multi-Axis Vision Transformer}.
-The model expects input tensors of shape \code{(batch_size, 3, 224, 224)}
-and returns classification logits with \code{1000} output classes.
+The model performs image classification and by default returns logits for
+1000 ImageNet classes.
 }
+\examples{
+\dontrun{
+# 1. Load the basketball image
+img_url <- "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
+img <- image_read(img_url)
+
+# 2. Define normalization (ImageNet)
+norm_mean <- c(0.485, 0.456, 0.406)
+norm_std <- c(0.229, 0.224, 0.225)
+
+# 3. Preprocess: convert to tensor and resize
+input <- transform_to_tensor(img)
+input <- transform_resize(input, size = c(224, 224))
+
+# Display the image before normalization
+tensor_image_browse(input)
+
+# 4. Normalize and add batch dimension
+input <- transform_normalize(input, mean = norm_mean, std = norm_std)
+input <- input$unsqueeze(1)  # -> [1, 3, 224, 224]
+
+# 5. Load MaxViT model
+model <- model_maxvit(pretrained = TRUE)
+model$eval()
+
+# 6. Run inference
+output <- model(input)
+topk <- output$topk(k = 5, dim = 2)
+indices <- as.integer(topk[[2]][1, ])
+scores <- as.numeric(topk[[1]][1, ])
+
+# 7. Download and read ImageNet labels
+labels_url <- "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+labels_path <- tempfile(fileext = ".txt")
+if (file.exists(labels_path)) unlink(labels_path)
+download.file(labels_url, labels_path, quiet = TRUE, mode = "wb")
+imagenet_labels <- suppressWarnings(readLines(labels_path, warn = FALSE))
+imagenet_labels <- imagenet_labels[nzchar(imagenet_labels)]
+
+# 8. Print Top-5 predictions
+cat("Top-5 Predictions for the basketball image:\n")
+for (i in seq_along(indices)) {
+  label <- imagenet_labels[indices[i]]
+  score <- round(scores[i], 2)
+  cat(sprintf("  \%d. \%s (\%.2f\%\%)\n", i, label, score))
+}
+}
+
+}
+\seealso{
+Other models: 
+\code{\link{model_alexnet}()},
+\code{\link{model_deeplabv3}},
+\code{\link{model_efficientnet}},
+\code{\link{model_efficientnet_v2}},
+\code{\link{model_fcn_resnet}},
+\code{\link{model_inception_v3}()},
+\code{\link{model_mobilenet_v2}()},
+\code{\link{model_resnet}},
+\code{\link{model_vgg}},
+\code{\link{model_vit}}
+}
+\concept{models}
