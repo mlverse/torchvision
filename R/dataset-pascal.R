@@ -19,10 +19,10 @@
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Determines the dataset split. Default is `"train"`.
 #'
 #' @return A torch dataset of class \code{pascal_segmentation_dataset}.
-#' 
+#'
 #' The returned list inherits class \code{image_with_segmentation_mask}, which allows generic visualization
 #' utilities to be applied.
-#' 
+#'
 #' Each element is a named list with the following structure:
 #' - `x`: a H x W x 3 array representing the RGB image.
 #' - `y`: A named list containing:
@@ -97,12 +97,7 @@ pascal_segmentation_dataset <- torch::dataset(
       trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
     )
   ),
-  classes = c(
-    "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-    "bus", "car", "cat", "chair", "cow", "dining table", "dog",
-    "horse", "motorbike", "person", "potted plant", "sheep",
-    "sofa", "train", "tv"
-  ),
+  classes = voc_segmentation_classes,
   voc_colormap = c(
     c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
     c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
@@ -259,10 +254,10 @@ pascal_segmentation_dataset <- torch::dataset(
 #' @inheritParams pascal_segmentation_dataset
 #'
 #' @return A torch dataset of class \code{pascal_detection_dataset}.
-#' 
+#'
 #' The returned list inherits class \code{image_with_bounding_box}, which allows generic visualization
 #' utilities to be applied.
-#' 
+#'
 #' Each element is a named list:
 #' - `x`: a H x W x 3 array representing the RGB image.
 #' - `y`: a list with:
