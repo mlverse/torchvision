@@ -24,10 +24,10 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
 })
 
 test_that("tests for the Pascal VOC Segmentation dataset for test split for year 2007", {
-  
+
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_segmentation_dataset(root = t, year = '2007', split = 'test', download = TRUE)
   expect_length(pascal, 210)
   first_item <- pascal[1]
@@ -45,10 +45,10 @@ test_that("tests for the Pascal VOC Segmentation dataset for test split for year
 })
 
 test_that("tests for the Pascal VOC Segmentation dataset for trainval split for year 2007", {
-  
+
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_segmentation_dataset(root = t, year = '2007', split = 'trainval', download = TRUE)
   expect_length(pascal, 422)
   first_item <- pascal[1]
@@ -66,10 +66,10 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
 })
 
 test_that("tests for the Pascal VOC Segmentation dataset for val split for year 2007", {
-  
+
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_segmentation_dataset(root = t, year = '2007', split = 'val', download = TRUE)
   expect_length(pascal, 213)
   first_item <- pascal[1]
@@ -422,10 +422,10 @@ test_that("tests for the Pascal VOC detection dataset for train split for year 2
 })
 
 test_that("tests for the Pascal VOC detection dataset for test split for year 2007", {
-  
+
     skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_detection_dataset(root = t, year = '2007', split = 'test', download = TRUE)
   expect_length(pascal, 4952)
   first_item <- pascal[1]
@@ -442,10 +442,10 @@ test_that("tests for the Pascal VOC detection dataset for test split for year 20
 })
 
 test_that("tests for the Pascal VOC detection dataset for trainval split for year 2007", {
-  
+
     skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_detection_dataset(root = t, year = '2007', split = 'trainval', download = TRUE)
   expect_length(pascal, 5011)
   first_item <- pascal[1]
@@ -462,10 +462,10 @@ test_that("tests for the Pascal VOC detection dataset for trainval split for yea
 })
 
 test_that("tests for the Pascal VOC detection dataset for val split for year 2007", {
-  
+
     skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  
+
   pascal <- pascal_detection_dataset(root = t, year = '2007', split = 'val', download = TRUE)
   expect_length(pascal, 2510)
   first_item <- pascal[1]

@@ -82,7 +82,8 @@ The VOC dataset was released in yearly editions (2007 to 2012), with slight vari
 Notably, only the 2007 edition includes a separate \code{test} split; all other years (2008–2012) provide only the \code{train}, \code{val}, and \code{trainval} splits.
 
 The dataset defines 21 semantic classes: \code{"background"}, \code{"aeroplane"}, \code{"bicycle"}, \code{"bird"}, \code{"boat"}, \code{"bottle"}, \code{"bus"}, \code{"car"}, \code{"cat"}, \code{"chair"},
-\code{"cow"}, \code{"dining table"}, \code{"dog"}, \code{"horse"}, \code{"motorbike"}, \code{"person"}, \code{"potted plant"}, \code{"sheep"}, \code{"sofa"}, \code{"train"}, and \code{"tv"}.
+\code{"cow"}, \code{"dining table"}, \code{"dog"}, \code{"horse"}, \code{"motorbike"}, \code{"person"}, \code{"potted plant"}, \code{"sheep"}, \code{"sofa"}, \code{"train"}, and \code{"tv/monitor"}.
+They are available through the \code{classes} variable of the dataset object.
 
 This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 }

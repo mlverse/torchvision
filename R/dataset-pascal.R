@@ -9,7 +9,8 @@
 #' Notably, only the 2007 edition includes a separate `test` split; all other years (2008–2012) provide only the `train`, `val`, and `trainval` splits.
 #'
 #' The dataset defines 21 semantic classes: `"background"`, `"aeroplane"`, `"bicycle"`, `"bird"`, `"boat"`, `"bottle"`, `"bus"`, `"car"`, `"cat"`, `"chair"`,
-#' `"cow"`, `"dining table"`, `"dog"`, `"horse"`, `"motorbike"`, `"person"`, `"potted plant"`, `"sheep"`, `"sofa"`, `"train"`, and `"tv"`.
+#' `"cow"`, `"dining table"`, `"dog"`, `"horse"`, `"motorbike"`, `"person"`, `"potted plant"`, `"sheep"`, `"sofa"`, `"train"`, and `"tv/monitor"`.
+#' They are available through the `classes` variable of the dataset object.
 #'
 #' This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 #'
@@ -76,28 +77,32 @@
 pascal_segmentation_dataset <- torch::dataset(
   name = "pascal_segmentation_dataset",
 
-  resources = list(
-    `2007` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_06-Nov-2007.tar",md5 = "c52e279531787c972589f7e41ab4ae64"),
-      test = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtest_06-Nov-2007.tar",md5 = "b6e924de25625d8de591ea690078ad9f")
-    ),
-    `2008` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_14-Jul-2008.tar",md5 = "2629fa636546599198acfcfbfcf1904a")
-    ),
-    `2009` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2009.tar",md5 = "59065e4b188729180974ef6572f6a212")
-    ),
-    `2010` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_03-May-2010.tar",md5 = "da459979d0c395079b5c75ee67908abb")
-    ),
-    `2011` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_25-May-2011.tar",md5 = "6c3384ef61512963050cb5d687e5bf1e")
-    ),
-    `2012` = list(
-      trainval = list(url = "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2012.tar",md5 = "6cd6e144f989b92b3379bac3b3de84fd")
-    )
+  resources = data.frame(
+    year = c("2007", "2007", "2008", "2009", "2010", "2011", "2012"),
+    type = c("trainval", "test", "trainval", "trainval", "trainval", "trainval", "trainval"),
+    url = c("https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_06-Nov-2007.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtest_06-Nov-2007.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_14-Jul-2008.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2009.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_03-May-2010.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_25-May-2011.tar",
+            "https://huggingface.co/datasets/JimmyUnleashed/Pascal_VOC/resolve/main/VOCtrainval_11-May-2012.tar"),
+    md5 = c("c52e279531787c972589f7e41ab4ae64",
+            "b6e924de25625d8de591ea690078ad9f",
+            "2629fa636546599198acfcfbfcf1904a",
+            "59065e4b188729180974ef6572f6a212",
+            "da459979d0c395079b5c75ee67908abb",
+            "6c3384ef61512963050cb5d687e5bf1e",
+            "6cd6e144f989b92b3379bac3b3de84fd"),
+    size = c("440 MB", "440 MB", "550 MB", "890 MB", "1.3 GB", "1.7 GB", "1.9 GB")
   ),
-  classes = voc_segmentation_classes,
+  classes = c(
+    "background", "aeroplane", "bicycle", "bird", "boat",
+    "bottle", "bus", "car", "cat", "chair",
+    "cow", "dining table", "dog", "horse", "motorbike",
+    "person", "potted plant", "sheep", "sofa", "train",
+    "tv/monitor"
+  ),
   voc_colormap = c(
     c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
     c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
@@ -105,14 +110,6 @@ pascal_segmentation_dataset <- torch::dataset(
     c(64, 0, 128), c(192, 0, 128), c(64, 128, 128), c(192, 128, 128),
     c(0, 64, 0), c(128, 64, 0), c(0, 192, 0), c(128, 192, 0),
     c(0, 64, 128)
-  ),
-  archive_size_table = list(
-    "2007" = list(trainval = "440 MB", test = "440 MB"),
-    "2008" = list(trainval = "550 MB"),
-    "2009" = list(trainval = "890 MB"),
-    "2010" = list(trainval = "1.3 GB"),
-    "2011" = list(trainval = "1.7 GB"),
-    "2012" = list(trainval = "1.9 GB")
   ),
 
   initialize = function(
@@ -124,8 +121,8 @@ pascal_segmentation_dataset <- torch::dataset(
     download = FALSE
   ) {
     self$root_path <- root
-    self$year <- match.arg(year, choices = names(self$resources))
-    self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
+    self$year <- match.arg(year, choices = unique(self$resources$year))
+    self$split <-  match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
     if (self$split == "test"){
@@ -133,7 +130,7 @@ pascal_segmentation_dataset <- torch::dataset(
     } else {
         self$archive_key <- "trainval"
     }
-    self$archive_size <- self$archive_size_table[[self$year]][[self$archive_key]]
+    self$archive_size <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]$size
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -163,7 +160,7 @@ pascal_segmentation_dataset <- torch::dataset(
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
-    resource <- self$resources[[self$year]][[self$archive_key]]
+    resource <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]
     archive <- download_and_cache(resource$url, prefix = class(self)[1])
     actual_md5 <- tools::md5sum(archive)
 
@@ -282,7 +279,7 @@ pascal_detection_dataset <- torch::dataset(
   ) {
 
     self$root_path <- root
-    self$year <- match.arg(year, choices = names(self$resources))
+    self$year <- match.arg(year, choices = unique(self$resources$year))
     self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
@@ -291,7 +288,7 @@ pascal_detection_dataset <- torch::dataset(
     } else {
       self$archive_key <- "trainval"
     }
-    self$archive_size <- self$archive_size_table[[self$year]][[self$archive_key]]
+    self$archive_size <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]$size
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -348,7 +345,7 @@ pascal_detection_dataset <- torch::dataset(
     xmax <- xml2::xml_integer(xml2::xml_find_all(bboxes, "xmax"))
     ymax <- xml2::xml_integer(xml2::xml_find_all(bboxes, "ymax"))
 
-    boxes <- torch_tensor(data.frame(xmin, ymin, xmax, ymax) %>% as.matrix(), dtype = torch_int64())
+    boxes <- torch_tensor(data.frame(xmin, ymin, xmax, ymax) %>% as.matrix(), dtype = torch_long())
 
     list(
       labels = labels,
