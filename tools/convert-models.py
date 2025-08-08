@@ -3,6 +3,7 @@ from torch.hub import load_state_dict_from_url # used to be in torchvision
 import os
 import boto3
 from botocore.exceptions import ClientError
+from ultralytics import settings
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -123,6 +124,9 @@ models = {
   }
 
 os.makedirs("models", exist_ok=True)
+# yolo specifics 
+os.makedirs("runs", exist_ok=True)
+settings.update({"runs_dir": "runs/", "weights_dir": "models/", "sync": False})
 
 for name, url in models.items():
   fpath = "models/" + name + ".pth"
@@ -134,6 +138,11 @@ for name, url in models.items():
     # download from url, convert and upload the converted weights
     m = load_state_dict_from_url(url, progress=False)
     converted = {}
+    
+    # yolo models weights are embedded in a BaseModel per https://github.com/ultralytics/ultralytics/blob/main/ultralytics/nn/tasks.py#L309
+    if name.startswith("yolo_"):
+      m = m["model"].model.float().state_dict()
+    
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)
