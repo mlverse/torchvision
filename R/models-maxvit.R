@@ -1,6 +1,6 @@
 # R/model-maxvit.R - PyTorch compatible MaxViT implementation
 
-conv_norm_act <- function(in_channels, mid_channels = 64, out_channels = 64, ...) {
+maxvit_conv_norm_act <- function(in_channels, mid_channels = 64, out_channels = 64, ...) {
   nn_sequential(
     "stem.0" = nn_sequential(
       "0" = nn_conv2d(in_channels, mid_channels, ..., bias = FALSE),
@@ -257,7 +257,7 @@ maxvit_stage <- nn_module(
 
 maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
-    self$stem <- conv_norm_act(
+    self$stem <- maxvit_conv_norm_act(
       3, mid_channels = 64, out_channels = 64,
       kernel_size = 3, stride = 2, padding = 1
     )
