@@ -50,6 +50,7 @@ Imports:
 Suggests:
     arrow,
     magick,
+    prettyunits,
     testthat,
     coro,
     R.matlab,

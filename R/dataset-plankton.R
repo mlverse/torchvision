@@ -59,6 +59,12 @@ whoi_small_plankton_dataset <- torch::dataset(
     target_transform = NULL,
     download = FALSE
   ) {
+    if (!requireNamespace("arrow", quietly = TRUE)) {
+      install.packages("arrow")
+    }
+    if (!requireNamespace("prettyunits", quietly = TRUE)) {
+      install.packages("prettyunits")
+    }
 
     self$transform <- transform
     self$target_transform <- target_transform
@@ -75,9 +81,6 @@ whoi_small_plankton_dataset <- torch::dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    if (!requireNamespace("arrow", quietly = TRUE)) {
-      install.packages("arrow")
-    }
     self$.data <- arrow::open_dataset(self$split_file)
     self$classes <- jsonlite::parse_json(self$.data$metadata$huggingface, simplifyVector = TRUE)$info$features$label$names
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
