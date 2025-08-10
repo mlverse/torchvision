@@ -12,7 +12,7 @@
 #' @inheritParams mnist_dataset
 #' @param root (Optional) Character. The root directory where the dataset will be stored.
 #'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
-#' @param split Character. Must be one of `train`, `val`, or `test`.
+#' @param split One of `"train"`, `"val"`, or `"test"`. Default is `"train"`.
 #'
 #' @return A `torch::dataset` object. Each item is a list with:
 #' * `x`: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
@@ -53,7 +53,7 @@ eurosat_dataset <- torch::dataset(
     self$images_dir <- file.path(self$root, class(self)[1], "images")
     self$split_file <- file.path(self$root, fs::path_ext_remove(basename(self$split_url)))
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
@@ -184,5 +184,3 @@ eurosat100_dataset <- torch::dataset(
   split_url = "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/eurosat-100-{split}.txt?download=true",
   archive_size = "7 MB"
 )
-
-

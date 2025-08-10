@@ -31,6 +31,17 @@
 fer_dataset <- dataset(
   name = "fer_dataset",
   archive_size = "90 MB",
+  url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz",
+  md5 = "ca95d94fe42f6ce65aaae694d18c628a",
+  classes <- c(
+    "Angry",
+    "Disgust",
+    "Fear",
+    "Happy",
+    "Sad",
+    "Surprise",
+    "Neutral"
+  ),
 
   initialize = function(
     root = tempdir(),
@@ -39,25 +50,25 @@ fer_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-
     self$root <- root
     self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
-    self$split <- if (train) "Train" else "Test"
+    self$split <- ifelse(train, "Train", "Test")
     self$folder_name <- "fer2013"
-    self$url <- "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz"
-    self$md5 <- "ca95d94fe42f6ce65aaae694d18c628a"
-    self$classes <- c("Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral")
     self$class_to_idx <- setNames(seq_along(self$classes), self$classes)
 
-    if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+    if (download) {
+      cli_inform(
+        "Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available."
+      )
       self$download()
     }
 
     if (!self$check_files()) {
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      runtime_error(
+        "Dataset not found. You can use `download = TRUE` to download it."
+      )
     }
 
     csv_file <- file.path(self$root, self$folder_name, "fer2013.csv")
@@ -87,11 +98,13 @@ fer_dataset <- dataset(
 
     y <- self$y[i]
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
+    }
 
     list(x = x, y = y)
   },
@@ -112,11 +125,14 @@ fer_dataset <- dataset(
 
     archive <- download_and_cache(self$url)
 
-    if (!tools::md5sum(archive) == self$md5)
+    if (!tools::md5sum(archive) == self$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    }
 
     untar(archive, exdir = self$root)
-    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
+    cli_inform(
+      "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
+    )
   },
 
   check_files = function() {
