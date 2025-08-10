@@ -12,7 +12,7 @@
 #' @inheritParams mnist_dataset
 #' @param root (Optional) Character. The root directory where the dataset will be stored.
 #'  if empty, will use the default `rappdirs::user_cache_dir("torch")`.
-#' @param split One of `"train"`, `"val"`, or `"test"`. Default is `"train"`.
+#' @param split One of `"train"`, `"val"`, or `"test"`. Default is `"val"`.
 #'
 #' @return A `torch::dataset` object. Each item is a list with:
 #' * `x`: a 64x64 image tensor with 3 (RGB) or 13 (all bands) channels
@@ -39,7 +39,7 @@ eurosat_dataset <- torch::dataset(
 
   initialize = function(
     root = tempdir(),
-    split = "train",
+    split = "val",
     download = FALSE,
     transform = NULL,
     target_transform = NULL

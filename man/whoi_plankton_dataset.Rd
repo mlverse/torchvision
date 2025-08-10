@@ -20,7 +20,7 @@ whoi_plankton_dataset(
 )
 }
 \arguments{
-\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
+\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"val"}.}
 
 \item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
@@ -29,7 +29,11 @@ whoi_plankton_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
-A torch dataset.
+A torch dataset with a
+\itemize{
+\item \code{classes} attribute providing the vector of class names.
+}
+
 Each element is a named list:
 \itemize{
 \item \code{x}: a H x W x 1 integer array representing an grayscale image.
@@ -41,25 +45,26 @@ WHOI-Plankton Dataset
 }
 \details{
 The WHOI-Plankton and WHOI-Plankton small are \strong{image classification} datasets
-composed of 957k and 58k grayscale images respectively, within classes
-The images are in format with varying spatial resolutions.
+of submarine plankton small grayscale images of varying size, classified into 100 classes.
+Dataset size is 957k and 58k respectively, and each provides a train / val / test split.
 }
 \examples{
 \dontrun{
-# Load the small plankton dataset
-plankton <- whoi_small_plankton_dataset(download = TRUE)
+# Load the small plankton dataset and turn images into tensor images
+plankton <- whoi_small_plankton_dataset(download = TRUE, transform = transform_to_tensor)
 
 # Access the first item
 first_item <- plankton[1]
-first_item$x  # image array with shape {H, W, 1}
+first_item$x  # a tensor grayscale image with shape {1, H, W}
 first_item$y  # id of the plankton class.
+plankton$classes[first_item$y] # name of the plankton class
 
 # Load the full plankton dataset
 plankton <- whoi_plankton_dataset(download = TRUE)
 
 # Access the first item
 first_item <- plankton[1]
-first_item$x  # image array with shape {H, W, 1}
+first_item$x  # grayscale image array with shape {H, W}
 first_item$y  # id of the plankton class.
 }
 

@@ -2,32 +2,35 @@
 #' WHOI-Plankton Dataset
 #'
 #' The WHOI-Plankton and WHOI-Plankton small are **image classification** datasets
-#' composed of 957k and 58k grayscale images respectively, within classes
-#' The images are in format with varying spatial resolutions.
+#' of submarine plankton small grayscale images of varying size, classified into 100 classes.
+#' Dataset size is 957k and 58k respectively, and each provides a train / val / test split.
 #'
 #' @inheritParams eurosat_dataset
 #'
-#' @return A torch dataset.
+#' @return A torch dataset with a
+#' - `classes` attribute providing the vector of class names.
+#'
 #' Each element is a named list:
 #' - `x`: a H x W x 1 integer array representing an grayscale image.
 #' - `y`: the class id of the image.
 #'
 #' @examples
 #' \dontrun{
-#' # Load the small plankton dataset
-#' plankton <- whoi_small_plankton_dataset(download = TRUE)
+#' # Load the small plankton dataset and turn images into tensor images
+#' plankton <- whoi_small_plankton_dataset(download = TRUE, transform = transform_to_tensor)
 #'
 #' # Access the first item
 #' first_item <- plankton[1]
-#' first_item$x  # image array with shape {H, W, 1}
+#' first_item$x  # a tensor grayscale image with shape {1, H, W}
 #' first_item$y  # id of the plankton class.
+#' plankton$classes[first_item$y] # name of the plankton class
 #'
 #' # Load the full plankton dataset
 #' plankton <- whoi_plankton_dataset(download = TRUE)
 #'
 #' # Access the first item
 #' first_item <- plankton[1]
-#' first_item$x  # image array with shape {H, W, 1}
+#' first_item$x  # grayscale image array with shape {H, W}
 #' first_item$y  # id of the plankton class.
 #' }
 #'
@@ -101,7 +104,7 @@ whoi_small_plankton_dataset <- torch::dataset(
   .getitem = function(index) {
     df <- collect(self$.data[index,])
     x <- df$image$bytes %>% unlist() %>% as.raw() %>% png::readPNG()
-    y <- df$label
+    y <- df$label + 1L
 
     if (!is.null(self$transform))
       x <- self$transform(x)

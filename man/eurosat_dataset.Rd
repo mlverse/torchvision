@@ -8,7 +8,7 @@
 \usage{
 eurosat_dataset(
   root = tempdir(),
-  split = "train",
+  split = "val",
   download = FALSE,
   transform = NULL,
   target_transform = NULL
@@ -16,7 +16,7 @@ eurosat_dataset(
 
 eurosat_all_bands_dataset(
   root = tempdir(),
-  split = "train",
+  split = "val",
   download = FALSE,
   transform = NULL,
   target_transform = NULL
@@ -24,7 +24,7 @@ eurosat_all_bands_dataset(
 
 eurosat100_dataset(
   root = tempdir(),
-  split = "train",
+  split = "val",
   download = FALSE,
   transform = NULL,
   target_transform = NULL
@@ -34,7 +34,7 @@ eurosat100_dataset(
 \item{root}{(Optional) Character. The root directory where the dataset will be stored.
 if empty, will use the default \code{rappdirs::user_cache_dir("torch")}.}
 
-\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
+\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"val"}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
