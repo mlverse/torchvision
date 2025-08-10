@@ -15,7 +15,7 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
     train_ds <- whoi_small_plankton_dataset(split = "train", download = TRUE)
   )
 
-  expect_is(ds, "Dataset", "train should be a dataset")
+  expect_is(train_ds, "dataset", "train should be a dataset")
   # Train dataset should have exactly 40599 samples
   expect_equal(train_ds$.length(), 40599)
 
@@ -88,7 +88,7 @@ test_that("whoi_plankton_dataset downloads correctly whatever the split", {
     train_ds <- whoi_plankton_dataset(split = "train", download = TRUE)
   )
 
-  expect_is(ds, "Dataset", "train should be a dataset")
+  expect_is(train_ds, "dataset", "train should be a dataset")
   # Train dataset should have exactly 669806 samples
   expect_equal(train_ds$.length(), 669806)
 
