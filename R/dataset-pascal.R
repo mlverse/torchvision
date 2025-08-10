@@ -146,7 +146,7 @@ pascal_segmentation_dataset <- torch::dataset(
     self$img_path <- data$img_path
     self$mask_paths <- data$mask_paths
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -314,7 +314,7 @@ pascal_detection_dataset <- torch::dataset(
       install.packages("xml2")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {

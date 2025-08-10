@@ -47,7 +47,7 @@ whoi_small_plankton_dataset <- torch::dataset(
             "170921030aee26f9676725a0c55a4420",
             "332ebc8b822058cd98f778099927c50e",
             "f0747ae16fc7cd6946ea54c3fe1f30b4"),
-    size = c("217 MB", "396 MB", "383 MB", "112 MB")
+    size = c(217e6, 396e6, 383e6, 112e6)
   ),
 
   initialize = function(
@@ -60,7 +60,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$archive_url <- self$resources[self$resources$split == split,]$url
-    self$archive_size <- self$resources[self$resources$split == split,]$size
+    self$archive_size <- prettyunits::pretty_bytes(sum(self$resources[self$resources$split == split,]$size))
     self$archive_md5 <- self$resources[self$resources$split == split,]$md5
     self$split_file <- sapply(self$archive_url, \(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], sub("\\?download=.*", "", basename(x))))
 
@@ -127,60 +127,32 @@ whoi_small_plankton_dataset <- torch::dataset(
 whoi_plankton_dataset <- torch::dataset(
   name = "whoi_plankton",
   inherit = whoi_small_plankton_dataset,
-  archive_size = "4.1 GB",
-  resources = list(
-    c("https://uofi.app.box.com/shared/static/1cpolrtkckn4hxr1zhmfg0ln9veo6jpl.gz", "985ac761bbb52ca49e0c474ae806c07c"),
-    c("https://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip", "4fa8c08369d22fe16e41dc124bd1adc2")
-  ),
-
-  initialize = function(
-    root = tempdir(),
-    train = TRUE,
-    transform = NULL,
-    target_transform = NULL,
-    download = FALSE
-  ) {
-    self$root <- root
-    self$transform <- transform
-    self$target_transform <- target_transform
-    self$train <- train
-    self$split <- ifelse(train, "train", "test")
-
-    if (download)
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
-      self$download()
-
-    if (!self$check_exists())
-      cli_abort("Dataset not found. Use `download = TRUE` to download it.")
-
-    captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")
-    captions_json <- jsonlite::fromJSON(captions_path)
-
-    imgs_df <- captions_json$images
-    filtered <- imgs_df[imgs_df$split == self$split, ]
-    self$filenames <- filtered$filename
-
-    captions_map <- setNames(
-      lapply(filtered$sentences, function(s) unname(vapply(s$raw, identity, character(1)))),
-      filtered$filename
-    )
-
-    all_ids <- names(captions_map)
-    caption_to_index <- setNames(seq_along(all_ids), all_ids)
-
-    self$images <- file.path(self$raw_folder, "flickr30k-images", self$filenames)
-    self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
-    self$classes <- captions_map
-
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
-  },
-
-  check_exists = function() {
-    fs::file_exists(file.path(self$raw_folder, "dataset_flickr30k.json")) &&
-    fs::dir_exists(file.path(self$raw_folder, "flickr30k-images"))
-  },
-
-  active = list(
-    raw_folder = function() file.path(self$root, "flickr30k", "raw")
+  archive_size = "9.1 GB",
+  resources = data.frame(
+    split = c(rep("test", 4), rep("train", 13), rep("val", 2)),
+    url = c(paste0("https://huggingface.co/datasets/nf-whoi/whoi-plankton/resolve/main/data/test-0000",0:3,"-of-00004.parquet?download=true"),
+            paste0("https://huggingface.co/datasets/nf-whoi/whoi-plankton/resolve/main/data/train-0000",0:9,"-of-00013.parquet?download=true"),
+            paste0("https://huggingface.co/datasets/nf-whoi/whoi-plankton/resolve/main/data/train-000",10:12,"-of-00013.parquet?download=true"),
+            paste0("https://huggingface.co/datasets/nf-whoi/whoi-plankton/resolve/main/data/validation-0000",0:1,"-of-00002.parquet?download=true")),
+    md5 = c("cd41b344ec4b6af83e39c38e19f09190",
+            "aa0965c0e59f7b1cddcb3c565d80edf3",
+            "b2a75513f1a084724e100678d8ee7180",
+            "a03c4d52758078bfb0799894926d60f6",
+            "07eaff140f39868a8bcb1d3c02ebe60f",
+            "87c927b9fbe0c327b7b9ae18388b4fcf",
+            "456efd91901571a41c2157732880f6b8",
+            "dc929fde45e3b2e38bdd61a15566cf32",
+            "f92ab6cfb4a3dd7e0866f3fdf8dbc33c",
+            "61c555bba39b6b3ccb4f02a5cf07e762",
+            "57e03cecf2b5d97912ed37e1b8fc6263",
+            "56081cc99e61c36e89db1566dbbf06c1",
+            "60b7998630468cb18880660c81d1004a",
+            "1fa94ceb54d4e53643a0d8cf323af901",
+            "7a7be4e3dfdc39a50c8ca086a4d9a8de",
+            "07194caf75805e956986cba68e6b398e",
+            "0f4d47f240cd9c30a7dd786171fa40ca",
+            "db827a7de8790cdcae67b174c7b8ea5e",
+            "d3181d9ffaed43d0c01f59455924edca"),
+    size = c(rep(450e6, 4), rep(490e6, 13), rep(450e6, 2))
   )
 )
