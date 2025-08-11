@@ -119,12 +119,14 @@ model <- model_inception_resnet_v1(pretrained = "vggface2")
 model$eval()
 input <- torch_randn(1, 3, 224, 224)
 output <- model(input)
+output
 
 # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
 model <- model_inception_resnet_v1(pretrained = "casia-webface")
 model$eval()
 input <- torch_randn(1, 3, 224, 224)
 output <- model(input)
+output
 }
 
 }
