@@ -6,6 +6,7 @@
 \alias{model_facenet_onet}
 \alias{model_facenet}
 \alias{model_mtcnn}
+\alias{model_inception_resnet_v1}
 \title{MTCNN Face Detection Networks}
 \usage{
 model_facenet_pnet(pretrained = TRUE, progress = FALSE, ...)
@@ -15,6 +16,13 @@ model_facenet_rnet(pretrained = TRUE, progress = FALSE, ...)
 model_facenet_onet(pretrained = TRUE, progress = FALSE, ...)
 
 model_mtcnn(pretrained = TRUE, progress = TRUE, ...)
+
+model_inception_resnet_v1(
+  pretrained = NULL,
+  classify = FALSE,
+  num_classes = 10,
+  dropout_prob = 0.6
+)
 }
 \arguments{
 \item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
@@ -44,6 +52,23 @@ MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pi
 | RNet  | 24×24          | ~30K       | 400 KB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
 | ONet  | 48×48          | ~100K      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
 }\if{html}{\out{</div>}}
+
+Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules
+with residual connections, designed for face recognition tasks. The model achieves high accuracy
+on standard face verification benchmarks such as LFW (Labeled Faces in the Wild).
+}
+
+\subsection{Model Variants and Performance (LFW accuracy)}{
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{|    Weights     | LFW Accuracy | File Size |
+|----------------|--------------|-----------|
+| CASIA-Webface  | 99.05\%       | 111 MB    |
+| VGGFace2       | 99.65\%       | 107 MB    |
+}\if{html}{\out{</div>}}
+\itemize{
+\item The CASIA-Webface pretrained weights provide strong baseline accuracy.
+\item The VGGFace2 pretrained weights achieve higher accuracy, benefiting from a larger, more diverse dataset.
+}
 }
 }
 \section{Functions}{
@@ -55,6 +80,8 @@ MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pi
 \item \code{model_facenet_onet()}: ONet (Output Network) — deeper CNN that outputs final bounding boxes and 5 facial landmark points.
 
 \item \code{model_mtcnn()}: MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks
+
+\item \code{model_inception_resnet_v1()}: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
 
 }}
 \examples{
@@ -83,9 +110,21 @@ output_onet
 # Example usage of MTCNN
 mtcnn <- model_mtcnn(pretrained = TRUE)
 mtcnn$eval()
-image_tensor <- torch_randn(c(1, 3, 160, 160))
+image_tensor <- torch_randn(c(1, 3, 224, 224))
 out <- mtcnn(image_tensor)
 out
+
+# Example usage of Inception-ResNet-v1 with VGGFace2 Weights
+model <- model_inception_resnet_v1(pretrained = "vggface2")
+model$eval()
+input <- torch_randn(1, 3, 224, 224)
+output <- model(input)
+
+# Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
+model <- model_inception_resnet_v1(pretrained = "casia-webface")
+model$eval()
+input <- torch_randn(1, 3, 224, 224)
+output <- model(input)
 }
 
 }
