@@ -48,7 +48,9 @@ Imports:
     glue,
     zeallot
 Suggests:
+    arrow,
     magick,
+    prettyunits,
     testthat,
     coro,
     R.matlab,

@@ -81,7 +81,7 @@ caltech101_dataset <- torch::dataset(
       self$image_indices <- c(self$image_indices, seq_along(imgs))
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
@@ -205,7 +205,7 @@ caltech256_dataset <- torch::dataset(
     }, seq_along(self$classes), images_per_class, SIMPLIFY = FALSE),
     use.names = FALSE
   )
-  cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+  cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {

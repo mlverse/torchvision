@@ -63,8 +63,8 @@ flickr8k_caption_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-    self$split <- if (train) "train" else "test"
-    
+    self$split <- ifelse(train, "train", "test")
+
     if (download)
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
@@ -130,7 +130,7 @@ flickr8k_caption_dataset <- torch::dataset(
 
   download = function() {
 
-    if (self$check_exists()) 
+    if (self$check_exists())
       return()
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
@@ -173,10 +173,10 @@ flickr8k_caption_dataset <- torch::dataset(
     caption_index <- self$captions[[index]]
     y <- self$classes[[caption_index]]
 
-    if (!is.null(self$transform)) 
+    if (!is.null(self$transform))
       x <- self$transform(x)
 
-    if (!is.null(self$target_transform)) 
+    if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
     list(x = x, y = y)
@@ -225,13 +225,13 @@ flickr30k_caption_dataset <- torch::dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
-    self$split <- if (train) "train" else "test"
+    self$split <- ifelse(train, "train", "test")
 
     if (download)
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
 
-    if (!self$check_exists()) 
+    if (!self$check_exists())
       cli_abort("Dataset not found. Use `download = TRUE` to download it.")
 
     captions_path <- file.path(self$raw_folder, "dataset_flickr30k.json")

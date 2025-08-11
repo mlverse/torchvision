@@ -78,7 +78,7 @@ fgvc_aircraft_dataset <- dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-    
+
     self$root <- root
     self$split <- split
     self$annotation_level <- annotation_level
@@ -132,10 +132,10 @@ fgvc_aircraft_dataset <- dataset(
   .getitem = function(index) {
     x <- jpeg::readJPEG(self$image_paths[index]) * 255
 
-    y <- if (self$annotation_level == "all") {
-      as.integer(self$labels_df[index, ])
+    if (self$annotation_level == "all") {
+      y <- as.integer(self$labels_df[index, ])
     } else {
-      self$labels_df[[self$annotation_level]][index]
+      y <- self$labels_df[[self$annotation_level]][index]
     }
 
     if (!is.null(self$transform)) {

@@ -95,7 +95,7 @@ efficientnet_v2 <- torch::nn_module(
       block_fn <- if (identical(cfg$block, "fused")) fused_mbconv_block else mbconv_block
       stage_blocks <- list()
       for (i in seq_len(r)) {
-        s <- if (i == 1) cfg$stride else 1
+        s <- ifelse(i == 1, cfg$stride, 1)
         if (identical(cfg$block, "fused")) {
           stage_blocks[[i]] <- block_fn(
             in_channels, oc, kernel_size = cfg$kernel, stride = s,
