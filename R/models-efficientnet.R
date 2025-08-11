@@ -53,15 +53,15 @@
 #' @name model_efficientnet
 NULL
 
-efficientnet_model_urls <- c(
-  efficientnet_b0 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b0.pth",
-  efficientnet_b1 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b1.pth",
-  efficientnet_b2 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b2.pth",
-  efficientnet_b3 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b3.pth",
-  efficientnet_b4 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b4.pth",
-  efficientnet_b5 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b5.pth",
-  efficientnet_b6 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b6.pth",
-  efficientnet_b7 = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b7.pth"
+efficientnet_model_urls <- list(
+  efficientnet_b0 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b0.pth", "5cb997d28f1a30cdf1732dd1e69a6647", "~22 MB"),
+  efficientnet_b1 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b1.pth", "1f1fdcc560d5a91875bbec02c0a105e8", "~32 MB"),
+  efficientnet_b2 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b2.pth", "c5440198bb37adc12d8d88f58863b2d3", "~37 MB"),
+  efficientnet_b3 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b3.pth", "74967d21f6d437845ab5f2fd87f31df1", "~50 MB"),
+  efficientnet_b4 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b4.pth", "a044c7adf3bf4c457581669eae41f713", "~80 MB"),
+  efficientnet_b5 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b5.pth", "8bea08f18d29d5becce388f363247a26", "~122 MB"),
+  efficientnet_b6 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b6.pth", "96844282790aff48afe3c56b434f4863", "~175 MB"),
+  efficientnet_b7 = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_b7.pth", "c3ddfc4df9851a8fe55312fdbe8f8c7e", "~270 MB")
 )
 
 conv_norm_act <- torch::nn_module(
@@ -186,7 +186,7 @@ efficientnet <- torch::nn_module(
       r <- round_repeats(cfg$repeats)
       stage_blocks <- list()
       for (i in 1:r) {
-        s <- if (i == 1) cfg$stride else 1
+        s <- ifelse(i == 1, cfg$stride, 1)
         stage_blocks[[i]] <- mbconv_block(in_channels, oc,
                                           kernel_size = cfg$kernel, stride = s, expand_ratio = cfg$expand,
                                           se_ratio = 0.25, norm_layer = norm_layer)
@@ -222,13 +222,13 @@ effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
   )))
 
   if (pretrained) {
-    url <- efficientnet_model_urls[[arch]]
-    if (is.null(url))
-      value_error("Unknown EfficientNet architecture '{arch}'")
-    cli_inform("Downloading pretrained weights for {.cls {arch}}")
-    state_dict_path <- download_and_cache(url)
-    state_dict <- torch::load_state_dict(state_dict_path)
+    r <- efficientnet_model_urls[[arch]]
+    cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 
+    state_dict <- torch::load_state_dict(state_dict_path)
     state_dict <- state_dict[!grepl("num_batches_tracked", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }

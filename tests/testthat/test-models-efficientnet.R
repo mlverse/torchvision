@@ -33,6 +33,7 @@ test_that("efficientnet models produce correct output shapes", {
     out <- model(input)
     expect_tensor_shape(out, c(1, 1000))
   }
+  unlink_model_file()
 })
 
 test_that("efficientnet allows custom num_classes", {

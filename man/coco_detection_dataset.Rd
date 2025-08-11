@@ -68,4 +68,8 @@ masked <- draw_segmentation_masks(item)
 tensor_image_browse(masked)
 }
 }
+\seealso{
+Other detection_dataset: 
+\code{\link{pascal_voc_datasets}}
+}
 \concept{detection_dataset}

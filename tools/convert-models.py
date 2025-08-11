@@ -3,6 +3,7 @@ from torch.hub import load_state_dict_from_url # used to be in torchvision
 import os
 import boto3
 from botocore.exceptions import ClientError
+from ultralytics import settings
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -99,9 +100,45 @@ models = {
   'convnext_large': 'https://download.pytorch.org/models/convnext_large-ea097f82.pth',
   'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
   'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
+  'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
+  'mobilenet_v3_small': 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth',
+  'maxvit': 'https://download.pytorch.org/models/maxvit_t-bc5ab103.pth',
+  'fcos_resnet50': 'https://download.pytorch.org/models/fcos_resnet50_fpn_coco-99b0c9b7.pth', 
+  'retinanet_resnet50_v2': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_v2_coco-5905b1c5.pth', # RetinaNet_ResNet50_FPN_V2_Weights
+  'ssd300_vgg16': 'https://download.pytorch.org/models/ssd300_vgg16_coco-b556d3b4.pth',
+  'ssdlite320_mobilenet_v3': 'https://download.pytorch.org/models/ssdlite320_mobilenet_v3_large_coco-a79551df.pth',
+  'fasterrcnn_resnet50': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth',
+  'fasterrcnn_resnet50_v2': 'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth',
+  'fasterrcnn_mobilenet_v3_large': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_fpn-fb6a3cc7.pth',
+  'fasterrcnn_mobilenet_v3_large_320': 'https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_320_fpn-907ea3f9.pth',
+  'yolo_v8_l': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8l.pt',
+  'yolo_v8_l_seg': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8l-seg.pt',
+  'yolo_v8_m': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8m.pt',
+  'yolo_v8_m_seg': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8m-seg.pt',
+  'yolo_v8_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt',
+  'yolo_v8_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt',
+  'yolo_v8_s_seg': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s-seg.pt',
+  'yolo_v8_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8x.pt',
+  'yolo_v11_l': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11l.pt',
+  'yolo_v11_m': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt',
+  'yolo_v11_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt',
+  'yolo_v11_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s.pt',
+  'yolo_v11_s_cls': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s-cls.pt',
+  'yolo_v11_s_obb': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s-obb.pt',
+  'yolo_v11_s_pose': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s-pose.pt',
+  'yolo_v11_s_seg': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s-seg.pt',
+  'yolo_v11_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11x.pt',
+  'yolo_v12_l': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12l.pt',
+  'yolo_v12_m': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12m.pt',
+  'yolo_v12_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12n.pt',
+  'yolo_v12_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12s.pt',
+  'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
   }
 
 os.makedirs("models", exist_ok=True)
+# yolo specifics 
+os.makedirs("runs", exist_ok=True)
+settings.update({"runs_dir": "runs/", "weights_dir": "models/", "sync": False})
 
 for name, url in models.items():
   fpath = "models/" + name + ".pth"
@@ -113,6 +150,11 @@ for name, url in models.items():
     # download from url, convert and upload the converted weights
     m = load_state_dict_from_url(url, progress=False)
     converted = {}
+    
+    # yolo models weights are embedded in a BaseModel per https://github.com/ultralytics/ultralytics/blob/main/ultralytics/nn/tasks.py#L309
+    if name.startswith("yolo_"):
+      m = m["model"].model.float().state_dict()
+    
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)

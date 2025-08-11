@@ -95,7 +95,7 @@ efficientnet_v2 <- torch::nn_module(
       block_fn <- if (identical(cfg$block, "fused")) fused_mbconv_block else mbconv_block
       stage_blocks <- list()
       for (i in seq_len(r)) {
-        s <- if (i == 1) cfg$stride else 1
+        s <- ifelse(i == 1, cfg$stride, 1)
         if (identical(cfg$block, "fused")) {
           stage_blocks[[i]] <- block_fn(
             in_channels, oc, kernel_size = cfg$kernel, stride = s,
@@ -192,8 +192,12 @@ effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, .
   )))
 
   if (pretrained) {
-    cli_inform("Downloading pretrained weights for {.cls {arch}}")
-    state_dict_path <- download_and_cache(efficientnet_v2_model_urls[[arch]])
+    r <- efficientnet_v2_model_urls[[arch]]
+    cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }
@@ -245,8 +249,8 @@ model_efficientnet_v2_l <- function(pretrained = FALSE, progress = TRUE, ...) {
   effnetv2("efficientnet_v2_l", cfgs, 0.4, 32, pretrained, progress, ...)
 }
 
-efficientnet_v2_model_urls <- c(
-  efficientnet_v2_s = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_s.pth",
-  efficientnet_v2_m = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_m.pth",
-  efficientnet_v2_l = "https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_l.pth"
+efficientnet_v2_model_urls <- list(
+  efficientnet_v2_s = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_s.pth", "9f0f813046f802fb7151fbf0e169ae13", "~87 MB"),
+  efficientnet_v2_m = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_m.pth", "0a08118483687a61c6d8e38f9e24dee6", "~220 MB"),
+  efficientnet_v2_l = c("https://torch-cdn.mlverse.org/models/vision/v2/models/efficientnet_v2_l.pth", "c7bca278771eb3ca70a00ff6a29e5208", "~476 MB")
 )

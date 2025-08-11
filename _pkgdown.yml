@@ -52,6 +52,7 @@ reference:
    - ends_with("6_dataset")
    - ends_with("1_dataset")
    - ends_with("2_dataset")
+   - ends_with("5_dataset")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and
@@ -65,7 +66,7 @@ reference:
    - ends_with("caption_dataset")
 - subtitle: for Image segmentation
   descr: >
-    Dataset having items with "y" as a named list containing a segmentation 
+    Dataset having items with "y" as a named list containing a segmentation
     mask and labels for image segmentation.
   contents:
    - ends_with("segmentation_dataset")
