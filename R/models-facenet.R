@@ -194,7 +194,7 @@ model_facenet_onet <- nn_module(
 #' # Example usage of PNet
 #' model_pnet <- model_facenet_pnet(pretrained = TRUE)
 #' model_pnet$eval()
-#' input_pnet <- torch_randn(1, 3, 160, 160)
+#' input_pnet <- torch_randn(1, 3, 224, 224)
 #' output_pnet <- model_pnet(input_pnet)
 #' output_pnet
 #'
@@ -235,6 +235,9 @@ model_facenet_onet <- nn_module(
 #' }
 #'
 #' @inheritParams model_mobilenet_v2
+#' @param classify Logical scalar, whether to include the classification head. Default is FALSE.
+#' @param num_classes Integer scalar, number of output classes for classification. Default is 10.
+#' @param dropout_prob Numeric scalar, dropout probability applied before classification. Default is 0.6.
 #'
 #' @family models
 #' @rdname model_facenet
@@ -268,16 +271,6 @@ model_mtcnn <- nn_module(
   }
 )
 
-fixed_image_standardization <- function(image_tensor) {
-  (image_tensor - 127.5) / 128.0
-}
-
-prewhiten <- function(x) {
-  mean_val <- x$mean()
-  std_val <- x$std()
-  std_adj <- torch_clamp(std_val, min = 1.0 / (x$numel() ^ 0.5))
-  (x - mean_val) / std_adj
-}
 
 load_inception_weights <- function(model, name) {
   if (name == "vggface2") {
@@ -293,7 +286,7 @@ load_inception_weights <- function(model, name) {
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
   }
 
-  state_dict <- load_state_dict(archive)
+  state_dict <- torch::load_state_dict(archive)
   model$load_state_dict(state_dict)
   model
 }
@@ -441,7 +434,8 @@ model_inception_resnet_v1 <- nn_module(
     pretrained = NULL,
     classify = FALSE,
     num_classes = 10,
-    dropout_prob = 0.6
+    dropout_prob = 0.6,
+    ...
   ) {
 
     if (!is.null(pretrained)) {
