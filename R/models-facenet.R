@@ -5,7 +5,7 @@ facenet_torchscript_urls <- list(
 )
 
 # PNet definition
-pnet <- nn_module(
+model_facenet_pnet <- nn_module(
   classname = "PNet",
   initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 10, kernel_size=3)
@@ -47,7 +47,7 @@ pnet <- nn_module(
 )
 
 # RNet definition
-rnet <- nn_module(
+model_facenet_rnet <- nn_module(
   classname = "RNet",
   initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 28, kernel_size=3)
@@ -96,7 +96,7 @@ rnet <- nn_module(
 )
 
 # ONet definition
-onet <- nn_module(
+model_facenet_onet <- nn_module(
   classname = "ONet",
   initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 32, kernel_size=3)
@@ -222,9 +222,9 @@ model_mtcnn <- nn_module(
   ) {
 
     
-    self$pnet <- pnet(pretrained=pretrained,...)
-    self$rnet <- rnet(pretrained=pretrained,...)
-    self$onet <- onet(pretrained=pretrained,...)
+    self$pnet <- model_facenet_pnet(pretrained=pretrained,...)
+    self$rnet <- model_facenet_rnet(pretrained=pretrained,...)
+    self$onet <- model_facenet_onet(pretrained=pretrained,...)
   },
   
   forward = function(x) {
