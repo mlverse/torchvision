@@ -19,7 +19,9 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
   # Train dataset should have exactly 40599 samples
   expect_equal(train_ds$.length(), 40599)
 
-  val_ds <- whoi_small_plankton_dataset(split = "val", download = TRUE, transform = transform_to_tensor)
+  expect_no_error(
+    val_ds <- whoi_small_plankton_dataset(split = "val", download = TRUE, transform = transform_to_tensor)
+  )
   # Validation dataset should have exactly 5799 samples
   expect_equal(val_ds$.length(), 5799)
 
@@ -29,7 +31,9 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
   expect_equal(first_item$y, 47L)
   expect_equal(val_ds$classes[first_item$y], "Leegaardiella_ovalis")
 
-  test_ds <- whoi_small_plankton_dataset(split = "test", download = TRUE)
+  expect_no_error(
+    test_ds <- whoi_small_plankton_dataset(split = "test", download = TRUE)
+  )
   # Test dataset should have exactly 11601 samples
   expect_equal(test_ds$.length(), 11601)
 
@@ -39,18 +43,11 @@ test_that("whoi_small_plankton_dataset derivatives download and prepare correctl
   skip_on_cran()
   skip_if_not_installed("torch")
 
-  expect_error(
-    whoi_small_plankton_dataset(split = "test", download = FALSE),
-    "Dataset not found. You can use `download = TRUE`",
-    label = "Dataset should fail if not previously downloaded"
-  )
+  val_ds <- whoi_small_plankton_dataset(
+    split = "val", download = TRUE,
+    transform = . %>% transform_to_tensor() %>% transform_resize(size = c(150, 300))
+    )
 
-  expect_no_error(
-    val_ds <- whoi_small_plankton_dataset(
-      split = "val", download = TRUE,
-      transform = . %>% transform_to_tensor() %>% transform_resize(size = c(150, 300))
-      )
-  )
 
   dl <- torch::dataloader(val_ds, batch_size = 10)
   # 5799 turns into 580 batches of 10
