@@ -4,10 +4,11 @@ facenet_torchscript_urls <- list(
   RNet = c("https://torch-cdn.mlverse.org/models/vision/v2/models/facenet_rnet.pth", "c19b2f0df8f448455dd7ddbb47dcfa19", "400 KB")
 )
 
-# PNet definition
+#' @describeIn model_facenet PNet (Proposal Network) — small fully-convolutional network for candidate face box generation.
+#' @export
 model_facenet_pnet <- nn_module(
   classname = "PNet",
-  initialize = function(pretrained=TRUE,...) {
+  initialize = function(pretrained=TRUE,progress=FALSE,...) {
     self$conv1 <- nn_conv2d(3, 10, kernel_size=3)
     self$prelu1 <- nn_prelu(10)
     self$pool1 <- nn_max_pool2d(2, 2, ceil_mode=TRUE)
@@ -42,14 +43,15 @@ model_facenet_pnet <- nn_module(
     a <- self$conv4_1(x)
     a <- self$softmax4_1(a)
     b <- self$conv4_2(x)
-    list(bbox_reg = b, cls = a)
+    list(boxes = b, cls = a)
   }
 )
 
-# RNet definition
+#' @describeIn model_facenet RNet (Refine Network) — medium CNN with dense layers for refining and rejecting false positives.
+#' @export
 model_facenet_rnet <- nn_module(
   classname = "RNet",
-  initialize = function(pretrained=TRUE,...) {
+  initialize = function(pretrained=TRUE,progress=FALSE,...) {
     self$conv1 <- nn_conv2d(3, 28, kernel_size=3)
     self$prelu1 <- nn_prelu(28)
     self$pool1 <- nn_max_pool2d(3, 2, ceil_mode=TRUE)
@@ -91,14 +93,15 @@ model_facenet_rnet <- nn_module(
     a <- self$dense5_1(x)
     a <- self$softmax5_1(a)
     b <- self$dense5_2(x)
-    list(bbox_reg = b, cls = a)
+    list(boxes = b, cls = a)
   }
 )
 
-# ONet definition
+#' @describeIn model_facenet ONet (Output Network) — deeper CNN that outputs final bounding boxes and 5 facial landmark points.
+#' @export
 model_facenet_onet <- nn_module(
   classname = "ONet",
-  initialize = function(pretrained=TRUE,...) {
+  initialize = function(pretrained=TRUE,progress=FALSE,...) {
     self$conv1 <- nn_conv2d(3, 32, kernel_size=3)
     self$prelu1 <- nn_prelu(32)
     self$pool1 <- nn_max_pool2d(3, 2, ceil_mode=TRUE)
@@ -148,70 +151,69 @@ model_facenet_onet <- nn_module(
     a <- self$softmax6_1(a)
     b <- self$dense6_2(x)
     c <- self$dense6_3(x)
-    list(bbox_reg = b, landmarks = c, cls = a)
+    list(boxes = b, landmarks = c, cls = a)
   }
 )
 
-#' Multi-task Cascaded Convolutional Networks (MTCNN) for Face Detection
+#' MTCNN Face Detection Networks
 #'
-#' MTCNN provides face detection and alignment using a cascade of three neural networks
-#' (\code{PNet}, \code{RNet}, \code{ONet}). It is widely used for detecting faces and 
-#' facial landmarks in images, implemented here in Torch for R with optional pretrained weights.
+#' These models implement the three-stage Multi-task Cascaded Convolutional Networks (MTCNN)
+#' architecture from the paper 
+#' [Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Networks](https://arxiv.org/abs/1604.02878).
+#' 
+#' MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pipeline:
+#' - **PNet** (Proposal Network): Generates candidate face bounding boxes at multiple scales.
+#' - **RNet** (Refine Network): Refines candidate boxes, rejecting false positives.
+#' - **ONet** (Output Network): Produces final bounding boxes and 5-point facial landmarks.
 #'
-#' ## Model Components and Architecture
-#'
-#' ### PNet (Proposal Network)
-#' - 3 convolutional layers with PReLU activations and max pooling.
-#' - Outputs:
-#'   - \code{bbox_reg}: bounding box regression.
-#'   - \code{cls}: classification (face/non-face probabilities via softmax).
-#'
-#' ### RNet (Refine Network)
-#' - Deeper than PNet: 3 convolution layers, 2 max pooling layers, dense layers with PReLU.
-#' - Outputs:
-#'   - \code{bbox_reg}: refined bounding box coordinates.
-#'   - \code{cls}: refined classification scores.
-#'
-#' ### ONet (Output Network)
-#' - Deepest network with 4 convolution layers and multiple pooling layers.
-#' - Fully connected layers for final outputs:
-#'   - \code{bbox_reg}: bounding box regression.
-#'   - \code{landmarks}: facial landmarks coordinates.
-#'   - \code{cls}: face classification scores.
-#'
-#' ## Combined MTCNN Wrapper
-#' - Automatically loads PNet, RNet, and ONet, optionally with pretrained weights.
-#' - Cascades input progressively for hierarchical face detection/alignment.
-#' - Resizes intermediate inputs to 24x24 (RNet) and 48x48 (ONet).
-#'
-#' ## Preprocessing Functions
-#' - \code{fixed_image_standardization}: normalizes image tensor: (x - 127.5) / 128.
-#' - \code{prewhiten}: standardizes image by subtracting mean and dividing by adjusted standard deviation.
-#'
-#' ## Model URLs & Metadata
+#' ## Model Variants
 #' ```
-#' | Weights |  Size  |
-#' |---------|--------|
-#' | PNet    | 30 KB  |
-#' | RNet    | 400 KB |
-#' | ONet    | 2 MB   |
+#' | Model | Input Size     | Parameters | File Size | Outputs                       | Notes                             |
+#' |-------|----------------|------------|-----------|-------------------------------|-----------------------------------|
+#' | PNet  | ~12×12+        | ~3K        | 30 KB     | 2-class face prob + bbox reg  | Fully conv, sliding window stage  |
+#' | RNet  | 24×24          | ~30K       | 400 KB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
+#' | ONet  | 48×48          | ~100K      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
 #' ```
 #'
 #' @examples
 #' \dontrun{
+#' # Example usage of PNet
+#' model_pnet <- model_facenet_pnet(pretrained = TRUE)
+#' model_pnet$eval()
+#' input_pnet <- torch_randn(1, 3, 160, 160)
+#' output_pnet <- model_pnet(input_pnet)
+#' output_pnet
+#'
+#' # Example usage of RNet
+#' model_rnet <- model_facenet_rnet(pretrained = TRUE)
+#' model_rnet$eval()
+#' input_rnet <- torch_randn(1, 3, 24, 24)
+#' output_rnet <- model_rnet(input_rnet)
+#' output_rnet
+#'
+#' # Example usage of ONet
+#' model_onet <- model_facenet_onet(pretrained = TRUE)
+#' model_onet$eval()
+#' input_onet <- torch_randn(1, 3, 48, 48)
+#' output_onet <- model_onet(input_onet)
+#' output_onet
+#'
+#' # Example usage of MTCNN
 #' mtcnn <- model_mtcnn(pretrained = TRUE)
 #' mtcnn$eval()
 #' image_tensor <- torch_randn(c(1, 3, 160, 160))
 #' out <- mtcnn(image_tensor)
-#' boxes <- out$boxes
-#' landmarks <- out$landmarks
-#' probs <- out$cls
+#' out
 #' }
 #'
 #' @inheritParams model_mobilenet_v2
 #'
 #' @family models
-#' @name model_mtcnn
+#' @rdname model_facenet
+#' @name model_facenet
+NULL
+
+#' @describeIn model_facenet MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks
 #' @export
 model_mtcnn <- nn_module(
   classname = "MTCNN",
@@ -234,7 +236,7 @@ model_mtcnn <- nn_module(
     x_onet <- nnf_interpolate(x_rnet, size = c(48, 48), mode = "bilinear", align_corners = FALSE)
     onet_out <- self$onet(x_onet)
     
-    list(boxes = onet_out$bbox_reg, landmarks = onet_out$landmarks, cls = onet_out$cls)
+    list(boxes = onet_out$boxes, landmarks = onet_out$landmarks, cls = onet_out$cls)
   }
 )
 
