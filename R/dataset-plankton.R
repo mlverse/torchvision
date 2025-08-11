@@ -105,7 +105,7 @@ whoi_small_plankton_dataset <- torch::dataset(
   },
 
   .getitem = function(index) {
-    df <- arrow::collect(self$.data[index,])
+    df <- self$.data[index,]$to_data_frame()
     x <- df$image$bytes %>% unlist() %>% as.raw() %>% png::readPNG()
     y <- df$label + 1L
 
