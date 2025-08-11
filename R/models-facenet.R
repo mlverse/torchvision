@@ -7,7 +7,7 @@ facenet_torchscript_urls <- list(
 # PNet definition
 pnet <- nn_module(
   classname = "PNet",
-  initialize = function(pretrained=TRUE) {
+  initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 10, kernel_size=3)
     self$prelu1 <- nn_prelu(10)
     self$pool1 <- nn_max_pool2d(2, 2, ceil_mode=TRUE)
@@ -49,7 +49,7 @@ pnet <- nn_module(
 # RNet definition
 rnet <- nn_module(
   classname = "RNet",
-  initialize = function(pretrained=TRUE) {
+  initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 28, kernel_size=3)
     self$prelu1 <- nn_prelu(28)
     self$pool1 <- nn_max_pool2d(3, 2, ceil_mode=TRUE)
@@ -98,7 +98,7 @@ rnet <- nn_module(
 # ONet definition
 onet <- nn_module(
   classname = "ONet",
-  initialize = function(pretrained=TRUE) {
+  initialize = function(pretrained=TRUE,...) {
     self$conv1 <- nn_conv2d(3, 32, kernel_size=3)
     self$prelu1 <- nn_prelu(32)
     self$pool1 <- nn_max_pool2d(3, 2, ceil_mode=TRUE)
@@ -152,56 +152,96 @@ onet <- nn_module(
   }
 )
 
-# MTCNN combined model wrapper
-mtcnn <- nn_module(
+#' Multi-task Cascaded Convolutional Networks (MTCNN) for Face Detection
+#'
+#' MTCNN provides face detection and alignment using a cascade of three neural networks
+#' (\code{PNet}, \code{RNet}, \code{ONet}). It is widely used for detecting faces and 
+#' facial landmarks in images, implemented here in Torch for R with optional pretrained weights.
+#'
+#' ## Model Components and Architecture
+#'
+#' ### PNet (Proposal Network)
+#' - 3 convolutional layers with PReLU activations and max pooling.
+#' - Outputs:
+#'   - \code{bbox_reg}: bounding box regression.
+#'   - \code{cls}: classification (face/non-face probabilities via softmax).
+#'
+#' ### RNet (Refine Network)
+#' - Deeper than PNet: 3 convolution layers, 2 max pooling layers, dense layers with PReLU.
+#' - Outputs:
+#'   - \code{bbox_reg}: refined bounding box coordinates.
+#'   - \code{cls}: refined classification scores.
+#'
+#' ### ONet (Output Network)
+#' - Deepest network with 4 convolution layers and multiple pooling layers.
+#' - Fully connected layers for final outputs:
+#'   - \code{bbox_reg}: bounding box regression.
+#'   - \code{landmarks}: facial landmarks coordinates.
+#'   - \code{cls}: face classification scores.
+#'
+#' ## Combined MTCNN Wrapper
+#' - Automatically loads PNet, RNet, and ONet, optionally with pretrained weights.
+#' - Cascades input progressively for hierarchical face detection/alignment.
+#' - Resizes intermediate inputs to 24x24 (RNet) and 48x48 (ONet).
+#'
+#' ## Preprocessing Functions
+#' - \code{fixed_image_standardization}: normalizes image tensor: (x - 127.5) / 128.
+#' - \code{prewhiten}: standardizes image by subtracting mean and dividing by adjusted standard deviation.
+#'
+#' ## Model URLs & Metadata
+#' ```
+#' | Weights |  Size  |
+#' |---------|--------|
+#' | PNet    | 30 KB  |
+#' | RNet    | 400 KB |
+#' | ONet    | 2 MB   |
+#' ```
+#'
+#' @examples
+#' \dontrun{
+#' mtcnn <- model_mtcnn(pretrained = TRUE)
+#' mtcnn$eval()
+#' image_tensor <- torch_randn(c(1, 3, 160, 160))
+#' out <- mtcnn(image_tensor)
+#' boxes <- out$boxes
+#' landmarks <- out$landmarks
+#' probs <- out$cls
+#' }
+#'
+#' @inheritParams model_mobilenet_v2
+#'
+#' @family models
+#' @name model_mtcnn
+#' @export
+model_mtcnn <- nn_module(
   classname = "MTCNN",
-  initialize = function(image_size=160, margin=0, min_face_size=20,
-                        thresholds=c(0.6, 0.7, 0.7), factor=0.709,
-                        post_process=TRUE, select_largest=TRUE, selection_method=NULL,
-                        keep_all=FALSE, device=NULL,pretrained=TRUE) {
-    self$image_size <- image_size
-    self$margin <- margin
-    self$min_face_size <- min_face_size
-    self$thresholds <- thresholds
-    self$factor <- factor
-    self$post_process <- post_process
-    self$select_largest <- select_largest
-    self$keep_all <- keep_all
-    self$selection_method <- selection_method
+  initialize = function(
+    pretrained = TRUE,
+    progress = TRUE,
+    ...
+  ) {
+
     
-    self$pnet <- pnet(pretrained=pretrained)
-    self$rnet <- rnet(pretrained=pretrained)
-    self$onet <- onet(pretrained=pretrained)
-    
-    self$device <- torch_device("cpu")
-    if (!is.null(device)) {
-      self$device <- device
-      self$to(device)
-    }
-    
-    if (is.null(self$selection_method)) {
-      self$selection_method <- ifelse(self$select_largest, "largest", "probability")
-    }
+    self$pnet <- pnet(pretrained=pretrained,...)
+    self$rnet <- rnet(pretrained=pretrained,...)
+    self$onet <- onet(pretrained=pretrained,...)
   },
   
   forward = function(x) {
-    x <- fixed_image_standardization(x)
     pnet_out <- self$pnet(x)
     x_rnet <- nnf_interpolate(x, size = c(24, 24), mode = "bilinear", align_corners = FALSE)
     rnet_out <- self$rnet(x_rnet)
     x_onet <- nnf_interpolate(x_rnet, size = c(48, 48), mode = "bilinear", align_corners = FALSE)
     onet_out <- self$onet(x_onet)
     
-    list(bbox_reg = onet_out$bbox_reg, landmarks = onet_out$landmarks, cls = onet_out$cls)
+    list(boxes = onet_out$bbox_reg, landmarks = onet_out$landmarks, cls = onet_out$cls)
   }
 )
 
-# Utility function for standardization (matching fixed_image_standardization)
 fixed_image_standardization <- function(image_tensor) {
   (image_tensor - 127.5) / 128.0
 }
 
-# Utility function for prewhiten
 prewhiten <- function(x) {
   mean_val <- x$mean()
   std_val <- x$std()
