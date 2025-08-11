@@ -21,7 +21,8 @@ model_inception_resnet_v1(
   pretrained = NULL,
   classify = FALSE,
   num_classes = 10,
-  dropout_prob = 0.6
+  dropout_prob = 0.6,
+  ...
 )
 }
 \arguments{
@@ -31,6 +32,12 @@ model_inception_resnet_v1(
 stderr.}
 
 \item{...}{Other parameters passed to the model implementation.}
+
+\item{classify}{Logical scalar, whether to include the classification head. Default is FALSE.}
+
+\item{num_classes}{Integer scalar, number of output classes for classification. Default is 10.}
+
+\item{dropout_prob}{Numeric scalar, dropout probability applied before classification. Default is 0.6.}
 }
 \description{
 These models implement the three-stage Multi-task Cascaded Convolutional Networks (MTCNN)
@@ -89,7 +96,7 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 # Example usage of PNet
 model_pnet <- model_facenet_pnet(pretrained = TRUE)
 model_pnet$eval()
-input_pnet <- torch_randn(1, 3, 160, 160)
+input_pnet <- torch_randn(1, 3, 224, 224)
 output_pnet <- model_pnet(input_pnet)
 output_pnet
 
