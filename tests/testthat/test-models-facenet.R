@@ -105,3 +105,39 @@ test_that("tests for non-pretrained model_facenet_onet", {
   rm(modelonet)
   gc()
 })
+
+test_that("tests for pretrained model_inception_resnet_v1 with vgg2face weights", {
+
+  model_vgg = model_inception_resnet_v1(pretrained = 'vggface2')
+  model_vgg$eval()
+  input = torch_randn(1,3,224,224)
+  out = model_vgg(input)
+  expect_tensor_shape(out, c(1,512))
+
+  rm(model_vgg)
+  gc()
+})
+
+test_that("tests for pretrained model_inception_resnet_v1 with casia-webface weights", {
+
+  model_casia = model_inception_resnet_v1(pretrained = 'casia-webface')
+  model_casia$eval()
+  input = torch_randn(1,3,224,224)
+  out = model_casia(input)
+  expect_tensor_shape(out, c(1,512))
+
+  rm(model_casia)
+  gc()
+})
+
+test_that("tests for non-pretrained model_inception_resnet_v1", {
+
+  model = model_inception_resnet_v1(pretrained = NULL)
+  model$eval()
+  input = torch_randn(1,3,224,224)
+  out = model(input)
+  expect_tensor_shape(out, c(1,512))
+
+  rm(model)
+  gc()
+})
