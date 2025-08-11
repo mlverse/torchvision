@@ -1,5 +1,3 @@
-library(torch)
-
 facenet_torchscript_urls <- list(
   ONet = c("https://torch-cdn.mlverse.org/models/vision/v2/models/facenet_onet.pth", "4833e21e3a610b4064b5a3d20683a55f", "2 MB"),
   PNet = c("https://torch-cdn.mlverse.org/models/vision/v2/models/facenet_pnet.pth", "7f59c98ccf07c4ed51caf68fde86373e", "30 KB"),
@@ -24,14 +22,11 @@ pnet <- nn_module(
     self$training <- FALSE
     
     if (pretrained) {
-      # Adjust path as needed
       archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "pnet")
-      print(tools::md5sum(archive))
-      if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2])
+      if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-
+      }
       state_dict <- load_state_dict(archive)
-      print(state_dict)
       self$load_state_dict(state_dict)
     }
   },
@@ -73,10 +68,9 @@ rnet <- nn_module(
     
     if (pretrained) {
       archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "rnet")
-      print(tools::md5sum(archive))
-      if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2])
+      if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-
+      }
       state_dict <- load_state_dict(archive)
       self$load_state_dict(state_dict)
     }
@@ -127,10 +121,9 @@ onet <- nn_module(
     
     if (pretrained) {
       archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "onet")
-      print(tools::md5sum(archive))
-      if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2])
+      if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-      
+      }
       state_dict <- load_state_dict(archive)
       self$load_state_dict(state_dict)
     }
@@ -192,12 +185,14 @@ mtcnn <- nn_module(
   },
   
   forward = function(x) {
-    # Forward pass through networks (example only, actual usage may differ)
+    x <- fixed_image_standardization(x)
     pnet_out <- self$pnet(x)
-    rnet_out <- self$rnet(x)
-    onet_out <- self$onet(x)
+    x_rnet <- nnf_interpolate(x, size = c(24, 24), mode = "bilinear", align_corners = FALSE)
+    rnet_out <- self$rnet(x_rnet)
+    x_onet <- nnf_interpolate(x_rnet, size = c(48, 48), mode = "bilinear", align_corners = FALSE)
+    onet_out <- self$onet(x_onet)
     
-    list(pnet = pnet_out, rnet = rnet_out, onet = onet_out)
+    list(bbox_reg = onet_out$bbox_reg, landmarks = onet_out$landmarks, cls = onet_out$cls)
   }
 )
 
