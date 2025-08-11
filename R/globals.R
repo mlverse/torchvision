@@ -1,1 +1,1 @@
-utils::globalVariables(c("..", "N"))
+utils::globalVariables(c("..", "N", "‘magick_loader"))
