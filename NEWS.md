@@ -9,6 +9,8 @@
 
 ## New models
 
+* Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
+
 ## New features
 
 ## Bug fixes and improvements
