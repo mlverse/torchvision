@@ -307,7 +307,7 @@ model_mobilenet_v3_large <- function(
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
     state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth", prefix = "mobilenet_v3_large")
-    state_dict <- load_state_dict(state_dict_path)
+    state_dict <- torch::load_state_dict(state_dict_path)
     new_names <- names(state_dict)
 
     new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
@@ -338,7 +338,7 @@ model_mobilenet_v3_small <- function(
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
     state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet_v3_small")
-    state_dict <- load_state_dict(state_dict_path)
+    state_dict <- torch::load_state_dict(state_dict_path)
     new_names <- names(state_dict)
 
     new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
