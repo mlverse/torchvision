@@ -5,8 +5,8 @@ options(timeout = 60000)
 
 test_that("VGGFace2 dataset works correctly for train split", {
 
-#   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
-#           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   vgg <- vggface2_dataset(root = t, download = TRUE)
   expect_length(vgg, 3141890)
@@ -19,8 +19,8 @@ test_that("VGGFace2 dataset works correctly for train split", {
 
 test_that("VGGFace2 dataset works correctly for test split", {
 
-#   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
-#           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   vgg <- vggface2_dataset(root = t, train = FALSE)
   expect_length(vgg, 169396)
