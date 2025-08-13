@@ -21,14 +21,14 @@
 #' #Load the training set
 #' ds <- vggface2_dataset(download = TRUE)
 #' item <- ds[1]
-#' item$x      # image tensor
+#' item$x      # image array RGB
 #' item$y      # integer label
 #' ds$classes[item$y]  # list(name=..., gender=...)
 #'
 #' #Load the test set
 #' ds <- vggface2_dataset(download = TRUE, train = FALSE)
 #' item <- ds[1]
-#' item$x      # image tensor
+#' item$x      # image array RGB
 #' item$y      # integer label
 #' ds$classes[item$y]  # list(name=..., gender=...)
 #' }
