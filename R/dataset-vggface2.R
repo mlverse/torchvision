@@ -38,11 +38,11 @@
 vggface2_dataset <- torch::dataset(
   name = "vggface2",
   resources = list(
-    train_images = "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_train.tar.gz",
-    test_images  = "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_test.tar.gz",
-    train_list   = "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/train_list.txt",
-    test_list    = "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/test_list.txt",
-    identity     = "https://huggingface.co/datasets/ProgramComputer/VGGFace2/raw/main/meta/identity_meta.csv"
+    train_images = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_train.tar.gz","88813c6b15de58afc8fa75ea83361d7f"),
+    test_images  = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_test.tar.gz","bb7a323824d1004e14e00c23974facd3"),
+    train_list   = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/train_list.txt","4cfbab4a839163f454d7ecef28b68669"),
+    test_list    = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/test_list.txt","d08b10f12bc9889509364ef56d73c621"),
+    identity     = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/raw/main/meta/identity_meta.csv","d315386c7e8e166c4f60e27d9cc61acc")
   ),
   archive_size = "38 GB",
   training_file = "train.rds",
@@ -100,18 +100,36 @@ vggface2_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    download_and_extract <- function(url, exdir) {
-      archive <- download_and_cache(url, prefix = class(self)[1])
-      utils::untar(archive, exdir = exdir)
+    archive <- download_and_cache(self$resources$train_images[1], prefix = class(self)[1])
+    if (tools::md5sum(archive) != self$resources$train_images[2]) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
+    utils::untar(archive, exdir = self$raw_folder)
 
-    download_and_extract(self$resources$train_images, self$raw_folder)
-    download_and_extract(self$resources$test_images, self$raw_folder)
+    archive <- download_and_cache(self$resources$test_images[1], prefix = class(self)[1])
+    if (tools::md5sum(archive) != self$resources$test_images[2]) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    }
+    utils::untar(archive, exdir = self$raw_folder)
 
-    train_list_file <- download_and_cache(self$resources$train_list, prefix = "train_list")
-    test_list_file <- download_and_cache(self$resources$test_list, prefix = "test_list")
-    identity_file <- download_and_cache(self$resources$identity, prefix = "identity_meta")
+    archive <- download_and_cache(self$resources$train_list[1], prefix = "train_list")
+    if (tools::md5sum(archive) != self$resources$train_list[2]) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    }
+    fs::file_move(archive, self$raw_folder)
 
+    archive <- download_and_cache(self$resources$test_list[1], prefix = "test_list")
+    if (tools::md5sum(archive) != self$resources$test_list[2]) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    }
+    fs::file_move(archive, self$raw_folder)
+
+    archive <- download_and_cache(self$resources$identity[1], prefix = "identity_meta")
+    if (tools::md5sum(archive) != self$resources$identity[2]) {
+      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    }
+    fs::file_move(archive, self$raw_folder)
+    identity_file <- file.path(self$raw_folder, "identity_meta.csv")
     identity_df <- read.csv(identity_file, sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
     identity_map <- setNames(
@@ -131,9 +149,9 @@ vggface2_dataset <- torch::dataset(
 
     for (split in c("train", "test")) {
         if (split == "train") {
-          list_file <- train_list_file
+          list_file <- file.path(self$raw_folder, "train_list.txt")
         } else {
-          list_file <- test_list_file
+          list_file <- file.path(self$raw_folder, "test_list.txt")
         }
         files <- readLines(list_file)
 
