@@ -108,13 +108,9 @@ vggface2_dataset <- torch::dataset(
     download_and_extract(self$resources$train_images, self$raw_folder)
     download_and_extract(self$resources$test_images, self$raw_folder)
 
-    train_list_file <- file.path(self$raw_folder, "train_list.txt")
-    download.file(self$resources$train_list, train_list_file, mode = "wb")
-    test_list_file <- file.path(self$raw_folder, "test_list.txt")
-    download.file(self$resources$test_list, test_list_file, mode = "wb")
-
-    identity_file <- file.path(self$raw_folder, "identity_meta.csv")
-    download.file(self$resources$identity, identity_file, mode = "wb")
+    train_list_file <- download_and_cache(self$resources$train_list, prefix = "train_list")
+    test_list_file <- download_and_cache(self$resources$test_list, prefix = "test_list")
+    identity_file <- download_and_cache(self$resources$identity, prefix = "identity_meta")
 
     identity_df <- read.csv(identity_file, sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
