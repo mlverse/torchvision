@@ -131,7 +131,8 @@ Other segmentation_dataset:
 \code{\link{oxfordiiitpet_segmentation_dataset}()}
 
 Other detection_dataset: 
-\code{\link{coco_detection_dataset}()}
+\code{\link{coco_detection_dataset}()},
+\code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}
 \concept{segmentation_dataset}
