@@ -96,5 +96,7 @@
 <url><loc>/reference/transform_to_tensor.html</loc></url>
 <url><loc>/reference/transform_vflip.html</loc></url>
 <url><loc>/reference/vision_make_grid.html</loc></url>
+<url><loc>/reference/whoi_plankton_dataset.html</loc></url>
+<url><loc>/reference/whoi_small_coralnet_dataset.html</loc></url>
 </urlset>
 
