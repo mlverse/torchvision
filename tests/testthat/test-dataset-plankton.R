@@ -1,4 +1,4 @@
-context("dataset-eurosat")
+context("dataset-plankton")
 
 
 test_that("whoi_small_plankton_dataset downloads correctly whatever the split", {
@@ -27,7 +27,7 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
 
   first_item <- val_ds[1]
   expect_tensor_shape(first_item$x, c(1,145, 230))
-  # classification of the first item is "48: Leptocylindrus"
+  # classification of the first item is "47: Leegaardiella_ovalis"
   expect_equal(first_item$y, 47L)
   expect_equal(val_ds$classes[first_item$y], "Leegaardiella_ovalis")
 
@@ -36,6 +36,47 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
   )
   # Test dataset should have exactly 11601 samples
   expect_equal(test_ds$.length(), 11601)
+
+})
+
+
+test_that("whoi_small_coralnet_dataset downloads correctly whatever the split", {
+  skip_on_cran()
+  skip_if_not_installed("torch")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  expect_error(
+    whoi_small_coralnet_dataset(split = "test", download = FALSE),
+    "Dataset not found. You can use `download = TRUE`",
+    label = "Dataset should fail if not previously downloaded"
+  )
+
+  expect_no_error(
+    train_ds <- whoi_small_coralnet_dataset(split = "train", download = TRUE)
+  )
+
+  expect_is(train_ds, "dataset", "train should be a dataset")
+  # Train dataset should have exactly 314 samples
+  expect_equal(train_ds$.length(), 314)
+
+  expect_no_error(
+    val_ds <- whoi_small_coralnet_dataset(split = "val", download = TRUE, transform = transform_to_tensor)
+  )
+  # Validation dataset should have exactly 45 samples
+  expect_equal(val_ds$.length(), 45)
+
+  first_item <- val_ds[1]
+  expect_tensor_shape(first_item$x, c(3, 3000, 4000))
+  # classification of the first item is "1: diploria_labrinthyformis"
+  expect_equal(first_item$y, 1L)
+  expect_equal(val_ds$classes[first_item$y], "diploria_labrinthyformis")
+
+  expect_no_error(
+    test_ds <- whoi_small_coralnet_dataset(split = "test", download = TRUE)
+  )
+  # Test dataset should have exactly 91 samples
+  expect_equal(test_ds$.length(), 91)
 
 })
 
