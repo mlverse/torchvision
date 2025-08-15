@@ -113,7 +113,12 @@ whoi_small_plankton_dataset <- torch::dataset(
 
   .getitem = function(index) {
     df <- self$.data[index,]$to_data_frame()
-    x <- df$image$bytes %>% unlist() %>% as.raw() %>% png::readPNG()
+    x_raw <- df$image$bytes %>% unlist() %>% as.raw()
+    if (tolower(tools::file_ext(df$image$path)) == "jpg") {
+      x <- jpeg::readJPEG(x_raw)
+    } else {
+      x <- png::readPNG(x_raw)
+    }
     y <- df$label + 1L
 
     if (!is.null(self$transform))
@@ -173,7 +178,10 @@ whoi_plankton_dataset <- torch::dataset(
 
 #' Coralnet Dataset
 #'
-#' [CoralNet](https://coralnet.ucsd.edu) is a resource for benthic images classification.
+#' Small Coralnet dataset is an image **classification dataset**
+#' of very large submarine coral reef images annotated into 3 classes
+#' and produced by  [CoralNet](https://coralnet.ucsd.edu),
+#' a resource for benthic images classification.
 #'
 #' @inheritParams whoi_plankton_dataset
 #' @export
@@ -186,12 +194,12 @@ whoi_small_coralnet_dataset <- torch::dataset(
     url = c("https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/test-00000-of-00001.parquet?download=true",
             paste0("https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/train-0000",0:3,"-of-00004.parquet?download=true"),
             "https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/validation-00000-of-00001.parquet?download=true"),
-    md5 = c("cd41b344ec4b6af83e39c38e19f09190",
-            "aa0965c0e59f7b1cddcb3c565d80edf3",
-            "b2a75513f1a084724e100678d8ee7180",
-            "a03c4d52758078bfb0799894926d60f6",
-            "07eaff140f39868a8bcb1d3c02ebe60f",
-            "87c927b9fbe0c327b7b9ae18388b4fcf"),
+    md5 = c("f9a3ce864fdbeb5f1f3d243fe1285186",
+            "82269e2251db22ef213e438126198afd",
+            "82d2cafbad7740e476310565a2bcd44e",
+            "f4dd2d2effc1f9c02918e3ee614b85d3",
+            "d66ec691a4c5c63878a9cfff164a6aaf",
+            "7ea146b9b2f7b6cee99092bd44182d06"),
     size = c(430e6, rep(380e6, 4), 192e6)
   )
 )

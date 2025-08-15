@@ -21,5 +21,8 @@ whoi_small_coralnet_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \description{
-Coralnet Dataset
+Small Coralnet dataset is an image \strong{classification dataset}
+of very large submarine coral reef images annotated into 3 classes
+and produced by  \href{https://coralnet.ucsd.edu}{CoralNet},
+a resource for benthic images classification.
 }
