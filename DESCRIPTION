@@ -43,6 +43,7 @@ Imports:
     png,
     abind,
     jsonlite,
+    yaml,
     withr,
     cli,
     glue,
@@ -54,5 +55,6 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2
+    xml2,
+    hfhub
 BugReports: https://github.com/mlverse/torchvision/issues
