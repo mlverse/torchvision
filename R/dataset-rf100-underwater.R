@@ -25,17 +25,23 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Load dataset
+#' # Load dataset and convert images to tensors
 #' devtools::load_all()
-#' ds <- rf100_underwater_collection(dataset = "pipes", split = "train", download = TRUE)
+#' ds <- rf100_underwater_collection(
+#'   dataset = "pipes",
+#'   split = "train",
+#'   transform = transform_to_tensor,
+#'   download = TRUE
+#' )
 #'
-#' # Find a sample with annotations
-#' item <- ds[1]
-#' # Convert array to tensor with proper dimensions (HWC -> CHW)
-#' img_tensor <- torch::torch_tensor(item$x)$permute(c(3, 1, 2))
-#' tensor_image_browse(img_tensor)
+#' # Retrieve a sample and inspect annotations
+#' item <- ds[2]
 #' item$y$labels
 #' item$y$boxes
+#'
+#' # Draw bounding boxes and display the image
+#' boxed_img <- draw_bounding_boxes(item)
+#' tensor_image_browse(boxed_img)
 #' }
 #'
 #' @family detection_dataset
