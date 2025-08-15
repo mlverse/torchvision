@@ -2,7 +2,13 @@
 #' WHOI-Plankton Dataset
 #'
 #' The WHOI-Plankton and WHOI-Plankton small are **image classification** datasets
-#' of submarine plankton small grayscale images of varying size, classified into 100 classes.
+#' from the Woods Hole Oceanographic Institution (WHOI) of microscopic marine plankton.
+#' https://hdl.handle.net/10.1575/1912/7341
+#' Images were collected in situ by automated submersible imaging-in-flow cytometry
+#' with an instrument called Imaging FlowCytobot (IFCB). They are small grayscale images
+#' of varying size.
+#' Images are classified into 100 classes, with an overview  available in
+#' [project Wiki page](https://whoigit.github.io/whoi-plankton/)
 #' Dataset size is 957k and 58k respectively, and each provides a train / val / test split.
 #'
 #' @inheritParams eurosat_dataset
@@ -66,6 +72,7 @@ whoi_small_plankton_dataset <- torch::dataset(
       install.packages("prettyunits")
     }
 
+    self$split <- match.arg(split, c("train", "val", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
     self$archive_url <- self$resources[self$resources$split == split,]$url
@@ -74,7 +81,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     self$split_file <- sapply(self$archive_url, \(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], sub("\\?download=.*", "", basename(x))))
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -127,7 +134,7 @@ whoi_small_plankton_dataset <- torch::dataset(
 
 #' WHOI-Plankton Dataset
 #'
-#' @inheritParams whoi_plankton_dataset#'
+#' @inheritParams whoi_plankton_dataset
 #' @rdname whoi_plankton_dataset
 #' @export
 whoi_plankton_dataset <- torch::dataset(
@@ -160,5 +167,31 @@ whoi_plankton_dataset <- torch::dataset(
             "db827a7de8790cdcae67b174c7b8ea5e",
             "d3181d9ffaed43d0c01f59455924edca"),
     size = c(rep(450e6, 4), rep(490e6, 13), rep(450e6, 2))
+  )
+)
+
+
+#' Coralnet Dataset
+#'
+#' [CoralNet](https://coralnet.ucsd.edu) is a resource for benthic images classification.
+#'
+#' @inheritParams whoi_plankton_dataset
+#' @export
+whoi_small_coralnet_dataset <- torch::dataset(
+  name = "whoi_small_coralnet",
+  inherit = whoi_small_plankton_dataset,
+  archive_size = "2.1 GB",
+  resources = data.frame(
+    split = c("test", rep("train", 4), "val"),
+    url = c("https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/test-00000-of-00001.parquet?download=true",
+            paste0("https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/train-0000",0:3,"-of-00004.parquet?download=true"),
+            "https://huggingface.co/datasets/nf-whoi/coralnet-small/resolve/main/data/validation-00000-of-00001.parquet?download=true"),
+    md5 = c("cd41b344ec4b6af83e39c38e19f09190",
+            "aa0965c0e59f7b1cddcb3c565d80edf3",
+            "b2a75513f1a084724e100678d8ee7180",
+            "a03c4d52758078bfb0799894926d60f6",
+            "07eaff140f39868a8bcb1d3c02ebe60f",
+            "87c927b9fbe0c327b7b9ae18388b4fcf"),
+    size = c(430e6, rep(380e6, 4), 192e6)
   )
 )
