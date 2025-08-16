@@ -8,9 +8,11 @@ rf100_document_collection(
   root = tempdir(),
   dataset = c("tweeter_post", "tweeter_profile", "document_part", "activity_diagram",
     "signature", "paper_part", "tabular_data", "paragraph"),
+  split = c("train", "valid", "test"),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  debug = FALSE
 )
 }
 \arguments{
@@ -20,11 +22,17 @@ rf100_document_collection(
 c("tweeter_post", "tweeter_profile", "document_part", "activity_diagram",
 "signature", "paper_part", "tabular_data", "paragraph").}
 
+\item{split}{Dataset split to load. One of \code{"train"}, \code{"valid"}, or
+\code{"test"}. Defaults to \code{"train"}.}
+
 \item{download}{Logical. If TRUE, downloads the dataset from Hugging Face.}
 
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{debug}{Logical. If TRUE, prints additional debugging information about the
+download and extraction steps.}
 }
 \value{
 A torch dataset where each item is a list with elements:

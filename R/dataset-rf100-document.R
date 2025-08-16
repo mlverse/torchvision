@@ -79,8 +79,15 @@ rf100_document_collection <- torch::dataset(
     self$annotation_file <- NULL
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} will be downloaded and processed if not already available.")
       self$download()
+    }
+
+    if (!fs::dir_exists(self$data_dir)) {
+      alt_dir <- fs::path(self$root, dataset)
+      if (fs::dir_exists(alt_dir)) {
+        self$data_dir <- alt_dir
+        self$image_dir <- fs::path(self$data_dir, "images")
+      }
     }
 
     if (!self$check_exists()) {
@@ -88,12 +95,10 @@ rf100_document_collection <- torch::dataset(
     }
 
     self$load_annotations()
-    cli_inform("{.cls {class(self)[[1]]}} dataset '{dataset}' loaded with {length(self$image_ids)} images.")
   },
 
   check_exists = function() {
     if (!fs::dir_exists(self$data_dir)) {
-      if (self$debug) cli_inform("Debug: data directory {self$data_dir} missing")
       return(FALSE)
     }
     if (fs::dir_exists(fs::path(self$data_dir, "images")))
@@ -102,13 +107,10 @@ rf100_document_collection <- torch::dataset(
       self$image_dir <- self$data_dir
     jsons <- fs::dir_ls(self$data_dir, glob = "*.json", type = "file")
     if (length(jsons) == 0) {
-      if (self$debug) cli_inform("Debug: no annotation files found in {self$data_dir}")
       return(FALSE)
     }
     self$annotation_file <- jsons[1]
-    exists <- fs::dir_exists(self$image_dir) && fs::file_exists(self$annotation_file)
-    if (self$debug) cli_inform("Debug: images dir {self$image_dir} exists={fs::dir_exists(self$image_dir)}, annotation file exists={fs::file_exists(self$annotation_file)}")
-    exists
+    fs::dir_exists(self$image_dir) && fs::file_exists(self$annotation_file)
   },
 
   download = function() {
@@ -120,7 +122,6 @@ rf100_document_collection <- torch::dataset(
       install.packages("curl")
     }
 
-    cli_inform("Downloading {.cls {class(self)[[1]]}} from Hugging Face ...")
     url <- sprintf(
       "https://huggingface.co/datasets/%s/resolve/main/dataset.tar.gz",
       self$repo
@@ -130,42 +131,46 @@ rf100_document_collection <- torch::dataset(
     if (!dir.exists(cache_dir))
       dir.create(cache_dir, recursive = TRUE)
     archive <- file.path(cache_dir, paste0(self$dataset, ".tar.gz"))
+
     if (!file.exists(archive)) {
-      if (self$debug) cli_inform("Debug: downloading archive to {archive}")
+      tryCatch({
+        curl::curl_fetch_memory(url, handle = curl::new_handle(nobody = TRUE))
+      }, error = function(e) {
+        cli_abort("Failed to access dataset URL {url}. Error: {conditionMessage(e)}")
+      })
+
       curl::curl_download(url, destfile = archive)
-    } else if (self$debug) {
-      cli_inform("Debug: using cached archive {archive}")
     }
 
-    tmp_dir <- tempfile()
-    dir.create(tmp_dir)
-    if (self$debug) cli_inform("Debug: extraction temp dir {tmp_dir}")
+    dest_dir <- fs::path(self$root, self$dataset)
 
-    # Extract the archive using R's internal tar to handle absolute paths better
-    tryCatch(
-      utils::untar(archive, exdir = tmp_dir, tar = "internal"),
-      error = function(e) {
-        if (self$debug) cli_inform("Debug: internal tar failed, trying external tar")
-        # Fallback to external tar without special options
-        tryCatch(
-          utils::untar(archive, exdir = tmp_dir),
-          error = function(e2) {
-            cli_abort("Failed to extract archive {archive}: {e2$message}")
-          }
-        )
+    if (fs::dir_exists(dest_dir)) {
+      fs::dir_delete(dest_dir)
+    }
+    fs::dir_create(dest_dir, recurse = TRUE)
+
+    tmp_dir <- file.path(tempdir(), paste0("rf", sample(1000:9999, 1)))
+    dir.create(tmp_dir, recursive = TRUE)
+
+    res <- try({
+      utils::untar(archive, exdir = tmp_dir, tar = "internal")
+    }, silent = TRUE)
+
+    if (inherits(res, "try-error")) {
+      res <- try({
+        utils::untar(archive, exdir = tmp_dir)
+      }, silent = TRUE)
+
+      if (inherits(res, "try-error")) {
+        msg <- conditionMessage(attr(res, "condition"))
+        cli_abort("Failed to extract archive {archive}: {msg}")
       }
-    )
+    }
 
-    # Find the actual dataset folder structure
-    extracted_files <- list.files(tmp_dir, recursive = TRUE, full.names = TRUE)
-    if (self$debug) cli_inform("Debug: extracted {length(extracted_files)} files")
-
-    # Look for the dataset folder pattern
-    dataset_folders <- list.dirs(tmp_dir, recursive = TRUE, full.names = TRUE)
+    all_dirs <- list.dirs(tmp_dir, recursive = TRUE, full.names = TRUE)
     target_folder <- NULL
 
-    # Find folder containing the dataset splits (train, valid, test)
-    for (folder in dataset_folders) {
+    for (folder in all_dirs) {
       subfolders <- basename(list.dirs(folder, recursive = FALSE))
       if (any(c("train", "valid", "test") %in% subfolders)) {
         target_folder <- folder
@@ -174,57 +179,37 @@ rf100_document_collection <- torch::dataset(
     }
 
     if (is.null(target_folder)) {
-      # Fallback: look for any folder with the expected name pattern
-      pattern_matches <- grep(self$folder, dataset_folders, value = TRUE)
+      pattern_matches <- grep(self$folder, all_dirs, value = TRUE, fixed = TRUE)
       if (length(pattern_matches) > 0) {
         target_folder <- pattern_matches[1]
-      } else {
-        # Last resort: use the first subdirectory that's not empty
-        non_empty_dirs <- dataset_folders[sapply(dataset_folders, function(d) length(list.files(d)) > 0)]
-        if (length(non_empty_dirs) > 0) {
-          target_folder <- non_empty_dirs[1]
-        }
       }
     }
 
     if (is.null(target_folder) || !dir.exists(target_folder)) {
-      cli_abort("Failed to locate dataset folder in the extracted archive. Available folders: {paste(basename(dataset_folders), collapse=', ')}")
+      available_folders <- basename(all_dirs[nchar(basename(all_dirs)) > 0])
+      cli_abort("Failed to locate dataset folder. Available folders: {paste(head(available_folders, 20), collapse=', ')}")
     }
 
-    if (self$debug) cli_inform("Debug: found dataset folder at {target_folder}")
+    split_dirs <- c("train", "valid", "test")
+    for (split in split_dirs) {
+      src_split <- file.path(target_folder, split)
+      if (dir.exists(src_split)) {
+        dest_split <- file.path(dest_dir, split)
 
-    # Copy the dataset to the final destination
-    dest_dir <- fs::path(self$root, self$dataset)
-    if (self$debug) cli_inform("Debug: copying dataset from {target_folder} to {dest_dir}")
+        dir.create(dest_split, recursive = TRUE, showWarnings = FALSE)
 
-    fs::dir_create(fs::path(self$root), recurse = TRUE)
-
-    # If target_folder contains train/valid/test directly, copy its contents
-    # Otherwise copy the folder itself and rename it
-    subfolders <- basename(list.dirs(target_folder, recursive = FALSE))
-    if (any(c("train", "valid", "test") %in% subfolders)) {
-      fs::dir_copy(target_folder, dest_dir, overwrite = TRUE)
-    } else {
-      # Look one level deeper
-      deeper_folders <- list.dirs(target_folder, recursive = FALSE, full.names = TRUE)
-      found_dataset <- FALSE
-      for (deeper in deeper_folders) {
-        deeper_subfolders <- basename(list.dirs(deeper, recursive = FALSE))
-        if (any(c("train", "valid", "test") %in% deeper_subfolders)) {
-          fs::dir_copy(deeper, dest_dir, overwrite = TRUE)
-          found_dataset <- TRUE
-          break
+        src_files <- list.files(src_split, full.names = TRUE, recursive = FALSE)
+        for (src_file in src_files) {
+          if (dir.exists(src_file)) {
+            file.copy(src_file, dest_split, recursive = TRUE, overwrite = TRUE)
+          } else {
+            file.copy(src_file, file.path(dest_split, basename(src_file)), overwrite = TRUE)
+          }
         }
       }
-      if (!found_dataset) {
-        fs::dir_copy(target_folder, dest_dir, overwrite = TRUE)
-      }
     }
 
-    # Clean up temporary directory
     unlink(tmp_dir, recursive = TRUE)
-
-    cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   load_annotations = function() {
