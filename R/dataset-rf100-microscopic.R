@@ -11,6 +11,22 @@ NULL
 #'   "mitosis", "phage", "liver_desease", or "asbestos".
 #' @inheritParams rf100_underwater_collection
 #' @inherit rf100_underwater_collection return
+#'
+#' @examples
+#' \dontrun{
+#' devtools::load_all()
+#' ds <- rf100_microscopic_collection(
+#'   dataset = "stomata_cell",
+#'   split = "test",
+#'   transform = transform_to_tensor,
+#'   download = TRUE
+#' )
+#' item <- ds[1]
+#' item$y$labels
+#' item$y$boxes
+#' boxed_img <- draw_bounding_boxes(item)
+#' tensor_image_browse(boxed_img)
+#' }
 #' @family detection_dataset
 #' @export
 rf100_microscopic_collection <- torch::dataset(
@@ -83,14 +99,13 @@ rf100_microscopic_collection <- torch::dataset(
   },
 
   check_exists = function() {
-    # If the dataset directory itself doesn't exist yet, nothing exists.
-    if (!fs::dir_exists(self$dataset_dir)) {
-      return(FALSE)
+    # If parent check succeeds we're done
+    if (super$check_exists()) {
+      return(TRUE)
     }
 
-    # Fast path: expected files/dirs already in place
-    if (fs::file_exists(self$annotation_file) && fs::dir_exists(self$image_dir)) {
-      return(TRUE)
+    if (!fs::dir_exists(self$dataset_dir)) {
+      return(FALSE)
     }
 
     # Accept both 'valid' and 'val'
@@ -101,7 +116,6 @@ rf100_microscopic_collection <- torch::dataset(
       split_candidates
     }
 
-    # Search for '<split>/_annotations.coco.json' anywhere under dataset_dir
     hits <- fs::dir_ls(
       self$dataset_dir,
       recurse = 3,
@@ -113,44 +127,19 @@ rf100_microscopic_collection <- torch::dataset(
       self$annotation_file <- hits[[1]]
       self$split_dir <- fs::path_dir(self$annotation_file)
       self$image_dir <- self$split_dir
-      return(TRUE)
+      return(super$check_exists())
     }
 
     FALSE
   },
 
-  .getitem = function(index) {
-    img_path <- self$image_paths[index]
+  read_image = function(img_path) {
     ext <- tolower(fs::path_ext(img_path))
     x <- if (ext %in% c("jpg","jpeg")) jpeg::readJPEG(img_path)
     else if (ext == "png")        png::readPNG(img_path)
-    else                          jpeg::readJPEG(img_path) # fallback
-
-    if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[,,1:3, drop = FALSE] # drop alpha
-    if (length(dim(x)) == 2) x <- array(rep(x, 3L), dim = c(dim(x), 3L))   # gray->RGB
-
-    img_info <- self$images[index, ]
-    anns <- self$annotations_by_image[[as.character(img_info$id)]]
-
-    if (is.null(anns) || nrow(anns) == 0) {
-      boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- character()
-    } else {
-      boxes_xywh <- torch::torch_tensor(do.call(rbind, anns$bbox), dtype = torch::torch_float())
-      # xywh -> xyxy (same logic as parent)
-      boxes <- torch::torch_stack(
-        list(boxes_xywh[,1],
-             boxes_xywh[,2],
-             boxes_xywh[,1] + boxes_xywh[,3],
-             boxes_xywh[,2] + boxes_xywh[,4]),
-        dim = 2
-      )
-      labels <- as.character(self$categories$name[match(anns$category_id, self$categories$id)])
-    }
-
-    y <- list(labels = labels, boxes = boxes)
-    if (!is.null(self$transform)) x <- self$transform(x)
-    if (!is.null(self$target_transform)) y <- self$target_transform(y)
-    structure(list(x = x, y = y), class = "image_with_bounding_box")
+    else                          jpeg::readJPEG(img_path)
+    if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[,,1:3, drop = FALSE]
+    if (length(dim(x)) == 2) x <- array(rep(x, 3L), dim = c(dim(x), 3L))
+    x
   }
 )

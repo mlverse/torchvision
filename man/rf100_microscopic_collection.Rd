@@ -47,15 +47,15 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the RF100 microscopic object detection datasets. COCO format,
-per dataset folders, and train valid test splits are expected.
+Loads one of the RF100 microscopic object detection datasets (COCO format),
+with per-dataset folders and train/valid/test splits.
 }
 \examples{
 \dontrun{
 devtools::load_all()
 ds <- rf100_microscopic_collection(
   dataset = "stomata_cell",
-  split = "train",
+  split = "test",
   transform = transform_to_tensor,
   download = TRUE
 )
