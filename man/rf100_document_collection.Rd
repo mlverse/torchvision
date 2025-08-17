@@ -15,9 +15,8 @@ rf100_document_collection(
 )
 }
 \arguments{
-\item{dataset}{Character. One of "tweeter_post", "tweeter_profile",
-"document_part", "activity_diagram", "signature", "paper_part",
-"tabular_data", or "paragraph".}
+\item{dataset}{One of "tweeter_post", "tweeter_profile", "document_part",
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph".}
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
@@ -47,14 +46,11 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the RF100 document object detection datasets: "tweeter_post",
-"tweeter_profile", "document_part", "activity_diagram", "signature",
-"paper_part", "tabular_data", or "paragraph". Images are provided with
-COCO-style bounding box annotations for object detection tasks.
+Loads one of the RF100 document object detection datasets. COCO format,
+per dataset folders, and train valid test splits are expected.
 }
 \examples{
 \dontrun{
-# Load dataset and convert images to tensors
 devtools::load_all()
 ds <- rf100_document_collection(
   dataset = "tweeter_post",
@@ -62,17 +58,12 @@ ds <- rf100_document_collection(
   transform = transform_to_tensor,
   download = TRUE
 )
-
-# Retrieve a sample and inspect annotations
-item <- ds[2]
+item <- ds[1]
 item$y$labels
 item$y$boxes
-
-# Draw bounding boxes and display the image
 boxed_img <- draw_bounding_boxes(item)
 tensor_image_browse(boxed_img)
 }
-
 }
 \seealso{
 Other detection_dataset: 
