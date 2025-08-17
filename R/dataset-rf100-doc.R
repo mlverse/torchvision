@@ -38,7 +38,7 @@
 #' )
 #'
 #' # Retrieve a sample and inspect annotations
-#' item <- ds[2]
+#' item <- ds[1]
 #' item$y$labels
 #' item$y$boxes
 #'
@@ -86,71 +86,60 @@ rf100_document_collection <- torch::dataset(
     transform = NULL,
     target_transform = NULL
   ) {
+    self$dataset <- match.arg(dataset)
+    self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
     self$base_dir <- fs::path(self$root, "rf100-doc")
-    self$split <- match.arg(split)
+    self$dataset_dir <- fs::path(self$base_dir, self$dataset)
     self$transform <- transform
     self$target_transform <- target_transform
 
-    # --- Detect COCO flat layout ---
-    coco_ann <- fs::path(self$base_dir, self$split, "_annotations.coco.json")
-    if (fs::file_exists(coco_ann)) {
+    if (download) self$download()
+
+    # Try dataset-scoped COCO first
+    resolved <- private$resolve_coco_dirs(self$dataset_dir, self$split)
+    if (!identical(resolved, FALSE)) {
       self$mode <- "coco"
-      self$image_dir <- fs::path(self$base_dir, self$split)
-      self$annotation_file <- coco_ann
-      # dataset arg is ignored in COCO mode
+      self$image_dir <- resolved$image_dir
+      self$annotation_file <- resolved$annotation_file
     } else {
-      # --- YOLO per-dataset fallback ---
+      # YOLO dataset layout
       self$mode <- "yolo"
-      self$dataset <- match.arg(dataset)
-      self$dataset_dir <- fs::path(self$base_dir, self$dataset)
-      # Accept both valid/val
       split_candidates <- if (self$split == "valid") c("valid", "val")
       else if (self$split == "val") c("val", "valid")
       else self$split
-      # Expected path first
       self$image_dir <- fs::path(self$dataset_dir, self$split, "images")
       self$label_dir <- fs::path(self$dataset_dir, self$split, "labels")
       self$yaml_path <- fs::path(self$dataset_dir, "data.yaml")
 
       if (!fs::dir_exists(self$image_dir) || !fs::dir_exists(self$label_dir)) {
-        # Try resolving alternate nestings and val/valid
-        resolved <- private$resolve_yolo_dirs(self$dataset_dir, split_candidates)
-        if (!isFALSE(resolved)) {
-          self$image_dir <- resolved$image_dir
-          self$label_dir <- resolved$label_dir
-          self$yaml_path <- resolved$yaml_path
+        yolo_res <- private$resolve_yolo_dirs(self$dataset_dir, split_candidates)
+        if (!identical(yolo_res, FALSE)) {
+          self$image_dir <- yolo_res$image_dir
+          self$label_dir <- yolo_res$label_dir
+          self$yaml_path <- yolo_res$yaml_path
         }
-      }
-
-      if (download) {
-        self$download()
       }
     }
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      runtime_error("Dataset not found. Use `download = TRUE` or check your paths.")
     }
 
     self$load_annotations()
   },
 
   download = function() {
-    if (self$mode == "coco") {
-      # Nothing to download for flat COCO layout
-      return(invisible(NULL))
-    }
-    if (self$check_exists()) return(invisible(NULL))
-    fs::dir_create(self$base_dir, recurse = TRUE)
+    fs::dir_create(self$dataset_dir, recurse = TRUE)
+    # Always unzip the selected dataset into <base>/<dataset>
     resource <- self$resources[self$resources$dataset == self$dataset, ]
     archive <- download_and_cache(resource$url, prefix = class(self)[1])
-    # Unzip into base_dir; archive has <dataset>/...
-    utils::unzip(archive, exdir = self$base_dir)
+    utils::unzip(archive, exdir = self$dataset_dir)
     invisible(NULL)
   },
 
   check_exists = function() {
-    if (self$mode == "coco") {
+    if (identical(self$mode, "coco")) {
       fs::file_exists(self$annotation_file) && fs::dir_exists(self$image_dir)
     } else {
       fs::dir_exists(self$image_dir) && fs::dir_exists(self$label_dir)
@@ -158,7 +147,7 @@ rf100_document_collection <- torch::dataset(
   },
 
   load_annotations = function() {
-    if (self$mode == "coco") {
+    if (identical(self$mode, "coco")) {
       ann <- jsonlite::fromJSON(self$annotation_file)
       self$categories <- ann$categories
       self$images <- ann$images
@@ -168,12 +157,9 @@ rf100_document_collection <- torch::dataset(
       } else {
         self$annotations_by_image <- list()
       }
-      # Build image paths from file_name relative to split dir
       self$image_paths <- fs::path(self$image_dir, self$images$file_name)
-      # class names
       self$classes <- as.character(self$categories$name)
     } else {
-      # YOLO: classes from data.yaml if present
       if (fs::file_exists(self$yaml_path)) {
         if (!requireNamespace("yaml", quietly = TRUE)) utils::install.packages("yaml")
         info <- yaml::read_yaml(self$yaml_path)
@@ -195,7 +181,7 @@ rf100_document_collection <- torch::dataset(
     img_path <- self$image_paths[index]
     x <- private$read_image(img_path)
 
-    if (self$mode == "coco") {
+    if (identical(self$mode, "coco")) {
       img_info <- self$images[index, ]
       anns <- self$annotations_by_image[[as.character(img_info$id)]]
       if (is.null(anns) || nrow(anns) == 0) {
@@ -207,7 +193,6 @@ rf100_document_collection <- torch::dataset(
         labels <- as.character(self$categories$name[match(anns$category_id, self$categories$id)])
       }
     } else {
-      # YOLO txt per image
       h <- dim(x)[1]; w <- dim(x)[2]
       lbl_path <- self$label_paths[index]
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
@@ -220,14 +205,13 @@ rf100_document_collection <- torch::dataset(
         if (nrow(df) > 0) {
           xc <- df$xc * w; yc <- df$yc * h; bw <- df$bw * w; bh <- df$bh * h
           boxes_cxcywh <- torch::torch_tensor(cbind(xc, yc, bw, bh), dtype = torch::torch_float())
-          # cxcywh -> xyxy
           x1 <- boxes_cxcywh[,1] - boxes_cxcywh[,3] / 2
           y1 <- boxes_cxcywh[,2] - boxes_cxcywh[,4] / 2
           x2 <- boxes_cxcywh[,1] + boxes_cxcywh[,3] / 2
           y2 <- boxes_cxcywh[,2] + boxes_cxcywh[,4] / 2
           boxes <- torch::torch_stack(list(x1, y1, x2, y2), dim = 2)$to(dtype = torch::torch_float())
           idx <- as.integer(df$cls) + 1L
-          if (length(self$classes) >= max(idx, 0)) labels <- self$classes[idx] else labels <- as.character(idx)
+          labels <- if (length(self$classes) >= max(idx, 0)) self$classes[idx] else as.character(idx)
         }
       }
     }
@@ -250,20 +234,44 @@ rf100_document_collection <- torch::dataset(
       } else {
         cli::cli_abort("Unsupported image format {.val {ext}} in {path}.")
       }
-      if (length(dim(img)) == 3 && dim(img)[3] == 4) img <- img[,,1:3, drop = FALSE] # drop alpha
-      if (length(dim(img)) == 2) img <- array(rep(img, 3L), dim = c(dim(img), 3L))   # gray->RGB
+      if (length(dim(img)) == 3 && dim(img)[3] == 4) img <- img[,,1:3, drop = FALSE]
+      if (length(dim(img)) == 2) img <- array(rep(img, 3L), dim = c(dim(img), 3L))
       img
     },
     xywh_to_xyxy = function(b) {
-      # b: (N,4) [x,y,w,h]
-      x1 <- b[,1]
-      y1 <- b[,2]
-      x2 <- b[,1] + b[,3]
-      y2 <- b[,2] + b[,4]
+      x1 <- b[,1]; y1 <- b[,2]; x2 <- b[,1] + b[,3]; y2 <- b[,2] + b[,4]
       torch::torch_stack(list(x1, y1, x2, y2), dim = 2)$to(dtype = torch::torch_float())
     },
+    resolve_coco_dirs = function(dataset_dir, split) {
+      # 1) <dataset>/<split>/_annotations.coco.json
+      ann1 <- fs::path(dataset_dir, split, "_annotations.coco.json")
+      if (fs::file_exists(ann1) && fs::dir_exists(fs::path(dataset_dir, split))) {
+        return(list(
+          image_dir = fs::path(dataset_dir, split),
+          annotation_file = ann1
+        ))
+      }
+      # 2) <dataset>/<dataset>/<split>/_annotations.coco.json  (double nest)
+      ann2 <- fs::path(dataset_dir, fs::path_file(dataset_dir), split, "_annotations.coco.json")
+      if (fs::file_exists(ann2) && fs::dir_exists(fs::path(dataset_dir, fs::path_file(dataset_dir), split))) {
+        return(list(
+          image_dir = fs::path(dataset_dir, fs::path_file(dataset_dir), split),
+          annotation_file = ann2
+        ))
+      }
+      # 3) Fallback: search recursively for a '<split>' dir with the annotation file
+      cands <- fs::dir_ls(dataset_dir, recurse = 3, type = "file",
+                          regexp = paste0("[/\\\\]", split, "[/\\\\]_annotations\\.coco\\.json$"))
+      if (length(cands) >= 1) {
+        ann <- cands[[1]]
+        return(list(
+          image_dir = fs::path_dir(ann),
+          annotation_file = ann
+        ))
+      }
+      FALSE
+    },
     resolve_yolo_dirs = function(dataset_dir, split_candidates) {
-      # Try <dataset>/<split>/{images,labels}
       for (sp in split_candidates) {
         img <- fs::path(dataset_dir, sp, "images")
         lbl <- fs::path(dataset_dir, sp, "labels")
@@ -275,7 +283,6 @@ rf100_document_collection <- torch::dataset(
           ))
         }
       }
-      # Try <dataset>/<dataset>/<split>/{images,labels} (double nest)
       for (sp in split_candidates) {
         img <- fs::path(dataset_dir, fs::path_file(dataset_dir), sp, "images")
         lbl <- fs::path(dataset_dir, fs::path_file(dataset_dir), sp, "labels")
@@ -291,4 +298,3 @@ rf100_document_collection <- torch::dataset(
     }
   )
 )
-
