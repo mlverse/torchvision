@@ -69,6 +69,7 @@ tensor_image_browse(boxed_img)
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
+\code{\link{rf100_microscopic_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}

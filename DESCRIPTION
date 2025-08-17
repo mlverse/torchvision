@@ -76,6 +76,7 @@ Collate:
     'dataset-plankton.R'
     'dataset-rf100-underwater.R'
     'dataset-rf100-doc.R'
+    'dataset-rf100-microscopic.R'
     'extension.R'
     'folder-dataset.R'
     'globals.R'
