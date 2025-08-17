@@ -132,6 +132,7 @@ Other segmentation_dataset:
 
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
+\code{\link{rf100_document_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}
