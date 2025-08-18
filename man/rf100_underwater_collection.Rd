@@ -75,6 +75,7 @@ Other detection_dataset:
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
 \code{\link{rf100_document_collection}()},
+\code{\link{rf100_electromagnetic_collection}()},
 \code{\link{rf100_microscopic_collection}()}
 }
 \concept{detection_dataset}
