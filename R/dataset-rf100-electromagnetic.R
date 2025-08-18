@@ -58,7 +58,20 @@ rf100_electromagnetic_collection <- torch::dataset(
         "brain_tumor", "fracture", "ir_object"
       ),
       url = paste0(base_url, files, "?download=1"),
-      md5 = NA_character_,
+      md5 = c(
+        "d661b7cddd6b5895adb56f6311b6a9dd",
+        "090283fb4db70939eeaa24c62929dac9",
+        "b33eef0197b950fa9f732563d43bc8ad",
+        "ec0e8e3309e57f6c4c8baa181aa919d1",
+        "ac25eb80a1ae57e6e0bd18d7f29620e9",
+        "a298aef24718e2fef13a4979387e62b6",
+        "6af855c80199522f1db16e788f20a276",
+        "ddf8106587e1638a22cdf020722e19c5",
+        "64f5216b9f5490145bccfabf7feac2ed",
+        "25f4122af1a8ce4f2f7c02bb57668c5f",
+        "720054a8a768deff52c18bfa1a354ed2",
+        "bdc0cec01ec6e11473130ad32f7eacd2"
+      ),
       stringsAsFactors = FALSE
     )
   },

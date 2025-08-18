@@ -78,6 +78,7 @@ Collate:
     'dataset-rf100-doc.R'
     'dataset-rf100-electromagnetic.R'
     'dataset-rf100-microscopic.R'
+    'dataset-rf100-peixos.R'
     'extension.R'
     'folder-dataset.R'
     'globals.R'

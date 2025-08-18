@@ -13,7 +13,7 @@ rf100_peixos_segmentation_dataset(
 )
 }
 \arguments{
-\item{split}{Character. One of "train", "test", or "valid".}
+\item{split}{Character. One of "train", "valid", or "test".}
 
 \item{root}{Character. Root directory where the dataset will be stored.}
 
@@ -23,33 +23,34 @@ rf100_peixos_segmentation_dataset(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target
-(mask and labels).}
+(labels and boxes).}
 }
 \value{
 A torch dataset. Each element is a named list with:
 \itemize{
-\item \code{x}: H x W x 3 array representing the image.
-\item \code{y}: a list containing:
+\item \code{x}: H × W × 3 \strong{array} (use \code{transform_to_tensor()} in \code{transform} to get C×H×W tensor).
+\item \code{y}: a list with:
 \itemize{
-\item \code{masks}: a boolean tensor of shape (1, H, W) with the segmentation mask.
+\item \code{mask}: boolean or {0,1} matrix of shape (H, W) (or \verb{1×H×W} if your transform makes it a tensor).
 \item \code{labels}: integer vector with the class index (always 1 for "fish").
 }
 }
 
-The returned item inherits the class \code{image_with_segmentation_mask} so it can
-be visualised with helper functions such as \code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}}.
+The returned item is given class \code{image_with_segmentation_mask} so it can be
+visualized with helpers like \code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}}.
 }
 \description{
 Loads the Roboflow 100 "peixos" dataset for semantic segmentation. Each
 split contains the raw images alongside an \verb{_annotations.coco.json} file in
-COCO format. Segmentation masks are generated on-the-fly from the polygon
-annotations contained in this file.
+COCO format. Segmentation masks are generated on-the-fly from polygon
+annotations (and can fall back to bounding boxes if polygons are absent).
 }
 \examples{
 \dontrun{
+devtools::load_all()
 ds <- rf100_peixos_segmentation_dataset(
   split = "train",
-  transform = transform_to_tensor,
+  transform = transform_to_tensor,  # follow the same pattern as other datasets
   download = TRUE
 )
 item <- ds[1]

@@ -59,7 +59,12 @@ rf100_underwater_collection <- torch::dataset(
         "coral.zip"
       )
     ),
-    md5 = NA_character_
+    md5 = c(
+      "b5017f2f37ed34dbcdb9ec1ee8995e21",
+      "997acccd2a9450dc96f1882bfd640632",
+      "3d5dd0b3b625aea5fa9ab7b54ea766ca",
+      "d91f0dbee171aba7b7c1c0e95a053e43"
+    )
   ),
   initialize = function(
     dataset = c("pipes", "aquarium", "objects", "coral"),

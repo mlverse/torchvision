@@ -1,32 +1,31 @@
+#' @include dataset-rf100-underwater.R
+NULL
+
 #' RF100 Peixos Segmentation Dataset
 #'
 #' Loads the Roboflow 100 "peixos" dataset for semantic segmentation. Each
 #' split contains the raw images alongside an `_annotations.coco.json` file in
-#' COCO format. Segmentation masks are generated on-the-fly from the polygon
-#' annotations contained in this file.
+#' COCO format. Segmentation masks are generated on-the-fly from polygon
+#' annotations (and can fall back to bounding boxes if polygons are absent).
 #'
-#' @param split Character. One of "train", "test", or "valid".
-#' @param root Character. Root directory where the dataset will be stored.
-#' @param download Logical. If TRUE, downloads the dataset if not present at
-#'   `root`.
-#' @param transform Optional transform function applied to the image.
-#' @param target_transform Optional transform function applied to the target
-#'   (mask and labels).
+#' @inheritParams rf100_underwater_collection
+#' @param split Character. One of "train", "valid", or "test".
 #'
 #' @return A torch dataset. Each element is a named list with:
-#' - `x`: H x W x 3 array representing the image.
-#' - `y`: a list containing:
-#'     - `masks`: a boolean tensor of shape (1, H, W) with the segmentation mask.
+#' - `x`: H × W × 3 **array** (use `transform_to_tensor()` in `transform` to get C×H×W tensor).
+#' - `y`: a list with:
+#'     - `mask`: boolean or {0,1} matrix of shape (H, W) (or `1×H×W` if your transform makes it a tensor).
 #'     - `labels`: integer vector with the class index (always 1 for "fish").
 #'
-#' The returned item inherits the class `image_with_segmentation_mask` so it can
-#' be visualised with helper functions such as [draw_segmentation_masks()].
+#' The returned item is given class `image_with_segmentation_mask` so it can be
+#' visualized with helpers like [draw_segmentation_masks()].
 #'
 #' @examples
 #' \dontrun{
+#' devtools::load_all()
 #' ds <- rf100_peixos_segmentation_dataset(
 #'   split = "train",
-#'   transform = transform_to_tensor,
+#'   transform = transform_to_tensor,  # follow the same pattern as other datasets
 #'   download = TRUE
 #' )
 #' item <- ds[1]
@@ -39,7 +38,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
   name = "rf100_peixos_segmentation_dataset",
   resources = data.frame(
     url = "https://huggingface.co/datasets/akankshakoshti/rf100-peixos/resolve/main/peixos-fish.zip?download=1",
-    md5 = NA_character_
+    md5 = "006c5f5e6f06e81a565c50df36dae6b9"
   ),
   classes = c("fish"),
   initialize = function(

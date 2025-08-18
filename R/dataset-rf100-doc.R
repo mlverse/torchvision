@@ -43,7 +43,16 @@ rf100_document_collection <- torch::dataset(
         "tabular_data.zip","paragraph.zip"),
       "?download=1"
     ),
-    md5 = NA_character_
+    md5 = c(
+      "f52c47bf174efb4d664898afac169e05",
+      "f92174ce8969c105c1a822f2a2313d78",
+      "8ddd1418f0a547491f99986fe6e77bdd",
+      "c6774082f83cc34ad6f54330adaf0ff8",
+      "8647c40a765248fee6d4fb19cad2a8e1",
+      "5808824dfd7e5caafa56b024702c77af",
+      "eb9231f3a9083a9f601ebedfd2c06359",
+      NA_character_
+    )
   ),
 
   initialize = function(

@@ -52,7 +52,19 @@ rf100_microscopic_collection <- torch::dataset(
       "https://huggingface.co/datasets/akankshakoshti/rf100-microscopic/resolve/main/liver-disease.zip?download=1",
       "https://huggingface.co/datasets/akankshakoshti/rf100-microscopic/resolve/main/asbestos.zip?download=1"
     ),
-    md5 = NA_character_
+    md5 = c(
+      "86ad78350a356964db56311f22a254a4",
+      "c3cf093a9b9ad04eae284f89486f04d3",
+      "3c221d7a4c25ea59769b3f8f75d8ff55",
+      "1750ed02223c6cc0febfb5217650fdf9",
+      NA_character_,
+      "cb71a6193026a9e0ebae4119a7b52cf1",
+      "ad198c7b04ae2f42814a5c2976399308",
+      "698d6f01605a80b4850973bb401930c4",
+      "64f06f8a4b5ceb83456a3e8fd0c3f2e8",
+      "804af8372e384086f6883b07994e50ce",
+      "3a132ef91cd5a52e04d0f4115cc9898b"
+    )
   ),
 
   initialize = function(
