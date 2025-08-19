@@ -170,8 +170,8 @@ model_facenet_onet <- nn_module(
 #' ```
 #' | Model | Input Size     | Parameters | File Size | Outputs                       | Notes                             |
 #' |-------|----------------|------------|-----------|-------------------------------|-----------------------------------|
-#' | PNet  | ~12×12+        | ~3K        | 30 KB     | 2-class face prob + bbox reg  | Fully conv, sliding window stage  |
-#' | RNet  | 24×24          | ~30K       | 400 KB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
+#' | PNet  | ~12×12+        | ~3k        | 30 kB     | 2-class face prob + bbox reg  | Fully conv, sliding window stage  |
+#' | RNet  | 24×24          | ~30k       | 400 kB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
 #' | ONet  | 48×48          | ~100K      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
 #' ```
 #' Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules 
