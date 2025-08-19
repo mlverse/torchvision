@@ -4,6 +4,98 @@ facenet_torchscript_urls <- list(
   RNet = c("https://torch-cdn.mlverse.org/models/vision/v2/models/facenet_rnet.pth", "c19b2f0df8f448455dd7ddbb47dcfa19", "400 KB")
 )
 
+#' MTCNN Face Detection Networks
+#'
+#' These models implement the three-stage Multi-task Cascaded Convolutional Networks (MTCNN)
+#' architecture from the paper 
+#' [Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Networks](https://arxiv.org/abs/1604.02878).
+#' 
+#' MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pipeline:
+#' - **PNet** (Proposal Network): Generates candidate face bounding boxes at multiple scales.
+#' - **RNet** (Refine Network): Refines candidate boxes, rejecting false positives.
+#' - **ONet** (Output Network): Produces final bounding boxes and 5-point facial landmarks.
+#'
+#' ## Model Variants
+#' ```
+#' | Model | Input Size     | Parameters | File Size | Outputs                       | Notes                             |
+#' |-------|----------------|------------|-----------|-------------------------------|-----------------------------------|
+#' | PNet  | ~12×12+        | ~3k        | 30 kB     | 2-class face prob + bbox reg  | Fully conv, sliding window stage  |
+#' | RNet  | 24×24          | ~30k       | 400 kB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
+#' | ONet  | 48×48          | ~100k      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
+#' ```
+#' Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules 
+#' with residual connections, designed for face recognition tasks. The model achieves high accuracy 
+#' on standard face verification benchmarks such as LFW (Labeled Faces in the Wild).
+#'
+#' ## Model Variants and Performance (LFW accuracy)
+#' ```
+#' |    Weights     | LFW Accuracy | File Size |
+#' |----------------|--------------|-----------|
+#' | CASIA-Webface  | 99.05%       | 111 MB    |
+#' | VGGFace2       | 99.65%       | 107 MB    |
+#' ```
+#'
+#' - The CASIA-Webface pretrained weights provide strong baseline accuracy.
+#' - The VGGFace2 pretrained weights achieve higher accuracy, benefiting from a larger, more diverse dataset.
+#' 
+#' @examples
+#' \dontrun{
+#' # Example usage of PNet
+#' model_pnet <- model_facenet_pnet(pretrained = TRUE)
+#' model_pnet$eval()
+#' input_pnet <- torch_randn(1, 3, 224, 224)
+#' output_pnet <- model_pnet(input_pnet)
+#' output_pnet
+#'
+#' # Example usage of RNet
+#' model_rnet <- model_facenet_rnet(pretrained = TRUE)
+#' model_rnet$eval()
+#' input_rnet <- torch_randn(1, 3, 24, 24)
+#' output_rnet <- model_rnet(input_rnet)
+#' output_rnet
+#'
+#' # Example usage of ONet
+#' model_onet <- model_facenet_onet(pretrained = TRUE)
+#' model_onet$eval()
+#' input_onet <- torch_randn(1, 3, 48, 48)
+#' output_onet <- model_onet(input_onet)
+#' output_onet
+#'
+#' # Example usage of MTCNN
+#' mtcnn <- model_mtcnn(pretrained = TRUE)
+#' mtcnn$eval()
+#' image_tensor <- torch_randn(c(1, 3, 224, 224))
+#' out <- mtcnn(image_tensor)
+#' out
+#'
+#' # Example usage of Inception-ResNet-v1 with VGGFace2 Weights
+#' model <- model_inception_resnet_v1(pretrained = "vggface2")
+#' model$eval()
+#' input <- torch_randn(1, 3, 224, 224)
+#' output <- model(input)
+#' output
+#'
+#' # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
+#' model <- model_inception_resnet_v1(pretrained = "casia-webface")
+#' model$eval()
+#' input <- torch_randn(1, 3, 224, 224)
+#' output <- model(input)
+#' output
+#' }
+#'
+#' @importFrom torch nn_module nn_conv2d nn_prelu nn_max_pool2d nn_softmax nn_linear nn_batch_norm2d nn_batch_norm1d
+#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat nnf_interpolate nnf_relu nnf_normalize
+#'
+#' @inheritParams model_mobilenet_v2
+#' @param classify Logical, whether to include the classification head. Default is FALSE.
+#' @param num_classes Integer, number of output classes for classification. Default is 10.
+#' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
+#'
+#' @family models
+#' @rdname model_facenet
+#' @name model_facenet
+NULL
+
 #' @describeIn model_facenet PNet (Proposal Network) — small fully-convolutional network for candidate face box generation.
 #' @export
 model_facenet_pnet <- nn_module(
@@ -154,95 +246,6 @@ model_facenet_onet <- nn_module(
     list(boxes = b, landmarks = c, cls = a)
   }
 )
-
-#' MTCNN Face Detection Networks
-#'
-#' These models implement the three-stage Multi-task Cascaded Convolutional Networks (MTCNN)
-#' architecture from the paper 
-#' [Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Networks](https://arxiv.org/abs/1604.02878).
-#' 
-#' MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pipeline:
-#' - **PNet** (Proposal Network): Generates candidate face bounding boxes at multiple scales.
-#' - **RNet** (Refine Network): Refines candidate boxes, rejecting false positives.
-#' - **ONet** (Output Network): Produces final bounding boxes and 5-point facial landmarks.
-#'
-#' ## Model Variants
-#' ```
-#' | Model | Input Size     | Parameters | File Size | Outputs                       | Notes                             |
-#' |-------|----------------|------------|-----------|-------------------------------|-----------------------------------|
-#' | PNet  | ~12×12+        | ~3k        | 30 kB     | 2-class face prob + bbox reg  | Fully conv, sliding window stage  |
-#' | RNet  | 24×24          | ~30k       | 400 kB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
-#' | ONet  | 48×48          | ~100k      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
-#' ```
-#' Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules 
-#' with residual connections, designed for face recognition tasks. The model achieves high accuracy 
-#' on standard face verification benchmarks such as LFW (Labeled Faces in the Wild).
-#'
-#' ## Model Variants and Performance (LFW accuracy)
-#' ```
-#' |    Weights     | LFW Accuracy | File Size |
-#' |----------------|--------------|-----------|
-#' | CASIA-Webface  | 99.05%       | 111 MB    |
-#' | VGGFace2       | 99.65%       | 107 MB    |
-#' ```
-#'
-#' - The CASIA-Webface pretrained weights provide strong baseline accuracy.
-#' - The VGGFace2 pretrained weights achieve higher accuracy, benefiting from a larger, more diverse dataset.
-#' 
-#' @examples
-#' \dontrun{
-#' # Example usage of PNet
-#' model_pnet <- model_facenet_pnet(pretrained = TRUE)
-#' model_pnet$eval()
-#' input_pnet <- torch_randn(1, 3, 224, 224)
-#' output_pnet <- model_pnet(input_pnet)
-#' output_pnet
-#'
-#' # Example usage of RNet
-#' model_rnet <- model_facenet_rnet(pretrained = TRUE)
-#' model_rnet$eval()
-#' input_rnet <- torch_randn(1, 3, 24, 24)
-#' output_rnet <- model_rnet(input_rnet)
-#' output_rnet
-#'
-#' # Example usage of ONet
-#' model_onet <- model_facenet_onet(pretrained = TRUE)
-#' model_onet$eval()
-#' input_onet <- torch_randn(1, 3, 48, 48)
-#' output_onet <- model_onet(input_onet)
-#' output_onet
-#'
-#' # Example usage of MTCNN
-#' mtcnn <- model_mtcnn(pretrained = TRUE)
-#' mtcnn$eval()
-#' image_tensor <- torch_randn(c(1, 3, 224, 224))
-#' out <- mtcnn(image_tensor)
-#' out
-#'
-#' # Example usage of Inception-ResNet-v1 with VGGFace2 Weights
-#' model <- model_inception_resnet_v1(pretrained = "vggface2")
-#' model$eval()
-#' input <- torch_randn(1, 3, 224, 224)
-#' output <- model(input)
-#' output
-#'
-#' # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
-#' model <- model_inception_resnet_v1(pretrained = "casia-webface")
-#' model$eval()
-#' input <- torch_randn(1, 3, 224, 224)
-#' output <- model(input)
-#' output
-#' }
-#'
-#' @inheritParams model_mobilenet_v2
-#' @param classify Logical, whether to include the classification head. Default is FALSE.
-#' @param num_classes Integer, number of output classes for classification. Default is 10.
-#' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
-#'
-#' @family models
-#' @rdname model_facenet
-#' @name model_facenet
-NULL
 
 #' @describeIn model_facenet MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks
 #' @export
