@@ -235,9 +235,9 @@ model_facenet_onet <- nn_module(
 #' }
 #'
 #' @inheritParams model_mobilenet_v2
-#' @param classify Logical scalar, whether to include the classification head. Default is FALSE.
-#' @param num_classes Integer scalar, number of output classes for classification. Default is 10.
-#' @param dropout_prob Numeric scalar, dropout probability applied before classification. Default is 0.6.
+#' @param classify Logical, whether to include the classification head. Default is FALSE.
+#' @param num_classes Integer, number of output classes for classification. Default is 10.
+#' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
 #'
 #' @family models
 #' @rdname model_facenet
