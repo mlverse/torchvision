@@ -165,27 +165,6 @@ generate_proposals <- function(features, rpn_out, image_size, strides) {
   list(proposals = proposals)
 }
 
-roi_align_stub <- function(feature_map, boxes, output_size = c(7, 7), stride = 4) {
-  pooled <- list()
-  if (boxes$shape[1] == 0) {
-    return(torch::torch_empty(c(0, feature_map$shape[1] * prod(output_size))))
-  }
-  for (i in seq_len(boxes$shape[1])) {
-    x1 <- floor(boxes[i, 1] / stride) + 1
-    y1 <- floor(boxes[i, 2] / stride) + 1
-    x2 <- ceiling(boxes[i, 3] / stride)
-    y2 <- ceiling(boxes[i, 4] / stride)
-    x1 <- max(1, min(x1, feature_map$shape[4]))
-    x2 <- max(1, min(x2, feature_map$shape[4]))
-    y1 <- max(1, min(y1, feature_map$shape[3]))
-    y2 <- max(1, min(y2, feature_map$shape[3]))
-    region <- feature_map[ , , y1:y2, x1:x2]
-    pooled_feat <- torch::nnf_adaptive_max_pool2d(region, output_size)
-    pooled[[i]] <- pooled_feat$reshape(-1)
-  }
-  torch::torch_stack(pooled)
-}
-
 roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
   h <- as.integer(feature_map$shape[[3]])
   w <- as.integer(feature_map$shape[[4]])
@@ -200,15 +179,17 @@ roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
     y2 <- max(y1 + 1, min(as.numeric(proposals[i, 4]), h))
 
     region <- feature_map[1, , y1:y2, x1:x2]
-    pooled[[i]] <- torch::nnf_interpolate(
+    pooled_feat <- torch::nnf_interpolate(
       region$unsqueeze(1),
       size = output_size,
       mode = "bilinear",
       align_corners = FALSE
     )[1, , , ]
+
+    pooled[[i]] <- pooled_feat$reshape(-1)
   }
 
-  torch::torch_stack(pooled, dim = 1)
+  torch::torch_stack(pooled)
 }
 
 
@@ -445,7 +426,7 @@ fasterrcnn_model <- function(backbone, num_classes) {
         )
       )
     }
-  )()
+  )  # <- Removed the () here
 }
 
 
@@ -859,7 +840,7 @@ NULL
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                           num_classes = 91, ...) {
   backbone <- resnet_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)()  # <- Add () here instead
 
   if (pretrained) {
     local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
