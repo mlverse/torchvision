@@ -20,6 +20,25 @@
 #' The returned item inherits the class `image_with_bounding_box` so it can be
 #' visualised with helper functions such as [draw_bounding_boxes()].
 #'
+#' @examples
+#' \dontrun{
+#' ds <- rf100_underwater_collection(
+#'   dataset = "pipes",
+#'   split = "train",
+#'   transform = transform_to_tensor,
+#'   download = TRUE
+#' )
+#'
+#' # Retrieve a sample and inspect annotations
+#' item <- ds[2]
+#' item$y$labels
+#' item$y$boxes
+#'
+#' # Draw bounding boxes and display the image
+#' boxed_img <- draw_bounding_boxes(item)
+#' tensor_image_browse(boxed_img)
+#' }
+#'
 #' @family detection_dataset
 #' @export
 rf100_underwater_collection <- torch::dataset(
@@ -58,16 +77,21 @@ rf100_underwater_collection <- torch::dataset(
     self$archive_url <- resource$url
 
     if (download) self$download()
-    if (!self$check_exists()) runtime_error("Dataset not found. Use `download=TRUE` to fetch it.")
+
+    if (!self$check_exists()) {
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+    }
 
     self$load_annotations()
   },
 
   download = function() {
     if (self$check_exists()) return(invisible(NULL))
+
     if (fs::dir_exists(self$dataset_dir)) fs::dir_delete(self$dataset_dir)
     fs::dir_create(self$dataset_dir, recurse = TRUE)
 
+    # Download the archive
     dest <- fs::path(self$dataset_dir, "dataset.tar.gz")
     download.file(self$archive_url, dest, mode = "wb")
 
@@ -75,37 +99,52 @@ rf100_underwater_collection <- torch::dataset(
       runtime_error("Package 'archive' is required. Please install.packages('archive').")
     }
 
+    # Inspect archive and filter files
     a <- archive::archive(dest)
-    files <- a$path[!grepl("/$", a$path)]  # skip dirs
 
-    sample_paths <- head(files[grepl("/(train|test|valid)/", files)], 1)
-    if (length(sample_paths)) {
-      parts <- strsplit(sample_paths, "/")[[1]]
-      idx <- which(parts %in% c("train", "test", "valid"))[1]
-      strip_n <- if (!is.na(idx)) idx - 1 else 7L
-    } else {
-      strip_n <- 7L
-    }
+    # Keep only regular files (skip hardlinks, dirs, symlinks)
+    files <- a$path[a$type == "file"]
 
-    archive::archive_extract(dest, files = files, dir = self$dataset_dir, strip_components = strip_n)
+    # Strip the long 'home/zuppif/.../rf100' prefix (7 levels deep)
+    strip_n <- 7L
+
+    # Extract only the file entries, skipping hardlinks
+    archive::archive_extract(
+      dest,
+      files = files,
+      dir = self$dataset_dir,
+      strip_components = strip_n
+    )
+
+    # Clean up the downloaded archive
     fs::file_delete(dest)
+
     invisible(NULL)
   },
 
   check_exists = function() {
     ann <- self$discover_annotation_file()
     if (is.na(ann) || !fs::file_exists(ann)) return(FALSE)
+
     self$annotation_file <- ann
     self$split_dir <- fs::path_dir(ann)
     candidate_img_dirs <- c(self$split_dir, fs::path(self$split_dir, "images"))
     self$image_dir <- candidate_img_dirs[fs::dir_exists(candidate_img_dirs)][1]
+
     fs::file_exists(self$annotation_file) && fs::dir_exists(self$image_dir)
   },
 
   discover_annotation_file = function() {
     if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
+
     jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*_annotations.coco.json")
-    if (!length(jsons)) return(NA_character_)
+
+    if (!length(jsons)) {
+      # Try alternative patterns
+      jsons_alt <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*.json")
+      return(NA_character_)
+    }
+
     jsons_split <- jsons[grepl(paste0("[/\\\\]", self$split, "[/\\\\]_annotations\\.coco\\.json$"), jsons)]
     if (length(jsons_split)) return(jsons_split[[1]])
     jsons[[1]]
@@ -120,27 +159,68 @@ rf100_underwater_collection <- torch::dataset(
     candidate_img_dirs <- c(self$split_dir, fs::path(self$split_dir, "images"))
     self$image_dir <- candidate_img_dirs[fs::dir_exists(candidate_img_dirs)][1]
 
-    full_paths <- fs::path(self$image_dir, self$images$file_name)
-    exists <- fs::file_exists(full_paths)
+    # Get all actual image files - search recursively in the entire dataset directory
+    # since images might be scattered across different split directories
+    all_img_files <- fs::dir_ls(self$dataset_dir, type = "file", recurse = TRUE,
+                                regexp = "\\.(jpg|jpeg|png|bmp)$")
 
-    if (sum(exists) == 0) {
-      disk_imgs <- fs::dir_ls(self$split_dir, recurse = TRUE, type = "file",
-                              regexp = "\\.(jpg|jpeg|png)$")
-      disk_key  <- tolower(fs::path_file(disk_imgs))
-      disk_map  <- stats::setNames(as.character(disk_imgs), disk_key)
-      file_keys <- tolower(fs::path_file(self$images$file_name))
-      mapped <- disk_map[file_keys]
-      keep <- !is.na(mapped)
-      self$images <- self$images[keep, , drop = FALSE]
-      full_paths  <- mapped[keep]
-      keep_ids <- self$images$id
-      self$annotations <- self$annotations[self$annotations$image_id %in% keep_ids, , drop = FALSE]
-    } else {
-      self$images <- self$images[exists, , drop = FALSE]
-      full_paths  <- full_paths[exists]
-      keep_ids <- self$images$id
-      self$annotations <- self$annotations[self$annotations$image_id %in% keep_ids, , drop = FALSE]
+    # Also try the specific image directory if it exists
+    if (!is.na(self$image_dir) && fs::dir_exists(self$image_dir)) {
+      local_img_files <- fs::dir_ls(self$image_dir, type = "file",
+                                    regexp = "\\.(jpg|jpeg|png|bmp)$")
+      all_img_files <- unique(c(all_img_files, local_img_files))
     }
+
+    actual_basenames <- fs::path_file(all_img_files)
+
+    # Since the JSON filenames already include the RoboFlow format,
+    # we can try direct matching first
+    matched_paths <- character(nrow(self$images))
+    exists <- logical(nrow(self$images))
+
+    # Create a lookup table for faster matching
+    filename_to_path <- setNames(all_img_files, actual_basenames)
+
+    for (i in seq_len(nrow(self$images))) {
+      json_filename <- self$images$file_name[i]
+
+      # Direct filename match
+      if (json_filename %in% names(filename_to_path)) {
+        matched_paths[i] <- filename_to_path[[json_filename]]
+        exists[i] <- TRUE
+        next
+      }
+
+      # Try searching in specific image directory
+      if (!is.na(self$image_dir)) {
+        direct_path <- fs::path(self$image_dir, json_filename)
+        if (fs::file_exists(direct_path)) {
+          matched_paths[i] <- direct_path
+          exists[i] <- TRUE
+          next
+        }
+      }
+
+      # Fuzzy matching - extract base name and look for partial matches
+      json_base <- sub("_[lr]rgb_jpg\\.rf\\.[^.]+\\.jpg$", "", json_filename)
+      json_base <- sub("^(empty_)?frame", "frame", json_base)
+
+      potential_matches <- all_img_files[grepl(json_base, actual_basenames, fixed = TRUE)]
+
+      if (length(potential_matches) > 0) {
+        matched_paths[i] <- potential_matches[1]  # Take first match
+        exists[i] <- TRUE
+        next
+      }
+
+      exists[i] <- FALSE
+    }
+
+    # Filter to existing images
+    self$images <- self$images[exists, , drop = FALSE]
+    matched_paths <- matched_paths[exists]
+    keep_ids <- self$images$id
+    self$annotations <- self$annotations[self$annotations$image_id %in% keep_ids, , drop = FALSE]
 
     if (nrow(self$annotations) > 0) {
       self$annotations_by_image <- split(self$annotations, self$annotations$image_id)
@@ -148,7 +228,7 @@ rf100_underwater_collection <- torch::dataset(
       self$annotations_by_image <- list()
     }
 
-    self$image_paths <- unname(full_paths)
+    self$image_paths <- matched_paths
   },
 
   .getitem = function(index) {

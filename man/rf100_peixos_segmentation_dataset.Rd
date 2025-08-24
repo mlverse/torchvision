@@ -17,13 +17,11 @@ rf100_peixos_segmentation_dataset(
 
 \item{root}{Character. Root directory where the dataset will be stored.}
 
-\item{download}{Logical. If TRUE, downloads the dataset if not present at
-\code{root}.}
+\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 
 \item{transform}{Optional transform function applied to the image.}
 
-\item{target_transform}{Optional transform function applied to the target
-(labels and boxes).}
+\item{target_transform}{Optional transform function applied to the target.}
 }
 \value{
 A torch dataset. Each element is a named list with:

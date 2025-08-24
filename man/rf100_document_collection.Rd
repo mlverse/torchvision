@@ -22,13 +22,11 @@ rf100_document_collection(
 
 \item{root}{Character. Root directory where the dataset will be stored.}
 
-\item{download}{Logical. If TRUE, downloads the dataset if not present at
-\code{root}.}
+\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 
 \item{transform}{Optional transform function applied to the image.}
 
-\item{target_transform}{Optional transform function applied to the target
-(labels and boxes).}
+\item{target_transform}{Optional transform function applied to the target.}
 }
 \value{
 A torch dataset. Each element is a named list with:
@@ -37,8 +35,7 @@ A torch dataset. Each element is a named list with:
 \item \code{y}: a list containing:
 \itemize{
 \item \code{labels}: character vector with object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in
-\verb{(xmin, ymin, xmax, ymax)} format.
+\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in (xmin, ymin, xmax, ymax).
 }
 }
 

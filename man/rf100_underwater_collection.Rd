@@ -7,7 +7,8 @@
 rf100_underwater_collection(
   dataset = c("pipes", "aquarium", "objects", "coral"),
   split = c("train", "test", "valid"),
-  root = tempdir(),
+  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
+    fs::path_temp("torchvision-datasets"),
   download = FALSE,
   transform = NULL,
   target_transform = NULL
@@ -20,13 +21,11 @@ rf100_underwater_collection(
 
 \item{root}{Character. Root directory where the dataset will be stored.}
 
-\item{download}{Logical. If TRUE, downloads the dataset if not present at
-\code{root}.}
+\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 
 \item{transform}{Optional transform function applied to the image.}
 
-\item{target_transform}{Optional transform function applied to the target
-(labels and boxes).}
+\item{target_transform}{Optional transform function applied to the target.}
 }
 \value{
 A torch dataset. Each element is a named list with:
@@ -35,8 +34,7 @@ A torch dataset. Each element is a named list with:
 \item \code{y}: a list containing:
 \itemize{
 \item \code{labels}: character vector with object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in
-\verb{(xmin, ymin, xmax, ymax)} format.
+\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in (xmin, ymin, xmax, ymax).
 }
 }
 
@@ -50,8 +48,6 @@ bounding box annotations for object detection tasks.
 }
 \examples{
 \dontrun{
-# Load dataset and convert images to tensors
-devtools::load_all()
 ds <- rf100_underwater_collection(
   dataset = "pipes",
   split = "train",
