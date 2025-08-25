@@ -25,7 +25,7 @@
 #' @examples
 #' \dontrun{
 #' ds <- rf100_underwater_collection(
-#'   dataset = "pipes",
+#'   dataset = "objects",  # Fixed: use "objects" not "object"
 #'   split = "train",
 #'   transform = transform_to_tensor,
 #'   download = TRUE
@@ -106,6 +106,12 @@ rf100_underwater_collection <- torch::dataset(
     attempts <- 3L
     success <- FALSE
     last_err <- NULL
+
+    if (self$debug) {
+      message("Downloading dataset from: ", self$archive_url)
+      message("Destination: ", dest)
+    }
+
     for (i in seq_len(attempts)) {
       last_err <- tryCatch({
         if (requireNamespace("curl", quietly = TRUE)) {
@@ -126,67 +132,219 @@ rf100_underwater_collection <- torch::dataset(
       runtime_error("Failed to download dataset archive from {self$archive_url}. {conditionMessage(last_err)}")
     }
 
-    if (!requireNamespace("archive", quietly = TRUE)) {
-      runtime_error("Package 'archive' is required. Please install.packages('archive').")
-    }
-
-    # Inspect archive to determine file entries and stripping depth
-    a <- archive::archive(dest)
     if (self$debug) {
-      message("Archive entries:\n", paste(a$path, collapse = "\n"))
+      message("Downloaded archive size: ", fs::file_size(dest), " bytes")
     }
 
-    if ("type" %in% colnames(a)) {
-      files <- a$path[a$type == "file"]
-      links <- a[a$type %in% c("link", "hardlink"), c("path", "linkpath"), drop = FALSE]
+    # Extract the archive - use a shorter temp path on Windows to avoid path length issues
+    if (.Platform$OS.type == "windows") {
+      tmp_extract <- fs::path("C:/temp_rf100")
     } else {
-      files <- a$path
-      links <- data.frame()
+      tmp_extract <- fs::path_temp("rf100_extract")
     }
 
-    paths <- c(files, if (nrow(links)) c(links$path, links$linkpath))
+    if (fs::dir_exists(tmp_extract)) fs::dir_delete(tmp_extract)
+    fs::dir_create(tmp_extract)
 
-    # Compute how many leading components to strip so paths start at the
-    # dataset directory (e.g. "underwater-pipes-4ng4t")
-    strip_n <- min(
-      vapply(strsplit(paths, "/"), function(p) {
-        idx <- which(grepl(self$dataset, p, fixed = TRUE))
-        if (length(idx)) idx[1] - 1 else Inf
-      }, numeric(1))
-    )
-    if (!is.finite(strip_n) || strip_n < 0) strip_n <- 0L
     if (self$debug) {
-      message("Using strip_components = ", strip_n)
+      message("Extracting to temporary directory: ", tmp_extract)
     }
 
-    strip_path <- function(p, n) {
-      parts <- strsplit(p, "/", fixed = TRUE)[[1]]
-      if (length(parts) <= n) "" else paste(parts[(n + 1):length(parts)], collapse = "/")
+    extract_success <- FALSE
+
+    # Try archive package first (better Windows support)
+    if (requireNamespace("archive", quietly = TRUE)) {
+      extract_success <- tryCatch({
+        archive::archive_extract(dest, dir = tmp_extract)
+        TRUE
+      }, error = function(e) {
+        if (self$debug) {
+          message("archive extraction failed: ", conditionMessage(e))
+        }
+        FALSE
+      })
     }
 
-    # Extract only regular files, then materialise hard links as copies
-    archive::archive_extract(
-      dest,
-      files = files,
-      dir = self$dataset_dir,
-      strip_components = strip_n
-    )
+    # Fallback to untar if archive package failed or isn't available
+    if (!extract_success) {
+      extract_success <- tryCatch({
+        # On Windows, try with additional options to handle long paths
+        if (.Platform$OS.type == "windows") {
+          # Try different tar options for Windows
+          system2("tar", args = c("-xf", shQuote(dest), "-C", shQuote(tmp_extract)),
+                  stdout = FALSE, stderr = FALSE)
+          TRUE
+        } else {
+          utils::untar(dest, exdir = tmp_extract)
+          TRUE
+        }
+      }, error = function(e) {
+        if (self$debug) {
+          message("untar failed: ", conditionMessage(e))
+        }
+        FALSE
+      })
+    }
 
-    if (nrow(links)) {
-      for (i in seq_len(nrow(links))) {
-        src <- fs::path(self$dataset_dir, strip_path(links$linkpath[i], strip_n))
-        dst <- fs::path(self$dataset_dir, strip_path(links$path[i], strip_n))
-        if (fs::file_exists(src) && !fs::file_exists(dst)) {
-          fs::file_copy(src, dst, overwrite = TRUE)
+    if (!extract_success) {
+      runtime_error("Failed to extract archive. The downloaded file may be corrupted.")
+    }
+
+    # Find the extracted dataset directory
+    extracted_dirs <- fs::dir_ls(tmp_extract, type = "directory")
+    if (self$debug) {
+      message("Extracted directories: ", paste(extracted_dirs, collapse = ", "))
+    }
+
+    # Look for annotation files with multiple possible patterns
+    # Even if extraction had errors, some files may have been extracted
+    all_files <- character(0)
+    if (fs::dir_exists(tmp_extract)) {
+      all_files <- fs::dir_ls(tmp_extract, recurse = TRUE)
+    }
+
+    if (self$debug) {
+      message("Found ", length(all_files), " extracted files")
+      if (length(all_files) > 0) {
+        message("Sample extracted files:\n", paste(head(all_files, 10), collapse = "\n"))
+        if (length(all_files) > 10) {
+          message("... and ", length(all_files) - 10, " more files")
         }
       }
     }
-    # Clean up the downloaded archive
-    fs::file_delete(dest)
+
+    # Find annotation files with different possible patterns
+    ann_patterns <- c(
+      "_annotations\\.coco\\.json$",
+      "_annotations\\.json$",
+      "annotations\\.json$",
+      "\\.json$"
+    )
+
+    ann_files <- character(0)
+    for (pattern in ann_patterns) {
+      if (fs::dir_exists(tmp_extract)) {
+        potential_ann_files <- fs::dir_ls(tmp_extract, recurse = TRUE, regexp = pattern, type = "file")
+        # Filter to only files that likely contain annotation data
+        for (file in potential_ann_files) {
+          if (grepl("annotation", tolower(fs::path_file(file))) ||
+              grepl("(train|test|valid)", fs::path_dir(file))) {
+            ann_files <- c(ann_files, file)
+          }
+        }
+      }
+      if (length(ann_files) > 0) {
+        if (self$debug) {
+          message("Found ", length(ann_files), " files matching pattern: ", pattern)
+          message("Annotation files: ", paste(ann_files, collapse = ", "))
+        }
+        break
+      }
+    }
+
+    # If no annotation files found, try to recreate them from the archive manually
+    if (length(ann_files) == 0 && requireNamespace("archive", quietly = TRUE)) {
+      if (self$debug) {
+        message("No annotation files found, attempting to extract annotation files directly...")
+      }
+
+      # List archive contents to find annotation files
+      archive_info <- tryCatch(archive::archive(dest), error = function(e) NULL)
+      if (!is.null(archive_info)) {
+        ann_entries <- archive_info[grepl("_annotations\\.coco\\.json$", archive_info$path), ]
+
+        if (nrow(ann_entries) > 0) {
+          # Extract just the annotation files to a simpler path structure
+          for (i in seq_len(nrow(ann_entries))) {
+            ann_path <- ann_entries$path[i]
+            # Create a simplified path
+            path_parts <- strsplit(ann_path, "/")[[1]]
+            split_name <- path_parts[length(path_parts) - 1]  # Should be train/test/valid
+            simple_path <- fs::path(tmp_extract, split_name, "_annotations.coco.json")
+
+            fs::dir_create(fs::path_dir(simple_path), recurse = TRUE)
+
+            tryCatch({
+              archive::archive_extract(dest, files = ann_path, dir = fs::path_temp())
+              temp_ann <- fs::path(fs::path_temp(), ann_path)
+              if (fs::file_exists(temp_ann)) {
+                fs::file_copy(temp_ann, simple_path, overwrite = TRUE)
+                ann_files <- c(ann_files, simple_path)
+              }
+            }, error = function(e) {
+              if (self$debug) {
+                message("Failed to extract annotation file ", ann_path, ": ", conditionMessage(e))
+              }
+            })
+          }
+        }
+      }
+    }
+
+    if (length(ann_files) == 0) {
+      runtime_error("No annotation files found in extracted archive. The download may have failed or the archive structure is unexpected.")
+    }
+
+    # Find the root directory that contains the dataset
+    dataset_source <- fs::path_dir(ann_files[1])
+
+    # If annotation is in a split directory, go up one level
+    if (tolower(fs::path_file(dataset_source)) %in% c("train", "test", "valid")) {
+      dataset_source <- fs::path_dir(dataset_source)
+    }
+
+    if (self$debug) {
+      message("Selected dataset source directory: ", dataset_source)
+    }
+
+    # Copy the dataset to the final location
+    if (dataset_source == tmp_extract) {
+      # Files are directly in temp directory
+      fs::dir_copy(tmp_extract, self$dataset_dir, overwrite = TRUE)
+    } else {
+      # Files are in a subdirectory
+      fs::dir_copy(dataset_source, self$dataset_dir, overwrite = TRUE)
+    }
+
+    # Clean up - close any file handles first
+    gc()  # Force garbage collection to release file handles
+
+    # Remove archive file with retry logic
+    for (retry in 1:3) {
+      remove_success <- tryCatch({
+        if (fs::file_exists(dest)) {
+          fs::file_delete(dest)
+        }
+        TRUE
+      }, error = function(e) {
+        if (self$debug) {
+          message("Attempt ", retry, " to remove archive failed: ", conditionMessage(e))
+        }
+        FALSE
+      })
+
+      if (remove_success) break
+
+      if (retry < 3) {
+        Sys.sleep(1)  # Wait a second before retrying
+        gc()  # Try garbage collection again
+      } else if (self$debug) {
+        message("Warning: Could not remove archive file. It may need to be manually deleted.")
+      }
+    }
+
+    # Remove temp directory
+    tryCatch({
+      fs::dir_delete(tmp_extract)
+    }, error = function(e) {
+      if (self$debug) {
+        message("Failed to remove temp directory: ", conditionMessage(e))
+      }
+    })
 
     if (self$debug) {
       extracted <- fs::dir_ls(self$dataset_dir, recurse = TRUE)
-      message("Extracted files:\n", paste(extracted, collapse = "\n"))
+      message("Final extracted files:\n", paste(extracted, collapse = "\n"))
     }
 
     invisible(NULL)
@@ -213,25 +371,59 @@ rf100_underwater_collection <- torch::dataset(
   discover_annotation_file = function() {
     if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
 
-    jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*_annotations.coco.json")
+    # Try multiple patterns for annotation files
+    ann_patterns <- c(
+      "_annotations\\.coco\\.json$",
+      "_annotations\\.json$",
+      "annotations\\.json$"
+    )
+
+    jsons <- character(0)
+    for (pattern in ann_patterns) {
+      jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", regexp = pattern)
+      if (length(jsons) > 0) break
+    }
+
     if (self$debug) {
       message("Annotation candidates:\n", paste(jsons, collapse = "\n"))
     }
 
     if (!length(jsons)) {
-      # Try alternative patterns
-      jsons_alt <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*.json")
+      # Try finding any JSON files as a last resort
+      jsons_alt <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", regexp = "\\.json$")
       if (self$debug) {
-        message("No annotation files found with expected pattern under ", self$dataset_dir)
-        message("JSON candidates:\n", paste(jsons_alt, collapse = "\n"))
+        message("No annotation files found with expected patterns under ", self$dataset_dir)
+        message("All JSON candidates:\n", paste(jsons_alt, collapse = "\n"))
       }
-      return(NA_character_)
+
+      # Filter JSON files that might be annotations (contain "annotations" or split names)
+      for (json_file in jsons_alt) {
+        json_content <- tryCatch({
+          jsonlite::fromJSON(json_file, simplifyVector = FALSE)
+        }, error = function(e) NULL)
+
+        if (!is.null(json_content) &&
+            ("annotations" %in% names(json_content) ||
+             "images" %in% names(json_content) ||
+             "categories" %in% names(json_content))) {
+          jsons <- c(jsons, json_file)
+        }
+      }
+
+      if (!length(jsons)) {
+        return(NA_character_)
+      }
     }
 
-    jsons_split <- jsons[grepl(paste0("[/\\\\]", self$split, "[/\\\\]_annotations\\.coco\\.json$"), jsons)]
+    # Prefer files that match the split name
+    jsons_split <- jsons[grepl(paste0("[/\\\\]", self$split, "[/\\\\]"), jsons) |
+                           grepl(paste0(self$split, ".*\\.json$"), fs::path_file(jsons))]
     if (length(jsons_split)) return(jsons_split[[1]])
+
+    # Return the first annotation file found
     jsons[[1]]
   },
+
   load_annotations = function() {
     ann <- jsonlite::fromJSON(self$annotation_file)
     self$categories  <- ann$categories
@@ -243,17 +435,24 @@ rf100_underwater_collection <- torch::dataset(
 
     # Get all actual image files - search recursively in the entire dataset directory
     # since images might be scattered across different split directories
-    all_img_files <- fs::dir_ls(self$dataset_dir, type = "file", recurse = TRUE,
-                                regexp = "\\.(jpg|jpeg|png|bmp)$")
+    all_img_files <- fs::dir_ls(
+      self$dataset_dir,
+      type = "file",
+      recurse = TRUE,
+      regexp = "(?i)\\.(jpg|jpeg|png|bmp)$"
+    )
 
     # Also try the specific image directory if it exists
     if (!is.na(self$image_dir) && fs::dir_exists(self$image_dir)) {
-      local_img_files <- fs::dir_ls(self$image_dir, type = "file",
-                                    regexp = "\\.(jpg|jpeg|png|bmp)$")
+      local_img_files <- fs::dir_ls(
+        self$image_dir,
+        type = "file",
+        regexp = "(?i)\\.(jpg|jpeg|png|bmp)$"
+      )
       all_img_files <- unique(c(all_img_files, local_img_files))
     }
 
-    actual_basenames <- fs::path_file(all_img_files)
+    actual_basenames <- tolower(fs::path_file(all_img_files))
 
     # Since the JSON filenames already include the RoboFlow format,
     # we can try direct matching first
@@ -265,17 +464,26 @@ rf100_underwater_collection <- torch::dataset(
 
     for (i in seq_len(nrow(self$images))) {
       json_filename <- self$images$file_name[i]
+      json_basename <- tolower(fs::path_file(json_filename))
 
-      # Direct filename match
-      if (json_filename %in% names(filename_to_path)) {
-        matched_paths[i] <- filename_to_path[[json_filename]]
+      # Direct filename match using basename
+      if (json_basename %in% names(filename_to_path)) {
+        matched_paths[i] <- filename_to_path[[json_basename]]
         exists[i] <- TRUE
         next
       }
 
-      # Try searching in specific image directory
+      # Try path relative to dataset root (the JSON may contain directories)
+      full_path <- fs::path(self$dataset_dir, json_filename)
+      if (fs::file_exists(full_path)) {
+        matched_paths[i] <- full_path
+        exists[i] <- TRUE
+        next
+      }
+
+      # Try searching in the split's image directory
       if (!is.na(self$image_dir)) {
-        direct_path <- fs::path(self$image_dir, json_filename)
+        direct_path <- fs::path(self$image_dir, json_basename)
         if (fs::file_exists(direct_path)) {
           matched_paths[i] <- direct_path
           exists[i] <- TRUE
@@ -284,7 +492,7 @@ rf100_underwater_collection <- torch::dataset(
       }
 
       # Fuzzy matching - extract base name and look for partial matches
-      json_base <- sub("_[lr]rgb_jpg\\.rf\\.[^.]+\\.jpg$", "", json_filename)
+      json_base <- sub("_[lr]gb_jpg\\.rf\\.[^.]+\\.jpg$", "", json_basename)
       json_base <- sub("^(empty_)?frame", "frame", json_base)
 
       potential_matches <- all_img_files[grepl(json_base, actual_basenames, fixed = TRUE)]
