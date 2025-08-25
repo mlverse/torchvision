@@ -148,17 +148,26 @@ image_tensor <- torch_randn(c(1, 3, 224, 224))
 out <- mtcnn(image_tensor)
 out
 
-# Example usage of Inception-ResNet-v1 with VGGFace2 Weights
+# Load an image from the web
+url <- "https://upload.wikimedia.org/wikipedia/commons/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
+tmp_file <- tempfile(fileext = ".jpg")
+download.file(url, tmp_file, mode = "wb")
+img <- jpeg::readJPEG(tmp_file)
+
+# Convert to torch tensor [C, H, W] normalized
+arr <- as.array(img)  # img is already [H, W, C]
+input <- torch_tensor(arr, dtype = torch_float())  # [H, W, C]
+input <- input$permute(c(3, 1, 2))$unsqueeze(1)   # [1, C, H, W]
+
+# Load pretrained model
 model <- model_inception_resnet_v1(pretrained = "vggface2")
 model$eval()
-input <- torch_randn(1, 3, 224, 224)
 output <- model(input)
 output
 
 # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
 model <- model_inception_resnet_v1(pretrained = "casia-webface")
 model$eval()
-input <- torch_randn(1, 3, 224, 224)
 output <- model(input)
 output
 }
