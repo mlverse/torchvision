@@ -11,7 +11,8 @@ rf100_underwater_collection(
     fs::path_temp("torchvision-datasets"),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  debug = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ rf100_underwater_collection(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{debug}{Logical. If TRUE, prints diagnostic information during
+download and setup.}
 }
 \value{
 A torch dataset. Each element is a named list with:

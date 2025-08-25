@@ -56,7 +56,8 @@ Suggests:
     coro,
     R.matlab,
     xml2,
-    hfhub
+    hfhub,
+    curl
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
     'conditions.R'

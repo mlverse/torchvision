@@ -10,6 +10,8 @@
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target.
+#' @param debug Logical. If TRUE, prints diagnostic information during
+#'   download and setup.
 #'
 #' @return A torch dataset. Each element is a named list with:
 #' - `x`: H x W x 3 array representing the image.
@@ -62,13 +64,15 @@ rf100_underwater_collection <- torch::dataset(
     root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else fs::path_temp("torchvision-datasets"),
     download = FALSE,
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    debug = FALSE
   ) {
     self$dataset <- match.arg(dataset)
     self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
     self$transform <- transform
     self$target_transform <- target_transform
+    self$debug <- debug
 
     fs::dir_create(self$root, recurse = TRUE)
     self$dataset_dir <- fs::path(self$root, paste0("rf100_underwater_", self$dataset))
@@ -79,7 +83,13 @@ rf100_underwater_collection <- torch::dataset(
     if (download) self$download()
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      if (self$debug) {
+        contents <- try(fs::dir_ls(self$dataset_dir, recurse = TRUE), silent = TRUE)
+        if (!inherits(contents, "try-error")) {
+          message("Dataset directory contents:\n", paste(contents, collapse = "\n"))
+        }
+      }
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it. Checked directory: {self$dataset_dir}")
     }
 
     self$load_annotations()
@@ -91,24 +101,70 @@ rf100_underwater_collection <- torch::dataset(
     if (fs::dir_exists(self$dataset_dir)) fs::dir_delete(self$dataset_dir)
     fs::dir_create(self$dataset_dir, recurse = TRUE)
 
-    # Download the archive
+    # Download the archive with retries and curl fallback for large files
     dest <- fs::path(self$dataset_dir, "dataset.tar.gz")
-    download.file(self$archive_url, dest, mode = "wb")
+    attempts <- 3L
+    success <- FALSE
+    last_err <- NULL
+    for (i in seq_len(attempts)) {
+      last_err <- tryCatch({
+        if (requireNamespace("curl", quietly = TRUE)) {
+          curl::curl_download(self$archive_url, dest, quiet = !self$debug)
+        } else {
+          download.file(self$archive_url, dest, mode = "wb", quiet = !self$debug)
+        }
+        if (fs::file_exists(dest) && fs::file_size(dest) > 0) {
+          success <- TRUE
+          break
+        } else {
+          stop("empty download")
+        }
+      }, error = function(e) e)
+      if (!success) Sys.sleep(i)
+    }
+    if (!success) {
+      runtime_error("Failed to download dataset archive from {self$archive_url}. {conditionMessage(last_err)}")
+    }
 
     if (!requireNamespace("archive", quietly = TRUE)) {
       runtime_error("Package 'archive' is required. Please install.packages('archive').")
     }
 
-    # Inspect archive and filter files
+    # Inspect archive to determine file entries and stripping depth
     a <- archive::archive(dest)
+    if (self$debug) {
+      message("Archive entries:\n", paste(a$path, collapse = "\n"))
+    }
 
-    # Keep only regular files (skip hardlinks, dirs, symlinks)
-    files <- a$path[a$type == "file"]
+    if ("type" %in% colnames(a)) {
+      files <- a$path[a$type == "file"]
+      links <- a[a$type %in% c("link", "hardlink"), c("path", "linkpath"), drop = FALSE]
+    } else {
+      files <- a$path
+      links <- data.frame()
+    }
 
-    # Strip the long 'home/zuppif/.../rf100' prefix (7 levels deep)
-    strip_n <- 7L
+    paths <- c(files, if (nrow(links)) c(links$path, links$linkpath))
 
-    # Extract only the file entries, skipping hardlinks
+    # Compute how many leading components to strip so paths start at the
+    # dataset directory (e.g. "underwater-pipes-4ng4t")
+    strip_n <- min(
+      vapply(strsplit(paths, "/"), function(p) {
+        idx <- which(grepl(self$dataset, p, fixed = TRUE))
+        if (length(idx)) idx[1] - 1 else Inf
+      }, numeric(1))
+    )
+    if (!is.finite(strip_n) || strip_n < 0) strip_n <- 0L
+    if (self$debug) {
+      message("Using strip_components = ", strip_n)
+    }
+
+    strip_path <- function(p, n) {
+      parts <- strsplit(p, "/", fixed = TRUE)[[1]]
+      if (length(parts) <= n) "" else paste(parts[(n + 1):length(parts)], collapse = "/")
+    }
+
+    # Extract only regular files, then materialise hard links as copies
     archive::archive_extract(
       dest,
       files = files,
@@ -116,20 +172,40 @@ rf100_underwater_collection <- torch::dataset(
       strip_components = strip_n
     )
 
+    if (nrow(links)) {
+      for (i in seq_len(nrow(links))) {
+        src <- fs::path(self$dataset_dir, strip_path(links$linkpath[i], strip_n))
+        dst <- fs::path(self$dataset_dir, strip_path(links$path[i], strip_n))
+        if (fs::file_exists(src) && !fs::file_exists(dst)) {
+          fs::file_copy(src, dst, overwrite = TRUE)
+        }
+      }
+    }
     # Clean up the downloaded archive
     fs::file_delete(dest)
+
+    if (self$debug) {
+      extracted <- fs::dir_ls(self$dataset_dir, recurse = TRUE)
+      message("Extracted files:\n", paste(extracted, collapse = "\n"))
+    }
 
     invisible(NULL)
   },
 
   check_exists = function() {
     ann <- self$discover_annotation_file()
+    if (self$debug) {
+      message("Annotation file discovered: ", ann)
+    }
     if (is.na(ann) || !fs::file_exists(ann)) return(FALSE)
 
     self$annotation_file <- ann
     self$split_dir <- fs::path_dir(ann)
     candidate_img_dirs <- c(self$split_dir, fs::path(self$split_dir, "images"))
     self$image_dir <- candidate_img_dirs[fs::dir_exists(candidate_img_dirs)][1]
+    if (self$debug) {
+      message("Image directory selected: ", self$image_dir)
+    }
 
     fs::file_exists(self$annotation_file) && fs::dir_exists(self$image_dir)
   },
@@ -138,10 +214,17 @@ rf100_underwater_collection <- torch::dataset(
     if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
 
     jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*_annotations.coco.json")
+    if (self$debug) {
+      message("Annotation candidates:\n", paste(jsons, collapse = "\n"))
+    }
 
     if (!length(jsons)) {
       # Try alternative patterns
       jsons_alt <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", glob = "*.json")
+      if (self$debug) {
+        message("No annotation files found with expected pattern under ", self$dataset_dir)
+        message("JSON candidates:\n", paste(jsons_alt, collapse = "\n"))
+      }
       return(NA_character_)
     }
 
@@ -149,7 +232,6 @@ rf100_underwater_collection <- torch::dataset(
     if (length(jsons_split)) return(jsons_split[[1]])
     jsons[[1]]
   },
-
   load_annotations = function() {
     ann <- jsonlite::fromJSON(self$annotation_file)
     self$categories  <- ann$categories
@@ -242,7 +324,7 @@ rf100_underwater_collection <- torch::dataset(
           img <- magick::image_read(img_path)
           arr <- magick::image_data(img, channels = "rgb")
           aperm(as.integer(arr)/255, c(3,2,1))
-        } else runtime_error("Failed to read image: ", img_path)
+        } else runtime_error("Failed to read image: {img_path}")
       })
     })
 
