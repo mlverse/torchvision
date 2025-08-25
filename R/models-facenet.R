@@ -248,6 +248,17 @@ model_facenet_onet <- nn_module(
 )
 
 #' @describeIn model_facenet MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks
+#'
+#' @return `model_mtcnn()` returns a named list with three elements:
+#' \itemize{
+#'   \item \code{boxes}: A tensor of shape \code{(N, 4)} with bounding box coordinates \code{[x1, y1, x2, y2]}.
+#'   \item \code{landmarks}: A tensor of shape \code{(N, 10)} with (x, y) coordinates of 5 facial landmarks:
+#'         left eye, right eye, nose, left mouth corner, right mouth corner.
+#'   \item \code{cls}: A tensor of shape \code{(N, 2)} with face classification probabilities
+#'         (face / non-face).
+#' }
+#' (Here, \code{N} is the number of detected faces in the input image.)
+#'
 #' @export
 model_mtcnn <- nn_module(
   classname = "MTCNN",
@@ -431,6 +442,20 @@ Mixed_7a <- nn_module(
 )
 
 #' @describeIn model_facenet Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
+#'
+#' @return
+#' `model_inception_resnet_v1()` returns a tensor output depending on the \code{classify} argument:
+#' \itemize{
+#'   \item When \code{classify = FALSE} (default):  
+#'         A tensor of shape \code{(N, 512)}, where each row is a normalized embedding
+#'         vector (L2 norm = 1).  
+#'         These 512-dimensional FaceNet embeddings can be compared using cosine
+#'         similarity or Euclidean distance for face verification and clustering.
+#'
+#'   \item When \code{classify = TRUE}:  
+#'         A tensor of shape \code{(N, num_classes)} containing class logits.
+#' }
+#'
 #' @export
 model_inception_resnet_v1 <- nn_module(
   initialize = function(
