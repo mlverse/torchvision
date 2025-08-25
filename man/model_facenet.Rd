@@ -46,7 +46,11 @@ stderr.}
 \item \code{landmarks}: A tensor of shape \code{(N, 10)} with (x, y) coordinates of 5 facial landmarks:
 left eye, right eye, nose, left mouth corner, right mouth corner.
 \item \code{cls}: A tensor of shape \code{(N, 2)} with face classification probabilities
-(face / non-face).
+(face / non-face). The \code{cls} head has two classes:
+\itemize{
+\item \code{1}: Non-face probability (background)
+\item \code{2}: Face probability — use this value for thresholding detections
+}
 }
 (Here, \code{N} is the number of detected faces in the input image.)
 
