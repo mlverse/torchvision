@@ -141,3 +141,50 @@ test_that("tests for non-pretrained model_inception_resnet_v1", {
   rm(model)
   gc()
 })
+
+test_that("tests for model_inception_resnet_v1 with classify=TRUE and default num_classes", {
+  model = model_inception_resnet_v1(pretrained = NULL, classify = TRUE)
+  model$eval()
+  input = torch_randn(1,3,224,224)
+  out = model(input)
+  expect_tensor_shape(out, c(1,10))  # Default num_classes is 10
+
+  rm(model)
+  gc()
+})
+
+test_that("tests for model_inception_resnet_v1 with classify=TRUE and custom num_classes", {
+  model = model_inception_resnet_v1(pretrained = NULL, classify = TRUE, num_classes = 100)
+  model$eval()
+  input = torch_randn(1,3,224,224)
+  out = model(input)
+  expect_tensor_shape(out, c(1,100))  # Custom num_classes is 100
+
+  rm(model)
+  gc()
+})
+
+test_that("tests for model_inception_resnet_v1 with batch size", {
+  model = model_inception_resnet_v1(pretrained = NULL)
+  model$eval()
+  input = torch_randn(4,3,224,224)  # Batch size of 4
+  out = model(input)
+  expect_tensor_shape(out, c(4,512)) 
+
+  rm(model)
+  gc()
+})
+
+test_that("error test for model_mtcnn with error input size", {
+  model <- model_mtcnn(pretrained = FALSE)
+  input <- torch_randn(1, 3, 10, 10)
+  model$eval()
+
+  expect_error(
+    model(input),
+    regexp = "size|dimension|shape"
+  )
+
+  rm(model)
+  gc()
+})
