@@ -192,13 +192,9 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       y <- self$target_transform(y)
     }
 
-    structure(
-      list(
-        x = x,
-        y = y
-      ),
-      class = c("image_with_segmentation_mask")
-    )
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_segmentation_mask", class(result))
+    result
   },
 
   .length = function() {
