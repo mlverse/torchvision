@@ -5,10 +5,12 @@
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
-* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
+* Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 
 ## New models
 
+* Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
+* Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
 * Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
 
 ## New features

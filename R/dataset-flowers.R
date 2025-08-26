@@ -99,7 +99,7 @@ flowers102_dataset <- dataset(
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {length(self$img_path)} samples.")
+    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {self$.length()} samples.")
   },
 
   .getitem = function(index) {
