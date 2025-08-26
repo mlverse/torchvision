@@ -2,7 +2,7 @@ context("models-facenet")
 
 test_that("tests for pretrained model_mtcnn", {
   model <- model_mtcnn(pretrained = TRUE)
-  input <- torch_randn(1, 3, 224, 224)
+  input <- torch_randn(1, 3, 192, 192)
   model$eval()
   out <- model(input)
   expect_tensor_shape(out$boxes, c(1, 4))
@@ -122,7 +122,7 @@ test_that("tests for pretrained model_inception_resnet_v1 with casia-webface wei
 
   model_casia = model_inception_resnet_v1(pretrained = 'casia-webface')
   model_casia$eval()
-  input = torch_randn(1,3,224,224)
+  input = torch_randn(1,3,320,260)
   out = model_casia(input)
   expect_tensor_shape(out, c(1,512))
 
@@ -169,7 +169,7 @@ test_that("tests for model_inception_resnet_v1 with batch size", {
   model$eval()
   input = torch_randn(4,3,224,224)  # Batch size of 4
   out = model(input)
-  expect_tensor_shape(out, c(4,512)) 
+  expect_tensor_shape(out, c(4,512))
 
   rm(model)
   gc()
