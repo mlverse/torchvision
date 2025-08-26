@@ -78,6 +78,9 @@ models = {
   'deeplabv3_resnet101_coco': 'https://download.pytorch.org/models/deeplabv3_resnet101_coco-586e9e4e.pth',
   'casia-webface': 'https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180408-102900-casia-webface.pt',
   'vggface2': 'https://github.com/timesler/facenet-pytorch/releases/download/v2.2.9/20180402-114759-vggface2.pt',
+  'facenet_onet': 'https://raw.githubusercontent.com/timesler/facenet-pytorch/refs/heads/master/data/onet.pt',
+  'facenet_pnet': 'https://raw.githubusercontent.com/timesler/facenet-pytorch/refs/heads/master/data/pnet.pt',
+  'facenet_rnet': 'https://raw.githubusercontent.com/timesler/facenet-pytorch/refs/heads/master/data/rnet.pt',
   'efficientnet_b0': 'https://download.pytorch.org/models/efficientnet_b0_rwightman-3dd342df.pth',
   'efficientnet_b1': 'https://download.pytorch.org/models/efficientnet_b1-c27df63c.pth', # IMAGENET1K_V2
   'efficientnet_b2': 'https://download.pytorch.org/models/efficientnet_b2_rwightman-bcdf34b7.pth',

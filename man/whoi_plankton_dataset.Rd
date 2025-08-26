@@ -45,7 +45,13 @@ WHOI-Plankton Dataset
 }
 \details{
 The WHOI-Plankton and WHOI-Plankton small are \strong{image classification} datasets
-of submarine plankton small grayscale images of varying size, classified into 100 classes.
+from the Woods Hole Oceanographic Institution (WHOI) of microscopic marine plankton.
+https://hdl.handle.net/10.1575/1912/7341
+Images were collected in situ by automated submersible imaging-in-flow cytometry
+with an instrument called Imaging FlowCytobot (IFCB). They are small grayscale images
+of varying size.
+Images are classified into 100 classes, with an overview  available in
+\href{https://whoigit.github.io/whoi-plankton/}{project Wiki page}
 Dataset size is 957k and 58k respectively, and each provides a train / val / test split.
 }
 \examples{
