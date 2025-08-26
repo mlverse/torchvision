@@ -2,21 +2,22 @@
 % Please edit documentation in R/dataset-rf100-doc.R
 \name{rf100_document_collection}
 \alias{rf100_document_collection}
-\title{RF100 Document Dataset Collection}
+\title{RF100 Document Collection Dataset}
 \usage{
 rf100_document_collection(
   dataset = c("tweeter_post", "tweeter_profile", "document_part", "activity_diagram",
     "signature", "paper_part", "tabular_data", "paragraph"),
   split = c("train", "test", "valid"),
-  root = tempdir(),
+  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
+    fs::path_temp("torchvision-datasets"),
   download = FALSE,
   transform = NULL,
   target_transform = NULL
 )
 }
 \arguments{
-\item{dataset}{One of "tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph".}
+\item{dataset}{Character. One of "tweeter_post", "tweeter_profile", "document_part",
+"activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".}
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
@@ -43,24 +44,28 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the RF100 document object detection datasets. COCO format,
-per dataset folders, and train valid test splits are expected.
+Loads one of the RF100 document object detection datasets with COCO-style
+bounding box annotations for object detection tasks.
 }
 \examples{
 \dontrun{
-devtools::load_all()
 ds <- rf100_document_collection(
   dataset = "tweeter_post",
   split = "train",
   transform = transform_to_tensor,
   download = TRUE
 )
+
+# Retrieve a sample and inspect annotations
 item <- ds[1]
 item$y$labels
 item$y$boxes
+
+# Draw bounding boxes and display the image
 boxed_img <- draw_bounding_boxes(item)
 tensor_image_browse(boxed_img)
 }
+
 }
 \seealso{
 Other detection_dataset: 

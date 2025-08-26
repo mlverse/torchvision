@@ -11,8 +11,7 @@ rf100_underwater_collection(
     fs::path_temp("torchvision-datasets"),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL,
-  debug = FALSE
+  target_transform = NULL
 )
 }
 \arguments{
@@ -27,9 +26,6 @@ rf100_underwater_collection(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
-
-\item{debug}{Logical. If TRUE, prints diagnostic information during
-download and setup.}
 }
 \value{
 A torch dataset. Each element is a named list with:
@@ -53,7 +49,7 @@ bounding box annotations for object detection tasks.
 \examples{
 \dontrun{
 ds <- rf100_underwater_collection(
-  dataset = "pipes",
+  dataset = "objects",
   split = "train",
   transform = transform_to_tensor,
   download = TRUE
