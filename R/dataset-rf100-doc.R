@@ -74,7 +74,7 @@ rf100_document_collection <- torch::dataset(
     transform = NULL,
     target_transform = NULL
   ) {
-    self$dataset <- match.arg(dataset)
+    self$dataset <- match.arg(dataset, self$resources$dataset)
     self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
     self$transform <- transform
@@ -105,98 +105,77 @@ rf100_document_collection <- torch::dataset(
     dest <- fs::path(self$dataset_dir, "dataset.tar.gz")
 
     if (requireNamespace("curl", quietly = TRUE)) {
-      curl::curl_download(self$archive_url, dest, quiet = FALSE)
+      curl::curl_download(self$archive_url, dest, quiet = TRUE)
     } else {
       download.file(self$archive_url, dest, mode = "wb")
     }
 
-    # Create temporary simple extraction directory
-    simple_extract <- fs::path(self$dataset_dir, "simple_extracted")
-    if (fs::dir_exists(simple_extract)) fs::dir_delete(simple_extract)
-    fs::dir_create(simple_extract, recurse = TRUE)
-
-    if (requireNamespace("archive", quietly = TRUE)) {
-      tryCatch({
-        # Get archive contents
-        contents <- archive::archive(dest)
-        annotation_entries <- contents[grepl("_annotations\\.coco\\.json", contents$path), ]
-
-        if (nrow(annotation_entries) > 0) {
-          # Create split directories
-          for (split_name in c("train", "test", "valid")) {
-            fs::dir_create(fs::path(simple_extract, split_name), recurse = TRUE)
-          }
-
-          # Extract annotation files to simplified structure
-          for (i in 1:nrow(annotation_entries)) {
-            original_path <- annotation_entries$path[i]
-
-            # Determine which split this belongs to
-            split_name <- if (grepl("/train/", original_path)) "train" else
-              if (grepl("/test/", original_path)) "test" else
-                if (grepl("/valid/", original_path)) "valid" else "unknown"
-
-            if (split_name != "unknown") {
-              target_file <- fs::path(simple_extract, split_name, "_annotations.coco.json")
-
-              # Extract specific file to temp directory
-              temp_dir <- tempdir()
-              archive::archive_extract(dest, files = original_path, dir = temp_dir)
-              temp_extracted <- fs::path(temp_dir, original_path)
-
-              if (fs::file_exists(temp_extracted)) {
-                file.copy(temp_extracted, target_file, overwrite = TRUE)
-              }
-            }
-          }
-
-          for (split_name in c("train", "test", "valid")) {
-            # Find image entries for this split
-            image_pattern <- paste0("/", split_name, "/.*\\.(jpg|jpeg|png|bmp)$")
-            image_entries <- contents[grepl(image_pattern, contents$path, ignore.case = TRUE), ]
-
-            if (nrow(image_entries) > 0) {
-              for (j in 1:nrow(image_entries)) {
-                img_path <- image_entries$path[j]
-                img_filename <- fs::path_file(img_path)
-                target_img <- fs::path(simple_extract, split_name, img_filename)
-
-                # Extract image to temp and copy
-                tryCatch({
-                  temp_dir <- tempdir()
-                  archive::archive_extract(dest, files = img_path, dir = temp_dir)
-                  temp_img <- fs::path(temp_dir, img_path)
-
-                  if (fs::file_exists(temp_img)) {
-                    file.copy(temp_img, target_img, overwrite = TRUE)
-                  }
-                }, error = function(e) {
-                })
-              }
-            }
-          }
-
-          # Move simple extracted structure to be the main dataset directory
-          final_dir <- fs::path(self$dataset_dir, "data")
-          if (fs::dir_exists(final_dir)) fs::dir_delete(final_dir)
-          fs::dir_copy(simple_extract, final_dir)
-          fs::dir_delete(simple_extract)
-
-        } else {
-          runtime_error("No annotation files found in archive.")
-        }
-
-      }, error = function(e) {
-        runtime_error("Failed to extract dataset: ", e$message)
-      })
-    } else {
-      runtime_error("Archive package required for extraction. Install with: install.packages('archive')")
+    if (!requireNamespace("archive", quietly = TRUE)) {
+      runtime_error("Archive package required. Install with: install.packages('archive')")
     }
 
-    # Clean up
-    gc()
-    tryCatch(fs::file_delete(dest), error = function(e) invisible(NULL))
+    # Fast extraction with minimal processing
+    tryCatch({
+      # Get all archive contents at once
+      contents <- archive::archive(dest)
 
+      # Filter for needed files upfront
+      ann_files <- contents[grepl("_annotations\\.coco\\.json", contents$path), ]
+      img_files <- contents[grepl("\\.(jpg|jpeg|png|bmp)$", contents$path, ignore.case = TRUE), ]
+
+      if (nrow(ann_files) == 0) {
+        runtime_error("No annotation files found in archive.")
+      }
+
+      # Extract directly to final structure
+      extract_dir <- fs::path(self$dataset_dir, "data")
+      fs::dir_create(extract_dir, recurse = TRUE)
+
+      # Create split directories
+      splits <- c("train", "test", "valid")
+      for (split in splits) {
+        fs::dir_create(fs::path(extract_dir, split), recurse = TRUE)
+      }
+
+      # Extract annotation files
+      for (i in seq_len(nrow(ann_files))) {
+        path <- ann_files$path[i]
+        split <- if (grepl("/train/", path)) "train" else
+          if (grepl("/test/", path)) "test" else
+            if (grepl("/valid/", path)) "valid" else next
+
+        target <- fs::path(extract_dir, split, "_annotations.coco.json")
+        archive::archive_extract(dest, files = path, dir = tempdir())
+        file.copy(fs::path(tempdir(), path), target, overwrite = TRUE)
+      }
+
+      # Bulk extract images by split
+      for (split in splits) {
+        split_imgs <- img_files[grepl(paste0("/", split, "/"), img_files$path), ]
+        if (nrow(split_imgs) == 0) next
+
+        # Extract all images for this split at once
+        archive::archive_extract(dest, files = split_imgs$path, dir = tempdir())
+
+        # Copy images to final location
+        for (j in seq_len(nrow(split_imgs))) {
+          img_path <- split_imgs$path[j]
+          img_name <- fs::path_file(img_path)
+          src <- fs::path(tempdir(), img_path)
+          dst <- fs::path(extract_dir, split, img_name)
+
+          if (fs::file_exists(src)) {
+            file.copy(src, dst, overwrite = TRUE)
+          }
+        }
+      }
+
+    }, error = function(e) {
+      runtime_error("Failed to extract dataset: ", e$message)
+    })
+
+    # Cleanup
+    fs::file_delete(dest)
     invisible(NULL)
   },
 
@@ -206,27 +185,31 @@ rf100_document_collection <- torch::dataset(
 
     self$annotation_file <- ann
     self$split_dir <- fs::path_dir(ann)
-    candidate_img_dirs <- c(self$split_dir, fs::path(self$split_dir, "images"))
-    self$image_dir <- candidate_img_dirs[fs::dir_exists(candidate_img_dirs)][1]
+    self$image_dir <- self$split_dir
 
-    fs::file_exists(self$annotation_file) && fs::dir_exists(self$image_dir)
+    TRUE
   },
 
   discover_annotation_file = function() {
-    if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
+    data_dir <- fs::path(self$dataset_dir, "data", self$split)
+    ann_file <- fs::path(data_dir, "_annotations.coco.json")
 
-    # Look for annotation files in the dataset directory
-    jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file", regexp = "_annotations\\.coco\\.json$")
-
-    if (!length(jsons)) {
-      return(NA_character_)
+    if (fs::file_exists(ann_file)) {
+      return(ann_file)
     }
 
-    # Try to find annotation file for the specific split
+    # Fallback search
+    if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
+
+    jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file",
+                        regexp = "_annotations\\.coco\\.json$")
+
+    if (!length(jsons)) return(NA_character_)
+
+    # Find split-specific file
     jsons_split <- jsons[grepl(paste0("[/\\\\]", self$split, "[/\\\\]"), jsons)]
     if (length(jsons_split)) return(jsons_split[[1]])
 
-    # Fallback to any annotation file
     jsons[[1]]
   },
 
@@ -237,66 +220,24 @@ rf100_document_collection <- torch::dataset(
     self$images      <- ann$images
     self$annotations <- ann$annotations
 
-    # Find all image files in the dataset directory
-    all_img_files <- fs::dir_ls(
-      self$dataset_dir,
-      type = "file",
-      recurse = TRUE,
-      regexp = "(?i)\\.(jpg|jpeg|png|bmp)$"
-    )
+    # Build image paths efficiently
+    self$image_paths <- fs::path(self$image_dir, self$images$file_name)
 
-    # Match images from annotations to actual files
-    actual_basenames <- tolower(fs::path_file(all_img_files))
-    matched_paths <- character(nrow(self$images))
-    exists <- logical(nrow(self$images))
-
-    filename_to_path <- setNames(all_img_files, actual_basenames)
-
-    for (i in seq_len(nrow(self$images))) {
-      json_filename <- self$images$file_name[i]
-      json_basename <- tolower(fs::path_file(json_filename))
-
-      # Direct filename match
-      if (json_basename %in% names(filename_to_path)) {
-        matched_paths[i] <- filename_to_path[[json_basename]]
-        exists[i] <- TRUE
-        next
-      }
-
-      # Try full path from dataset directory
-      full_path <- fs::path(self$dataset_dir, json_filename)
-      if (fs::file_exists(full_path)) {
-        matched_paths[i] <- full_path
-        exists[i] <- TRUE
-        next
-      }
-
-      # Fuzzy matching for files with modified names
-      potential_matches <- all_img_files[grepl(sub("\\.[^.]*$", "", json_basename), actual_basenames, fixed = TRUE)]
-
-      if (length(potential_matches) > 0) {
-        matched_paths[i] <- potential_matches[1]
-        exists[i] <- TRUE
-      } else {
-        exists[i] <- FALSE
-      }
-    }
-
-    # Filter to existing images only
+    # Filter to existing images
+    exists <- fs::file_exists(self$image_paths)
     self$images <- self$images[exists, , drop = FALSE]
-    matched_paths <- matched_paths[exists]
+    self$image_paths <- self$image_paths[exists]
+
+    # Filter annotations
     keep_ids <- self$images$id
     self$annotations <- self$annotations[self$annotations$image_id %in% keep_ids, , drop = FALSE]
 
-    # Group annotations by image ID for efficient lookup
+    # Group annotations by image ID
     if (nrow(self$annotations) > 0) {
       self$annotations_by_image <- split(self$annotations, self$annotations$image_id)
     } else {
       self$annotations_by_image <- list()
     }
-
-    self$image_paths <- matched_paths
-
   },
 
   .getitem = function(index) {
@@ -304,27 +245,21 @@ rf100_document_collection <- torch::dataset(
     img_info <- self$images[index, ]
     anns     <- self$annotations_by_image[[as.character(img_info$id)]]
 
-    # Load image using multiple fallback methods
+    # Load image
     x <- tryCatch({
       if (grepl("\\.jpe?g$", img_path, ignore.case = TRUE)) {
         jpeg::readJPEG(img_path)
       } else if (grepl("\\.png$", img_path, ignore.case = TRUE)) {
         png::readPNG(img_path)
+      } else if (requireNamespace("magick", quietly = TRUE)) {
+        img <- magick::image_read(img_path)
+        arr <- magick::image_data(img, channels = "rgb")
+        aperm(as.integer(arr)/255, c(3,2,1))
       } else {
-        stop("Unsupported format")
+        runtime_error("Cannot read image: ", img_path)
       }
     }, error = function(e) {
-      tryCatch({
-        if (requireNamespace("magick", quietly = TRUE)) {
-          img <- magick::image_read(img_path)
-          arr <- magick::image_data(img, channels = "rgb")
-          aperm(as.integer(arr)/255, c(3,2,1))
-        } else {
-          runtime_error("Failed to read image: ", img_path)
-        }
-      }, error = function(e2) {
-        runtime_error("Failed to read image with all methods: ", img_path)
-      })
+      runtime_error("Failed to read image: ", img_path, " - ", e$message)
     })
 
     # Convert grayscale to RGB if needed

@@ -8,16 +8,16 @@ rf100_microscopic_collection(
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell", "liquid_crystals",
     "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease", "asbestos"),
   split = c("train", "test", "valid"),
-  root = tempdir(),
+  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
+    fs::path_temp("torchvision-datasets"),
   download = FALSE,
   transform = NULL,
   target_transform = NULL
 )
 }
 \arguments{
-\item{dataset}{One of "stomata_cell", "blood_cell", "parasite",
-"cell", "liquid_crystals", "bacteria", "cotton_desease",
-"mitosis", "phage", "liver_desease", or "asbestos".}
+\item{dataset}{Character. One of "tweeter_post", "tweeter_profile", "document_part",
+"activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".}
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
@@ -44,12 +44,11 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the RF100 microscopic object detection datasets (COCO format),
+Loads one of the RF100 microscopic object detection datasets (COCO format)
 with per-dataset folders and train/valid/test splits.
 }
 \examples{
 \dontrun{
-devtools::load_all()
 ds <- rf100_microscopic_collection(
   dataset = "stomata_cell",
   split = "test",
@@ -57,11 +56,10 @@ ds <- rf100_microscopic_collection(
   download = TRUE
 )
 item <- ds[1]
-item$y$labels
-item$y$boxes
-boxed_img <- draw_bounding_boxes(item)
-tensor_image_browse(boxed_img)
+boxed <- draw_bounding_boxes(item)
+tensor_image_browse(boxed)
 }
+
 }
 \seealso{
 Other detection_dataset: 

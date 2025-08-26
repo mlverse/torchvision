@@ -15,7 +15,8 @@ rf100_underwater_collection(
 )
 }
 \arguments{
-\item{dataset}{Character. One of "pipes", "aquarium", "objects", or "coral".}
+\item{dataset}{Character. One of "tweeter_post", "tweeter_profile", "document_part",
+"activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".}
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
@@ -55,14 +56,9 @@ ds <- rf100_underwater_collection(
   download = TRUE
 )
 
-# Retrieve a sample and inspect annotations
-item <- ds[2]
-item$y$labels
-item$y$boxes
-
-# Draw bounding boxes and display the image
-boxed_img <- draw_bounding_boxes(item)
-tensor_image_browse(boxed_img)
+item <- ds[1]
+boxed <- draw_bounding_boxes(item)
+tensor_image_browse(boxed)
 }
 
 }
