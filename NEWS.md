@@ -9,6 +9,9 @@
 
 ## New models
 
+* Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
+* Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
+
 ## New features
 
 ## Bug fixes and improvements
