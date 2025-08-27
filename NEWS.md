@@ -14,6 +14,8 @@
 
 ## New features
 
+* Added vignette showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `make_vision_grid()` (@DerrickUnleashed, #244).
+
 ## Bug fixes and improvements
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
