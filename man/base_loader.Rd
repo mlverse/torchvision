@@ -7,7 +7,10 @@
 base_loader(path)
 }
 \arguments{
-\item{path}{path to the image to load from}
+\item{path}{path or URL to load the image from.}
+}
+\value{
+an array with dim 3 x Height x Width
 }
 \description{
 Loads an image using \code{jpeg}, \code{png} or \code{tiff} packages depending on the
