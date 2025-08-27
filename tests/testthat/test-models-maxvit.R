@@ -16,7 +16,7 @@ test_that("tests for pretrained model_maxvit", {
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_maxvit(pretrained = TRUE)
-  input <- torch::torch_randn(1, 3, 224, 224)
+  input <- torch::torch_randn(1, 3, 448, 448)
   out <- model(input)
   expect_tensor_shape(out, c(1, 1000))
 })

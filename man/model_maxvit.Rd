@@ -26,7 +26,9 @@ The model performs image classification and by default returns logits for
 \dontrun{
 # 1. Load the basketball image
 img_url <- "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
-img <- image_read(img_url)
+img_path <- tempfile(fileext = ".png")
+download.file(img_url, img_path, mode = "wb")
+img <- png::readPNG(img_path)[, , 1:3]
 
 # 2. Define normalization (ImageNet)
 norm_mean <- c(0.485, 0.456, 0.406)
@@ -53,21 +55,8 @@ topk <- output$topk(k = 5, dim = 2)
 indices <- as.integer(topk[[2]][1, ])
 scores <- as.numeric(topk[[1]][1, ])
 
-# 7. Download and read ImageNet labels
-labels_url <- "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
-labels_path <- tempfile(fileext = ".txt")
-if (file.exists(labels_path)) unlink(labels_path)
-download.file(labels_url, labels_path, quiet = TRUE, mode = "wb")
-imagenet_labels <- suppressWarnings(readLines(labels_path, warn = FALSE))
-imagenet_labels <- imagenet_labels[nzchar(imagenet_labels)]
-
-# 8. Print Top-5 predictions
-cat("Top-5 Predictions for the basketball image:\n")
-for (i in seq_along(indices)) {
-  label <- imagenet_labels[indices[i]]
-  score <- round(scores[i], 2)
-  cat(sprintf("  \%d. \%s (\%.2f\%\%)\n", i, label, score))
-}
+# 7. Show Top-5 predictions
+glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\%)")
 }
 
 }
