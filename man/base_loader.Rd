@@ -10,7 +10,7 @@ base_loader(path)
 \item{path}{path or URL to load the image from.}
 }
 \value{
-an array with dim 3 x Height x Width
+an channel-last array of image values with dim Height x Width x 3
 }
 \description{
 Loads an image using \code{jpeg}, \code{png} or \code{tiff} packages depending on the

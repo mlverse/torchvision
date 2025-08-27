@@ -131,7 +131,7 @@ magick_loader <- function(path) {
 #'
 #' @inheritParams magick_loader
 #'
-#' @returns an array with dim 3 x Height x Width
+#' @returns an channel-last array of image values with dim Height x Width x 3
 #' @export
 base_loader <- function(path) {
 
@@ -153,8 +153,9 @@ base_loader <- function(path) {
   if (length(dim(img)) == 2)
     img <- abind::abind(img, img, img, along = 3)
   else if (length(dim(img)) == 3 && dim(img)[1] == 1)
-    img <- abind::abind(img, img, img, along = 1)
+    img <- abind::abind(img, img, img, along = 1) %>% aperm(c(3,1,2))
 
+  # all readers default to channel last
   img
 }
 
