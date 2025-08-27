@@ -1,11 +1,10 @@
 # Loading Images ---------------------------------------------------
-
+library(torchvision)
+library(torch)
 
 read_to_tensor <- function(url) {
-  tmp <- download_and_cache(url)
-  arr <- jpeg::readJPEG(tmp)              
-  arr <- as.array(arr)
-  torch_tensor(aperm(arr, c(3,1,2)), dtype = torch_float())  
+  arr <- magick_loader(url)
+  torch_tensor(arr, dtype = torch_float())$permute(c(3,1,2))
 }
 
 url1 <- "https://raw.githubusercontent.com/pytorch/vision/main/gallery/assets/dog1.jpg"
@@ -20,7 +19,7 @@ dog2 <- read_to_tensor(url2)
 
 dogs <- torch_stack(list(dog1, dog2))
 grid <- vision_make_grid(dogs, scale = TRUE, num_rows = 2)
-grid_arr <- as.array(grid$permute(c(2,3,1)))  
+grid_arr <- as.array(grid$permute(c(2,3,1)))
 plot(c(0, dim(grid_arr)[2]), c(0, dim(grid_arr)[1]), type = "n", ann = FALSE, axes = FALSE, asp = 1)
 rasterImage(grid_arr, 0, 0, w, h)
 
@@ -74,13 +73,13 @@ mask_bool2 <- make_masks(mask_id[2,..])
 
 
 segmented1 <- draw_segmentation_masks(
-  (dog1_prep$resized * 255)$to(torch_uint8()), 
+  (dog1_prep$resized * 255)$to(torch_uint8()),
   masks = mask_bool1,
   alpha = 0.6
 )
 
 segmented2 <- draw_segmentation_masks(
-  (dog2_prep$resized * 255)$to(torch_uint8()), 
+  (dog2_prep$resized * 255)$to(torch_uint8()),
   masks = mask_bool2,
   alpha = 0.6
 )
