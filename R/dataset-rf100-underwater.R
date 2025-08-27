@@ -38,7 +38,12 @@ rf100_underwater_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/underwater-objects-5v7p8/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/coral-lwptl/resolve/main/dataset.tar.gz?download=1"
     ),
-    md5 = NA_character_,
+    md5 = c(
+      "939d5b4d887fc01a22f6d4f8053d7da9",
+      "b0264a188255158a82a295206d2dde3c",
+      "c90a6897b232fa704047eec9c0f731bf",
+      "b6314345326007cb45eacade42c9caa8"
+    ),
     stringsAsFactors = FALSE
   ),
 

@@ -49,7 +49,20 @@ rf100_electromagnetic_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/bone-fracture-7fylg/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/flir-camera-objects/resolve/main/dataset.tar.gz?download=1"
     ),
-    md5 = NA_character_,
+    md5 = c(
+      "9c22581d6a33efaa4673524a7a999c31",
+      "ee6ee92a6ed67a7a3999feceb032a4bf",
+      "a18a3139bcdc63fbb2441e6465869df3",
+      "b3a9b673331d6b180d8a3397a4b3a8d2",
+      "bc5dbf0118184f3c7fc29fd14f824370",
+      "6417140ea24d31cc1796008f97aeec9e",
+      "f08ca040a1512bff3dd18e4347c789eb",
+      "3b4c34891d23815e3d1b334262ee987b",
+      "6a05407e5bf48744d1bee74746898af9",
+      "f4ad6d2cf7ed34a8a3d6cc96be06e91f",
+      "5956bad4cca0c3bc0ad215d6e3d32638",
+      "ebabf3b3c5d447f8a6070d503f9de476"
+    ),
     stringsAsFactors = FALSE
   ),
 

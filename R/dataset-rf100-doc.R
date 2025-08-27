@@ -63,7 +63,16 @@ rf100_document_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/tabular-data-wf9uh/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/paragraphs-co84b/resolve/main/dataset.tar.gz?download=1"
     ),
-    md5 = rep(NA_character_, 8),
+    md5 = c(
+      "0d2ce84f061dc186f4fb2ac44c3c0e5d",
+      "60b449b28202bcbc3bdad9c833ff4a5e",
+      "c8b34fa5a31be5557fe847e2ccf07eec",
+      "04836401021613542718ab5d44880fd3",
+      "96c49f5e2432abee7a9da602747e54f3",
+      "7a933cf055ccb13c3309c748a38cd760",
+      "0bfdc35e2eeb9c2d07d7b42bfe33e7ff",
+      ""
+    ),
     stringsAsFactors = FALSE
   ),
 

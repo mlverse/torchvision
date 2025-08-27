@@ -40,7 +40,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
   resources = data.frame(
     dataset = "peixos",
     url = "https://huggingface.co/datasets/Francesco/peixos-fish/resolve/main/dataset.tar.gz?download=1",
-    md5 = NA_character_,
+    md5 = "0eb13ea40677178aed2fd47f153fabe2",
     stringsAsFactors = FALSE
   ),
   classes = c("fish"),

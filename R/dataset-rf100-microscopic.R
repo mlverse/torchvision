@@ -47,7 +47,19 @@ rf100_microscopic_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/asbestos/resolve/main/dataset.tar.gz?download=1"
     ),
-    md5 = NA_character_,
+    md5 = c(
+      "4d995120bcbf6d3e2f19c07823d23afb",
+      "b7c9834262d02125a924bbc65957eb71",
+      "ef078d9eab60620da57f337b4ee78952",
+      "8da033f1f517c4ff1ba6bc9aa0e8f3dd",
+      "a95355d0bfe959755f0938f80dc64197",
+      "c5cad1348923c95efd8950ae4d3c9fcc",
+      "cf42440d4884a626d7c5c8b3230b57e0",
+      "1b1b3da67e9eab80221e02c3ec1abaab",
+      "2a0c279b22e971086bc87d3a4991e04f",
+      "2081b132d964ef00b9bfd8a1f41465ce",
+      "e29fb3351454242603ac3b9096da9654"
+    ),
     stringsAsFactors = FALSE
   ),
 
