@@ -1,3 +1,6 @@
+#' @include dataset-rf100-doc.R
+NULL
+
 #' RF100 Underwater Dataset Collection
 #'
 #' Loads one of the RF100 underwater object detection datasets: "pipes",

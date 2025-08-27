@@ -1,3 +1,6 @@
+#' @include dataset-rf100-doc.R
+NULL
+
 #' RF100 Microscopic Dataset Collection
 #'
 #' Loads one of the RF100 microscopic object detection datasets (COCO format)
@@ -36,7 +39,7 @@ rf100_microscopic_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/bccd-ouzjz/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/parasites-1s07h/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/cells-uyemf/resolve/main/dataset.tar.gz?download=1",
-      NA_character_,
+      "https://huggingface.co/datasets/Francesco/4-fold-defect/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/dataset.tar.gz?download=1",
       "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/resolve/main/dataset.tar.gz?download=1",

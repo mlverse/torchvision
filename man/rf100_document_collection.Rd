@@ -8,8 +8,7 @@ rf100_document_collection(
   dataset = c("tweeter_post", "tweeter_profile", "document_part", "activity_diagram",
     "signature", "paper_part", "tabular_data", "paragraph"),
   split = c("train", "test", "valid"),
-  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
-    fs::path_temp("torchvision-datasets"),
+  root = if (.Platform$OS.type == "windows") fs::path("C:/tv") else fs::path_temp("tv"),
   download = FALSE,
   transform = NULL,
   target_transform = NULL

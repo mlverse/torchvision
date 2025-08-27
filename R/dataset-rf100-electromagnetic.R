@@ -1,3 +1,6 @@
+#' @include dataset-rf100-doc.R
+NULL
+
 #' RF100 Electromagnetic Dataset Collection
 #'
 #' Loads one of the RF100 electromagnetic object detection datasets (COCO

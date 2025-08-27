@@ -43,7 +43,6 @@ Imports:
     png,
     abind,
     jsonlite,
-    yaml,
     withr,
     cli,
     glue,
@@ -56,7 +55,6 @@ Suggests:
     coro,
     R.matlab,
     xml2,
-    hfhub,
     curl
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
@@ -76,10 +74,10 @@ Collate:
     'dataset-places365.R'
     'dataset-plankton.R'
     'dataset-rf100-doc.R'
-    'dataset-rf100-underwater.R'
     'dataset-rf100-electromagnetic.R'
     'dataset-rf100-microscopic.R'
     'dataset-rf100-peixos.R'
+    'dataset-rf100-underwater.R'
     'extension.R'
     'folder-dataset.R'
     'globals.R'

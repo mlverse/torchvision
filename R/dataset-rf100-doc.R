@@ -69,7 +69,7 @@ rf100_document_collection <- torch::dataset(
                 "activity_diagram", "signature", "paper_part",
                 "tabular_data", "paragraph"),
     split = c("train", "test", "valid"),
-    root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else fs::path_temp("torchvision-datasets"),
+    root = if (.Platform$OS.type == "windows") fs::path("C:/tv") else fs::path_temp("tv"),
     download = FALSE,
     transform = NULL,
     target_transform = NULL
@@ -81,7 +81,7 @@ rf100_document_collection <- torch::dataset(
     self$target_transform <- target_transform
 
     fs::dir_create(self$root, recurse = TRUE)
-    self$dataset_dir <- fs::path(self$root, paste0("rf100_document_", self$dataset))
+    self$dataset_dir <- fs::path(self$root, self$dataset)
 
     resource <- self$resources[self$resources$dataset == self$dataset, , drop = FALSE]
     self$archive_url <- resource$url
@@ -111,10 +111,14 @@ rf100_document_collection <- torch::dataset(
     }
 
     if (!requireNamespace("archive", quietly = TRUE)) {
-      runtime_error(paste("Archive package required. Install with: install.packages('archive')"))
+      runtime_error("Archive package required. Install with: install.packages('archive')")
     }
 
-    # Fast extraction with minimal processing
+    # Use short temp directory to avoid Windows path limits
+    short_temp <- "C:/tmp"
+    if (fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
+    fs::dir_create(short_temp, recurse = TRUE)
+
     tryCatch({
       # Get all archive contents at once
       contents <- archive::archive(dest)
@@ -128,7 +132,7 @@ rf100_document_collection <- torch::dataset(
       }
 
       # Extract directly to final structure
-      extract_dir <- fs::path(self$dataset_dir, "data")
+      extract_dir <- self$dataset_dir
       fs::dir_create(extract_dir, recurse = TRUE)
 
       # Create split directories
@@ -145,8 +149,10 @@ rf100_document_collection <- torch::dataset(
             if (grepl("/valid/", path)) "valid" else next
 
         target <- fs::path(extract_dir, split, "_annotations.coco.json")
-        archive::archive_extract(dest, files = path, dir = tempdir())
-        file.copy(fs::path(tempdir(), path), target, overwrite = TRUE)
+
+        # Extract to short temp directory
+        archive::archive_extract(dest, files = path, dir = short_temp)
+        file.copy(fs::path(short_temp, path), target, overwrite = TRUE)
       }
 
       # Bulk extract images by split
@@ -155,13 +161,13 @@ rf100_document_collection <- torch::dataset(
         if (nrow(split_imgs) == 0) next
 
         # Extract all images for this split at once
-        archive::archive_extract(dest, files = split_imgs$path, dir = tempdir())
+        archive::archive_extract(dest, files = split_imgs$path, dir = short_temp)
 
         # Copy images to final location
         for (j in seq_len(nrow(split_imgs))) {
           img_path <- split_imgs$path[j]
           img_name <- fs::path_file(img_path)
-          src <- fs::path(tempdir(), img_path)
+          src <- fs::path(short_temp, img_path)
           dst <- fs::path(extract_dir, split, img_name)
 
           if (fs::file_exists(src)) {
@@ -170,8 +176,13 @@ rf100_document_collection <- torch::dataset(
         }
       }
 
+      # Clean up temp directory
+      if (fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
+
     }, error = function(e) {
-      runtime_error(paste("Failed to extract dataset: ", e$message))
+      # Clean up temp directory on error
+      if (exists("short_temp") && fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
+      runtime_error("Failed to extract dataset: ", e$message)
     })
 
     # Cleanup
@@ -191,7 +202,7 @@ rf100_document_collection <- torch::dataset(
   },
 
   discover_annotation_file = function() {
-    data_dir <- fs::path(self$dataset_dir, "data", self$split)
+    data_dir <- fs::path(self$dataset_dir, self$split)
     ann_file <- fs::path(data_dir, "_annotations.coco.json")
 
     if (fs::file_exists(ann_file)) {
