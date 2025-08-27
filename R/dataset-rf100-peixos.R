@@ -81,10 +81,10 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     }
     anns <- self$annotations_by_image[[as.character(img_info$id)]]
 
-    ext <- tolower(fs::path_ext(img_path))
-    x <- if (ext %in% c("jpg", "jpeg")) jpeg::readJPEG(img_path) else png::readPNG(img_path)
-    if (length(dim(x)) == 2) x <- array(rep(x, 3L), dim = c(dim(x), 3L))
-    if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[,,1:3, drop = FALSE]
+    x <- base_loader(img_path)
+    if (length(dim(x)) == 3 && dim(x)[3] == 4) {
+      x <- x[, , 1:3, drop = FALSE]
+    }
 
     H <- dim(x)[1]
     W <- dim(x)[2]

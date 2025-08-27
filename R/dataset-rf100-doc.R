@@ -1,3 +1,6 @@
+#' @include folder-dataset.R
+NULL
+
 #' RF100 Document Collection Dataset
 #'
 #' Loads one of the RF100 document object detection datasets with COCO-style
@@ -256,26 +259,16 @@ rf100_document_collection <- torch::dataset(
     img_info <- self$images[index, ]
     anns     <- self$annotations_by_image[[as.character(img_info$id)]]
 
-    # Load image
-    x <- tryCatch({
-      if (grepl("\\.jpe?g$", img_path, ignore.case = TRUE)) {
-        jpeg::readJPEG(img_path)
-      } else if (grepl("\\.png$", img_path, ignore.case = TRUE)) {
-        png::readPNG(img_path)
-      } else if (requireNamespace("magick", quietly = TRUE)) {
-        img <- magick::image_read(img_path)
-        arr <- magick::image_data(img, channels = "rgb")
-        aperm(as.integer(arr)/255, c(3,2,1))
-      } else {
-        runtime_error("Cannot read image: ", img_path)
+    # Load image using shared loader
+    x <- tryCatch(
+      base_loader(img_path),
+      error = function(e) {
+        runtime_error(paste("Failed to read image: ", img_path, " - ", e$message))
       }
-    }, error = function(e) {
-      runtime_error(paste("Failed to read image: ", img_path, " - ", e$message))
-    })
+    )
 
-    # Convert grayscale to RGB if needed
-    if (length(dim(x)) == 2L) {
-      x <- array(rep(x, each = 3), dim = c(dim(x), 3L))
+    if (length(dim(x)) == 3 && dim(x)[3] == 4) {
+      x <- x[, , 1:3, drop = FALSE]
     }
 
     # Process annotations

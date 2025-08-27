@@ -31,6 +31,7 @@
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
+* Added `rf100_document_collection()`, `rf100_underwater_collection()`, `rf100_electromagnetic_collection()`, `rf100_microscopic_collection()`, and `rf100_peixos_segmentation_dataset()` for loading Roboflow 100 datasets (@koshtiakanksha, #239).
 
 ## New models
 
