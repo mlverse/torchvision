@@ -189,8 +189,7 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
     name <- "model_fcn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
     state_dict_path <- download_and_cache(r[1])
-    if (!is.na(r[2])) {
-      if (!tools::md5sum(state_dict_path) == r[2])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
@@ -238,8 +237,7 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
     name <- "model_fcn_resnet101"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
     state_dict_path <- download_and_cache(r[1])
-    if (!is.na(r[2])) {
-      if (!tools::md5sum(state_dict_path) == r[2])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
