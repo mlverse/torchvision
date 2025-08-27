@@ -51,7 +51,7 @@
 #' top_class_index <- class_contingency_with_background$argmax()$item()
 #' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
 #'
-#' # Only highlight 'aeroplane' class
+#' # Only highlight 'cow' class
 #' mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["cow"]])$unsqueeze(1)
 #' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
 #' tensor_image_browse(segmented)
