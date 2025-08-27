@@ -89,7 +89,7 @@ rf100_document_collection <- torch::dataset(
     if (download) self$download()
 
     if (!self$check_exists()) {
-      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+      runtime_error(paste("Dataset not found. You can use `download = TRUE` to download it."))
     }
 
     self$load_annotations()
@@ -111,7 +111,7 @@ rf100_document_collection <- torch::dataset(
     }
 
     if (!requireNamespace("archive", quietly = TRUE)) {
-      runtime_error("Archive package required. Install with: install.packages('archive')")
+      runtime_error(paste("Archive package required. Install with: install.packages('archive')"))
     }
 
     # Fast extraction with minimal processing
@@ -171,7 +171,7 @@ rf100_document_collection <- torch::dataset(
       }
 
     }, error = function(e) {
-      runtime_error("Failed to extract dataset: ", e$message)
+      runtime_error(paste("Failed to extract dataset: ", e$message))
     })
 
     # Cleanup
@@ -259,7 +259,7 @@ rf100_document_collection <- torch::dataset(
         runtime_error("Cannot read image: ", img_path)
       }
     }, error = function(e) {
-      runtime_error("Failed to read image: ", img_path, " - ", e$message)
+      runtime_error(paste("Failed to read image: ", img_path, " - ", e$message))
     })
 
     # Convert grayscale to RGB if needed

@@ -49,14 +49,25 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     transform = NULL,
     target_transform = NULL
   ) {
-    super$initialize(
-      dataset = "peixos",
-      split = split,
-      root = root,
-      download = download,
-      transform = transform,
-      target_transform = target_transform
-    )
+    self$dataset <- "peixos"
+    self$split <- match.arg(split)
+    self$root <- fs::path_expand(root)
+    self$transform <- transform
+    self$target_transform <- target_transform
+
+    fs::dir_create(self$root, recurse = TRUE)
+    self$dataset_dir <- fs::path(self$root, "rf100-peixos")
+
+    resource <- self$resources[self$resources$dataset == self$dataset, , drop = FALSE]
+    self$archive_url <- resource$url
+
+    if (download) self$download()
+
+    if (!self$check_exists()) {
+      runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
+    }
+
+    self$load_annotations()
   },
 
   .getitem = function(index) {
