@@ -149,26 +149,24 @@ out <- mtcnn(image_tensor)
 out
 
 # Load an image from the web
-url <- "https://upload.wikimedia.org/wikipedia/commons/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
-tmp_file <- tempfile(fileext = ".jpg")
-download.file(url, tmp_file, mode = "wb")
-img <- jpeg::readJPEG(tmp_file)
+wmc <- "https://upload.wikimedia.org/wikipedia/commons/"
+url <- "b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
+img <- base_loader(paste0(wmc,url))
 
 # Convert to torch tensor [C, H, W] normalized
-arr <- as.array(img)  # img is already [H, W, C]
-input <- torch_tensor(arr, dtype = torch_float())  # [H, W, C]
-input <- input$permute(c(3, 1, 2))$unsqueeze(1)   # [1, C, H, W]
+input <- transform_to_tensor(arr)  # [C, H, W]
+batch <- input$unsqueeze(1)   # [1, C, H, W]
 
 # Load pretrained model
 model <- model_inception_resnet_v1(pretrained = "vggface2")
 model$eval()
-output <- model(input)
+output <- model(batch)
 output
 
 # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
 model <- model_inception_resnet_v1(pretrained = "casia-webface")
 model$eval()
-output <- model(input)
+output <- model(batch)
 output
 }
 
