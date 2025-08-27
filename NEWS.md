@@ -14,6 +14,8 @@
 
 ## New features
 
+* `base_loader()` now accept URLs (@cregouby, #246).
+
 ## Bug fixes and improvements
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
@@ -32,7 +34,6 @@
 * Added `fer_dataset()` for loading the FER-2013 dataset (@DerrickUnleashed, #154).
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
-* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
 
 ## New models
@@ -44,7 +45,7 @@
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
-* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+* `draw_bounding_boxes()` and `draw_segmentation_masks()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
   the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).
