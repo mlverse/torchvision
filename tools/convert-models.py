@@ -48,17 +48,25 @@ models = {
   "mnasnet0_5": "https://download.pytorch.org/models/mnasnet0.5_top1_67.823-3ffadce67e.pth",
   "mnasnet1_0": "https://download.pytorch.org/models/mnasnet1.0_top1_73.512-f206786ef8.pth",
   'mobilenet_v2': 'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth',
+  'mobilenet_v2_quantized': 'https://download.pytorch.org/models/quantized/mobilenet_v2_qnnpack_37f702c5.pth',
   'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+  'resnet18_quantized': 'https://download.pytorch.org/models/quantized/resnet18_fbgemm_16fa66dd.pth',
   'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
   'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+  'resnet50_quantized': 'https://download.pytorch.org/models/quantized/resnet50_fbgemm-23753f79.pth', # IMAGENET1K_FBGEMM_V2
   'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
   'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
   'resnext50_32x4d': 'https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth',
   'resnext101_32x8d': 'https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth',
+  'resnext101_32x8d_quantized': 'https://download.pytorch.org/models/quantized/resnext101_32x8_fbgemm-ee16d00c.pth', # IMAGENET1K_FBGEMM_V2
   'wide_resnet50_2': 'https://download.pytorch.org/models/wide_resnet50_2-95faca4d.pth',
   'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
   'shufflenetv2_x0.5': 'https://download.pytorch.org/models/shufflenetv2_x0.5-f707e7126e.pth',
+  'shufflenetv2_x0.5_quantized': 'https://download.pytorch.org/models/quantized/shufflenetv2_x0.5_fbgemm-00845098.pth',
   'shufflenetv2_x1.0': 'https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth',
+  'shufflenetv2_x1.0_quantized': 'https://download.pytorch.org/models/quantized/shufflenetv2_x1_fbgemm-1e62bb32.pth',
+  'shufflenetv2_x1.5_quantized': 'https://download.pytorch.org/models/quantized/shufflenetv2_x1_5_fbgemm-d7401f05.pth',
+  'shufflenetv2_x2.0_quantized': 'https://download.pytorch.org/models/quantized/shufflenetv2_x2_0_fbgemm-5cac526c.pth',
   'squeezenet1_0': 'https://download.pytorch.org/models/squeezenet1_0-a815701f.pth',
   'squeezenet1_1': 'https://download.pytorch.org/models/squeezenet1_1-f364aa15.pth',
   'vgg11': 'https://download.pytorch.org/models/vgg11-bbd30ac9.pth',
@@ -105,6 +113,7 @@ models = {
   'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
   'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
   'mobilenet_v3_small': 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth',
+  'mobilenet_v3_large_quantized': 'https://download.pytorch.org/models/quantized/mobilenet_v3_large_qnnpack-5bcacf28.pth',
   'maxvit': 'https://download.pytorch.org/models/maxvit_t-bc5ab103.pth',
   'fcos_resnet50': 'https://download.pytorch.org/models/fcos_resnet50_fpn_coco-99b0c9b7.pth', 
   'retinanet_resnet50_v2': 'https://download.pytorch.org/models/retinanet_resnet50_fpn_v2_coco-5905b1c5.pth', # RetinaNet_ResNet50_FPN_V2_Weights
