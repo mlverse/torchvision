@@ -7,7 +7,10 @@
 magick_loader(path)
 }
 \arguments{
-\item{path}{path to the image to load from.}
+\item{path}{path or URL to load the image from.}
+}
+\value{
+an magick-image object as result of \code{image_read()}
 }
 \description{
 Load an image located at \code{path} using the \code{{magick}} package.
