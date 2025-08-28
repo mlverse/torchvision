@@ -43,7 +43,7 @@ transform_convert_image_dtype.torch_tensor <- function(img, dtype = torch::torch
 
     if (input_max > output_max) {
       factor <- (input_max + 1) %/% (output_max + 1)
-      img = img %/% factor
+      img <- img %/% factor
       return(img$to(dtype = dtype))
     } else {
 
@@ -192,7 +192,7 @@ transform_pad.torch_tensor <- function(img, padding, fill = 0, padding_mode = "c
   else if (length(padding) == 2) {
     pad_left <- pad_right <- padding[1]
     pad_top <- pad_bottom <- padding[2]
-  } else if (length(padding == 4)) {
+  } else if (length(padding) == 4) {
     pad_left <- padding[1]
     pad_right <- padding[2]
     pad_top <- padding[3]
@@ -542,7 +542,7 @@ deg2rad <- function(deg) {(deg * pi) / (180)}
 # Thus, the inverse is M^-1 = C * RSS^-1 * C^-1 * T^-1
 get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
 
-  rot = deg2rad(angle)
+  rot <- deg2rad(angle)
   sx <- deg2rad(shear[1])
   sy <- deg2rad(shear[2])
 
@@ -554,9 +554,9 @@ get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
 
   # RSS without scaling
   a <- cos(rot - sy) / cos(sy)
-  b = -cos(rot - sy) * tan(sx) / cos(sy) - sin(rot)
-  c = sin(rot - sy) / cos(sy)
-  d = -sin(rot - sy) * tan(sx) / cos(sy) + cos(rot)
+  b <- -cos(rot - sy) * tan(sx) / cos(sy) - sin(rot)
+  c <- sin(rot - sy) / cos(sy)
+  d <- -sin(rot - sy) * tan(sx) / cos(sy) + cos(rot)
 
   # Inverted rotation matrix with scale and shear
   # det([[a, b], [c, d]]) == 1, since det(rotation) = 1 and det(shear) = 1
@@ -614,8 +614,8 @@ apply_grid_transform <- function(img, grid, mode) {
 # 2) we can normalize by other image size, such that it covers "extend" option like in PIL.Image.rotate
 gen_affine_grid <- function(theta, w, h, ow, oh) {
 
-  d = 0.5
-  base_grid = torch::torch_empty(1, oh, ow, 3)
+  d <- 0.5
+  base_grid <- torch::torch_empty(1, oh, ow, 3)
   base_grid[.., 1]$copy_(torch::torch_linspace(start = -ow * 0.5 + d, end = ow * 0.5 + d - 1,
                                                steps=ow))
 
@@ -623,7 +623,7 @@ gen_affine_grid <- function(theta, w, h, ow, oh) {
                                                steps=oh)$unsqueeze_(-1))
   base_grid[.., 3]$fill_(1)
 
-  output_grid = base_grid$view(c(1, oh * ow, 3))$bmm(
+  output_grid <- base_grid$view(c(1, oh * ow, 3))$bmm(
     theta$transpose(2, 3) / torch::torch_tensor(c(0.5 * w, 0.5 * h))
   )
 
@@ -646,10 +646,10 @@ rotate_compute_output_size <- function(theta, w, h) {
   max_vals <- new_pts$max(dim=1)[[1]]
 
   # Truncate precision to 1e-4 to avoid ceil of Xe-15 to 1.0
-  tol = 1e-4
-  cmax = torch::torch_ceil((max_vals / tol)$trunc_() * tol)
-  cmin = torch::torch_floor((min_vals / tol)$trunc_() * tol)
-  size = cmax - cmin
+  tol <- 1e-4
+  cmax <- torch::torch_ceil((max_vals / tol)$trunc_() * tol)
+  cmin <- torch::torch_floor((min_vals / tol)$trunc_() * tol)
+  size <- cmax - cmin
 
   as.integer(c(size[1]$item(), size[2]$item()))
 }

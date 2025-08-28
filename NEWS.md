@@ -5,11 +5,16 @@
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
-* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
+* Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 
 ## New models
 
+* Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
+* Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
+
 ## New features
+
+* `base_loader()` now accept URLs (@cregouby, #246).
 
 ## Bug fixes and improvements
 
@@ -29,7 +34,6 @@
 * Added `fer_dataset()` for loading the FER-2013 dataset (@DerrickUnleashed, #154).
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
-* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
 * Added `rf100_document_collection()`, `rf100_underwater_collection()`, `rf100_electromagnetic_collection()`, `rf100_microscopic_collection()`, and `rf100_peixos_segmentation_dataset()` for loading Roboflow 100 datasets (@koshtiakanksha, #239).
 
@@ -42,7 +46,7 @@
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
-* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+* `draw_bounding_boxes()` and `draw_segmentation_masks()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
   the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).
