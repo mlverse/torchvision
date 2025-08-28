@@ -42,265 +42,163 @@ NULL
 #' tensor_image_browse(boxed_img)
 #' }
 #'
+#' @name rf100_document_collection
+#' @title RF100 Document Collection Datasets
 #' @family detection_dataset
 #' @export
 rf100_document_collection <- torch::dataset(
   name = "rf100_document_collection",
 
   resources = data.frame(
-    dataset = c(
-      "tweeter_post", "tweeter_profile", "document_part",
-      "activity_diagram", "signature", "paper_part",
-      "tabular_data", "paragraph"
-    ),
+    dataset = rep(c("tweeter_post", "tweeter_profile", "document_part",
+                    "activity_diagram", "signature", "paper_part"), each = 3),
+    split   = rep(c("train", "test", "valid"), times = 6),
+
     url = c(
-      "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/tweeter-profile/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/document-parts/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/activity-diagrams-qdobr/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/signatures-xc8up/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/tabular-data-wf9uh/resolve/main/dataset.tar.gz?download=1",
-      "https://huggingface.co/datasets/Francesco/paragraphs-co84b/resolve/main/dataset.tar.gz?download=1"
+      # tweeter_post
+      "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/train-00000-of-00001-5ca0e754c63f9a31.parquet",
+      "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/test-00000-of-00001-489e49c5dfdce787.parquet",
+      "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/validation-00000-of-00001-2ab456c0d1f04f82.parquet",
+
+      # tweeter_profile
+      "https://huggingface.co/datasets/Francesco/tweeter-profile/resolve/main/data/train-00000-of-00001-1c7085071a0f4972.parquet",
+      "https://huggingface.co/datasets/Francesco/tweeter-profile/resolve/main/data/test-00000-of-00001-be2dd504b504117f.parquet",
+      "https://huggingface.co/datasets/Francesco/tweeter-profile/resolve/main/data/validation-00000-of-00001-747ade4e297e090a.parquet",
+
+      # document_part
+      "https://huggingface.co/datasets/Francesco/document-parts/resolve/main/data/train-00000-of-00001-5503c1fa031a4929.parquet",
+      "https://huggingface.co/datasets/Francesco/document-parts/resolve/main/data/test-00000-of-00001-6cb74e4a35ca2ba5.parquet",
+      "https://huggingface.co/datasets/Francesco/document-parts/resolve/main/data/validation-00000-of-00001-53417fa849d940f8.parquet",
+
+      # activity_diagram
+      "https://huggingface.co/datasets/Francesco/activity-diagrams-qdobr/resolve/main/data/train-00000-of-00001-9c2ac6dd4a9e53d8.parquet",
+      "https://huggingface.co/datasets/Francesco/activity-diagrams-qdobr/resolve/main/data/test-00000-of-00001-acf5b67e3c7ca657.parquet",
+      "https://huggingface.co/datasets/Francesco/activity-diagrams-qdobr/resolve/main/data/validation-00000-of-00001-d6f6f66b7dc88280.parquet",
+
+      # signature
+      "https://huggingface.co/datasets/Francesco/signatures-xc8up/resolve/main/data/train-00000-of-00001-aab07332622fb759.parquet",
+      "https://huggingface.co/datasets/Francesco/signatures-xc8up/resolve/main/data/test-00000-of-00001-acf5b67e3c7ca657.parquet",
+      "https://huggingface.co/datasets/Francesco/signatures-xc8up/resolve/main/data/validation-00000-of-00001-2cd116e72c9571b0.parquet",
+
+      # paper_part
+      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/train-00000-of-00001-0f677be56de6ff94.parquet",
+      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/test-00000-of-00001-94db1ab1c191f5e2.parquet",
+      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/validation-00000-of-00001-2ce552e0b2a0aac5.parquet"
     ),
+
     md5 = c(
-      "0d2ce84f061dc186f4fb2ac44c3c0e5d",
-      "60b449b28202bcbc3bdad9c833ff4a5e",
-      "c8b34fa5a31be5557fe847e2ccf07eec",
-      "04836401021613542718ab5d44880fd3",
-      "96c49f5e2432abee7a9da602747e54f3",
-      "7a933cf055ccb13c3309c748a38cd760",
-      "0bfdc35e2eeb9c2d07d7b42bfe33e7ff",
-      ""
+      # tweeter_post
+      "30f8ee708cdfc443bfa8f9bc1d89e3b2",
+      "00d694afad4f384d37fadbc9325a16ad",
+      "14b26370147438e5c7c9b9de246d6891",
+      # tweeter_profile
+      "9a5fe681eded1fc8a08975a5ed142b24",
+      "b54028739024b34e2acda860eb6a8068",
+      "1eb31069867c3f855bda0aa269bb1eda",
+      # document_part
+      "5181f82eb8f91d92dd225dd23387b5e5",
+      "a8bb1bd010ece905acb8a3ec2851de93",
+      "85a20f23b6d53fb6a5148b125dd3ec4c",
+      # activity_diagram
+      "340249bc764ebcd4c00c243fdd75b773",
+      "04d07c012caf23e643c4e28f15d43f83",
+      "e2d3050bd5fed14664e71444e8df2ab9",
+      # signature
+      "742e26e8ee5d4d8605da68dda4df3c62",
+      "e07083621e8b1cf73f6daea8f93e8943",
+      "46836f6ebe462605e37b4640c0cc336d",
+      # paper_part
+      "253fd2189e89eb4664e89e9ed4b08dcc",
+      "23cebd238571b4d130a11a6df760a180",
+      "e02e6da02d92de11283739c5b0daeb4b"
     ),
-    stringsAsFactors = FALSE
+
+    size = rep(50e6, 18)  # placeholder; optional
   ),
 
   initialize = function(
     dataset = c("tweeter_post", "tweeter_profile", "document_part",
-                "activity_diagram", "signature", "paper_part",
-                "tabular_data", "paragraph"),
+                "activity_diagram", "signature", "paper_part"),
     split = c("train", "test", "valid"),
-    root = if (.Platform$OS.type == "windows") fs::path("C:/tv") else fs::path_temp("tv"),
-    download = FALSE,
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    download = FALSE
   ) {
-    self$dataset <- match.arg(dataset, self$resources$dataset)
-    self$split <- match.arg(split)
-    self$root <- fs::path_expand(root)
+    if (!requireNamespace("arrow", quietly = TRUE)) install.packages("arrow")
+    if (!requireNamespace("prettyunits", quietly = TRUE)) install.packages("prettyunits")
+
+    self$dataset <- match.arg(dataset)
+    self$split   <- match.arg(split)
     self$transform <- transform
     self$target_transform <- target_transform
 
-    fs::dir_create(self$root, recurse = TRUE)
-    self$dataset_dir <- fs::path(self$root, self$dataset)
+    sel <- self$resources$dataset == self$dataset & self$resources$split == self$split
+    self$archive_url  <- self$resources$url[sel]
+    self$archive_size <- prettyunits::pretty_bytes(sum(self$resources$size[sel]))
+    self$archive_md5  <- self$resources$md5[sel]
+    self$split_file   <- file.path(
+      rappdirs::user_cache_dir("torch"),
+      class(self)[1], self$dataset,
+      sub("\\?download=.*", "", basename(self$archive_url))
+    )
 
-    resource <- self$resources[self$resources$dataset == self$dataset, , drop = FALSE]
-    self$archive_url <- resource$url
-
-    if (download) self$download()
-
-    if (!self$check_exists()) {
-      runtime_error(paste("Dataset not found. You can use `download = TRUE` to download it."))
+    if (download) {
+      cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
     }
 
-    self$load_annotations()
+    if (!self$check_exists())
+      runtime_error("Dataset not found. Use download=TRUE or check that parquet files exist at the expected paths.")
+
+    self$.data <- arrow::open_dataset(self$split_file)
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for {.val {self$dataset}}.")
   },
 
   download = function() {
     if (self$check_exists()) return(invisible(NULL))
+    cli_inform("Downloading {.cls {class(self)[[1]]}} dataset {.val {self$dataset}}...")
 
-    if (fs::dir_exists(self$dataset_dir)) fs::dir_delete(self$dataset_dir)
-    fs::dir_create(self$dataset_dir, recurse = TRUE)
-
-    # Download the archive
-    dest <- fs::path(self$dataset_dir, "dataset.tar.gz")
-
-    if (requireNamespace("curl", quietly = TRUE)) {
-      curl::curl_download(self$archive_url, dest, quiet = TRUE)
-    } else {
-      download.file(self$archive_url, dest, mode = "wb")
-    }
-
-    if (!requireNamespace("archive", quietly = TRUE)) {
-      runtime_error("Archive package required. Install with: install.packages('archive')")
-    }
-
-    # Use short temp directory to avoid Windows path limits
-    short_temp <- "C:/tmp"
-    if (fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
-    fs::dir_create(short_temp, recurse = TRUE)
-
-    tryCatch({
-      # Get all archive contents at once
-      contents <- archive::archive(dest)
-
-      # Filter for needed files upfront
-      ann_files <- contents[grepl("_annotations\\.coco\\.json", contents$path), ]
-      img_files <- contents[grepl("\\.(jpg|jpeg|png|bmp)$", contents$path, ignore.case = TRUE), ]
-
-      if (nrow(ann_files) == 0) {
-        runtime_error("No annotation files found in archive.")
-      }
-
-      # Extract directly to final structure
-      extract_dir <- self$dataset_dir
-      fs::dir_create(extract_dir, recurse = TRUE)
-
-      # Create split directories
-      splits <- c("train", "test", "valid")
-      for (split in splits) {
-        fs::dir_create(fs::path(extract_dir, split), recurse = TRUE)
-      }
-
-      # Extract annotation files
-      for (i in seq_len(nrow(ann_files))) {
-        path <- ann_files$path[i]
-        split <- if (grepl("/train/", path)) "train" else
-          if (grepl("/test/", path)) "test" else
-            if (grepl("/valid/", path)) "valid" else next
-
-        target <- fs::path(extract_dir, split, "_annotations.coco.json")
-
-        # Extract to short temp directory
-        archive::archive_extract(dest, files = path, dir = short_temp)
-        file.copy(fs::path(short_temp, path), target, overwrite = TRUE)
-      }
-
-      # Bulk extract images by split
-      for (split in splits) {
-        split_imgs <- img_files[grepl(paste0("/", split, "/"), img_files$path), ]
-        if (nrow(split_imgs) == 0) next
-
-        # Extract all images for this split at once
-        archive::archive_extract(dest, files = split_imgs$path, dir = short_temp)
-
-        # Copy images to final location
-        for (j in seq_len(nrow(split_imgs))) {
-          img_path <- split_imgs$path[j]
-          img_name <- fs::path_file(img_path)
-          src <- fs::path(short_temp, img_path)
-          dst <- fs::path(extract_dir, split, img_name)
-
-          if (fs::file_exists(src)) {
-            file.copy(src, dst, overwrite = TRUE)
-          }
-        }
-      }
-
-      # Clean up temp directory
-      if (fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
-
-    }, error = function(e) {
-      # Clean up temp directory on error
-      if (exists("short_temp") && fs::dir_exists(short_temp)) fs::dir_delete(short_temp)
-      runtime_error("Failed to extract dataset: ", e$message)
-    })
-
-    # Cleanup
-    fs::file_delete(dest)
-    invisible(NULL)
-  },
-
-  check_exists = function() {
-    ann <- self$discover_annotation_file()
-    if (is.na(ann) || !fs::file_exists(ann)) return(FALSE)
-
-    self$annotation_file <- ann
-    self$split_dir <- fs::path_dir(ann)
-    self$image_dir <- self$split_dir
-
-    TRUE
-  },
-
-  discover_annotation_file = function() {
-    data_dir <- fs::path(self$dataset_dir, self$split)
-    ann_file <- fs::path(data_dir, "_annotations.coco.json")
-
-    if (fs::file_exists(ann_file)) {
-      return(ann_file)
-    }
-
-    # Fallback search
-    if (!fs::dir_exists(self$dataset_dir)) return(NA_character_)
-
-    jsons <- fs::dir_ls(self$dataset_dir, recurse = TRUE, type = "file",
-                        regexp = "_annotations\\.coco\\.json$")
-
-    if (!length(jsons)) return(NA_character_)
-
-    # Find split-specific file
-    jsons_split <- jsons[grepl(paste0("[/\\\\]", self$split, "[/\\\\]"), jsons)]
-    if (length(jsons_split)) return(jsons_split[[1]])
-
-    jsons[[1]]
-  },
-
-  load_annotations = function() {
-    # Parse COCO annotations
-    ann <- jsonlite::fromJSON(self$annotation_file)
-    self$categories  <- ann$categories
-    self$images      <- ann$images
-    self$annotations <- ann$annotations
-
-    # Build image paths efficiently
-    self$image_paths <- fs::path(self$image_dir, self$images$file_name)
-
-    # Filter to existing images
-    exists <- fs::file_exists(self$image_paths)
-    self$images <- self$images[exists, , drop = FALSE]
-    self$image_paths <- self$image_paths[exists]
-
-    # Filter annotations
-    keep_ids <- self$images$id
-    self$annotations <- self$annotations[self$annotations$image_id %in% keep_ids, , drop = FALSE]
-
-    # Group annotations by image ID
-    if (nrow(self$annotations) > 0) {
-      self$annotations_by_image <- split(self$annotations, self$annotations$image_id)
-    } else {
-      self$annotations_by_image <- list()
-    }
-  },
-
-  .getitem = function(index) {
-    img_path <- self$image_paths[index]
-    img_info <- self$images[index, ]
-    anns     <- self$annotations_by_image[[as.character(img_info$id)]]
-
-    # Load image using shared loader
-    x <- tryCatch(
-      base_loader(img_path),
-      error = function(e) {
-        runtime_error(paste("Failed to read image: ", img_path, " - ", e$message))
-      }
+    archive <- vapply(self$archive_url, function(u)
+      download_and_cache(u, prefix = file.path(class(self)[1], self$dataset)),
+      character(1)
     )
 
-    if (length(dim(x)) == 3 && dim(x)[3] == 4) {
-      x <- x[, , 1:3, drop = FALSE]
-    }
+    if (!all(tools::md5sum(archive) == self$archive_md5))
+      runtime_error("Corrupt file! Delete the cached files and try again.")
 
-    # Process annotations
-    if (is.null(anns) || nrow(anns) == 0) {
+    for (i in seq_along(archive)) fs::file_move(archive[i], self$split_file[i])
+  },
+
+  check_exists = function() all(fs::file_exists(self$split_file)),
+
+  .getitem = function(index) {
+    df <- self$.data[index, ]$to_data_frame()
+    x_raw <- unlist(df$image$bytes) |> as.raw()
+    if (tolower(tools::file_ext(df$image$path)) == "jpg") {
+      x <- jpeg::readJPEG(x_raw)
+    } else {
+      x <- png::readPNG(x_raw)
+    }
+    if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
+
+    if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
+      objs <- df$objects[[1]]
+      bbox <- objs$bbox
+      if (is.list(bbox)) bbox <- do.call(rbind, bbox)
+      boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
+      labels <- objs$category; if (is.null(labels)) labels <- objs$label
+      labels <- as.character(unlist(labels))
+    } else {
       boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- character()
-    } else {
-      # Convert COCO format [x, y, width, height] to [xmin, ymin, xmax, ymax]
-      boxes_xywh <- torch::torch_tensor(do.call(rbind, anns$bbox), dtype = torch::torch_float())
-      boxes      <- box_xywh_to_xyxy(boxes_xywh)
-      labels     <- as.character(self$categories$name[match(anns$category_id, self$categories$id)])
     }
 
     y <- list(labels = labels, boxes = boxes)
-
-    # Apply transforms
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
-    structure(list(x = x, y = y), class = "image_with_bounding_box")
+    item <- list(x = x, y = y); class(item) <- "image_with_bounding_box"; item
   },
 
-  .length = function() {
-    length(self$image_paths)
-  }
+  .length = function() self$.data$num_rows
 )
