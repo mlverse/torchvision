@@ -94,7 +94,9 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-</div>
+<ul><li>
+<code><a href="../reference/base_loader.html">base_loader()</a></code> now accept URLs (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/246" class="external-link">#246</a>).</li>
+</ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>Switch pre 0.5.0 models to their <code>/v2/</code> URL in torch-cdn.mlverse.org. (<a href="https://github.com/mlverse/torchvision/issues/215" class="external-link">#215</a>)</li>
@@ -114,7 +116,6 @@
 <li>Added <code><a href="../reference/fer_dataset.html">fer_dataset()</a></code> for loading the FER-2013 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/154" class="external-link">#154</a>).</li>
 <li>Added <code><a href="../reference/flowers102_dataset.html">flowers102_dataset()</a></code> for loading the Flowers102 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/157" class="external-link">#157</a>).</li>
 <li>Added <code>flickr8k_dataset()</code> and <code>flickr30k_dataset()</code> for loading the Flickr8k and Flickr30k datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/159" class="external-link">#159</a>).</li>
-<li>Added <code><a href="../reference/places365_dataset.html">places365_dataset()</a></code>for loading the Places365 dataset (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/196" class="external-link">#196</a>).</li>
 <li>Added <code><a href="../reference/oxfordiiitpet_dataset.html">oxfordiiitpet_dataset()</a></code>, <code><a href="../reference/oxfordiiitpet_dataset.html">oxfordiiitpet_binary_dataset()</a></code>, and <code><a href="../reference/oxfordiiitpet_segmentation_dataset.html">oxfordiiitpet_segmentation_dataset()</a></code> for loading the Oxford-IIIT Pet datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/162" class="external-link">#162</a>).</li>
 </ul></div>
 <div class="section level3">
@@ -128,7 +129,7 @@
 <ul><li>
 <code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> and <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> now accept all <code>tensor_image</code> dtypes (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/115" class="external-link">#115</a>).</li>
 <li>
-<code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> and <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> now accept <code>image_with_bounding_box</code> and <code>image_with_segmentation_mask</code> inputs which are the default items class for respectively detection datasets and segmentation datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/175" class="external-link">#175</a>).</li>
+<code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> and <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> now accept <code>image_with_bounding_box</code> and <code>image_with_segmentation_mask</code> inputs which are the default items class for respectively detection datasets and segmentation datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/175" class="external-link">#175</a>).</li>
 <li>
 <code><a href="../reference/fgvc_aircraft_dataset.html">fgvc_aircraft_dataset()</a></code> gains support for <code>annotation_level = "all"</code> (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/168" class="external-link">#168</a>).</li>
 <li>
