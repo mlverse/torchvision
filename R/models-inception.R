@@ -116,11 +116,10 @@ Inception3 <- torch::nn_module(
     # N x 768 x 17 x 17
     x <- self$Mixed_6e(x)
     # N x 768 x 17 x 17
-    aux <- NULL
-    if (!is.null(self$AuxLogits)) {
-      if (self$training) {
-        aux <- self$AuxLogits(x)
-      }
+    if (!is.null(self$AuxLogits) && self$training) {
+      aux <- self$AuxLogits(x)
+    } else {
+      aux <- NULL
     }
     # N x 768 x 17 x 17
     x <- self$Mixed_7a(x)

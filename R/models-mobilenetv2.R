@@ -46,7 +46,7 @@ mobilenet_v2 <- torch::nn_module(
     last_channel <- 1280
 
     if (is.null(inverted_residual_setting)) {
-      inverted_residual_setting = list(
+      inverted_residual_setting <- list(
         # t, c, n, s
         c(1, 16, 1, 1),
         c(6, 24, 2, 2),

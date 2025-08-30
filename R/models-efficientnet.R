@@ -38,8 +38,7 @@
 #' model <- model_efficientnet_b0()
 #' image_batch <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(image_batch)
-#' which.max(as.numeric(output))  # class 815 in ImageNet is a Egyptian cat (see
-#'                                # <https://image-net.org>)
+#' imagenet_label(which.max(as.numeric(output)))
 #' }
 #'
 #' \dontrun{
