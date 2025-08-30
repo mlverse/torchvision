@@ -54,6 +54,5 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2,
-    curl
+    xml2
 BugReports: https://github.com/mlverse/torchvision/issues
