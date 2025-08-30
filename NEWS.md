@@ -6,7 +6,11 @@
 
 ## New models
 
+* Added `model_maxvit()` for MaxViT: Multi-Axis Vision Transformer (#229, @koshtiakanksha).
+
 ## New features
+
+* Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 
 ## Bug fixes and improvements
 
