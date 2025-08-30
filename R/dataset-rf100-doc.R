@@ -150,7 +150,15 @@ rf100_document_collection <- torch::dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. Use download=TRUE or check that parquet files exist at the expected paths.")
 
-    self$.data <- arrow::open_dataset(self$split_file)
+    ads <- arrow::open_dataset(self$split_file)
+    self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names
+
+    if (sum(sel) == 1) {
+      self$.data <- arrow::read_parquet(self$split_file)
+    } else {
+      self$.data <- ads$to_data_frame()
+    }
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for {.val {self$dataset}}.")
   },
 
@@ -158,9 +166,9 @@ rf100_document_collection <- torch::dataset(
     if (self$check_exists()) return(invisible(NULL))
     cli_inform("Downloading {.cls {class(self)[[1]]}} dataset {.val {self$dataset}}...")
 
-    archive <- vapply(self$archive_url, function(u)
-      download_and_cache(u, prefix = file.path(class(self)[1], self$dataset)),
-      character(1)
+    archive <- vapply(self$archive_url, function(u) {
+      download_and_cache(u, prefix = file.path(class(self)[1], self$dataset))
+      }
     )
 
     if (!all(tools::md5sum(archive) == self$archive_md5))
@@ -172,7 +180,7 @@ rf100_document_collection <- torch::dataset(
   check_exists = function() all(fs::file_exists(self$split_file)),
 
   .getitem = function(index) {
-    df <- self$.data[index, ]$to_data_frame()
+    df <- self$.data[index, ]
     x_raw <- unlist(df$image$bytes) |> as.raw()
     if (tolower(tools::file_ext(df$image$path)) == "jpg") {
       x <- jpeg::readJPEG(x_raw)
@@ -182,23 +190,29 @@ rf100_document_collection <- torch::dataset(
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
     if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
-      objs <- df$objects[[1]]
-      bbox <- objs$bbox
-      if (is.list(bbox)) bbox <- do.call(rbind, bbox)
+      bbox <- df$objects$bbox
+      if (is.list(bbox)) {
+        bbox <- do.call(rbind, bbox[[1]])
+      }
       boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-      labels <- objs$category; if (is.null(labels)) labels <- objs$label
-      labels <- as.character(unlist(labels))
+      labels <- df$objects$category[[1]]
+      if (is.null(labels)) {
+        labels <- df$objects$label[[1]]
+      }
+      # labels <- as.character(unlist(labels))
     } else {
       boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- character()
+      labels <- 0L
     }
 
     y <- list(labels = labels, boxes = boxes)
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
-    item <- list(x = x, y = y); class(item) <- "image_with_bounding_box"; item
+    item <- list(x = x, y = y)
+    class(item) <- "image_with_bounding_box"
+    item
   },
 
-  .length = function() self$.data$num_rows
+  .length = function() nrow(self$.data)
 )

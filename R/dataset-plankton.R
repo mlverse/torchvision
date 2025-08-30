@@ -108,7 +108,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     }
   },
   check_exists = function() {
-    all(sapply(self$split_file, \(x) fs::file_exists(x)))
+    all(fs::file_exists(self$split_file))
   },
 
   .getitem = function(index) {

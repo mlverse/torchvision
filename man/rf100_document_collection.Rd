@@ -2,16 +2,15 @@
 % Please edit documentation in R/dataset-rf100-doc.R
 \name{rf100_document_collection}
 \alias{rf100_document_collection}
-\title{RF100 Document Collection Dataset}
+\title{RF100 Document Collection Datasets}
 \usage{
 rf100_document_collection(
   dataset = c("tweeter_post", "tweeter_profile", "document_part", "activity_diagram",
-    "signature", "paper_part", "tabular_data", "paragraph"),
+    "signature", "paper_part"),
   split = c("train", "test", "valid"),
-  root = if (.Platform$OS.type == "windows") fs::path("C:/tv") else fs::path_temp("tv"),
-  download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  download = FALSE
 )
 }
 \arguments{
@@ -20,13 +19,13 @@ rf100_document_collection(
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
-\item{root}{Character. Root directory where the dataset will be stored.}
-
-\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
-
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
+
+\item{root}{Character. Root directory where the dataset will be stored.}
 }
 \value{
 A torch dataset. Each element is a named list with:
@@ -43,6 +42,9 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
+RF100 Document Collection Dataset
+}
+\details{
 Loads one of the RF100 document object detection datasets with COCO-style
 bounding box annotations for object detection tasks.
 }
