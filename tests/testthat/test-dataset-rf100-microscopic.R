@@ -23,12 +23,14 @@ for (ds_name in datasets) {
 
     expect_s3_class(ds, "rf100_microscopic_collection")
     expect_gt(length(ds), 0)
+    expect_type(ds$classes, "character")
+    expect_gt(length(ds$classes), 0)
 
     item <- ds[1]
 
     expect_type(item$y, "list")
     expect_named(item$y, c("labels", "boxes"))
-    expect_type(item$y$labels, "character")
+    expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)
     expect_equal(item$y$boxes$size(2), 4)
