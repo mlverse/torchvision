@@ -1,6 +1,7 @@
-test_that("multiplication works", {
-  im <- magick::image_read("torch.png")
-  transform_crop(im, 1, 1, 500, 500)
+test_that("transform works for magick images", {
+  im <- magick::image_read("assets/class/horse/horse-2.tif")
 
   im <- transform_random_resized_crop(im, size = c(224, 224))
+  ii <- magick::image_info(im)
+  expect_equal(c(ii$width, ii$height), c(224,224))
 })

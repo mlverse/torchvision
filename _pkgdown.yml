@@ -53,6 +53,7 @@ reference:
    - ends_with("1_dataset")
    - ends_with("2_dataset")
    - ends_with("5_dataset")
+   - ends_with("kton_dataset")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and

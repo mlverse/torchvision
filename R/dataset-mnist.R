@@ -486,8 +486,8 @@ emnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    data_set <- if (self$is_train) self$data else self$test_data
-    targets_set <- if (self$is_train) self$targets else self$test_targets
+    data_set <- ifelse(self$is_train, self$data, self$test_data)
+    targets_set <- ifelse(self$is_train, self$targets, self$test_targets)
 
     x <- data_set[index, , ]
     y <- targets_set[index]
@@ -502,7 +502,7 @@ emnist_dataset <- dataset(
   },
 
   .length = function() {
-    data_set <- if (self$is_train) self$data else self$test_data
+    data_set <- ifelse(self$is_train, self$data, self$test_data)
     dim(data_set)[1]
   },
 

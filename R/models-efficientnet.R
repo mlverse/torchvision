@@ -185,7 +185,7 @@ efficientnet <- torch::nn_module(
       r <- round_repeats(cfg$repeats)
       stage_blocks <- list()
       for (i in 1:r) {
-        s <- if (i == 1) cfg$stride else 1
+        s <- ifelse(i == 1, cfg$stride, 1)
         stage_blocks[[i]] <- mbconv_block(in_channels, oc,
                                           kernel_size = cfg$kernel, stride = s, expand_ratio = cfg$expand,
                                           se_ratio = 0.25, norm_layer = norm_layer)

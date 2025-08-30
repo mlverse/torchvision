@@ -73,6 +73,7 @@ Other models:
 \code{\link{model_alexnet}()},
 \code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet}},
+\code{\link{model_facenet}},
 \code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},

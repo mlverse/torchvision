@@ -132,7 +132,7 @@ lfw_people_dataset <- torch::dataset(
     self$classes <- class_names
     self$class_to_idx <- class_to_idx
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -283,7 +283,7 @@ lfw_pairs_dataset <- torch::dataset(
     self$pairs <- do.call(rbind, pair_list)
     self$img_path <- c(self$pairs$img1, self$pairs$img2)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {

@@ -48,8 +48,11 @@ Imports:
     glue,
     zeallot
 Suggests:
+    arrow,
     magick,
+    prettyunits,
     testthat,
     coro,
-    R.matlab
+    R.matlab,
+    xml2
 BugReports: https://github.com/mlverse/torchvision/issues
