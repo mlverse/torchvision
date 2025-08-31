@@ -22,64 +22,52 @@
 #' @examples
 #' \dontrun{
 #' # 1. Download sample image (dog)
-#' img_path <- download_and_cache("https://raw.githubusercontent.com/pytorch/hub/master/dog.jpg")
-#' img <- jpeg::readJPEG(img_path)
+#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+#' # https://pytorch.org/vision/stable/models.html
+#' norm_std  <- c(0.229, 0.224, 0.225)
+#' img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(img_url)
 #'
-#' # 2. Convert to tensor (RGB only)
-#' input <- torch_tensor(aperm(img[,,1:3], c(3,1,2)), dtype = torch_float())
+#' # 2. Convert to tensor (RGB only), resize and normalize
+#' input <- img %>%
+#'  transform_to_tensor() %>%
+#'  transform_resize(c(224, 224)) %>%
+#'  transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)
 #'
-#' # 3. Resize to 224x224
-#' input <- nnf_interpolate(
-#'   input$unsqueeze(1), size = c(224,224),
-#'   mode = "bilinear", align_corners = FALSE
-#' )$squeeze(1)
-#'
-#' # 4. Normalize with ImageNet mean/std
-#' mean <- torch_tensor(c(0.485, 0.456, 0.406))$view(c(3,1,1))
-#' std  <- torch_tensor(c(0.229, 0.224, 0.225))$view(c(3,1,1))
-#' input <- (input - mean) / std
-#'
-#' # 5. Add batch dimension
-#' input <- input$unsqueeze(1)  # shape [1,3,224,224]
-#'
-#' # 6. Load pretrained models
-#' model_large <- model_mobilenet_v3_large(pretrained = TRUE)
+#' # 3. Load pretrained models
 #' model_small <- model_mobilenet_v3_small(pretrained = TRUE)
-#' model_large$eval()
 #' model_small$eval()
 #'
-#' # 7. Forward pass
+#' # 4. Forward pass
+#' output_s <- model_small(batch)
+#'
+#' # 5. Top-5 printing helper
+#' topk <- output_s$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#'
+#' # 6. Show Top-5 predictions
+#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
+#'
+#' # 7. Same with large model
+#' model_large <- model_mobilenet_v3_large(pretrained = TRUE)
+#' model_large$eval()
 #' output_l <- model_large(input)
-#' output_s <- model_small(input)
-#'
-#' # 8. Load ImageNet class labels
-#' labels_path <- download_and_cache("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt")
-#' classes <- readLines(labels_path)
-#'
-#' # 9. Top-5 printing helper
-#' print_top5 <- function(output, classes, title) {
-#'   topk <- output$topk(k = 5)
-#'   idxs <- as.integer(topk[[2]])
-#'   scores <- as.numeric(topk[[1]])
-#'   cat("\n", title, "\n", sep = "")
-#'   for (i in seq_along(idxs)) {
-#'     cat(sprintf("%d. %s (%.2f)\n", i, classes[idxs[i] + 1], scores[i]))
-#'   }
+#' topk <- output_l$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
 #' }
 #'
-#' # 10. Print predictions
-#' print_top5(output_l, classes, "MobileNetV3 Large Top-5 Predictions:")
-#' print_top5(output_s, classes, "MobileNetV3 Small Top-5 Predictions:")
-#' }
-#'
-#' @importFrom torch nn_module nn_conv2d nn_batch_norm2d nn_relu nn_hardswish nn_hardsigmoid nn_identity nn_sequential 
+#' @importFrom torch nn_module nn_conv2d nn_batch_norm2d nn_relu nn_hardswish nn_hardsigmoid nn_identity nn_sequential
 #' @importFrom torch nn_adaptive_avg_pool2d nn_linear nn_dropout torch_clamp torch_flatten load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
 #' @param num_classes number of output classes (default: 1000).
 #' @param width_mult width multiplier for model scaling (default: 1.0).
 #'
-#' @family models
+#' @family classification_model
 #' @rdname model_mobilenet_v3
 #' @name model_mobilenet_v3
 NULL
