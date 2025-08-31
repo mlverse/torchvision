@@ -1,5 +1,5 @@
 # R/model-maxvit.R - torch compatible MaxViT implementation
-
+#' @importFrom torch nn_module nn_conv2d nn_gelu nn_batch_norm2d nn_sequential
 maxvit_conv_norm_act <- function(in_channels, mid_channels = 64, out_channels = 64, ...) {
   nn_sequential(
     "stem.0" = nn_sequential(
@@ -13,6 +13,7 @@ maxvit_conv_norm_act <- function(in_channels, mid_channels = 64, out_channels = 
   )
 }
 
+#' @importFrom torch nn_module nn_conv2d nnf_gelu torch_sigmoid
 squeeze_excitation <- nn_module(
   initialize = function(in_channels, squeeze_factor = 16) {
     squeeze_channels <- max(1L, as.integer(in_channels / squeeze_factor))
@@ -30,6 +31,7 @@ squeeze_excitation <- nn_module(
 )
 
 # Simplified relative position implementation
+#' @importFrom torch torch_arange torch_zeros torch_long
 create_relative_position_params <- function(window_size, heads) {
   # Create a simple relative position index
   coords <- torch_arange(window_size * window_size)
@@ -45,6 +47,8 @@ create_relative_position_params <- function(window_size, heads) {
   )
 }
 
+#' @importFrom torch nn_module nn_module_dict nn_layer_norm nn_linear nn_gelu nn_parameter torch_chunk
+#' @importFrom torch torch_matmul nnf_softmax
 window_attention <- nn_module(
   initialize = function(dim, heads = 2, window_size = 7) {
     self$dim <- dim
@@ -107,6 +111,7 @@ window_attention <- nn_module(
   }
 )
 
+#' @importFrom torch nn_module nn_module_dict nn_layer_norm nn_linear nn_gelu nn_parameter torch_chunk
 grid_attention <- nn_module(
   initialize = function(dim, heads = 2, grid_size = 7) {
     self$dim <- dim
@@ -171,6 +176,7 @@ grid_attention <- nn_module(
   }
 )
 
+#' @importFrom torch nn_module nn_module_dict nn_batch_norm2d nn_conv2d nn_identity nn_sequential
 mbconv <- nn_module(
   initialize = function(in_channels, out_channels, expansion = 4, stride = 1) {
     hidden_dim <- in_channels * expansion
@@ -229,6 +235,7 @@ mbconv <- nn_module(
   }
 )
 
+#' @importFrom torch nn_module nn_module_dict nn_sequential
 maxvit_block <- nn_module(
   initialize = function(in_channels, out_channels, expansion = 4, stride = 1, num_heads = 2) {
     self$layers <- nn_module_dict(list(
@@ -246,6 +253,7 @@ maxvit_block <- nn_module(
   }
 )
 
+#' @importFrom torch nn_module nn_module_dict nn_sequential
 maxvit_stage <- nn_module(
   initialize = function(...) {
     self$layers <- nn_sequential(...)
@@ -255,6 +263,7 @@ maxvit_stage <- nn_module(
   }
 )
 
+#' @importFrom torch nn_module nn_module_list nn_adaptive_avg_pool2d nn_identity nn_layer_norm nn_linear
 maxvit_impl <- nn_module(
   initialize = function(num_classes = 1000) {
     self$stem <- maxvit_conv_norm_act(
@@ -362,7 +371,7 @@ maxvit_impl <- nn_module(
 #' @param num_classes (integer) Number of output classes.
 #' @param ... Additional parameters passed to the model initializer.
 #'
-#' @family models
+#' @family classification_model
 #'
 #' @examples
 #' \dontrun{

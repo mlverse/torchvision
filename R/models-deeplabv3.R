@@ -23,7 +23,7 @@
 #' @param ... Other parameters passed to the model implementation.
 #'
 #' @importFrom torch nn_module
-#' @family models
+#' @family classification_model
 #'
 #' @examples
 #' \dontrun{
