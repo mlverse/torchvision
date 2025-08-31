@@ -2,8 +2,7 @@
 % Please edit documentation in R/models-mobilenetv2.R
 \name{model_mobilenet_v2}
 \alias{model_mobilenet_v2}
-\title{Constructs a MobileNetV2 architecture from
-\href{https://arxiv.org/abs/1801.04381}{MobileNetV2: Inverted Residuals and Linear Bottlenecks}.}
+\title{MobileNetV2 implementation}
 \usage{
 model_mobilenet_v2(pretrained = FALSE, progress = TRUE, ...)
 }

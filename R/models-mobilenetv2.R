@@ -1,3 +1,5 @@
+#' MobileNetV2 implementation
+#'
 #' Constructs a MobileNetV2 architecture from
 #' [MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381).
 #'
