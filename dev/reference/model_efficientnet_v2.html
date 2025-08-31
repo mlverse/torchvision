@@ -147,11 +147,27 @@ and 512 for V2-L.</p>
 <code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
 <code><a href="model_maxvit.html">model_maxvit</a>()</code>,
 <code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
+<code><a href="model_mobilenet_v3.html">model_mobilenet_v3</a></code>,
 <code><a href="model_resnet.html">model_resnet</a></code>,
 <code><a href="model_vgg.html">model_vgg</a></code>,
 <code><a href="model_vit.html">model_vit</a></code></p></div>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_efficientnet_v2_s</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randn.html" class="external-link">torch_randn</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">224</span>, <span class="fl">224</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Show Top-5 predictions</span></span></span>
+<span class="r-in"><span><span class="va">topk</span> <span class="op">&lt;-</span> <span class="va">output</span><span class="op">$</span><span class="fu">topk</span><span class="op">(</span>k <span class="op">=</span> <span class="fl">5</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">topk</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">topk</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">glue</span><span class="fu">::</span><span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue</a></span><span class="op">(</span><span class="st">"{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
