@@ -375,33 +375,31 @@ maxvit_impl <- nn_module(
 #'
 #' @examples
 #' \dontrun{
+#' library(magrittr)
 #' # 1. Load the basketball image
 #' img_url <- "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
-#' img_path <- tempfile(fileext = ".png")
-#' download.file(img_url, img_path, mode = "wb")
-#' img <- png::readPNG(img_path)[, , 1:3]
+#' img <- base_loader(img_url)
 #'
 #' # 2. Define normalization (ImageNet)
 #' norm_mean <- c(0.485, 0.456, 0.406)
 #' norm_std <- c(0.229, 0.224, 0.225)
 #'
-#' # 3. Preprocess: convert to tensor and resize
-#' input <- transform_to_tensor(img)
-#' input <- transform_resize(input, size = c(224, 224))
+#' # 3. Preprocess: convert to tensor, resize, Normalize
+#' input <- img %>%
+#'   transform_to_tensor() %>%
+#'   transform_resize(c(400, 400)) %>%
+#'   transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #'
-#' # Display the image before normalization
+#' # 4. Display the image before normalization
 #' tensor_image_browse(input)
-#'
-#' # 4. Normalize and add batch dimension
-#' input <- transform_normalize(input, mean = norm_mean, std = norm_std)
-#' input <- input$unsqueeze(1)  # -> [1, 3, 224, 224]
 #'
 #' # 5. Load MaxViT model
 #' model <- model_maxvit(pretrained = TRUE)
 #' model$eval()
 #'
 #' # 6. Run inference
-#' output <- model(input)
+#' output <- model(batch)
 #' topk <- output$topk(k = 5, dim = 2)
 #' indices <- as.integer(topk[[2]][1, ])
 #' scores <- as.numeric(topk[[1]][1, ])
