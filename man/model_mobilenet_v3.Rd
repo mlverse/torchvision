@@ -62,19 +62,55 @@ and hard-swish activations for improved accuracy and efficiency.
 }}
 \examples{
 \dontrun{
-# For pretrained weights mobilenet_v3_large
-model_large <- model_mobilenet_v3_large(pretrained = TRUE)
-model_large$eval()
-input <- torch_randn(1, 3, 224, 224)
-output <- model_large(input)
-output
+# 1. Download sample image (dog)
+img_path <- download_and_cache("https://raw.githubusercontent.com/pytorch/hub/master/dog.jpg")
+img <- jpeg::readJPEG(img_path)
 
-# For pretrained weights mobilenet_v3_small
+# 2. Convert to tensor (RGB only)
+input <- torch_tensor(aperm(img[,,1:3], c(3,1,2)), dtype = torch_float())
+
+# 3. Resize to 224x224
+input <- nnf_interpolate(
+  input$unsqueeze(1), size = c(224,224),
+  mode = "bilinear", align_corners = FALSE
+)$squeeze(1)
+
+# 4. Normalize with ImageNet mean/std
+mean <- torch_tensor(c(0.485, 0.456, 0.406))$view(c(3,1,1))
+std  <- torch_tensor(c(0.229, 0.224, 0.225))$view(c(3,1,1))
+input <- (input - mean) / std
+
+# 5. Add batch dimension
+input <- input$unsqueeze(1)  # shape [1,3,224,224]
+
+# 6. Load pretrained models
+model_large <- model_mobilenet_v3_large(pretrained = TRUE)
 model_small <- model_mobilenet_v3_small(pretrained = TRUE)
+model_large$eval()
 model_small$eval()
-input <- torch_randn(1, 3, 224, 224)
-output <- model_small(input)
-output
+
+# 7. Forward pass
+output_l <- model_large(input)
+output_s <- model_small(input)
+
+# 8. Load ImageNet class labels
+labels_path <- download_and_cache("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt")
+classes <- readLines(labels_path)
+
+# 9. Top-5 printing helper
+print_top5 <- function(output, classes, title) {
+  topk <- output$topk(k = 5)
+  idxs <- as.integer(topk[[2]])
+  scores <- as.numeric(topk[[1]])
+  cat("\n", title, "\n", sep = "")
+  for (i in seq_along(idxs)) {
+    cat(sprintf("\%d. \%s (\%.2f)\n", i, classes[idxs[i] + 1], scores[i]))
+  }
+}
+
+# 10. Print predictions
+print_top5(output_l, classes, "MobileNetV3 Large Top-5 Predictions:")
+print_top5(output_s, classes, "MobileNetV3 Small Top-5 Predictions:")
 }
 
 }
