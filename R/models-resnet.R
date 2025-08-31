@@ -265,7 +265,7 @@ resnet <- torch::nn_module(
 #'   stderr.
 #' @param ... Other parameters passed to the resnet model.
 #'
-#' @family models
+#' @family classification_model
 #' @name model_resnet
 #' @rdname model_resnet
 NULL

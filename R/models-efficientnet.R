@@ -31,7 +31,7 @@
 #' @param ... Other parameters passed to the model implementation, such as
 #' \code{num_classes} to change the output dimension.
 #'
-#' @family models
+#' @family classification_model
 #'
 #' @examples
 #' \dontrun{
@@ -46,7 +46,7 @@
 #' model <- model_efficientnet_b5()
 #' image_batch <- torch::torch_randn(1, 3, 456, 456)
 #' output <- model(image_batch)
-#' which.max(as.numeric(output))
+#' imagenet_label(which.max(as.numeric(output)))
 #' }
 #'
 #' @name model_efficientnet

@@ -362,7 +362,7 @@ maxvit_impl <- nn_module(
 #' @param num_classes (integer) Number of output classes.
 #' @param ... Additional parameters passed to the model initializer.
 #'
-#' @family models
+#' @family classification_model
 #'
 #' @examples
 #' \dontrun{

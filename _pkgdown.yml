@@ -34,8 +34,26 @@ reference:
   contents:
     - starts_with("transform_")
 - title: Models
-  desc: Model architectures
+  desc: Computer Vision deep-learning Model architectures
 - subtitle: Classification models
+  desc: >
+    Model providing a output vector of the size of `num_classes` beeing the
+    logit probability of each class.
+  contents:
+   - has_concept("classification_model")
+- subtitle: Object detection models
+  desc: >
+    Model providing an output list including a bounding-boxes vector of the detected
+    object in the image each with $c(x_{min}, y_{min}, x_{max}, y_{max})$ format.
+  contents:
+   - has_concept("object_detection_model")
+- subtitle: Semantic segmentation models
+  desc: >
+    Model providing an output list including a binary mask for each pixel of the image
+    for each covered segmentation class.
+  contents:
+   - has_concept("semantic_segmentation_model")
+- subtitle: Other models
   contents:
    - starts_with("model_")
 - title: Datasets

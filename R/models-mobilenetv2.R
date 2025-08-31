@@ -4,7 +4,7 @@
 #' @inheritParams model_resnet18
 #' @param ... Other parameters passed to the model implementation.
 #'
-#' @family models
+#' @family classification_model
 #' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   # resources

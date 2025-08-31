@@ -21,7 +21,7 @@
 #'
 #' @return An `nn_module` representing the FCN model.
 #'
-#' @family models
+#' @family semantic_segmentation_model
 #' @name model_fcn_resnet
 #' @rdname model_fcn_resnet
 #'
