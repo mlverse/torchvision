@@ -61,7 +61,7 @@ and hard-swish activations for improved accuracy and efficiency.
 
 }}
 \examples{
-\dontrun{ 
+\dontrun{
 # For pretrained weights mobilenet_v3_large
 model_large <- model_mobilenet_v3_large(pretrained = TRUE)
 model_large$eval()
@@ -87,6 +87,7 @@ Other models:
 \code{\link{model_facenet}},
 \code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
+\code{\link{model_maxvit}()},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},

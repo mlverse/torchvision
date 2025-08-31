@@ -20,14 +20,14 @@
 #' ```
 #'
 #' @examples
-#' \dontrun{ 
+#' \dontrun{
 #' # For pretrained weights mobilenet_v3_large
 #' model_large <- model_mobilenet_v3_large(pretrained = TRUE)
 #' model_large$eval()
 #' input <- torch_randn(1, 3, 224, 224)
 #' output <- model_large(input)
 #' output
-#' 
+#'
 #' # For pretrained weights mobilenet_v3_small
 #' model_small <- model_mobilenet_v3_small(pretrained = TRUE)
 #' model_small$eval()
@@ -35,6 +35,9 @@
 #' output <- model_small(input)
 #' output
 #' }
+#'
+#' @importFrom torch nn_module nn_conv2d nn_batch_norm2d nn_relu nn_hardswish nn_hardsigmoid nn_identity nn_sequential 
+#' @importFrom torch nn_adaptive_avg_pool2d nn_linear nn_dropout torch_clamp torch_flatten load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
 #' @param num_classes number of output classes (default: 1000).
@@ -44,8 +47,6 @@
 #' @rdname model_mobilenet_v3
 #' @name model_mobilenet_v3
 NULL
-
-library(torch)
 
 make_divisible <- function(v, divisor = 8, min_value = NULL) {
   if (is.null(min_value)) min_value <- divisor
@@ -57,14 +58,14 @@ make_divisible <- function(v, divisor = 8, min_value = NULL) {
 HardSwish <- nn_module(
   "HardSwish",
   forward = function(x) {
-    x * torch::torch_clamp(x + 3, min = 0, max = 6) / 6
+    x * torch_clamp(x + 3, min = 0, max = 6) / 6
   }
 )
 
 HardSigmoid <- nn_module(
   "HardSigmoid",
   forward = function(x) {
-    torch::torch_clamp(x + 3, min = 0, max = 6) / 6
+    torch_clamp(x + 3, min = 0, max = 6) / 6
   }
 )
 
@@ -307,7 +308,7 @@ model_mobilenet_v3_large <- function(
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
     state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth", prefix = "mobilenet_v3_large")
-    state_dict <- torch::load_state_dict(state_dict_path)
+    state_dict <- load_state_dict(state_dict_path)
     new_names <- names(state_dict)
 
     new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
@@ -338,7 +339,7 @@ model_mobilenet_v3_small <- function(
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
     state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet_v3_small")
-    state_dict <- torch::load_state_dict(state_dict_path)
+    state_dict <- load_state_dict(state_dict_path)
     new_names <- names(state_dict)
 
     new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
