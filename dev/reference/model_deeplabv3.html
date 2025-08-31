@@ -161,24 +161,18 @@ training uses 520x520 images.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other classification_model:
-<code><a href="model_alexnet.html">model_alexnet</a>()</code>,
-<code><a href="model_efficientnet.html">model_efficientnet</a></code>,
-<code><a href="model_efficientnet_v2.html">model_efficientnet_v2</a></code>,
-<code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
-<code><a href="model_maxvit.html">model_maxvit</a>()</code>,
-<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
-<code><a href="model_mobilenet_v3.html">model_mobilenet_v3</a></code>,
-<code><a href="model_resnet.html">model_resnet</a></code>,
-<code><a href="model_vgg.html">model_vgg</a></code>,
-<code><a href="model_vit.html">model_vit</a></code></p></div>
+    <div class="dont-index"><p>Other semantic_segmentation_model:
+<code><a href="model_fcn_resnet.html">model_fcn_resnet</a></code></p></div>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># Use a publicly available image of an airplane</span></span></span>
+<span class="r-in"><span><span class="va">norm_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span><span class="op">)</span> <span class="co"># ImageNet normalization constants, see</span></span></span>
+<span class="r-in"><span><span class="co"># https://pytorch.org/vision/stable/models.html</span></span></span>
+<span class="r-in"><span><span class="va">norm_std</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Use a publicly available image of an animal</span></span></span>
 <span class="r-in"><span><span class="va">wmc</span> <span class="op">&lt;-</span> <span class="st">"https://upload.wikimedia.org/wikipedia/commons/thumb/"</span></span></span>
 <span class="r-in"><span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"</span></span></span>
 <span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="base_loader.html">base_loader</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">wmc</span>,<span class="va">url</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -186,40 +180,39 @@ training uses 520x520 images.</p>
 <span class="r-in"><span><span class="va">input</span> <span class="op">&lt;-</span> <span class="va">img</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="transform_to_tensor.html">transform_to_tensor</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="transform_resize.html">transform_resize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">520</span>, <span class="fl">520</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_unsqueeze.html" class="external-link">torch_unsqueeze</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>  <span class="co"># Add batch dimension (1, 3, H, W)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="transform_normalize.html">transform_normalize</a></span><span class="op">(</span><span class="va">norm_mean</span>, <span class="va">norm_std</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>    <span class="co"># Add batch dimension (1, 3, H, W)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># DeepLabV3 with ResNet-50</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_deeplabv3_resnet50</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">mask_id</span> <span class="op">&lt;-</span> <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>  <span class="co"># (1, H, W)</span></span></span>
+<span class="r-in"><span><span class="co"># visualize the result</span></span></span>
+<span class="r-in"><span><span class="co"># `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:</span></span></span>
+<span class="r-in"><span><span class="va">segmented</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">squeeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="tensor_image_display.html">tensor_image_display</a></span><span class="op">(</span><span class="va">segmented</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Show most frequent class</span></span></span>
+<span class="r-in"><span><span class="va">mask_id</span> <span class="op">&lt;-</span> <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>  <span class="co"># (1, H, W)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="fu">bincount</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0L</span> <span class="co"># we clean the counter for background class id 1</span></span></span>
 <span class="r-in"><span><span class="va">top_class_index</span> <span class="op">&lt;-</span> <span class="va">class_contingency_with_background</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Only highlight 'cow' class</span></span></span>
-<span class="r-in"><span><span class="va">mask_bool</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">[</span><span class="fl">1</span>, <span class="va">..</span><span class="op">]</span><span class="op">$</span><span class="fu">eq</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">class_to_idx</span><span class="op">[[</span><span class="st">"cow"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">segmented</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="fu">squeeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="va">mask_bool</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">segmented</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># DeepLabV3 with ResNet-101 (same steps)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_deeplabv3_resnet101</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">segmented</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">squeeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="tensor_image_display.html">tensor_image_display</a></span><span class="op">(</span><span class="va">segmented</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mask_id</span> <span class="op">&lt;-</span> <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span>dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="fu">bincount</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0L</span> <span class="co"># we clean the counter for background class id 1</span></span></span>
 <span class="r-in"><span><span class="va">top_class_index</span> <span class="op">&lt;-</span> <span class="va">class_contingency_with_background</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">mask_bool</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">[</span><span class="fl">1</span>, <span class="va">..</span><span class="op">]</span><span class="op">$</span><span class="fu">eq</span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">class_to_idx</span><span class="op">[[</span><span class="st">"cow"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">segmented</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="fu">squeeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="va">mask_bool</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">segmented</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
