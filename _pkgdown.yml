@@ -79,11 +79,12 @@ reference:
    - draw_segmentation_masks
    - tensor_image_browse
    - tensor_image_display
+   - vision_make_grid
 - title: Misc
   contents:
    - magick_loader
    - base_loader
-   - vision_make_grid
+   - starts_with("imagenet_")
    - ends_with("nms")
    - starts_with("box_")
    - clip_boxes_to_image
