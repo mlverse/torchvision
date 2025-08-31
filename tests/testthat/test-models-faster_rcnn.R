@@ -22,54 +22,54 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor_shape(out, c(1, 1000))
 })
 
-ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
-sample <- ds[1]
-image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
-# ResNet-50 FPN
-model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
-model$eval()
-pred <- model(list(sample$x))$detections
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-if (num_boxes > 0) {
- boxed <- draw_bounding_boxes(image, boxes, labels = labels)
- tensor_image_browse(boxed)
-}
-# ResNet-50 FPN V2
-model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
-model$eval()
-pred <- model(list(sample$x))$detections
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-if (num_boxes > 0) {
- boxed <- draw_bounding_boxes(image, boxes, labels = labels)
- tensor_image_browse(boxed)
-}
-# MobileNet V3 Large FPN
-model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
-model$eval()
-pred <- model(list(sample$x))$detections
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-if (num_boxes > 0) {
- boxed <- draw_bounding_boxes(image, boxes, labels = labels)
- tensor_image_browse(boxed)
-}
-# MobileNet V3 Large 320 FPN
-model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
-model$eval()
-pred <- model(list(sample$x))$detections
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-if (num_boxes > 0) {
- boxed <- draw_bounding_boxes(image, boxes, labels = labels)
- tensor_image_browse(boxed)
-}
+# ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+# sample <- ds[1]
+# image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
+# # ResNet-50 FPN
+# model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
+# model$eval()
+# pred <- model(list(sample$x))$detections
+# num_boxes <- as.integer(pred$boxes$size()[1])
+# keep <- seq_len(min(5, num_boxes))
+# boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+# labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+# if (num_boxes > 0) {
+#  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#  tensor_image_browse(boxed)
+# }
+# # ResNet-50 FPN V2
+# model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+# model$eval()
+# pred <- model(list(sample$x))$detections
+# num_boxes <- as.integer(pred$boxes$size()[1])
+# keep <- seq_len(min(5, num_boxes))
+# boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+# labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+# if (num_boxes > 0) {
+#  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#  tensor_image_browse(boxed)
+# }
+# # MobileNet V3 Large FPN
+# model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
+# model$eval()
+# pred <- model(list(sample$x))$detections
+# num_boxes <- as.integer(pred$boxes$size()[1])
+# keep <- seq_len(min(5, num_boxes))
+# boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+# labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+# if (num_boxes > 0) {
+#  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#  tensor_image_browse(boxed)
+# }
+# # MobileNet V3 Large 320 FPN
+# model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
+# model$eval()
+# pred <- model(list(sample$x))$detections
+# num_boxes <- as.integer(pred$boxes$size()[1])
+# keep <- seq_len(min(5, num_boxes))
+# boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+# labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+# if (num_boxes > 0) {
+#  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+#  tensor_image_browse(boxed)
+# }
