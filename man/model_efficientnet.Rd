@@ -103,17 +103,15 @@ imagenet_label(which.max(as.numeric(output)))
 model <- model_efficientnet_b5()
 image_batch <- torch::torch_randn(1, 3, 456, 456)
 output <- model(image_batch)
-which.max(as.numeric(output))
+imagenet_label(which.max(as.numeric(output)))
 }
 
 }
 \seealso{
-Other models: 
+Other classification_model: 
 \code{\link{model_alexnet}()},
 \code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet_v2}},
-\code{\link{model_facenet}},
-\code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},
 \code{\link{model_mobilenet_v2}()},
@@ -121,4 +119,4 @@ Other models:
 \code{\link{model_vgg}},
 \code{\link{model_vit}}
 }
-\concept{models}
+\concept{classification_model}
