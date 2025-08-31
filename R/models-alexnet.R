@@ -47,17 +47,19 @@ alexnet <- torch::nn_module(
 #' @param ... other parameters passed to the model intializer. currently only
 #'   `num_classes` is used.
 #'
-#' @family models
+#' @family classification_model
 #'
 #' @export
 model_alexnet <- function(pretrained = FALSE, progress = TRUE, ...) {
-
+  r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/alexnet.pth", "41ac4efd60b7e72480c4b9ba75618507", "~235 MB" )
   model <- alexnet(...)
 
   if (pretrained) {
-    state_dict_path <- download_and_cache(
-      "https://torch-cdn.mlverse.org/models/vision/v1/models/alexnet.pth",
-    )
+    cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
   }

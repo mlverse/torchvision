@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: torchvision 0.6.0.9000\n"
-"POT-Creation-Date: 2025-07-05 13:51+0200\n"
-"PO-Revision-Date: 2025-07-05 14:44+0200\n"
+"Project-Id-Version: torchvision 0.7.0.9000\n"
+"POT-Creation-Date: 2025-08-15 10:15+0200\n"
+"PO-Revision-Date: 2025-08-15 10:18+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -10,6 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.6\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #: conditions.R:2
 msgid "type_error"
@@ -40,48 +41,61 @@ msgid "deprecated"
 msgstr ""
 
 #: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:85 dataset-coco.R:305
-#: dataset-eurosat.R:57 dataset-fer.R:55 dataset-fgvc.R:91 dataset-flickr.R:69
-#: dataset-flickr.R:231 dataset-flowers.R:92 dataset-mnist.R:86
-#: dataset-mnist.R:234 dataset-mnist.R:421
+#: dataset-eurosat.R:57 dataset-fer.R:63 dataset-fgvc.R:91 dataset-flickr.R:69
+#: dataset-flickr.R:231 dataset-flowers.R:92 dataset-lfw.R:108
+#: dataset-lfw.R:246 dataset-mnist.R:86 dataset-mnist.R:234 dataset-mnist.R:421
+#: dataset-oxfordiiitpet.R:71 dataset-oxfordiiitpet.R:283
+#: dataset-oxfordiiitpet.R:347 dataset-pascal.R:136 dataset-pascal.R:294
+#: dataset-places365.R:98
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
 "downloaded and processed if not already available."
 msgstr ""
-"Le jeu de données {.cls {class(self)[[1]]}} de taille (~{.emph "
+"Le jeu de données {.cls {class(self)[[1]]}} (de taille ~{.emph "
 "{self$archive_size}}) sera téléchargé et traité s'il n'est pas déjà "
 "disponible."
 
 #: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:90
-#: dataset-coco.R:310 dataset-eurosat.R:64 dataset-fer.R:60
-#: dataset-flowers.R:97 dataset-mnist.R:91 dataset-mnist.R:239
-#: dataset-mnist.R:426
+#: dataset-coco.R:310 dataset-eurosat.R:64 dataset-fer.R:70
+#: dataset-flowers.R:97 dataset-lfw.R:113 dataset-lfw.R:251 dataset-mnist.R:91
+#: dataset-mnist.R:239 dataset-mnist.R:426 dataset-oxfordiiitpet.R:76
+#: dataset-oxfordiiitpet.R:288 dataset-oxfordiiitpet.R:352 dataset-pascal.R:141
+#: dataset-pascal.R:299 dataset-places365.R:103 dataset-plankton.R:89
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 "Jeu de données introuvable. Veuillez ajouter `download = TRUE` pour le "
 "télécharger."
 
-#: dataset-caltech.R:84 dataset-caltech.R:208
+#: dataset-caltech.R:84 dataset-caltech.R:208 dataset-lfw.R:135
+#: dataset-lfw.R:286 dataset-oxfordiiitpet.R:95 dataset-oxfordiiitpet.R:302
+#: dataset-oxfordiiitpet.R:366 dataset-pascal.R:149 dataset-pascal.R:317
+#: dataset-plankton.R:93
 msgid ""
-"{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images "
-"across {length(self$classes)} classes."
+"{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across "
+"{length(self$classes)} classes."
 msgstr ""
-"Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$img_path)} "
-"images réparties en {length(self$classes)} classes."
+"Le jeu de données {.cls {class(self)[[1]]}} est disponible avec {self$."
+"length()} images réparties en {length(self$classes)} classes."
 
 #: dataset-caltech.R:117 dataset-coco.R:187 dataset-eurosat.R:81
-#: dataset-flickr.R:136
+#: dataset-flickr.R:136 dataset-lfw.R:146 dataset-oxfordiiitpet.R:107
+#: dataset-pascal.R:158 dataset-plankton.R:100
 msgid "Downloading {.cls {class(self)[[1]]}}..."
 msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
 
-#: dataset-caltech.R:125
-msgid "Corrupt file! Delete the file in {.file {archive}} and try again."
-msgstr ""
-"Fichier corrompu. Supprimez le fichier dans {.file {archive}} et réessayez."
+#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:193
+#: dataset-eurosat.R:88 dataset-fer.R:129 dataset-flowers.R:136
+#: dataset-lfw.R:157 dataset-lfw.R:172 dataset-mnist.R:121 dataset-mnist.R:264
+#: dataset-mnist.R:453 dataset-oxfordiiitpet.R:115 dataset-pascal.R:168
+#: dataset-places365.R:182 dataset-plankton.R:105 models-vit.R:49
+msgid "Corrupt file! Delete the file in {archive} and try again."
+msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
 
 #: dataset-caltech.R:136 dataset-cifar.R:115 dataset-coco.R:199
-#: dataset-eurosat.R:104 dataset-fer.R:119 dataset-fgvc.R:178
-#: dataset-flickr.R:154 dataset-flowers.R:158 dataset-mnist.R:141
-#: dataset-mnist.R:300 tiny-imagenet-dataset.R:67
+#: dataset-eurosat.R:104 dataset-fer.R:134 dataset-fgvc.R:178
+#: dataset-flickr.R:154 dataset-flowers.R:158 dataset-lfw.R:179
+#: dataset-mnist.R:141 dataset-mnist.R:300 dataset-oxfordiiitpet.R:154
+#: dataset-pascal.R:191 tiny-imagenet-dataset.R:67
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
 msgstr ""
@@ -109,17 +123,11 @@ msgstr ""
 "Le jeu de données {.cls {class(self)[[1]]}} contient {length(self$img_path)} "
 "images réparties en {length(self$classes)} classes."
 
-#: dataset-cifar.R:106 dataset-fer.R:111 dataset-fgvc.R:169
+#: dataset-cifar.R:106 dataset-fer.R:124 dataset-fgvc.R:169
 #: dataset-flowers.R:131 dataset-mnist.R:125 dataset-mnist.R:255
 #: tiny-imagenet-dataset.R:43
 msgid "Downloading {.cls {class(self)[[1]]}} ..."
 msgstr "Téléchargement de {.cls {class(self)[[1]]}}..."
-
-#: dataset-cifar.R:111 dataset-coco.R:193 dataset-eurosat.R:88
-#: dataset-fer.R:116 dataset-flowers.R:136 dataset-mnist.R:121
-#: dataset-mnist.R:264 dataset-mnist.R:453
-msgid "Corrupt file! Delete the file in {archive} and try again."
-msgstr "Fichier corrompu. Supprimez le fichier {archive} et recommencez."
 
 #: dataset-coco.R:95 dataset-coco.R:315
 msgid ""
@@ -152,7 +160,7 @@ msgstr "Extraction de l'archive {.cls {class(self)[[1]]}} terminée..."
 #: dataset-eurosat.R:98
 msgid "Downloading {.cls {class(self)[[1]]}} split file: {self$split_url}"
 msgstr ""
-"Téléchargement du fichier de split de {.cls {class(self)[[1]]}} depuis "
+"Téléchargement du fichier de partition de {.cls {class(self)[[1]]}} depuis "
 "{self$split_url} ..."
 
 #: dataset-eurosat.R:102
@@ -167,7 +175,7 @@ msgstr "Fichier d'image `{filename}` introuvable."
 msgid "Label `{label}` not found in class_to_idx."
 msgstr "Le label `{label}` ne fait pas partie de `class_to_idx`."
 
-#: dataset-fer.R:72 dataset-fer.R:80 dataset-mnist.R:267
+#: dataset-fer.R:83 dataset-fer.R:91 dataset-mnist.R:267
 #: tiny-imagenet-dataset.R:48
 msgid "Processing {.cls {class(self)[[1]]}} ..."
 msgstr "Préparation de {.cls {class(self)[[1]]}} ..."
@@ -206,18 +214,18 @@ msgstr ""
 #: dataset-flowers.R:102
 msgid ""
 "Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with "
-"{length(self$img_path)} samples."
+"{self$.length()} samples."
 msgstr ""
-"Le sous-ensemble {.val {self$split}} du jeu de données {.cls {class(self)"
-"[[1]]}} chargé avec {length(self$img_path)} images."
+"La partition {.val {self$split}} du jeu de données {.cls {class(self)[[1]]}} "
+"est chargée avec {length(self$img_path)} images."
 
 #: dataset-flowers.R:126
 msgid ""
 "Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} is already "
 "processed and cached."
 msgstr ""
-"Le sous-ensemble {.val {self$split}} du jeu de données {.cls {class(self)"
-"[[1]]}} a déjà été préparé et mis en cache."
+"La partition {.val {self$split}} du jeu de données {.cls {class(self)[[1]]}} "
+"a déjà été préparé et mis en cache."
 
 #: dataset-flowers.R:140
 msgid "{.cls {class(self)[[1]]}} Extracting images and processing dataset..."
@@ -238,6 +246,34 @@ msgstr "Préparation de {.cls {class(self)[[1]]}} ..."
 #: dataset-mnist.R:440
 msgid "{.cls {class(self)[[1]]}} dataset processed successfully!"
 msgstr "Le jeu de données {.cls {class(self)[[1]]}} a été préparé avec succès."
+
+#: dataset-places365.R:128
+msgid ""
+"{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self)} "
+"samples."
+msgstr ""
+"{.cls {class(self)[[1]]}} Le pratage '{self$split}' chargé et contient "
+"{length(self)} échantillons."
+
+#: dataset-places365.R:155
+msgid "Invalid split: {self$split}"
+msgstr "Partage non valide : {self$split}"
+
+#: dataset-places365.R:163
+msgid "Downloading {.cls {class(self)[[1]]}} split '{self$split}'..."
+msgstr ""
+"Téléchargement du fichier de partition '{self$split}' de {.cls {class(self)"
+"[[1]]} ..."
+
+#: dataset-plankton.R:84
+msgid ""
+"Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph "
+"{self$archive_size}}) will be downloaded and processed if not already "
+"available."
+msgstr ""
+"La partition {.val {self$split}} du jeu de données {.cls {class(self)[[1]]}} "
+"(de taille ~{.emph {self$archive_size}}) sera téléchargée et traitée si elle "
+"n'est pas déjà disponible."
 
 #: extension.R:2
 msgid ""
@@ -299,6 +335,52 @@ msgstr "doivent être identiques"
 msgid "{.var aspect_ratios} and {.var steps} should have the same length"
 msgstr "{.var aspect_ratios} et {.var steps} doivent être de même taille."
 
+#: models-alexnet.R:58 models-inception.R:435 models-mobilenetv2.R:15
+msgid ""
+"Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be "
+"downloaded and processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {class(model)[1]}} ({.emph {r[3]}}) seront "
+"téléchargés et traités s'ils ne sont pas déjà disponibles."
+
+#: models-alexnet.R:61 models-deeplabv3.R:254 models-efficientnet.R:229
+#: models-efficientnetv2.R:199 models-fcn.R:194 models-fcn.R:243
+#: models-inception.R:438 models-mobilenetv2.R:18 models-resnet.R:248
+#: models-vgg.R:114
+msgid "Corrupt file! Delete the file in {state_dict_path} and try again."
+msgstr ""
+"Fichier corrompu. Supprimez le fichier {state_dict_path} et recommencez."
+
+#: models-deeplabv3.R:216 models-fcn.R:170 models-fcn.R:219
+msgid "Pretrained weights require num_classes = 21."
+msgstr "Les poids pré-entraînés nécessitent `num_classes = 21`."
+
+#: models-deeplabv3.R:223
+msgid "`pretrained_backbone` ignored when `pretrained = TRUE`."
+msgstr "`pretrained_backbone` est ignoré lorsque `pretrained = TRUE`."
+
+#: models-deeplabv3.R:251
+msgid "Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ..."
+msgstr ""
+"Téléchargement des poids pré-entraînés {.cls {arch}} (~{.emph {info[3]}}) ..."
+
+#: models-efficientnet.R:226 models-efficientnetv2.R:196 models-resnet.R:245
+#: models-vgg.R:111
+msgid ""
+"Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and "
+"processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {arch}} ({.emph {r[3]}}) seront téléchargés "
+"et traités s'ils ne sont pas déjà disponibles."
+
+#: models-fcn.R:190 models-fcn.R:239 models-vit.R:44
+msgid ""
+"Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and "
+"processed if not already available."
+msgstr ""
+"Les poids du modèle pour {.cls {name}} (~{.emph {r[3]}}) seront téléchargés "
+"et traités s'ils ne sont pas déjà disponibles."
+
 #: models-inception.R:16
 msgid ""
 "The default weight initialization of inception_v3 will be changed in future "
@@ -328,7 +410,7 @@ msgstr ""
 "La longueur de {.arg inception_blocks} doit être 7 et non "
 "{length(inception_blocks)}."
 
-#: models-mobilenetv2.R:58
+#: models-mobilenetv2.R:63
 msgid ""
 "{.var inverted_residual_setting} should be non-empty or a 4-element list, "
 "got {.val {inverted_residual_setting}}"
@@ -619,3 +701,8 @@ msgid ""
 msgstr ""
 "{.var keypoints} doit être de taille (num_instances, K, 2), pourtant sa "
 "taille actuelle est {.value {keypoints$shape}}"
+
+#~ msgid "Corrupt file! Delete the file in {.file {archive}} and try again."
+#~ msgstr ""
+#~ "Fichier corrompu. Supprimez le fichier dans {.file {archive}} et "
+#~ "réessayez."

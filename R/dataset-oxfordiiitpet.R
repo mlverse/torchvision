@@ -92,7 +92,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       self$classes <- c("Cat", "Dog")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -192,13 +192,9 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       y <- self$target_transform(y)
     }
 
-    structure(
-      list(
-        x = x,
-        y = y
-      ),
-      class = c("image_with_segmentation_mask")
-    )
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_segmentation_mask", class(result))
+    result
   },
 
   .length = function() {
@@ -299,7 +295,7 @@ oxfordiiitpet_dataset <- dataset(
     self$class_to_idx <- data$class_to_idx
     self$classes <- names(self$class_to_idx)
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
@@ -363,7 +359,7 @@ oxfordiiitpet_binary_dataset <- dataset(
     self$class_to_idx <- data$class_to_idx
     self$classes <- c("Cat", "Dog")
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$img_path)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {

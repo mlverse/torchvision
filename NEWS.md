@@ -1,23 +1,27 @@
 # torchvision (development version)
 
-- fix `transform_rotation` wrongly using w x w for image size (@114, cregouby)
-- `tensor_image_display` and `tensor_image_browse` now accept all tensor_image dtypes. (#115, @cregouby) 
-- fix `transform_affine` help to remove confusion with `transforme_random_affine` help (#116, @cregouby)
-- add message translation in french (#112, @cregouby)
-- Added the Fashion-MNIST dataset. (#148, @koshtiakanksha)
-- Added 3 EuroSAT datasets (#126 @cregouby)
-- Added `qmnist_dataset()` – a dataset loader for the QMNIST dataset (#153, @DerrickUnleashed)
-- Added `emnist_dataset()` – a dataset loader for the EMNIST dataset. (#152, @DerrickUnleashed)
-- Added `fgvc_aircraft_dataset()` – a dataset loader for the FGCV-Aircraft dataset. (#156, @DerrickUnleashed)
-- Added support for the MS COCO dataset. (#161, @koshtiakanksha)
-- add tiff image support to `folder_dataset()` (#169, @cregouby)
-- Added support for `annotation_level = "all"` in `fgvc_aircraft_dataset()` (#168, @DerrickUnleashed)
-- Add `nms()`and `batched_nms()` Non-Maximum Suppression, and bounding-box manipulation via `box_convert()` (#40, @Athospd)
-- Added `caltech101_dataset()` and `caltech256_dataset()` – for the Caltech 101 and 256 datasets. (#158, @DerrickUnleashed)
-- Added `fer_dataset()` – a dataset loader for the FER-2013 dataset. (#154, @DerrickUnleashed)
-- Added `flowers102_dataset()` – a dataset loader for the Flowers102 dataset. (#157, @DerrickUnleashed)
-- Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
-- Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
+## New datasets
+
+* Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
+* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
+* Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
+* Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
+
+## New models
+
+* Added `model_maxvit()` for MaxViT: Multi-Axis Vision Transformer (#229, @koshtiakanksha).
+* Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
+* Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
+* Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
+
+## New features
+
+* Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
+* `base_loader()` now accept URLs (@cregouby, #246).
+
+## Bug fixes and improvements
+
+* Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
 
 # torchvision 0.7.0
 
@@ -37,12 +41,14 @@
 
 ## New models
 
+* Added EfficientNet model family (B0–B7) – scalable CNNs for image classification. (#166, @koshtiakanksha)
+* Added EfficientNetV2 model family (V2-S/M/L) – improved EfficientNet models for faster training. (#166, @koshtiakanksha)
 * Added `model_vit_b_16()`, `model_vit_b_32()`, `model_vit_l_16()`, `model_vit_l_32()`, and `model_vit_h_14()` for loading Vision Transformer models (@DerrickUnleashed, #202).
 
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
-* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+* `draw_bounding_boxes()` and `draw_segmentation_masks()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
   the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).

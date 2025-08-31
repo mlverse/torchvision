@@ -64,7 +64,7 @@ coco_detection_dataset <- torch::dataset(
   ) {
 
     year <- match.arg(year)
-    split <- if (train) "train" else "val"
+    split <- ifelse(train, "train", "val")
 
     root <- fs::path_expand(root)
     self$root <- root
@@ -76,7 +76,7 @@ coco_detection_dataset <- torch::dataset(
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
-    image_year <- if (year == "2016") "2014" else year
+    image_year <- ifelse(year == "2016", "2014", year)
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{image_year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations",
                                      glue::glue("instances_{split}{year}.json"))
@@ -168,13 +168,9 @@ coco_detection_dataset <- torch::dataset(
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
-    structure(
-      list(
-        x = x,
-        y = y
-      ),
-      class = c("image_with_bounding_box", "image_with_segmentation_mask")
-    )
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_bounding_box", "image_with_segmentation_mask", class(result))
+    result
   },
 
   .length = function() {
@@ -288,7 +284,7 @@ coco_caption_dataset <- torch::dataset(
   ) {
 
     year <- match.arg(year)
-    split <- if (train) "train" else "val"
+    split <- ifelse(train, "train", "val")
 
     root <- fs::path_expand(root)
     self$root <- root
@@ -329,7 +325,7 @@ coco_caption_dataset <- torch::dataset(
     image_id <- ann$image_id
     y <- ann$caption
 
-    prefix <- if (self$split == "train") "COCO_train2014_" else "COCO_val2014_"
+    prefix <- ifelse(self$split == "train", "COCO_train2014_", "COCO_val2014_")
     filename <- paste0(prefix, sprintf("%012d", image_id), ".jpg")
     image_path <- fs::path(self$image_dir, filename)
 

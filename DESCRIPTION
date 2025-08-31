@@ -1,11 +1,11 @@
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
-Version: 0.6.0.9000
+Version: 0.7.0.9000
 Authors@R: c(
     person(given = "Daniel",
            family = "Falbel",
            role = c("aut", "cre"),
-           email = "daniel@rstudio.com"
+           email = "daniel@posit.co"
            ),
     person(given = "Christophe",
            family = "Regouby",
@@ -48,8 +48,11 @@ Imports:
     glue,
     zeallot
 Suggests:
+    arrow,
     magick,
+    prettyunits,
     testthat,
     coro,
-    R.matlab
+    R.matlab,
+    xml2
 BugReports: https://github.com/mlverse/torchvision/issues

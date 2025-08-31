@@ -9,6 +9,10 @@ is_image_file <- function(filename) {
   has_file_allowed_extension(filename, IMG_EXTENSIONS)
 }
 
+is_url <- function(path) {
+  grepl("^((http|ftp)s?|sftp)://", path, ignore.case = TRUE)
+}
+
 folder_make_dataset <- function(directory, class_to_idx, extensions = NULL, is_valid_file = NULL) {
   directory <- normalizePath(directory)
 
@@ -110,7 +114,9 @@ folder_dataset <- torch::dataset(
 #'
 #' Load an image located at `path` using the `{magick}` package.
 #'
-#' @param path path to the image to load from.
+#' @param path path or URL to load the image from.
+#'
+#' @returns an magick-image object as result of `image_read()`
 #'
 #' @export
 magick_loader <- function(path) {
@@ -123,10 +129,15 @@ magick_loader <- function(path) {
 #' Loads an image using `jpeg`, `png` or `tiff` packages depending on the
 #' file extension.
 #'
-#' @param path path to the image to load from
+#' @inheritParams magick_loader
 #'
+#' @returns an channel-last array of image values with dim Height x Width x 3
 #' @export
 base_loader <- function(path) {
+
+  if (is_url(path)) {
+    path <- download_and_cache(path)
+  }
 
   ext <- tolower(fs::path_ext(path))
 
@@ -142,8 +153,9 @@ base_loader <- function(path) {
   if (length(dim(img)) == 2)
     img <- abind::abind(img, img, img, along = 3)
   else if (length(dim(img)) == 3 && dim(img)[1] == 1)
-    img <- abind::abind(img, img, img, along = 1)
+    img <- abind::abind(img, img, img, along = 1) %>% aperm(c(3,1,2))
 
+  # all readers default to channel last
   img
 }
 
