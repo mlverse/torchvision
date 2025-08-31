@@ -192,20 +192,6 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 <li><p><code>model_mtcnn()</code>: MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks</p></li>
 <li><p><code>model_inception_resnet_v1()</code>: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets</p></li>
 </ul></div>
-    <div id="see-also">
-    <h2>See also</h2>
-    <div class="dont-index"><p>Other models:
-<code><a href="model_alexnet.html">model_alexnet</a>()</code>,
-<code><a href="model_deeplabv3.html">model_deeplabv3</a></code>,
-<code><a href="model_efficientnet.html">model_efficientnet</a></code>,
-<code><a href="model_efficientnet_v2.html">model_efficientnet_v2</a></code>,
-<code><a href="model_fcn_resnet.html">model_fcn_resnet</a></code>,
-<code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
-<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
-<code><a href="model_resnet.html">model_resnet</a></code>,
-<code><a href="model_vgg.html">model_vgg</a></code>,
-<code><a href="model_vit.html">model_vit</a></code></p></div>
-    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
@@ -244,7 +230,7 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 <span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="base_loader.html">base_loader</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">wmc</span>,<span class="va">url</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Convert to torch tensor [C, H, W] normalized</span></span></span>
-<span class="r-in"><span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="transform_to_tensor.html">transform_to_tensor</a></span><span class="op">(</span><span class="va">arr</span><span class="op">)</span>  <span class="co"># [C, H, W]</span></span></span>
+<span class="r-in"><span><span class="va">input</span> <span class="op">&lt;-</span> <span class="fu"><a href="transform_to_tensor.html">transform_to_tensor</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span>  <span class="co"># [C, H, W]</span></span></span>
 <span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>   <span class="co"># [1, C, H, W]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Load pretrained model</span></span></span>

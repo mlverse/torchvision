@@ -36,6 +36,7 @@
 <url><loc>/reference/flowers102_dataset.html</loc></url>
 <url><loc>/reference/generalized_box_iou.html</loc></url>
 <url><loc>/reference/image_folder_dataset.html</loc></url>
+<url><loc>/reference/imagenet_classes.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/lfw_dataset.html</loc></url>
 <url><loc>/reference/magick_loader.html</loc></url>
@@ -47,6 +48,7 @@
 <url><loc>/reference/model_facenet.html</loc></url>
 <url><loc>/reference/model_fcn_resnet.html</loc></url>
 <url><loc>/reference/model_inception_v3.html</loc></url>
+<url><loc>/reference/model_maxvit.html</loc></url>
 <url><loc>/reference/model_mobilenet_v2.html</loc></url>
 <url><loc>/reference/model_resnet.html</loc></url>
 <url><loc>/reference/model_vgg.html</loc></url>

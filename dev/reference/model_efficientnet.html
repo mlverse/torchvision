@@ -157,13 +157,12 @@ should typically be 224 for B0 and scaled versions for B1–B7 (e.g., B7 uses 60
 <table class="table table"><tr><td><strong>Model</strong></td><td><strong>Width</strong></td><td><strong>Depth</strong></td><td><strong>Resolution</strong></td><td><strong>Params (M)</strong></td><td><strong>GFLOPs</strong></td><td><strong>Top-1 Acc.</strong></td></tr><tr><td>B0</td><td>1.0</td><td>1.0</td><td>224</td><td>5.3</td><td>0.39</td><td>77.1</td></tr><tr><td>B1</td><td>1.0</td><td>1.1</td><td>240</td><td>7.8</td><td>0.70</td><td>79.1</td></tr><tr><td>B2</td><td>1.1</td><td>1.2</td><td>260</td><td>9.2</td><td>1.00</td><td>80.1</td></tr><tr><td>B3</td><td>1.2</td><td>1.4</td><td>300</td><td>12.0</td><td>1.80</td><td>81.6</td></tr><tr><td>B4</td><td>1.4</td><td>1.8</td><td>380</td><td>19.0</td><td>4.20</td><td>82.9</td></tr><tr><td>B5</td><td>1.6</td><td>2.2</td><td>456</td><td>30.0</td><td>9.90</td><td>83.6</td></tr><tr><td>B6</td><td>1.8</td><td>2.6</td><td>528</td><td>43.0</td><td>19.0</td><td>84.0</td></tr><tr><td>B7</td><td>2.0</td><td>3.1</td><td>600</td><td>66.0</td><td>37.0</td><td>84.3</td></tr></table></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other models:
+    <div class="dont-index"><p>Other classification_model:
 <code><a href="model_alexnet.html">model_alexnet</a>()</code>,
 <code><a href="model_deeplabv3.html">model_deeplabv3</a></code>,
 <code><a href="model_efficientnet_v2.html">model_efficientnet_v2</a></code>,
-<code><a href="model_facenet.html">model_facenet</a></code>,
-<code><a href="model_fcn_resnet.html">model_fcn_resnet</a></code>,
 <code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
+<code><a href="model_maxvit.html">model_maxvit</a>()</code>,
 <code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
 <code><a href="model_resnet.html">model_resnet</a></code>,
 <code><a href="model_vgg.html">model_vgg</a></code>,
@@ -176,8 +175,7 @@ should typically be 224 for B0 and scaled versions for B1–B7 (e.g., B7 uses 60
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_efficientnet_b0</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">image_batch</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randn.html" class="external-link">torch_randn</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">224</span>, <span class="fl">224</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">image_batch</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span><span class="op">)</span>  <span class="co"># class 815 in ImageNet is a Egyptian cat (see</span></span></span>
-<span class="r-in"><span>                               <span class="co"># &lt;https://image-net.org&gt;)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="imagenet_classes.html">imagenet_label</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
@@ -185,7 +183,7 @@ should typically be 224 for B0 and scaled versions for B1–B7 (e.g., B7 uses 60
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_efficientnet_b5</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">image_batch</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randn.html" class="external-link">torch_randn</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">456</span>, <span class="fl">456</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">image_batch</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="imagenet_classes.html">imagenet_label</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
