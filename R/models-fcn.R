@@ -27,11 +27,13 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(magrittr)
 #' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 #' # https://pytorch.org/vision/stable/models.html
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #' img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
 #' img <- base_loader(img_url)
+#'
 #' input <- img %>%
 #'  transform_to_tensor() %>%
 #'  transform_resize(c(520, 520)) %>%
