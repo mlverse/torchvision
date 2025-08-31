@@ -22,8 +22,8 @@ vision_make_grid <- function(tensor,
                              pad_value = 0) {
 
   min_max_scale <- function(x) {
-    min = x$min()$item()
-    max = x$max()$item()
+    min <- x$min()$item()
+    max <- x$max()$item()
     x$clamp_(min = min, max = max)
     x$add_(-min)$div_(max - min + 1e-5)
     x
