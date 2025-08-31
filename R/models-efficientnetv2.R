@@ -39,7 +39,6 @@
 #' scores <- as.numeric(topk[[1]][1, ])
 #' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
 #' }
-#' }
 NULL
 
 fused_mbconv_block <- torch::nn_module(

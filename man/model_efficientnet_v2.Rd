@@ -58,6 +58,19 @@ V2-L \tab 512 \tab 119 \tab 55 \tab 85.7
 }
 }
 
+\examples{
+\dontrun{
+model <- model_efficientnet_v2_s()
+input <- torch::torch_randn(1, 3, 224, 224)
+output <- model(input)
+
+# Show Top-5 predictions
+topk <- output$topk(k = 5, dim = 2)
+indices <- as.integer(topk[[2]][1, ])
+scores <- as.numeric(topk[[1]][1, ])
+glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\%)")
+}
+}
 \seealso{
 \code{\link{model_efficientnet}}
 
@@ -68,6 +81,7 @@ Other classification_model:
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},
 \code{\link{model_mobilenet_v2}()},
+\code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
 \code{\link{model_vit}}

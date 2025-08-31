@@ -35,6 +35,7 @@ Other classification_model:
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_maxvit}()},
 \code{\link{model_mobilenet_v2}()},
+\code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
 \code{\link{model_vit}}
