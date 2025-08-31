@@ -319,7 +319,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
   out_dtype <- torch::torch_uint8()
 
   if (x$ndim != 3) {
-    value_error("Pass tensor of individual `image`, not batches")
+    value_error("Pass individual `image`, not batches")
   }
   if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
