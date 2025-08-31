@@ -4,7 +4,7 @@
 \alias{model_fcn_resnet}
 \alias{model_fcn_resnet50}
 \alias{model_fcn_resnet101}
-\title{FCN - Fully Convolutional Network}
+\title{Fully Convolutional Network for Semantic Segmentation}
 \usage{
 model_fcn_resnet50(
   pretrained = FALSE,
@@ -42,7 +42,7 @@ stderr.}
 An \code{nn_module} representing the FCN model.
 }
 \description{
-Constructs an FCN (Fully Convolutional Network) model for semantic segmentation,
+Constructs an FCN (Fully Convolutional Network) model for semantic image segmentation,
 based on a ResNet backbone as described in
 \href{https://arxiv.org/abs/1411.4038}{Fully Convolutional Networks for Semantic Segmentation}.
 }
@@ -62,55 +62,30 @@ norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 # https://pytorch.org/vision/stable/models.html
 norm_std  <- c(0.229, 0.224, 0.225)
 img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
-img <- jpeg::readJPG(img_url)
-input <- transform_to_tensor(img)
-input <- transform_resize(input, c(520, 520))
-input <- transform_normalize(input, norm_mean, norm_std)
-input <- input$unsqueeze(1)
+img <- base_loader(img_url)
+input <- img \%>\%
+ transform_to_tensor() \%>\%
+ transform_resize(c(520, 520)) \%>\%
+ transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)
 
 model <- model_fcn_resnet50(pretrained = TRUE)
 model$eval()
-output <- model(input)
-
-# extract the highest mask class identifier on first image of the batch
-mask_id <- output$out$argmax(dim = 2)
-
-# turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
-mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+output <- model(batch)
 
 # visualize the result
-segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+# `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
+segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
 tensor_image_display(segmented)
 
 
 model <- model_fcn_resnet101(pretrained = TRUE)
 model$eval()
-output <- model(input)
-
-# extract the highest mask class identifier on first image of the batch
-mask_id <- output$out$argmax(dim = 2)
-
-# turn mask_id \code{[LongType{1,224,224}]} into a boolean mask \code{[BoolType{21,224,224}]}
-mask_bool <- torch::torch_stack(lapply(1:21, function(x) mask_id[1, ..]$eq(x)), dim = 1)
+output <- model(batch)
 
 # visualize the result
-segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool)
+segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
 tensor_image_display(segmented)
 }
 }
-\seealso{
-Other models: 
-\code{\link{model_alexnet}()},
-\code{\link{model_deeplabv3}},
-\code{\link{model_efficientnet}},
-\code{\link{model_efficientnet_v2}},
-\code{\link{model_facenet}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
-\code{\link{model_mobilenet_v3}},
-\code{\link{model_resnet}},
-\code{\link{model_vgg}},
-\code{\link{model_vit}}
-}
-\concept{models}
+\concept{semantic_segmentation_model}
