@@ -67,7 +67,10 @@ training uses 520x520 images.
 \examples{
 \dontrun{
 library(magrittr)
-# Use a publicly available image of an airplane
+norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+# https://pytorch.org/vision/stable/models.html
+norm_std  <- c(0.229, 0.224, 0.225)
+# Use a publicly available image of an animal
 wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
 url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
 img <- base_loader(paste0(wmc,url))
@@ -75,53 +78,43 @@ img <- base_loader(paste0(wmc,url))
 input <- img \%>\%
   transform_to_tensor() \%>\%
   transform_resize(c(520, 520)) \%>\%
-  torch::torch_unsqueeze(1)  # Add batch dimension (1, 3, H, W)
+ transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 
 # DeepLabV3 with ResNet-50
 model <- model_deeplabv3_resnet50(pretrained = TRUE)
 model$eval()
-output <- model(input)
+output <- model(batch)
 
-mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
+# visualize the result
+# `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
+segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
+tensor_image_display(segmented)
 
 # Show most frequent class
+mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
 class_contingency_with_background <- mask_id$view(-1)$bincount()
 class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 top_class_index <- class_contingency_with_background$argmax()$item()
 cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
 
-# Only highlight 'cow' class
-mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["cow"]])$unsqueeze(1)
-segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
-tensor_image_browse(segmented)
-
 # DeepLabV3 with ResNet-101 (same steps)
 model <- model_deeplabv3_resnet101(pretrained = TRUE)
 model$eval()
-output <- model(input)
+output <- model(batch)
+
+segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
+tensor_image_display(segmented)
 
 mask_id <- output$out$argmax(dim = 2)
 class_contingency_with_background <- mask_id$view(-1)$bincount()
 class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 top_class_index <- class_contingency_with_background$argmax()$item()
 cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}")
-
-mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["cow"]])$unsqueeze(1)
-segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
-tensor_image_browse(segmented)
 }
 }
 \seealso{
-Other classification_model: 
-\code{\link{model_alexnet}()},
-\code{\link{model_efficientnet}},
-\code{\link{model_efficientnet_v2}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
-\code{\link{model_mobilenet_v3}},
-\code{\link{model_resnet}},
-\code{\link{model_vgg}},
-\code{\link{model_vit}}
+Other semantic_segmentation_model: 
+\code{\link{model_fcn_resnet}}
 }
-\concept{classification_model}
+\concept{semantic_segmentation_model}

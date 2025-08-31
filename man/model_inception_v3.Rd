@@ -30,7 +30,6 @@ N x 3 x 299 x 299, so ensure your images are sized accordingly.
 \seealso{
 Other classification_model: 
 \code{\link{model_alexnet}()},
-\code{\link{model_deeplabv3}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_maxvit}()},

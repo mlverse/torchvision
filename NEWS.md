@@ -18,10 +18,12 @@
 
 * Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 * `base_loader()` now accept URLs (@cregouby, #246).
+* `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
 
 ## Bug fixes and improvements
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
+* Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
 
 # torchvision 0.7.0
 
