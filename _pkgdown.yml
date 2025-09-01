@@ -54,8 +54,7 @@ reference:
   contents:
    - has_concept("semantic_segmentation_model")
 - subtitle: Other models
-  contents:
-   - starts_with("model_")
+
 - title: Datasets
   desc: >
     Datasets readily available. All have a `x` variable in each item
@@ -89,6 +88,7 @@ reference:
     mask and labels for image segmentation.
   contents:
    - ends_with("segmentation_dataset")
+
 - title: Displaying
   desc: Show images
   contents:
@@ -98,6 +98,7 @@ reference:
    - tensor_image_browse
    - tensor_image_display
    - vision_make_grid
+
 - title: Misc
   contents:
    - magick_loader
