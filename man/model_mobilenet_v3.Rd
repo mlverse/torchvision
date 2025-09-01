@@ -6,12 +6,7 @@
 \alias{model_mobilenet_v3_small}
 \title{MobileNetV3 Implementation in R Torch}
 \usage{
-model_mobilenet_v3_large(
-  pretrained = FALSE,
-  progress = TRUE,
-  num_classes = 1000,
-  width_mult = 1
-)
+model_mobilenet_v3_large(pretrained = FALSE, progress = TRUE, ...)
 
 model_mobilenet_v3_small(
   pretrained = FALSE,
@@ -25,6 +20,8 @@ model_mobilenet_v3_small(
 
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
+
+\item{...}{Other parameters passed to the model implementation.}
 
 \item{num_classes}{number of output classes (default: 1000).}
 
