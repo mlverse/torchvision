@@ -53,7 +53,6 @@ rf100_document_collection <- torch::dataset(
     dataset = rep(c("tweeter_post", "tweeter_profile", "document_part",
                     "activity_diagram", "signature", "paper_part"), each = 3),
     split   = rep(c("train", "test", "valid"), times = 6),
-
     url = c(
       # tweeter_post
       "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/train-00000-of-00001-5ca0e754c63f9a31.parquet",
@@ -117,9 +116,7 @@ rf100_document_collection <- torch::dataset(
   ),
 
   initialize = function(
-    dataset = c("tweeter_post", "tweeter_profile", "document_part",
-                "activity_diagram", "signature", "paper_part"),
-    split = c("train", "test", "valid"),
+    dataset, split = c("train", "test", "valid"),
     transform = NULL,
     target_transform = NULL,
     download = FALSE
@@ -127,7 +124,7 @@ rf100_document_collection <- torch::dataset(
     if (!requireNamespace("arrow", quietly = TRUE)) install.packages("arrow")
     if (!requireNamespace("prettyunits", quietly = TRUE)) install.packages("prettyunits")
 
-    self$dataset <- match.arg(dataset)
+    self$dataset <- match.arg(dataset, self$resources$dataset)
     self$split   <- match.arg(split)
     self$transform <- transform
     self$target_transform <- target_transform
@@ -164,11 +161,9 @@ rf100_document_collection <- torch::dataset(
 
   download = function() {
     if (self$check_exists()) return(invisible(NULL))
-    cli_inform("Downloading {.cls {class(self)[[1]]}} dataset {.val {self$dataset}}...")
+    cli_inform("Downloading {.val {self$dataset}}...")
 
-    archive <- vapply(self$archive_url, function(u) {
-      download_and_cache(u, prefix = file.path(class(self)[1], self$dataset))
-      }
+    archive <- sapply(self$archive_url, \(u) download_and_cache(u, prefix = file.path(class(self)[1], self$dataset))
     )
 
     if (!all(tools::md5sum(archive) == self$archive_md5))

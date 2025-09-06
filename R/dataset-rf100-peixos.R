@@ -1,4 +1,4 @@
-#' @include dataset-rf100-doc.R
+#' @include collection-rf100-doc.R
 NULL
 
 #' RF100 Peixos Segmentation Dataset
