@@ -5,13 +5,11 @@
 \title{RF100 Underwater Dataset Collection}
 \usage{
 rf100_underwater_collection(
-  dataset = c("pipes", "aquarium", "objects", "coral"),
+  dataset,
   split = c("train", "test", "valid"),
-  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
-    fs::path_temp("torchvision-datasets"),
-  download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  download = FALSE
 )
 }
 \arguments{
@@ -20,13 +18,11 @@ rf100_underwater_collection(
 
 \item{split}{Character. One of "train", "test", or "valid".}
 
-\item{root}{Character. Root directory where the dataset will be stored.}
-
-\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
-
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 }
 \value{
 A torch dataset. Each element is a named list with:
