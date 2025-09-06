@@ -70,6 +70,8 @@ Other detection_dataset:
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
 \code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
+\code{\link{rf100_infrared_collection}()},
 \code{\link{rf100_medical_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }

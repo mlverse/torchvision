@@ -13,9 +13,9 @@ rf100_medical_collection(
 )
 }
 \arguments{
-\item{dataset}{Dataset to select within \code{c("thermal_dog_and_people", "solar_panel", "radio_signal",
-"thermal_cheetah", "rheumatology", "knee", "abdomen_mri", "brain_axial_mri",
-"gynecology_mri", "brain_tumor", "fracture", "ir_object")}.}
+\item{dataset}{Dataset to select within \code{c("radio_signal",
+"rheumatology", "knee", "abdomen_mri", "brain_axial_mri",
+"gynecology_mri", "brain_tumor", "fracture")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
@@ -46,7 +46,7 @@ format) with per-dataset folders and train/valid/test splits.
 \examples{
 \dontrun{
 ds <- rf100_medical_collection(
-  dataset = "thermal_dog_and_people",
+  dataset = "rheumatology",
   split = "test",
   transform = transform_to_tensor,
   download = TRUE
@@ -62,7 +62,9 @@ Other detection_dataset:
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
 \code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
 \code{\link{rf100_document_collection}()},
+\code{\link{rf100_infrared_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}

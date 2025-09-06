@@ -134,7 +134,9 @@ Other segmentation_dataset:
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
 \code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
 \code{\link{rf100_document_collection}()},
+\code{\link{rf100_infrared_collection}()},
 \code{\link{rf100_medical_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }
