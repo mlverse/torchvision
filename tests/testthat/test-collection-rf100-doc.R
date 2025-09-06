@@ -17,9 +17,9 @@ for (ds_name in datasets) {
     ds <- rf100_document_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_document_collection")
-    expect_gt(length(ds), 0)
+    expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(ds$classes), 0)
+    expect_gt(length(unique(ds$classes)), 1)
 
     item <- ds[1]
 
@@ -39,9 +39,9 @@ test_that(paste0("rf100_document_collection loads paper_part correctly"), {
   ds <- rf100_document_collection(dataset = "paper_part", split = "train", download = TRUE)
 
   expect_s3_class(ds, "rf100_document_collection")
-  expect_gt(length(ds), 0)
+  expect_gt(ds$.length(), 1)
   expect_type(ds$classes, "character")
-  expect_gt(length(ds$classes), 0)
+  expect_gt(length(unique(ds$classes)), 1)
 
   item <- ds[1]
 

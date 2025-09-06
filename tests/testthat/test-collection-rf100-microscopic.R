@@ -22,9 +22,9 @@ for (ds_name in datasets) {
     ds <- rf100_microscopic_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_microscopic_collection")
-    expect_gt(length(ds), 0)
+    expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(ds$classes), 0)
+    expect_gt(length(unique(ds$classes)), 1)
 
     item <- ds[1]
 
