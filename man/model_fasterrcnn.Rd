@@ -88,15 +88,25 @@ Input images should be \code{torch_tensor}s of shape
 
 \examples{
 \dontrun{
-# Visualize predictions for each Faster R-CNN variant on the same COCO sample
-ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
-sample <- ds[1]
-image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
+library(magrittr)
+norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+# https://pytorch.org/vision/stable/models.html
+norm_std  <- c(0.229, 0.224, 0.225)
+# Use a publicly available image of an animal
+wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+img <- base_loader(paste0(wmc,url))
+
+input <- img \%>\%
+  transform_to_tensor() \%>\%
+  transform_resize(c(520, 520)) \%>\%
+  transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 
 # ResNet-50 FPN
 model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
 model$eval()
-pred <- model(list(sample$x))$detections
+pred <- model(batch)$detections
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -109,7 +119,7 @@ if (num_boxes > 0) {
 # ResNet-50 FPN V2
 model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
 model$eval()
-pred <- model(list(sample$x))$detections
+pred <- model(batch)$detections
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -122,7 +132,7 @@ if (num_boxes > 0) {
 # MobileNet V3 Large FPN
 model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
 model$eval()
-pred <- model(list(sample$x))$detections
+pred <- model(batch)$detections
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -135,7 +145,7 @@ if (num_boxes > 0) {
 # MobileNet V3 Large 320 FPN
 model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
 model$eval()
-pred <- model(list(sample$x))$detections
+pred <- model(batch)$detections
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -148,7 +158,7 @@ if (num_boxes > 0) {
 
 }
 \seealso{
-Other models: 
-\code{\link{model_mobilenet_v3_large}()}
+Other semantic_segmentation_model: 
+\code{\link{model_fcn_resnet}}
 }
-\concept{models}
+\concept{semantic_segmentation_model}

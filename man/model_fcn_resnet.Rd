@@ -88,4 +88,8 @@ segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
 tensor_image_display(segmented)
 }
 }
+\seealso{
+Other semantic_segmentation_model: 
+\code{\link{model_fasterrcnn}}
+}
 \concept{semantic_segmentation_model}

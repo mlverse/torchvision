@@ -17,8 +17,4 @@ stderr.}
 \description{
 This implementation mimics \code{torchvision::mobilenet_v3_large}.
 }
-\seealso{
-Other models: 
-\code{\link{model_fasterrcnn}}
-}
 \concept{models}
