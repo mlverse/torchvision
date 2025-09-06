@@ -1,17 +1,20 @@
 #' @include collection-rf100-doc.R
 NULL
 
-#' RF100 Electromagnetic Dataset Collection
+#' RoboFlow 100 Medical dataset Collection
 #'
-#' Loads one of the RF100 electromagnetic object detection datasets (COCO
+#' Loads one of the [RoboFlow 100 Medical](https://universe.roboflow.com/browse/medical) datasets (COCO
 #' format) with per-dataset folders and train/valid/test splits.
 #'
 #' @inheritParams rf100_document_collection
+#' @param dataset Dataset to select within \code{c("thermal_dog_and_people", "solar_panel", "radio_signal",
+#'  "thermal_cheetah", "rheumatology", "knee", "abdomen_mri", "brain_axial_mri",
+#'  "gynecology_mri", "brain_tumor", "fracture", "ir_object")}.
 #' @inherit rf100_document_collection return
 #'
 #' @examples
 #' \dontrun{
-#' ds <- rf100_electromagnetic_collection(
+#' ds <- rf100_medical_collection(
 #'   dataset = "thermal_dog_and_people",
 #'   split = "test",
 #'   transform = transform_to_tensor,
@@ -24,8 +27,8 @@ NULL
 #'
 #' @family detection_dataset
 #' @export
-rf100_electromagnetic_collection <- torch::dataset(
-  name = "rf100_electromagnetic_collection",
+rf100_medical_collection <- torch::dataset(
+  name = "rf100_medical_collection",
   inherit = rf100_document_collection,
 
   resources = data.frame(

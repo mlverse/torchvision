@@ -1,24 +1,23 @@
 #' @include folder-dataset.R
 NULL
 
-#' RF100 Document Collection Dataset
+#' RoboFlow 100 Document dataset Collection
 #'
-#' Loads one of the RF100 document object detection datasets with COCO-style
+#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with COCO-style
 #' bounding box annotations for object detection tasks.
 #'
-#' @param dataset Character. One of "tweeter_post", "tweeter_profile", "document_part",
-#'   "activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".
-#' @param split Character. One of "train", "test", or "valid".
-#' @param root Character. Root directory where the dataset will be stored.
+#' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
+#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.
+#' @param split the subset of the dataset to choose between \code{c("train", "test", "valid")}.
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target.
 #'
 #' @return A torch dataset. Each element is a named list with:
 #' - `x`: H x W x 3 array representing the image.
-#' - `y`: a list containing:
-#'     - `labels`: character vector with object class names.
-#'     - `boxes`: a tensor of shape (N, 4) with bounding boxes in (xmin, ymin, xmax, ymax).
+#' - `y`: a list containing the target with:
+#'     - `labels`: character vector of object class names.
+#'     - `boxes`: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 #'
 #' The returned item inherits the class `image_with_bounding_box` so it can be
 #' visualised with helper functions such as [draw_bounding_boxes()].

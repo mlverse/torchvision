@@ -1,13 +1,14 @@
 #' @include collection-rf100-doc.R
 NULL
 
-#' RF100 Underwater Dataset Collection
+#' RoboFlow 100 Underwater dataset Collection
 #'
-#' Loads one of the RF100 underwater object detection datasets: "pipes",
+#' Loads one of the [RoboFlow 100 Underwater](https://universe.roboflow.com/browse/documents) datasets: "pipes",
 #' "aquarium", "objects", or "coral". Images are provided with COCO-style
 #' bounding box annotations for object detection tasks.
 #'
 #' @inheritParams rf100_document_collection
+#' @param dataset Dataset to select within \code{c("pipes", "aquarium", "objects", "coral")}.
 #' @inherit rf100_document_collection return
 #'
 #' @examples

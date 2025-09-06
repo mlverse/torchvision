@@ -2,7 +2,7 @@
 % Please edit documentation in R/collection-rf100-underwater.R
 \name{rf100_underwater_collection}
 \alias{rf100_underwater_collection}
-\title{RF100 Underwater Dataset Collection}
+\title{RoboFlow 100 Underwater dataset Collection}
 \usage{
 rf100_underwater_collection(
   dataset,
@@ -13,10 +13,9 @@ rf100_underwater_collection(
 )
 }
 \arguments{
-\item{dataset}{Character. One of "tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".}
+\item{dataset}{Dataset to select within \code{c("pipes", "aquarium", "objects", "coral")}.}
 
-\item{split}{Character. One of "train", "test", or "valid".}
+\item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
 \item{transform}{Optional transform function applied to the image.}
 
@@ -28,10 +27,10 @@ rf100_underwater_collection(
 A torch dataset. Each element is a named list with:
 \itemize{
 \item \code{x}: H x W x 3 array representing the image.
-\item \code{y}: a list containing:
+\item \code{y}: a list containing the target with:
 \itemize{
-\item \code{labels}: character vector with object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in (xmin, ymin, xmax, ymax).
+\item \code{labels}: character vector of object class names.
+\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 }
 }
 
@@ -39,7 +38,7 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the RF100 underwater object detection datasets: "pipes",
+Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Underwater} datasets: "pipes",
 "aquarium", "objects", or "coral". Images are provided with COCO-style
 bounding box annotations for object detection tasks.
 }
@@ -62,8 +61,8 @@ tensor_image_browse(boxed)
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
+\code{\link{rf100_biology_collection}()},
 \code{\link{rf100_document_collection}()},
-\code{\link{rf100_electromagnetic_collection}()},
-\code{\link{rf100_microscopic_collection}()}
+\code{\link{rf100_medical_collection}()}
 }
 \concept{detection_dataset}

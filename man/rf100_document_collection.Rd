@@ -13,27 +13,25 @@ rf100_document_collection(
 )
 }
 \arguments{
-\item{dataset}{Character. One of "tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", or "paragraph".}
+\item{dataset}{Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.}
 
-\item{split}{Character. One of "train", "test", or "valid".}
+\item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
-
-\item{root}{Character. Root directory where the dataset will be stored.}
 }
 \value{
 A torch dataset. Each element is a named list with:
 \itemize{
 \item \code{x}: H x W x 3 array representing the image.
-\item \code{y}: a list containing:
+\item \code{y}: a list containing the target with:
 \itemize{
-\item \code{labels}: character vector with object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes in (xmin, ymin, xmax, ymax).
+\item \code{labels}: character vector of object class names.
+\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 }
 }
 
@@ -41,10 +39,10 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-RF100 Document Collection Dataset
+RoboFlow 100 Document dataset Collection
 }
 \details{
-Loads one of the RF100 document object detection datasets with COCO-style
+Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with COCO-style
 bounding box annotations for object detection tasks.
 }
 \examples{
@@ -71,8 +69,8 @@ tensor_image_browse(boxed_img)
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_electromagnetic_collection}()},
-\code{\link{rf100_microscopic_collection}()},
+\code{\link{rf100_biology_collection}()},
+\code{\link{rf100_medical_collection}()},
 \code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}

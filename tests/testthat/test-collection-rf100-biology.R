@@ -1,47 +1,21 @@
-context("dataset-rf100-electromagnetic")
+context("dataset-rf100-microscopic")
 
 t <- withr::local_tempdir()
 
-test_that("rf100_electromagnetic_collection handles missing files gracefully", {
+test_that("rf100_biology_collection handles missing files gracefully", {
   expect_error(
-    rf100_electromagnetic_collection(dataset = "thermal_dog_and_people", split = "train", download = FALSE),
+    rf100_biology_collection(dataset = "stomata_cell", split = "train", download = FALSE),
     class = "runtime_error"
   )
 })
 
-datasets <- c(
-  "thermal_dog_and_people", "solar_panel", "radio_signal",
-  "thermal_cheetah", "rheumatology", "knee",
-  "abdomen_mri", "brain_axial_mri", "gynecology_mri",
-  "brain_tumor", "fracture"
-)
+small_datasets <- c("blood_cell",  "cell", "liquid_crystals", "bacteria", "mitosis", "asbestos")
 
-for (ds_name in datasets) {
-  test_that(paste0("rf100_electromagnetic_collection loads ", ds_name, " correctly"), {
-    ds <- rf100_electromagnetic_collection(dataset = ds_name, split = "train", download = TRUE)
+for (ds_name in small_datasets) {
+  test_that(paste0("rf100_biology_collection loads ", ds_name, " correctly"), {
+    ds <- rf100_biology_collection(dataset = ds_name, split = "train", download = TRUE)
 
-    expect_s3_class(ds, "rf100_electromagnetic_collection")
-    expect_gt(ds$.length(), 1)
-    expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
-
-    item <- ds[2] # as 2 datasets have their first item wo bbox
-
-    expect_type(item$y, "list")
-    expect_named(item$y, c("labels", "boxes"))
-    expect_type(item$y$labels, "integer")
-    expect_tensor(item$y$boxes)
-    expect_equal(item$y$boxes$ndim, 2)
-    expect_equal(item$y$boxes$size(2), 4)
-    expect_s3_class(item, "image_with_bounding_box")
-  })
-}
-test_that(paste0("rf100_electromagnetic_collection loads 'ir_object' correctly"), {
-    skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
-            "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-    ds <- rf100_electromagnetic_collection(dataset ="ir_object", split = "train", download = TRUE)
-
-    expect_s3_class(ds, "rf100_electromagnetic_collection")
+    expect_s3_class(ds, "rf100_biology_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
     expect_gt(length(unique(ds$classes)), 1)
@@ -56,4 +30,34 @@ test_that(paste0("rf100_electromagnetic_collection loads 'ir_object' correctly")
     expect_equal(item$y$boxes$size(2), 4)
     expect_s3_class(item, "image_with_bounding_box")
   })
+}
+
+datasets <- c(
+  "stomata_cell", "blood_cell", "parasite", "cell",
+  "liquid_crystals", "bacteria", "cotton_desease",
+  "mitosis", "phage", "liver_desease", "asbestos"
+)
+
+for (ds_name in datasets) {
+  test_that(paste0("rf100_biology_collection loads ", ds_name, " correctly"), {
+    skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+            "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+    ds <- rf100_biology_collection(dataset = ds_name, split = "val", download = TRUE)
+
+    expect_s3_class(ds, "rf100_biology_collection")
+    expect_gt(ds$.length(), 1)
+    expect_type(ds$classes, "character")
+    expect_gt(length(unique(ds$classes)), 1)
+
+    item <- ds[1]
+
+    expect_type(item$y, "list")
+    expect_named(item$y, c("labels", "boxes"))
+    expect_type(item$y$labels, "integer")
+    expect_tensor(item$y$boxes)
+    expect_equal(item$y$boxes$ndim, 2)
+    expect_equal(item$y$boxes$size(2), 4)
+    expect_s3_class(item, "image_with_bounding_box")
+  })
+}
 

@@ -14,9 +14,7 @@ rf100_peixos_segmentation_dataset(
 )
 }
 \arguments{
-\item{split}{Character. One of "train", "test", or "valid".}
-
-\item{root}{Character. Root directory where the dataset will be stored.}
+\item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 
