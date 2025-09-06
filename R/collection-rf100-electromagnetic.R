@@ -34,7 +34,7 @@ rf100_electromagnetic_collection <- torch::dataset(
         "thermal_cheetah", "rheumatology", "knee", "abdomen_mri", "brain_axial_mri",
         "gynecology_mri", "brain_tumor", "fracture", "ir_object"), each = 3
     ),
-    split   = rep(c("train", "test", "valid"), times = 6),
+    split   = rep(c("train", "test", "valid"), times = 12),
     url = c(
       # thermal_dog_and_people
       "https://huggingface.co/datasets/Francesco/thermal-dogs-and-people-x6ejw/resolve/main/data/train-00000-of-00001-1610caffe8805fb2.parquet",

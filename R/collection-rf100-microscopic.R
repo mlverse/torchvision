@@ -34,100 +34,79 @@ rf100_microscopic_collection <- torch::dataset(
       "liquid_crystals", "bacteria", "cotton_desease",
       "mitosis", "phage", "liver_desease", "asbestos"
     ),each = 3),
+    split   = rep(c("train", "test", "valid"), times = 11),
     url = c(
       # stomata_cell
-      "https://huggingface.co/datasets/Francesco/stomata-cells/blob/main/data/train-00000-of-00001-f3d24fcd68c928f1.parquet",
-      "https://huggingface.co/datasets/Francesco/stomata-cells/blob/main/data/test-00000-of-00001-32bdd663798cbfdc.parquet",
-      "https://huggingface.co/datasets/Francesco/stomata-cells/blob/main/data/validation-00000-of-00001-e91f7b8ad813e041.parquet",
+      "https://huggingface.co/datasets/Francesco/stomata-cells/resolve/main/data/train-00000-of-00001-f3d24fcd68c928f1.parquet",
+      "https://huggingface.co/datasets/Francesco/stomata-cells/resolve/main/data/test-00000-of-00001-32bdd663798cbfdc.parquet",
+      "https://huggingface.co/datasets/Francesco/stomata-cells/resolve/main/data/validation-00000-of-00001-e91f7b8ad813e041.parquet",
       # blood_cell
-      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/blob/main/data/train-00000-of-00001-f7bd2ef2fd6e29bf.parquet",
-      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/blob/main/data/test-00000-of-00001-8ea65561716eb43e.parquet",
-      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/blob/main/data/validation-00000-of-00001-135e61fc2bee97fd.parquet",
+      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/resolve/main/data/train-00000-of-00001-f7bd2ef2fd6e29bf.parquet",
+      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/resolve/main/data/test-00000-of-00001-8ea65561716eb43e.parquet",
+      "https://huggingface.co/datasets/Francesco/bccd-ouzjz/resolve/main/data/validation-00000-of-00001-135e61fc2bee97fd.parquet",
       # parasite
-      "https://huggingface.co/datasets/Francesco/parasites-1s07h/blob/main/data/train-00000-of-00001-7e2c85bbcc1a45a2.parquet",
-      "https://huggingface.co/datasets/Francesco/parasites-1s07h/blob/main/data/test-00000-of-00001-829beee109b299d9.parquet",
-      "https://huggingface.co/datasets/Francesco/parasites-1s07h/blob/main/data/validation-00000-of-00001-e3aee1a46235b438.parquet",
+      "https://huggingface.co/datasets/Francesco/parasites-1s07h/resolve/main/data/train-00000-of-00001-7e2c85bbcc1a45a2.parquet",
+      "https://huggingface.co/datasets/Francesco/parasites-1s07h/resolve/main/data/test-00000-of-00001-829beee109b299d9.parquet",
+      "https://huggingface.co/datasets/Francesco/parasites-1s07h/resolve/main/data/validation-00000-of-00001-e3aee1a46235b438.parquet",
       # cell
-      "https://huggingface.co/datasets/Francesco/cells-uyemf/blob/main/data/train-00000-of-00001-ddb451e11ab01b6e.parquet",
-      "https://huggingface.co/datasets/Francesco/cells-uyemf/blob/main/data/test-00000-of-00001-93af1cfd45e4b7aa.parquet",
-      "https://huggingface.co/datasets/Francesco/cells-uyemf/blob/main/data/validation-00000-of-00001-948f71851dc45fa4.parquet",
+      "https://huggingface.co/datasets/Francesco/cells-uyemf/resolve/main/data/train-00000-of-00001-ddb451e11ab01b6e.parquet",
+      "https://huggingface.co/datasets/Francesco/cells-uyemf/resolve/main/data/test-00000-of-00001-93af1cfd45e4b7aa.parquet",
+      "https://huggingface.co/datasets/Francesco/cells-uyemf/resolve/main/data/validation-00000-of-00001-948f71851dc45fa4.parquet",
       # liquid_crystals
-      "https://huggingface.co/datasets/Francesco/4-fold-defect/blob/main/data/train-00000-of-00001-b438dc70da70c5f3.parquet",
-      "https://huggingface.co/datasets/Francesco/4-fold-defect/blob/main/data/test-00000-of-00001-0c18bd0b95b38167.parquet",
-      "https://huggingface.co/datasets/Francesco/4-fold-defect/blob/main/data/validation-00000-of-00001-58a56f521b5aaffb.parquet",
+      "https://huggingface.co/datasets/Francesco/4-fold-defect/resolve/main/data/train-00000-of-00001-b438dc70da70c5f3.parquet",
+      "https://huggingface.co/datasets/Francesco/4-fold-defect/resolve/main/data/test-00000-of-00001-0c18bd0b95b38167.parquet",
+      "https://huggingface.co/datasets/Francesco/4-fold-defect/resolve/main/data/validation-00000-of-00001-58a56f521b5aaffb.parquet",
       # bacteria
-      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/blob/main/data/train-00000-of-00001-4874c525c9b5291f.parquet",
-      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/blob/main/data/test-00000-of-00001-515eb8a6a2a9bb07.parquet",
-      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/blob/main/data/validation-00000-of-00001-2d3417d16e44ab71.parquet",
+      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/train-00000-of-00001-4874c525c9b5291f.parquet",
+      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/test-00000-of-00001-515eb8a6a2a9bb07.parquet",
+      "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/validation-00000-of-00001-2d3417d16e44ab71.parquet",
       # cotton_desease
-      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/blob/main/data/train-00000-of-00001-fb83220158d0bab1.parquet",
-      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/blob/main/data/test-00000-of-00001-cb05eef9488873d3.parquet",
-      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/blob/main/data/validation-00000-of-00001-d9b9a7655deebe71.parquet",
+      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/train-00000-of-00001-fb83220158d0bab1.parquet",
+      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/test-00000-of-00001-cb05eef9488873d3.parquet",
+      "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/validation-00000-of-00001-d9b9a7655deebe71.parquet",
       # mitosis
-      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/blob/main/data/train-00000-of-00001-97a883514c06adf1.parquet",
-      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/blob/main/data/test-00000-of-00001-e5d76ced0a07539a.parquet",
-      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/blob/main/data/validation-00000-of-00001-54fb9dda67697025.parquet",
+      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/resolve/main/data/train-00000-of-00001-97a883514c06adf1.parquet",
+      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/resolve/main/data/test-00000-of-00001-e5d76ced0a07539a.parquet",
+      "https://huggingface.co/datasets/Francesco/mitosis-gjs3g/resolve/main/data/validation-00000-of-00001-54fb9dda67697025.parquet",
       # phage
-      "https://huggingface.co/datasets/Francesco/phages/blob/main/data/train-00000-of-00001-b9eccf55a37a9c14.parquet",
-      "https://huggingface.co/datasets/Francesco/phages/blob/main/data/test-00000-of-00001-4fee5dee9a0c8f17.parquet",
-      "https://huggingface.co/datasets/Francesco/phages/blob/main/data/validation-00000-of-00001-5d783205edb8aef3.parquet",
+      "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/train-00000-of-00001-b9eccf55a37a9c14.parquet",
+      "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/test-00000-of-00001-4fee5dee9a0c8f17.parquet",
+      "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/validation-00000-of-00001-5d783205edb8aef3.parquet",
       # liver_desease
-      "https://huggingface.co/datasets/Francesco/liver-disease/blob/main/data/train-00000-of-00001-075b34404316815c.parquet",
-      "https://huggingface.co/datasets/Francesco/liver-disease/blob/main/data/test-00000-of-00001-d6b1dd29852bde4e.parquet",
-      "https://huggingface.co/datasets/Francesco/liver-disease/blob/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet",
+      "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/train-00000-of-00001-075b34404316815c.parquet",
+      "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/test-00000-of-00001-d6b1dd29852bde4e.parquet",
+      "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet",
       # asbestos
-      "https://huggingface.co/datasets/Francesco/asbestos/blob/main/data/train-00000-of-00001-4bdd9b41e9daaf91.parquet",
-      "https://huggingface.co/datasets/Francesco/asbestos/blob/main/data/test-00000-of-00001-283c6964a2943199.parquet",
-      "https://huggingface.co/datasets/Francesco/asbestos/blob/main/data/validation-00000-of-00001-6e5e04a76562dda8.parquet"
+      "https://huggingface.co/datasets/Francesco/asbestos/resolve/main/data/train-00000-of-00001-4bdd9b41e9daaf91.parquet",
+      "https://huggingface.co/datasets/Francesco/asbestos/resolve/main/data/test-00000-of-00001-283c6964a2943199.parquet",
+      "https://huggingface.co/datasets/Francesco/asbestos/resolve/main/data/validation-00000-of-00001-6e5e04a76562dda8.parquet"
     ),
     md5 = c(
       # stomata_cell
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "ba27c9cee8476a814a2869a622b9c2e3",      "95e3713caf397aa4182c2ed72651032a",      "c7c50c24fb1c11abc8da96eda21d8055",
       # blood_cell
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "40a57c143f70aa7b9898011669d5c500",      "601b0b184be5ff7b134edae5619ba852",      "4429c295861719418d038819241b40b9",
       # parasite
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "83d03d6eeee66f9b0bb32e59b9168a2f",      "c25500e4e96d60d5f6ae9ec4c40cb479",      "d74f6367de2cf8c9ef7c1d2199881362",
       # cell
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "6b23b8be679a0eff434147adec24c30a",      "24340cf1332e32241ca453f7277e4b43",      "2d9d19a6f8280bc72a7377f94a0d745d",
       # liquid_crystals
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "e25e75da04c0f8199a9b47215b6e3ac2",      "b9729b2776cee8704f1ddeff0597378d",      "5cbf6f189b2449969f47dfbb746ecca3",
       # bacteria
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "c6641ee845c254e398d746c4286ae9af",      "7468dc6ae120a82d2f750a0bd051d338",      "ed9d0b920cb96cfa707b8f648675c07f",
       # cotton_desease
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "475743a07c9ffb2ad106c112f83fd110",      "8773a3dba89c3bf86879d12c1bb93007",      "45082d626c19fd3e5c3d3d955ae83f7b",
       # mitosis
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "6d7a45051cbb8bda5203004e04bb6639",      "64c4e2470e47556d3736dd2279f6457e",      "9f915191ff92498d1c9250bd1994afdf",
       # phage
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "c7622fed8a37b697b9dd1c3ab0d0708f",      "4623461f1526e50c6badae08e28b1692",      "9610c62631166e65636d25d541b6911b",
       # liver_desease
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4",
+      "9b5839ae524277eb1702a0db33030e9a",      "c97b80332d710b1378a9f3ceb5abc197",      "2f255ba7ed3c1ce0948d2fc06305ce54",
       # asbestos
-      "eac1d66da9b5e92d1e9a21f3c99563e1",      "fe6317e4930f8be1c0c15a600c38e7a4",      "952d5adf6d969844527eb94b63656ce4"
+      "f53af703c4ce594c3950d7e732003f2d",      "8e99904ce49e7f0e830735fb22986868",      "4fef507d057690d1a55fa043696248cc"
     ),
-    size = c(85, 24, 12, 6.7, 1.9, .9 ,68,19,9.5, .3, .1, .05,
-             22.5, 5.9, 1.4, 2.5, .8, .8, 65, 17.6, 9,
-             19, 5.5, 2.7, 142,72, 9.4, 6,205, 58, 29, 8.2, 4.1) * 1e6
-  ),
-
-  initialize = function(
-    dataset = c(
-      "stomata_cell", "blood_cell", "parasite", "cell",
-      "liquid_crystals", "bacteria", "cotton_desease",
-      "mitosis", "phage", "liver_desease", "asbestos"
-    ),
-    split = c("train", "test", "valid"),
-    root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else fs::path_temp("torchvision-datasets"),
-    download = FALSE,
-    transform = NULL,
-    target_transform = NULL
-  ) {
-    super$initialize(
-      dataset = dataset,
-      split = split,
-      root = root,
-      download = download,
-      transform = transform,
-      target_transform = target_transform
-    )
-  }
+    size = c(81, 24, 12, 6.4, 1.8, .9 ,65.1,17.9,9, .3, .1, .05,
+             21.5, 5.7, 1.4, 2.5, .8, .8, 62, 16.8, 9,
+             19, 5.3, 2.7,  69,9.0, 5.7,   192,55.6, 28, 28, 7.8, 4) * 1e6
+  )
 )
