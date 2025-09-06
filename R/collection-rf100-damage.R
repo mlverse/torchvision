@@ -1,4 +1,4 @@
-#' @include collection-rf100-doc.R
+#' @include collection-rf100_doc.R
 NULL
 
 #' RoboFlow 100 Damages dataset Collection
