@@ -4,7 +4,7 @@ t <- withr::local_tempdir()
 
 test_that("rf100_microscopic_collection handles missing files gracefully", {
   expect_error(
-    rf100_microscopic_collection(dataset = "stomata_cell", split = "train", root = tempfile(), download = FALSE),
+    rf100_microscopic_collection(dataset = "stomata_cell", split = "train", download = FALSE),
     class = "runtime_error"
   )
 })
@@ -19,7 +19,7 @@ for (ds_name in datasets) {
   test_that(paste0("rf100_microscopic_collection loads ", ds_name, " correctly"), {
     skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
             "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-    ds <- rf100_microscopic_collection(dataset = ds_name, split = "train", root = t, download = TRUE)
+    ds <- rf100_microscopic_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_microscopic_collection")
     expect_gt(length(ds), 0)
