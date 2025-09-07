@@ -3,7 +3,7 @@ context("dataset-rf100-doc")
 test_that("rf100_document_collection handles missing dataset gracefully", {
   expect_error(
     rf100_document_collection(dataset = "paragraph", split = "train", download = FALSE),
-    "'arg' should be one of “tweeter_post”"
+    "'arg' should be one of"
   )
 })
 

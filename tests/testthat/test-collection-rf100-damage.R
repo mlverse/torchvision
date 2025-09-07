@@ -11,7 +11,7 @@ test_that("rf100_damage_collection handles missing files gracefully", {
 
 datasets <- c("liquid_crystals", "solar_panel", "asbestos")
 
-for (ds_name in small_datasets) {
+for (ds_name in datasets) {
   test_that(paste0("rf100_damage_collection loads ", ds_name, " correctly"), {
     ds <- rf100_damage_collection(dataset = ds_name, split = "train", download = TRUE)
 

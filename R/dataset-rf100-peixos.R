@@ -9,6 +9,7 @@ NULL
 #' annotations (falling back to bounding boxes if necessary).
 #'
 #' @inheritParams rf100_document_collection
+#' @inheritParams tiny_imagenet_dataset
 #' @return A torch dataset. Each element is a named list with:
 #' - `x`: H × W × 3 array (use `transform_to_tensor()` in `transform` to get
 #'   C × H × W tensor).

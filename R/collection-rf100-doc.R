@@ -155,7 +155,7 @@ rf100_document_collection <- torch::dataset(
       self$.data <- ads$to_data_frame()
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for {.val {self$dataset}}.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
   },
 
   download = function() {

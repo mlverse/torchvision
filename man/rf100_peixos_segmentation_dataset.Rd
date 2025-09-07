@@ -16,6 +16,8 @@ rf100_peixos_segmentation_dataset(
 \arguments{
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
+\item{root}{directory path to download the dataset.}
+
 \item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 
 \item{transform}{Optional transform function applied to the image.}
