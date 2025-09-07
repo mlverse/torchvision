@@ -74,7 +74,7 @@ facenet_torchscript_urls <- list(
 #' img <- base_loader(paste0(wmc,url))
 #'
 #' # Convert to torch tensor [C, H, W] normalized
-#' input <- transform_to_tensor(arr)  # [C, H, W]
+#' input <- transform_to_tensor(img)  # [C, H, W]
 #' batch <- input$unsqueeze(1)   # [1, C, H, W]
 #'
 #' # Load pretrained model
@@ -91,14 +91,15 @@ facenet_torchscript_urls <- list(
 #' }
 #'
 #' @importFrom torch nn_module nn_conv2d nn_prelu nn_max_pool2d nn_softmax nn_linear nn_batch_norm2d nn_batch_norm1d
-#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat nnf_interpolate nnf_relu nnf_normalize
+#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat
+#' @importFrom torch nnf_interpolate nnf_relu nnf_normalize load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
 #' @param classify Logical, whether to include the classification head. Default is FALSE.
 #' @param num_classes Integer, number of output classes for classification. Default is 10.
 #' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
 #'
-#' @family models
+#' @family object_detection_model
 #' @rdname model_facenet
 #' @name model_facenet
 NULL

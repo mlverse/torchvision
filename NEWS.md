@@ -12,16 +12,21 @@
 
 ## New models
 
+* Added `model_maxvit()` for MaxViT: Multi-Axis Vision Transformer (#229, @koshtiakanksha).
 * Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
 * Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
+* Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
 
 ## New features
 
+* Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 * `base_loader()` now accept URLs (@cregouby, #246).
+* `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
 
 ## Bug fixes and improvements
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
+* Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
 
 # torchvision 0.7.0
 

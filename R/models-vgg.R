@@ -138,7 +138,7 @@ NULL
 
 #' @describeIn model_vgg VGG 11-layer model (configuration "A")
 #'
-#' @family models
+#' @family classification_model
 #' @export
 model_vgg11 <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg('vgg11', 'A', FALSE, pretrained, progress, ...)
