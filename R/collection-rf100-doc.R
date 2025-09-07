@@ -162,8 +162,7 @@ rf100_document_collection <- torch::dataset(
     if (self$check_exists()) return(invisible(NULL))
     cli_inform("Downloading {.val {self$dataset}}...")
 
-    archive <- sapply(self$archive_url, \(u) download_and_cache(u, prefix = file.path(class(self)[1], self$dataset))
-    )
+    archive <- sapply(self$archive_url, download_and_cache, prefix = file.path(class(self)[1], self$dataset))
 
     if (!all(tools::md5sum(archive) == self$archive_md5))
       runtime_error("Corrupt file! Delete the cached files and try again.")
