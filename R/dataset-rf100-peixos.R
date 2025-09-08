@@ -36,7 +36,7 @@ NULL
 #' @export
 rf100_peixos_segmentation_dataset <- torch::dataset(
   name = "rf100_peixos_segmentation_dataset",
-  inherit = rf100_document_collection,
+  inherit = coco_detection_dataset,
 
   resources = data.frame(
     dataset = "peixos",
@@ -48,7 +48,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
 
   initialize = function(
     split = c("train", "test", "valid"),
-    root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else fs::path_temp("torchvision-datasets"),
+    root = tempfile(),
     download = FALSE,
     transform = NULL,
     target_transform = NULL
@@ -56,11 +56,12 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     self$dataset <- "peixos"
     self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
+    self$archive_size <- 125e6
     self$transform <- transform
     self$target_transform <- target_transform
 
     fs::dir_create(self$root, recurse = TRUE)
-    self$dataset_dir <- fs::path(self$root, "rf100-peixos")
+    self$data_dir <- fs::path(self$root, "rf100-peixos")
 
     resource <- self$resources[self$resources$dataset == self$dataset, , drop = FALSE]
     self$archive_url <- resource$url
@@ -73,6 +74,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
 
     self$load_annotations()
   },
+
 
   .getitem = function(index) {
     img_path <- self$image_paths[index]
@@ -116,6 +118,8 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
-    structure(list(x = x, y = y), class = "image_with_segmentation_mask")
+    item <- list(x = x, y = y)
+    class(item) <- c("image_with_segmentation_mask", class(item))
+    item
   }
 )

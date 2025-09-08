@@ -6,8 +6,7 @@
 \usage{
 rf100_peixos_segmentation_dataset(
   split = c("train", "test", "valid"),
-  root = if (.Platform$OS.type == "windows") fs::path("C:/torchvision-datasets") else
-    fs::path_temp("torchvision-datasets"),
+  root = tempfile(),
   download = FALSE,
   transform = NULL,
   target_transform = NULL

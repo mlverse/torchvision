@@ -11,8 +11,8 @@
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
-#' - `x`: a `(C, H, W)` `torch_tensor` representing the image.
-#' - `y$boxes`: a `(N, 4)` `torch_tensor` of bounding boxes in the format `c(x_min, y_min, x_max, y_max)`.
+#' - `x`: a `(C, H, W)` array representing the image.
+#' - `y$boxes`: a `(N, 4)` `torch_tensor` of bounding boxes in the format  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}.
 #' - `y$labels`: an integer `torch_tensor` with the class label for each object.
 #' - `y$area`: a float `torch_tensor` indicating the area of each object.
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
@@ -105,15 +105,10 @@ coco_detection_dataset <- torch::dataset(
 
     img_path <- fs::path(self$image_dir, image_info$file_name)
 
-    x <- jpeg::readJPEG(img_path)
-    if (length(dim(x)) == 2) {
-      x <- array(rep(x, 3), dim = c(dim(x), 3))
-    }
-    x <- aperm(x, c(3, 1, 2))
-    x <- torch::torch_tensor(x, dtype = torch::torch_float())
+    x <- base_loader(img_path)
 
-    H <- as.integer(x$shape[2])
-    W <- as.integer(x$shape[3])
+    H <- dim(x)[1]
+    W <- dim(x)[2]
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -145,11 +140,12 @@ coco_detection_dataset <- torch::dataset(
       }
 
     } else {
+      # empty annotation
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
-      masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+      masks_tensor <- torch::torch_empty(c(0, H, W), dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 
