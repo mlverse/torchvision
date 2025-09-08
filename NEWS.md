@@ -6,6 +6,9 @@
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
+* Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
+  `rf100_underwater_collection()` and `rf100_peixos_segmentation_dataset()`. The 6 firsts are collection of datasets under the same 
+  thematic, for a total of 36 datasets (@koshtiakanksha, @cregouby, #239).
 
 ## New models
 
@@ -40,6 +43,7 @@
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
+* Added `rf100_document_collection()`, `rf100_underwater_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, and `rf100_peixos_segmentation_dataset()` for loading Roboflow 100 datasets (@koshtiakanksha, #239).
 
 ## New models
 

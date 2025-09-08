@@ -28,7 +28,7 @@ Description: Provides access to datasets, models and preprocessing
     'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd"))
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
 RoxygenNote: 7.3.2
 Imports:
@@ -56,3 +56,52 @@ Suggests:
     R.matlab,
     xml2
 BugReports: https://github.com/mlverse/torchvision/issues
+Collate: 
+    'folder-dataset.R'
+    'collection-rf100-doc.R'
+    'collection-rf100-biology.R'
+    'collection-rf100-damage.R'
+    'collection-rf100-infrared.R'
+    'collection-rf100-medical.R'
+    'collection-rf100-underwater.R'
+    'conditions.R'
+    'dataset-caltech.R'
+    'dataset-cifar.R'
+    'dataset-coco.R'
+    'dataset-eurosat.R'
+    'dataset-fer.R'
+    'dataset-fgvc.R'
+    'dataset-flickr.R'
+    'dataset-flowers.R'
+    'dataset-lfw.R'
+    'dataset-mnist.R'
+    'dataset-oxfordiiitpet.R'
+    'dataset-pascal.R'
+    'dataset-places365.R'
+    'dataset-plankton.R'
+    'extension.R'
+    'globals.R'
+    'imagenet.R'
+    'models-alexnet.R'
+    'models-deeplabv3.R'
+    'models-efficientnet.R'
+    'models-efficientnetv2.R'
+    'models-facenet.R'
+    'models-fcn.R'
+    'models-inception.R'
+    'models-maxvit.R'
+    'models-mobilenetv2.R'
+    'models-mobilenetv3.R'
+    'models-resnet.R'
+    'models-vgg.R'
+    'models-vit.R'
+    'ops-box_convert.R'
+    'ops-boxes.R'
+    'tiny-imagenet-dataset.R'
+    'transforms-array.R'
+    'transforms-defaults.R'
+    'transforms-generics.R'
+    'transforms-magick.R'
+    'transforms-tensor.R'
+    'utils.R'
+    'vision_utils.R'

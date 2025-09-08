@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.7.0.9000\n"
-"POT-Creation-Date: 2025-08-15 10:15+0200\n"
+"POT-Creation-Date: 2025-09-07 18:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -9,6 +9,33 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: collection-rf100-doc.R:142
+msgid ""
+"Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls "
+"{class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and "
+"processed if not already available."
+msgstr ""
+
+#: collection-rf100-doc.R:147
+msgid ""
+"Dataset not found. Use download=TRUE or check that parquet files exist at "
+"the expected paths."
+msgstr ""
+
+#: collection-rf100-doc.R:158
+msgid ""
+"{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for {."
+"val {self$dataset}}."
+msgstr ""
+
+#: collection-rf100-doc.R:163
+msgid "Downloading {.val {self$dataset}}..."
+msgstr ""
+
+#: collection-rf100-doc.R:168
+msgid "Corrupt file! Delete the cached files and try again."
+msgstr ""
 
 #: conditions.R:2
 msgid "type_error"
@@ -38,31 +65,31 @@ msgstr ""
 msgid "deprecated"
 msgstr ""
 
-#: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:85 dataset-coco.R:305 dataset-eurosat.R:57 dataset-fer.R:63 dataset-fgvc.R:91 dataset-flickr.R:69 dataset-flickr.R:231 dataset-flowers.R:92 dataset-lfw.R:108 dataset-lfw.R:246 dataset-mnist.R:86 dataset-mnist.R:234 dataset-mnist.R:421 dataset-oxfordiiitpet.R:71 dataset-oxfordiiitpet.R:283 dataset-oxfordiiitpet.R:347 dataset-pascal.R:136 dataset-pascal.R:294 dataset-places365.R:98
+#: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:85 dataset-coco.R:301 dataset-eurosat.R:57 dataset-fer.R:63 dataset-fgvc.R:91 dataset-flickr.R:69 dataset-flickr.R:231 dataset-flowers.R:92 dataset-lfw.R:108 dataset-lfw.R:246 dataset-mnist.R:86 dataset-mnist.R:234 dataset-mnist.R:421 dataset-oxfordiiitpet.R:71 dataset-oxfordiiitpet.R:279 dataset-oxfordiiitpet.R:343 dataset-pascal.R:136 dataset-pascal.R:296 dataset-places365.R:98
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
 "downloaded and processed if not already available."
 msgstr ""
 
-#: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:90 dataset-coco.R:310 dataset-eurosat.R:64 dataset-fer.R:70 dataset-flowers.R:97 dataset-lfw.R:113 dataset-lfw.R:251 dataset-mnist.R:91 dataset-mnist.R:239 dataset-mnist.R:426 dataset-oxfordiiitpet.R:76 dataset-oxfordiiitpet.R:288 dataset-oxfordiiitpet.R:352 dataset-pascal.R:141 dataset-pascal.R:299 dataset-places365.R:103 dataset-plankton.R:89
+#: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:90 dataset-coco.R:306 dataset-eurosat.R:64 dataset-fer.R:70 dataset-flowers.R:97 dataset-lfw.R:113 dataset-lfw.R:251 dataset-mnist.R:91 dataset-mnist.R:239 dataset-mnist.R:426 dataset-oxfordiiitpet.R:76 dataset-oxfordiiitpet.R:284 dataset-oxfordiiitpet.R:348 dataset-pascal.R:141 dataset-pascal.R:301 dataset-places365.R:103 dataset-plankton.R:89 dataset-rf100-peixos.R:71
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 
-#: dataset-caltech.R:84 dataset-caltech.R:208 dataset-lfw.R:135 dataset-lfw.R:286 dataset-oxfordiiitpet.R:95 dataset-oxfordiiitpet.R:302 dataset-oxfordiiitpet.R:366 dataset-pascal.R:149 dataset-pascal.R:317 dataset-plankton.R:93
+#: dataset-caltech.R:84 dataset-caltech.R:208 dataset-lfw.R:135 dataset-lfw.R:286 dataset-oxfordiiitpet.R:95 dataset-oxfordiiitpet.R:298 dataset-oxfordiiitpet.R:362 dataset-pascal.R:149 dataset-pascal.R:319 dataset-plankton.R:93
 msgid ""
 "{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across "
 "{length(self$classes)} classes."
 msgstr ""
 
-#: dataset-caltech.R:117 dataset-coco.R:187 dataset-eurosat.R:81 dataset-flickr.R:136 dataset-lfw.R:146 dataset-oxfordiiitpet.R:107 dataset-pascal.R:158 dataset-plankton.R:100
+#: dataset-caltech.R:117 dataset-coco.R:183 dataset-eurosat.R:81 dataset-flickr.R:136 dataset-lfw.R:146 dataset-oxfordiiitpet.R:107 dataset-pascal.R:158 dataset-plankton.R:100
 msgid "Downloading {.cls {class(self)[[1]]}}..."
 msgstr ""
 
-#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:193 dataset-eurosat.R:88 dataset-fer.R:129 dataset-flowers.R:136 dataset-lfw.R:157 dataset-lfw.R:172 dataset-mnist.R:121 dataset-mnist.R:264 dataset-mnist.R:453 dataset-oxfordiiitpet.R:115 dataset-pascal.R:168 dataset-places365.R:182 dataset-plankton.R:105 models-vit.R:49
+#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:189 dataset-eurosat.R:88 dataset-fer.R:129 dataset-flowers.R:136 dataset-lfw.R:157 dataset-lfw.R:172 dataset-mnist.R:121 dataset-mnist.R:264 dataset-mnist.R:453 dataset-oxfordiiitpet.R:115 dataset-pascal.R:168 dataset-places365.R:182 dataset-plankton.R:105 models-facenet.R:128 models-facenet.R:174 models-facenet.R:228 models-facenet.R:311 models-vit.R:49
 msgid "Corrupt file! Delete the file in {archive} and try again."
 msgstr ""
 
-#: dataset-caltech.R:136 dataset-cifar.R:115 dataset-coco.R:199 dataset-eurosat.R:104 dataset-fer.R:134 dataset-fgvc.R:178 dataset-flickr.R:154 dataset-flowers.R:158 dataset-lfw.R:179 dataset-mnist.R:141 dataset-mnist.R:300 dataset-oxfordiiitpet.R:154 dataset-pascal.R:191 tiny-imagenet-dataset.R:67
+#: dataset-caltech.R:136 dataset-cifar.R:115 dataset-coco.R:195 dataset-eurosat.R:104 dataset-fer.R:134 dataset-fgvc.R:178 dataset-flickr.R:154 dataset-flowers.R:158 dataset-lfw.R:179 dataset-mnist.R:141 dataset-mnist.R:300 dataset-oxfordiiitpet.R:154 dataset-pascal.R:191 tiny-imagenet-dataset.R:67
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
 msgstr ""
@@ -87,13 +114,13 @@ msgstr ""
 msgid "Downloading {.cls {class(self)[[1]]}} ..."
 msgstr ""
 
-#: dataset-coco.R:95 dataset-coco.R:315
+#: dataset-coco.R:95 dataset-coco.R:311
 msgid ""
 "{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} "
 "images."
 msgstr ""
 
-#: dataset-coco.R:326
+#: dataset-coco.R:322
 msgid "Index out of bounds"
 msgstr ""
 
@@ -205,6 +232,10 @@ msgid ""
 "available."
 msgstr ""
 
+#: dataset-rf100-peixos.R:81
+msgid "Image file not found:"
+msgstr ""
+
 #: extension.R:2
 msgid ""
 "has_ops() Not implemented yet. https://github.com/pytorch/vision/blob/"
@@ -220,68 +251,44 @@ msgid ""
 "torch install."
 msgstr ""
 
-#: folder-dataset.R:19
+#: folder-dataset.R:23
 msgid ""
 "Both extensions and is_valid_file cannot be None or not None at the same time"
 msgstr ""
 
-#: folder-dataset.R:140
+#: folder-dataset.R:151
 msgid "unknown extension {ext} in path {path}"
 msgstr ""
 
-#: model-detection-anchor-utils.R:83
-msgid "{.var cell_anchors} should not be NULL"
-msgstr ""
-
-#: model-detection-anchor-utils.R:86
-msgid "Anchors should be a list(list(int)) because each feature"
-msgstr ""
-
-#: model-detection-anchor-utils.R:87
-msgid "map could potentially have different sizes and aspect ratios."
-msgstr ""
-
-#: model-detection-anchor-utils.R:88
-msgid "There needs to be a match between the number of"
-msgstr ""
-
-#: model-detection-anchor-utils.R:89
-msgid "feature maps passed and the number of sizes / aspect ratios specified."
-msgstr ""
-
-#: model-detection-anchor-utils.R:164
-msgid "{.var aspect_ratios} and {.var steps} should have the same length"
-msgstr ""
-
-#: models-alexnet.R:58 models-inception.R:435 models-mobilenetv2.R:15
+#: models-alexnet.R:58 models-inception.R:434 models-mobilenetv2.R:17
 msgid ""
 "Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be "
 "downloaded and processed if not already available."
 msgstr ""
 
-#: models-alexnet.R:61 models-deeplabv3.R:254 models-efficientnet.R:229 models-efficientnetv2.R:199 models-fcn.R:194 models-fcn.R:243 models-inception.R:438 models-mobilenetv2.R:18 models-resnet.R:248 models-vgg.R:114
+#: models-alexnet.R:61 models-deeplabv3.R:263 models-efficientnet.R:228 models-efficientnetv2.R:204 models-fcn.R:185 models-fcn.R:233 models-inception.R:437 models-mobilenetv2.R:20 models-resnet.R:248 models-vgg.R:114
 msgid "Corrupt file! Delete the file in {state_dict_path} and try again."
 msgstr ""
 
-#: models-deeplabv3.R:216 models-fcn.R:170 models-fcn.R:219
+#: models-deeplabv3.R:225 models-fcn.R:162 models-fcn.R:210
 msgid "Pretrained weights require num_classes = 21."
 msgstr ""
 
-#: models-deeplabv3.R:223
+#: models-deeplabv3.R:232
 msgid "`pretrained_backbone` ignored when `pretrained = TRUE`."
 msgstr ""
 
-#: models-deeplabv3.R:251
+#: models-deeplabv3.R:260
 msgid "Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ..."
 msgstr ""
 
-#: models-efficientnet.R:226 models-efficientnetv2.R:196 models-resnet.R:245 models-vgg.R:111
+#: models-efficientnet.R:225 models-efficientnetv2.R:201 models-resnet.R:245 models-vgg.R:111
 msgid ""
 "Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and "
 "processed if not already available."
 msgstr ""
 
-#: models-fcn.R:190 models-fcn.R:239 models-vit.R:44
+#: models-fcn.R:182 models-fcn.R:230 models-vit.R:44
 msgid ""
 "Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and "
 "processed if not already available."
@@ -309,10 +316,14 @@ msgid ""
 "{length(inception_blocks)}"
 msgstr ""
 
-#: models-mobilenetv2.R:63
+#: models-mobilenetv2.R:65
 msgid ""
 "{.var inverted_residual_setting} should be non-empty or a 4-element list, "
 "got {.val {inverted_residual_setting}}"
+msgstr ""
+
+#: models-mobilenetv3.R:148
+msgid "illegal stride value"
 msgstr ""
 
 #: models-resnet.R:34
@@ -477,7 +488,7 @@ msgstr ""
 msgid "The provided x class {.class {class(x)}} is not supported"
 msgstr ""
 
-#: vision_utils.R:122 vision_utils.R:227 vision_utils.R:318 vision_utils.R:423
+#: vision_utils.R:122 vision_utils.R:227 vision_utils.R:318 vision_utils.R:433
 msgid "magick"
 msgstr ""
 
@@ -485,7 +496,7 @@ msgstr ""
 msgid "Pass individual `x`, not batches"
 msgstr ""
 
-#: vision_utils.R:128 vision_utils.R:325 vision_utils.R:431 vision_utils.R:493 vision_utils.R:523
+#: vision_utils.R:128 vision_utils.R:325 vision_utils.R:441 vision_utils.R:503 vision_utils.R:533
 msgid "Only grayscale and RGB images are supported"
 msgstr ""
 
@@ -523,7 +534,7 @@ msgid ""
 "draw_segmentation_masks."
 msgstr ""
 
-#: vision_utils.R:322 vision_utils.R:428 vision_utils.R:490 vision_utils.R:520
+#: vision_utils.R:322 vision_utils.R:438 vision_utils.R:500 vision_utils.R:530
 msgid "Pass individual `image`, not batches"
 msgstr ""
 
@@ -535,33 +546,33 @@ msgstr ""
 msgid "`masks` must be of shape (H, W) or (num_masks, H, W)"
 msgstr ""
 
-#: vision_utils.R:342
-msgid "`masks` is expected to be of dtype torch_bool"
+#: vision_utils.R:343
+msgid "`masks` is expected to be of dtype torch_bool() or torch_float()"
 msgstr ""
 
-#: vision_utils.R:345
+#: vision_utils.R:346
 msgid "`masks` and `image` must have the same height and width"
 msgstr ""
 
-#: vision_utils.R:350
+#: vision_utils.R:359
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr ""
 
-#: vision_utils.R:358
+#: vision_utils.R:367
 msgid ""
 "colors vector of size {.value {length(colors)}} cannot be broadcasted on {."
 "value {num_masks}} masks"
 msgstr ""
 
-#: vision_utils.R:425
+#: vision_utils.R:435
 msgid "`image` should be a torch_tensor"
 msgstr ""
 
-#: vision_utils.R:438
+#: vision_utils.R:448
 msgid "`image` should be of dtype `torch_uint8` or `torch_float`"
 msgstr ""
 
-#: vision_utils.R:442
+#: vision_utils.R:452
 msgid ""
 "{.var keypoints} must be of shape (num_instances, K, 2), but is current "
 "shape is {.value {keypoints$shape}}"
