@@ -27,6 +27,7 @@
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
 * Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
+* Demonstration of Open Source Contributions
 
 # torchvision 0.7.0
 
