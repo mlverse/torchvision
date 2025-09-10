@@ -6,7 +6,7 @@
 \usage{
 rf100_peixos_segmentation_dataset(
   split = c("train", "test", "valid"),
-  root = tempfile(),
+  root = tempdir(),
   download = FALSE,
   transform = NULL,
   target_transform = NULL
@@ -39,10 +39,10 @@ The returned item is given class \code{image_with_segmentation_mask} so it can b
 visualised with helpers like \code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}}.
 }
 \description{
-Loads the Roboflow 100 "peixos" dataset for semantic segmentation. Each
-split contains the raw images alongside an \verb{_annotations.coco.json} file in
-COCO format. Segmentation masks are generated on-the-fly from polygon
-annotations (falling back to bounding boxes if necessary).
+Loads the Roboflow 100 "peixos" dataset for semantic segmentation.
+"peixos" contains 3 splits of respectively 821 / 118 / 261 color images of size 640 x 640.
+Segmentation masks are generated on-the-fly from polygon
+annotations of the unique "fish" category.
 }
 \examples{
 \dontrun{
