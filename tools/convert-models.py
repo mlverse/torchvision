@@ -68,6 +68,9 @@ for name, url in models.items():
     if name.startswith("yolo_"):
       m = m["model"].model.float().state_dict()
     
+    if name.startswith("convnext_"):
+      m = m["model"]
+    
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)
