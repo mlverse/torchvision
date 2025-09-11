@@ -41,13 +41,7 @@ Block <- nn_module(
   initialize = function(dim,
                         drop_path = 0,
                         layer_scale_init_value = 1e-6) {
-    self$dwconv <- nn_conv2d(
-      dim,
-      dim,
-      kernel_size = 7,
-      padding = 3,
-      groups = dim
-    )
+    self$dwconv <- nn_conv2d(dim, dim, kernel_size = 7, padding = 3, groups = dim)
     self$norm <- LayerNorm(dim, eps = 1e-6)
     self$pwconv1 <- nn_linear(dim, 4 * dim)
     self$act <- nn_gelu()
@@ -136,24 +130,19 @@ ConvNeXt <- nn_module(
 
 
 convnext_model_urls <- c(
-  "convnext_tiny_224_1k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_tiny.pth",
-  "convnext_tiny_224_22k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_tiny.pth",
-  "convnextsmall_224_22k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_small.pth",
-  'convnextsmall_224_22k_1k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_small.pth",
-  'convnextbase' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_base.pth",
-  'convnextlarge' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_large.pth"
+  "convnext_tiny_1k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_tiny_1k.pth",
+  "convnext_tiny_22k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_tiny_22k.pth",
+  "convnext_small_22k" = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_small_22k.pth",
+  'convnext_small_22k1k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_small_22k1k.pth",
+  'convnext_base_1k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_base_1k.pth",
+  'convnext_base_22k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_base_22k.pth",
+  'convnext_large_1k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_large_1k.pth",
+  'convnext_large_22k' = "https://torch-cdn.mlverse.org/models/vision/v2/models/convnext_large_22k.pth"
 )
 
 
 
-.convnext <- function(arch,
-                      channels,
-                      depths,
-                      dims,
-                      num_classes,
-                      pretrained,
-                      progress,
-                      ...) {
+.convnext <- function(arch, channels, depths, dims, num_classes, pretrained, progress, ...) {
   if (!is.character(arch) || length(arch) != 1) {
     stop("arch must be a single character string.")
   }
@@ -176,7 +165,12 @@ convnext_model_urls <- c(
     if (!arch %in% names(convnext_model_urls)) {
       stop(paste("Pretrained model for", arch, "is not available."))
     }
-    state_dict <- torch::load_state_dict(convnext_model_urls[arch])
+    state_dict_path <- download_and_cache(convnext_model_urls[arch], prefix = "convnext")
+    state_dict <- torch::load_state_dict(state_dict_path)
+    new_names <- names(state_dict)
+    new_names <- gsub("^features\\.([0-9])\\.([0-1])\\.w", "downsample_layers.\\1.\\2.w", new_names)
+    new_names <- gsub("^features\\.([0-9])\\.([0-1])\\.bias", "downsample_layers.\\1.\\2.bias", new_names)
+    names(state_dict) <- new_names
 
     # Interpolate stem weights if input channels differ.sample use cases - satellite images
     conv1_weight <- state_dict[["downsample_layers.0.0.weight"]]
@@ -198,18 +192,20 @@ convnext_model_urls <- c(
 }
 
 
-#' @describeIn model_convnext ConvNeXt Tiny model 224 22k_1k.
+#' @describeIn model_convnext ConvNeXt Tiny model with 28 M parameters
+#' 224 trained on Imagenet 1k.
 #' @export
 model_convnext_tiny <- function(pretrained = FALSE,
-                                          progress = TRUE,
-                                          channels = 3,
-                                          ...) {
+                                progress = TRUE,
+                                channels = 3,
+                                num_classes = 1000,
+                                ...) {
   .convnext(
     arch = "convnext_tiny_224_1k" ,
     channels = channels,
     depths = c(3, 3, 9, 3),
     dims = c(96, 192, 384, 768),
-    num_classes = 1000,
+    num_classes = num_classes,
     pretrained,
     progress,
     ...
@@ -239,15 +235,16 @@ model_convnext_tiny <- function(pretrained = FALSE,
 #' @describeIn model_convnext ConvNeXt Small model 224 22k_1k.
 #' @export
 model_convnext_small <- function(pretrained = FALSE,
-                                           progress = TRUE,
-                                           channels = 3,
-                                           ...) {
+                                 progress = TRUE,
+                                 channels = 3,
+                                 num_classes = 1000,
+                                 ...) {
   .convnext(
     arch = "convnextsmall_224_22k_1k" ,
     channels = channels,
     depths = c(3, 3, 27, 3),
     dims = c(96, 192, 384, 768),
-    num_classes = 1000,
+    num_classes = num_classes,
     pretrained,
     progress,
     ...
