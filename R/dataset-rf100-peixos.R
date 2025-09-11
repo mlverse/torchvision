@@ -37,7 +37,7 @@ NULL
 rf100_peixos_segmentation_dataset <- torch::dataset(
   name = "rf100_peixos_segmentation_dataset",
   inherit = coco_detection_dataset,
-
+  archive_size_table = list(train = "119 MB", test = "119 MB", valid = "119 MB"),
   resources = data.frame(
     dataset = "peixos",
     url = "https://huggingface.co/datasets/Francesco/peixos-fish/resolve/main/dataset.tar.gz?download=1",
@@ -56,13 +56,13 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     self$dataset <- "peixos"
     self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
-    self$archive_size <- 125e6
     self$transform <- transform
     self$target_transform <- target_transform
 
-    fs::dir_create(self$root, recurse = TRUE)
     self$data_dir <- fs::path(self$root, class(self)[[1]])
-    self$annotation_file <- fs::path(self$data_dir, self$split, "_annotations.coco.json")
+    self$image_dir <- fs::path(self$data_dir, self$split)
+    fs::dir_create(self$image_dir, recurse = TRUE)
+    self$annotation_file <- fs::path(self$image_dir, "_annotations.coco.json")
 
     if (download) self$download()
 
@@ -82,7 +82,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
     archive_gz <- fs::path(self$data_dir, basename(sub("download=1$", "", archive)))
-    fs::file_move(archive, archive_gz)
+    fs::file_copy(archive, archive_gz)
     utils::untar(archive_gz, exdir = self$data_dir, extras = "--strip-components=8")
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")

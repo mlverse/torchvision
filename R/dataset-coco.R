@@ -50,10 +50,22 @@
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
-  archive_size_table = list(
-    "2017" = list(train = "18 GB", val = "770 MB"),
-    "2014" = list(train = "13 GB", val = "6.3 GB")
+  resources = data.frame(
+    year = rep(c(2017, 2014), each = 4 ),
+    content = rep(c("image", "annotation"), time = 2, each = 2),
+    split = rep(c("train", "val"), time = 4),
+    url = c("http://images.cocodataset.org/zips/train2017.zip", "http://images.cocodataset.org/zips/val2017.zip",
+            rep("http://images.cocodataset.org/annotations/annotations_trainval2017.zip", time = 2),
+            "http://images.cocodataset.org/zips/train2014.zip", "http://images.cocodataset.org/zips/val2014.zip",
+            rep("http://images.cocodataset.org/annotations/annotations_trainval2014.zip", time = 2)),
+    size = c(rep(c("18 GB", "770 MB"), each = 2), rep(c("13 GB", "6.3 GB"), each = 2)),
+    md5 = c(rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
+            c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
+            rep("d3e24dc9f5bda3e7887a1e6a5ff34c0c", time = 2),
+            c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3")),
+    stringsAsFactors = FALSE
   ),
+
   initialize = function(
     root = tempdir(),
     train = TRUE,
@@ -72,7 +84,7 @@ coco_detection_dataset <- torch::dataset(
     self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
-    self$archive_size <- self$archive_size_table[[year]][[split]]
+    self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
@@ -81,7 +93,7 @@ coco_detection_dataset <- torch::dataset(
     self$annotation_file <- fs::path(self$data_dir, "annotations",
                                      glue::glue("instances_{split}{year}.json"))
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
@@ -174,14 +186,15 @@ coco_detection_dataset <- torch::dataset(
   },
 
   download = function() {
-    info <- self$get_resource_info()
+    annotation_filter <- self$resources$year == self$year & self$resources$split == split & self$resource$content == "annotation"
+    image_filter <- self$resources$year == self$year & self$resources$split == split & self$resource$content == "image"
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(info$ann_url)
-    archive <- download_and_cache(info$img_url)
+    ann_zip <- download_and_cache(self$resource[annotation_filter , ]$url)
+    archive <- download_and_cache(self$resource[image_filter , ]$url)
 
-    if (tools::md5sum(archive) != info$img_md5) {
+    if (tools::md5sum(archive) != self$resource[image_filter , ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
@@ -189,24 +202,6 @@ coco_detection_dataset <- torch::dataset(
     utils::unzip(archive, exdir = self$data_dir)
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
-  },
-
-  get_resource_info = function() {
-    split <- self$split
-    list(
-      "2017" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip",
-        ann_md5 = "f4bbac642086de4f52a3fdda2de5fa2c",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2017.zip"),
-        img_md5 = if (split == "train") "cced6f7f71b7629ddf16f17bbcfab6b2" else "442b8da7639aecaf257c1dceb8ba8c80"
-      ),
-      "2014" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip",
-        ann_md5 = "d3e24dc9f5bda3e7887a1e6a5ff34c0c",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2014.zip"),
-        img_md5 = if (split == "train") "0da8cfa0e090c266b78f30e2d2874f1a" else "a3d79f5ed8d289b7a7554ce06a5782b3"
-      )
-    )[[self$year]]
   },
 
   load_annotations = function() {
