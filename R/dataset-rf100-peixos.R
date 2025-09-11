@@ -37,11 +37,11 @@ NULL
 rf100_peixos_segmentation_dataset <- torch::dataset(
   name = "rf100_peixos_segmentation_dataset",
   inherit = coco_detection_dataset,
-  archive_size_table = list(train = "119 MB", test = "119 MB", valid = "119 MB"),
   resources = data.frame(
     dataset = "peixos",
     url = "https://huggingface.co/datasets/Francesco/peixos-fish/resolve/main/dataset.tar.gz",
     md5 = "0eb13ea40677178aed2fd47f153fabe2",
+    size = "119 MB",
     stringsAsFactors = FALSE
   ),
   classes = c("fish"),
@@ -83,7 +83,13 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     }
     archive_gz <- fs::path(self$data_dir, basename(archive))
     fs::file_copy(archive, archive_gz, overwrite = TRUE)
-    utils::untar(archive_gz, exdir = self$data_dir, extras = "--strip-components=8")
+    utils::untar(archive_gz, exdir = self$data_dir)
+    # workaround the `--strip-compoents = 8` not widely available
+    fs::file_move(
+      fs::path_filter(
+        list.files(self$data_dir, recursive = TRUE, full.names = TRUE, pattern = "jpg|png|json"),
+        regexp = self$split),
+      self$image_dir)
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
