@@ -24,12 +24,11 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_s3_class(ds, "coco_detection_dataset")
   expect_gt(length(ds), 0)
 
-  example <- ds[1]
-  x <- example$x
-  y <- example$y
+  item <- ds[1]
+  y <- item$y
 
-  expect_tensor(x)
-  expect_equal(x$ndim, 3)
+  expect_is(item$x, array)
+  expect_equal(length(dim(item$x)), 3)
 
   expect_type(y, "list")
   expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
@@ -53,7 +52,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
 
-  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
+  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE, transform = transform_to_tensor)
 
   dl <- dataloader(ds, batch_size = 2, collate_fn = collate_fn)
   iter <- dataloader_make_iter(dl)
@@ -85,15 +84,15 @@ test_that("coco_caption_dataset loads a single example correctly", {
   expect_s3_class(ds, "coco_caption_dataset")
   expect_gt(length(ds), 0)
 
-  example <- ds[1]
-  x <- example$x
-  y <- example$y
+  item <- ds[1]
+  x <- item$x
+  y <- item$y
 
-  expect_true(is.array(x))
+  expect_is(x, array)
   expect_equal(length(dim(x)), 3)
   expect_equal(dim(x)[3], 3)
 
-  expect_true(is.character(y))
+  expect_is(y, character)
   expect_gt(nchar(y), 0)
 })
 
