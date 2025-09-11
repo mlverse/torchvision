@@ -82,6 +82,7 @@ Collate:
     'extension.R'
     'globals.R'
     'imagenet.R'
+    'model_convnext.R'
     'models-alexnet.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
