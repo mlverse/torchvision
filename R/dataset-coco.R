@@ -186,15 +186,15 @@ coco_detection_dataset <- torch::dataset(
   },
 
   download = function() {
-    annotation_filter <- self$resources$year == self$year & self$resources$split == split & self$resource$content == "annotation"
-    image_filter <- self$resources$year == self$year & self$resources$split == split & self$resource$content == "image"
+    annotation_filter <- self$resources$year == self$year & self$resources$split == self$split & self$resources$content == "annotation"
+    image_filter <- self$resources$year == self$year & self$resources$split == self$split & self$resources$content == "image"
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(self$resource[annotation_filter , ]$url)
-    archive <- download_and_cache(self$resource[image_filter , ]$url)
+    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url)
+    archive <- download_and_cache(self$resources[image_filter, ]$url)
 
-    if (tools::md5sum(archive) != self$resource[image_filter , ]$md5) {
+    if (tools::md5sum(archive) != self$resources[image_filter, ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
