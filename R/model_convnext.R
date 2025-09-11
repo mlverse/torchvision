@@ -167,10 +167,6 @@ convnext_model_urls <- c(
     }
     state_dict_path <- download_and_cache(convnext_model_urls[arch], prefix = "convnext")
     state_dict <- torch::load_state_dict(state_dict_path)
-    new_names <- names(state_dict)
-    new_names <- gsub("^features\\.([0-9])\\.([0-1])\\.w", "downsample_layers.\\1.\\2.w", new_names)
-    new_names <- gsub("^features\\.([0-9])\\.([0-1])\\.bias", "downsample_layers.\\1.\\2.bias", new_names)
-    names(state_dict) <- new_names
 
     # Interpolate stem weights if input channels differ.sample use cases - satellite images
     conv1_weight <- state_dict[["downsample_layers.0.0.weight"]]
@@ -192,16 +188,16 @@ convnext_model_urls <- c(
 }
 
 
-#' @describeIn model_convnext ConvNeXt Tiny model with 28 M parameters
-#' 224 trained on Imagenet 1k.
+#' @describeIn model_convnext ConvNeXt Tiny model with 29 M parameters
+#' for 224 x 224 pixels images, trained on Imagenet 1k.
 #' @export
-model_convnext_tiny <- function(pretrained = FALSE,
+model_convnext_tiny_1k <- function(pretrained = FALSE,
                                 progress = TRUE,
                                 channels = 3,
                                 num_classes = 1000,
                                 ...) {
   .convnext(
-    arch = "convnext_tiny_224_1k" ,
+    arch = "convnext_tiny_1k" ,
     channels = channels,
     depths = c(3, 3, 9, 3),
     dims = c(96, 192, 384, 768),
@@ -213,34 +209,37 @@ model_convnext_tiny <- function(pretrained = FALSE,
 }
 
 
-# #' @describeIn model_convnext ConvNeXt Tiny model.
-## ' @export
-# model_convnextTiny_224_22k <- function(pretrained = FALSE,
-#                                        progress = TRUE,
-#                                        channels = 3,
-#                                        ...) {
-#   .convnext(
-#     "convnext_tiny_224_22k",
-#     channels = channels,
-#     depths = c(3, 3, 9, 3),
-#     dims = c(96, 192, 384, 768),
-#     num_classes = 21841,
-#     pretrained,
-#     progress,
-#     ...
-#   )
-# }
-
-
-#' @describeIn model_convnext ConvNeXt Small model 224 22k_1k.
+#' @describeIn model_convnext ConvNeXt Tiny model with 29 M parameters
+#' for 224 x 224 pixels images, trained on Imagenet 22k.
 #' @export
-model_convnext_small <- function(pretrained = FALSE,
+model_convnext_tiny_22k <- function(pretrained = FALSE,
+                                       progress = TRUE,
+                                       channels = 3,
+                                       num_classes = 21841,
+                                       ...) {
+  .convnext(
+    "convnext_tiny_22k",
+    channels = channels,
+    depths = c(3, 3, 9, 3),
+    dims = c(96, 192, 384, 768),
+    num_classes = num_classes,
+    pretrained,
+    progress,
+    ...
+  )
+}
+
+
+#' @describeIn model_convnext ConvNeXt Small model with 50 M parameters
+#' for 224 x 224 pixels images, trained on Imagenet 22k.
+#' @export
+model_convnext_small_22k <- function(pretrained = FALSE,
                                  progress = TRUE,
                                  channels = 3,
-                                 num_classes = 1000,
+                                 num_classes = 21841,
                                  ...) {
   .convnext(
-    arch = "convnextsmall_224_22k_1k" ,
+    arch = "convnext_small_22k" ,
     channels = channels,
     depths = c(3, 3, 27, 3),
     dims = c(96, 192, 384, 768),
@@ -252,20 +251,22 @@ model_convnext_small <- function(pretrained = FALSE,
 }
 
 
-# #' @describeIn model_convnext ConvNeXt Small model.
-# #' @export
-# model_convnextSmall_224_22k <- function(pretrained = FALSE,
-#                                         progress = TRUE,
-#                                         channels = 3,
-#                                         ...) {
-#   .convnext(
-#     "convnextsmall_224_22k",
-#     channels = channels,
-#     depths = c(3, 3, 27, 3),
-#     dims = c(96, 192, 384, 768),
-#     num_classes = 21841,
-#     pretrained,
-#     progress,
-#     ...
-#   )
-# }
+#' @describeIn model_convnext ConvNeXt Small model with 50 M parameters
+#' for 224 x 224 pixels images, trained on Imagenet 22k and fine-tuned on Imagenet 1k classes.
+#' @export
+model_convnext_small_22k1k <- function(pretrained = FALSE,
+                                        progress = TRUE,
+                                        channels = 3,
+                                        num_classes = 1000,
+                                        ...) {
+  .convnext(
+    "convnext_small_22k1k",
+    channels = channels,
+    depths = c(3, 3, 27, 3),
+    dims = c(96, 192, 384, 768),
+    num_classes = 21841,
+    pretrained,
+    progress,
+    ...
+  )
+}

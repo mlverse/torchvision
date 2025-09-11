@@ -2,7 +2,7 @@ context("models-convnext")
 
 test_that("non-pretrained model_convnext_tiny work", {
   expect_no_error(
-    model_tiny <- model_convnext_tiny(pretrained = FALSE)
+    model_tiny <- model_convnext_tiny_1k(pretrained = FALSE)
   )
   input <- torch_randn(1, 3, 224, 224)
   model_tiny$eval()
@@ -10,7 +10,7 @@ test_that("non-pretrained model_convnext_tiny work", {
   expect_tensor_shape(out, c(1, 1000))
 
   expect_no_error(
-    model <- model_convnext_tiny(pretrained = FALSE, num_classes = 10)
+    model <- model_convnext_tiny_1k(pretrained = FALSE, num_classes = 10)
   )
   input <- torch_randn(1, 3, 224, 224)
   out <- model(input)
@@ -23,7 +23,7 @@ test_that("non-pretrained model_convnext_tiny work", {
 
 test_that("pretrained model_convnext_tiny works", {
   expect_no_error(
-    model_tiny <- model_convnext_tiny(pretrained = TRUE)
+    model_tiny <- model_convnext_tiny_1k(pretrained = TRUE)
   )
   input <- torch_randn(1, 3, 224, 224)
   model_tiny$eval()
