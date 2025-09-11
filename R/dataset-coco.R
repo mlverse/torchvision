@@ -58,11 +58,11 @@ coco_detection_dataset <- torch::dataset(
             rep("http://images.cocodataset.org/annotations/annotations_trainval2017.zip", time = 2),
             "http://images.cocodataset.org/zips/train2014.zip", "http://images.cocodataset.org/zips/val2014.zip",
             rep("http://images.cocodataset.org/annotations/annotations_trainval2014.zip", time = 2)),
-    size = c(rep(c("18 GB", "770 MB"), each = 2), rep(c("13 GB", "6.3 GB"), each = 2)),
-    md5 = c(rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
-            c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
-            rep("d3e24dc9f5bda3e7887a1e6a5ff34c0c", time = 2),
-            c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3")),
+    size = c("800 MB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
+    md5 = c(c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
+            rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
+            c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3"),
+            rep("0a379cfc70b0e71301e0f377548639bd", time = 2)),
     stringsAsFactors = FALSE
   ),
 
@@ -191,8 +191,8 @@ coco_detection_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url)
-    archive <- download_and_cache(self$resources[image_filter, ]$url)
+    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco_dataset")
+    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco_dataset")
 
     if (tools::md5sum(archive) != self$resources[image_filter, ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
@@ -261,9 +261,6 @@ coco_detection_dataset <- torch::dataset(
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",
   inherit = coco_detection_dataset,
-  archive_size_table = list(
-    "2014" = list(train = "13 GB", val = "6.3 GB")
-  ),
 
   initialize = function(
     root = tempdir(),
@@ -286,7 +283,7 @@ coco_caption_dataset <- torch::dataset(
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
-    self$archive_size <- self$archive_size_table[[year]][[split]]
+    self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     if (download){
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
