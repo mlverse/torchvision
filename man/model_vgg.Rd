@@ -69,6 +69,7 @@ Other classification_model:
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
+\code{\link{model_resnext}},
 \code{\link{model_vit}}
 }
 \concept{classification_model}

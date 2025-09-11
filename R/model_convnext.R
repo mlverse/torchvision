@@ -5,8 +5,10 @@
 #' @param ... Other parameters passed to the model implementation.
 #'
 #' @family classification_model
+#' @name model_resnext
 NULL
 
+#' @importFrom torch nn_module nn_parameter torch_ones torch_zeros nnf_layer_norm
 LayerNorm <- nn_module(
   "LayerNorm",
   initialize = function(normalized_shape,
@@ -33,6 +35,7 @@ LayerNorm <- nn_module(
   }
 )
 
+#' @importFrom torch nn_conv2d nn_linear torch_ones nn_gelu nn_identity
 Block <- nn_module(
   "Block",
   initialize = function(dim,
@@ -74,6 +77,7 @@ Block <- nn_module(
 )
 
 
+#' @importFrom torch nn_conv2d nn_linear nn_sequential nn_module_list torch_linspace nn_layer_norm
 ConvNeXt <- nn_module(
   "ConvNeXt",
   initialize = function(in_chans = 3,
