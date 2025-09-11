@@ -11,17 +11,19 @@ test_that("rf100_peixos_segmentation_dataset handles missing files gracefully", 
 
 test_that("rf100_peixos_segmentation_dataset 'test' split works", {
   ds <- rf100_peixos_segmentation_dataset(split = "test", root = t, download = TRUE)
-  expect_length(ds, 1)
+  expect_length(ds, 118)
   item <- ds[1]
   expect_tensor(item$y$masks)
+  expect_equal(item$y$masks$ndim, 3)
   expect_gt(item$y$masks$sum()$item(), 0)
 })
 
 test_that("rf100_peixos_segmentation_dataset 'val' split works", {
-  ds <- rf100_peixos_segmentation_dataset(split = "test", root = t, download = TRUE)
-  expect_length(ds, 1)
+  ds <- rf100_peixos_segmentation_dataset(split = "val", root = t, download = TRUE)
+  expect_length(ds, 251)
   item <- ds[1]
   expect_tensor(item$y$masks)
+  expect_equal(item$y$masks$ndim, 3)
   expect_gt(item$y$masks$sum()$item(), 0)
 })
 
@@ -32,7 +34,7 @@ test_that(paste0("rf100_peixos_segmentation_dataset loads 'train' split correctl
   ds <- rf100_peixos_segmentation_dataset(split = "train", root = t, download = TRUE)
 
   expect_s3_class(ds, "rf100_peixos_segmentation_dataset")
-  expect_gt(length(ds), 0)
+  expect_length(ds, 821)
 
   item <- ds[1]
 

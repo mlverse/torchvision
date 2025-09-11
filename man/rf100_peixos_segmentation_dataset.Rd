@@ -40,7 +40,7 @@ visualised with helpers like \code{\link[=draw_segmentation_masks]{draw_segmenta
 }
 \description{
 Loads the Roboflow 100 "peixos" dataset for semantic segmentation.
-"peixos" contains 3 splits of respectively 821 / 118 / 261 color images of size 640 x 640.
+"peixos" contains 3 splits of respectively 821 / 118 / 251 color images of size 640 x 640.
 Segmentation masks are generated on-the-fly from polygon
 annotations of the unique "fish" category.
 }

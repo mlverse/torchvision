@@ -4,7 +4,7 @@ NULL
 #' RF100 Peixos Segmentation Dataset
 #'
 #' Loads the Roboflow 100 "peixos" dataset for semantic segmentation.
-#' "peixos" contains 3 splits of respectively 821 / 118 / 261 color images of size 640 x 640.
+#' "peixos" contains 3 splits of respectively 821 / 118 / 251 color images of size 640 x 640.
 #' Segmentation masks are generated on-the-fly from polygon
 #' annotations of the unique "fish" category.
 #'
@@ -82,7 +82,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
     archive_gz <- fs::path(self$data_dir, basename(sub("download=1$", "", archive)))
-    fs::file_copy(archive, archive_gz)
+    fs::file_copy(archive, archive_gz, overwrite = TRUE)
     utils::untar(archive_gz, exdir = self$data_dir, extras = "--strip-components=8")
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
@@ -96,19 +96,23 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     cats <- data$categories[, c("id", "name")]
 
     # Left join annotations with images
-    tmp <- merge(ann, imgs,
+    ann_df <- merge(ann, imgs,
                  by.x = "image_id", by.y = "id",
                  all.x = TRUE)
 
     # shift image index and category index to be 1-indexed
-    final_df$image_id <- final_df$image_id + 1
-    final_df$category_id <- final_df$category_id + 1
+    ann_df$image_id <- ann_df$image_id + 1
+    ann_df$category_id <- ann_df$category_id + 1
+    ann_df$file_name <- fs::path(self$data_dir, self$split, ann_df$file_name)
 
     # Filter on existing images and drop _id columns
-    has_image <- fs::file_exists(fs::path(self$data_dir, self$split, final_df$file_name))
-    self$annotation <- final_df[has_image, c("image_id", "segmentation", "file_name", "category_id")]
+    has_image <- fs::file_exists(ann_df$file_name)
+    self$annotation <- ann_df[has_image, c("image_id", "segmentation", "file_name", "category_id")]
   },
 
+  .length = function() {
+    nlevels(as.factor(self$annotation$image_id))
+  },
 
   .getitem = function(index) {
     index_annotation <- self$annotation[self$annotation$image_id == index, ]
