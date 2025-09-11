@@ -10,7 +10,9 @@ test_that("rf100_peixos_segmentation_dataset handles missing files gracefully", 
 })
 
 test_that("rf100_peixos_segmentation_dataset 'test' split works", {
-  ds <- rf100_peixos_segmentation_dataset(split = "test", root = t, download = TRUE)
+  expect_no_error(
+    ds <- rf100_peixos_segmentation_dataset(split = "test", root = t, download = TRUE)
+  )
   expect_length(ds, 118)
   item <- ds[1]
   expect_tensor(item$y$masks)
@@ -19,7 +21,9 @@ test_that("rf100_peixos_segmentation_dataset 'test' split works", {
 })
 
 test_that("rf100_peixos_segmentation_dataset 'val' split works", {
-  ds <- rf100_peixos_segmentation_dataset(split = "val", root = t, download = TRUE)
+  expect_no_error(
+    ds <- rf100_peixos_segmentation_dataset(split = "val", root = t, download = TRUE)
+  )
   expect_length(ds, 251)
   item <- ds[1]
   expect_tensor(item$y$masks)
