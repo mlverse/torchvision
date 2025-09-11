@@ -40,7 +40,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
   archive_size_table = list(train = "119 MB", test = "119 MB", valid = "119 MB"),
   resources = data.frame(
     dataset = "peixos",
-    url = "https://huggingface.co/datasets/Francesco/peixos-fish/resolve/main/dataset.tar.gz?download=1",
+    url = "https://huggingface.co/datasets/Francesco/peixos-fish/resolve/main/dataset.tar.gz",
     md5 = "0eb13ea40677178aed2fd47f153fabe2",
     stringsAsFactors = FALSE
   ),
@@ -81,7 +81,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     if (tools::md5sum(archive) != self$resources$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
-    archive_gz <- fs::path(self$data_dir, basename(sub("download=1$", "", archive)))
+    archive_gz <- fs::path(self$data_dir, basename(archive))
     fs::file_copy(archive, archive_gz, overwrite = TRUE)
     utils::untar(archive_gz, exdir = self$data_dir, extras = "--strip-components=8")
 
