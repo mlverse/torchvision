@@ -4,6 +4,49 @@
 #' @inheritParams model_resnet18
 #' @param ... Other parameters passed to the model implementation.
 #'
+#' ## Model Summary and Performance for pretrained weights
+#' ```
+#' | Model                | Top-1 Acc| Params  | GFLOPS | File Size | `num_classes` | image size |
+#' |----------------------|----------|---------|-------|-----------|----------------|------------|
+#' | convnext_tiny_1k     | 82.1%    | 28M    | 4.5    | 21.1 MB   |  1000 | 224 x 224 |
+#' | convnext_tiny_22k    | 82.9%    | 29M    | 4.5    | 9.8 MB    | 21841 | 224 x 224 |
+#' | convnext_small_22k   | 84.6%    | 50M    | 8.7    | 9.8 MB    | 21841 | 224 x 224 |
+#' | convnext_small_22k1k | 84.6%    | 50M    | 8.7    | 9.8 MB    | 1000  | 224 x 224 |
+#' | convnext_base_1k     | 85.1%    | 89M    | 15.4   | 9.8 MB    | 1000  | 224 x 224 |
+#' | convnext_base_22k    | 85.8%    | 89M    | 15.4   | 9.8 MB    | 21841 | 224 x 224 |
+#' | convnext_large_1k    | 84.3%    | 198M   | 34.4   | 9.8 MB    | 1000  | 224 x 224 |
+#' | convnext_large_22k   | 86.6%    | 198M   | 34.4   | 9.8 MB    | 21841 | 224 x 224 |
+#' ```
+#'
+#' @examples
+#' \dontrun{
+#' # 1. Download sample image (dog)
+#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+#' # https://pytorch.org/vision/stable/models.html
+#' norm_std  <- c(0.229, 0.224, 0.225)
+#' img_url <- "https://en.wikipedia.org/wiki/Special:FilePath/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(img_url)
+#'
+#' # 2. Convert to tensor (RGB only), resize and normalize
+#' input <- img %>%
+#'  transform_to_tensor() %>%
+#'  transform_resize(c(224, 224)) %>%
+#'  transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)
+#'
+#' # 3. Load pretrained models
+#' model_small <- convnext_tiny_1k(pretrained = TRUE, root = tempdir())
+#' model_small$eval()
+#'
+#' # 4. Forward pass
+#' output_s <- model_small(batch)
+#'
+#' # 5. Show Top-5 predictions
+#' topk <- output_s$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
+#'
 #' @family classification_model
 #' @name model_resnext
 NULL
@@ -188,8 +231,7 @@ convnext_model_urls <- c(
 }
 
 
-#' @describeIn model_convnext ConvNeXt Tiny model with 29 M parameters
-#' for 224 x 224 pixels images, trained on Imagenet 1k.
+#' @describeIn model_convnext ConvNeXt Tiny model trained on Imagenet 1k.
 #' @export
 model_convnext_tiny_1k <- function(pretrained = FALSE,
                                 progress = TRUE,
@@ -209,14 +251,9 @@ model_convnext_tiny_1k <- function(pretrained = FALSE,
 }
 
 
-#' @describeIn model_convnext ConvNeXt Tiny model with 29 M parameters
-#' for 224 x 224 pixels images, trained on Imagenet 22k.
+#' @describeIn model_convnext ConvNeXt Tiny model trained on Imagenet 22k.
 #' @export
-model_convnext_tiny_22k <- function(pretrained = FALSE,
-                                       progress = TRUE,
-                                       channels = 3,
-                                       num_classes = 21841,
-                                       ...) {
+model_convnext_tiny_22k <- function(pretrained = FALSE, progress = TRUE, channels = 3, num_classes = 21841, ...) {
   .convnext(
     "convnext_tiny_22k",
     channels = channels,
@@ -230,14 +267,9 @@ model_convnext_tiny_22k <- function(pretrained = FALSE,
 }
 
 
-#' @describeIn model_convnext ConvNeXt Small model with 50 M parameters
-#' for 224 x 224 pixels images, trained on Imagenet 22k.
+#' @describeIn model_convnext ConvNeXt Small model trained on Imagenet 22k.
 #' @export
-model_convnext_small_22k <- function(pretrained = FALSE,
-                                 progress = TRUE,
-                                 channels = 3,
-                                 num_classes = 21841,
-                                 ...) {
+model_convnext_small_22k <- function(pretrained = FALSE, progress = TRUE, channels = 3, num_classes = 21841, ...) {
   .convnext(
     arch = "convnext_small_22k" ,
     channels = channels,
@@ -251,20 +283,96 @@ model_convnext_small_22k <- function(pretrained = FALSE,
 }
 
 
-#' @describeIn model_convnext ConvNeXt Small model with 50 M parameters
-#' for 224 x 224 pixels images, trained on Imagenet 22k and fine-tuned on Imagenet 1k classes.
+#' @describeIn model_convnext ConvNeXt Small model trained on Imagenet 22k
+#'  and fine-tuned on Imagenet 1k classes.
 #' @export
-model_convnext_small_22k1k <- function(pretrained = FALSE,
-                                        progress = TRUE,
-                                        channels = 3,
-                                        num_classes = 1000,
-                                        ...) {
+model_convnext_small_22k1k <- function(pretrained = FALSE, progress = TRUE, channels = 3, num_classes = 21841, ...) {
   .convnext(
     "convnext_small_22k1k",
     channels = channels,
     depths = c(3, 3, 27, 3),
     dims = c(96, 192, 384, 768),
-    num_classes = 21841,
+    num_classes = num_classes,
+    pretrained,
+    progress,
+    ...
+  )
+}
+
+
+#' @describeIn model_convnext ConvNeXt Base model trained on Imagenet 1k.
+#' @export
+model_convnext_base_1k <- function(pretrained = FALSE,
+                                   progress = TRUE,
+                                   channels = 3,
+                                   num_classes = 1000,
+                                   ...) {
+  .convnext(
+    arch = "convnext_base_1k" ,
+    channels = channels,
+    depths = c(3, 3, 27, 3),
+    dims = c(128, 256, 512, 1024),
+    num_classes = num_classes,
+    pretrained,
+    progress,
+    ...
+  )
+}
+
+
+#' @describeIn model_convnext ConvNeXt Base model trained on Imagenet 22k.
+#' @export
+model_convnext_base_22k <- function(pretrained = FALSE,
+                                   progress = TRUE,
+                                   channels = 3,
+                                   num_classes = 21841,
+                                   ...) {
+  .convnext(
+    arch = "convnext_base_22k" ,
+    channels = channels,
+    depths = c(3, 3, 27, 3),
+    dims = c(128, 256, 512, 1024),
+    num_classes = num_classes,
+    pretrained,
+    progress,
+    ...
+  )
+}
+
+
+#' @describeIn model_convnext ConvNeXt Large model trained on Imagenet 1k.
+#' @export
+model_convnext_large_1k <- function(pretrained = FALSE,
+                                   progress = TRUE,
+                                   channels = 3,
+                                   num_classes = 1000,
+                                   ...) {
+  .convnext(
+    arch = "convnext_large_1k" ,
+    channels = channels,
+    depths = c(3, 3, 27, 3),
+    dims = c(192, 384, 768, 1536),
+    num_classes = num_classes,
+    pretrained,
+    progress,
+    ...
+  )
+}
+
+
+#' @describeIn model_convnext ConvNeXt Large model trained on Imagenet 22k.
+#' @export
+model_convnext_large_22k <- function(pretrained = FALSE,
+                                   progress = TRUE,
+                                   channels = 3,
+                                   num_classes = 21841,
+                                   ...) {
+  .convnext(
+    arch = "convnext_large_22k" ,
+    channels = channels,
+    depths = c(3, 3, 27, 3),
+    dims = c(192, 384, 768, 1536),
+    num_classes = num_classes,
     pretrained,
     progress,
     ...

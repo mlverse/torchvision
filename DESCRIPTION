@@ -30,7 +30,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd"))
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports:
     torch (>= 0.5.0),
     fs,
@@ -82,8 +82,8 @@ Collate:
     'extension.R'
     'globals.R'
     'imagenet.R'
-    'model_convnext.R'
     'models-alexnet.R'
+    'models-convnext.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
     'models-efficientnetv2.R'
