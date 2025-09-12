@@ -389,7 +389,7 @@ transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
 #' @param num_output_channels (int): (1 or 3) number of channels desired for
 #'   output image
 #'
-#' @family unitarytransforms
+#' @family unitary_transforms
 #' @export
 transform_grayscale <- function(img, num_output_channels) {
   UseMethod("transform_grayscale", img)

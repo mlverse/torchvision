@@ -21,6 +21,7 @@ Constructs a MobileNetV2 architecture from
 \seealso{
 Other classification_model: 
 \code{\link{model_alexnet}()},
+\code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},

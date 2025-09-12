@@ -15,4 +15,26 @@ output image}
 \description{
 Convert image to grayscale
 }
-\concept{unitarytransforms}
+\seealso{
+Other unitary_transforms: 
+\code{\link{transform_adjust_brightness}()},
+\code{\link{transform_adjust_contrast}()},
+\code{\link{transform_adjust_gamma}()},
+\code{\link{transform_adjust_hue}()},
+\code{\link{transform_adjust_saturation}()},
+\code{\link{transform_affine}()},
+\code{\link{transform_center_crop}()},
+\code{\link{transform_convert_image_dtype}()},
+\code{\link{transform_crop}()},
+\code{\link{transform_hflip}()},
+\code{\link{transform_linear_transformation}()},
+\code{\link{transform_normalize}()},
+\code{\link{transform_pad}()},
+\code{\link{transform_perspective}()},
+\code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
+\code{\link{transform_rotate}()},
+\code{\link{transform_to_tensor}()},
+\code{\link{transform_vflip}()}
+}
+\concept{unitary_transforms}

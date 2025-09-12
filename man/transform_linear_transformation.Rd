@@ -38,6 +38,7 @@ Other unitary_transforms:
 \code{\link{transform_center_crop}()},
 \code{\link{transform_convert_image_dtype}()},
 \code{\link{transform_crop}()},
+\code{\link{transform_grayscale}()},
 \code{\link{transform_hflip}()},
 \code{\link{transform_normalize}()},
 \code{\link{transform_pad}()},

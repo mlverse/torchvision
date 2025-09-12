@@ -84,6 +84,7 @@ Collate:
     'globals.R'
     'imagenet.R'
     'models-alexnet.R'
+    'models-convnext.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
     'models-efficientnetv2.R'

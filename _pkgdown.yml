@@ -36,10 +36,10 @@ reference:
     - has_concept("unitary_transforms")
 - subtitle: Random transformation
   contents:
-    - has_concept("random_transform")
+    - has_concept("random_transforms")
 - subtitle: Combining / multiplying transformations
   contents:
-    - has_concept("combining_transform")
+    - has_concept("combining_transforms")
 
 - title: Models
   desc: Computer Vision deep-learning Model architectures
@@ -79,6 +79,7 @@ reference:
    - ends_with("2_dataset")
    - ends_with("5_dataset")
    - ends_with("kton_dataset")
+   - ends_with("_collection")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and

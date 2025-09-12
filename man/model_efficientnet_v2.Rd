@@ -76,6 +76,7 @@ glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\
 
 Other classification_model: 
 \code{\link{model_alexnet}()},
+\code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},
