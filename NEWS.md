@@ -32,7 +32,7 @@
 * Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
 * Breaking Change : Refactoring of `coco_*` dataset family now provides each `item$x` being an image array (for consistency with other datasets). 
 You can use `transform = transform_to_tensor` to restore the previous x output to be a `torch_tensor()`.
-* `transforma_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
+* `transform_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
 
 # torchvision 0.7.0
 
