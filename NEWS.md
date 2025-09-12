@@ -17,6 +17,8 @@
 * Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
 * Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
 * Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
+* Added 8 of the `model_convnext_()` family models for image classification, thanks to @horlar1 contribution. (@cregouby, #251)
+
 
 ## New features
 
