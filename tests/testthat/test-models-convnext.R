@@ -94,6 +94,14 @@ test_that("pretrained model_convnext_*_22k works", {
   out <- model_22k(input)
   expect_tensor_shape(out, c(1, 1000))
 
+  rm(model_22k)
+  gc()
+})
+
+test_that("pretrained model_convnext_large_22k works", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
   expect_no_error(
     model_22k <- model_convnext_large_22k(pretrained = TRUE)
   )
@@ -101,7 +109,6 @@ test_that("pretrained model_convnext_*_22k works", {
   model_22k$eval()
   out <- model_22k(input)
   expect_tensor_shape(out, c(1, 1000))
-
 
   rm(model_22k)
   gc()
