@@ -10,6 +10,8 @@ test_that("rf100_peixos_segmentation_dataset handles missing files gracefully", 
 })
 
 test_that("rf100_peixos_segmentation_dataset 'test' split works", {
+  # windows error on tar deep folder decompression on tempdir()
+  skip_on_os("windows")
   expect_no_error(
     ds <- rf100_peixos_segmentation_dataset(split = "test", root = t, download = TRUE)
   )
@@ -21,6 +23,8 @@ test_that("rf100_peixos_segmentation_dataset 'test' split works", {
 })
 
 test_that("rf100_peixos_segmentation_dataset 'val' split works", {
+  # windows error on tar deep folder decompression on tempdir()
+  skip_on_os("windows")
   expect_no_error(
     ds <- rf100_peixos_segmentation_dataset(split = "val", root = t, download = TRUE)
   )
@@ -35,6 +39,8 @@ test_that("rf100_peixos_segmentation_dataset 'val' split works", {
 test_that(paste0("rf100_peixos_segmentation_dataset loads 'train' split correctly"), {
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  # windows error on tar deep folder decompression on tempdir()
+  skip_on_os("windows")
   ds <- rf100_peixos_segmentation_dataset(split = "train", root = t, download = TRUE)
 
   expect_s3_class(ds, "rf100_peixos_segmentation_dataset")

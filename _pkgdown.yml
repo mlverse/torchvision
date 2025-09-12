@@ -31,8 +31,16 @@ navbar:
 reference:
 - title: Transforms
   desc: Image transformation functions
+- subtitle: Unitary transformation
   contents:
-    - starts_with("transform_")
+    - has_concept("unitary_transforms")
+- subtitle: Random transformation
+  contents:
+    - has_concept("random_transform")
+- subtitle: Combining / multiplying transformations
+  contents:
+    - has_concept("combining_transform")
+
 - title: Models
   desc: Computer Vision deep-learning Model architectures
 - subtitle: Classification models
@@ -90,7 +98,13 @@ reference:
    - ends_with("segmentation_dataset")
 
 - title: Displaying
-  desc: Show images
+- subtitle: Images loading
+  desc: Tools for Images loading
+  contents:
+   - magick_loader
+   - base_loader
+- subtitle: Images visualization
+  desc: Tools for Images manipulation and visualization
   contents:
    - draw_bounding_boxes
    - draw_keypoints
@@ -101,8 +115,6 @@ reference:
 
 - title: Misc
   contents:
-   - magick_loader
-   - base_loader
    - starts_with("imagenet_")
    - ends_with("nms")
    - starts_with("box_")

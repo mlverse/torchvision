@@ -1,4 +1,4 @@
-#' MobileNetV3 Implementation in R Torch
+#' MobileNetV3 Model
 #'
 #' MobileNetV3 is a state-of-the-art lightweight convolutional neural network architecture
 #' designed for mobile and embedded vision applications. This implementation follows the
