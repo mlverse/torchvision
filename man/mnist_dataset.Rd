@@ -42,7 +42,8 @@ fashion_mnist_dataset(
 
 emnist_dataset(
   root = tempdir(),
-  split = "balanced",
+  split = "test",
+  kind = "balanced",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
@@ -60,6 +61,9 @@ emnist_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
+
+\item{kind}{change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
+can look at dataset attribute \verb{$classes} to see the actual classes.}
 }
 \value{
 A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).

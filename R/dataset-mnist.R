@@ -141,10 +141,12 @@ mnist_dataset <- dataset(
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
 
   },
+
   check_exists = function() {
     fs::file_exists(file.path(self$processed_folder, self$training_file)) &&
       fs::file_exists(file.path(self$processed_folder, self$test_file))
   },
+
   .getitem = function(index) {
     x <- self$data[index, ,]
     y <- self$targets[index]
@@ -157,9 +159,28 @@ mnist_dataset <- dataset(
 
     list(x = x, y = y)
   },
+
+  .getbatch = function(index) {
+    x <- self$data[index, ,]
+    if (length(index) > 1) {
+      x <-  aperm(x, c(2, 3, 1))
+    }
+
+    y <- self$targets[index]
+
+    if (!is.null(self$transform))
+      x <- self$transform(x)
+
+    if (!is.null(self$target_transform))
+      y <- self$target_transform(y)
+
+    list(x = x, y = y)
+  },
+
   .length = function() {
     dim(self$data)[1]
   },
+
   active = list(
     raw_folder = function() {
       file.path(self$root_path, "mnist", "raw")
@@ -190,6 +211,7 @@ kmnist_dataset <- dataset(
 #' @export
 qmnist_dataset <- dataset(
   name = "qmnist_dataset",
+  inherit = mnist_dataset,
   archive_size = "70 MB",
 
   resources = list(
@@ -304,23 +326,6 @@ qmnist_dataset <- dataset(
     fs::file_exists(file.path(self$processed_folder, self$files[[self$split]]))
   },
 
-  .getitem = function(index) {
-    x <- self$data[index, ,]
-    y <- self$targets[index]
-
-    if (!is.null(self$transform))
-      x <- self$transform(x)
-
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
-
-    list(x = x, y = y)
-  },
-
-  .length = function() {
-    dim(self$data)[1]
-  },
-
   active = list(
     raw_folder = function() {
       file.path(self$root_path, "qmnist", "raw")
@@ -339,14 +344,9 @@ read_sn3_pascalvincent <- function(path) {
   n_dimensions <- magic %% 256
   ty <- magic %/% 256
 
-  dim <- readBin(x, what = integer(), size = 4, endian = "big",
-          n = n_dimensions)
+  dim <- readBin(x, what = integer(), size = 4, endian = "big", n = n_dimensions)
 
-  a <- readBin(
-    x,
-    what = "int", endian = "big", n = prod(dim),
-    size = 1, signed = FALSE
-  )
+  a <- readBin(x, what = "int", endian = "big", n = prod(dim), size = 1, signed = FALSE)
 
   a <- array(a, dim = rev(dim))
   a <- aperm(a, perm = rev(seq_along(dim)))
@@ -372,16 +372,19 @@ fashion_mnist_dataset <- dataset(
 )
 
 #' @describeIn mnist_dataset EMNIST dataset with digits and letters and multiple split modes.
+#' @param kind change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
+#' can look at dataset attribute `$classes` to see the actual classes.
 #' @export
 emnist_dataset <- dataset(
   name = "emnist_dataset",
   archive_size = "540 MB",
+
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
-  training_file = function(split) glue::glue("training-{split}.rds"),
-  test_file = function(split) glue::glue("test-{split}.rds"),
-  classes_list = list(
+  training_file = function(kind) glue::glue("training-{kind}.rds"),
+  test_file = function(kind) glue::glue("test-{kind}.rds"),
+  classes = list(
     byclass = c(
       "0","1","2","3","4","5","6","7","8","9",
       LETTERS,
@@ -404,20 +407,21 @@ emnist_dataset <- dataset(
 
   initialize = function(
     root = tempdir(),
-    split = "balanced",
+    split = "test",
+    kind = "balanced",
     transform = NULL,
     target_transform = NULL,
     download = FALSE
   ) {
 
-    split <- match.arg(split, choices = names(self$classes_list))
-    self$split <- split
+    self$split <- match.arg(split, choices = c("train", "test"))
+    self$kind <- match.arg(kind,  choices = names(self$classes))
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
-    self$classes <- self$classes_list[[split]]
+    self$classes <- self$classes[[kind]]
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
@@ -425,18 +429,15 @@ emnist_dataset <- dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    file_to_load_train <- self$training_file(split)
-    file_to_load_test <- self$test_file(split)
+    file_to_load_train <- self$training_file(kind)
+    file_to_load_test <- self$test_file(kind)
 
     training_data <- readRDS(file.path(self$processed_folder, file_to_load_train))
     test_data <- readRDS(file.path(self$processed_folder, file_to_load_test))
 
-    self$data <- training_data[[1]]
-    self$targets <- training_data[[2]] + 1L
-    self$test_data <- test_data[[1]]
-    self$test_targets <- test_data[[2]] + 1L
+    self$data <- ifelse(self$split == "train", training_data[[1]], test_data[[1]])
+    self$targets <- ifelse(self$split == "train", training_data[[2]] + 1L, test_data[[2]] + 1L)
 
-    self$is_train <- TRUE
     cli_inform("{.cls {class(self)[[1]]}} dataset processed successfully!")
   },
 
@@ -473,24 +474,22 @@ emnist_dataset <- dataset(
       saveRDS(test_set, file.path(self$processed_folder, self$test_file(split_name)))
     }
 
-    for (split_name in names(self$classes_list)) {
+    for (split_name in names(self$classes)) {
       process_split(split_name)
     }
   },
 
   check_exists = function() {
-    all(sapply(names(self$classes_list), function(split_name) {
+    all(sapply(names(self$classes), function(split_name) {
       fs::file_exists(file.path(self$processed_folder, self$training_file(split_name))) &&
-      fs::file_exists(file.path(self$processed_folder, self$test_file(split_name)))
+        fs::file_exists(file.path(self$processed_folder, self$test_file(split_name)))
     }))
   },
 
   .getitem = function(index) {
-    data_set <- ifelse(self$is_train, self$data, self$test_data)
-    targets_set <- ifelse(self$is_train, self$targets, self$test_targets)
 
-    x <- data_set[index, , ]
-    y <- targets_set[index]
+    x <- self$data[index, , ]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -515,10 +514,6 @@ emnist_dataset <- dataset(
     }
   ),
 
-  set_train = function(train = TRUE) {
-    self$is_train <- train
-    invisible(self)
-  }
 )
 
 read_sn3_pascalvincent <- function(path) {
