@@ -6,7 +6,7 @@ test_that("rf100_peixos_segmentation_dataset handles missing files gracefully", 
   expect_error(
     rf100_peixos_segmentation_dataset(split = "train", root = t, download = FALSE),
     class = "runtime_error"
-  )F
+  )
 })
 
 test_that("rf100_peixos_segmentation_dataset 'test' split works", {

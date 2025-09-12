@@ -90,7 +90,13 @@ reference:
    - ends_with("segmentation_dataset")
 
 - title: Displaying
-  desc: Show images
+- subtitle: Images loading
+  desc: Tools for Images loading
+  contents:
+   - magick_loader
+   - base_loader
+- subtitle: Images visualization
+  desc: Tools for Images manipulation and visualization
   contents:
    - draw_bounding_boxes
    - draw_keypoints
@@ -101,8 +107,6 @@ reference:
 
 - title: Misc
   contents:
-   - magick_loader
-   - base_loader
    - starts_with("imagenet_")
    - ends_with("nms")
    - starts_with("box_")
