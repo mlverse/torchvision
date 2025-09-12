@@ -25,7 +25,7 @@ channels, this transform will normalize each channel of the input
 This transform acts out of place, i.e., it does not mutate the input tensor.
 }
 \seealso{
-Other transforms: 
+Other unitary_transforms: 
 \code{\link{transform_adjust_brightness}()},
 \code{\link{transform_adjust_contrast}()},
 \code{\link{transform_adjust_gamma}()},
@@ -33,33 +33,16 @@ Other transforms:
 \code{\link{transform_adjust_saturation}()},
 \code{\link{transform_affine}()},
 \code{\link{transform_center_crop}()},
-\code{\link{transform_color_jitter}()},
 \code{\link{transform_convert_image_dtype}()},
 \code{\link{transform_crop}()},
-\code{\link{transform_five_crop}()},
-\code{\link{transform_grayscale}()},
 \code{\link{transform_hflip}()},
 \code{\link{transform_linear_transformation}()},
 \code{\link{transform_pad}()},
 \code{\link{transform_perspective}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_apply}()},
-\code{\link{transform_random_choice}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_order}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()},
 \code{\link{transform_resize}()},
-\code{\link{transform_resized_crop}()},
 \code{\link{transform_rgb_to_grayscale}()},
 \code{\link{transform_rotate}()},
-\code{\link{transform_ten_crop}()},
 \code{\link{transform_to_tensor}()},
 \code{\link{transform_vflip}()}
 }
-\concept{transforms}
+\concept{unitary_transforms}

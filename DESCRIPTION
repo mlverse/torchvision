@@ -79,6 +79,7 @@ Collate:
     'dataset-pascal.R'
     'dataset-places365.R'
     'dataset-plankton.R'
+    'dataset-rf100-peixos.R'
     'extension.R'
     'globals.R'
     'imagenet.R'

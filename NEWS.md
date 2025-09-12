@@ -7,8 +7,9 @@
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
-  `rf100_underwater_collection()` and `rf100_peixos_segmentation_dataset()`. The 6 firsts are collection of datasets under the same 
-  thematic, for a total of 36 datasets (@koshtiakanksha, @cregouby, #239).
+  and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
+  thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
+* Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
 
 ## New models
 
@@ -27,6 +28,9 @@
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
 * Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
+* Breaking Change : Refactoring of `coco_*` dataset family now provides each `item$x` being an image array (for consistency with other datasets). 
+You can use `transform = transform_to_tensor` to restore the previous x output to be a `torch_tensor()`.
+* `transforma_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
 
 # torchvision 0.7.0
 

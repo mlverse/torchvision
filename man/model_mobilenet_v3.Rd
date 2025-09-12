@@ -4,7 +4,7 @@
 \alias{model_mobilenet_v3}
 \alias{model_mobilenet_v3_large}
 \alias{model_mobilenet_v3_small}
-\title{MobileNetV3 Implementation in R Torch}
+\title{MobileNetV3 Model}
 \usage{
 model_mobilenet_v3_large(
   pretrained = FALSE,

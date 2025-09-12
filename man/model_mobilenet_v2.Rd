@@ -2,7 +2,7 @@
 % Please edit documentation in R/models-mobilenetv2.R
 \name{model_mobilenet_v2}
 \alias{model_mobilenet_v2}
-\title{MobileNetV2 implementation}
+\title{MobileNetV2 Model}
 \usage{
 model_mobilenet_v2(pretrained = FALSE, progress = TRUE, ...)
 }
