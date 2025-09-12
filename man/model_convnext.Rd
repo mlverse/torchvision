@@ -113,13 +113,13 @@ and fine-tuned on Imagenet 22k classes.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{| Model                | Top-1 Acc| Params | GFLOPS | File Size | `num_classes`| image size |
 |----------------------|----------|--------|--------|-----------|--------------|------------|
-| convnext_tiny_1k     | 82.1\%    | 28M    | 4.5    | 170 MB    |         1000 | 224 x 224  |
+| convnext_tiny_1k     | 82.1\%    | 28M    | 4.5    | 109 MB    |         1000 | 224 x 224  |
 | convnext_tiny_22k    | 82.9\%    | 29M    | 4.5    | 170 MB    |        21841 | 224 x 224  |
 | convnext_small_22k   | 84.6\%    | 50M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
 | convnext_small_22k1k | 84.6\%    | 50M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
-| convnext_base_1k     | 85.1\%    | 89M    | 15.4   | 420 MB    |         1000 | 224 x 224  |
+| convnext_base_1k     | 85.1\%    | 89M    | 15.4   | 338 MB    |         1000 | 224 x 224  |
 | convnext_base_22k    | 85.8\%    | 89M    | 15.4   | 420 MB    |        21841 | 224 x 224  |
-| convnext_large_1k    | 84.3\%    | 198M   | 34.4   | 880 MB    |         1000 | 224 x 224  |
+| convnext_large_1k    | 84.3\%    | 198M   | 34.4   | 750 MB    |         1000 | 224 x 224  |
 | convnext_large_22k   | 86.6\%    | 198M   | 34.4   | 880 MB    |        21841 | 224 x 224  |
 }\if{html}{\out{</div>}}
 }
