@@ -459,11 +459,11 @@ emnist_dataset <- dataset(
 
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 
-    process_split <- function(split_name) {
-      train_img <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-images-idx3-ubyte.gz"))
-      train_lbl <- file.path(unzipped_root, glue::glue("emnist-{split_name}-train-labels-idx1-ubyte.gz"))
-      test_img  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-images-idx3-ubyte.gz"))
-      test_lbl  <- file.path(unzipped_root, glue::glue("emnist-{split_name}-test-labels-idx1-ubyte.gz"))
+    process_split <- function(kind) {
+      train_img <- file.path(unzipped_root, glue::glue("emnist-{kind}-train-images-idx3-ubyte.gz"))
+      train_lbl <- file.path(unzipped_root, glue::glue("emnist-{kind}-train-labels-idx1-ubyte.gz"))
+      test_img  <- file.path(unzipped_root, glue::glue("emnist-{kind}-test-images-idx3-ubyte.gz"))
+      test_lbl  <- file.path(unzipped_root, glue::glue("emnist-{kind}-test-labels-idx1-ubyte.gz"))
 
       train_set <- list(read_sn3_pascalvincent(train_img),
                         read_sn3_pascalvincent(train_lbl))
@@ -474,8 +474,8 @@ emnist_dataset <- dataset(
       saveRDS(test_set, file.path(self$processed_folder, self$test_file(split_name)))
     }
 
-    for (split_name in names(self$classes)) {
-      process_split(split_name)
+    for (kind in names(self$classes)) {
+      process_split(kind)
     }
   },
 
