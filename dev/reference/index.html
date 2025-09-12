@@ -81,6 +81,10 @@
           <h2 id="transforms">Transforms <a href="#transforms" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Image transformation functions</p>
         </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="unitary-transformation">Unitary transformation <a href="#unitary-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p>
+        </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="transform_adjust_brightness.html">transform_adjust_brightness()</a></code> </p>
         </td>
@@ -110,10 +114,6 @@
         </td>
         <td><p>Crops the given image at the center</p></td>
       </tr><tr><td>
-          <p><code><a href="transform_color_jitter.html">transform_color_jitter()</a></code> </p>
-        </td>
-        <td><p>Randomly change the brightness, contrast and saturation of an image</p></td>
-      </tr><tr><td>
           <p><code><a href="transform_convert_image_dtype.html">transform_convert_image_dtype()</a></code> </p>
         </td>
         <td><p>Convert a tensor image to the given <code>dtype</code> and scale the values accordingly</p></td>
@@ -121,10 +121,6 @@
           <p><code><a href="transform_crop.html">transform_crop()</a></code> </p>
         </td>
         <td><p>Crop the given image at specified location and output size</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_five_crop.html">transform_five_crop()</a></code> </p>
-        </td>
-        <td><p>Crop image into four corners and a central crop</p></td>
       </tr><tr><td>
           <p><code><a href="transform_grayscale.html">transform_grayscale()</a></code> </p>
         </td>
@@ -150,17 +146,37 @@
         </td>
         <td><p>Perspective transformation of an image</p></td>
       </tr><tr><td>
+          <p><code><a href="transform_resize.html">transform_resize()</a></code> </p>
+        </td>
+        <td><p>Resize the input image to the given size</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_rgb_to_grayscale.html">transform_rgb_to_grayscale()</a></code> </p>
+        </td>
+        <td><p>Convert RGB Image Tensor to Grayscale</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_rotate.html">transform_rotate()</a></code> </p>
+        </td>
+        <td><p>Angular rotation of an image</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_to_tensor.html">transform_to_tensor()</a></code> </p>
+        </td>
+        <td><p>Convert an image to a tensor</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_vflip.html">transform_vflip()</a></code> </p>
+        </td>
+        <td><p>Vertically flip a PIL Image or Tensor</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="random-transformation">Random transformation <a href="#random-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="transform_color_jitter.html">transform_color_jitter()</a></code> </p>
+        </td>
+        <td><p>Randomly change the brightness, contrast and saturation of an image</p></td>
+      </tr><tr><td>
           <p><code><a href="transform_random_affine.html">transform_random_affine()</a></code> </p>
         </td>
         <td><p>Random affine transformation of the image keeping center invariant</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_random_apply.html">transform_random_apply()</a></code> </p>
-        </td>
-        <td><p>Apply a list of transformations randomly with a given probability</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_random_choice.html">transform_random_choice()</a></code> </p>
-        </td>
-        <td><p>Apply single transformation randomly picked from a list</p></td>
       </tr><tr><td>
           <p><code><a href="transform_random_crop.html">transform_random_crop()</a></code> </p>
         </td>
@@ -178,10 +194,6 @@
         </td>
         <td><p>Horizontally flip an image randomly with a given probability</p></td>
       </tr><tr><td>
-          <p><code><a href="transform_random_order.html">transform_random_order()</a></code> </p>
-        </td>
-        <td><p>Apply a list of transformations in a random order</p></td>
-      </tr><tr><td>
           <p><code><a href="transform_random_perspective.html">transform_random_perspective()</a></code> </p>
         </td>
         <td><p>Random perspective transformation of an image with a given probability</p></td>
@@ -197,34 +209,34 @@
           <p><code><a href="transform_random_vertical_flip.html">transform_random_vertical_flip()</a></code> </p>
         </td>
         <td><p>Vertically flip an image randomly with a given probability</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_resize.html">transform_resize()</a></code> </p>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="combining-multiplying-transformations">Combining / multiplying transformations <a href="#combining-multiplying-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="transform_five_crop.html">transform_five_crop()</a></code> </p>
         </td>
-        <td><p>Resize the input image to the given size</p></td>
+        <td><p>Crop image into four corners and a central crop</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_random_apply.html">transform_random_apply()</a></code> </p>
+        </td>
+        <td><p>Apply a list of transformations randomly with a given probability</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_random_choice.html">transform_random_choice()</a></code> </p>
+        </td>
+        <td><p>Apply single transformation randomly picked from a list</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_random_order.html">transform_random_order()</a></code> </p>
+        </td>
+        <td><p>Apply a list of transformations in a random order</p></td>
       </tr><tr><td>
           <p><code><a href="transform_resized_crop.html">transform_resized_crop()</a></code> </p>
         </td>
         <td><p>Crop an image and resize it to a desired size</p></td>
       </tr><tr><td>
-          <p><code><a href="transform_rgb_to_grayscale.html">transform_rgb_to_grayscale()</a></code> </p>
-        </td>
-        <td><p>Convert RGB Image Tensor to Grayscale</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_rotate.html">transform_rotate()</a></code> </p>
-        </td>
-        <td><p>Angular rotation of an image</p></td>
-      </tr><tr><td>
           <p><code><a href="transform_ten_crop.html">transform_ten_crop()</a></code> </p>
         </td>
         <td><p>Crop an image and the flipped image each into four corners and a central crop</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_to_tensor.html">transform_to_tensor()</a></code> </p>
-        </td>
-        <td><p>Convert an image to a tensor</p></td>
-      </tr><tr><td>
-          <p><code><a href="transform_vflip.html">transform_vflip()</a></code> </p>
-        </td>
-        <td><p>Vertically flip a PIL Image or Tensor</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="models">Models <a href="#models" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Computer Vision deep-learning Model architectures</p>
@@ -237,6 +249,10 @@
           <p><code><a href="model_alexnet.html">model_alexnet()</a></code> </p>
         </td>
         <td><p>AlexNet Model Architecture</p></td>
+      </tr><tr><td>
+          <p><code><a href="model_convnext.html">model_convnext_tiny_1k()</a></code> <code><a href="model_convnext.html">model_convnext_tiny_22k()</a></code> <code><a href="model_convnext.html">model_convnext_small_22k()</a></code> <code><a href="model_convnext.html">model_convnext_small_22k1k()</a></code> <code><a href="model_convnext.html">model_convnext_base_1k()</a></code> <code><a href="model_convnext.html">model_convnext_base_22k()</a></code> <code><a href="model_convnext.html">model_convnext_large_1k()</a></code> <code><a href="model_convnext.html">model_convnext_large_22k()</a></code> </p>
+        </td>
+        <td><p>ConvNeXt Implementation</p></td>
       </tr><tr><td>
           <p><code><a href="model_efficientnet.html">model_efficientnet_b0()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b1()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b2()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b3()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b4()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b5()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b6()</a></code> <code><a href="model_efficientnet.html">model_efficientnet_b7()</a></code> </p>
         </td>
@@ -256,11 +272,11 @@
       </tr><tr><td>
           <p><code><a href="model_mobilenet_v2.html">model_mobilenet_v2()</a></code> </p>
         </td>
-        <td><p>MobileNetV2 implementation</p></td>
+        <td><p>MobileNetV2 Model</p></td>
       </tr><tr><td>
           <p><code><a href="model_mobilenet_v3.html">model_mobilenet_v3_large()</a></code> <code><a href="model_mobilenet_v3.html">model_mobilenet_v3_small()</a></code> </p>
         </td>
-        <td><p>MobileNetV3 Implementation in R Torch</p></td>
+        <td><p>MobileNetV3 Model</p></td>
       </tr><tr><td>
           <p><code><a href="model_resnet.html">model_resnet18()</a></code> <code><a href="model_resnet.html">model_resnet34()</a></code> <code><a href="model_resnet.html">model_resnet50()</a></code> <code><a href="model_resnet.html">model_resnet101()</a></code> <code><a href="model_resnet.html">model_resnet152()</a></code> <code><a href="model_resnet.html">model_resnext50_32x4d()</a></code> <code><a href="model_resnet.html">model_resnext101_32x8d()</a></code> <code><a href="model_resnet.html">model_wide_resnet50_2()</a></code> <code><a href="model_resnet.html">model_wide_resnet101_2()</a></code> </p>
         </td>
@@ -361,6 +377,30 @@
           <p><code><a href="whoi_plankton_dataset.html">whoi_small_plankton_dataset()</a></code> <code><a href="whoi_plankton_dataset.html">whoi_plankton_dataset()</a></code> </p>
         </td>
         <td><p>WHOI Plankton Datasets</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_biology_collection.html">rf100_biology_collection()</a></code> </p>
+        </td>
+        <td><p>RoboFlow 100 Biology dataset Collection</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_damage_collection.html">rf100_damage_collection()</a></code> </p>
+        </td>
+        <td><p>RoboFlow 100 Damages dataset Collection</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_document_collection.html">rf100_document_collection()</a></code> </p>
+        </td>
+        <td><p>RF100 Document Collection Datasets</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_infrared_collection.html">rf100_infrared_collection()</a></code> </p>
+        </td>
+        <td><p>RoboFlow 100 Infrared dataset Collection</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_medical_collection.html">rf100_medical_collection()</a></code> </p>
+        </td>
+        <td><p>RoboFlow 100 Medical dataset Collection</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_underwater_collection.html">rf100_underwater_collection()</a></code> </p>
+        </td>
+        <td><p>RoboFlow 100 Underwater dataset Collection</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="for-object-detection">for Object Detection <a href="#for-object-detection" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p><p>Dataset having items with “y” as a named list of bounding-box and labels for object detection.</p>
@@ -397,9 +437,29 @@
           <p><code><a href="pascal_voc_datasets.html">pascal_segmentation_dataset()</a></code> <code><a href="pascal_voc_datasets.html">pascal_detection_dataset()</a></code> </p>
         </td>
         <td><p>Pascal VOC Datasets</p></td>
+      </tr><tr><td>
+          <p><code><a href="rf100_peixos_segmentation_dataset.html">rf100_peixos_segmentation_dataset()</a></code> </p>
+        </td>
+        <td><p>RF100 Peixos Segmentation Dataset</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="displaying">Displaying <a href="#displaying" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Show images</p>
+          <p class="section-desc"></p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="images-loading">Images loading <a href="#images-loading" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Tools for Images loading</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="magick_loader.html">magick_loader()</a></code> </p>
+        </td>
+        <td><p>Load an Image using ImageMagick</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_loader.html">base_loader()</a></code> </p>
+        </td>
+        <td><p>Base loader</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="images-visualization">Images visualization <a href="#images-visualization" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Tools for Images manipulation and visualization</p>
         </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code> </p>
@@ -430,14 +490,6 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="magick_loader.html">magick_loader()</a></code> </p>
-        </td>
-        <td><p>Load an Image using ImageMagick</p></td>
-      </tr><tr><td>
-          <p><code><a href="base_loader.html">base_loader()</a></code> </p>
-        </td>
-        <td><p>Base loader</p></td>
-      </tr><tr><td>
           <p><code><a href="imagenet_classes.html">imagenet_classes()</a></code> <code><a href="imagenet_classes.html">imagenet_label()</a></code> </p>
         </td>
         <td><p>ImageNet Class Labels</p></td>

@@ -124,8 +124,8 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>coco_detection_dataset</code>. Each item is a list:</p><ul><li><p><code>x</code>: a <code>(C, H, W)</code> <code>torch_tensor</code> representing the image.</p></li>
-<li><p><code>y$boxes</code>: a <code>(N, 4)</code> <code>torch_tensor</code> of bounding boxes in the format <code>c(x_min, y_min, x_max, y_max)</code>.</p></li>
+    <p>An object of class <code>coco_detection_dataset</code>. Each item is a list:</p><ul><li><p><code>x</code>: a <code>(C, H, W)</code> array representing the image.</p></li>
+<li><p><code>y$boxes</code>: a <code>(N, 4)</code> <code>torch_tensor</code> of bounding boxes in the format  \((x_{min}, y_{min}, x_{max}, y_{max})\).</p></li>
 <li><p><code>y$labels</code>: an integer <code>torch_tensor</code> with the class label for each object.</p></li>
 <li><p><code>y$area</code>: a float <code>torch_tensor</code> indicating the area of each object.</p></li>
 <li><p><code>y$iscrowd</code>: a boolean <code>torch_tensor</code>, where <code>TRUE</code> marks the object as part of a crowd.</p></li>
@@ -143,7 +143,13 @@ areas, crowd indicators, and segmentation masks from the official COCO annotatio
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other detection_dataset:
-<code><a href="pascal_voc_datasets.html">pascal_voc_datasets</a></code></p></div>
+<code><a href="pascal_voc_datasets.html">pascal_voc_datasets</a></code>,
+<code><a href="rf100_biology_collection.html">rf100_biology_collection</a>()</code>,
+<code><a href="rf100_damage_collection.html">rf100_damage_collection</a>()</code>,
+<code><a href="rf100_document_collection.html">rf100_document_collection</a>()</code>,
+<code><a href="rf100_infrared_collection.html">rf100_infrared_collection</a>()</code>,
+<code><a href="rf100_medical_collection.html">rf100_medical_collection</a>()</code>,
+<code><a href="rf100_underwater_collection.html">rf100_underwater_collection</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">

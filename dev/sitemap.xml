@@ -42,6 +42,7 @@
 <url><loc>/reference/magick_loader.html</loc></url>
 <url><loc>/reference/mnist_dataset.html</loc></url>
 <url><loc>/reference/model_alexnet.html</loc></url>
+<url><loc>/reference/model_convnext.html</loc></url>
 <url><loc>/reference/model_deeplabv3.html</loc></url>
 <url><loc>/reference/model_efficientnet.html</loc></url>
 <url><loc>/reference/model_efficientnet_v2.html</loc></url>
@@ -60,6 +61,13 @@
 <url><loc>/reference/pascal_voc_datasets.html</loc></url>
 <url><loc>/reference/places365_dataset.html</loc></url>
 <url><loc>/reference/remove_small_boxes.html</loc></url>
+<url><loc>/reference/rf100_biology_collection.html</loc></url>
+<url><loc>/reference/rf100_damage_collection.html</loc></url>
+<url><loc>/reference/rf100_document_collection.html</loc></url>
+<url><loc>/reference/rf100_infrared_collection.html</loc></url>
+<url><loc>/reference/rf100_medical_collection.html</loc></url>
+<url><loc>/reference/rf100_peixos_segmentation_dataset.html</loc></url>
+<url><loc>/reference/rf100_underwater_collection.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>
 <url><loc>/reference/tiny_imagenet_dataset.html</loc></url>
