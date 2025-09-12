@@ -82,6 +82,10 @@ model_convnext_large_22k(
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
+\item{channels}{The number of channels in the input image.  Default: 3.}
+
+\item{num_classes}{number of output classes (default: 1000).}
+
 \item{...}{Other parameters passed to the model implementation.}
 }
 \description{

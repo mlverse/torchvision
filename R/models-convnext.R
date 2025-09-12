@@ -1,7 +1,9 @@
 #' ConvNeXt Implementation
 #'
 #' Implements the ConvNeXt architecture from [ConvNeXt: A ConvNet for the 2020s](https://arxiv.org/pdf/2201.03545)
-#' @inheritParams model_resnet18
+#'
+#' @inheritParams model_mobilenet_v3
+#' @param channels The number of channels in the input image.  Default: 3.
 #' @param ... Other parameters passed to the model implementation.
 #'
 #' @section Variants:
