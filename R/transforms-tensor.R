@@ -299,7 +299,7 @@ transform_linear_transformation.torch_tensor <- function(img, transformation_mat
 transform_random_grayscale.torch_tensor <- function(img, p = 0.1) {
   check_img(img)
 
-  if (runif(1) > p) {
+  if (stats::runif(1) > p) {
     img
   } else {
     transform_grayscale(img, num_output_channels = 3)
