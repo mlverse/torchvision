@@ -434,7 +434,7 @@ emnist_dataset <- dataset(
     self$data <- dataset_lst[[1]]
     self$targets <- dataset_lst[[2]] + 1L
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset processed successfully!")
+    cli_inform("Split {.val {self$split}} of {.cls {class(self)[[1]]}} dataset of kind {.val {self$kind}} processed successfully!")
   },
 
   download = function() {
@@ -463,15 +463,9 @@ emnist_dataset <- dataset(
     saveRDS(dataset_set, file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
 
   },
-
+  # only manage existence of the rds file under interest
   check_exists = function() {
-    train_files <- sapply(names(self$classes_all_kind), function(kind)
-      file.path(self$processed_folder, self$rds_file("train", kind))
-    )
-    test_files <- sapply(names(self$classes_all_kind), function(kind)
-      file.path(self$processed_folder, self$rds_file("test", kind))
-    )
-    all(fs::file_exists(train_files)) && all(fs::file_exists(test_files))
+    fs::file_exists(file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
   },
 
   .getitem = function(index) {

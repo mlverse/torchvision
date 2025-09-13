@@ -91,35 +91,38 @@ test_that("tests for the emnist dataset", {
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 42)
 
-  emnist <- emnist_dataset(dir, kind = "byclass", split = "train")
-  expect_equal(length(emnist), 697932)
+  emnist <- emnist_dataset(dir, kind = "byclass", split = "test", download = TRUE)
+  expect_equal(length(emnist), 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
-  expect_equal((first_item[[2]]), 36)
+  expect_equal(dim(first_item$x), c(28,28))
+  expect_equal((first_item[[2]]), 19)
 
-  emnist <- emnist_dataset(dir, kind = "bymerge")
+  emnist <- emnist_dataset(dir, kind = "bymerge", download = TRUE)
   expect_equal(length(emnist), 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 25)
 
-  emnist <- emnist_dataset(dir, kind = "letters", split = "train")
+  emnist <- emnist_dataset(dir, kind = "letters", split = "train", download = TRUE,
+                           transform = transform_to_tensor)
   expect_equal(length(emnist), 124800)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_tensor(first_item$x)
+  expect_tensor_shape(first_item$x, c(1,28,28))
   expect_equal((first_item[[2]]), 24)
 
-  emnist <- emnist_dataset(dir, kind = "digits")
+  emnist <- emnist_dataset(dir, kind = "digits", download = TRUE)
   expect_equal(length(emnist), 40000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 1)
 
-  emnist <- emnist_dataset(dir, kind = "mnist", split = "train")
+  emnist <- emnist_dataset(dir, kind = "mnist", split = "train", download = TRUE)
   expect_equal(length(emnist), 60000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
@@ -129,13 +132,14 @@ test_that("tests for the emnist dataset", {
   ds2 <- emnist_dataset(
     root = dir,
     kind = "balanced",
-    split = "train",
-    transform = transform_to_tensor
+    split = "test",
+    transform = transform_to_tensor,
+    download = TRUE
   )
   dl <- torch::dataloader(ds2, batch_size = 32)
   iter <- torch::dataloader_make_iter(dl)
   batch <- torch::dataloader_next(iter)
-  expect_tensor_shape(batch$x, c(32, 28, 28))
+  expect_tensor_shape(batch$x, c(32, 1, 28, 28))
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
 })
