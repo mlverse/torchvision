@@ -18,7 +18,7 @@
 #'
 #' @return A torch dataset object, where each items is a list of `x` (image) and `y` (label).
 #'
-#' @section Supported Splits for `emnist_dataset()`:
+#' @section Supported `kind`s for `emnist_dataset()`:
 #' - `"byclass"`: 62 classes (digits + uppercase + lowercase)
 #' - `"bymerge"`: 47 classes (merged uppercase and lowercase)
 #' - `"balanced"`: 47 classes, balanced digits and letters
@@ -26,7 +26,7 @@
 #' - `"digits"`: 10 digit classes
 #' - `"mnist"`: Standard MNIST digit classes
 #'
-#' @section Supported Splits for `qmnist_dataset()`:
+#' @section Supported `split`s for `qmnist_dataset()`:
 #' - `"train"`: 60,000 training samples (MNIST-compatible)
 #' - `"test"`: Extended test set
 #' - `"nist"`: Full NIST digit set
@@ -43,13 +43,13 @@
 #' item$x
 #' item$y
 #'
-#' emnist <- emnist_dataset(split = "balanced", download = TRUE)
+#' emnist <- emnist_dataset(kind = "balanced", split = "test", download = TRUE)
 #' item <- emnist[1]
 #' item$x
 #' item$y
 #'
-#' kmnist <- kmnist_dataset(download = TRUE)
-#' fmnist <- fashion_mnist_dataset(download = TRUE)
+#' kmnist <- kmnist_dataset(download = TRUE, train = FALSE)
+#' fmnist <- fashion_mnist_dataset(download = TRUE, train = TRUE)
 #' }
 #'
 #' @family classification_dataset
@@ -382,9 +382,8 @@ emnist_dataset <- dataset(
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
-  training_file = function(kind) glue::glue("training-{kind}.rds"),
-  test_file = function(kind) glue::glue("test-{kind}.rds"),
-  classes = list(
+  rds_file = function(split, kind) paste0(split,"-",kind,".rds"),
+  classes_all_kind = list(
     byclass = c(
       "0","1","2","3","4","5","6","7","8","9",
       LETTERS,
@@ -415,11 +414,13 @@ emnist_dataset <- dataset(
   ) {
 
     self$split <- match.arg(split, choices = c("train", "test"))
-    self$kind <- match.arg(kind,  choices = names(self$classes))
+    self$kind <- match.arg(kind,  choices = names(self$classes_all_kind))
     self$root_path <- root
+    self$raw_folder <- file.path(root, class(self)[1], "raw")
+    self$processed_folder <- file.path(root, class(self)[1], "processed")
     self$transform <- transform
     self$target_transform <- target_transform
-    self$classes <- self$classes[[kind]]
+    self$class <- self$classes_all_kind[[self$kind]]
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -429,14 +430,9 @@ emnist_dataset <- dataset(
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    file_to_load_train <- self$training_file(kind)
-    file_to_load_test <- self$test_file(kind)
-
-    training_data <- readRDS(file.path(self$processed_folder, file_to_load_train))
-    test_data <- readRDS(file.path(self$processed_folder, file_to_load_test))
-
-    self$data <- ifelse(self$split == "train", training_data[[1]], test_data[[1]])
-    self$targets <- ifelse(self$split == "train", training_data[[2]] + 1L, test_data[[2]] + 1L)
+    dataset_lst <- readRDS(file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
+    self$data <- dataset_lst[[1]]
+    self$targets <- dataset_lst[[2]] + 1L
 
     cli_inform("{.cls {class(self)[[1]]}} dataset processed successfully!")
   },
@@ -457,33 +453,25 @@ emnist_dataset <- dataset(
     fs::dir_create(unzip_dir)
     unzip(archive, exdir = unzip_dir)
 
+    # unzip second level of archives
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 
-    process_split <- function(kind) {
-      train_img <- file.path(unzipped_root, glue::glue("emnist-{kind}-train-images-idx3-ubyte.gz"))
-      train_lbl <- file.path(unzipped_root, glue::glue("emnist-{kind}-train-labels-idx1-ubyte.gz"))
-      test_img  <- file.path(unzipped_root, glue::glue("emnist-{kind}-test-images-idx3-ubyte.gz"))
-      test_lbl  <- file.path(unzipped_root, glue::glue("emnist-{kind}-test-labels-idx1-ubyte.gz"))
+    # only manage extraction of the 2 ubyte.gz under interest
+    img <- file.path(unzipped_root, glue::glue("emnist-{self$kind}-{self$split}-images-idx3-ubyte.gz"))
+    lbl <- file.path(unzipped_root, glue::glue("emnist-{self$kind}-{self$split}-labels-idx1-ubyte.gz"))
+    dataset_set <- list(read_sn3_pascalvincent(img), read_sn3_pascalvincent(lbl))
+    saveRDS(dataset_set, file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
 
-      train_set <- list(read_sn3_pascalvincent(train_img),
-                        read_sn3_pascalvincent(train_lbl))
-      test_set <- list(read_sn3_pascalvincent(test_img),
-                       read_sn3_pascalvincent(test_lbl))
-
-      saveRDS(train_set, file.path(self$processed_folder, self$training_file(split_name)))
-      saveRDS(test_set, file.path(self$processed_folder, self$test_file(split_name)))
-    }
-
-    for (kind in names(self$classes)) {
-      process_split(kind)
-    }
   },
 
   check_exists = function() {
-    all(sapply(names(self$classes), function(split_name) {
-      fs::file_exists(file.path(self$processed_folder, self$training_file(split_name))) &&
-        fs::file_exists(file.path(self$processed_folder, self$test_file(split_name)))
-    }))
+    train_files <- sapply(names(self$classes_all_kind), function(kind)
+      file.path(self$processed_folder, self$rds_file("train", kind))
+    )
+    test_files <- sapply(names(self$classes_all_kind), function(kind)
+      file.path(self$processed_folder, self$rds_file("test", kind))
+    )
+    all(fs::file_exists(train_files)) && all(fs::file_exists(test_files))
   },
 
   .getitem = function(index) {
@@ -501,18 +489,8 @@ emnist_dataset <- dataset(
   },
 
   .length = function() {
-    data_set <- ifelse(self$is_train, self$data, self$test_data)
-    dim(data_set)[1]
-  },
-
-  active = list(
-    raw_folder = function() {
-      file.path(self$root_path, "emnist", "raw")
-    },
-    processed_folder = function() {
-      file.path(self$root_path, "emnist", "processed")
-    }
-  ),
+    dim(self$data)[1]
+  }
 
 )
 

@@ -92,7 +92,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 \item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
 
 }}
-\section{Supported Splits for \code{emnist_dataset()}}{
+\section{Supported \code{kind}s for \code{emnist_dataset()}}{
 
 \itemize{
 \item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
@@ -104,7 +104,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 }
 }
 
-\section{Supported Splits for \code{qmnist_dataset()}}{
+\section{Supported \code{split}s for \code{qmnist_dataset()}}{
 
 \itemize{
 \item \code{"train"}: 60,000 training samples (MNIST-compatible)
@@ -125,13 +125,13 @@ item <- qmnist[1]
 item$x
 item$y
 
-emnist <- emnist_dataset(split = "balanced", download = TRUE)
+emnist <- emnist_dataset(kind = "balanced", split = "test", download = TRUE)
 item <- emnist[1]
 item$x
 item$y
 
-kmnist <- kmnist_dataset(download = TRUE)
-fmnist <- fashion_mnist_dataset(download = TRUE)
+kmnist <- kmnist_dataset(download = TRUE, train = FALSE)
+fmnist <- fashion_mnist_dataset(download = TRUE, train = TRUE)
 }
 
 }

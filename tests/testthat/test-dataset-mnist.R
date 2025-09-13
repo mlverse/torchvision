@@ -85,11 +85,11 @@ test_that("tests for the emnist dataset", {
   )
 
   emnist <- emnist_dataset(dir, kind = "balanced", download = TRUE)
-  expect_equal(length(emnist), 112800)
+  expect_equal(length(emnist), 18800)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
-  expect_equal((first_item[[2]]), 46)
+  expect_equal((first_item[[2]]), 42)
 
   emnist <- emnist_dataset(dir, kind = "byclass", split = "train")
   expect_equal(length(emnist), 697932)
@@ -99,7 +99,7 @@ test_that("tests for the emnist dataset", {
   expect_equal((first_item[[2]]), 36)
 
   emnist <- emnist_dataset(dir, kind = "bymerge")
-  expect_equal(length(emnist), 697932)
+  expect_equal(length(emnist), 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
@@ -113,11 +113,11 @@ test_that("tests for the emnist dataset", {
   expect_equal((first_item[[2]]), 24)
 
   emnist <- emnist_dataset(dir, kind = "digits")
-  expect_equal(length(emnist), 240000)
+  expect_equal(length(emnist), 40000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
-  expect_equal((first_item[[2]]), 9)
+  expect_equal((first_item[[2]]), 1)
 
   emnist <- emnist_dataset(dir, kind = "mnist", split = "train")
   expect_equal(length(emnist), 60000)
@@ -133,8 +133,8 @@ test_that("tests for the emnist dataset", {
     transform = transform_to_tensor
   )
   dl <- torch::dataloader(ds2, batch_size = 32)
-  iter <- dataloader_make_iter(dl)
-  batch <- dataloader_next(iter)
+  iter <- torch::dataloader_make_iter(dl)
+  batch <- torch::dataloader_next(iter)
   expect_tensor_shape(batch$x, c(32, 28, 28))
   expect_tensor_shape(batch$y, 32)
   expect_named(batch, c("x", "y"))
