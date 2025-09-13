@@ -123,7 +123,7 @@ model_facenet_pnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "pnet")
+      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -169,7 +169,7 @@ model_facenet_rnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "rnet")
+      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -223,7 +223,7 @@ model_facenet_onet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "onet")
+      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -306,7 +306,7 @@ load_inception_weights <- function(model, name) {
     md5 = "ff4aff482f6c1941784abba5131bae20"
   }
 
-  archive <- download_and_cache(url,prefix = name)
+  archive <- download_and_cache(url,prefix = "facenet")
   if (tools::md5sum(archive) != md5){
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
   }
