@@ -120,7 +120,8 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <span></span>
 <span><span class="fu">emnist_dataset</span><span class="op">(</span></span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  split <span class="op">=</span> <span class="st">"balanced"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"test"</span>,</span>
+<span>  kind <span class="op">=</span> <span class="st">"balanced"</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -154,6 +155,11 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
 <dd><p>Character. Used in <code>emnist_dataset()</code> and <code>qmnist_dataset()</code> to specify the subset. See individual descriptions for valid values.</p></dd>
 
+
+<dt id="arg-kind">kind<a class="anchor" aria-label="anchor" href="#arg-kind"></a></dt>
+<dd><p>change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
+can look at dataset attribute <code>$classes</code> to see the actual classes.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -176,8 +182,8 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <li><p><code>fashion_mnist_dataset()</code>: Fashion-MNIST clothing image dataset.</p></li>
 <li><p><code>emnist_dataset()</code>: EMNIST dataset with digits and letters and multiple split modes.</p></li>
 </ul></div>
-    <div id="supported-splits-for-emnist-dataset-">
-    <h2>Supported Splits for <code>emnist_dataset()</code></h2>
+    <div id="supported-kinds-for-emnist-dataset-">
+    <h2>Supported <code>kind</code>s for <code>emnist_dataset()</code></h2>
 
 
 <ul><li><p><code>"byclass"</code>: 62 classes (digits + uppercase + lowercase)</p></li>
@@ -188,7 +194,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <li><p><code>"mnist"</code>: Standard MNIST digit classes</p></li>
 </ul></div>
     <div id="supported-splits-for-qmnist-dataset-">
-    <h2>Supported Splits for <code>qmnist_dataset()</code></h2>
+    <h2>Supported <code>split</code>s for <code>qmnist_dataset()</code></h2>
 
 
 <ul><li><p><code>"train"</code>: 60,000 training samples (MNIST-compatible)</p></li>
@@ -224,13 +230,13 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">x</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">y</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">emnist</span> <span class="op">&lt;-</span> <span class="fu">emnist_dataset</span><span class="op">(</span>split <span class="op">=</span> <span class="st">"balanced"</span>, download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">emnist</span> <span class="op">&lt;-</span> <span class="fu">emnist_dataset</span><span class="op">(</span>kind <span class="op">=</span> <span class="st">"balanced"</span>, split <span class="op">=</span> <span class="st">"test"</span>, download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">item</span> <span class="op">&lt;-</span> <span class="va">emnist</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">x</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">y</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">kmnist</span> <span class="op">&lt;-</span> <span class="fu">kmnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fmnist</span> <span class="op">&lt;-</span> <span class="fu">fashion_mnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">kmnist</span> <span class="op">&lt;-</span> <span class="fu">kmnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span>, train <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fmnist</span> <span class="op">&lt;-</span> <span class="fu">fashion_mnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
