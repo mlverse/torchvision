@@ -124,51 +124,31 @@ vggface2_dataset <- torch::dataset(
     identity_file <- file.path(self$raw_folder, "identity_meta.csv")
     identity_df <- read.csv(identity_file, sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
-    identity_map <- setNames(
-      lapply(seq_len(nrow(identity_df)), function(i) {
-        if(identity_df$Gender[i] == 'f'){
-          gender <- "Female"
-        }else{
-          gender <- "Male"
-        }
-        list(
-          name = identity_df$Name[i],
-          gender = gender
-        )
-      }),
-      identity_df$Class_ID
-    )
+    identity_df$Gender <- factor(identity_df$Gender, levels = c("f", "m"), labels = c("Female", "Male"))
 
     for (split in c("train", "test")) {
-        if (split == "train") {
-          list_file <- file.path(self$raw_folder, "train_list.txt")
-        } else {
-          list_file <- file.path(self$raw_folder, "test_list.txt")
-        }
-        files <- readLines(list_file)
+      if (split == "train") {
+        list_file <- file.path(self$raw_folder, "train_list.txt")
+      } else {
+        list_file <- file.path(self$raw_folder, "test_list.txt")
+      }
 
-        img_path <- file.path(self$raw_folder, split, files)
-        class_ids <- sub("/.*$", "", files)
-        unique_ids <- unique(class_ids)
+      split_df <- read.delim(
+        list_file,
+        sep = "/",
+        col.names = c("Class_ID", "img_path"),
+        header = FALSE,
+        stringsAsFactors = FALSE
+      )
 
-        class_to_idx <- setNames(seq_along(unique_ids), unique_ids)
+      merged_df <- merge(split_df, identity_df, by = "Class_ID", all.x = TRUE)
+      merged_df$Label <- as.integer(factor(merged_df$Class_ID, levels = unique(merged_df$Class_ID)))
 
-        labels <- as.integer(class_to_idx[class_ids])
-
-        classes_list <- lapply(unique_ids, function(cid) {
-            identity_map[[cid]]
-        })
-
-        saveRDS(
-            list(
-            img_path = img_path,
-            labels = labels,
-            classes = classes_list
-            ),
-            file.path(self$processed_folder, paste0(split, ".rds"))
-        )
+      saveRDS(
+        merged_df,
+        file.path(self$processed_folder, paste0(split, ".rds"))
+      )
     }
-
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
