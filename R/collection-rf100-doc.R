@@ -180,6 +180,7 @@ rf100_document_collection <- torch::dataset(
     } else {
       x <- png::readPNG(x_raw)
     }
+    # remove alpha channel
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
     if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
@@ -192,7 +193,7 @@ rf100_document_collection <- torch::dataset(
       if (is.null(labels)) {
         labels <- df$objects$label[[1]]
       }
-      # labels <- as.character(unlist(labels))
+
     } else {
       boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- 0L
@@ -203,6 +204,54 @@ rf100_document_collection <- torch::dataset(
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
     item <- list(x = x, y = y)
+    class(item) <- "image_with_bounding_box"
+    item
+  },
+
+  .getbatch = function(index) {
+    df <- self$.data[index, ]
+    # hoist bytes
+    df$bytes <- df$image$bytes
+
+    df$is_jpg <- tolower(tools::file_ext(df$image$path)) == "jpg"
+
+    x_lst <- mapply(function(bytes, is_jpg) {
+      if (is_jpg) {
+        x <- jpeg::readJPEG(as.raw(bytes))
+      } else {
+        x <- png::readPNG(as.raw(bytes))
+      }
+      # remove alpha channel if any and go to channel-first
+      if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
+      aperm(x, c(2, 3, 1))
+    }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
+
+
+    if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
+      bbox <- df$objects$bbox
+      if (is.list(bbox)) {
+        bbox <- do.call(rbind, bbox[[1]])
+      }
+      boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
+      labels <- df$objects$category[[1]]
+      if (is.null(labels)) {
+        labels <- df$objects$label[[1]]
+      }
+
+    } else {
+      boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
+      labels <- 0L
+    }
+
+    y <- list(labels = labels, boxes = boxes)
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+    if (!is.null(self$target_transform)) {
+      y <- self$target_transform(y)
+    }
+
+    item <- list(x = x_lst, y = y)
     class(item) <- "image_with_bounding_box"
     item
   },
