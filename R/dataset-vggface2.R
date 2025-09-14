@@ -37,14 +37,23 @@
 #' @export
 vggface2_dataset <- torch::dataset(
   name = "vggface2",
-  resources = list(
-    train_images = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_train.tar.gz","88813c6b15de58afc8fa75ea83361d7f"),
-    test_images  = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_test.tar.gz","bb7a323824d1004e14e00c23974facd3"),
-    train_list   = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/train_list.txt","4cfbab4a839163f454d7ecef28b68669"),
-    test_list    = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/test_list.txt","d08b10f12bc9889509364ef56d73c621"),
-    identity     = c("https://huggingface.co/datasets/ProgramComputer/VGGFace2/raw/main/meta/identity_meta.csv","d315386c7e8e166c4f60e27d9cc61acc")
+  resources = data.frame(
+    split = c("train_images", "test_images", "train_list", "test_list", "identity"),
+    url = c(
+      "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_train.tar.gz",
+      "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/data/vggface2_test.tar.gz",
+      "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/train_list.txt",
+      "https://huggingface.co/datasets/ProgramComputer/VGGFace2/resolve/main/meta/test_list.txt",
+      "https://huggingface.co/datasets/ProgramComputer/VGGFace2/raw/main/meta/identity_meta.csv"
+    ),
+    md5 = c(
+      "88813c6b15de58afc8fa75ea83361d7f",
+      "bb7a323824d1004e14e00c23974facd3",
+      "4cfbab4a839163f454d7ecef28b68669",
+      "d08b10f12bc9889509364ef56d73c621",
+      "d315386c7e8e166c4f60e27d9cc61acc"
+    )
   ),
-  archive_size = "38 GB",
   training_file = "train.rds",
   test_file = "test.rds",
 
@@ -56,7 +65,6 @@ vggface2_dataset <- torch::dataset(
     download = FALSE
   ) {
     self$root_path <- root
-    self$train <- train
     self$transform <- transform
     self$target_transform <- target_transform
     if (train) {
@@ -100,35 +108,19 @@ vggface2_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    archive <- download_and_cache(self$resources$train_images[1], prefix = class(self)[1])
-    if (tools::md5sum(archive) != self$resources$train_images[2]) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+    for (i in seq_len(nrow(self$resources))) {
+      row <- self$resources[i, ]
+      archive <- download_and_cache(row$url, prefix = row$split)
+      if (tools::md5sum(archive) != row$md5) {
+        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+      }
+      if (tools::file_ext(row$url) == "gz") {
+        utils::untar(archive, exdir = self$raw_folder)
+      } else {
+        fs::file_move(archive, self$raw_folder)
+      }
     }
-    utils::untar(archive, exdir = self$raw_folder)
-
-    archive <- download_and_cache(self$resources$test_images[1], prefix = class(self)[1])
-    if (tools::md5sum(archive) != self$resources$test_images[2]) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
-    utils::untar(archive, exdir = self$raw_folder)
-
-    archive <- download_and_cache(self$resources$train_list[1], prefix = "train_list")
-    if (tools::md5sum(archive) != self$resources$train_list[2]) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
-    fs::file_move(archive, self$raw_folder)
-
-    archive <- download_and_cache(self$resources$test_list[1], prefix = "test_list")
-    if (tools::md5sum(archive) != self$resources$test_list[2]) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
-    fs::file_move(archive, self$raw_folder)
-
-    archive <- download_and_cache(self$resources$identity[1], prefix = "identity_meta")
-    if (tools::md5sum(archive) != self$resources$identity[2]) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
-    fs::file_move(archive, self$raw_folder)
+    
     identity_file <- file.path(self$raw_folder, "identity_meta.csv")
     identity_df <- read.csv(identity_file, sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
