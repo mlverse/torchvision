@@ -161,7 +161,7 @@ pascal_segmentation_dataset <- torch::dataset(
     fs::dir_create(self$processed_folder)
 
     resource <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]
-    archive <- download_and_cache(resource$url, prefix = class(self)[1])
+    archive <- download_and_cache(resource$url, prefix = "pascal_dataset")
     actual_md5 <- tools::md5sum(archive)
 
     if (actual_md5 != resource$md5) {
@@ -229,7 +229,9 @@ pascal_segmentation_dataset <- torch::dataset(
       y <- self$target_transform(y)
     }
 
-    structure(list(x = x, y = y), class = "image_with_segmentation_mask")
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_segmentation_mask", class(result))
+    result
   },
 
   .length = function() {
@@ -330,7 +332,9 @@ pascal_detection_dataset <- torch::dataset(
       y <- self$target_transform(y)
     }
 
-    structure(list(x = x, y = y), class = "image_with_bounding_box")
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_bounding_box", class(result))
+    result
   },
 
   parse_voc_xml = function(xml) {

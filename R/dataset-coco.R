@@ -11,8 +11,8 @@
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
-#' - `x`: a `(C, H, W)` `torch_tensor` representing the image.
-#' - `y$boxes`: a `(N, 4)` `torch_tensor` of bounding boxes in the format `c(x_min, y_min, x_max, y_max)`.
+#' - `x`: a `(C, H, W)` array representing the image.
+#' - `y$boxes`: a `(N, 4)` `torch_tensor` of bounding boxes in the format  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}.
 #' - `y$labels`: an integer `torch_tensor` with the class label for each object.
 #' - `y$area`: a float `torch_tensor` indicating the area of each object.
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
@@ -50,10 +50,22 @@
 #' @export
 coco_detection_dataset <- torch::dataset(
   name = "coco_detection_dataset",
-  archive_size_table = list(
-    "2017" = list(train = "18 GB", val = "770 MB"),
-    "2014" = list(train = "13 GB", val = "6.3 GB")
+  resources = data.frame(
+    year = rep(c(2017, 2014), each = 4 ),
+    content = rep(c("image", "annotation"), time = 2, each = 2),
+    split = rep(c("train", "val"), time = 4),
+    url = c("http://images.cocodataset.org/zips/train2017.zip", "http://images.cocodataset.org/zips/val2017.zip",
+            rep("http://images.cocodataset.org/annotations/annotations_trainval2017.zip", time = 2),
+            "http://images.cocodataset.org/zips/train2014.zip", "http://images.cocodataset.org/zips/val2014.zip",
+            rep("http://images.cocodataset.org/annotations/annotations_trainval2014.zip", time = 2)),
+    size = c("800 MB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
+    md5 = c(c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
+            rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
+            c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3"),
+            rep("0a379cfc70b0e71301e0f377548639bd", time = 2)),
+    stringsAsFactors = FALSE
   ),
+
   initialize = function(
     root = tempdir(),
     train = TRUE,
@@ -72,7 +84,7 @@ coco_detection_dataset <- torch::dataset(
     self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
-    self$archive_size <- self$archive_size_table[[year]][[split]]
+    self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
 
@@ -81,7 +93,7 @@ coco_detection_dataset <- torch::dataset(
     self$annotation_file <- fs::path(self$data_dir, "annotations",
                                      glue::glue("instances_{split}{year}.json"))
 
-    if (download){
+    if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
@@ -105,15 +117,10 @@ coco_detection_dataset <- torch::dataset(
 
     img_path <- fs::path(self$image_dir, image_info$file_name)
 
-    x <- jpeg::readJPEG(img_path)
-    if (length(dim(x)) == 2) {
-      x <- array(rep(x, 3), dim = c(dim(x), 3))
-    }
-    x <- aperm(x, c(3, 1, 2))
-    x <- torch::torch_tensor(x, dtype = torch::torch_float())
+    x <- base_loader(img_path)
 
-    H <- as.integer(x$shape[2])
-    W <- as.integer(x$shape[3])
+    H <- dim(x)[1]
+    W <- dim(x)[2]
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -145,11 +152,12 @@ coco_detection_dataset <- torch::dataset(
       }
 
     } else {
+      # empty annotation
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
-      masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+      masks_tensor <- torch::torch_empty(c(0, H, W), dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 
@@ -168,13 +176,9 @@ coco_detection_dataset <- torch::dataset(
     if (!is.null(self$target_transform))
       y <- self$target_transform(y)
 
-    structure(
-      list(
-        x = x,
-        y = y
-      ),
-      class = c("image_with_bounding_box", "image_with_segmentation_mask")
-    )
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_bounding_box", "image_with_segmentation_mask", class(result))
+    result
   },
 
   .length = function() {
@@ -182,14 +186,15 @@ coco_detection_dataset <- torch::dataset(
   },
 
   download = function() {
-    info <- self$get_resource_info()
+    annotation_filter <- self$resources$year == self$year & self$resources$split == self$split & self$resources$content == "annotation"
+    image_filter <- self$resources$year == self$year & self$resources$split == self$split & self$resources$content == "image"
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(info$ann_url)
-    archive <- download_and_cache(info$img_url)
+    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco_dataset")
+    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco_dataset")
 
-    if (tools::md5sum(archive) != info$img_md5) {
+    if (tools::md5sum(archive) != self$resources[image_filter, ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
 
@@ -197,24 +202,6 @@ coco_detection_dataset <- torch::dataset(
     utils::unzip(archive, exdir = self$data_dir)
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
-  },
-
-  get_resource_info = function() {
-    split <- self$split
-    list(
-      "2017" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip",
-        ann_md5 = "f4bbac642086de4f52a3fdda2de5fa2c",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2017.zip"),
-        img_md5 = if (split == "train") "cced6f7f71b7629ddf16f17bbcfab6b2" else "442b8da7639aecaf257c1dceb8ba8c80"
-      ),
-      "2014" = list(
-        ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip",
-        ann_md5 = "d3e24dc9f5bda3e7887a1e6a5ff34c0c",
-        img_url = glue::glue("http://images.cocodataset.org/zips/{split}2014.zip"),
-        img_md5 = if (split == "train") "0da8cfa0e090c266b78f30e2d2874f1a" else "a3d79f5ed8d289b7a7554ce06a5782b3"
-      )
-    )[[self$year]]
   },
 
   load_annotations = function() {
@@ -274,9 +261,6 @@ coco_detection_dataset <- torch::dataset(
 coco_caption_dataset <- torch::dataset(
   name = "coco_caption_dataset",
   inherit = coco_detection_dataset,
-  archive_size_table = list(
-    "2014" = list(train = "13 GB", val = "6.3 GB")
-  ),
 
   initialize = function(
     root = tempdir(),
@@ -299,7 +283,7 @@ coco_caption_dataset <- torch::dataset(
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
     self$image_dir <- fs::path(self$data_dir, glue::glue("{split}{year}"))
     self$annotation_file <- fs::path(self$data_dir, "annotations", glue::glue("captions_{split}{year}.json"))
-    self$archive_size <- self$archive_size_table[[year]][[split]]
+    self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     if (download){
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")

@@ -1,9 +1,36 @@
 context("dataset-plankton")
 
 
+test_that("whoi_small_plankton_dataset val downloads correctly", {
+  skip_on_cran()
+  skip_if_not_installed("torch")
+
+  expect_error(
+    whoi_small_plankton_dataset(split = "test", download = FALSE),
+    "Dataset not found. You can use `download = TRUE`",
+    label = "Dataset should fail if not previously downloaded"
+  )
+
+  expect_no_error(
+    val_ds <- whoi_small_plankton_dataset(split = "val", download = TRUE, transform = transform_to_tensor)
+  )
+  # Validation dataset should have exactly 5799 samples
+  expect_equal(val_ds$.length(), 5799)
+
+  first_item <- val_ds[1]
+  expect_tensor_shape(first_item$x, c(1,145, 230))
+  # classification of the first item is "47: Leegaardiella_ovalis"
+  expect_equal(first_item$y, 47L)
+  expect_equal(val_ds$classes[first_item$y], "Leegaardiella_ovalis")
+
+})
+
+
 test_that("whoi_small_plankton_dataset downloads correctly whatever the split", {
   skip_on_cran()
   skip_if_not_installed("torch")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
     whoi_small_plankton_dataset(split = "test", download = FALSE),
@@ -18,18 +45,6 @@ test_that("whoi_small_plankton_dataset downloads correctly whatever the split", 
   expect_is(train_ds, "dataset", "train should be a dataset")
   # Train dataset should have exactly 40599 samples
   expect_equal(train_ds$.length(), 40599)
-
-  expect_no_error(
-    val_ds <- whoi_small_plankton_dataset(split = "val", download = TRUE, transform = transform_to_tensor)
-  )
-  # Validation dataset should have exactly 5799 samples
-  expect_equal(val_ds$.length(), 5799)
-
-  first_item <- val_ds[1]
-  expect_tensor_shape(first_item$x, c(1,145, 230))
-  # classification of the first item is "47: Leegaardiella_ovalis"
-  expect_equal(first_item$y, 47L)
-  expect_equal(val_ds$classes[first_item$y], "Leegaardiella_ovalis")
 
   expect_no_error(
     test_ds <- whoi_small_plankton_dataset(split = "test", download = TRUE)

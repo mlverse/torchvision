@@ -31,13 +31,38 @@ navbar:
 reference:
 - title: Transforms
   desc: Image transformation functions
+- subtitle: Unitary transformation
   contents:
-    - starts_with("transform_")
+    - has_concept("unitary_transforms")
+- subtitle: Random transformation
+  contents:
+    - has_concept("random_transforms")
+- subtitle: Combining / multiplying transformations
+  contents:
+    - has_concept("combining_transforms")
+
 - title: Models
-  desc: Model architectures
+  desc: Computer Vision deep-learning Model architectures
 - subtitle: Classification models
+  desc: >
+    Model providing a output vector of the size of `num_classes` beeing the
+    logit probability of each class.
   contents:
-   - starts_with("model_")
+   - has_concept("classification_model")
+- subtitle: Object detection models
+  desc: >
+    Model providing an output list including a bounding-boxes vector of the detected
+    object in the image each with $c(x_{min}, y_{min}, x_{max}, y_{max})$ format.
+  contents:
+   - has_concept("object_detection_model")
+- subtitle: Semantic segmentation models
+  desc: >
+    Model providing an output list including a binary mask for each pixel of the image
+    for each covered segmentation class.
+  contents:
+   - has_concept("semantic_segmentation_model")
+- subtitle: Other models
+
 - title: Datasets
   desc: >
     Datasets readily available. All have a `x` variable in each item
@@ -54,6 +79,7 @@ reference:
    - ends_with("2_dataset")
    - ends_with("5_dataset")
    - ends_with("kton_dataset")
+   - ends_with("_collection")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and
@@ -71,19 +97,26 @@ reference:
     mask and labels for image segmentation.
   contents:
    - ends_with("segmentation_dataset")
+
 - title: Displaying
-  desc: Show images
+- subtitle: Images loading
+  desc: Tools for Images loading
+  contents:
+   - magick_loader
+   - base_loader
+- subtitle: Images visualization
+  desc: Tools for Images manipulation and visualization
   contents:
    - draw_bounding_boxes
    - draw_keypoints
    - draw_segmentation_masks
    - tensor_image_browse
    - tensor_image_display
+   - vision_make_grid
+
 - title: Misc
   contents:
-   - magick_loader
-   - base_loader
-   - vision_make_grid
+   - starts_with("imagenet_")
    - ends_with("nms")
    - starts_with("box_")
    - clip_boxes_to_image

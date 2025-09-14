@@ -216,20 +216,44 @@ test_that("adjust hue", {
 
 })
 
+test_that("grayscale", {
+
+  x <- torch::torch_rand(3, 24, 32)
+  out <- transform_grayscale(x, 3)
+  expect_equal(dim(out), dim(x))
+  expect_equal(dim(out)[1], 3)
+
+  out <- transform_grayscale(x, 1)
+  expect_equal(dim(out)[2:3], dim(x)[2:3])
+  expect_equal(dim(out)[1], 1)
+
+})
+
+test_that("random grayscale", {
+
+  tensor <- torch::torch_rand(3, 24, 32)
+  for (p in seq(0, 1, length.out = 10)) {
+    out <- transform_random_grayscale(tensor, p)
+    expect_equal(dim(out), dim(tensor))
+  }
+
+})
+
+
 test_that("random vertical flip", {
 
   tensor <- torch::torch_randn(3, 24, 32)
 
   for (i in 1:10) {
     out <- transform_random_vertical_flip(tensor)
+    expect_equal(dim(out), dim(tensor))
   }
-  for (p in seq(0, 1, length.out=10)) {
+  for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_vertical_flip(tensor, p)
+    expect_equal(dim(out), dim(tensor))
   }
-
-  expect_equal(dim(out), dim(tensor))
-
 })
+
 
 test_that("random rotation works", {
 

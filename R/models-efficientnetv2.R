@@ -24,7 +24,7 @@
 #' @param ... Other parameters passed to the model implementation, such as
 #'   \code{num_classes} to change the output dimension.
 #'
-#' @family models
+#' @family classification_model
 #' @name model_efficientnet_v2
 #' @seealso \code{\link{model_efficientnet}}
 #' @examples
@@ -32,7 +32,12 @@
 #' model <- model_efficientnet_v2_s()
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' which.max(as.numeric(output)) (see <https://image-net.org> to find class.)
+#'
+#' # Show Top-5 predictions
+#' topk <- output$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
 #' }
 NULL
 
