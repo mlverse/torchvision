@@ -55,7 +55,7 @@ test_that(paste0("rf100_document_collection loads paper_part correctly"), {
 })
 
 
-test_that("rf100_document_collection datasets can be turned into a dataloader", {
+test_that("rf100_document_collection datasets can be turned into a dataloader wo transform", {
   ds <- rf100_document_collection(dataset = "document_part", split = "test", download = TRUE)
 
   expect_equal(ds$.length(), 318)
@@ -63,18 +63,36 @@ test_that("rf100_document_collection datasets can be turned into a dataloader", 
   expect_equal(length(unique(ds$classes)), 3)
 
   dl <- dataloader(ds, batch_size = 10, shuffle = TRUE)
-  # 318k turns into 32 batches of 10
+  # 318 turns into 32 batches of 10
   expect_length(dl, 32)
   iter <- dataloader_make_iter(dl)
   expect_no_error(
     i <- dataloader_next(iter)
   )
   # Check shape, dtype, and values on X
-  expect_equal(dim(i$x[[1]]), c(640, 640, 3))
-  expect_tensor_dtype(i[[1]], torch_float())
-  expect_true((torch_max(i[[1]]) <= 1)$item())
-  # Check shape, dtype and names on y
-  expect_length(i[[2]],10)
   expect_named(i, c("x", "y"))
+  expect_equal(length(i$x), 10)
+  expect_equal(dim(i$x[[1]]), c(640, 640, 3))
+  expect_lte(max(i$x[[1]])$item(), 1)
+  # Check shape, dtype and names on y
+  expect_length(i$y,10)
+})
+
+test_that("rf100_document_collection datasets can be turned into a dataloader wo transform", {
+  ds <- rf100_document_collection(dataset = "document_part", split = "test",
+                                  download = TRUE, transform = transform_to_tensor)
+  items <- ds[2:4]
+  expect_tensor_shape(items$x, c(3,3,640, 640))
+  expect_tensor_dtype(items$x, torch_float())
+
+  dl <- dataloader(ds, batch_size = 10, shuffle = TRUE)
+  # 318 turns into 32 batches of 10
+  expect_length(dl, 32)
+  iter <- dataloader_make_iter(dl)
+  expect_no_error(
+    i <- dataloader_next(iter)
+  )
+  expect_tensor(i$x)
+  expect_tensor_shape(i$x, c(10, 3, 640, 640))
 
 })

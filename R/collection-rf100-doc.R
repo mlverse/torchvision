@@ -223,8 +223,8 @@ rf100_document_collection <- torch::dataset(
       }
       # remove alpha channel if any and go to channel-first
       if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
-      aperm(x, c(2, 3, 1))
-    }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
+      x
+      }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
 
 
     if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
@@ -244,8 +244,9 @@ rf100_document_collection <- torch::dataset(
     }
 
     y <- list(labels = labels, boxes = boxes)
+
     if (!is.null(self$transform)) {
-      x <- self$transform(x)
+      x_lst <- self$transform(x_lst)
     }
     if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
