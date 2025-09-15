@@ -46,4 +46,19 @@ root/cat/nsdf3.png
 root/cat/asd932_.png
 }\if{html}{\out{</div>}}
 }
-\concept{datasets}
+\seealso{
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{lfw_dataset}},
+\code{\link{mnist_dataset}()},
+\code{\link{oxfordiiitpet_dataset}()},
+\code{\link{places365_dataset}()},
+\code{\link{tiny_imagenet_dataset}()},
+\code{\link{whoi_plankton_dataset}()}
+}
+\concept{classification_dataset}
