@@ -184,6 +184,7 @@ whoi_plankton_dataset <- torch::dataset(
 #' a resource for benthic images classification.
 #'
 #' @inheritParams whoi_plankton_dataset
+#' @family classification_dataset
 #' @export
 whoi_small_coralnet_dataset <- torch::dataset(
   name = "whoi_small_coralnet",
