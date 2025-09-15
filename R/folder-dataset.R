@@ -190,7 +190,7 @@ base_loader <- function(path) {
 #' @param is_valid_file A function that takes path of an Image file and check if
 #'   the file is a valid file (used to check of corrupt files)
 #'
-#' @family datasets
+#' @family classification_dataset
 #'
 #' @importFrom torch dataset
 #' @export

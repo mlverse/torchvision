@@ -25,6 +25,7 @@
 * Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 * `base_loader()` now accept URLs (@cregouby, #246).
 * `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
+* MNIST datasets and Roboflow 100 collections now have a `.getbatch` attached method (@cregouby #255)
 
 ## Bug fixes and improvements
 

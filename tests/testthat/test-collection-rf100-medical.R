@@ -26,7 +26,7 @@ for (ds_name in datasets) {
     item <- ds[2] # as 2 datasets have their first item wo bbox
 
     expect_type(item$y, "list")
-    expect_named(item$y, c("labels", "boxes"))
+    expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)
