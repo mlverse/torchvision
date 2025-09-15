@@ -17,11 +17,11 @@ transform_to_tensor.array <- function(img) {
 transform_to_tensor.matrix <- transform_to_tensor.array
 
 #' @export
-transform_to_tensor.list <- function(list)
-  if (inherits(list[[1]], "array")) {
-    torch::torch_stack(lapply(list, transform_to_tensor))
+transform_to_tensor.list <- function(img)
+  if (inherits(img[[1]], "array")) {
+    torch::torch_stack(lapply(img, transform_to_tensor))
   } else {
-    not_implemented_for_class(list[[1]])
+    not_implemented_for_class(img[[1]])
   }
 
 
