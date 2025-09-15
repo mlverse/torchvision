@@ -1,0 +1,67 @@
+---
+title: "Visualization_utilities"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualization_utilities}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+  
+)
+```
+
+This vignette illustrates some of the utilities that torchvision offers for visualizing 
+images, bounding boxes, segmentation masks and keypoints.
+
+```{r setup}
+library(torchvision)
+library(torch)
+library(magrittr)
+```
+
+## Visualizing a grid of images
+
+In order to visualize a grid of images, we need a "image batch" i.e. a 4-D tensor of shape
+$(B \times C \times H \times W)$, where B is the batch - 2 for a 2-images grid -, 
+C is the image channels - 3 for the RGB color images -, H ad W the image pixel dimension.
+
+The image batch is composed here using the `torch_stack()` command on a vector of tensors.
+
+Then `tensor_image_browse()` will display the image in your usual image viewer.
+
+```{r}
+#| label: "image grid"
+#| eval: false
+dog1_tensor <- base_loader("examples/assets/dog1.jpg") %>% transform_to_tensor()
+dog2_tensor <- base_loader("examples/assets/dog2.jpg") %>% transform_to_tensor()
+
+grid <- vision_make_grid(torch_stack(c(dog1_tensor, dog2_tensor)))
+
+tensor_image_browse(grid)
+```
+```{r, fig.alt = "An horizontal image grid made of two dog images"}
+knitr::include_graphics("examples/assets/file84fb43ce0fa5.png")
+```
+
+## Visualizing bounding boxes
+
+We can use `draw_bounding_box()` to draw boxes on an image. We can set the colors, labels, width
+as well as font and font size. The boxes are in $(x_{min}, y_{min}, x_{max}, y_{max})$ format.
+
+
+
+
+```{r}
+boxes <- matrix(c(50, 50, 100, 200, 210, 150, 350, 430), ncol = 4, byrow = TRUE)
+boxes_tensor <- torch_tensor(boxes, dtype=torch_float())
+colors <- c("blue", "yellow")
+
+result <- draw_bounding_boxes(dog1_tensor, boxes_tensor, colors=colors, width=5)
+tensor_image_browse(result)
+```
+

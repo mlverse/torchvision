@@ -54,7 +54,9 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2
+    xml2,
+    knitr,
+    rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
     'folder-dataset.R'
@@ -107,3 +109,4 @@ Collate:
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
+VignetteBuilder: knitr
