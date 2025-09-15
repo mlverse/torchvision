@@ -70,13 +70,13 @@ reference:
 - subtitle: for Image Classification
   descr: Dataset having items with "y" for target class identifier.
   contents:
-   - has_concept(classification_dataset)
+   - has_concept("classification_dataset")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and
     labels for object detection.
   contents:
-   - has_concept(detection_dataset)
+   - has_concept("detection_dataset")
 - subtitle: for Image captionning
   descr: >
     Dataset having items with "y" as one or multiple captions of the image
