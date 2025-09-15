@@ -121,8 +121,9 @@
     <div id="value">
     <h2>Value</h2>
     <p>A torch dataset. Each element is a named list with:</p><ul><li><p><code>x</code>: H x W x 3 array representing the image.</p></li>
-<li><p><code>y</code>: a list containing the target with:</p><ul><li><p><code>labels</code>: character vector of object class names.</p></li>
-<li><p><code>boxes</code>: a tensor of shape (N, 4) with bounding boxes, if any, in \((x_{min}, y_{min}, x_{max}, y_{max})\) format.</p></li>
+<li><p><code>y</code>: a list containing the target with:</p><ul><li><p><code>image_id</code>: numeric identifier of the x image.</p></li>
+<li><p><code>labels</code>: numeric identifier of the N bounding-box object class.</p></li>
+<li><p><code>boxes</code>: a torch_tensor of shape (N, 4) with bounding boxes, each in \((x_{min}, y_{min}, x_{max}, y_{max})\) format.</p></li>
 </ul></li>
 </ul><p>The returned item inherits the class <code>image_with_bounding_box</code> so it can be
 visualised with helper functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>.</p>
