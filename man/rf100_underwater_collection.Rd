@@ -29,8 +29,9 @@ A torch dataset. Each element is a named list with:
 \item \code{x}: H x W x 3 array representing the image.
 \item \code{y}: a list containing the target with:
 \itemize{
-\item \code{labels}: character vector of object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
+\item \code{image_id}: numeric identifier of the x image.
+\item \code{labels}: numeric identifier of the N bounding-box object class.
+\item \code{boxes}: a torch_tensor of shape (N, 4) with bounding boxes, each in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 }
 }
 
