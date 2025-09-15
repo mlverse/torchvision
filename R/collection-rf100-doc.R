@@ -16,8 +16,9 @@ NULL
 #' @return A torch dataset. Each element is a named list with:
 #' - `x`: H x W x 3 array representing the image.
 #' - `y`: a list containing the target with:
-#'     - `labels`: character vector of object class names.
-#'     - `boxes`: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
+#'     - `image_id`: numeric identifier of the x image.
+#'     - `labels`: numeric identifier of the N bounding-box object class.
+#'     - `boxes`: a torch_tensor of shape (N, 4) with bounding boxes, each in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 #'
 #' The returned item inherits the class `image_with_bounding_box` so it can be
 #' visualised with helper functions such as [draw_bounding_boxes()].
@@ -132,11 +133,7 @@ rf100_document_collection <- torch::dataset(
     self$archive_url  <- self$resources$url[sel]
     self$archive_size <- prettyunits::pretty_bytes(sum(self$resources$size[sel]))
     self$archive_md5  <- self$resources$md5[sel]
-    self$split_file   <- file.path(
-      rappdirs::user_cache_dir("torch"),
-      class(self)[1], self$dataset,
-      sub("\\?download=.*", "", basename(self$archive_url))
-    )
+    self$split_file   <- file.path(rappdirs::user_cache_dir("torch"), class(self)[1], self$dataset, basename(self$archive_url))
 
     if (download) {
       cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -149,11 +146,11 @@ rf100_document_collection <- torch::dataset(
     ads <- arrow::open_dataset(self$split_file)
     self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names
 
-    # single parquet file or arrow dataset
+    # single parquet file versus arrow dataset, and only keep bboxed images
     if (sum(sel) == 1) {
-      self$.data <- arrow::read_parquet(self$split_file) %>% filter(map_dbl(objects$bbox, length) > 0 )
+      self$.data <- arrow::read_parquet(self$split_file) %>% subset(sapply(objects$bbox, length) > 0)
     } else {
-      self$.data <- ads$to_data_frame() %>% filter(map_dbl(objects$bbox, length) > 0 )
+      self$.data <- ads$to_data_frame() %>% subset(sapply(objects$bbox, length) > 0)
     }
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
@@ -185,16 +182,13 @@ rf100_document_collection <- torch::dataset(
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
     bbox <- df$objects$bbox
-    if (is.list(bbox)) {
-      bbox <- do.call(rbind, bbox[[1]])
-    }
-    boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-    labels <- df$objects$category[[1]]
+    boxes  <- torch::torch_tensor(unlist(bbox), dtype = torch::torch_float())$view(c(4,-1))$t()
+    labels <- unlist(df$objects$category)
     if (is.null(labels)) {
-      labels <- df$objects$label[[1]]
+      labels <- unlist(df$objects$label)
     }
 
-    y <- list(id = 1L, labels = labels, boxes = boxes)
+    y <- list(image_id = df$image_id, labels = labels, boxes = boxes)
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
@@ -216,27 +210,23 @@ rf100_document_collection <- torch::dataset(
       } else {
         x <- png::readPNG(as.raw(bytes))
       }
-      # remove alpha channel if any and go to channel-first
+      # remove alpha channel if any
       if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
       x
       }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
 
-    bbox <- df$objects$bbox
+    # y, step 1 unnest `objects`
+    unnested_df <- do.call(bind_rows, lapply(1:nrow(df), function(row) {
+      obj_df <- df$objects[row, ]
+      return(obj_df)
+    }))
+    # y step 2 select, and unnest_longer bbox and label
+    unnested_bbox <- torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(4,-1))$t()
+    unnested_label <- unlist(unnested_df$category)
+    # y step 3 repeat image_id along each of unnested value
+    image_id_rep <- rep(df$image_id, sapply(unnested_df$bbox, length))
 
-    bbox <- df$objects$bbox
-    if (is.list(bbox)) {
-      bbox <- do.call(rbind, bbox[[1]])
-    }
-    boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-    # TODO need rework
-    labels <- df$objects$category[[1]]
-    if (is.null(labels)) {
-      labels <- df$objects$label[[1]]
-    }
-    # TODO need original id from objects$id
-
-
-    y <- list(id = 1L, labels = labels, boxes = boxes)
+    y <- list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox)
 
     if (!is.null(self$transform)) {
       x_lst <- self$transform(x_lst)
