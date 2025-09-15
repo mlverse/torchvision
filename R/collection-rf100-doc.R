@@ -215,16 +215,18 @@ rf100_document_collection <- torch::dataset(
       x
       }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
 
-    # y, step 1 unnest `objects`
-    unnested_df <- do.call(bind_rows, lapply(1:nrow(df), function(row) {
+    # y, step 1 unnest and select `objects`
+    unnested_df <- do.call(rbind, lapply(1:nrow(df), function(row) {
       obj_df <- df$objects[row, ]
-      return(obj_df)
+      obj_df$bbox <- list(unlist(obj_df$bbox))
+      obj_df$category <- list(unlist(obj_df$category))
+      return(obj_df[,c("bbox", "category")])
     }))
     # y step 2 select, and unnest_longer bbox and label
     unnested_bbox <- torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(4,-1))$t()
     unnested_label <- unlist(unnested_df$category)
     # y step 3 repeat image_id along each of unnested value
-    image_id_rep <- rep(df$image_id, sapply(unnested_df$bbox, length))
+    image_id_rep <- rep(df$image_id, sapply(unnested_df$category, length))
 
     y <- list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox)
 
