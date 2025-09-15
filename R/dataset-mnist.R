@@ -336,23 +336,6 @@ qmnist_dataset <- dataset(
   )
 )
 
-read_sn3_pascalvincent <- function(path) {
-  x <- gzfile(path, open = "rb")
-  on.exit({close(x)})
-
-  magic <- readBin(x, endian = "big", what = integer(), n = 1)
-  n_dimensions <- magic %% 256
-  ty <- magic %/% 256
-
-  dim <- readBin(x, what = integer(), size = 4, endian = "big", n = n_dimensions)
-
-  a <- readBin(x, what = "int", endian = "big", n = prod(dim), size = 1, signed = FALSE)
-
-  a <- array(a, dim = rev(dim))
-  a <- aperm(a, perm = rev(seq_along(dim)))
-  a
-}
-
 #' @describeIn mnist_dataset Fashion-MNIST clothing image dataset.
 #' @export
 fashion_mnist_dataset <- dataset(
