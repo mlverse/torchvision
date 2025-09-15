@@ -1,6 +1,3 @@
-+33
--0
-
 context("dataset-rf100-underwater")
 
 t <- withr::local_tempdir()
@@ -28,7 +25,7 @@ for (ds_name in datasets) {
     item <- ds[1]
 
     expect_type(item$y, "list")
-    expect_named(item$y, c("labels", "boxes"))
+    expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)
@@ -48,7 +45,7 @@ test_that(paste0("rf100_underwater_collection loads `aquarium` correctly"), {
   item <- ds[1]
 
   expect_type(item$y, "list")
-  expect_named(item$y, c("labels", "boxes"))
+  expect_named(item$y, c("image_id","labels","boxes"))
   expect_type(item$y$labels, "integer")
   expect_tensor(item$y$boxes)
   expect_equal(item$y$boxes$ndim, 2)
