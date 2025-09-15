@@ -24,7 +24,7 @@ for (ds_name in datasets) {
     item <- ds[1]
 
     expect_type(item$y, "list")
-    expect_named(item$y, c("labels", "boxes"))
+    expect_named(item$y, c("id", "labels", "boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)
@@ -46,7 +46,7 @@ test_that(paste0("rf100_document_collection loads paper_part correctly"), {
   item <- ds[1]
 
   expect_type(item$y, "list")
-  expect_named(item$y, c("labels", "boxes"))
+  expect_named(item$y, c("id", "labels", "boxes"))
   expect_type(item$y$labels, "integer")
   expect_tensor(item$y$boxes)
   expect_equal(item$y$boxes$ndim, 2)

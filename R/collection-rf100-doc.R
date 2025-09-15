@@ -149,10 +149,11 @@ rf100_document_collection <- torch::dataset(
     ads <- arrow::open_dataset(self$split_file)
     self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names
 
+    # single parquet file or arrow dataset
     if (sum(sel) == 1) {
-      self$.data <- arrow::read_parquet(self$split_file)
+      self$.data <- arrow::read_parquet(self$split_file) %>% filter(map_dbl(objects$bbox, length) > 0 )
     } else {
-      self$.data <- ads$to_data_frame()
+      self$.data <- ads$to_data_frame() %>% filter(map_dbl(objects$bbox, length) > 0 )
     }
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
@@ -183,23 +184,17 @@ rf100_document_collection <- torch::dataset(
     # remove alpha channel
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
-    if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
-      bbox <- df$objects$bbox
-      if (is.list(bbox)) {
-        bbox <- do.call(rbind, bbox[[1]])
-      }
-      boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-      labels <- df$objects$category[[1]]
-      if (is.null(labels)) {
-        labels <- df$objects$label[[1]]
-      }
-
-    } else {
-      boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- 0L
+    bbox <- df$objects$bbox
+    if (is.list(bbox)) {
+      bbox <- do.call(rbind, bbox[[1]])
+    }
+    boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
+    labels <- df$objects$category[[1]]
+    if (is.null(labels)) {
+      labels <- df$objects$label[[1]]
     }
 
-    y <- list(labels = labels, boxes = boxes)
+    y <- list(id = 1L, labels = labels, boxes = boxes)
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
@@ -226,24 +221,22 @@ rf100_document_collection <- torch::dataset(
       x
       }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
 
+    bbox <- df$objects$bbox
 
-    if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
-      bbox <- df$objects$bbox
-      if (is.list(bbox)) {
-        bbox <- do.call(rbind, bbox[[1]])
-      }
-      boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-      labels <- df$objects$category[[1]]
-      if (is.null(labels)) {
-        labels <- df$objects$label[[1]]
-      }
-
-    } else {
-      boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- 0L
+    bbox <- df$objects$bbox
+    if (is.list(bbox)) {
+      bbox <- do.call(rbind, bbox[[1]])
     }
+    boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
+    # TODO need rework
+    labels <- df$objects$category[[1]]
+    if (is.null(labels)) {
+      labels <- df$objects$label[[1]]
+    }
+    # TODO need original id from objects$id
 
-    y <- list(labels = labels, boxes = boxes)
+
+    y <- list(id = 1L, labels = labels, boxes = boxes)
 
     if (!is.null(self$transform)) {
       x_lst <- self$transform(x_lst)
