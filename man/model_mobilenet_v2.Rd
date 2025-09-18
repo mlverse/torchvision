@@ -2,7 +2,7 @@
 % Please edit documentation in R/models-mobilenetv2.R
 \name{model_mobilenet_v2}
 \alias{model_mobilenet_v2}
-\title{MobileNetV2 implementation}
+\title{MobileNetV2 Model}
 \usage{
 model_mobilenet_v2(pretrained = FALSE, progress = TRUE, ...)
 }
@@ -21,7 +21,7 @@ Constructs a MobileNetV2 architecture from
 \seealso{
 Other classification_model: 
 \code{\link{model_alexnet}()},
-\code{\link{model_deeplabv3}},
+\code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},

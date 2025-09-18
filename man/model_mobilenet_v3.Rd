@@ -4,7 +4,7 @@
 \alias{model_mobilenet_v3}
 \alias{model_mobilenet_v3_large}
 \alias{model_mobilenet_v3_small}
-\title{MobileNetV3 Implementation in R Torch}
+\title{MobileNetV3 Model}
 \usage{
 model_mobilenet_v3_large(pretrained = FALSE, progress = TRUE, ...)
 
@@ -102,7 +102,7 @@ glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\
 \seealso{
 Other classification_model: 
 \code{\link{model_alexnet}()},
-\code{\link{model_deeplabv3}},
+\code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_inception_v3}()},

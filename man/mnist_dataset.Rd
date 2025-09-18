@@ -42,7 +42,8 @@ fashion_mnist_dataset(
 
 emnist_dataset(
   root = tempdir(),
-  split = "balanced",
+  split = "test",
+  kind = "balanced",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
@@ -60,6 +61,9 @@ emnist_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
+
+\item{kind}{change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
+can look at dataset attribute \verb{$classes} to see the actual classes.}
 }
 \value{
 A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
@@ -88,7 +92,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 \item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
 
 }}
-\section{Supported Splits for \code{emnist_dataset()}}{
+\section{Supported \code{kind}s for \code{emnist_dataset()}}{
 
 \itemize{
 \item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
@@ -100,7 +104,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 }
 }
 
-\section{Supported Splits for \code{qmnist_dataset()}}{
+\section{Supported \code{split}s for \code{qmnist_dataset()}}{
 
 \itemize{
 \item \code{"train"}: 60,000 training samples (MNIST-compatible)
@@ -121,13 +125,13 @@ item <- qmnist[1]
 item$x
 item$y
 
-emnist <- emnist_dataset(split = "balanced", download = TRUE)
+emnist <- emnist_dataset(kind = "balanced", split = "test", download = TRUE)
 item <- emnist[1]
 item$x
 item$y
 
-kmnist <- kmnist_dataset(download = TRUE)
-fmnist <- fashion_mnist_dataset(download = TRUE)
+kmnist <- kmnist_dataset(download = TRUE, train = FALSE)
+fmnist <- fashion_mnist_dataset(download = TRUE, train = TRUE)
 }
 
 }
@@ -139,10 +143,12 @@ Other classification_dataset:
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
 \code{\link{lfw_dataset}},
 \code{\link{oxfordiiitpet_dataset}()},
 \code{\link{places365_dataset}()},
 \code{\link{tiny_imagenet_dataset}()},
-\code{\link{whoi_plankton_dataset}()}
+\code{\link{whoi_plankton_dataset}()},
+\code{\link{whoi_small_coralnet_dataset}()}
 }
 \concept{classification_dataset}

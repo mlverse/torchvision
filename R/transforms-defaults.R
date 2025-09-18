@@ -31,8 +31,8 @@ transform_center_crop.default <- function(img, size) {
 
   size <- get_image_size(img)
 
-  image_height <- size[1]
-  image_width <- size[2]
+  image_height <- size[2]
+  image_width <- size[1]
 
   crop_height <- output_size[1]
   crop_width <- output_size[2]
@@ -171,7 +171,7 @@ transform_random_vertical_flip.default <- function(img, p = 0.5) {
 get_random_resized_crop_params <- function(img, scale, ratio) {
 
   img_size <- get_image_size(img)
-  width <- img_size[2]; height <- img_size[1]
+  width <- img_size[1]; height <- img_size[2]
 
   area <- height * width
 

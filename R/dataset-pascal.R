@@ -161,7 +161,7 @@ pascal_segmentation_dataset <- torch::dataset(
     fs::dir_create(self$processed_folder)
 
     resource <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]
-    archive <- download_and_cache(resource$url, prefix = class(self)[1])
+    archive <- download_and_cache(resource$url, prefix = "pascal_dataset")
     actual_md5 <- tools::md5sum(archive)
 
     if (actual_md5 != resource$md5) {

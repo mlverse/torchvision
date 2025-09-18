@@ -31,8 +31,16 @@ navbar:
 reference:
 - title: Transforms
   desc: Image transformation functions
+- subtitle: Unitary transformation
   contents:
-    - starts_with("transform_")
+    - has_concept("unitary_transforms")
+- subtitle: Random transformation
+  contents:
+    - has_concept("random_transforms")
+- subtitle: Combining / multiplying transformations
+  contents:
+    - has_concept("combining_transforms")
+
 - title: Models
   desc: Computer Vision deep-learning Model architectures
 - subtitle: Classification models
@@ -54,8 +62,7 @@ reference:
   contents:
    - has_concept("semantic_segmentation_model")
 - subtitle: Other models
-  contents:
-   - starts_with("model_")
+
 - title: Datasets
   desc: >
     Datasets readily available. All have a `x` variable in each item
@@ -63,34 +70,33 @@ reference:
 - subtitle: for Image Classification
   descr: Dataset having items with "y" for target class identifier.
   contents:
-   - ends_with("t_dataset")
-   - ends_with("s_dataset")
-   - ends_with("0_dataset")
-   - ends_with("r_dataset")
-   - ends_with("6_dataset")
-   - ends_with("1_dataset")
-   - ends_with("2_dataset")
-   - ends_with("5_dataset")
-   - ends_with("kton_dataset")
+   - has_concept("classification_dataset")
 - subtitle: for Object Detection
   descr: >
     Dataset having items with "y" as a named list of bounding-box and
     labels for object detection.
   contents:
-   - ends_with("detection_dataset")
+   - has_concept("detection_dataset")
 - subtitle: for Image captionning
   descr: >
     Dataset having items with "y" as one or multiple captions of the image
   contents:
-   - ends_with("caption_dataset")
-- subtitle: for Image segmentation
+   - has_concept("caption_dataset")
+- subtitle: for Semantic segmentation
   descr: >
     Dataset having items with "y" as a named list containing a segmentation
     mask and labels for image segmentation.
   contents:
-   - ends_with("segmentation_dataset")
+   - has_concept("segmentation_dataset")
+
 - title: Displaying
-  desc: Show images
+- subtitle: Images loading
+  desc: Tools for Images loading
+  contents:
+   - magick_loader
+   - base_loader
+- subtitle: Images visualization
+  desc: Tools for Images manipulation and visualization
   contents:
    - draw_bounding_boxes
    - draw_keypoints
@@ -98,10 +104,9 @@ reference:
    - tensor_image_browse
    - tensor_image_display
    - vision_make_grid
+
 - title: Misc
   contents:
-   - magick_loader
-   - base_loader
    - starts_with("imagenet_")
    - ends_with("nms")
    - starts_with("box_")

@@ -296,6 +296,24 @@ transform_linear_transformation.torch_tensor <- function(img, transformation_mat
 # Other methods -----------------------------------------------------------
 
 #' @export
+transform_random_grayscale.torch_tensor <- function(img, p = 0.1) {
+  check_img(img)
+
+  if (stats::runif(1) > p) {
+    img
+  } else {
+    transform_grayscale(img, num_output_channels = 3)
+  }
+}
+
+#' @export
+transform_grayscale.torch_tensor <- function(img, num_output_channels) {
+  check_img(img)
+
+  transform_rgb_to_grayscale(img)$`repeat`(c(num_output_channels, 1, 1))
+}
+
+#' @export
 transform_crop.torch_tensor <- function(img, top, left, height, width) {
   check_img(img)
 

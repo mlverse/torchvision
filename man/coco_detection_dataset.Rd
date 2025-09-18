@@ -29,8 +29,8 @@ coco_detection_dataset(
 \value{
 An object of class \code{coco_detection_dataset}. Each item is a list:
 \itemize{
-\item \code{x}: a \verb{(C, H, W)} \code{torch_tensor} representing the image.
-\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format \code{c(x_min, y_min, x_max, y_max)}.
+\item \code{x}: a \verb{(C, H, W)} array representing the image.
+\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}.
 \item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
 \item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
@@ -70,6 +70,12 @@ tensor_image_browse(masked)
 }
 \seealso{
 Other detection_dataset: 
-\code{\link{pascal_voc_datasets}}
+\code{\link{pascal_voc_datasets}},
+\code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
+\code{\link{rf100_document_collection}()},
+\code{\link{rf100_infrared_collection}()},
+\code{\link{rf100_medical_collection}()},
+\code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}
