@@ -57,11 +57,22 @@ as well as font and font size. The boxes are in $(x_{min}, y_{min}, x_{max}, y_{
 
 
 ```{r}
+#| label: "draw_bounding_boxes"
+#| eval: false
+
 boxes <- matrix(c(50, 50, 100, 200, 210, 150, 350, 430), ncol = 4, byrow = TRUE)
 boxes_tensor <- torch_tensor(boxes, dtype=torch_float())
+
+# which is equivalent to the pure torch method using $view
+boxes_tensor <- torch_tensor(c(50, 50, 100, 200, 210, 150, 350, 430), dtype=torch_float())$view(c(-1,4))
+
 colors <- c("blue", "yellow")
 
-result <- draw_bounding_boxes(dog1_tensor, boxes_tensor, colors=colors, width=5)
+labels <- c("random", "dog")
+
+result <- draw_bounding_boxes(dog1_tensor, boxes_tensor, colors=colors, labels = labels, width=5, font_size = 18)
 tensor_image_browse(result)
 ```
-
+```{r, fig.alt = "An sitting dog with two bounding boxes, one blue in the top left corner, one yellow over the dog forefront with a label `dog`"}
+knitr::include_graphics("examples/assets/filec2f777fd4b1a.png")
+```

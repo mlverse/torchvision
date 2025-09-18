@@ -170,18 +170,18 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x <- x$tile(c(4, 2, 2))
   }
 
-  img_bb <- boxes$to(torch::torch_int64()) %>% as.array
+  img_bb <- boxes$to(torch::torch_int64()) %>% as.array()
 
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors)
+  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors, lwd = width)
 
   if (!is.null(labels)) {
     graphics::text(
-      img_bb[, 1] + width,
-      img_bb[, 2] + width,
+      img_bb[, 1] + 2 * width + font_size,
+      img_bb[, 2] + 2 * width,
       labels = labels,
       col = colors,
       vfont = font,
