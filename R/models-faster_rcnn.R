@@ -848,10 +848,10 @@ NULL
 rpn_model_urls <- list(
   fasterrcnn_resnet50 = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_resnet50.pth",
-    "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
+    "8c519bb0e3a1a4fd94fb7bd21d51c135", "160 MB"),
   fasterrcnn_resnet50_v2 = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_resnet50_v2.pth",
-    "369109597fa68546df1231ae2fe0f66f", "207 MB"),
+    "88b414aecf00367413650dc732aa0aba", "170 MB"),
   fasterrcnn_mobilenet_v3_large = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_mobilenet_v3_large.pth",
     "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
