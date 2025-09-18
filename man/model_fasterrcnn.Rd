@@ -158,7 +158,7 @@ if (num_boxes > 0) {
 
 }
 \seealso{
-Other semantic_segmentation_model: 
-\code{\link{model_fcn_resnet}}
+Other object_detection_model: 
+\code{\link{model_facenet}}
 }
-\concept{semantic_segmentation_model}
+\concept{object_detection_model}

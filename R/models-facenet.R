@@ -78,13 +78,13 @@ facenet_torchscript_urls <- list(
 #' batch <- input$unsqueeze(1)   # [1, C, H, W]
 #'
 #' # Load pretrained model
-#' model <- model_inception_resnet_v1(pretrained = "vggface2")
+#' model <- model_facenet_inception_resnet_v1(pretrained = "vggface2")
 #' model$eval()
 #' output <- model(batch)
 #' output
 #'
 #' # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
-#' model <- model_inception_resnet_v1(pretrained = "casia-webface")
+#' model <- model_facenet_inception_resnet_v1(pretrained = "casia-webface")
 #' model$eval()
 #' output <- model(batch)
 #' output
@@ -270,6 +270,7 @@ model_facenet_onet <- nn_module(
 #'         }
 #' }
 #' (Here, \code{N} is the number of detected faces in the input image.)
+#' @family object_detection_model
 #' @export
 model_mtcnn <- nn_module(
   classname = "MTCNN",
@@ -455,7 +456,7 @@ Mixed_7a <- nn_module(
 #' @describeIn model_facenet Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
 #'
 #' @return
-#' `model_inception_resnet_v1()` returns a tensor output depending on the \code{classify} argument:
+#' `model_facenet_inception_resnet_v1()` returns a tensor output depending on the \code{classify} argument:
 #' \itemize{
 #'   \item When \code{classify = FALSE} (default):
 #'         A tensor of shape \code{(N, 512)}, where each row is a normalized embedding
@@ -467,8 +468,9 @@ Mixed_7a <- nn_module(
 #'         A tensor of shape \code{(N, num_classes)} containing class logits.
 #' }
 #'
+#' @family classification_model
 #' @export
-model_inception_resnet_v1 <- nn_module(
+model_facenet_inception_resnet_v1 <- nn_module(
   initialize = function(
     pretrained = NULL,
     classify = FALSE,

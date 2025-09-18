@@ -56,7 +56,6 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
   )
 }
 
-
 rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
   torch::nn_module(
     initialize = function() {
@@ -126,6 +125,7 @@ decode_boxes <- function(anchors, deltas) {
 }
 
 generate_proposals <- function(features, rpn_out, image_size, strides) {
+  # TODO requires performance refactoring (currently 20s for 12k proposals from image in test)
   all_proposals <- list()
   all_scores <- list()
   for (i in seq_along(features)) {
@@ -397,8 +397,8 @@ fasterrcnn_model <- function(backbone, num_classes) {
 
       scores <- torch::nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores$values
-      final_labels <- max_scores$indices
+      final_scores <- max_scores[[1]]
+      final_labels <- max_scores[[2]]
 
       box_reg <- detections$boxes$view(c(-1, num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
@@ -553,8 +553,8 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
 
       scores <- torch::nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores$values
-      final_labels <- max_scores$indices
+      final_scores <- max_scores[[1]]
+      final_labels <- max_scores[[2]]
 
       box_reg <- detections$boxes$view(c(-1, num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
@@ -681,8 +681,8 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
 
       scores <- nnf_softmax(detections$scores, dim = 2)
       max_scores <- torch_max(scores, dim = 2)
-      final_scores <- max_scores$values
-      final_labels <- max_scores$indices
+      final_scores <- max_scores[[1]]
+      final_labels <- max_scores[[2]]
 
       box_reg <- detections$boxes$view(c(-1, num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
@@ -840,10 +840,26 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' }
 #' }
 #'
-#' @family semantic_segmentation_model
+#' @family object_detection_model
 #' @name model_fasterrcnn
 #' @rdname model_fasterrcnn
 NULL
+
+rpn_model_urls <- list(
+  fasterrcnn_resnet50 = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_resnet50.pth",
+    "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
+  fasterrcnn_resnet50_v2 = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_resnet50_v2.pth",
+    "369109597fa68546df1231ae2fe0f66f", "207 MB"),
+  fasterrcnn_mobilenet_v3_large = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_mobilenet_v3_large.pth",
+    "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
+  fasterrcnn_mobilenet_v3_large_320 = c(
+    "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_mobilenet_v3_large_320.pth",
+    "369109597fa68546df1231ae2fe0f66f", "207 MB")
+)
+
 
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
 #' @export
@@ -852,9 +868,21 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
   backbone <- resnet_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_model(backbone, num_classes = num_classes)()  # <- Add () here instead
 
+  if (pretrained && num_classes != 91)
+    cli_abort("Pretrained weights require num_classes = 91.")
+
   if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
-    state_dict <- torch::load_state_dict(local_path)
+    # local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
+    # state_dict <- torch::load_state_dict(local_path)
+    r <- rpn_model_urls$fasterrcnn_resnet50
+    name <- "fasterrcnn_resnet50"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
+    state_dict <- torch::load_state_dict(state_dict_path)
+
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }
@@ -870,9 +898,18 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
   backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
   model <- fasterrcnn_model_v2(backbone, num_classes = num_classes)
 
+  if (pretrained && num_classes != 91)
+    cli_abort("Pretrained weights require num_classes = 91.")
+
   if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_resnet50_fpn_v2.pth"
-    state_dict <- torch::load_state_dict(local_path)
+    r <- rpn_model_urls$fasterrcnn_resnet50_v2
+    name <- "fasterrcnn_resnet50_v2"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
+    state_dict <- torch::load_state_dict(state_dict_path)
 
     model_state <- model$state_dict()
     state_dict <- state_dict[names(state_dict) %in% names(model_state)]
@@ -903,9 +940,18 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
   backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
 
+  if (pretrained && num_classes != 91)
+    cli_abort("Pretrained weights require num_classes = 91.")
+
   if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_mobilenet_v3_large_fpn.pth"
-    state_dict <- torch::load_state_dict(local_path)
+    r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
+    name <- "fasterrcnn_mobilenet_v3_large"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
+    state_dict <- torch::load_state_dict(state_dict_path)
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }
@@ -922,9 +968,18 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
   backbone <- mobilenet_v3_320_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
 
+  if (pretrained && num_classes != 91)
+    cli_abort("Pretrained weights require num_classes = 91.")
+
   if (pretrained) {
-    local_path <- "tools/models/fasterrcnn_mobilenet_v3_large_320_fpn.pth"
-    state_dict <- torch::load_state_dict(local_path)
+    r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320
+    name <- "fasterrcnn_mobilenet_v3_large_320"
+    cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
+    state_dict_path <- download_and_cache(r[1])
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
+    state_dict <- torch::load_state_dict(state_dict_path)
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }

@@ -3,13 +3,23 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
   input <- torch::torch_randn(1, 3, 224, 224)
   model$eval()
   out <- model(input)
-  expect_s3_class(out, "list")
-  expect_names(out, c(""))
+  expect_named(out, c("features","detections"))
+  expect_named(out$detections, c("boxes","labels", "scores"))
+  expect_tensor(out$detections$boxes)
+  expect_tensor(out$detections$labels)
+  expect_tensor(out$detections$scores)
+  expect_equal(out$detections$boxes$shape[2], 4L)
+
 
   model <- model_fasterrcnn_resnet50_fpn(num_classes = 10)
   input <- torch::torch_randn(1, 3, 224, 224)
   out <- model(input)
-  expect_s3_class(out, "list")
+  expect_named(out, c("features","detections"))
+  expect_named(out$detections, c("boxes","labels", "scores"))
+  expect_tensor(out$detections$boxes)
+  expect_tensor(out$detections$labels)
+  expect_tensor(out$detections$scores)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
@@ -19,12 +29,14 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
   input <- torch::torch_randn(1, 3, 448, 448)
   out <- model(input)
-  expect_tensor_shape(out, c(1, 1000))
+  expect_named(out, c("features","detections"))
+  expect_named(out$detections, c("boxes","labels", "scores"))
+  expect_tensor(out$detections$boxes)
+  expect_tensor(out$detections$labels)
+  expect_tensor(out$detections$scores)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
-# ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
-# sample <- ds[1]
-# image <- (sample$x * 255)$to(dtype = torch::torch_uint8())
 # # ResNet-50 FPN
 # model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
 # model$eval()
