@@ -854,10 +854,10 @@ rpn_model_urls <- list(
     "88b414aecf00367413650dc732aa0aba", "170 MB"),
   fasterrcnn_mobilenet_v3_large = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_mobilenet_v3_large.pth",
-    "c79a7e2675d73817cfe6ba383be6ca7d", "135 MB"),
+    "58eba0ba379ed1497da8aa1adb8b7a7e", "75 MB"),
   fasterrcnn_mobilenet_v3_large_320 = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fasterrcnn_mobilenet_v3_large_320.pth",
-    "369109597fa68546df1231ae2fe0f66f", "207 MB")
+    "bd711fc4bb0da7fce38ca9916fc98753", "75 MB")
 )
 
 
@@ -866,8 +866,7 @@ rpn_model_urls <- list(
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                           num_classes = 91, ...) {
   backbone <- resnet_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)()  # <- Add () here instead
-
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)()
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
 
@@ -883,7 +882,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     }
     state_dict <- torch::load_state_dict(state_dict_path)
 
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
+    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 184 discrepancies
     model$load_state_dict(state_dict, strict = FALSE)
   }
 
@@ -912,6 +911,8 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     state_dict <- torch::load_state_dict(state_dict_path)
 
     model_state <- model$state_dict()
+    # TODO remove that model scalping
+    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 221 discrepancies
     state_dict <- state_dict[names(state_dict) %in% names(model_state)]
     for (n in names(state_dict)) {
       if (!all(state_dict[[n]]$size() == model_state[[n]]$size())) {
@@ -952,6 +953,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
+    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 275 discrepancies
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }
@@ -980,6 +982,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
+    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 275 discrepancies
     state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
     model$load_state_dict(state_dict, strict = FALSE)
   }
