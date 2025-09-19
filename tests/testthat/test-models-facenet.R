@@ -106,9 +106,9 @@ test_that("tests for non-pretrained model_facenet_onet", {
   gc()
 })
 
-test_that("tests for pretrained model_inception_resnet_v1 with vgg2face weights", {
+test_that("tests for pretrained model_facenet_inception_resnet_v1 with vgg2face weights", {
 
-  model_vgg = model_inception_resnet_v1(pretrained = 'vggface2')
+  model_vgg = model_facenet_inception_resnet_v1(pretrained = 'vggface2')
   model_vgg$eval()
   input = torch_randn(1,3,224,224)
   out = model_vgg(input)
@@ -118,9 +118,9 @@ test_that("tests for pretrained model_inception_resnet_v1 with vgg2face weights"
   gc()
 })
 
-test_that("tests for pretrained model_inception_resnet_v1 with casia-webface weights", {
+test_that("tests for pretrained model_facenet_inception_resnet_v1 with casia-webface weights", {
 
-  model_casia = model_inception_resnet_v1(pretrained = 'casia-webface')
+  model_casia = model_facenet_inception_resnet_v1(pretrained = 'casia-webface')
   model_casia$eval()
   input = torch_randn(1,3,320,260)
   out = model_casia(input)
@@ -130,9 +130,9 @@ test_that("tests for pretrained model_inception_resnet_v1 with casia-webface wei
   gc()
 })
 
-test_that("tests for non-pretrained model_inception_resnet_v1", {
+test_that("tests for non-pretrained model_facenet_inception_resnet_v1", {
 
-  model = model_inception_resnet_v1(pretrained = NULL)
+  model = model_facenet_inception_resnet_v1(pretrained = NULL)
   model$eval()
   input = torch_randn(1,3,224,224)
   out = model(input)
@@ -142,8 +142,8 @@ test_that("tests for non-pretrained model_inception_resnet_v1", {
   gc()
 })
 
-test_that("tests for model_inception_resnet_v1 with classify=TRUE and default num_classes", {
-  model = model_inception_resnet_v1(pretrained = NULL, classify = TRUE)
+test_that("tests for model_facenet_inception_resnet_v1 with classify=TRUE and default num_classes", {
+  model = model_facenet_inception_resnet_v1(pretrained = NULL, classify = TRUE)
   model$eval()
   input = torch_randn(1,3,224,224)
   out = model(input)
@@ -153,8 +153,8 @@ test_that("tests for model_inception_resnet_v1 with classify=TRUE and default nu
   gc()
 })
 
-test_that("tests for model_inception_resnet_v1 with classify=TRUE and custom num_classes", {
-  model = model_inception_resnet_v1(pretrained = NULL, classify = TRUE, num_classes = 100)
+test_that("tests for model_facenet_inception_resnet_v1 with classify=TRUE and custom num_classes", {
+  model = model_facenet_inception_resnet_v1(pretrained = NULL, classify = TRUE, num_classes = 100)
   model$eval()
   input = torch_randn(1,3,224,224)
   out = model(input)
@@ -164,8 +164,8 @@ test_that("tests for model_inception_resnet_v1 with classify=TRUE and custom num
   gc()
 })
 
-test_that("tests for model_inception_resnet_v1 with batch size", {
-  model = model_inception_resnet_v1(pretrained = NULL)
+test_that("tests for model_facenet_inception_resnet_v1 with batch size", {
+  model = model_facenet_inception_resnet_v1(pretrained = NULL)
   model$eval()
   input = torch_randn(4,3,224,224)  # Batch size of 4
   out = model(input)
