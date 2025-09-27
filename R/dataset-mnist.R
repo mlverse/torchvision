@@ -354,9 +354,9 @@ fashion_mnist_dataset <- dataset(
   )
 )
 
-#' @describeIn mnist_dataset EMNIST dataset with digits and letters and multiple split modes.
-#' @param kind change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
-#' can look at dataset attribute `$classes` to see the actual classes.
+#' @describeIn mnist_dataset EMNIST collection with digits and letters arranged in multiple datasets.
+#' @param dataset one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
+#' made of a set of classes. You can look at dataset attribute `$classes` to see the actual classes.
 #' @export
 emnist_collection <- dataset(
   name = "emnist_collection",
@@ -491,4 +491,11 @@ read_sn3_pascalvincent <- function(path) {
   a <- array(a, dim = rev(dim))
   a <- aperm(a, perm = rev(seq_along(dim)))
   a
+}
+
+#' @describeIn mnist_dataset Deprecated. Please use emnist_collection.
+#' @export
+emnist_dataset <- function(kind, ...){
+  .Deprecated("emnist_collection")
+  emnist_collection(dataset = kind, ...)
 }

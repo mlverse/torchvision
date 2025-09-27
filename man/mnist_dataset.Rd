@@ -6,6 +6,7 @@
 \alias{qmnist_dataset}
 \alias{fashion_mnist_dataset}
 \alias{emnist_collection}
+\alias{emnist_dataset}
 \title{MNIST and Derived Datasets}
 \usage{
 mnist_dataset(
@@ -48,6 +49,8 @@ emnist_collection(
   target_transform = NULL,
   download = FALSE
 )
+
+emnist_dataset(kind, ...)
 }
 \arguments{
 \item{root}{Root directory for dataset storage. The dataset will be stored under \verb{root/<dataset-name>}. Defaults to \code{tempdir()}.}
@@ -62,8 +65,8 @@ emnist_collection(
 
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
 
-\item{kind}{change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
-can look at dataset attribute \verb{$classes} to see the actual classes.}
+\item{dataset}{one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
+made of a set of classes. You can look at dataset attribute \verb{$classes} to see the actual classes.}
 }
 \value{
 A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
@@ -89,7 +92,9 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 
 \item \code{fashion_mnist_dataset()}: Fashion-MNIST clothing image dataset.
 
-\item \code{emnist_collection()}: EMNIST dataset with digits and letters and multiple split modes.
+\item \code{emnist_collection()}: EMNIST collection with digits and letters arranged in multiple datasets.
+
+\item \code{emnist_dataset()}: Deprecated. Please use emnist_collection.
 
 }}
 \section{Supported \code{dataset}s for \code{emnist_collection()}}{
