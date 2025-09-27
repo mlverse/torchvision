@@ -5,7 +5,7 @@
 \alias{kmnist_dataset}
 \alias{qmnist_dataset}
 \alias{fashion_mnist_dataset}
-\alias{emnist_dataset}
+\alias{emnist_collection}
 \title{MNIST and Derived Datasets}
 \usage{
 mnist_dataset(
@@ -40,10 +40,10 @@ fashion_mnist_dataset(
   download = FALSE
 )
 
-emnist_dataset(
+emnist_collection(
   root = tempdir(),
   split = "test",
-  kind = "balanced",
+  dataset = "balanced",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
@@ -78,7 +78,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 \item \strong{Fashion-MNIST}: Clothing item images for classification.
 \item \strong{Kuzushiji-MNIST}: Japanese cursive character dataset.
 \item \strong{QMNIST}: Extended MNIST with high-precision NIST data.
-\item \strong{EMNIST}: Letters and digits with multiple label splits.
+\item \strong{EMNIST}: A collection of letters and digits with multiple datasets and  splits.
 }
 }
 \section{Functions}{
@@ -89,10 +89,10 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 
 \item \code{fashion_mnist_dataset()}: Fashion-MNIST clothing image dataset.
 
-\item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
+\item \code{emnist_collection()}: EMNIST dataset with digits and letters and multiple split modes.
 
 }}
-\section{Supported \code{kind}s for \code{emnist_dataset()}}{
+\section{Supported \code{dataset}s for \code{emnist_collection()}}{
 
 \itemize{
 \item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
@@ -125,7 +125,7 @@ item <- qmnist[1]
 item$x
 item$y
 
-emnist <- emnist_dataset(kind = "balanced", split = "test", download = TRUE)
+emnist <- emnist_collection(dataset = "balanced", split = "test", download = TRUE)
 item <- emnist[1]
 item$x
 item$y
