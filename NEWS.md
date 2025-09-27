@@ -34,6 +34,7 @@
 * Breaking Change : Refactoring of `coco_*` dataset family now provides each `item$x` being an image array (for consistency with other datasets). 
 You can use `transform = transform_to_tensor` to restore the previous x output to be a `torch_tensor()`.
 * `transform_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
+* Deprecation : `emnist_dataset` is deprecated in favor of `emnist_collection()` (@cregouby, #260).
 
 # torchvision 0.7.0
 

@@ -172,3 +172,11 @@ test_that("tests for the qmnist dataset", {
     expect_named(i, c("x", "y"))
   }
 })
+
+test_that("tests for the emnist_dataset is deprecated", {
+
+  expect_warning(
+    emnist_dataset(kind = "digits"),
+    "'emnist_dataset' is deprecated."
+  )
+})
