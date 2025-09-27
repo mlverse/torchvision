@@ -176,7 +176,7 @@ test_that("tests for the qmnist dataset", {
 test_that("tests for the emnist_dataset is deprecated", {
 
   expect_warning(
-    emnist_dataset(kind = "digits"),
+    emnist_dataset(kind = "digits", download = TRUE),
     "'emnist_dataset' is deprecated."
   )
 })
