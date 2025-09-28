@@ -662,7 +662,6 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
       self$roi_heads <- roi_heads_module(num_classes = num_classes)()
     },
     forward = function(images) {
-      images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
@@ -910,23 +909,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     }
     state_dict <- torch::load_state_dict(state_dict_path)
 
-    model_state <- model$state_dict()
-    # TODO remove that model scalping
-    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 221 discrepancies
-    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
-    for (n in names(state_dict)) {
-      if (!all(state_dict[[n]]$size() == model_state[[n]]$size())) {
-        state_dict[[n]] <- model_state[[n]]
-      }
-    }
-    missing <- setdiff(names(model_state), names(state_dict))
-    if (length(missing) > 0) {
-      for (n in missing) {
-        state_dict[[n]] <- model_state[[n]]
-      }
-    }
-
-    model$load_state_dict(state_dict, strict = TRUE)
+    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = TRUE)
   }
 
   model
@@ -953,9 +936,8 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 275 discrepancies
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
+
+    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
   }
 
   model
@@ -982,9 +964,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 275 discrepancies
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
+    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
   }
 
   model
