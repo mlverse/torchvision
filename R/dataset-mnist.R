@@ -7,7 +7,7 @@
 #' - **Fashion-MNIST**: Clothing item images for classification.
 #' - **Kuzushiji-MNIST**: Japanese cursive character dataset.
 #' - **QMNIST**: Extended MNIST with high-precision NIST data.
-#' - **EMNIST**: Letters and digits with multiple label splits.
+#' - **EMNIST**: A collection of letters and digits with multiple datasets and  splits.
 #'
 #' @param root Root directory for dataset storage. The dataset will be stored under `root/<dataset-name>`. Defaults to `tempdir()`.
 #' @param train Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.
@@ -18,7 +18,7 @@
 #'
 #' @return A torch dataset object, where each items is a list of `x` (image) and `y` (label).
 #'
-#' @section Supported `kind`s for `emnist_dataset()`:
+#' @section Supported `dataset`s for `emnist_collection()`:
 #' - `"byclass"`: 62 classes (digits + uppercase + lowercase)
 #' - `"bymerge"`: 47 classes (merged uppercase and lowercase)
 #' - `"balanced"`: 47 classes, balanced digits and letters
@@ -43,7 +43,7 @@
 #' item$x
 #' item$y
 #'
-#' emnist <- emnist_dataset(kind = "balanced", split = "test", download = TRUE)
+#' emnist <- emnist_collection(dataset = "balanced", split = "test", download = TRUE)
 #' item <- emnist[1]
 #' item$x
 #' item$y
@@ -354,19 +354,19 @@ fashion_mnist_dataset <- dataset(
   )
 )
 
-#' @describeIn mnist_dataset EMNIST dataset with digits and letters and multiple split modes.
-#' @param kind change the classes into one of "byclass", "bymerge", "balanced" representing the kind of emnist dataset. You
-#' can look at dataset attribute `$classes` to see the actual classes.
+#' @describeIn mnist_dataset EMNIST collection with digits and letters arranged in multiple datasets.
+#' @param dataset one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
+#' made of a set of classes. You can look at dataset attribute `$classes` to see the actual classes.
 #' @export
-emnist_dataset <- dataset(
-  name = "emnist_dataset",
+emnist_collection <- dataset(
+  name = "emnist_collection",
   archive_size = "540 MB",
 
   resources = list(
     c("https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip", "58c8d27c78d21e728a6bc7b3cc06412e")
   ),
   rds_file = function(split, kind) paste0(split,"-",kind,".rds"),
-  classes_all_kind = list(
+  classes_all_dataset = list(
     byclass = c(
       "0","1","2","3","4","5","6","7","8","9",
       LETTERS,
@@ -390,34 +390,34 @@ emnist_dataset <- dataset(
   initialize = function(
     root = tempdir(),
     split = "test",
-    kind = "balanced",
+    dataset = "balanced",
     transform = NULL,
     target_transform = NULL,
     download = FALSE
   ) {
 
     self$split <- match.arg(split, choices = c("train", "test"))
-    self$kind <- match.arg(kind,  choices = names(self$classes_all_kind))
+    self$dataset <- match.arg(dataset,  choices = names(self$classes_all_dataset))
     self$root_path <- root
     self$raw_folder <- file.path(root, class(self)[1], "raw")
     self$processed_folder <- file.path(root, class(self)[1], "processed")
     self$transform <- transform
     self$target_transform <- target_transform
-    self$class <- self$classes_all_kind[[self$kind]]
+    self$class <- self$classes_all_dataset[[self$dataset]]
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("{.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
     if (!self$check_exists())
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
 
-    dataset_lst <- readRDS(file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
+    dataset_lst <- readRDS(file.path(self$processed_folder, self$rds_file(self$split, self$dataset)))
     self$data <- dataset_lst[[1]]
     self$targets <- dataset_lst[[2]] + 1L
 
-    cli_inform("Split {.val {self$split}} of {.cls {class(self)[[1]]}} dataset of kind {.val {self$kind}} processed successfully!")
+    cli_inform("Split {.val {self$split}} of dataset {.val {self$dataset}} from {.cls {class(self)[[1]]}} processed successfully!")
   },
 
   download = function() {
@@ -440,15 +440,15 @@ emnist_dataset <- dataset(
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
 
     # only manage extraction of the 2 ubyte.gz under interest
-    img <- file.path(unzipped_root, glue::glue("emnist-{self$kind}-{self$split}-images-idx3-ubyte.gz"))
-    lbl <- file.path(unzipped_root, glue::glue("emnist-{self$kind}-{self$split}-labels-idx1-ubyte.gz"))
+    img <- file.path(unzipped_root, glue::glue("emnist-{self$dataset}-{self$split}-images-idx3-ubyte.gz"))
+    lbl <- file.path(unzipped_root, glue::glue("emnist-{self$dataset}-{self$split}-labels-idx1-ubyte.gz"))
     dataset_set <- list(read_sn3_pascalvincent(img), read_sn3_pascalvincent(lbl))
-    saveRDS(dataset_set, file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
+    saveRDS(dataset_set, file.path(self$processed_folder, self$rds_file(self$split, self$dataset)))
 
   },
   # only manage existence of the rds file under interest
   check_exists = function() {
-    fs::file_exists(file.path(self$processed_folder, self$rds_file(self$split, self$kind)))
+    fs::file_exists(file.path(self$processed_folder, self$rds_file(self$split, self$dataset)))
   },
 
   .getitem = function(index) {
@@ -491,4 +491,13 @@ read_sn3_pascalvincent <- function(path) {
   a <- array(a, dim = rev(dim))
   a <- aperm(a, perm = rev(seq_along(dim)))
   a
+}
+
+#' @describeIn mnist_dataset Deprecated. Please use emnist_collection.
+#' @param kind the `dataset` in `emnist_collection`.
+#' @param ... the other `emnist_collection` parameters.
+#' @export
+emnist_dataset <- function(kind, ...){
+  .Deprecated("emnist_collection")
+  emnist_collection(dataset = kind, ...)
 }
