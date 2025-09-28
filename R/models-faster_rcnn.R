@@ -972,22 +972,14 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
 .rename_fasterrcnn_state_dict <- function(state_dict) {
   renamed <- list()
-
-  for (nm in names(state_dict)) {
-
-    new_nm <- nm
-
+  new_nm <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
-    new_nm <- sub("(inner_blocks\\.[0-3]\\.)", "\\10\\.", new_nm)
-    new_nm <- sub("(layer_blocks\\.[0-3]\\.)", "\\10\\.", new_nm)
+    sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
+    sub(pattern = "(layer_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     # add ".0.0" to rpn.head.conv
-    new_nm <- sub("(rpn\\.head\\.conv\\.)", "\\10\\.0\\.", new_nm)
+    sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .)
 
-    # Keep classifier names exactly as they are in the .pth file
-    # Don't rename classifier.2, classifier.3, classifier.5
-
-    renamed[[new_nm]] <- state_dict[[nm]]
-  }
+  renamed[new_nm] <- state_dict[names(state_dict)]
 
   renamed
 }
