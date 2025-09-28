@@ -78,25 +78,30 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
   )
 }
 
+#' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like
 generate_level_anchors <- function(h, w, stride, scales) {
-  anchors <- torch::torch_empty(h * w * length(scales), 4)
-  idx <- 1
-  for (y in seq_len(h)) {
-    for (x in seq_len(w)) {
-      cx <- (x - 0.5) * stride
-      cy <- (y - 0.5) * stride
-      for (s in scales) {
-        ws <- stride * s
-        hs <- stride * s
-        x1 <- cx - ws / 2
-        y1 <- cy - hs / 2
-        x2 <- cx + ws / 2
-        y2 <- cy + hs / 2
-        anchors[idx, ] <- torch::torch_tensor(c(x1, y1, x2, y2))
-        idx <- idx + 1
-      }
-    }
-  }
+  # Grid centers
+  shift_x <- torch_arange(0.5, w - 0.5, 1.0) * stride
+  shift_y <- torch_arange(0.5, h - 0.5, 1.0) * stride
+  shifts <- torch_meshgrid(list(shift_x, shift_y), indexing = "xy")
+  shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], shifts[[1]], shifts[[2]]), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
+
+  # Anchor sizes (width/height)
+  # Example: square anchors per scale
+  anchor_sizes <- torch_tensor(scales) * stride  # [A]
+  anchor_widths <- anchor_sizes
+  anchor_heights <- anchor_sizes
+
+  # Create base anchors [A, 4] (xc, yc, w, h)
+  anchors <- torch_stack(list(
+    torch_zeros_like(anchor_sizes),
+    torch_zeros_like(anchor_sizes),
+    anchor_widths,
+    anchor_heights
+  ), dim = 1)  # [A, 4]
+
+  # Expand to [H, W, A, 4]
+  anchors <- anchors$reshape(c(1, 1, -1, 4)) + shift_grid  # Broadcasting
   anchors
 }
 
@@ -125,41 +130,39 @@ decode_boxes <- function(anchors, deltas) {
 }
 
 generate_proposals <- function(features, rpn_out, image_size, strides) {
-  # TODO requires performance refactoring (currently 20s for 12k proposals from image in test)
-  all_proposals <- list()
-  all_scores <- list()
+  device <- rpn_out$objectness[[1]]$device
+  all_proposals <- torch::torch_empty(0L, 4L, device = device)
+  all_scores <- torch::torch_empty(0L, device = device)
+
   for (i in seq_along(features)) {
     objectness <- rpn_out$objectness[[i]][1, , , ]
     deltas <- rpn_out$bbox_deltas[[i]][1, , , ]
 
-    h <- dim(objectness)[2]
-    w <- dim(objectness)[3]
-    a <- dim(objectness)[1]
+    c(a, h, w) %<-% objectness$shape
 
-    anchors <- generate_level_anchors(h, w, strides[i], scales = seq_len(a))
+    anchors <- generate_level_anchors(h, w, strides[[i]], scales = seq_len(a))
+    anchors <- anchors$reshape(c(-1, 4))  # [H*W*A, 4]
 
-    objectness <- objectness$sigmoid()$reshape(c(-1))
-    deltas <- deltas$permute(c(2, 3, 1))$reshape(c(-1, 4))
+    objectness <- objectness$sigmoid()$flatten() ## [H*W*A]
+    deltas <- deltas$permute(c(2, 3, 1))$reshape(c(-1, 4))  # [H*W*A, 4]
 
     proposals <- decode_boxes(anchors, deltas)
     proposals <- clip_boxes_to_image(proposals, image_size)
 
-    all_proposals[[i]] <- proposals
-    all_scores[[i]] <- objectness
+    all_proposals <- torch::torch_cat(list(all_proposals, proposals), dim = 1L)
+    all_scores <- torch::torch_cat(list(all_scores, objectness), dim = 1L)
   }
 
-  proposals <- torch::torch_cat(all_proposals, dim = 1)
-  scores <- torch::torch_cat(all_scores, dim = 1)
-
+  scores <- all_scores$flatten()
   keep <- scores > 0.05
-  proposals <- proposals[keep, ]
+  proposals <- all_proposals[keep, ]
   scores <- scores[keep]
 
   if (proposals$shape[1] > 0) {
     keep_idx <- nms(proposals, scores, 0.7)
     proposals <- proposals[keep_idx, ]
   } else {
-    proposals <- torch::torch_empty(c(0, 4))
+    proposals <- torch::torch_empty(c(0, 4), device = device, dtype = torch_float32())
   }
 
   list(proposals = proposals)

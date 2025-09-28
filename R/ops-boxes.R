@@ -263,8 +263,8 @@ box_inter_union <- function(boxes1, boxes2) {
 #'
 #' @export
 box_iou <- function(boxes1, boxes2) {
-    c(inter, union) %<-% box_inter_union(boxes1, boxes2)
-    iou <- inter / union
+    inter_union <- box_inter_union(boxes1, boxes2)
+    iou <- inter_union[[1]] / inter_union[[2]]
     return(iou)
 }
 
@@ -292,8 +292,8 @@ generalized_box_iou <- function(boxes1, boxes2) {
   if(as.numeric((boxes2[, 3:N] >= boxes2[, 1:2])$all()) != 1)
     value_error("(boxes2[, 3:N] >= boxes2[, 1:2])$all() not TRUE")
 
-  c(inter, union) %<-% box_inter_union(boxes1, boxes2)
-  iou <- inter / union
+  inter_union <- box_inter_union(boxes1, boxes2)
+  iou <- inter_union[[1]] / inter_union[[2]]
 
   lti <- torch::torch_min(boxes1[, NULL, 1:2], other = boxes2[, 1:2])
   rbi <- torch::torch_max(boxes1[, NULL, 3:N], other = boxes2[, 3:N])
