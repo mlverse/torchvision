@@ -380,7 +380,6 @@ fasterrcnn_model <- function(backbone, num_classes) {
     },
 
     forward = function(images) {
-      # images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
@@ -536,7 +535,6 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
       self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
     },
     forward = function(images) {
-      images <- torch::torch_stack(images)
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 

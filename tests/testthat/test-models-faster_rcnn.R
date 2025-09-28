@@ -1,6 +1,4 @@
 test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
-  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
-          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_fasterrcnn_resnet50_fpn()
   input <- torch::torch_randn(1, 3, 224, 224)
@@ -15,7 +13,32 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
 
 
   model <- model_fasterrcnn_resnet50_fpn(num_classes = 10)
+  input <- torch::torch_randn(1, 3, 243, 254)
+  out <- model(input)
+  expect_named(out, c("features","detections"))
+  expect_named(out$detections, c("boxes","labels", "scores"))
+  expect_tensor(out$detections$boxes)
+  expect_tensor(out$detections$labels)
+  expect_tensor(out$detections$scores)
+  expect_equal(out$detections$boxes$shape[2], 4L)
+})
+
+test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
+
+  model <- model_fasterrcnn_resnet50_fpn_v2()
   input <- torch::torch_randn(1, 3, 224, 224)
+  model$eval()
+  out <- model(input)
+  expect_named(out, c("features","detections"))
+  expect_named(out$detections, c("boxes","labels", "scores"))
+  expect_tensor(out$detections$boxes)
+  expect_tensor(out$detections$labels)
+  expect_tensor(out$detections$scores)
+  expect_equal(out$detections$boxes$shape[2], 4L)
+
+
+  model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
+  input <- torch::torch_randn(1, 3, 248, 212)
   out <- model(input)
   expect_named(out, c("features","detections"))
   expect_named(out$detections, c("boxes","labels", "scores"))
