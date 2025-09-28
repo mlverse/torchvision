@@ -495,6 +495,7 @@ read_sn3_pascalvincent <- function(path) {
 
 #' @describeIn mnist_dataset Deprecated. Please use emnist_collection.
 #' @param kind the `dataset` in `emnist_collection`.
+#' @param ... the other `emnist_collection` parameters.
 #' @export
 emnist_dataset <- function(kind, ...){
   .Deprecated("emnist_collection")

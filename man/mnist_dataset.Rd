@@ -69,6 +69,8 @@ emnist_dataset(kind, ...)
 made of a set of classes. You can look at dataset attribute \verb{$classes} to see the actual classes.}
 
 \item{kind}{the \code{dataset} in \code{emnist_collection}.}
+
+\item{...}{the other \code{emnist_collection} parameters.}
 }
 \value{
 A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
