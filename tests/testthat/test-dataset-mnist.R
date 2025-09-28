@@ -174,6 +174,10 @@ test_that("tests for the qmnist dataset", {
 })
 
 test_that("tests for the emnist_dataset is deprecated", {
+  skip_on_cran()
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_warning(
     emnist_dataset(kind = "digits", download = TRUE),

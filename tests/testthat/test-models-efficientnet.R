@@ -8,12 +8,11 @@ test_that("efficientnet models produce correct output shapes", {
     b3 = model_efficientnet_b3,
     b4 = model_efficientnet_b4,
     b5 = model_efficientnet_b5,
-    b6 = model_efficientnet_b6,
-    b7 = model_efficientnet_b7
+    b6 = model_efficientnet_b6
   )
 
   sizes <- c(b0 = 224, b1 = 240, b2 = 260, b3 = 300,
-             b4 = 380, b5 = 456, b6 = 528, b7 = 600)
+             b4 = 380, b5 = 456, b6 = 528)
 
   for (name in names(variants)) {
     fn <- variants[[name]]
@@ -33,6 +32,27 @@ test_that("efficientnet models produce correct output shapes", {
     out <- model(input)
     expect_tensor_shape(out, c(1, 1000))
   }
+  unlink_model_file()
+})
+
+test_that("efficientnet b7 model produce correct output shapes", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = "0") != "1",
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  # without pretrained
+  model <- model_efficientnet_b7(pretrained = FALSE)
+  input <- torch::torch_randn(1, 3, 600, 600)
+  out <- model(input)
+  expect_tensor_shape(out, c(1, 1000))
+
+  # with pretrained
+  withr::with_options(list(timeout = 360), {
+    model <- model_efficientnet_b7(pretrained = TRUE)
+  })
+  input <- torch::torch_randn(1, 3, 600, 600)
+  out <- model(input)
+  expect_tensor_shape(out, c(1, 1000))
+
   unlink_model_file()
 })
 
