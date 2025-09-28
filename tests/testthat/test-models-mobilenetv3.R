@@ -59,10 +59,10 @@ test_that("tests for pretrained model_mobilenet_v3_small", {
 test_that("tests for model_mobilenet_v3_large with non-divisible input shapes", {
 
   model <- model_mobilenet_v3_large(pretrained = FALSE)
-  input <- torch_randn(1, 3, 223, 225)
+  input <- torch_randn(2, 3, 223, 225)
   model$eval()
   out <- model(input)
-  expect_tensor_shape(out, c(1000))
+  expect_tensor_shape(out, c(2, 1000))
   rm(model)
   gc()
 })
@@ -73,7 +73,7 @@ test_that("tests for model_mobilenet_v3_small with non-divisible input shapes", 
   input <- torch_randn(1, 3, 223, 225)
   model$eval()
   out <- model(input)
-  expect_tensor_shape(out, c(1000))
+  expect_tensor_shape(out, c(1, 1000))
   rm(model)
   gc()
 })
@@ -81,10 +81,10 @@ test_that("tests for model_mobilenet_v3_small with non-divisible input shapes", 
 test_that("tests for model_mobilenet_v3_small with varied width_mult", {
 
   model <- model_mobilenet_v3_small(pretrained = FALSE, width_mult = 0.5)
-  input <- torch_randn(1, 3, 224, 224)
+  input <- torch_randn(2, 3, 224, 224)
   model$eval()
   out <- model(input)
-  expect_tensor_shape(out, c(1000))
+  expect_tensor_shape(out, c(2, 1000))
   rm(model)
   gc()
 })
@@ -95,7 +95,7 @@ test_that("tests for model_mobilenet_v3_large with varied width_mult", {
   input <- torch_randn(1, 3, 224, 224)
   model$eval()
   out <- model(input)
-  expect_tensor_shape(out, c(1000))
+  expect_tensor_shape(out, c(1, 1000))
   rm(model)
   gc()
 })
