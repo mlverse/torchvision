@@ -113,6 +113,7 @@
 <li>Breaking Change : Refactoring of <code>coco_*</code> dataset family now provides each <code>item$x</code> being an image array (for consistency with other datasets). You can use <code>transform = transform_to_tensor</code> to restore the previous x output to be a <code><a href="https://torch.mlverse.org/docs/reference/torch_tensor.html" class="external-link">torch_tensor()</a></code>.</li>
 <li>
 <code>transform_</code> are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/250" class="external-link">#250</a>)</li>
+<li>Deprecation : <code>emnist_dataset</code> is deprecated in favor of <code><a href="../reference/mnist_dataset.html">emnist_collection()</a></code> (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/260" class="external-link">#260</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">
