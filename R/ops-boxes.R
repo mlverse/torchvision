@@ -301,5 +301,5 @@ generalized_box_iou <- function(boxes1, boxes2) {
   whi <- upcast(rbi - lti)$clamp(min=0) # [N,M,2]
   areai <- whi[, , 1] * whi[, , 2]
 
-  return(iou - (areai - union) / areai)
+  return(iou - (areai - inter_union[[2]]) / areai)
 }
