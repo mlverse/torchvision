@@ -1,34 +1,3 @@
-#' MobileNetV3 Large model architecture.
-#'
-#' This implementation mimics `torchvision::mobilenet_v3_large`.
-#'
-#' @inheritParams model_mobilenet_v2
-#' @param ... Other parameters passed to the model implementation.
-#'
-#' @family classification_model
-#' @rdname model_mobilenet_v3
-#' @name model_mobilenet_v3
-#' @export
-model_mobilenet_v3_large <- function(pretrained = FALSE, progress = TRUE, ...) {
-  # resources
-  model <- mobilenet_v3_large_impl(...)
-
-  if (pretrained) {
-    r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth",
-           "71625955bc3be9516032a6d5bab49199", "~21 MB")
-    cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet")
-    if (!tools::md5sum(state_dict_path) == r[2])
-      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
-
-    state_dict <- torch::load_state_dict(state_dict_path)
-    state_dict <- state_dict[!grepl("num_batches_tracked$", names(state_dict))]
-    model$load_state_dict(state_dict, strict = FALSE)
-  }
-
-  model
-}
-
 #' Quantized MobileNetV3 Large model architecture.
 #'
 #' This function mirrors `torchvision::quantization::mobilenet_v3_large` and
@@ -36,8 +5,8 @@ model_mobilenet_v3_large <- function(pretrained = FALSE, progress = TRUE, ...) {
 #'
 #' @inheritParams model_mobilenet_v3_large
 #' @family classification_model
-#' @rdname model_mobilenet
-#' @name model_mobilenet
+#' @rdname model_mobilenet_v3
+#' @name model_mobilenet_v3
 #' @export
 model_mobilenet_v3_large_quantized <- function(pretrained = FALSE, progress = TRUE, ...) {
   # resources

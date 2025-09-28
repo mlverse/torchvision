@@ -5,9 +5,15 @@
 \alias{model_mobilenet_v3}
 \alias{model_mobilenet_v3_large}
 \alias{model_mobilenet_v3_small}
+\alias{model_mobilenet_v3_large_quantized}
 \title{MobileNetV3 Model}
 \usage{
-model_mobilenet_v3_large(pretrained = FALSE, progress = TRUE, ...)
+model_mobilenet_v3_large(
+  pretrained = FALSE,
+  progress = TRUE,
+  num_classes = 1000,
+  width_mult = 1
+)
 
 model_mobilenet_v3_small(
   pretrained = FALSE,
@@ -16,7 +22,7 @@ model_mobilenet_v3_small(
   width_mult = 1
 )
 
-model_mobilenet_v3_large(pretrained = FALSE, progress = TRUE, ...)
+model_mobilenet_v3_large_quantized(pretrained = FALSE, progress = TRUE, ...)
 }
 \arguments{
 \item{pretrained}{(bool): If TRUE, returns a model pre-trained on ImageNet.}
@@ -24,18 +30,19 @@ model_mobilenet_v3_large(pretrained = FALSE, progress = TRUE, ...)
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{...}{Other parameters passed to the model implementation.}
-
 \item{num_classes}{number of output classes (default: 1000).}
 
 \item{width_mult}{width multiplier for model scaling (default: 1.0).}
+
+\item{...}{Other parameters passed to the model implementation.}
 }
 \description{
 MobileNetV3 is a state-of-the-art lightweight convolutional neural network architecture
 designed for mobile and embedded vision applications. This implementation follows the
 design and optimizations presented in the original paper:\href{https://arxiv.org/abs/1905.02244}{MobileNetV3: Searching for MobileNetV3}
 
-This implementation mimics \code{torchvision::mobilenet_v3_large}.
+This function mirrors \verb{torchvision::quantization::mobilenet_v3_large} and
+loads quantized weights when \code{pretrained} is \code{TRUE}.
 }
 \details{
 The model includes two variants:
@@ -113,7 +120,6 @@ Other classification_model:
 \code{\link{model_facenet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},
-\code{\link{model_mobilenet}},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
@@ -127,7 +133,6 @@ Other classification_model:
 \code{\link{model_facenet}},
 \code{\link{model_inception_v3}()},
 \code{\link{model_maxvit}()},
-\code{\link{model_mobilenet}},
 \code{\link{model_mobilenet_v2}()},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},

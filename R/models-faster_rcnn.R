@@ -909,7 +909,23 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     }
     state_dict <- torch::load_state_dict(state_dict_path)
 
-    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = TRUE)
+    model_state <- model$state_dict()
+    # TODO remove that model scalping
+    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 221 discrepancies
+    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
+    for (n in names(state_dict)) {
+      if (!all(state_dict[[n]]$size() == model_state[[n]]$size())) {
+        state_dict[[n]] <- model_state[[n]]
+      }
+    }
+    missing <- setdiff(names(model_state), names(state_dict))
+    if (length(missing) > 0) {
+      for (n in missing) {
+        state_dict[[n]] <- model_state[[n]]
+      }
+    }
+
+    model$load_state_dict(state_dict, strict = TRUE)
   }
 
   model
@@ -935,9 +951,17 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
-    state_dict <- torch::load_state_dict(state_dict_path)
+    state_dict <- torch::load_state_dict(state_dict_path) %>%
+      .rename_frcnn_mn_v2_state_dict()
 
-    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
+    # TODO those 2 rpn.head.conv weight need investigation. In the meantime, get value back from model.
+    model_state <- model$state_dict()
+    missing <- setdiff(names(model_state), names(state_dict))
+    if (length(missing) > 0) {
+      state_dict[missing] <- model_state[missing]
+    }
+
+    model$load_state_dict(state_dict, strict = FALSE)
   }
 
   model
@@ -983,4 +1007,3 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
   renamed
 }
-
