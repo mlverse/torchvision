@@ -883,8 +883,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     }
     state_dict <- torch::load_state_dict(state_dict_path)
 
-    # TODO will fail due to setdiff(names(model$modules), names(state_dict)), currently 184 discrepancies
-    model$load_state_dict(state_dict, strict = FALSE)
+    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
   }
 
   model
@@ -989,5 +988,27 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
   }
 
   model
+}
+
+.rename_fasterrcnn_state_dict <- function(state_dict) {
+  renamed <- list()
+
+  for (nm in names(state_dict)) {
+
+    new_nm <- nm
+
+    # add ".0" to inner_blocks + layer_blocks layer renaming
+    new_nm <- sub("(inner_blocks\\.[0-3]\\.)", "\\10\\.", new_nm)
+    new_nm <- sub("(layer_blocks\\.[0-3]\\.)", "\\10\\.", new_nm)
+    # add ".0.0" to rpn.head.conv
+    new_nm <- sub("(rpn\\.head\\.conv\\.)", "\\10\\.0\\.", new_nm)
+
+    # Keep classifier names exactly as they are in the .pth file
+    # Don't rename classifier.2, classifier.3, classifier.5
+
+    renamed[[new_nm]] <- state_dict[[nm]]
+  }
+
+  renamed
 }
 
