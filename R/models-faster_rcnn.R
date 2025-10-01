@@ -78,7 +78,7 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
   )
 }
 
-#' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like
+#' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like torch_max torch_float32
 generate_level_anchors <- function(h, w, stride, scales) {
   # Grid centers
   shift_x <- torch_arange(0.5, w - 0.5, 1.0) * stride
