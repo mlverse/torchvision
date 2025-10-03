@@ -327,12 +327,13 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
       self$layer4 <- resnet$layer4
     },
     forward = function(x) {
-      x <- self$conv1(x)
-      x <- self$bn1(x)
-      x <- self$relu(x)
-      x <- self$maxpool(x)
+      c2 <- x %>%
+        self$conv1() %>%
+        self$bn1() %>%
+        self$relu() %>%
+        self$maxpool() %>%
+        self$layer1()
 
-      c2 <- self$layer1(x)
       c3 <- self$layer2(c2)
       c4 <- self$layer3(c3)
       c5 <- self$layer4(c4)
@@ -486,12 +487,13 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
       self$layer4 <- resnet$layer4
     },
     forward = function(x) {
-      x <- self$conv1(x)
-      x <- self$bn1(x)
-      x <- self$relu(x)
-      x <- self$maxpool(x)
+       c2 <- x %>%
+        self$conv1() %>%
+        self$bn1() %>%
+        self$relu() %>%
+        self$maxpool() %>%
+        self$layer1()
 
-      c2 <- self$layer1(x)
       c3 <- self$layer2(c2)
       c4 <- self$layer3(c3)
       c5 <- self$layer4(c4)
@@ -880,8 +882,8 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
-    state_dict <- torch::load_state_dict(state_dict_path)
 
+    state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
   }
 
@@ -951,17 +953,9 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
-    state_dict <- torch::load_state_dict(state_dict_path) %>%
-      .rename_frcnn_mn_v2_state_dict()
 
-    # TODO those 2 rpn.head.conv weight need investigation. In the meantime, get value back from model.
-    model_state <- model$state_dict()
-    missing <- setdiff(names(model_state), names(state_dict))
-    if (length(missing) > 0) {
-      state_dict[missing] <- model_state[missing]
-    }
-
-    model$load_state_dict(state_dict, strict = FALSE)
+    state_dict <- torch::load_state_dict(state_dict_path)
+    model$load_state_dict(.rename_fasterrcnn_large_state_dict(state_dict), strict = FALSE)
   }
 
   model
@@ -987,23 +981,37 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
+
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(.rename_fasterrcnn_state_dict(state_dict), strict = FALSE)
+    model$load_state_dict(.rename_fasterrcnn_large_state_dict(state_dict), strict = FALSE)
   }
 
   model
 }
 
 .rename_fasterrcnn_state_dict <- function(state_dict) {
-  renamed <- list()
-  new_nm <- names(state_dict) %>%
+  new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
     sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     sub(pattern = "(layer_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     # add ".0.0" to rpn.head.conv
     sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .)
 
-  renamed[new_nm] <- state_dict[names(state_dict)]
+  # Recreate a list with renamed keys
+  setNames(state_dict[names(state_dict)], new_names)
+}
 
-  renamed
+
+.rename_fasterrcnn_large_state_dict <- function(state_dict) {
+  new_names <- names(.rename_fasterrcnn_state_dict(state_dict)) %>%
+    # turn bn into 'O' value and conv into '1' value
+    sub(pattern = "(block\\.[0-3]\\.)0\\.", replacement = "\\1conv\\.", x = .) %>%
+    sub(pattern = "(block\\.[0-3]\\.)1\\.", replacement = "\\1bn\\.", x = .) %>%
+    sub(pattern = "(body\\.0\\.)0\\.", replacement = "\\1conv\\.", x = .) %>%
+    sub(pattern = "(body\\.0\\.)1\\.", replacement = "\\1bn\\.", x = .) %>%
+    sub(pattern = "(body\\.16\\.)0\\.", replacement = "\\1conv\\.", x = .) %>%
+    sub(pattern = "(body\\.16\\.)1\\.", replacement = "\\1bn\\.", x = .)
+
+  # Recreate a list with renamed keys
+  setNames(state_dict[names(state_dict)], new_names)
 }
