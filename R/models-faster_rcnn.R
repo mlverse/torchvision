@@ -989,6 +989,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
   model
 }
 
+#' @importFrom stats setNames
 .rename_fasterrcnn_state_dict <- function(state_dict) {
   new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
