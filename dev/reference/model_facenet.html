@@ -96,7 +96,7 @@ architecture from the paper
 <span></span>
 <span><span class="fu">model_mtcnn</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">model_inception_resnet_v1</span><span class="op">(</span></span>
+<span><span class="fu">model_facenet_inception_resnet_v1</span><span class="op">(</span></span>
 <span>  pretrained <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  classify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -144,7 +144,7 @@ left eye, right eye, nose, left mouth corner, right mouth corner.</p></li>
 <li><p><code>2</code>: Face probability — use this value for thresholding detections</p></li>
 </ul></li>
 </ul><p>(Here, <code>N</code> is the number of detected faces in the input image.)</p>
-<p><code>model_inception_resnet_v1()</code> returns a tensor output depending on the <code>classify</code> argument:</p><ul><li><p>When <code>classify = FALSE</code> (default):
+<p><code>model_facenet_inception_resnet_v1()</code> returns a tensor output depending on the <code>classify</code> argument:</p><ul><li><p>When <code>classify = FALSE</code> (default):
 A tensor of shape <code>(N, 512)</code>, where each row is a normalized embedding
 vector (L2 norm = 1).
 These 512-dimensional FaceNet embeddings can be compared using cosine
@@ -190,8 +190,27 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 <li><p><code>model_facenet_rnet()</code>: RNet (Refine Network) — medium CNN with dense layers for refining and rejecting false positives.</p></li>
 <li><p><code>model_facenet_onet()</code>: ONet (Output Network) — deeper CNN that outputs final bounding boxes and 5 facial landmark points.</p></li>
 <li><p><code>model_mtcnn()</code>: MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks</p></li>
-<li><p><code>model_inception_resnet_v1()</code>: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets</p></li>
+<li><p><code>model_facenet_inception_resnet_v1()</code>: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets</p></li>
 </ul></div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other object_detection_model:
+<code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code></p>
+<p>Other object_detection_model:
+<code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code></p>
+<p>Other classification_model:
+<code><a href="model_alexnet.html">model_alexnet</a>()</code>,
+<code><a href="model_convnext.html">model_convnext</a></code>,
+<code><a href="model_efficientnet.html">model_efficientnet</a></code>,
+<code><a href="model_efficientnet_v2.html">model_efficientnet_v2</a></code>,
+<code><a href="model_inception_v3.html">model_inception_v3</a>()</code>,
+<code><a href="model_maxvit.html">model_maxvit</a>()</code>,
+<code><a href="model_mobilenet_v2.html">model_mobilenet_v2</a>()</code>,
+<code><a href="model_mobilenet_v3.html">model_mobilenet_v3</a></code>,
+<code><a href="model_resnet.html">model_resnet</a></code>,
+<code><a href="model_vgg.html">model_vgg</a></code>,
+<code><a href="model_vit.html">model_vit</a></code></p></div>
+    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
@@ -234,13 +253,13 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 <span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>   <span class="co"># [1, C, H, W]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Load pretrained model</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_inception_resnet_v1</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="st">"vggface2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_facenet_inception_resnet_v1</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="st">"vggface2"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example usage of Inception-ResNet-v1 with CASIA-Webface Weights</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_inception_resnet_v1</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="st">"casia-webface"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_facenet_inception_resnet_v1</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="st">"casia-webface"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">output</span></span></span>
