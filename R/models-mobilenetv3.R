@@ -262,11 +262,11 @@ MobileNetV3 <- nn_module(
     )
   },
   forward = function(x) {
-    x <- self$features(x)
-    x <- self$avgpool(x)
-    x <- torch_flatten(x, start_dim = 1)
-    x <- self$classifier(x)
-    x
+    x %>%
+      self$features() %>%
+      self$avgpool() %>%
+      torch_flatten(start_dim = 2) %>%
+      self$classifier()
   }
 )
 
@@ -331,19 +331,14 @@ model_mobilenet_v3_large <- function(
   last_channel <- make_divisible(1280 * width_mult)
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
-    state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth", prefix = "mobilenet_v3_large")
+    r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth",
+           "71625955bc3be9516032a6d5bab49199", "~21 MB")
+    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet")
+    if (!tools::md5sum(state_dict_path) == r[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- load_state_dict(state_dict_path)
-    new_names <- names(state_dict)
-
-    new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
-    new_names <- gsub("^features\\.([0-9]+)\\.1\\.", "features.\\1.bn.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+)\\.0\\.", "\\1.conv.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+)\\.1\\.", "\\1.bn.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+\\.fc1)\\.", "\\1.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+\\.fc2)\\.", "\\1.", new_names)
-
-    names(state_dict) <- new_names
-    model$load_state_dict(state_dict)
+    renamed_state_dict <- .rename_mobilenet_v3_state_dict(state_dict)
+    model$load_state_dict(renamed_state_dict)
   }
   model$eval()
   model
@@ -362,20 +357,35 @@ model_mobilenet_v3_small <- function(
   last_channel <- make_divisible(1024 * width_mult)
   model <- MobileNetV3(config, last_channel, num_classes = num_classes)
   if (pretrained) {
-    state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet_v3_small")
+    state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet")
     state_dict <- load_state_dict(state_dict_path)
-    new_names <- names(state_dict)
-
-    new_names <- gsub("^features\\.([0-9]+)\\.0\\.", "features.\\1.conv.", new_names)
-    new_names <- gsub("^features\\.([0-9]+)\\.1\\.", "features.\\1.bn.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+)\\.0\\.", "\\1.conv.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+)\\.1\\.", "\\1.bn.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+\\.fc1)\\.", "\\1.", new_names)
-    new_names <- gsub("(features\\.[0-9]+\\.block\\.[0-9]+\\.fc2)\\.", "\\1.", new_names)
-
-    names(state_dict) <- new_names
-    model$load_state_dict(state_dict)
+    renamed_state_dict <- .rename_mobilenet_v3_state_dict(state_dict)
+    model$load_state_dict(renamed_state_dict)
   }
   model$eval()
   model
 }
+
+
+#' Rename state_dict keys to match current MobileNetV3 model structure
+#' @param state_dict Named list of model parameters
+#' @return Named list with updated key names
+.rename_mobilenet_v3_state_dict <- function(state_dict) {
+  new_names <- names(state_dict) %>%
+    # features.N.0 -> features.N.conv
+    gsub(pattern = "^features\\.([0-9]+)\\.0\\.", replacement = "features.\\1.conv.", x = .) %>%
+    # features.N.1 -> features.N.bn
+    gsub(pattern = "^features\\.([0-9]+)\\.1\\.", replacement = "features.\\1.bn.", x = .) %>%
+    # features.N.block.M.0 -> features.N.block.M.conv
+    gsub(pattern = "(features\\.[0-9]+\\.block\\.[0-9]+)\\.0\\.", replacement = "\\1.conv.", x = .) %>%
+    # features.N.block.M.1 -> features.N.block.M.bn
+    gsub(pattern = "(features\\.[0-9]+\\.block\\.[0-9]+)\\.1\\.", replacement = "\\1.bn.", x = .) %>%
+    # features.N.block.M.fc1. -> fc1. (no change needed, but ensure correct)
+    gsub(pattern = "(features\\.[0-9]+\\.block\\.[0-9]+\\.fc1)\\.", replacement = "\\1.", x = .) %>%
+    # features.N.block.M.fc2. -> fc2.
+    gsub(pattern = "(features\\.[0-9]+\\.block\\.[0-9]+\\.fc2)\\.", replacement = "\\1.", x = .)
+
+  # Recreate a list with renamed keys
+  setNames(state_dict[names(state_dict)], new_names)
+}
+
