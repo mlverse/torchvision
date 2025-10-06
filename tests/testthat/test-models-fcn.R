@@ -78,6 +78,8 @@ test_that("model_fcn_resnet101 returns correct output shape", {
 })
 
 test_that("model_fcn_resnet101 works with custom num_classes", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
   model <- model_fcn_resnet101(pretrained = FALSE, num_classes = 3)
   model$eval()
 
@@ -100,6 +102,8 @@ test_that("model_fcn_resnet101 with aux classifier returns aux output", {
 })
 
 test_that("model_fcn_resnet101 loads pretrained weights", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
   model <- model_fcn_resnet101(pretrained = TRUE)
   expect_true(inherits(model, "fcn"))
 })

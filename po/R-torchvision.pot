@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.7.0.9000\n"
-"POT-Creation-Date: 2025-09-13 23:15+0200\n"
+"POT-Creation-Date: 2025-09-28 10:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10,30 +10,30 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: collection-rf100-doc.R:142
+#: collection-rf100-doc.R:139
 msgid ""
 "Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls "
 "{class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and "
 "processed if not already available."
 msgstr ""
 
-#: collection-rf100-doc.R:147
+#: collection-rf100-doc.R:144
 msgid ""
 "Dataset not found. Use download=TRUE or check that parquet files exist at "
 "the expected paths."
 msgstr ""
 
-#: collection-rf100-doc.R:158
+#: collection-rf100-doc.R:156
 msgid ""
 "{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for "
 "split {.val {self$split}}."
 msgstr ""
 
-#: collection-rf100-doc.R:163
+#: collection-rf100-doc.R:161
 msgid "Downloading {.val {self$dataset}}..."
 msgstr ""
 
-#: collection-rf100-doc.R:168
+#: collection-rf100-doc.R:166
 msgid "Corrupt file! Delete the cached files and try again."
 msgstr ""
 
@@ -65,13 +65,13 @@ msgstr ""
 msgid "deprecated"
 msgstr ""
 
-#: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:97 dataset-coco.R:289 dataset-eurosat.R:57 dataset-fer.R:63 dataset-fgvc.R:91 dataset-flickr.R:69 dataset-flickr.R:231 dataset-flowers.R:92 dataset-lfw.R:108 dataset-lfw.R:242 dataset-mnist.R:86 dataset-mnist.R:256 dataset-mnist.R:426 dataset-oxfordiiitpet.R:71 dataset-oxfordiiitpet.R:279 dataset-oxfordiiitpet.R:343 dataset-pascal.R:136 dataset-pascal.R:296 dataset-places365.R:98
+#: dataset-caltech.R:61 dataset-cifar.R:52 dataset-coco.R:97 dataset-coco.R:289 dataset-eurosat.R:57 dataset-fer.R:63 dataset-fgvc.R:91 dataset-flickr.R:69 dataset-flickr.R:231 dataset-flowers.R:92 dataset-lfw.R:108 dataset-lfw.R:242 dataset-mnist.R:86 dataset-mnist.R:256 dataset-oxfordiiitpet.R:71 dataset-oxfordiiitpet.R:279 dataset-oxfordiiitpet.R:343 dataset-pascal.R:136 dataset-pascal.R:296 dataset-places365.R:98
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be "
 "downloaded and processed if not already available."
 msgstr ""
 
-#: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:102 dataset-coco.R:294 dataset-eurosat.R:64 dataset-fer.R:70 dataset-flowers.R:97 dataset-lfw.R:113 dataset-lfw.R:247 dataset-mnist.R:91 dataset-mnist.R:261 dataset-mnist.R:431 dataset-oxfordiiitpet.R:76 dataset-oxfordiiitpet.R:284 dataset-oxfordiiitpet.R:348 dataset-pascal.R:141 dataset-pascal.R:301 dataset-places365.R:103 dataset-plankton.R:89 dataset-rf100-peixos.R:70
+#: dataset-caltech.R:66 dataset-caltech.R:187 dataset-coco.R:102 dataset-coco.R:294 dataset-eurosat.R:64 dataset-fer.R:70 dataset-flowers.R:97 dataset-lfw.R:113 dataset-lfw.R:247 dataset-mnist.R:91 dataset-mnist.R:261 dataset-mnist.R:414 dataset-oxfordiiitpet.R:76 dataset-oxfordiiitpet.R:284 dataset-oxfordiiitpet.R:348 dataset-pascal.R:141 dataset-pascal.R:301 dataset-places365.R:103 dataset-plankton.R:89 dataset-rf100-peixos.R:70
 msgid "Dataset not found. You can use `download = TRUE` to download it."
 msgstr ""
 
@@ -85,7 +85,7 @@ msgstr ""
 msgid "Downloading {.cls {class(self)[[1]]}}..."
 msgstr ""
 
-#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:198 dataset-eurosat.R:88 dataset-fer.R:129 dataset-flowers.R:136 dataset-lfw.R:155 dataset-lfw.R:168 dataset-mnist.R:121 dataset-mnist.R:286 dataset-mnist.R:450 dataset-oxfordiiitpet.R:115 dataset-pascal.R:168 dataset-places365.R:182 dataset-plankton.R:105 dataset-rf100-peixos.R:82 models-facenet.R:128 models-facenet.R:174 models-facenet.R:228 models-facenet.R:311 models-vit.R:49
+#: dataset-caltech.R:125 dataset-cifar.R:111 dataset-coco.R:198 dataset-eurosat.R:88 dataset-fer.R:129 dataset-flowers.R:136 dataset-lfw.R:155 dataset-lfw.R:168 dataset-mnist.R:121 dataset-mnist.R:286 dataset-mnist.R:433 dataset-oxfordiiitpet.R:115 dataset-pascal.R:168 dataset-places365.R:182 dataset-plankton.R:105 dataset-rf100-peixos.R:82 models-facenet.R:128 models-facenet.R:174 models-facenet.R:228 models-facenet.R:311 models-vit.R:49
 msgid "Corrupt file! Delete the file in {archive} and try again."
 msgstr ""
 
@@ -207,10 +207,16 @@ msgstr ""
 msgid "Processing {.cls {class(self)[[1]]}}..."
 msgstr ""
 
-#: dataset-mnist.R:437
+#: dataset-mnist.R:409
 msgid ""
-"Split {.val {self$split}} of {.cls {class(self)[[1]]}} dataset of kind {.val "
-"{self$kind}} processed successfully!"
+"{.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded "
+"and processed if not already available."
+msgstr ""
+
+#: dataset-mnist.R:420
+msgid ""
+"Split {.val {self$split}} of dataset {.val {self$dataset}} from {.cls "
+"{class(self)[[1]]}} processed successfully!"
 msgstr ""
 
 #: dataset-places365.R:128

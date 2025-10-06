@@ -172,7 +172,7 @@ rf100_document_collection <- torch::dataset(
 
   .getitem = function(index) {
     df <- self$.data[index, ]
-    x_raw <- unlist(df$image$bytes) |> as.raw()
+    x_raw <- unlist(df$image$bytes) %>% as.raw()
     if (tolower(tools::file_ext(df$image$path)) == "jpg") {
       x <- jpeg::readJPEG(x_raw)
     } else {

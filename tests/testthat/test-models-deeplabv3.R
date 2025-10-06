@@ -16,6 +16,9 @@ test_that("deeplabv3_resnet50 works with default aux_loss=NULL", {
 })
 
 test_that("deeplabv3_resnet101 works with default aux_loss=NULL", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = "0") != "1",
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
   model <- model_deeplabv3_resnet101(num_classes = 21)
   input <- torch::torch_randn(1, 3, 32, 32)
   out <- model(input)

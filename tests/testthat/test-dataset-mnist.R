@@ -81,17 +81,17 @@ test_that("tests for the emnist dataset", {
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   expect_error(
-    ds <- emnist_dataset(root = tempfile())
+    ds <- emnist_collection(root = tempfile())
   )
 
-  emnist <- emnist_dataset(dir, kind = "balanced", download = TRUE)
+  emnist <- emnist_collection(dir, dataset = "balanced", download = TRUE)
   expect_equal(length(emnist), 18800)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 42)
 
-  emnist <- emnist_dataset(dir, kind = "byclass", split = "test", download = TRUE)
+  emnist <- emnist_collection(dir, dataset = "byclass", split = "test", download = TRUE)
   expect_equal(length(emnist), 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
@@ -99,14 +99,14 @@ test_that("tests for the emnist dataset", {
   expect_equal(dim(first_item$x), c(28,28))
   expect_equal((first_item[[2]]), 19)
 
-  emnist <- emnist_dataset(dir, kind = "bymerge", download = TRUE)
+  emnist <- emnist_collection(dir, dataset = "bymerge", download = TRUE)
   expect_equal(length(emnist), 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 25)
 
-  emnist <- emnist_dataset(dir, kind = "letters", split = "train", download = TRUE,
+  emnist <- emnist_collection(dir, dataset = "letters", split = "train", download = TRUE,
                            transform = transform_to_tensor)
   expect_equal(length(emnist), 124800)
   first_item <- emnist[1]
@@ -115,23 +115,23 @@ test_that("tests for the emnist dataset", {
   expect_tensor_shape(first_item$x, c(1,28,28))
   expect_equal((first_item[[2]]), 24)
 
-  emnist <- emnist_dataset(dir, kind = "digits", download = TRUE)
+  emnist <- emnist_collection(dir, dataset = "digits", download = TRUE)
   expect_equal(length(emnist), 40000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 1)
 
-  emnist <- emnist_dataset(dir, kind = "mnist", split = "train", download = TRUE)
+  emnist <- emnist_collection(dir, dataset = "mnist", split = "train", download = TRUE)
   expect_equal(length(emnist), 60000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(inherits(first_item$x, "array"))
   expect_equal((first_item[[2]]), 5)
 
-  ds2 <- emnist_dataset(
+  ds2 <- emnist_collection(
     root = dir,
-    kind = "balanced",
+    dataset = "balanced",
     split = "test",
     transform = transform_to_tensor,
     download = TRUE
@@ -171,4 +171,16 @@ test_that("tests for the qmnist dataset", {
     expect_true((torch_max(i[[1]]) <= 1)$item())
     expect_named(i, c("x", "y"))
   }
+})
+
+test_that("tests for the emnist_dataset is deprecated", {
+  skip_on_cran()
+
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  expect_warning(
+    emnist_dataset(kind = "digits", download = TRUE),
+    "'emnist_dataset' is deprecated."
+  )
 })
