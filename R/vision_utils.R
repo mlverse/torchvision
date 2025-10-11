@@ -176,7 +176,8 @@ draw_bounding_boxes.torch_tensor <- function(x,
     magick::image_read() %>%
     magick::image_draw()
 
-  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors, lwd = width)
+  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4],
+                 col = fill_col, border = colors, lwd = width)
 
   if (!is.null(labels)) {
     graphics::text(

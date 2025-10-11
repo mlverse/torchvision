@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.7.0.9000\n"
 "POT-Creation-Date: 2025-09-28 10:02+0200\n"
-"PO-Revision-Date: 2025-09-28 10:08+0200\n"
+"PO-Revision-Date: 2025-10-11 17:43+0200\n"
 "Last-Translator: Christophe Regouby <christophe.regouby@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -657,7 +657,7 @@ msgstr "Il faut passer des `x` individuels, et non en batch."
 #: vision_utils.R:128 vision_utils.R:325 vision_utils.R:441 vision_utils.R:503
 #: vision_utils.R:533
 msgid "Only grayscale and RGB images are supported"
-msgstr "Seules les images en niveau de gris et RGB son prise en compte."
+msgstr "Seules les images en niveaux de gris et RVB sont prises en charge"
 
 #: vision_utils.R:135
 msgid "`x` should be of dtype `torch_uint8` or `torch_float`"
