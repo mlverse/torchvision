@@ -1,4 +1,5 @@
 lwdetr <- nn_module(
+  "lw-detr",
   initialize = function(backbone,
                         transformer,
                         segmentation_head,
@@ -92,7 +93,7 @@ lwdetr <- nn_module(
   #'                                See PostProcess for information on how to retrieve the unnormalized bounding box.
   #'                - "aux_outputs": Optional, only returned when auxilary losses are activated. It is a list of
   #'                                 dictionnaries containing the two above keys for each decoder layer.
-  forward = function(self, samples, targets=NULL){
+  forward = function(samples, targets=NULL){
 
     if (inherits(samples, c(list, torch::torch_Tensor))) {
       samples <- nested_tensor_from_tensor_list(samples)
@@ -200,7 +201,7 @@ lwdetr <- nn_module(
         outputs_masks <- self$segmentation_head(srcs[1], c(hs, ), tensors$shape %>% tail(2))[1]
       }
     } else {
-      stopifnot(self$two_stage, "if not using decoder, two_stage must be TRUE")
+      stopifnot("if not using decoder, two_stage must be TRUE" = self$two_stage == TRUE)
       outputs_class <- self$transformer$enc_out_class_embed[[1]](hs_enc)
       outputs_coord <- ref_enc
       if (!is.null(self$segmentation_head)) {
@@ -237,8 +238,7 @@ lwdetr <- nn_module(
 
     return(result)
   },
-  update_drop_path = function(self,
-                              drop_path_rate,
+  update_drop_path = function(drop_path_rate,
                               vit_encoder_num_layers) {
     dp_rates <- sapply(torch::torch_linspace(0, drop_path_rate, vit_encoder_num_layers),
                        x$item())
@@ -256,7 +256,7 @@ lwdetr <- nn_module(
       }
     }
   },
-  update_dropout = function(self, drop_rate) {
+  update_dropout = function(drop_rate) {
     for (module in self$transformer$modules()) {
       if (inherits(module, torch::nn_dropout)) {
         module$p <- drop_rate
@@ -267,6 +267,7 @@ lwdetr <- nn_module(
 
 
 set_criterion <- nn_module(
+  "set-criterion",
   #' Create the criterion
   #'
   #' @param num_classes number of object categories, omitting the special no-object category
@@ -290,7 +291,7 @@ set_criterion <- nn_module(
                         use_varifocal_loss = FALSE,
                         use_position_supervised_loss = FALSE,
                         ia_bce_loss = FALSE,
-                        mask_point_sample_ratio:= 16L) {
+                        mask_point_sample_ratio = 16L) {
     self$num_classes <- num_classes
     self$matcher <- matcher
     self$weight_dict <- weight_dict
@@ -312,7 +313,7 @@ set_criterion <- nn_module(
                          indices,
                          num_boxes,
                          log = TRUE) {
-    stopifnot('pred_logits' %in% names(outputs))
+    stopifnot("pred_logits" %in% names(outputs))
     src_logits <- outputs$pred_logits
 
     idx <- self$.get_src_permutation_idx(indices)
@@ -405,7 +406,7 @@ set_criterion <- nn_module(
 
     } else if (self$use_varifocal_loss) {
       src_boxes <- outputs$pred_boxes[idx]
-      target_boxes <- torch::torch_cat(
+      target_boxes <- torch::torch_cat(mapply(
         FUN = function(t, index_pair) {
           i <- index_pair[[2]]
           t[["boxes"]][i]
@@ -500,7 +501,7 @@ loss_ce <- sigmoid_varifocal_loss(
     stopifnot("pred_boxes" %in% names(outputs))
     idx <- self$.get_src_permutation_idx(indices)
     src_boxes <- outputs$pred_boxes[idx]
-    target_boxes <- torch::torch_cat(
+    target_boxes <- torch::torch_cat(mapply(
       FUN = function(t, index_pair) {
         i <- index_pair[[2]]
         t[["boxes"]][i]
@@ -528,8 +529,7 @@ loss_ce <- sigmoid_varifocal_loss(
   #' Compute BCE-with-logits and Dice losses for segmentation masks on matched pairs.
   #' Expects outputs to contain 'pred_masks' of shape c(B, Q, H, W) and targets with key 'masks'.
   loss_masks = function(self, outputs, targets, indices, num_boxes) {
-    stopifnot("pred_masks" in names(outputs),
-           "pred_masks missing in model outputs")
+    stopifnot("pred_masks missing in model outputs" = "pred_masks" %in% names(outputs))
     pred_masks <- outputs$pred_masks  # c(B, Q, H, W)
     # gather matched prediction masks
     idx <- self$.get_src_permutation_idx(indices)
@@ -543,7 +543,7 @@ loss_ce <- sigmoid_varifocal_loss(
       ))
     }
     # gather matched target masks
-    target_masks <- torch::torch_cat(
+    target_masks <- torch::torch_cat(mapply(
       FUN = function(t, index_pair) {
         i <- index_pair[[2]]
         t[["masks"]][i]
@@ -563,7 +563,7 @@ loss_ce <- sigmoid_varifocal_loss(
     src_masks$shape[src_masks$ndim - 1] * src_masks$shape[src_masks$ndim] %/% self$mask_point_sample_ratio
   )
 
-  with torch::torch_no_grad() {
+  torch::with_no_grad({
     # sample point_coords
     point_coords <- get_uncertain_point_coords_with_randomness(src_masks, function(logits)
       calculate_uncertainty(logits), num_points, 3, 0.75, )
@@ -572,6 +572,7 @@ loss_ce <- sigmoid_varifocal_loss(
                                  point_coords,
                                  align_corners = FALSE,
                                  mode = "nearest",)$squeeze(2)
+  })
 
     point_logits <- point_sample(src_masks, point_coords, align_corners =
                                    FALSE, )$squeeze(2)
@@ -587,4 +588,5 @@ loss_ce <- sigmoid_varifocal_loss(
 
 
   }
+
 )
