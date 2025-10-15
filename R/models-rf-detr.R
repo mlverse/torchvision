@@ -70,7 +70,7 @@ lwdetr <- nn_module(
       }
     }
   },
-  export = function(){
+  export = function() {
     self$.export <- TRUE
     self$.forward_origin <- self$forward
     self$forward <- self$forward_export
@@ -81,19 +81,19 @@ lwdetr <- nn_module(
     }
   },
   #' The forward expects a NestedTensor, which consists of:
-  #'                - samples$tensor: batched images, of shape [batch_size x 3 x H x W]
-  #'                - samples$mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels
+  #'                - samples$tensor: batched images, of shape \[batch_size x 3 x H x W]
+  #'                - samples$mask: a binary mask of shape \[batch_size x H x W], containing 1 on padded pixels
   #'
   #'             It returns a dict with the following elements:
   #'                - "pred_logits": the classification logits (including no-object) for all queries.
-  #'                                 Shape= [batch_size x num_queries x num_classes]
+  #'                                 Shap = \[batch_size x num_queries x num_classes]
   #'                - "pred_boxes": The normalized boxes coordinates for all queries, represented as
   #'                                (center_x, center_y, width, height). These values are normalized in [0, 1],
   #'                                relative to the size of each individual image (disregarding possible padding).
   #'                                See PostProcess for information on how to retrieve the unnormalized bounding box.
   #'                - "aux_outputs": Optional, only returned when auxilary losses are activated. It is a list of
   #'                                 dictionnaries containing the two above keys for each decoder layer.
-  forward = function(samples, targets=NULL){
+  forward = function(samples, target = NULL) {
 
     if (inherits(samples, c(list, torch::torch_Tensor))) {
       samples <- nested_tensor_from_tensor_list(samples)
@@ -130,7 +130,7 @@ lwdetr <- nn_module(
       outputs_class <- self$class_embed(hs)
 
       if (!is.null(self$segmentation_head)) {
-        outputs_masks <- self$segmentation_head(features[[0]]$tensors, hs, samples$tensors$shape %>% tail(2))
+        outputs_masks <- self$segmentation_head(features[[0]]$tensors, hs, tail(samples$tensors$shape,2))
       }
       out <- list('pred_logits' =  outputs_class[-1], 'pred_boxes' =  outputs_coord[-1])
       if (!is.null(self$segmentation_head)) {
@@ -157,7 +157,7 @@ lwdetr <- nn_module(
       if (!is.null(self$segmentation_head)) {
         masks_enc <- self$segmentation_head(features[1]$tensors,
                                             c(hs_enc, ),
-                                            samples$tensors$shape %>% tail(2),
+                                            tail(samples$tensors$shape,2),
                                             skip_blocks = TRUE)
         masks_enc <- torch::torch_cat(masks_enc, dim = 1)
       }
@@ -177,7 +177,7 @@ lwdetr <- nn_module(
 
   },
   forward_export = function(tensors) {
-    c(srcs, _, poss) %<-% self$backbone(tensors)
+    c(srcs, trash, poss) %<-% self$backbone(tensors)
     # only use one group in inference
     refpoint_embed_weight <- self$refpoint_embed$weight[1:self$num_queries]
     query_feat_weight <- self$query_feat$weight[1:self$num_queries]
@@ -191,14 +191,13 @@ lwdetr <- nn_module(
         outputs_coord_delta <- self$bbox_embed(hs)
         outputs_coord_cxcy <- outputs_coord_delta[.., 1:2] * ref_unsigmoid[.., 3:N] + ref_unsigmoid[.., 1:2]
         outputs_coord_wh <- outputs_coord_delta[.., 3:N]$exp() * ref_unsigmoid[.., 3:N]
-        outputs_coord <- torch::torch_concat(c(outputs_coord_cxcy, outputs_coord_wh), dim =
-                                               -1)
+        outputs_coord <- torch::torch_concat(c(outputs_coord_cxcy, outputs_coord_wh), dim = -1)
       } else {
         outputs_coord <- (self$bbox_embed(hs) + ref_unsigmoid)$sigmoid()
       }
       outputs_class <- self$class_embed(hs)
       if (!is.null(self$segmentation_head)) {
-        outputs_masks <- self$segmentation_head(srcs[1], c(hs, ), tensors$shape %>% tail(2))[1]
+        outputs_masks <- self$segmentation_head(srcs[[1]], hs, tail(tensors$shape,2))[[1]]
       }
     } else {
       stopifnot("if not using decoder, two_stage must be TRUE" = self$two_stage == TRUE)
@@ -207,16 +206,14 @@ lwdetr <- nn_module(
       if (!is.null(self$segmentation_head)) {
         outputs_masks <- self$segmentation_head(srcs[[1]],
                                                 hs_enc,
-                                                tensors$shape %>% tail(2),
-                                                skip_blocks = TRUE)[1]
+                                                tail(tensors$shape,2),
+                                                skip_blocks = TRUE)[[1]]
       }
     }
     return(list(outputs_coord, outputs_class, outputs_masks))
 
   },
-  .set_aux_loss = function(outputs_class,
-                           outputs_coord,
-                           outputs_masks) {
+  .set_aux_loss = function(outputs_class, outputs_coord, outputs_masks) {
     # this is a workaround to make torchscript happy, as torchscript
     # doesn't support dictionary with non-homogeneous values, such
     # as a dict having both a Tensor and a list.
@@ -416,58 +413,58 @@ set_criterion <- nn_module(
         simplify = FALSE
       ), dim = 0)
 
-iou_targets <- torch::torch_diag(box_ops$box_iou(
-  box_ops$box_cxcywh_to_xyxy(src_boxes$detach()),
-  box_ops$box_cxcywh_to_xyxy(target_boxes)
-)[1])
-pos_ious <- iou_targets$clone()$detach()
+    iou_targets <- torch::torch_diag(box_ops$box_iou(
+      box_ops$box_cxcywh_to_xyxy(src_boxes$detach()),
+      box_ops$box_cxcywh_to_xyxy(target_boxes)
+    )[1])
+    pos_ious <- iou_targets$clone()$detach()
 
-cls_iou_targets <- torch::torch_zeros(
-  c(src_logits$shape[1], src_logits$shape[2], self$num_classes),
-  dtype = src_logits$dtype,
-  device = src_logits$device
-)
+    cls_iou_targets <- torch::torch_zeros(
+      c(src_logits$shape[1], src_logits$shape[2], self$num_classes),
+      dtype = src_logits$dtype,
+      device = src_logits$device
+    )
 
-idx$append(target_classes_o)
-cls_iou_targets[idx] <- pos_ious
-loss_ce <- sigmoid_varifocal_loss(
-  src_logits,
-  cls_iou_targets,
-  num_boxes,
-  alpha = self$focal_alpha,
-  gamma = 2
-) * src_logits$shape[2]
-    } else
-    {
-      target_classes <- torch::torch_full(
-        src_logits$shape[1:2],
-        self$num_classes,
-        dtype  =  torch::torch_int64,
-        device  =  src_logits$device
-      )
-      target_classes[idx] <- target_classes_o
+    idx$append(target_classes_o)
+    cls_iou_targets[idx] <- pos_ious
+    loss_ce <- sigmoid_varifocal_loss(
+      src_logits,
+      cls_iou_targets,
+      num_boxes,
+      alpha = self$focal_alpha,
+      gamma = 2
+    ) * src_logits$shape[2]
+        } else
+        {
+          target_classes <- torch::torch_full(
+            src_logits$shape[1:2],
+            self$num_classes,
+            dtype  =  torch::torch_int64,
+            device  =  src_logits$device
+          )
+          target_classes[idx] <- target_classes_o
 
-      target_classes_onehot <- torch::torch_zeros(
-        c(
-          src_logits$shape[1],
-          src_logits$shape[2],
-          src_logits$shape[3]  +  1
-        ),
-        dtype  =  src_logits$dtype,
-        layout  =  src_logits$layout,
-        device  =  src_logits$device
-      )
-      target_classes_onehot$scatter_(2, target_classes$unsqueeze(-1), 1)
+          target_classes_onehot <- torch::torch_zeros(
+            c(
+              src_logits$shape[1],
+              src_logits$shape[2],
+              src_logits$shape[3]  +  1
+            ),
+            dtype  =  src_logits$dtype,
+            layout  =  src_logits$layout,
+            device  =  src_logits$device
+          )
+          target_classes_onehot$scatter_(2, target_classes$unsqueeze(-1), 1)
 
-      target_classes_onehot <- target_classes_onehot[.., 1:(N  -  1)]
-      loss_ce <- sigmoid_focal_loss(
-        src_logits,
-        target_classes_onehot,
-        num_boxes,
-        alpha  =  self$focal_alpha,
-        gamma  =  2
-      ) * src_logits$shape[2]
-    }
+          target_classes_onehot <- target_classes_onehot[.., 1:(N  -  1)]
+          loss_ce <- sigmoid_focal_loss(
+            src_logits,
+            target_classes_onehot,
+            num_boxes,
+            alpha  =  self$focal_alpha,
+            gamma  =  2
+          ) * src_logits$shape[2]
+        }
     losses <- list(loss_ce  =  loss_ce)
 
     if (log)
@@ -486,9 +483,9 @@ loss_ce <- sigmoid_varifocal_loss(
     device <- pred_logits$device
     tgt_lengths <- torch::torch_tensor(lapply(targets, function(v)
       length(v$labels)), device  =  device)
-    # [len(v$labels) for v in targets], device=device)
+    # [len(v$labels) for v in targets], devic = device)
     # Count the number of predictions that are NOT "no-object" (which is the last class)
-    card_pred <- (pred_logits$argmax(-1) != pred_logits$shape[pred_logits$ndim] - 1)$sum(2)
+    card_pred <- (pred_logits$argmax(-1)  = pred_logits$shape[pred_logits$ndim] - 1)$sum(2)
     card_err <- nnf_l1_loss(card_pred$float(), tgt_lengths$float())
     losses <- list(cardinality_error =  card_err)
     return(losses)
@@ -582,8 +579,8 @@ loss_ce <- sigmoid_varifocal_loss(
       loss_mask_dice = dice_loss_jit(point_logits, point_labels, num_boxes),
     )
 
-    rm src_masks
-    rm target_masks
+    rm(src_masks)
+    rm(target_masks)
     return(losses)
 
 

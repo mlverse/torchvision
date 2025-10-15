@@ -95,6 +95,7 @@ Collate:
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'
     'models-resnet.R'
+    'models-rf-detr.R'
     'models-vgg.R'
     'models-vit.R'
     'ops-box_convert.R'
