@@ -273,11 +273,11 @@ set_criterion <- nn_module(
   #' @param focal_alpha alpha in Focal Loss
   #' @param losses  list of all the losses to be applied. See get_loss for list of available losses.
   #' @param group_detr Number of groups to speed detr training. Default is 1.
-  #' @param sum_group_losses
-  #' @param use_varifocal_loss
-  #' @param use_position_supervised_loss
-  #' @param ia_bce_loss
-  #' @param mask_point_sample_ratio
+  #' @param sum_group_losses: whether or not to sum the losses
+  #' @param use_varifocal_loss: whether or not to use varifocal loss
+  #' @param use_position_supervised_loss: whether or not to use positional supervsed loss
+  #' @param ia_bce_loss: whether or not to use ia binary cros entropy loss
+  #' @param mask_point_sample_ratio value of the mask-point sample ratio
   initialize = function(num_classes,
                         matcher,
                         weight_dict,
@@ -303,7 +303,7 @@ set_criterion <- nn_module(
 
   },
   #' Classification loss (Binary focal loss)
-  #' targets dicts must contain the key "labels" containing a tensor of dim \[nb_target_boxes]
+  #' @param targets a named list that must include a "labels" named tensor of dim \[nb_target_boxes]
   loss_labels = function(self,
                          outputs,
                          targets,
@@ -434,8 +434,7 @@ set_criterion <- nn_module(
       alpha = self$focal_alpha,
       gamma = 2
     ) * src_logits$shape[2]
-        } else
-        {
+        } else {
           target_classes <- torch::torch_full(
             src_logits$shape[1:2],
             self$num_classes,
@@ -467,15 +466,14 @@ set_criterion <- nn_module(
         }
     losses <- list(loss_ce  =  loss_ce)
 
-    if (log)
-    {
+    if (log) {
       # TODO this should probably be a separate loss, not hacked in this one here
       losses$class_error <- 100 - accuracy(src_logits[idx], target_classes_o)[1]
     }
     return(losses)
 
   },
-  #' Compute the cardinality error, ie the absolute error in the number of predicted non-empty boxes
+  #' Compute the cardinality error, i.e. the absolute error in the number of predicted non-empty boxes
   #' This is not really a loss, it is intended for logging purposes only. It doesn't propagate gradients
   loss_cardinality = function(self, outputs, targets, indices, num_boxes) {
     torch::torch_no_grad()
@@ -582,8 +580,94 @@ set_criterion <- nn_module(
     rm(src_masks)
     rm(target_masks)
     return(losses)
+  },
+  .get_src_permutation_idx = function(indices){
+    # permute predictions following indices
+    batch_idx <- torch::torch_cat(lapply(seq_along(indices), function(i) torch::torch_full_like(indices[[i]][[1]], i)))
+    src_idx <- torch::torch_cat(lapply(indices, function(i) i[[1]]))
+    return(batch_idx, src_idx)
+  },
 
+  .get_tgt_permutation_idx = function(indices){
+    # permute targets following indices
+    batch_idx <- torch::torch_cat(lapply(seq_along(indices), function(i) torch::torch_full_like(indices[[i]][[2]], i)))
+      # c(torch::torch_full_like(tgt, i) for i, (_, tgt) in enumerate(indices)))
+    tgt_idx <- torch::torch_cat(lapply(indices, function(i) i[[2]]))
+      # c(tgt for (_, tgt) in indices))
+    return(batch_idx, tgt_idx)
+  },
 
+  get_loss = function(loss, outputs, targets, indices, num_boxes, ...){
+    loss_map <- list(
+      'labels'=  self$loss_labels,
+      'cardinality'=  self$loss_cardinality,
+      'boxes'=  self$loss_boxes,
+      'masks'=  self$loss_masks
+      )
+    stopifnot("do you really want to compute {loss} loss?" =  loss %in% loss_map)
+    return(loss_map[[!!loss]](outputs, targets, indices, num_boxes, ...))
+
+  },
+  #' performs the loss computation.
+  #' @param outputs: list of tensors, see the output specification of the model for the format
+  #' @param targets: list of lists, such that length(targets) == batch_size.
+  #'                 The expected names in each list depends on the losses applied, see each loss' doc
+  forward = function(outputs, targets) {
+    group_detr <- ifelse(self$training, self$group_detr , 1)
+    outputs_without_aux <- outputs$items()
+    outputs_without_aux$aux_outputs <- NULL
+
+    # Retrieve the matching between the outputs of the last layer and the targets
+    indices <- self$matcher(outputs_without_aux, targets, group_detr=group_detr)
+
+    # Compute the average number of target boxes accross all nodes, for normalization purposes
+    num_boxes <- sum(lapply(targets$labels, length))
+    if (!self$sum_group_losses) {
+      num_boxes <- num_boxes * group_detr
+    }
+    num_boxes <- torch::torch_as_tensor(num_boxes, dtype=torch::torch_float, device=next(iter(outputs$values()))$device)
+    if (is_dist_avail_and_initialized()) {
+      torch::torch_distributed$all_reduce(num_boxes)
+    }
+    num_boxes <- torch::torch_clamp(num_boxes / get_world_size(), min=1)$item()
+
+    # Compute all the requested losses
+    losses <- list()
+    for (loss in self$losses) {
+      losses$update(self$get_loss(loss, outputs, targets, indices, num_boxes))
+    }
+    # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
+    if ("aux_outputs" %in% outputs) {
+      for (i in seq_along(outputs$aux_outputs)) {
+        indices <- self$matcher(outputs$aux_outputs[[i]], targets, group_detr=group_detr)
+        for (loss in self$losses){
+          kwargs <- list()
+          if (loss == "labels") {
+            # Logging is enabled only for the last layer
+            kwargs$log <- FALSE
+          }
+          l_dict <- self$get_loss(loss, outputs$aux_outputs[[i]], targets, indices, num_boxes, ...)
+          l_dict <- list(glue::glue("{names(l_dict$items())}_{i}" = l_dict$items()))
+          losses$update(l_dict)
+      }
+    }
+
+    if ("enc_outputs" %in% outputs) {
+        enc_outputs <- outputs$enc_outputs
+        indices <- self$matcher(enc_outputs, targets, group_detr=group_detr)
+        for (loss in self$losses) {
+          kwargs <- list()
+            if (loss == "labels") {
+              # Logging is enabled only for the last layer
+              kwargs$log <- FALSE
+            }
+            l_dict <- self$get_loss(loss, enc_outputs, targets, indices, num_boxes, ...)
+            l_dict <- list(glue::glue("{names(l_dict$items())}_{i}" = l_dict$items()))
+            losses$update(l_dict)
+        }
+      }
+    return(losses)
+    }
   }
-
 )
+
