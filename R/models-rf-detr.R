@@ -303,7 +303,7 @@ set_criterion <- nn_module(
 
   },
   #' Classification loss (Binary focal loss)
-  #' @param targets a named list that must include a "labels" named tensor of dim \[nb_target_boxes]
+  #' @param targets a named list that must include a "labels" named tensor of dim `nb_target_boxes`
   loss_labels = function(self,
                          outputs,
                          targets,
