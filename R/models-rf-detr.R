@@ -262,22 +262,22 @@ lwdetr <- nn_module(
   }
 )
 
-
+#' Create the RF-DETR criterion
+#'
+#' @param num_classes number of object categories, omitting the special no-object category
+#' @param matcher module able to compute a matching between targets and proposals
+#' @param weight_dict dict containing as key the names of the losses and as values their relative weight.
+#' @param focal_alpha alpha in Focal Loss
+#' @param losses  list of all the losses to be applied. See get_loss for list of available losses.
+#' @param group_detr Number of groups to speed detr training. Default is 1.
+#' @param sum_group_losses: whether or not to sum the losses
+#' @param use_varifocal_loss: whether or not to use varifocal loss
+#' @param use_position_supervised_loss: whether or not to use positional supervsed loss
+#' @param ia_bce_loss: whether or not to use ia binary cros entropy loss
+#' @param mask_point_sample_ratio value of the mask-point sample ratio
+#' @noRd
 set_criterion <- nn_module(
   "set-criterion",
-  #' Create the criterion
-  #'
-  #' @param num_classes number of object categories, omitting the special no-object category
-  #' @param matcher module able to compute a matching between targets and proposals
-  #' @param weight_dict dict containing as key the names of the losses and as values their relative weight.
-  #' @param focal_alpha alpha in Focal Loss
-  #' @param losses  list of all the losses to be applied. See get_loss for list of available losses.
-  #' @param group_detr Number of groups to speed detr training. Default is 1.
-  #' @param sum_group_losses: whether or not to sum the losses
-  #' @param use_varifocal_loss: whether or not to use varifocal loss
-  #' @param use_position_supervised_loss: whether or not to use positional supervsed loss
-  #' @param ia_bce_loss: whether or not to use ia binary cros entropy loss
-  #' @param mask_point_sample_ratio value of the mask-point sample ratio
   initialize = function(num_classes,
                         matcher,
                         weight_dict,
@@ -671,3 +671,241 @@ set_criterion <- nn_module(
   }
 )
 
+#' Sigmoid Focal loss
+#'
+#' Loss used in RetinaNet for dense detection: https:%/%arxiv$org/abs/1708.02002.
+#'
+#' @param inputs: A float tensor of arbitrary shape.
+#'             The predictions for each example.
+#' @param targets: A float tensor with the same shape as inputs. Stores the binary
+#'              classification label for each element in inputs
+#'             (0 for the negative class and 1 for the positive class).
+#' @param alpha: (optional) Weighting factor in range (0,1) to balance
+#'             positive vs negative examples. Default <- -1 (no weighting).
+#' @param gamma: Exponent of the modulating factor (1 - p_t) to
+#'            balance easy vs hard examples.
+#' @return Loss tensor
+#' @noRd
+#' @importFrom torch nnf_binary_cross_entropy_with_logits
+sigmoid_focal_loss = function(inputs, targets, num_boxes, alpha = 0.25, gamma = 2){
+
+  prob <- inputs$sigmoid()
+  ce_loss <- nnf_binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+  p_t <- prob * targets + (1 - prob) * (1 - targets)
+  loss <- ce_loss * ((1 - p_t) ^ gamma)
+
+  if (alpha >= 0) {
+    alpha_t <- alpha * targets + (1 - alpha) * (1 - targets)
+    loss <- alpha_t * loss
+  }
+  return(loss$mean(1)$sum() / num_boxes)
+}
+
+
+#' Sigmoid Varifocal loss
+#'
+#' used in RetinaNet for dense detection: https:%/%arxiv$org/abs/1708.02002.
+#'
+#' @param inputs: A float tensor of arbitrary shape.
+#'             The predictions for each example.
+#' @param targets: A float tensor with the same shape as inputs. Stores the binary
+#'              classification label for each element in inputs
+#'             (0 for the negative class and 1 for the positive class).
+#' @param alpha: (optional) Weighting factor in range (0,1) to balance
+#'             positive vs negative examples. Default <- -1 (no weighting).
+#' @param gamma: Exponent of the modulating factor (1 - p_t) to
+#'            balance easy vs hard examples.
+#' @return Loss tensor
+#' @noRd
+sigmoid_varifocal_loss = function(inputs, targets, num_boxes, alpha = 0.25, gamma = 2){
+  prob <- inputs$sigmoid()
+  focal_weight <- targets * (targets > 0)$float() + (1 - alpha) * (prob - targets)$abs()$pow(gamma) * (targets <= 0)$float()
+  ce_loss <- nnf_binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+  loss <- ce_loss * focal_weight
+
+  return(loss$mean(1)$sum() / num_boxes)
+}
+
+
+#' Position Supervised loss
+#'
+#' used in RetinaNet for dense detection: https:%/%arxiv$org/abs/1708.02002.
+#'
+#' @param inputs: A float tensor of arbitrary shape.
+#'             The predictions for each example.
+#' @param targets: A float tensor with the same shape as inputs. Stores the binary
+#'              classification label for each element in inputs
+#'             (0 for the negative class and 1 for the positive class).
+#' @param num_boxes: number of bounding box
+#' @param alpha: (optional) Weighting factor in range (0,1) to balance
+#'             positive vs negative examples. Default <- -1 (no weighting).
+#' @param gamma: Exponent of the modulating factor (1 - p_t) to
+#'            balance easy vs hard examples.
+#' @return Loss tensor
+#' @noRd
+position_supervised_loss = function(inputs, targets, num_boxes, alpha= 0.25, gamma = 2){
+  prob <- inputs$sigmoid()
+  ce_loss <- nnf_binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+  loss <- ce_loss * (torch::torch_abs(targets - prob) ^ gamma)
+
+  if (alpha >= 0) {
+    alpha_t <- alpha * (targets > 0)$float() + (1 - alpha) * (targets <= 0)$float()
+    loss <- alpha_t * loss
+
+    return(loss$mean(1)$sum() / num_boxes)
+  }
+}
+
+
+
+#' DICE loss.
+#'
+#' Compute the DICE loss, similar to generalized IOU for masks
+#'
+#' @param inputs: A float tensor of arbitrary shape.
+#'                The predictions for each example.
+#' @param targets: A float tensor with the same shape as inputs. Stores the binary
+#'                 classification label for each element in inputs
+#'                (0 for the negative class and 1 for the positive class).
+#' @noRd
+dice_loss = function( inputs, targets, num_masks){
+
+  inputs <- inputs$sigmoid()
+  inputs <- inputs$flatten(1)
+  numerator <- 2 * (inputs * targets)$sum(-1)
+  denominator <- inputs$sum(-1) + targets$sum(-1)
+  loss <- 1 - (numerator + 1) / (denominator + 1)
+  return(loss$sum() / num_masks)
+
+
+  dice_loss_jit <- torch::torch_jit$script(
+    dice_loss
+  )  # type: torch::torch_jit$ScriptModule
+
+
+}
+#' Sigmoid cross-entropy loss
+#'
+#' @param inputs: A float tensor of arbitrary shape.
+#'         The predictions for each example.
+#' @param targets: A float tensor with the same shape as inputs. Stores the binary
+#'              classification label for each element in inputs
+#'          (0 for the negative class and 1 for the positive class).
+#' @param num_masks: number of masks
+#' @returns Loss tensor
+sigmoid_ce_loss = function(inputs,targets, num_masks){
+  loss <- nnf_binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+
+  return(loss$mean(1)$sum() / num_masks)
+
+
+  sigmoid_ce_loss_jit <- torch::torch_jit$script(
+    sigmoid_ce_loss
+  )  # type: torch::torch_jit$ScriptModule
+}
+
+
+#' Compute Uncertainty
+#'
+#' We estimate uncertainty as L1 distance between 0.0 and the logit prediction in 'logits' for the
+#'     foreground class in `classes`.
+#'
+#' @param logits (Tensor): A tensor of shape (R, 1, ...) for class-specific or
+#'         class-agnostic, where R is the total number of predicted masks in all images and C is
+#'         the number of foreground classes. The values are logits.
+#' @return A tensor of shape (R, 1, ...) that contains uncertainty scores with
+#'         the most uncertain locations having the highest uncertainty score.
+calculate_uncertainty = function(logits){
+
+  stopifnot(logits$shape[1] == 1)
+  gt_class_logits <- logits$clone()
+  return(-(torch::torch_abs(gt_class_logits)))
+}
+
+
+#' PostProcess to coco API
+#'
+#' converts the model's output into the format expected by the coco api
+#' @noRd
+post_process <- torch::nn_module(
+  "PostProcess",
+  initialize = function(num_select=300) {
+    self$num_select <- num_select
+  },
+  #' Perform the computation
+  #'
+  #' @param outputs: raw outputs of the model
+  #' @param target_sizes: tensor of dimension [batch_size x 2] containing the size of each images of the batch
+  #'             For evaluation, this must be the original image size (before any data augmentation)
+  #'             For visualization, this should be the image size after data augment, but before padding
+  forward = function(outputs, target_sizes) {
+    torch::with_no_grad({
+      out_logits <- outputs$pred_logits
+      out_bbox <- outputs$pred_boxes
+      out_masks <- outputs$get('pred_masks', NULL)
+
+      stopifnot(length(out_logits) == length(target_sizes))
+      stopifnot(target_sizes$shape[2] == 2)
+
+      prob <- out_logits$sigmoid()
+      c(topk_values, topk_indexes) %<-% torch::torch_topk(prob$view(out_logits$shape[0], -1), self$num_select, dim=1)
+      scores <- topk_values
+      topk_boxes <- topk_indexes %/% out_logits$shape[3]
+      labels <- topk_indexes %% out_logits$shape[3]
+      boxes <- box_convert(out_bbox, "cxcywh", "xyxy")
+      boxes <- torch::torch_gather(boxes, 1, topk_boxes$unsqueeze(-1)$`repeat`(c(1,1,4)))
+
+      # and from relative [0, 1] to absolute [0, height] coordinates
+      c(img_h, img_w) %<-% target_sizes$unbind(1)
+      scale_fct <- torch::torch_stack(c(img_w, img_h, img_w, img_h), dim=2)
+      boxes <- boxes * scale_fct[, NULL, ]
+
+      # Optionally gather masks corresponding to the same top-K queries and resize to original size
+      results <- list()
+      if (!is.null(out_masks)) {
+        for (i in range(out_masks$shape[1])) {
+          res_i <- list(scores =  scores[i], 'labels'=  labels[i], 'boxes'=  boxes[i])
+          k_idx <- topk_boxes[i]
+          masks_i <- torch::torch_gather(out_masks[i], 0, k_idx$unsqueeze(-1)$unsqueeze(-1)$`repeat`(c(1, tail(out_masks$shape, 2))))  # c(K, Hm, Wm)
+          c(h, w) %<-% target_sizes[i]$tolist()
+          masks_i <- nnf_interpolate(masks_i$unsqueeze(2), size=c(h, w), mode='bilinear', align_corners=FALSE)  # [K,1,H,W]
+          res_i$masks <- masks_i > 0.0
+          results$append(res_i)
+        }
+      } else {
+        results <- list('scores'=  scores, 'labels'=  labels, 'boxes'=  boxes)
+      }
+    })
+    return(results)
+  }
+)
+
+#' simple MLP
+#'
+#'  Very simple multi-layer perceptron (also called FFN)
+#'  @noRd
+mlp <- torch::nn_module(
+  "MLP",
+  initialize = function(input_dim, hidden_dim, output_dim, num_layers){
+    self$num_layers <- num_layers
+    h <- rep(hidden_dim, num_layers - 1)
+    input_dims <- c(input_dim, h)
+    output_dims <- c(h, output_dim)
+    layers_list <- list()
+    for (i in seq_along(input_dims)) {
+      layers_list[[i]] <- nn_linear(input_dims[i], output_dims[i])
+    }
+    self$layers <- nn_module_list(layers_list)
+
+  },
+  forward = function(x){
+    for (i in seq_along(self$layers)) {
+      layer <- self$layers[[i]]
+      x <- layer(x)
+      if (i < self$num_layers) {
+        x <- nnf_relu(x)
+      }
+      return(x)
+    }
+  }
+)
