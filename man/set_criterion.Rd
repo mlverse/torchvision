@@ -2,7 +2,7 @@
 % Please edit documentation in R/models-rf-detr.R
 \name{set_criterion}
 \alias{set_criterion}
-\title{Create the criterion}
+\title{Create the RF-DETR criterion}
 \usage{
 set_criterion(
   num_classes,
@@ -31,8 +31,7 @@ set_criterion(
 
 \item{group_detr}{Number of groups to speed detr training. Default is 1.}
 
-\item{mask_point_sample_ratio}{value of the mask-point sample ratio
-Classification loss (Binary focal loss)}
+\item{mask_point_sample_ratio}{value of the mask-point sample ratio}
 
 \item{sum_group_losses:}{whether or not to sum the losses}
 
@@ -58,5 +57,5 @@ performs the loss computation.}
 The expected names in each list depends on the losses applied, see each loss' doc}
 }
 \description{
-Create the criterion
+Create the RF-DETR criterion
 }
