@@ -991,6 +991,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
 #' @importFrom stats setNames
 .rename_fasterrcnn_state_dict <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
     sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
@@ -1004,6 +1005,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
 
 .rename_fasterrcnn_large_state_dict <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(.rename_fasterrcnn_state_dict(state_dict)) %>%
     # turn bn into 'O' value and conv into '1' value
     sub(pattern = "(block\\.[0-3]\\.)0\\.", replacement = "\\1conv\\.", x = .) %>%
