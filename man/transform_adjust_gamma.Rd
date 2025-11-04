@@ -24,7 +24,7 @@ based on the following equation:
     }
 }
 \details{
-See \href{https://en.wikipedia.org/wiki/Gamma_correction}{Gamma Correction} for more details.
+Search for Gamma Correction for more details.
 }
 \seealso{
 Other unitary_transforms: 
