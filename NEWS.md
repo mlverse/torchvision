@@ -1,4 +1,4 @@
-# torchvision (development version)
+# torchvision 0.8.0
 
 ## New datasets
 
