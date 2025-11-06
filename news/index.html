@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -79,6 +79,45 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="0.8.0" id="torchvision-080">torchvision 0.8.0<small>2025-11-06</small><a class="anchor" aria-label="anchor" href="#torchvision-080"></a></h2>
+<div class="section level3">
+<h3 id="new-datasets-0-8-0">New datasets<a class="anchor" aria-label="anchor" href="#new-datasets-0-8-0"></a></h3>
+<ul><li>Added <code><a href="../reference/lfw_dataset.html">lfw_people_dataset()</a></code> and <code><a href="../reference/lfw_dataset.html">lfw_pairs_dataset()</a></code> for loading Labelled Faces in the Wild (LFW) datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/203" class="external-link">#203</a>).</li>
+<li>Added <code><a href="../reference/places365_dataset.html">places365_dataset()</a></code>for loading the Places365 dataset (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/196" class="external-link">#196</a>).</li>
+<li>Added <code><a href="../reference/pascal_voc_datasets.html">pascal_segmentation_dataset()</a></code>, and <code><a href="../reference/pascal_voc_datasets.html">pascal_detection_dataset()</a></code> for loading the Pascal Visual Object Classes datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/209" class="external-link">#209</a>).</li>
+<li>Added <code><a href="../reference/whoi_plankton_dataset.html">whoi_plankton_dataset()</a></code>, <code><a href="../reference/whoi_plankton_dataset.html">whoi_small_plankton_dataset()</a></code>, and <code>whoi_small_coral_dataset()</code> (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/236" class="external-link">#236</a>).</li>
+<li>Added <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code>, <code><a href="../reference/rf100_medical_collection.html">rf100_medical_collection()</a></code>, <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code>, <code><a href="../reference/rf100_damage_collection.html">rf100_damage_collection()</a></code>, <code><a href="../reference/rf100_infrared_collection.html">rf100_infrared_collection()</a></code>, and <code><a href="../reference/rf100_underwater_collection.html">rf100_underwater_collection()</a></code> . Those are collection of datasets from RoboFlow 100 under the same thematic, for a total of 35 datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/239" class="external-link">#239</a>).</li>
+<li>Added <code><a href="../reference/rf100_peixos_segmentation_dataset.html">rf100_peixos_segmentation_dataset()</a></code>. (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/250" class="external-link">#250</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-models-0-8-0">New models<a class="anchor" aria-label="anchor" href="#new-models-0-8-0"></a></h3>
+<ul><li>Added <code><a href="../reference/model_maxvit.html">model_maxvit()</a></code> for MaxViT: Multi-Axis Vision Transformer (<a href="https://github.com/mlverse/torchvision/issues/229" class="external-link">#229</a>, <a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>).</li>
+<li>Added <code><a href="../reference/model_facenet.html">model_facenet_pnet()</a></code>, <code><a href="../reference/model_facenet.html">model_facenet_rnet()</a></code>, and <code><a href="../reference/model_facenet.html">model_facenet_onet()</a></code> for Facenet MTCNN face detection models. (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/227" class="external-link">#227</a>)</li>
+<li>Added <code><a href="../reference/model_facenet.html">model_mtcnn()</a></code> and <code>model_inception_resnet_v1()</code> models for face detection and recognition. (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/217" class="external-link">#217</a>)</li>
+<li>Added <code><a href="../reference/model_mobilenet_v3.html">model_mobilenet_v3_large()</a></code> and <code><a href="../reference/model_mobilenet_v3.html">model_mobilenet_v3_small()</a></code> models for efficient image classification. (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/237" class="external-link">#237</a>)</li>
+<li>Added 8 of the <code>model_convnext_()</code> family models for image classification, thanks to <a href="https://github.com/horlar1" class="external-link">@horlar1</a> contribution. (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/251" class="external-link">#251</a>)</li>
+<li>Added 2 <code>model_fasterrcnn_resnet50_()</code> models and 2 <code>model_fasterrcnn_mobilenet_v3_large_()</code> for object detection. (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/251" class="external-link">#251</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-8-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-8-0"></a></h3>
+<ul><li>Added <code><a href="../reference/imagenet_classes.html">imagenet_label()</a></code> and <code><a href="../reference/imagenet_classes.html">imagenet_classes()</a></code> for ImageNet classes resolution (<a href="https://github.com/mlverse/torchvision/issues/229" class="external-link">#229</a>, <a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>).</li>
+<li>
+<code><a href="../reference/base_loader.html">base_loader()</a></code> now accept URLs (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/246" class="external-link">#246</a>).</li>
+<li>
+<code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> now accepts semantic segmentation models torch_float() output. (<a href="https://github.com/cregouby" class="external-link">@cregouby</a> <a href="https://github.com/mlverse/torchvision/issues/247" class="external-link">#247</a>)</li>
+<li>MNIST datasets and Roboflow 100 collections now have a <code>.getbatch</code> attached method (<a href="https://github.com/cregouby" class="external-link">@cregouby</a> <a href="https://github.com/mlverse/torchvision/issues/255" class="external-link">#255</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-and-improvements-0-8-0">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-0-8-0"></a></h3>
+<ul><li>Switch pre 0.5.0 models to their <code>/v2/</code> URL in torch-cdn.mlverse.org. (<a href="https://github.com/mlverse/torchvision/issues/215" class="external-link">#215</a>)</li>
+<li>Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/247" class="external-link">#247</a>)</li>
+<li>Breaking Change : Refactoring of <code>coco_*</code> dataset family now provides each <code>item$x</code> being an image array (for consistency with other datasets). You can use <code>transform = transform_to_tensor</code> to restore the previous x output to be a <code><a href="https://torch.mlverse.org/docs/reference/torch_tensor.html" class="external-link">torch_tensor()</a></code>.</li>
+<li>
+<code>transform_</code> are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/250" class="external-link">#250</a>)</li>
+<li>Deprecation : <code>emnist_dataset</code> is deprecated in favor of <code><a href="../reference/mnist_dataset.html">emnist_collection()</a></code> (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/260" class="external-link">#260</a>).</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="0.7.0" id="torchvision-070">torchvision 0.7.0<small>2025-07-18</small><a class="anchor" aria-label="anchor" href="#torchvision-070"></a></h2>
 <div class="section level3">
 <h3 id="new-datasets-0-7-0">New datasets<a class="anchor" aria-label="anchor" href="#new-datasets-0-7-0"></a></h3>
@@ -93,6 +132,7 @@
 <li>Added <code><a href="../reference/flowers102_dataset.html">flowers102_dataset()</a></code> for loading the Flowers102 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/157" class="external-link">#157</a>).</li>
 <li>Added <code>flickr8k_dataset()</code> and <code>flickr30k_dataset()</code> for loading the Flickr8k and Flickr30k datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/159" class="external-link">#159</a>).</li>
 <li>Added <code><a href="../reference/oxfordiiitpet_dataset.html">oxfordiiitpet_dataset()</a></code>, <code><a href="../reference/oxfordiiitpet_dataset.html">oxfordiiitpet_binary_dataset()</a></code>, and <code><a href="../reference/oxfordiiitpet_segmentation_dataset.html">oxfordiiitpet_segmentation_dataset()</a></code> for loading the Oxford-IIIT Pet datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/162" class="external-link">#162</a>).</li>
+<li>Added <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code>, <code><a href="../reference/rf100_underwater_collection.html">rf100_underwater_collection()</a></code>, <code><a href="../reference/rf100_medical_collection.html">rf100_medical_collection()</a></code>, <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code>, and <code><a href="../reference/rf100_peixos_segmentation_dataset.html">rf100_peixos_segmentation_dataset()</a></code> for loading Roboflow 100 datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/239" class="external-link">#239</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-models-0-7-0">New models<a class="anchor" aria-label="anchor" href="#new-models-0-7-0"></a></h3>
@@ -105,7 +145,7 @@
 <ul><li>
 <code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> and <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> now accept all <code>tensor_image</code> dtypes (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/115" class="external-link">#115</a>).</li>
 <li>
-<code><a href="../reference/tensor_image_display.html">tensor_image_display()</a></code> and <code><a href="../reference/tensor_image_browse.html">tensor_image_browse()</a></code> now accept <code>image_with_bounding_box</code> and <code>image_with_segmentation_mask</code> inputs which are the default items class for respectively detection datasets and segmentation datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/175" class="external-link">#175</a>).</li>
+<code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> and <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> now accept <code>image_with_bounding_box</code> and <code>image_with_segmentation_mask</code> inputs which are the default items class for respectively detection datasets and segmentation datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/175" class="external-link">#175</a>).</li>
 <li>
 <code><a href="../reference/fgvc_aircraft_dataset.html">fgvc_aircraft_dataset()</a></code> gains support for <code>annotation_level = "all"</code> (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/168" class="external-link">#168</a>).</li>
 <li>

@@ -28,7 +28,7 @@ A subset of 100 images with 13 spectral bands useful for workshops and demos."><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -96,7 +96,7 @@ subset useful for demos.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">eurosat_dataset</span><span class="op">(</span></span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"val"</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -104,7 +104,7 @@ subset useful for demos.</p>
 <span></span>
 <span><span class="fu">eurosat_all_bands_dataset</span><span class="op">(</span></span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"val"</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -112,7 +112,7 @@ subset useful for demos.</p>
 <span></span>
 <span><span class="fu">eurosat100_dataset</span><span class="op">(</span></span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"val"</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -129,7 +129,7 @@ if empty, will use the default <code>rappdirs::user_cache_dir("torch")</code>.</
 
 
 <dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
-<dd><p>Character. Must be one of <code>train</code>, <code>val</code>, or <code>test</code>.</p></dd>
+<dd><p>One of <code>"train"</code>, <code>"val"</code>, or <code>"test"</code>. Default is <code>"val"</code>.</p></dd>
 
 
 <dt id="arg-download">download<a class="anchor" aria-label="anchor" href="#arg-download"></a></dt>
@@ -163,9 +163,14 @@ if empty, will use the default <code>rappdirs::user_cache_dir("torch")</code>.</
 <code><a href="fer_dataset.html">fer_dataset</a>()</code>,
 <code><a href="fgvc_aircraft_dataset.html">fgvc_aircraft_dataset</a>()</code>,
 <code><a href="flowers102_dataset.html">flowers102_dataset</a>()</code>,
+<code><a href="image_folder_dataset.html">image_folder_dataset</a>()</code>,
+<code><a href="lfw_dataset.html">lfw_dataset</a></code>,
 <code><a href="mnist_dataset.html">mnist_dataset</a>()</code>,
 <code><a href="oxfordiiitpet_dataset.html">oxfordiiitpet_dataset</a>()</code>,
-<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset</a>()</code></p></div>
+<code><a href="places365_dataset.html">places365_dataset</a>()</code>,
+<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset</a>()</code>,
+<code><a href="whoi_plankton_dataset.html">whoi_plankton_dataset</a>()</code>,
+<code><a href="whoi_small_coralnet_dataset.html">whoi_small_coralnet_dataset</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">

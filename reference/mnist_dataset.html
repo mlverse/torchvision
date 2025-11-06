@@ -24,7 +24,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -118,13 +118,16 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">emnist_dataset</span><span class="op">(</span></span>
+<span><span class="fu">emnist_collection</span><span class="op">(</span></span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  split <span class="op">=</span> <span class="st">"balanced"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"test"</span>,</span>
+<span>  dataset <span class="op">=</span> <span class="st">"balanced"</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">emnist_dataset</span><span class="op">(</span><span class="va">kind</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -154,6 +157,19 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
 <dd><p>Character. Used in <code>emnist_dataset()</code> and <code>qmnist_dataset()</code> to specify the subset. See individual descriptions for valid values.</p></dd>
 
+
+<dt id="arg-dataset">dataset<a class="anchor" aria-label="anchor" href="#arg-dataset"></a></dt>
+<dd><p>one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
+made of a set of classes. You can look at dataset attribute <code>$classes</code> to see the actual classes.</p></dd>
+
+
+<dt id="arg-kind">kind<a class="anchor" aria-label="anchor" href="#arg-kind"></a></dt>
+<dd><p>the <code>dataset</code> in <code>emnist_collection</code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>the other <code>emnist_collection</code> parameters.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -166,7 +182,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <li><p><strong>Fashion-MNIST</strong>: Clothing item images for classification.</p></li>
 <li><p><strong>Kuzushiji-MNIST</strong>: Japanese cursive character dataset.</p></li>
 <li><p><strong>QMNIST</strong>: Extended MNIST with high-precision NIST data.</p></li>
-<li><p><strong>EMNIST</strong>: Letters and digits with multiple label splits.</p></li>
+<li><p><strong>EMNIST</strong>: A collection of letters and digits with multiple datasets and  splits.</p></li>
 </ul></div>
     <div id="functions">
     <h2>Functions</h2>
@@ -174,10 +190,11 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <ul><li><p><code>kmnist_dataset()</code>: Kuzushiji-MNIST cursive Japanese character dataset.</p></li>
 <li><p><code>qmnist_dataset()</code>: Extended MNIST dataset with high-precision test data (QMNIST).</p></li>
 <li><p><code>fashion_mnist_dataset()</code>: Fashion-MNIST clothing image dataset.</p></li>
-<li><p><code>emnist_dataset()</code>: EMNIST dataset with digits and letters and multiple split modes.</p></li>
+<li><p><code>emnist_collection()</code>: EMNIST collection with digits and letters arranged in multiple datasets.</p></li>
+<li><p><code>emnist_dataset()</code>: Deprecated. Please use emnist_collection.</p></li>
 </ul></div>
-    <div id="supported-splits-for-emnist-dataset-">
-    <h2>Supported Splits for <code>emnist_dataset()</code></h2>
+    <div id="supported-datasets-for-emnist-collection-">
+    <h2>Supported <code>dataset</code>s for <code>emnist_collection()</code></h2>
 
 
 <ul><li><p><code>"byclass"</code>: 62 classes (digits + uppercase + lowercase)</p></li>
@@ -188,7 +205,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <li><p><code>"mnist"</code>: Standard MNIST digit classes</p></li>
 </ul></div>
     <div id="supported-splits-for-qmnist-dataset-">
-    <h2>Supported Splits for <code>qmnist_dataset()</code></h2>
+    <h2>Supported <code>split</code>s for <code>qmnist_dataset()</code></h2>
 
 
 <ul><li><p><code>"train"</code>: 60,000 training samples (MNIST-compatible)</p></li>
@@ -204,8 +221,13 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <code><a href="fer_dataset.html">fer_dataset</a>()</code>,
 <code><a href="fgvc_aircraft_dataset.html">fgvc_aircraft_dataset</a>()</code>,
 <code><a href="flowers102_dataset.html">flowers102_dataset</a>()</code>,
+<code><a href="image_folder_dataset.html">image_folder_dataset</a>()</code>,
+<code><a href="lfw_dataset.html">lfw_dataset</a></code>,
 <code><a href="oxfordiiitpet_dataset.html">oxfordiiitpet_dataset</a>()</code>,
-<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset</a>()</code></p></div>
+<code><a href="places365_dataset.html">places365_dataset</a>()</code>,
+<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset</a>()</code>,
+<code><a href="whoi_plankton_dataset.html">whoi_plankton_dataset</a>()</code>,
+<code><a href="whoi_small_coralnet_dataset.html">whoi_small_coralnet_dataset</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -221,13 +243,13 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">x</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">y</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">emnist</span> <span class="op">&lt;-</span> <span class="fu">emnist_dataset</span><span class="op">(</span>split <span class="op">=</span> <span class="st">"balanced"</span>, download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">emnist</span> <span class="op">&lt;-</span> <span class="fu">emnist_collection</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"balanced"</span>, split <span class="op">=</span> <span class="st">"test"</span>, download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">item</span> <span class="op">&lt;-</span> <span class="va">emnist</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">x</span></span></span>
 <span class="r-in"><span><span class="va">item</span><span class="op">$</span><span class="va">y</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">kmnist</span> <span class="op">&lt;-</span> <span class="fu">kmnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fmnist</span> <span class="op">&lt;-</span> <span class="fu">fashion_mnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">kmnist</span> <span class="op">&lt;-</span> <span class="fu">kmnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span>, train <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fmnist</span> <span class="op">&lt;-</span> <span class="fu">fashion_mnist_dataset</span><span class="op">(</span>download <span class="op">=</span> <span class="cn">TRUE</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
