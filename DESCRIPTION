@@ -80,6 +80,7 @@ Collate:
     'dataset-places365.R'
     'dataset-plankton.R'
     'dataset-rf100-peixos.R'
+    'dataset-vggface2.R'
     'extension.R'
     'globals.R'
     'imagenet.R'
