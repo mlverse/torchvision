@@ -122,7 +122,7 @@ mnist_dataset <- dataset(
 
     }
 
-        cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
+    cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
     cli_inform("Processing {.cls {class(self)[[1]]}}...")
 
     training_set <- list(
@@ -149,23 +149,6 @@ mnist_dataset <- dataset(
 
   .getitem = function(index) {
     x <- self$data[index, ,]
-    y <- self$targets[index]
-
-    if (!is.null(self$transform))
-      x <- self$transform(x)
-
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
-
-    list(x = x, y = y)
-  },
-
-  .getbatch = function(index) {
-    x <- self$data[index, ,]
-    if (length(index) > 1) {
-      x <-  aperm(x, c(2, 3, 1))
-    }
-
     y <- self$targets[index]
 
     if (!is.null(self$transform))
