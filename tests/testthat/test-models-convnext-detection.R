@@ -142,7 +142,7 @@ test_that("model_convnext_detection has FPN and produces multi-scale features", 
   skip_if_not(torch::torch_is_installed())
 
   model <- model_convnext_tiny_detection(num_classes = 10)
-  expect_true("backbone" %in% names(model))
+  expect_false(is.null(model$backbone))
 
   input <- base_loader("assets/class/dog/dog.3.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(224, 224)) %>% torch_unsqueeze(1)
