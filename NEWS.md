@@ -1,5 +1,10 @@
 # torchvision (development version)
 
+## Bug fixes and improvements
+
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
+to non-vectorized `transform_` operations (#264)
+
 # torchvision 0.8.0
 
 ## New datasets
