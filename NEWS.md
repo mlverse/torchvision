@@ -1,5 +1,9 @@
 # torchvision (development version)
 
+## New models
+
+* Added `model_convnext_detection()` for object detection (#262, @ANAMASGARD).
+
 ## Bug fixes and improvements
 
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
