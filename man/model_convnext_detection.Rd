@@ -62,6 +62,35 @@ ConvNeXt variants.
 }
 }
 
+\examples{
+\dontrun{
+library(torch)
+library(magrittr)
+
+# Create a random input tensor for demonstration
+# Shape: (batch, channels, height, width)
+batch <- torch_randn(1, 3, 224, 224)
+
+# Build model with pretrained backbone (detection head is random)
+model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
+model$eval()
+
+# Run inference
+torch::with_no_grad({
+  output <- model(batch)
+})
+
+# Access detection outputs
+pred <- output$detections
+cat("Number of detections:", pred$boxes$size()[1], "\n")
+cat("Box format: [x_min, y_min, x_max, y_max]\n")
+
+# Note: Without pretrained detection head weights, predictions are random.
+# For meaningful results, you would need to train the model on your data
+# or use a model with pretrained detection weights when available.
+}
+
+}
 \seealso{
 Other object_detection_model: 
 \code{\link{model_facenet}},

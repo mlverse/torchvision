@@ -26,33 +26,30 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(torch)
 #' library(magrittr)
-#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants
-#' norm_std  <- c(0.229, 0.224, 0.225)
 #'
-#' # Use a publicly available image
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc, url))
+#' # Create a random input tensor for demonstration
+#' # Shape: (batch, channels, height, width)
+#' batch <- torch_randn(1, 3, 224, 224)
 #'
-#' input <- img %>%
-#'   transform_to_tensor() %>%
-#'   transform_resize(c(520, 520)) %>%
-#'   transform_normalize(norm_mean, norm_std)
-#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
-#'
-#' # ConvNeXt Tiny detection
+#' # Build model with pretrained backbone (detection head is random)
 #' model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
 #' model$eval()
-#' pred <- model(batch)$detections
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- as.character(as.integer(pred$labels[keep]))
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(input, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
+#'
+#' # Run inference
+#' torch::with_no_grad({
+#'   output <- model(batch)
+#' })
+#'
+#' # Access detection outputs
+#' pred <- output$detections
+#' cat("Number of detections:", pred$boxes$size()[1], "\n")
+#' cat("Box format: [x_min, y_min, x_max, y_max]\n")
+#'
+#' # Note: Without pretrained detection head weights, predictions are random.
+#' # For meaningful results, you would need to train the model on your data
+#' # or use a model with pretrained detection weights when available.
 #' }
 #'
 #' @family object_detection_model
