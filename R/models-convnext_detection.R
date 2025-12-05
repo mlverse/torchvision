@@ -24,6 +24,37 @@
 #' @param ... Additional arguments forwarded to the underlying ConvNeXt
 #'   backbone constructors.
 #'
+#' @examples
+#' \dontrun{
+#' library(magrittr)
+#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants
+#' norm_std  <- c(0.229, 0.224, 0.225)
+#'
+#' # Use a publicly available image
+#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+#' img <- base_loader(paste0(wmc, url))
+#'
+#' input <- img %>%
+#'   transform_to_tensor() %>%
+#'   transform_resize(c(520, 520)) %>%
+#'   transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+#'
+#' # ConvNeXt Tiny detection
+#' model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
+#' model$eval()
+#' pred <- model(batch)$detections
+#' num_boxes <- as.integer(pred$boxes$size()[1])
+#' keep <- seq_len(min(5, num_boxes))
+#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
+#' labels <- as.character(as.integer(pred$labels[keep]))
+#' if (num_boxes > 0) {
+#'   boxed <- draw_bounding_boxes(input, boxes, labels = labels)
+#'   tensor_image_browse(boxed)
+#' }
+#' }
+#'
 #' @family object_detection_model
 #' @name model_convnext_detection
 NULL
@@ -175,7 +206,7 @@ convnext_fpn_backbone_base <- function(pretrained_backbone = FALSE, ...) {
 
 validate_convnext_num_classes <- function(num_classes) {
   if (num_classes <= 0) {
-    stop("num_classes must be positive")
+    cli_abort("{.var num_classes} must be positive")
   }
 }
 
