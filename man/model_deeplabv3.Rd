@@ -115,6 +115,7 @@ cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_cla
 }
 \seealso{
 Other semantic_segmentation_model: 
+\code{\link{model_convnext_segmentation}},
 \code{\link{model_fcn_resnet}}
 }
 \concept{semantic_segmentation_model}
