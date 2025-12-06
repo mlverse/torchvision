@@ -135,7 +135,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
     type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
   }
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
-    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
+    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use `box_convert()` to convert them")
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {

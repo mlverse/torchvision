@@ -429,7 +429,7 @@ fasterrcnn_model <- function(backbone, num_classes) {
         )
       )
     }
-  )  # <- Removed the () here
+  )
 }
 
 

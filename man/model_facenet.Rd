@@ -173,9 +173,11 @@ output
 }
 \seealso{
 Other object_detection_model: 
+\code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}}
 
 Other object_detection_model: 
+\code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}}
 
 Other classification_model: 

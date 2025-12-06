@@ -20,6 +20,9 @@ Authors@R: c(
            role = c("ctb"),
            email = "derrickrds@gmail.com"
            ),
+    person(given = "ANAMASGARD",
+           role = c("ctb")
+           ),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing
@@ -85,6 +88,7 @@ Collate:
     'imagenet.R'
     'models-alexnet.R'
     'models-convnext.R'
+    'models-convnext_detection.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
     'models-efficientnetv2.R'
