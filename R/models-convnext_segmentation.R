@@ -76,23 +76,43 @@ NULL
 
 
 # ------------------------------------------------------------------------------
-# Validation
-# ------------------------------------------------------------------------------
-
-validate_segmentation_num_classes <- function(num_classes) {
-  if (num_classes <= 0) {
-    cli_abort("{.var num_classes} must be positive")
-  }
-}
-
-
-# ------------------------------------------------------------------------------
 # ConvNeXt Backbone for Segmentation (extracts multi-scale features)
 # ------------------------------------------------------------------------------
 
-convnext_segmentation_backbone <- torch::nn_module(
+# Backbone wrapper for FCN-style models (returns out/aux keys)
+convnext_fcn_backbone <- torch::nn_module(
+  "convnext_fcn_backbone",
+  initialize = function(convnext_model, out_channels, aux_channels) {
+    self$model <- convnext_model
+    self$out_channels <- out_channels
+    self$aux_channels <- aux_channels
+  },
+  forward = function(x) {
+    # Extract features at different scales
+    c2 <- x %>%
+      self$model$downsample_layers[[1]]() %>%
+      self$model$stages[[1]]()
 
-  "convnext_segmentation_backbone",
+    c3 <- c2 %>%
+      self$model$downsample_layers[[2]]() %>%
+      self$model$stages[[2]]()
+
+    c4 <- c3 %>%
+      self$model$downsample_layers[[3]]() %>%
+      self$model$stages[[3]]()
+
+    c5 <- c4 %>%
+      self$model$downsample_layers[[4]]() %>%
+      self$model$stages[[4]]()
+
+    # Return in FCN-compatible format (out = deepest, aux = intermediate)
+    list(out = c5, aux = c4)
+  }
+)
+
+# Backbone wrapper for UPerNet models (returns c2/c3/c4/c5 keys)
+convnext_upernet_backbone <- torch::nn_module(
+  "convnext_upernet_backbone",
   initialize = function(convnext_model) {
     self$model <- convnext_model
   },
@@ -115,51 +135,6 @@ convnext_segmentation_backbone <- torch::nn_module(
       self$model$stages[[4]]()
 
     list(c2 = c2, c3 = c3, c4 = c4, c5 = c5)
-  }
-)
-
-
-# ------------------------------------------------------------------------------
-# FCN Head
-# ------------------------------------------------------------------------------
-
-convnext_fcn_head <- function(in_channels, channels, num_classes) {
-  torch::nn_sequential(
-    torch::nn_conv2d(in_channels, channels, kernel_size = 3, padding = 1, bias = FALSE),
-    torch::nn_batch_norm2d(channels),
-    torch::nn_relu(inplace = TRUE),
-    torch::nn_dropout(0.1),
-    torch::nn_conv2d(channels, num_classes, kernel_size = 1)
-  )
-}
-
-
-# FCN Segmentation Model
-convnext_fcn <- torch::nn_module(
-  "convnext_fcn",
-  initialize = function(backbone, classifier, aux_classifier = NULL) {
-    self$backbone <- backbone
-    self$classifier <- classifier
-    self$aux_classifier <- aux_classifier
-  },
-  forward = function(x) {
-    input_shape <- x$shape[3:4]
-    features <- self$backbone(x)
-
-    # Main classifier uses c5 (deepest features)
-    out <- self$classifier(features$c5)
-    out <- torch::nnf_interpolate(out, size = input_shape, mode = "bilinear", align_corners = FALSE)
-
-    result <- list(out = out)
-
-    # Auxiliary classifier uses c4 (intermediate features)
-    if (!is.null(self$aux_classifier)) {
-      aux_out <- self$aux_classifier(features$c4)
-      aux_out <- torch::nnf_interpolate(aux_out, size = input_shape, mode = "bilinear", align_corners = FALSE)
-      result$aux <- aux_out
-    }
-
-    result
   }
 )
 
@@ -353,16 +328,16 @@ model_convnext_tiny_fcn <- function(num_classes = 21,
                                     aux_loss = FALSE,
                                     pretrained_backbone = FALSE,
                                     ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_tiny_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
-
   # ConvNeXt Tiny dims: c(96, 192, 384, 768)
-  classifier <- convnext_fcn_head(768, 512, num_classes)
-  aux_classifier <- if (aux_loss) convnext_fcn_head(384, 256, num_classes) else NULL
+  backbone <- convnext_fcn_backbone(convnext, out_channels = 768, aux_channels = 384)
 
-  convnext_fcn(backbone, classifier, aux_classifier)
+  classifier <- fcn_head(768, 512, num_classes)
+  aux_classifier <- if (aux_loss) fcn_head(384, 256, num_classes) else NULL
+
+  fcn(backbone, classifier, aux_classifier)
 }
 
 
@@ -372,16 +347,16 @@ model_convnext_small_fcn <- function(num_classes = 21,
                                      aux_loss = FALSE,
                                      pretrained_backbone = FALSE,
                                      ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_small_22k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
-
   # ConvNeXt Small dims: c(96, 192, 384, 768)
-  classifier <- convnext_fcn_head(768, 512, num_classes)
-  aux_classifier <- if (aux_loss) convnext_fcn_head(384, 256, num_classes) else NULL
+  backbone <- convnext_fcn_backbone(convnext, out_channels = 768, aux_channels = 384)
 
-  convnext_fcn(backbone, classifier, aux_classifier)
+  classifier <- fcn_head(768, 512, num_classes)
+  aux_classifier <- if (aux_loss) fcn_head(384, 256, num_classes) else NULL
+
+  fcn(backbone, classifier, aux_classifier)
 }
 
 
@@ -391,16 +366,16 @@ model_convnext_base_fcn <- function(num_classes = 21,
                                     aux_loss = FALSE,
                                     pretrained_backbone = FALSE,
                                     ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_base_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
-
   # ConvNeXt Base dims: c(128, 256, 512, 1024)
-  classifier <- convnext_fcn_head(1024, 512, num_classes)
-  aux_classifier <- if (aux_loss) convnext_fcn_head(512, 256, num_classes) else NULL
+  backbone <- convnext_fcn_backbone(convnext, out_channels = 1024, aux_channels = 512)
 
-  convnext_fcn(backbone, classifier, aux_classifier)
+  classifier <- fcn_head(1024, 512, num_classes)
+  aux_classifier <- if (aux_loss) fcn_head(512, 256, num_classes) else NULL
+
+  fcn(backbone, classifier, aux_classifier)
 }
 
 
@@ -415,10 +390,10 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
                                         pretrained_backbone = FALSE,
                                         pool_scales = c(1, 2, 3, 6),
                                         ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_tiny_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
+  backbone <- convnext_upernet_backbone(convnext)
 
   # ConvNeXt Tiny dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -427,7 +402,7 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
     num_classes = num_classes,
     pool_scales = pool_scales
   )
-  aux_classifier <- if (aux_loss) convnext_fcn_head(384, 256, num_classes) else NULL
+  aux_classifier <- if (aux_loss) fcn_head(384, 256, num_classes) else NULL
 
   convnext_upernet(backbone, decode_head, aux_classifier)
 }
@@ -440,10 +415,10 @@ model_convnext_small_upernet <- function(num_classes = 21,
                                          pretrained_backbone = FALSE,
                                          pool_scales = c(1, 2, 3, 6),
                                          ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_small_22k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
+  backbone <- convnext_upernet_backbone(convnext)
 
   # ConvNeXt Small dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -452,7 +427,7 @@ model_convnext_small_upernet <- function(num_classes = 21,
     num_classes = num_classes,
     pool_scales = pool_scales
   )
-  aux_classifier <- if (aux_loss) convnext_fcn_head(384, 256, num_classes) else NULL
+  aux_classifier <- if (aux_loss) fcn_head(384, 256, num_classes) else NULL
 
   convnext_upernet(backbone, decode_head, aux_classifier)
 }
@@ -465,10 +440,10 @@ model_convnext_base_upernet <- function(num_classes = 21,
                                         pretrained_backbone = FALSE,
                                         pool_scales = c(1, 2, 3, 6),
                                         ...) {
-  validate_segmentation_num_classes(num_classes)
+  validate_num_classes(num_classes)
 
   convnext <- model_convnext_base_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_segmentation_backbone(convnext)
+  backbone <- convnext_upernet_backbone(convnext)
 
   # ConvNeXt Base dims: c(128, 256, 512, 1024)
   decode_head <- upernet_head(
@@ -477,7 +452,7 @@ model_convnext_base_upernet <- function(num_classes = 21,
     num_classes = num_classes,
     pool_scales = pool_scales
   )
-  aux_classifier <- if (aux_loss) convnext_fcn_head(512, 256, num_classes) else NULL
+  aux_classifier <- if (aux_loss) fcn_head(512, 256, num_classes) else NULL
 
   convnext_upernet(backbone, decode_head, aux_classifier)
 }
