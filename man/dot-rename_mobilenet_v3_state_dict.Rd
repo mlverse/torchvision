@@ -15,3 +15,4 @@ Named list with updated key names
 \description{
 Rename state_dict keys to match current MobileNetV3 model structure
 }
+\keyword{internal}
