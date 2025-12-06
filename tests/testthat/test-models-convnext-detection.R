@@ -133,8 +133,8 @@ test_that("model_convnext_detection validates num_classes parameter", {
 
   expect_no_error(model_convnext_tiny_detection(num_classes = 10, pretrained_backbone = FALSE))
   expect_no_error(model_convnext_tiny_detection(num_classes = 91, pretrained_backbone = FALSE))
-  expect_error(model_convnext_tiny_detection(num_classes = 0), class = "rlang_error")
-  expect_error(model_convnext_tiny_detection(num_classes = -1), class = "rlang_error")
+  expect_error(model_convnext_tiny_detection(num_classes = 0), "`num_classes` must be positive")
+  expect_error(model_convnext_tiny_detection(num_classes = -1), "`num_classes` must be positive")
 })
 
 test_that("model_convnext_detection has FPN and produces multi-scale features", {

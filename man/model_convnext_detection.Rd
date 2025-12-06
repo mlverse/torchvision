@@ -26,14 +26,12 @@ model_convnext_base_detection(
 )
 }
 \arguments{
-\item{num_classes}{Number of output classes (including background).
-Must be strictly positive.}
+\item{num_classes}{Number of output classes (default: 91 for COCO).}
 
 \item{pretrained_backbone}{Logical, if \code{TRUE} the ConvNeXt backbone
 weights are loaded from ImageNet pretraining.}
 
-\item{...}{Additional arguments forwarded to the underlying ConvNeXt
-backbone constructors.}
+\item{...}{Other arguments (unused).}
 }
 \description{
 Object detection models that use a ConvNeXt backbone with a Feature
@@ -53,6 +51,11 @@ ConvNeXt variants.
 \item \code{model_convnext_base_detection()}: ConvNeXt Base with FPN detection head
 
 }}
+\note{
+Currently, detection head weights are randomly initialized, so predicted
+bounding-boxes are random. For meaningful results, you need to train the model
+detection head on your data.
+}
 \section{Available Models}{
 
 \itemize{
@@ -64,30 +67,35 @@ ConvNeXt variants.
 
 \examples{
 \dontrun{
-library(torch)
 library(magrittr)
+norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants
+norm_std  <- c(0.229, 0.224, 0.225)
 
-# Create a random input tensor for demonstration
-# Shape: (batch, channels, height, width)
-batch <- torch_randn(1, 3, 224, 224)
+# Use a publicly available image
+wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+img <- base_loader(paste0(wmc, url))
 
-# Build model with pretrained backbone (detection head is random)
+input <- img \%>\%
+  transform_to_tensor() \%>\%
+  transform_resize(c(520, 520)) \%>\%
+  transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+
+# ConvNeXt Tiny detection
 model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
 model$eval()
+pred <- model(batch)$detections
+num_boxes <- as.integer(pred$boxes$size()[1])
+topk <- pred$scores$topk(k = 5)[[2]]
+boxes <- pred$boxes[topk, ]
+labels <- as.character(as.integer(pred$labels[topk]))
 
-# Run inference
-torch::with_no_grad({
-  output <- model(batch)
-})
-
-# Access detection outputs
-pred <- output$detections
-cat("Number of detections:", pred$boxes$size()[1], "\n")
-cat("Box format: [x_min, y_min, x_max, y_max]\n")
-
-# Note: Without pretrained detection head weights, predictions are random.
-# For meaningful results, you would need to train the model on your data
-# or use a model with pretrained detection weights when available.
+# `draw_bounding_box()` may fail if bbox values are not consistent.
+if (num_boxes > 0) {
+  boxed <- draw_bounding_boxes(input, boxes, labels = labels)
+  tensor_image_browse(boxed)
+}
 }
 
 }
