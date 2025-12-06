@@ -26,6 +26,7 @@
 <url><loc>/reference/coco_caption_dataset.html</loc></url>
 <url><loc>/reference/coco_detection_dataset.html</loc></url>
 <url><loc>/reference/coco_polygon_to_mask.html</loc></url>
+<url><loc>/reference/dot-rename_mobilenet_v3_state_dict.html</loc></url>
 <url><loc>/reference/draw_bounding_boxes.html</loc></url>
 <url><loc>/reference/draw_keypoints.html</loc></url>
 <url><loc>/reference/draw_segmentation_masks.html</loc></url>
@@ -43,6 +44,7 @@
 <url><loc>/reference/mnist_dataset.html</loc></url>
 <url><loc>/reference/model_alexnet.html</loc></url>
 <url><loc>/reference/model_convnext.html</loc></url>
+<url><loc>/reference/model_convnext_detection.html</loc></url>
 <url><loc>/reference/model_deeplabv3.html</loc></url>
 <url><loc>/reference/model_efficientnet.html</loc></url>
 <url><loc>/reference/model_efficientnet_v2.html</loc></url>
