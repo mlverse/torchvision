@@ -3,6 +3,7 @@
 ## New models
 
 * Added `model_convnext_detection()` for object detection (#262, @ANAMASGARD).
+* Added `model_convnext_tiny/small/base_fcn()` and `model_convnext_tiny/small/base_upernet()` for semantic segmentation (#265, @ANAMASGARD).
 
 ## Bug fixes and improvements
 
