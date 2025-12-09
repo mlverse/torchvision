@@ -41,7 +41,8 @@ nms <- function(boxes, scores, iou_threshold) {
 
   for (i in 2:length(scores)) {
     # Compute IoU with the last kept box
-    iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i, , drop = FALSE])
+    # Use i:i indexing to ensure proper tensor slicing on all platforms
+    iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i:i, , drop = FALSE])
     # Check if the current box has IoU <= iou_threshold with all kept boxes
     if (all(as.logical(iou <= iou_threshold))) {
       keep <- c(keep, i)
