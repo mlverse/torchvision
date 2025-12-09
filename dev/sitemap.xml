@@ -45,6 +45,7 @@
 <url><loc>/reference/model_alexnet.html</loc></url>
 <url><loc>/reference/model_convnext.html</loc></url>
 <url><loc>/reference/model_convnext_detection.html</loc></url>
+<url><loc>/reference/model_convnext_segmentation.html</loc></url>
 <url><loc>/reference/model_deeplabv3.html</loc></url>
 <url><loc>/reference/model_efficientnet.html</loc></url>
 <url><loc>/reference/model_efficientnet_v2.html</loc></url>
