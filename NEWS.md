@@ -6,6 +6,10 @@
 
 ## Bug fixes and improvements
 
+* Improved `lfw_people_dataset()` and `lfw_pairs_dataset()` download reliability with 
+  fallback mirror URLs and retry logic. Added `download_with_fallback()` helper 
+  function with improved error messages for manual download instructions (#267, @ANAMASGARD).
+
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
 to non-vectorized `transform_` operations (#264)
 
