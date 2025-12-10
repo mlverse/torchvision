@@ -135,6 +135,18 @@ download_with_fallback <- function(
   ))
 }
 
+#' Validate num_classes parameter
+#'
+#' @param num_classes Number of classes to validate
+#' @keywords internal
+#' @noRd
+validate_num_classes <- function(num_classes) {
+  if (num_classes <= 0) {
+    cli_abort("{.var num_classes} must be positive")
+  }
+}
+
+
 # add additional checks to release issues created with usethis::use_release_issue()
 # https://usethis.r-lib.org/reference/use_release_issue.html
 release_bullets <- function() {

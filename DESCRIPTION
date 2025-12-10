@@ -88,6 +88,7 @@ Collate:
     'imagenet.R'
     'models-alexnet.R'
     'models-convnext.R'
+    'models-convnext_segmentation.R'
     'models-convnext_detection.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
