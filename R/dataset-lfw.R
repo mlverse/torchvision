@@ -78,21 +78,18 @@ lfw_people_dataset <- torch::dataset(
     "original" = "170 MB",
     "funneled" = "230 MB"
   ),
-  # Multiple mirror URLs for improved reliability (issue #267)
-  # Primary: Figshare, Fallback: Kaggle datasets mirror
+  # Mirror URLs for improved reliability (issue #267)
+  # Infrastructure supports multiple mirrors - add more as they become available
   base_urls = list(
-    figshare = "https://ndownloader.figshare.com/files/",
-    kaggle = "https://storage.googleapis.com/kaggle-data-sets/60126/106592/compressed/"
+    figshare = "https://ndownloader.figshare.com/files/"
   ),
   resources = list(
     original = list(
       file_ids = c("5976018"),  # Figshare file ID
-      kaggle_file = "lfw.tgz",
       md5 = "a17d05bd522c52d84eca14327a23d494"
     ),
     funneled = list(
       file_ids = c("5976015"),  # Figshare file ID
-      kaggle_file = "lfw-funneled.tgz",
       md5 = "1b42dfed7d15c9b2dd63d5e5840c86ad"
     )
   ),
