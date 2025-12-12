@@ -12,6 +12,9 @@ model_fasterrcnn_resnet50_fpn(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 91,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 
@@ -19,6 +22,9 @@ model_fasterrcnn_resnet50_fpn_v2(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 91,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 
@@ -26,6 +32,9 @@ model_fasterrcnn_mobilenet_v3_large_fpn(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 91,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 
@@ -33,6 +42,9 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 91,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 }
@@ -42,6 +54,12 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 \item{progress}{Logical. Show progress bar during download (unused).}
 
 \item{num_classes}{Number of output classes (default: 91 for COCO).}
+
+\item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
+
+\item{nms_thresh}{Numeric. NMS IoU threshold for removing overlapping boxes (default: 0.5).}
+
+\item{detections_per_img}{Integer. Maximum detections per image (default: 100).}
 
 \item{...}{Other arguments (unused).}
 }
@@ -63,9 +81,6 @@ Construct Faster R-CNN model variants for object detection tasks.
 
 }}
 \section{Task}{
-
-Object detection over images with bounding boxes and class labels.
-
 
 Object detection over images with bounding boxes and class labels.
 }
