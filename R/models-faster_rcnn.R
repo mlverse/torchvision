@@ -840,12 +840,11 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
 #' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
+#' @param nms_thresh Numeric. NMS IoU threshold for removing overlapping boxes (default: 0.5).
+#' @param detections_per_img Integer. Maximum detections per image (default: 100).
 #' @param ... Other arguments (unused).
 #' @return A `fasterrcnn_model` nn_module.
-#'
-#' @section Task:
-#' Object detection over images with bounding boxes and class labels.
-#'
 #'
 #' @section Task:
 #' Object detection over images with bounding boxes and class labels.
@@ -954,9 +953,6 @@ rpn_model_urls <- list(
 
 
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
-#' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
-#' @param nms_thresh Numeric. NMS IoU threshold for removing overlapping boxes (default: 0.5).
-#' @param detections_per_img Integer. Maximum detections per image (default: 100).
 #' @export
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                           num_classes = 91,
@@ -1076,7 +1072,6 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
 }
 
 
-#' @describeIn model_fasterrcnn Faster R-CNN with MobileNet V3 Large 320 FPN
 #' @describeIn model_fasterrcnn Faster R-CNN with MobileNet V3 Large 320 FPN
 #' @export
 model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
