@@ -1,0 +1,263 @@
+---
+title: "RF100 Dataset Catalog"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RF100 Dataset Catalog}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+The RoboFlow 100 (RF100) benchmark consists of 34 diverse object detection datasets organized into 6 collections. This vignette provides a comprehensive catalog to help you find the right dataset for your task.
+
+The RF100 datasets cover a wide range of domains including:
+
+- **Biology**: Microscopy, cells, bacteria, parasites (9 datasets)
+- **Medical**: X-rays, MRI, pathology (8 datasets)  
+- **Infrared**: Thermal imaging, FLIR cameras (4 datasets)
+- **Damage**: Defect detection, infrastructure inspection (3 datasets)
+- **Underwater**: Marine life, coral, infrastructure (4 datasets)
+- **Document**: OCR, document parsing, diagrams (6 datasets)
+
+## Quick Search
+
+The easiest way to find datasets is using the search functions:
+
+```{r eval=FALSE}
+library(torchvision)
+
+# Search for specific topics
+search_rf100("cell")        # Find cell-related datasets
+search_rf100("solar")       # Find solar panel datasets
+search_rf100("x-ray")       # Find X-ray datasets
+
+# List all datasets in a collection
+search_rf100(collection = "biology")
+search_rf100(collection = "medical")
+
+# View complete catalog
+catalog <- get_rf100_catalog()
+View(catalog)
+```
+
+## Example: Finding a Photovoltaic Dataset
+
+One of the motivations for this catalog was answering questions like: *"Is there a photovoltaic dataset in torchvision?"*
+
+```{r eval=FALSE}
+# Search for solar/photovoltaic datasets
+search_rf100("solar")
+search_rf100("photovoltaic")
+
+# Result shows:
+# - solar_panel in infrared collection
+# - solar_panel in damage collection
+```
+
+## Complete Catalog
+
+Here's the complete catalog of all RF100 datasets:
+
+```{r eval=FALSE}
+library(torchvision)
+library(knitr)
+
+catalog <- get_rf100_catalog()
+
+# Display key columns
+kable(catalog[, c("collection", "dataset", "description", "total_size_mb", "estimated_images")])
+```
+
+## Collections
+
+### Biology Collection (9 datasets)
+
+Microscopy and biological imaging datasets for research and diagnostics:
+
+```{r eval=FALSE}
+search_rf100(collection = "biology")
+```
+
+**Available datasets:**
+
+- `stomata_cell`: Plant stomata cells for biology research
+- `blood_cell`: Blood cell detection (RBC, WBC, platelets)
+- `parasite`: Parasite detection in microscopy images
+- `cell`: General cell detection in microscopy
+- `bacteria`: Bacteria detection in microscopy images
+- `cotton_desease`: Cotton plant disease detection
+- `mitosis`: Mitosis phase detection in cell images
+- `phage`: Bacteriophage detection in microscopy
+- `liver_desease`: Liver disease pathology detection
+
+### Medical Collection (8 datasets)
+
+Medical imaging datasets for clinical and research applications:
+
+```{r eval=FALSE}
+search_rf100(collection = "medical")
+```
+
+**Available datasets:**
+
+- `radio_signal`: Radio signal detection in medical imaging
+- `rheumatology`: Rheumatology X-ray abnormality detection
+- `knee`: ACL and knee X-ray analysis
+- `abdomen_mri`: Abdomen MRI organ detection
+- `brain_axial_mri`: Brain axial MRI structure detection
+- `gynecology_mri`: Gynecology MRI structure detection
+- `brain_tumor`: Brain tumor detection in MRI scans
+- `fracture`: Bone fracture detection in X-rays
+
+### Infrared Collection (4 datasets)
+
+Thermal and infrared imaging datasets:
+
+```{r eval=FALSE}
+search_rf100(collection = "infrared")
+```
+
+**Available datasets:**
+
+- `thermal_dog_and_people`: Thermal imaging of dogs and people
+- `solar_panel`: Solar panel detection in infrared imagery
+- `thermal_cheetah`: Thermal imaging of cheetahs
+- `ir_object`: FLIR camera object detection
+
+### Damage Collection (3 datasets)
+
+Infrastructure damage and defect detection:
+
+```{r eval=FALSE}
+search_rf100(collection = "damage")
+```
+
+**Available datasets:**
+
+- `liquid_crystals`: 4-fold defect detection in LCD displays
+- `solar_panel`: Solar panel defect and damage detection
+- `asbestos`: Asbestos detection for safety inspection
+
+### Underwater Collection (4 datasets)
+
+Marine and underwater imaging datasets:
+
+```{r eval=FALSE}
+search_rf100(collection = "underwater")
+```
+
+**Available datasets:**
+
+- `pipes`: Underwater pipe detection for infrastructure
+- `aquarium`: Aquarium fish and species detection
+- `objects`: Underwater object detection
+- `coral`: Coral reef detection and monitoring
+
+### Document Collection (6 datasets)
+
+Document analysis and OCR datasets:
+
+```{r eval=FALSE}
+search_rf100(collection = "document")
+```
+
+**Available datasets:**
+
+- `tweeter_post`: Twitter post element detection
+- `tweeter_profile`: Twitter profile element detection
+- `document_part`: Document structure and part detection
+- `activity_diagram`: Activity diagram element detection
+- `signature`: Signature detection in documents
+- `paper_part`: Academic paper structure detection
+
+## Usage Example
+
+Once you've found a dataset, loading it is straightforward:
+
+```{r eval=FALSE}
+library(torchvision)
+
+# Search for blood cell dataset
+search_rf100("blood")
+
+# Load the dataset
+ds <- rf100_biology_collection(
+  dataset = "blood_cell",
+  split = "train",
+  download = TRUE
+)
+
+# Inspect a sample
+item <- ds[1]
+print(item$y$labels)  # Object classes
+print(item$y$boxes)   # Bounding boxes
+
+# Visualize with bounding boxes
+boxed <- draw_bounding_boxes(item)
+tensor_image_browse(boxed)
+```
+
+## Dataset Statistics
+
+```{r eval=FALSE}
+catalog <- get_rf100_catalog()
+
+# Total size of all datasets
+sum(catalog$total_size_mb) / 1024  # In GB
+
+# Datasets by size
+catalog[order(-catalog$total_size_mb), c("dataset", "collection", "total_size_mb")]
+
+# Smallest and largest datasets
+catalog[which.min(catalog$total_size_mb), ]
+catalog[which.max(catalog$total_size_mb), ]
+
+# Average size by collection
+aggregate(total_size_mb ~ collection, data = catalog, FUN = mean)
+```
+
+## Filtering and Exploration
+
+The catalog is a regular data frame, so you can use standard R operations:
+
+```{r eval=FALSE}
+# Find small datasets (< 20 MB total)
+subset(catalog, total_size_mb < 20)
+
+# Find large datasets (> 200 MB total)
+subset(catalog, total_size_mb > 200)
+
+# Find datasets with specific keywords
+subset(catalog, grepl("tumor|cancer|disease", description, ignore.case = TRUE))
+
+# Datasets with all three splits
+subset(catalog, has_train & has_test & has_valid)
+```
+
+## Additional Resources
+
+- **RoboFlow Universe**: Browse datasets at [https://universe.roboflow.com/browse/](https://universe.roboflow.com/browse/)
+- **Collection Functions**: See `?rf100_biology_collection`, `?rf100_medical_collection`, etc.
+- **Visualization**: See `?draw_bounding_boxes` for visualizing detections
+
+## Citation
+
+If you use RF100 datasets in your research, please cite:
+
+```
+@article{roboflow100,
+  title={Roboflow 100: A Rich, Multi-Domain Object Detection Benchmark},
+  author={Roboflow},
+  journal={arXiv preprint},
+  year={2022}
+}
+```
+
