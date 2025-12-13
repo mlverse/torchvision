@@ -26,29 +26,33 @@
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
-  # assert_has_ops()
-  # return(torch::torch_nms(boxes, scores, iou_threshold))
   if (length(scores) == 0) {
     return(integer())
   }
+  if (requireNamespace("torchvisionlib", quietly = TRUE)) {
+    return(torchvisionlib::ops_nms(boxes, scores, iou_threshold))
 
-  # Sort scores in descending order
-  order <- scores$sort(descending = TRUE)[[2]]
-  boxes <- boxes[order, ]
-  scores <- scores[order]
+  } else {
 
-  keep <- c(1L)
+    # run in slow software path
+    cli_warn("Package {.pkg torchvisionlib} is needed for NMS performance. Please install it or it will be very slow.")
+    # Sort scores in descending order
+    order <- scores$sort(descending = TRUE)[[2]]
+    boxes <- boxes[order, ]
+    scores <- scores[order]
 
-  for (i in 2:length(scores)) {
-    # Compute IoU with the last kept box
-    iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i, , drop = FALSE])
-    # Check if the current box has IoU <= iou_threshold with all kept boxes
-    if (all(as.logical(iou <= iou_threshold))) {
-      keep <- c(keep, i)
+    keep <- c(1L)
+
+    for (i in 2:length(scores)) {
+      # Compute IoU with the last kept box
+      iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i, , drop = FALSE])
+      # Check if the current box has IoU <= iou_threshold with all kept boxes
+      if (all(as.logical(iou <= iou_threshold))) {
+        keep <- c(keep, i)
+      }
     }
+    return(order[keep])
   }
-
-  return(order[keep])
 }
 
 

@@ -53,7 +53,8 @@ Imports:
 Suggests:
     arrow,
     magick,
-    prettyunits,
+    prettyunits
+    torchvisionlib,
     testthat,
     coro,
     R.matlab,
