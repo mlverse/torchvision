@@ -57,9 +57,9 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 
 \item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
 
-\item{nms_thresh}{Numeric. NMS IoU threshold for removing overlapping boxes (default: 0.5).}
+\item{nms_thresh}{Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).}
 
-\item{detections_per_img}{Integer. Maximum detections per image (default: 100).}
+\item{detections_per_img}{Integer. Maximum number of detections per image (default: 100).}
 
 \item{...}{Other arguments (unused).}
 }
