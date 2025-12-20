@@ -1,4 +1,5 @@
-# Script to create RF100 dataset catalog
+## code to prepare `rf100_catalog` dataset goes here
+
 # This creates a comprehensive catalog of all 39 RF100 datasets
 
 # Biology Collection (9 datasets)
@@ -30,7 +31,7 @@ biology <- data.frame(
 # Medical Collection (8 datasets)
 medical <- data.frame(
   collection = "medical",
-  dataset = c("radio_signal", "rheumatology", "knee", "abdomen_mri", 
+  dataset = c("radio_signal", "rheumatology", "knee", "abdomen_mri",
               "brain_axial_mri", "gynecology_mri", "brain_tumor", "fracture"),
   description = c(
     "Radio signal detection in medical imaging",
@@ -145,21 +146,21 @@ rf100_catalog <- rbind(
 )
 
 # Add additional metadata
-rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb + 
-                                rf100_catalog$test_size_mb + 
-                                rf100_catalog$valid_size_mb
+rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb +
+  rf100_catalog$test_size_mb +
+  rf100_catalog$valid_size_mb
 
 rf100_catalog$function_name <- paste0("rf100_", rf100_catalog$collection, "_collection")
 
-rf100_catalog$roboflow_url <- paste0("https://universe.roboflow.com/browse/", 
+rf100_catalog$roboflow_url <- paste0("https://universe.roboflow.com/browse/",
                                      rf100_catalog$collection)
 
 # Estimate number of images based on size
 rf100_catalog$estimated_images <- ifelse(
   rf100_catalog$total_size_mb < 10, "< 1,000",
   ifelse(rf100_catalog$total_size_mb < 50, "1,000-5,000",
-  ifelse(rf100_catalog$total_size_mb < 100, "5,000-10,000",
-  ifelse(rf100_catalog$total_size_mb < 200, "10,000-20,000", "> 20,000")))
+         ifelse(rf100_catalog$total_size_mb < 100, "5,000-10,000",
+                ifelse(rf100_catalog$total_size_mb < 200, "10,000-20,000", "> 20,000")))
 )
 
 # Reorder columns for better readability

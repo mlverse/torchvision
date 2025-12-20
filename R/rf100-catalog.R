@@ -1,6 +1,6 @@
 #' RF100 Dataset Catalog
 #'
-#' A comprehensive catalog of all 39 RF100 (RoboFlow 100) datasets available in torchvision.
+#' A comprehensive catalog of all RF100 (RoboFlow 100) datasets available in torchvision.
 #' This data frame contains metadata about each dataset including descriptions, sizes,
 #' available splits, and collection information.
 #'
@@ -77,9 +77,9 @@
 search_rf100 <- function(keyword = NULL, collection = NULL) {
   # Load the catalog
   utils::data("rf100_catalog", package = "torchvision", envir = environment())
-  
+
   result <- rf100_catalog
-  
+
   # Filter by collection first
   if (!is.null(collection)) {
     valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document")
@@ -88,7 +88,7 @@ search_rf100 <- function(keyword = NULL, collection = NULL) {
     }
     result <- result[result$collection == collection, ]
   }
-  
+
   # Filter by keyword in dataset name or description
   if (!is.null(keyword)) {
     pattern <- tolower(keyword)
@@ -96,15 +96,15 @@ search_rf100 <- function(keyword = NULL, collection = NULL) {
                grepl(pattern, tolower(result$description))
     result <- result[matches, ]
   }
-  
+
   if (nrow(result) == 0) {
     message("No datasets found matching criteria")
     return(invisible(NULL))
   }
-  
+
   # Reset row names for cleaner display
   rownames(result) <- NULL
-  
+
   result
 }
 
@@ -166,7 +166,7 @@ list_rf100_datasets <- function(collection) {
   if (!collection %in% valid_collections) {
     stop("Invalid collection. Must be one of: ", paste(valid_collections, collapse = ", "))
   }
-  
+
   utils::data("rf100_catalog", package = "torchvision", envir = environment())
   datasets <- rf100_catalog[rf100_catalog$collection == collection, "dataset"]
   sort(datasets)
