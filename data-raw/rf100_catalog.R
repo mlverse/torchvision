@@ -1,6 +1,8 @@
 ## code to prepare `rf100_catalog` dataset goes here
 
+
 # This creates a comprehensive catalog of all 39 RF100 datasets
+
 
 # Biology Collection (9 datasets)
 biology <- data.frame(
@@ -28,6 +30,7 @@ biology <- data.frame(
   stringsAsFactors = FALSE
 )
 
+
 # Medical Collection (8 datasets)
 medical <- data.frame(
   collection = "medical",
@@ -53,6 +56,7 @@ medical <- data.frame(
   stringsAsFactors = FALSE
 )
 
+
 # Infrared Collection (4 datasets)
 infrared <- data.frame(
   collection = "infrared",
@@ -73,6 +77,7 @@ infrared <- data.frame(
   stringsAsFactors = FALSE
 )
 
+
 # Damage Collection (3 datasets)
 damage <- data.frame(
   collection = "damage",
@@ -91,6 +96,7 @@ damage <- data.frame(
   has_valid = TRUE,
   stringsAsFactors = FALSE
 )
+
 
 # Underwater Collection (4 datasets)
 underwater <- data.frame(
@@ -111,6 +117,7 @@ underwater <- data.frame(
   has_valid = TRUE,
   stringsAsFactors = FALSE
 )
+
 
 # Document Collection (6 datasets)
 document <- data.frame(
@@ -135,6 +142,7 @@ document <- data.frame(
   stringsAsFactors = FALSE
 )
 
+
 # Combine all catalogs
 rf100_catalog <- rbind(
   biology,
@@ -145,41 +153,41 @@ rf100_catalog <- rbind(
   document
 )
 
+
 # Add additional metadata
 rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb +
   rf100_catalog$test_size_mb +
   rf100_catalog$valid_size_mb
 
+
 rf100_catalog$function_name <- paste0("rf100_", rf100_catalog$collection, "_collection")
+
 
 rf100_catalog$roboflow_url <- paste0("https://universe.roboflow.com/browse/",
                                      rf100_catalog$collection)
 
-# Estimate number of images based on size
-rf100_catalog$estimated_images <- ifelse(
-  rf100_catalog$total_size_mb < 10, "< 1,000",
-  ifelse(rf100_catalog$total_size_mb < 50, "1,000-5,000",
-         ifelse(rf100_catalog$total_size_mb < 100, "5,000-10,000",
-                ifelse(rf100_catalog$total_size_mb < 200, "10,000-20,000", "> 20,000")))
-)
 
 # Reorder columns for better readability
 rf100_catalog <- rf100_catalog[, c(
   "collection", "dataset", "description", "task",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
   "has_train", "has_test", "has_valid",
-  "estimated_images", "function_name", "roboflow_url"
+  "function_name", "roboflow_url"
 )]
+
 
 # Sort by collection and dataset
 rf100_catalog <- rf100_catalog[order(rf100_catalog$collection, rf100_catalog$dataset), ]
 rownames(rf100_catalog) <- NULL
 
+
 # Save as R data
 usethis::use_data(rf100_catalog, overwrite = TRUE)
 
+
 # Also save as CSV for easy viewing
 write.csv(rf100_catalog, "inst/extdata/rf100_catalog.csv", row.names = FALSE)
+
 
 # Print summary
 cat("\n=== RF100 Dataset Catalog Summary ===\n")
@@ -191,4 +199,3 @@ cat("\nTotal size (all datasets):", round(sum(rf100_catalog$total_size_mb) / 102
 cat("\nCatalog saved to:\n")
 cat("  - data/rf100_catalog.rda\n")
 cat("  - inst/extdata/rf100_catalog.csv\n")
-

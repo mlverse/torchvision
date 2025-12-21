@@ -4,7 +4,7 @@
 #' This data frame contains metadata about each dataset including descriptions, sizes,
 #' available splits, and collection information.
 #'
-#' @format A data frame with 34 rows (datasets) and 14 columns:
+#' @format A data frame with datasets as rows and 13 columns:
 #' \describe{
 #'   \item{collection}{Collection name (biology, medical, infrared, damage, underwater, document)}
 #'   \item{dataset}{Dataset identifier used in collection functions}
@@ -17,7 +17,6 @@
 #'   \item{has_train}{Logical indicating if training split is available}
 #'   \item{has_test}{Logical indicating if test split is available}
 #'   \item{has_valid}{Logical indicating if validation split is available}
-#'   \item{estimated_images}{Estimated number of images in the dataset}
 #'   \item{function_name}{R function name to load this dataset's collection}
 #'   \item{roboflow_url}{URL to the collection on RoboFlow Universe}
 #' }
