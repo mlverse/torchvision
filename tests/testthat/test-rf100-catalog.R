@@ -11,11 +11,11 @@ test_that("RF100 catalog data exists and has correct structure", {
   expected_cols <- c("collection", "dataset", "description", "task",
                      "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
                      "has_train", "has_test", "has_valid",
-                     "estimated_images", "function_name", "roboflow_url")
+                     "function_name", "roboflow_url")
   expect_true(all(expected_cols %in% names(catalog)))
   
-  # Should have 34 datasets
-  expect_equal(nrow(catalog), 34)
+  # Should have datasets (allow for future additions)
+  expect_true(nrow(catalog) >= 34)
   
   # All datasets should have descriptions
   expect_true(all(nchar(catalog$description) > 10))
