@@ -5,7 +5,7 @@
 \alias{rf100_catalog}
 \title{RF100 Dataset Catalog}
 \format{
-A data frame with 34 rows (datasets) and 14 columns:
+A data frame with datasets as rows and 13 columns:
 \describe{
 \item{collection}{Collection name (biology, medical, infrared, damage, underwater, document)}
 \item{dataset}{Dataset identifier used in collection functions}
@@ -18,7 +18,6 @@ A data frame with 34 rows (datasets) and 14 columns:
 \item{has_train}{Logical indicating if training split is available}
 \item{has_test}{Logical indicating if test split is available}
 \item{has_valid}{Logical indicating if validation split is available}
-\item{estimated_images}{Estimated number of images in the dataset}
 \item{function_name}{R function name to load this dataset's collection}
 \item{roboflow_url}{URL to the collection on RoboFlow Universe}
 }
@@ -27,7 +26,7 @@ A data frame with 34 rows (datasets) and 14 columns:
 rf100_catalog
 }
 \description{
-A comprehensive catalog of all 39 RF100 (RoboFlow 100) datasets available in torchvision.
+A comprehensive catalog of all RF100 (RoboFlow 100) datasets available in torchvision.
 This data frame contains metadata about each dataset including descriptions, sizes,
 available splits, and collection information.
 }
