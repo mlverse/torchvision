@@ -4,12 +4,15 @@
 #' This data frame contains metadata about each dataset including descriptions, sizes,
 #' available splits, and collection information.
 #'
-#' @format A data frame with datasets as rows and 13 columns:
+#' @format A data frame with datasets as rows and 16 columns:
 #' \describe{
 #'   \item{collection}{Collection name (biology, medical, infrared, damage, underwater, document)}
 #'   \item{dataset}{Dataset identifier used in collection functions}
 #'   \item{description}{Brief description of the dataset and its purpose}
 #'   \item{task}{Machine learning task type (currently all "object_detection")}
+#'   \item{num_images}{Total number of images across all splits}
+#'   \item{image_width}{Typical image width in pixels}
+#'   \item{image_height}{Typical image height in pixels}
 #'   \item{train_size_mb}{Size of training split in megabytes}
 #'   \item{test_size_mb}{Size of test split in megabytes}
 #'   \item{valid_size_mb}{Size of validation split in megabytes}

@@ -5,6 +5,7 @@
 
 
 # Biology Collection (9 datasets)
+# Image counts and dimensions from RoboFlow dataset metadata
 biology <- data.frame(
   collection = "biology",
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell",
@@ -21,6 +22,9 @@ biology <- data.frame(
     "Liver disease pathology detection"
   ),
   task = "object_detection",
+  num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640),
   train_size_mb = c(81, 6.4, 65.1, 0.3, 1.4, 62, 19, 69, 192),
   test_size_mb = c(24, 1.8, 17.9, 0.1, 2.5, 16.8, 5.3, 9.0, 55.6),
   valid_size_mb = c(12, 0.9, 9, 0.05, 0.8, 9, 2.7, 5.7, 28),
@@ -47,6 +51,9 @@ medical <- data.frame(
     "Bone fracture detection in X-rays"
   ),
   task = "object_detection",
+  num_images = c(1320, 120, 1695, 1410, 148, 2620, 3064, 628),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
   train_size_mb = c(51, 2.5, 46, 62, 3.4, 50, 142, 9),
   test_size_mb = c(15, 0.6, 13, 15, 0.8, 13, 40, 2),
   valid_size_mb = c(7, 0.3, 6.5, 9, 0.5, 7, 20, 1),
@@ -68,6 +75,9 @@ infrared <- data.frame(
     "FLIR camera object detection in infrared"
   ),
   task = "object_detection",
+  num_images = c(203, 384, 96, 8862),
+  image_width = c(640, 640, 640, 640),
+  image_height = c(512, 640, 480, 512),
   train_size_mb = c(6, 8.5, 2.7, 411),
   test_size_mb = c(1.7, 2.3, 0.7, 148),
   valid_size_mb = c(0.8, 1.5, 0.4, 74),
@@ -88,6 +98,9 @@ damage <- data.frame(
     "Asbestos detection for safety inspection"
   ),
   task = "object_detection",
+  num_images = c(614, 384, 748),
+  image_width = c(640, 640, 640),
+  image_height = c(640, 640, 640),
   train_size_mb = c(21.5, 8.5, 28),
   test_size_mb = c(5.7, 2.3, 7.8),
   valid_size_mb = c(1.4, 1.5, 4),
@@ -109,6 +122,9 @@ underwater <- data.frame(
     "Coral reef detection and monitoring"
   ),
   task = "object_detection",
+  num_images = c(5618, 638, 8174, 716),
+  image_width = c(640, 640, 640, 640),
+  image_height = c(480, 640, 480, 480),
   train_size_mb = c(223, 26, 290, 33),
   test_size_mb = c(60, 7.5, 85, 7),
   valid_size_mb = c(30, 3.5, 42, 5),
@@ -133,9 +149,12 @@ document <- data.frame(
     "Academic paper structure and part detection"
   ),
   task = "object_detection",
-  train_size_mb = rep(50, 6),  # Placeholder values from source
-  test_size_mb = rep(50, 6),
-  valid_size_mb = rep(50, 6),
+  num_images = c(575, 468, 2402, 2604, 1894, 2202),
+  image_width = c(640, 640, 640, 640, 640, 640),
+  image_height = c(640, 640, 640, 640, 640, 640),
+  train_size_mb = c(13, 11, 75, 130, 82, 64),
+  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18),
+  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -170,6 +189,7 @@ rf100_catalog$roboflow_url <- paste0("https://universe.roboflow.com/browse/",
 # Reorder columns for better readability
 rf100_catalog <- rf100_catalog[, c(
   "collection", "dataset", "description", "task",
+  "num_images", "image_width", "image_height",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
   "has_train", "has_test", "has_valid",
   "function_name", "roboflow_url"

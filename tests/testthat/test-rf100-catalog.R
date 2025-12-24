@@ -9,6 +9,7 @@ test_that("RF100 catalog data exists and has correct structure", {
   
   # Should have expected columns
   expected_cols <- c("collection", "dataset", "description", "task",
+                     "num_images", "image_width", "image_height",
                      "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
                      "has_train", "has_test", "has_valid",
                      "function_name", "roboflow_url")
@@ -22,6 +23,13 @@ test_that("RF100 catalog data exists and has correct structure", {
   
   # All datasets should have positive sizes
   expect_true(all(catalog$total_size_mb > 0))
+  
+  # All datasets should have positive image counts
+  expect_true(all(catalog$num_images > 0))
+  
+  # All datasets should have positive dimensions
+  expect_true(all(catalog$image_width > 0))
+  expect_true(all(catalog$image_height > 0))
   
   # Check collections are valid
   valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document")

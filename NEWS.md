@@ -1,5 +1,9 @@
 # torchvision (development version)
 
+## New features
+
+* Added RF100 dataset catalog with `search_rf100()`, `get_rf100_catalog()`, and `list_rf100_datasets()` functions for discovering and exploring RoboFlow 100 datasets (#271, @ANAMASGARD).
+
 ## New models
 
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
