@@ -1,6 +1,3 @@
-# Suppress R CMD check NOTE about global variable
-utils::globalVariables("rf100_catalog")
-
 #' RF100 Dataset Catalog
 #'
 #' A comprehensive catalog of all RF100 (RoboFlow 100) datasets available in torchvision.
