@@ -88,6 +88,9 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -95,6 +98,9 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -102,6 +108,9 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -109,6 +118,9 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -127,6 +139,18 @@
 
 <dt id="arg-num-classes">num_classes<a class="anchor" aria-label="anchor" href="#arg-num-classes"></a></dt>
 <dd><p>Number of output classes (default: 91 for COCO).</p></dd>
+
+
+<dt id="arg-score-thresh">score_thresh<a class="anchor" aria-label="anchor" href="#arg-score-thresh"></a></dt>
+<dd><p>Numeric. Minimum score threshold for detections (default: 0.05).</p></dd>
+
+
+<dt id="arg-nms-thresh">nms_thresh<a class="anchor" aria-label="anchor" href="#arg-nms-thresh"></a></dt>
+<dd><p>Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).</p></dd>
+
+
+<dt id="arg-detections-per-img">detections_per_img<a class="anchor" aria-label="anchor" href="#arg-detections-per-img"></a></dt>
+<dd><p>Integer. Maximum number of detections per image (default: 100).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -148,8 +172,6 @@
     <div id="task">
     <h2>Task</h2>
 
-
-<p>Object detection over images with bounding boxes and class labels.</p>
 
 <p>Object detection over images with bounding boxes and class labels.</p>
     </div>
