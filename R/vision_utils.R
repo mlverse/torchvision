@@ -121,6 +121,10 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              font_size = 10, ...) {
   rlang::check_installed("magick")
 
+  # manage single batch images
+  if (x$ndim == 4 && x$size(1) == 1) {
+    x <- x$squeeze(1)
+  }
   if (x$ndim != 3) {
     value_error("Pass individual `x`, not batches")
   }
