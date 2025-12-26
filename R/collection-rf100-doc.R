@@ -224,7 +224,7 @@ rf100_document_collection <- torch::dataset(
       return(obj_df[,c("bbox", "category")])
     }))
     # y step 2 select, and unnest_longer bbox and label
-    unnested_bbox <- box_convert(torch::torch_tensor(unlist(bbox), dtype = torch::torch_float())$view(c(-1, 4)),
+    unnested_bbox <- box_convert(torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(-1, 4)),
                                  'xywh', 'xyxy')
     unnested_label <- unlist(unnested_df$category)
     # y step 3 repeat image_id along each of unnested value
