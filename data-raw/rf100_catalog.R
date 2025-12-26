@@ -31,11 +31,20 @@ biology <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/stomata-cells",
+                   "https://universe.roboflow.com/object-detection/bccd-ouzjz",
+                   "https://universe.roboflow.com/object-detection/parasites-1s07h",
+                   "https://universe.roboflow.com/object-detection/cells-uyemf",
+                   "https://universe.roboflow.com/object-detection/bacteria-ptywi",
+                   "https://universe.roboflow.com/object-detection/cotton-plant-disease",
+                   "https://universe.roboflow.com/object-detection/mitosis-gjs3g",
+                   "https://universe.roboflow.com/object-detection/phages",
+                   "https://universe.roboflow.com/object-detection/liver-disease"),
   stringsAsFactors = FALSE
 )
 
 
-# Medical Collection (8 datasets)
+# Medical Collection
 medical <- data.frame(
   collection = "medical",
   dataset = c("radio_signal", "rheumatology", "knee", "abdomen_mri",
@@ -60,6 +69,14 @@ medical <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/radio-signal",
+                   "https://universe.roboflow.com/object-detection/x-ray-rheumatology",
+                   "https://universe.roboflow.com/object-detection/acl-x-ray",
+                   "https://universe.roboflow.com/object-detection/abdomen-mri",
+                   "https://universe.roboflow.com/object-detection/axial-mri",
+                   "https://universe.roboflow.com/object-detection/gynecology-mri",
+                   "https://universe.roboflow.com/object-detection/brain-tumor-m2pbp",
+                   "https://universe.roboflow.com/object-detection/bone-fracture-7fylg"),
   stringsAsFactors = FALSE
 )
 
@@ -84,6 +101,10 @@ infrared <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/thermal-dogs-and-people-x6ejw",
+                   "https://universe.roboflow.com/object-detection/solar-panels-taxvb",
+                   "https://universe.roboflow.com/object-detection/thermal-cheetah-my4dp",
+                   "https://universe.roboflow.com/object-detection/flir-camera-objects"),
   stringsAsFactors = FALSE
 )
 
@@ -107,6 +128,9 @@ damage <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/4-fold-defect",
+                   "https://universe.roboflow.com/object-detection/solar-panels-taxvb",
+                   "https://universe.roboflow.com/object-detection/asbestos"),
   stringsAsFactors = FALSE
 )
 
@@ -131,6 +155,10 @@ underwater <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/underwater-pipes-4ng4t",
+                   "https://universe.roboflow.com/object-detection/aquarium-qlnqy",
+                   "https://universe.roboflow.com/object-detection/underwater-objects-5v7p8",
+                   "https://universe.roboflow.com/object-detection/coral-lwptl"),
   stringsAsFactors = FALSE
 )
 
@@ -158,6 +186,12 @@ document <- data.frame(
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
+  roboflow_url = c("https://universe.roboflow.com/object-detection/tweeter-posts",
+                   "https://universe.roboflow.com/object-detection/tweeter-profile",
+                   "https://universe.roboflow.com/object-detection/document-parts",
+                   "https://universe.roboflow.com/object-detection/activity-diagrams-qdobr",
+                   "https://universe.roboflow.com/object-detection/signatures-xc8up",
+                   "https://universe.roboflow.com/object-detection/paper-parts"),
   stringsAsFactors = FALSE
 )
 
@@ -182,8 +216,9 @@ rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb +
 rf100_catalog$function_name <- paste0("rf100_", rf100_catalog$collection, "_collection")
 
 
-rf100_catalog$roboflow_url <- paste0("https://universe.roboflow.com/browse/",
-                                     rf100_catalog$collection)
+rf100_catalog$roboflow_url <- ifelse(is.na(rf100_catalog$roboflow_url),
+                                     paste0("https://universe.roboflow.com/browse/", rf100_catalog$collection),
+                                     rf100_catalog$roboflow_url)
 
 
 # Reorder columns for better readability
@@ -215,7 +250,7 @@ cli::cli_text("Total datasets: {nrow(rf100_catalog)}")
 cli::cli_text("Collections: {.val {paste(unique(rf100_catalog$collection), collapse = ', ')}}")
 cli::cli_h2("Datasets by collection")
 cli::cli_verbatim(capture.output(print(table(rf100_catalog$collection))))
-cli::cli_text("Total size (all datasets): {.strong {round(sum(rf100_catalog$total_size_mb) / 1024, 2)} GB}")
+cli::cli_text("Total size (all datasets): {.strong {prettyunits::pretty_bytes(sum(rf100_catalog$total_size_mb) * 1024^2)}}")
 cli::cli_h2("Catalog saved to:")
 cli::cli_ul()
 cli::cli_li("{.path data/rf100_catalog.rda}")
