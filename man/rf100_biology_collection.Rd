@@ -14,7 +14,7 @@ rf100_biology_collection(
 }
 \arguments{
 \item{dataset}{Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",
-"bacteria", "cotton_desease","mitosis", "phage", "liver_desease")}.}
+"bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "insects")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 

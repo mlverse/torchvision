@@ -32,7 +32,7 @@ for (ds_name in small_datasets) {
   })
 }
 
-datasets <- c("stomata_cell", "parasite", "cotton_desease", "phage", "liver_desease")
+datasets <- c("stomata_cell", "parasite", "cotton_desease", "phage", "liver_desease", "insects")
 
 for (ds_name in datasets) {
   test_that(paste0("rf100_biology_collection loads ", ds_name, " correctly"), {
