@@ -87,7 +87,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
-<ul><li>Remove <code>.getbatch</code> method from MNIST as it is providing inconsistent tensor dimensions with <code>.getitem</code> due to non-vectorized <code>transform_</code> operations (<a href="https://github.com/mlverse/torchvision/issues/264" class="external-link">#264</a>)</li>
+<ul><li>fix rf100 collection bounding-box now consider the correct native COCO format being ‘xywh’ (<a href="https://github.com/mlverse/torchvision/issues/272" class="external-link">#272</a>)</li>
+<li>Remove <code>.getbatch</code> method from MNIST as it is providing inconsistent tensor dimensions with <code>.getitem</code> due to non-vectorized <code>transform_</code> operations (<a href="https://github.com/mlverse/torchvision/issues/264" class="external-link">#264</a>)</li>
 </ul></div>
 </div>
     <div class="section level2">
