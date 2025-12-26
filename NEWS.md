@@ -7,6 +7,7 @@
 
 ## Bug fixes and improvements
 
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
 to non-vectorized `transform_` operations (#264)
 
