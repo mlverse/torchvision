@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100  Biology dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Biology](https://universe.roboflow.com/browse/biology) datasets with COCO-style
+#' Loads one of the [RoboFlow 100 Biology](https://universe.roboflow.com/browse/biology) datasets with
 #' bounding box annotations for object detection tasks.
 #'
 #' @inheritParams rf100_document_collection

@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Document dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with COCO-style
+#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with
 #' bounding box annotations for object detection tasks.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
@@ -14,7 +14,7 @@ NULL
 #' @param target_transform Optional transform function applied to the target.
 #'
 #' @return A torch dataset. Each element is a named list with:
-#' - `x`: H x W x 3 array representing the image.
+#' - `x`: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
 #' - `y`: a list containing the target with:
 #'     - `image_id`: numeric identifier of the x image.
 #'     - `labels`: numeric identifier of the N bounding-box object class.

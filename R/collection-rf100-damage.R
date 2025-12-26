@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Damages dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Damage & Risk assesment](https://universe.roboflow.com/browse/damage-risk) datasets with COCO-style
+#' Loads one of the [RoboFlow 100 Damage & Risk assesment](https://universe.roboflow.com/browse/damage-risk) datasets with
 #' bounding box annotations for object detection tasks.
 #'
 #' @inheritParams rf100_document_collection
