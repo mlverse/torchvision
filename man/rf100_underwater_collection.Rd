@@ -26,7 +26,7 @@ rf100_underwater_collection(
 \value{
 A torch dataset. Each element is a named list with:
 \itemize{
-\item \code{x}: H x W x 3 array representing the image.
+\item \code{x}: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
 \item \code{y}: a list containing the target with:
 \itemize{
 \item \code{image_id}: numeric identifier of the x image.

@@ -57,7 +57,9 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2
+    xml2,
+    knitr,
+    rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
     'folder-dataset.R'
@@ -106,6 +108,7 @@ Collate:
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
+    'rf100-catalog.R'
     'tiny-imagenet-dataset.R'
     'transforms-array.R'
     'transforms-defaults.R'
@@ -114,3 +117,7 @@ Collate:
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
+Depends: 
+    R (>= 3.5)
+LazyData: true
+VignetteBuilder: knitr
