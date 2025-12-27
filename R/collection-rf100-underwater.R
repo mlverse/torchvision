@@ -3,8 +3,8 @@ NULL
 
 #' RoboFlow 100 Underwater dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Underwater](https://universe.roboflow.com/browse/documents) datasets: "pipes",
-#' "aquarium", "objects", or "coral". Images are provided with COCO-style
+#' Loads one of the underwater related [RoboFlow 100 Environmental](https://universe.roboflow.com/browse/environmental)
+#' datasets: "pipes", "aquarium", "objects", or "coral". Images are provided with COCO-style
 #' bounding box annotations for object detection tasks.
 #'
 #' @inheritParams rf100_document_collection

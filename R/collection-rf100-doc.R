@@ -144,7 +144,7 @@ rf100_document_collection <- torch::dataset(
       runtime_error("Dataset not found. Use download=TRUE or check that parquet files exist at the expected paths.")
 
     ads <- arrow::open_dataset(self$split_file)
-    self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names
+    self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names[-1]
 
     # single parquet file versus arrow dataset, and only keep bboxed images
     if (sum(sel) == 1) {
