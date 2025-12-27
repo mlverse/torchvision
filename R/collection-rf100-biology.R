@@ -4,7 +4,7 @@ NULL
 #' RoboFlow 100  Biology dataset Collection
 #'
 #' Loads one of the [RoboFlow 100 Biology](https://universe.roboflow.com/browse/biology) datasets with
-#' bounding box annotations for object detection tasks.
+#' bounding box annotations for object-detection task.
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",

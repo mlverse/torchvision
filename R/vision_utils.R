@@ -126,7 +126,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x <- x$squeeze(1)
   }
   if (x$ndim != 3) {
-    value_error("Pass individual `x`, not batches")
+    value_error("Pass an individual image as `x`, not a batch")
   }
   if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")

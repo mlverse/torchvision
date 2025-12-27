@@ -41,7 +41,7 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 }
 \description{
 Loads one of the \href{https://universe.roboflow.com/browse/biology}{RoboFlow 100 Biology} datasets with
-bounding box annotations for object detection tasks.
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

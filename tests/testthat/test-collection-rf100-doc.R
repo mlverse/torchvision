@@ -7,19 +7,19 @@ test_that("rf100_document_collection handles missing dataset gracefully", {
   )
 })
 
-datasets <- c(
-  "tweeter_post", "tweeter_profile", "document_part",
-  "activity_diagram", "signature"
+dataset <- data.frame(name = c("tweeter_post", "tweeter_profile", "document_part",
+                                "activity_diagram", "signature", "currency"),
+                       nlevels = c(2L, 1L, 2L, 19L, 1L, 10L)
 )
 
-for (ds_name in datasets) {
+for (ds_name in dataset$name) {
   test_that(paste0("rf100_document_collection loads ", ds_name, " correctly"), {
     ds <- rf100_document_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_document_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
 
     item <- ds[1]
 
@@ -41,7 +41,7 @@ test_that(paste0("rf100_document_collection loads paper_part correctly"), {
   expect_s3_class(ds, "rf100_document_collection")
   expect_gt(ds$.length(), 1)
   expect_type(ds$classes, "character")
-  expect_gt(length(unique(ds$classes)), 1)
+  expect_length(unique(ds$classes), 19)
 
   item <- ds[1]
 
@@ -60,7 +60,7 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wo
 
   expect_equal(ds$.length(), 181)
   expect_type(ds$classes, "character")
-  expect_equal(length(unique(ds$classes)), 3)
+  expect_length(unique(ds$classes), 2)
 
   items <- ds[7:9]
   # Check shape, dtype, and values on X

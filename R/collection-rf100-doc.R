@@ -4,10 +4,10 @@ NULL
 #' RoboFlow 100 Document dataset Collection
 #'
 #' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with
-#' bounding box annotations for object detection tasks.
+#' bounding box annotations for object-detection task.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.
+#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency")}.
 #' @param split the subset of the dataset to choose between \code{c("train", "test", "valid")}.
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
@@ -51,8 +51,8 @@ rf100_document_collection <- torch::dataset(
 
   resources = data.frame(
     dataset = rep(c("tweeter_post", "tweeter_profile", "document_part",
-                    "activity_diagram", "signature", "paper_part"), each = 3),
-    split   = rep(c("train", "test", "valid"), times = 6),
+                    "activity_diagram", "signature", "paper_part", "currency"), each = 3),
+    split   = rep(c("train", "test", "valid"), times = 7),
     url = c(
       # tweeter_post
       "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/train-00000-of-00001-5ca0e754c63f9a31.parquet",
@@ -82,7 +82,12 @@ rf100_document_collection <- torch::dataset(
       # paper_part
       "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/train-00000-of-00001-0f677be56de6ff94.parquet",
       "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/test-00000-of-00001-94db1ab1c191f5e2.parquet",
-      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/validation-00000-of-00001-2ce552e0b2a0aac5.parquet"
+      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/validation-00000-of-00001-2ce552e0b2a0aac5.parquet",
+
+      # currency
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/train-00000-of-00001-3c80a5c3981074e8.parquet",
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/test-00000-of-00001-06a9ff754a1f48d1.parquet",
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/validation-00000-of-00001-6dbf43e62bbf1c54.parquet"
     ),
 
     md5 = c(
@@ -109,10 +114,14 @@ rf100_document_collection <- torch::dataset(
       # paper_part
       "253fd2189e89eb4664e89e9ed4b08dcc",
       "23cebd238571b4d130a11a6df760a180",
-      "e02e6da02d92de11283739c5b0daeb4b"
+      "e02e6da02d92de11283739c5b0daeb4b",
+      # currency
+      "bfdca87eaf49018d16b13f9e08b1d8de",
+      "b3c94d97b8fc3edf25ca0eaf31b5db4f",
+      "80b5c6352457d66ef1c2dccd607ec732"
     ),
 
-    size = rep(50e6, 18)  # placeholder; optional
+    size = c(rep(50, 18), 32, 9, 5) * 1e6 # placeholder; optional
   ),
 
   initialize = function(
@@ -182,8 +191,7 @@ rf100_document_collection <- torch::dataset(
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
     bbox <- df$objects$bbox
-    boxes  <- box_convert(torch::torch_tensor(unlist(bbox), dtype = torch::torch_float())$view(c(-1, 4)),
-                          'xywh', 'xyxy')
+    boxes  <- box_xywh_to_xyxy(torch::torch_tensor(unlist(bbox), dtype = torch::torch_float())$view(c(-1, 4)))
     labels <- unlist(df$objects$category)
     if (is.null(labels)) {
       labels <- unlist(df$objects$label)
@@ -224,8 +232,7 @@ rf100_document_collection <- torch::dataset(
       return(obj_df[,c("bbox", "category")])
     }))
     # y step 2 select, and unnest_longer bbox and label
-    unnested_bbox <- box_convert(torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(-1, 4)),
-                                 'xywh', 'xyxy')
+    unnested_bbox <- box_xywh_to_xyxy(torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(-1, 4)))
     unnested_label <- unlist(unnested_df$category)
     # y step 3 repeat image_id along each of unnested value
     image_id_rep <- rep(df$image_id, sapply(unnested_df$category, length))
