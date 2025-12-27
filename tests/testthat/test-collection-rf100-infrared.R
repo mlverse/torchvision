@@ -9,16 +9,18 @@ test_that("rf100_infrared_collection handles missing files gracefully", {
   )
 })
 
-datasets <- c("thermal_dog_and_people", "solar_panel", "thermal_cheetah")
+dataset <- data.frame(name = c("thermal_dog_and_people", "solar_panel", "thermal_cheetah"),
+                      nlevels = c(2L, 5L, 2L)
+)
 
-for (ds_name in datasets) {
+for (ds_name in dataset$name) {
   test_that(paste0("rf100_infrared_collection loads ", ds_name, " correctly"), {
     ds <- rf100_infrared_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_infrared_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
 
     item <- ds[2] # as 2 datasets have their first item wo bbox
 
@@ -39,7 +41,7 @@ test_that(paste0("rf100_infrared_collection loads 'ir_object' correctly"), {
     expect_s3_class(ds, "rf100_infrared_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
+    expect_length(unique(ds$classes), 4)
 
     item <- ds[1]
 
