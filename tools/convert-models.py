@@ -105,6 +105,12 @@ models = {
   'convnext_base_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_base_22k_224.pth', # _224_22k
   'convnext_large_1k': 'https://dl.fbaipublicfiles.com/convnext/convnext_large_1k_224_ema.pth', # _224_1k
   'convnext_large_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_large_22k_224.pth', # _224_22k
+  'convnext_tiny_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_tiny_fp16_512x512_160k_ade20k/upernet_convnext_tiny_fp16_512x512_160k_ade20k_20220227_124553-cad485de.pth',
+  'convnext_small_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_small_fp16_512x512_160k_ade20k/upernet_convnext_small_fp16_512x512_160k_ade20k_20220227_131208-1b1e394f.pth',
+  'convnext_base_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_base_fp16_512x512_160k_ade20k/upernet_convnext_base_fp16_512x512_160k_ade20k_20220227_181227-02a24fc6.pth',
+  'convnext_base_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_base_fp16_640x640_160k_ade20k/upernet_convnext_base_fp16_640x640_160k_ade20k_20220227_182859-9280e39b.pth',
+  'convnext_large_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_large_fp16_640x640_160k_ade20k/upernet_convnext_large_fp16_640x640_160k_ade20k_20220226_040532-e57aa54d.pth',
+  'convnext_xlarge_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_xlarge_fp16_640x640_160k_ade20k/upernet_convnext_xlarge_fp16_640x640_160k_ade20k_20220226_080344-95fc38c2.pth',
   'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
   'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
   'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
