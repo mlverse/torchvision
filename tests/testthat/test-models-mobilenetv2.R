@@ -18,9 +18,9 @@ test_that("we can prune head of mobilenetv2 moels", {
   mobilenet <- model_mobilenet_v2(pretrained=TRUE)
 
   expect_no_error(prune <- nn_prune_head(mobilenet, 1))
-  expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 1)
-  expect_true(inherits(prune[[length(prune)]], "nn_sequential"))
+  expect_s3_class(prune, "nn_sequential")
+  expect_length(prune, 1)
+  expect_s3_class(prune[[length(prune)]], "nn_sequential")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)

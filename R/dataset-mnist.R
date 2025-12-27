@@ -338,8 +338,9 @@ fashion_mnist_dataset <- dataset(
 )
 
 #' @describeIn mnist_dataset EMNIST collection with digits and letters arranged in multiple datasets.
-#' @param dataset one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
-#' made of a set of classes. You can look at dataset attribute `$classes` to see the actual classes.
+#' @param dataset to select within \code{c("byclass", "bymerge", "balanced", "letters", "digits", "mnist")}
+#' representing the subset of emnist collection made of a set of classes.
+#' You can look at dataset attribute `$classes` to see the actual classes.
 #' @export
 emnist_collection <- dataset(
   name = "emnist_collection",

@@ -3,5 +3,5 @@ test_that("transform works for magick images", {
 
   im <- transform_random_resized_crop(im, size = c(224, 224))
   ii <- magick::image_info(im)
-  expect_equal(c(ii$width, ii$height), c(224,224))
+  expect_identical(c(ii$width, ii$height), c(224,224))
 })

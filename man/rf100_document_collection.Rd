@@ -14,7 +14,7 @@ rf100_document_collection(
 }
 \arguments{
 \item{dataset}{Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.}
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
@@ -44,7 +44,7 @@ RoboFlow 100 Document dataset Collection
 }
 \details{
 Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with
-bounding box annotations for object detection tasks.
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

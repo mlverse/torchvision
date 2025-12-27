@@ -10,12 +10,12 @@ test_that("Caltech101 dataset works correctly", {
   )
 
   ds <- caltech101_dataset(root = t, download = TRUE)
-  expect_equal(length(ds), 8677)
+  expect_length(ds, 8677)
   first_item <- ds[1]
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("Caltech101 dataset works correctly (dataloader)", {
@@ -62,7 +62,7 @@ test_that("Caltech256 dataset works correctly", {
   expect_length(first_item$x,416166)
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("Caltech256 dataset works correctly (dataloader)", {

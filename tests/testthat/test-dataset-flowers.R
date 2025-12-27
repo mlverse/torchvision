@@ -19,7 +19,7 @@ test_that("tests for the Flowers102 dataset for train split", {
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Flowers102 dataset for test split", {
@@ -34,7 +34,7 @@ test_that("tests for the Flowers102 dataset for test split", {
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Flowers102 dataset for validation split", {
@@ -49,7 +49,7 @@ test_that("tests for the Flowers102 dataset for validation split", {
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Flowers102 dataset for dataloader", {

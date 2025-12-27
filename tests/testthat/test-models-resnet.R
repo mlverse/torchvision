@@ -185,8 +185,8 @@ test_that("we can prune head of resnet34 moels", {
 
   expect_error(prune <- nn_prune_head(resnet34, 1), NA)
   # expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)
@@ -198,9 +198,9 @@ test_that("we can prune head of resnet50 moels", {
   resnet50 <- model_resnet50(pretrained=TRUE)
 
   expect_error(prune <- nn_prune_head(resnet50, 1), NA)
-  expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_s3_class(prune, "nn_sequential")
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)
@@ -216,9 +216,9 @@ test_that("we can prune head of resnext101 moels", {
   resnext101 <- model_resnext101_32x8d(pretrained=TRUE)
 
   expect_error(prune <- torch:::nn_prune_head(resnext101, 1), NA)
-  expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_s3_class(prune, "nn_sequential")
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)

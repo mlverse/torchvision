@@ -67,7 +67,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 A \code{fasterrcnn_model} nn_module.
 }
 \description{
-Construct Faster R-CNN model variants for object detection tasks.
+Construct Faster R-CNN model variants for object-detection task.
 }
 \section{Functions}{
 \itemize{

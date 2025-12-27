@@ -301,10 +301,10 @@ model_mtcnn <- nn_module(
 load_inception_weights <- function(model, name) {
   if (name == "vggface2") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/vggface2.pth"
-    md5 = "c446a04f0b22763858226717ba1f7410"
+    md5 <- "c446a04f0b22763858226717ba1f7410"
   } else if (name == "casia-webface") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/casia-webface.pth"
-    md5 = "ff4aff482f6c1941784abba5131bae20"
+    md5 <- "ff4aff482f6c1941784abba5131bae20"
   }
 
   archive <- download_and_cache(url,prefix = "facenet")

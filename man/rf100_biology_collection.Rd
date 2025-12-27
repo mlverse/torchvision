@@ -14,7 +14,7 @@ rf100_biology_collection(
 }
 \arguments{
 \item{dataset}{Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",
-"bacteria", "cotton_desease","mitosis", "phage", "liver_desease")}.}
+"bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "moth")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
@@ -41,7 +41,7 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 }
 \description{
 Loads one of the \href{https://universe.roboflow.com/browse/biology}{RoboFlow 100 Biology} datasets with
-bounding box annotations for object detection tasks.
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

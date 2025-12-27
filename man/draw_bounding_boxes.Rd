@@ -35,8 +35,8 @@ C value for channel can only be 1 (grayscale) or 3 (RGB).}
 \item{boxes}{Tensor of size (N, 4) containing N bounding boxes in
 c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
 format. Note that the boxes coordinates are absolute with respect
-to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < W } and
-\eqn{0  \leq y_{min} < y_{max} < W }.}
+to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
+\eqn{0  \leq y_{min} < y_{max} < Width }.}
 
 \item{labels}{character vector containing the labels of bounding boxes.}
 

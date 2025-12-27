@@ -28,14 +28,14 @@ test_that("coco_detection_dataset loads a single example correctly", {
   y <- item$y
 
   expect_is(item$x, "array")
-  expect_equal(length(dim(item$x)), 3)
+  expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
   expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
 
   expect_tensor(y$boxes)
-  expect_equal(y$boxes$ndim, 2)
-  expect_equal(y$boxes$size(2), 4)
+  expect_identical(y$boxes$ndim, 2)
+  expect_identical(y$boxes$size(2), 4)
 
   expect_type(y$labels, "character")
   expect_gt(length(y$labels), 0)
@@ -44,7 +44,7 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_tensor(y$iscrowd)
   expect_true(is.list(y$segmentation))
   expect_tensor(y$masks)
-  expect_equal(y$masks$ndim, 3)
+  expect_identical(y$masks$ndim, 3)
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
@@ -64,8 +64,8 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_type(batch$y, "list")
   expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
   expect_tensor(batch$y[[1]]$boxes)
-  expect_equal(batch$y[[1]]$boxes$ndim, 2)
-  expect_equal(batch$y[[1]]$boxes$size(2), 4)
+  expect_identical(batch$y[[1]]$boxes$ndim, 2)
+  expect_identical(batch$y[[1]]$boxes$size(2), 4)
 })
 
 test_that("coco_caption_dataset handles missing files gracefully", {
@@ -89,8 +89,8 @@ test_that("coco_caption_dataset loads a single example correctly", {
   y <- item$y
 
   expect_is(x, "array")
-  expect_equal(length(dim(x)), 3)
-  expect_equal(dim(x)[3], 3)
+  expect_length(dim(x), 3)
+  expect_identical(dim(x)[3], 3)
 
   expect_type(y, "character")
   expect_gt(nchar(y), 0)
