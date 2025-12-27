@@ -169,7 +169,7 @@ for name, url in models.items():
       m = m["model"].model.float().state_dict()
     
     # fb models weights are embedded in a named object
-    if name.startswith("convnext_"):
+    if name.startswith("convnext_") and name.endswith("k"):
       m = m["model"]
     
     for nm, par in m.items():
