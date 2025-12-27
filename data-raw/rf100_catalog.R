@@ -174,7 +174,7 @@ underwater <- data.frame(
 document <- data.frame(
   collection = "document",
   dataset = c("tweeter_post", "tweeter_profile", "document_part",
-              "activity_diagram", "signature", "paper_part", "currency"),
+              "activity_diagram", "signature", "paper_part", "currency", "wine_label"),
   description = c(
     "Twitter post element detection and parsing",
     "Twitter profile element detection",
@@ -182,16 +182,17 @@ document <- data.frame(
     "Activity diagram element detection",
     "Signature detection in documents",
     "Academic paper structure and part detection",
-    "Combination of Dollar Bill Detection project from Alex Hyams and Coin Counter project from Dawson Mcgee."
+    "Combination of Dollar Bill Detection project from Alex Hyams and Coin Counter project from Dawson Mcgee.",
+    "Wine Label elements detection"
   ),
   task = "object_detection",
-  nlevels = c(2L, 1L, 2L, 19L, 1L, 19L, 10L),
-  num_images = c(575, 468, 2402, 2604, 1894, 2202, 789),
-  image_width = c(640, 640, 640, 640, 640, 640, 640),
-  image_height = c(640, 640, 640, 640, 640, 640, 640),
-  train_size_mb = c(13, 11, 75, 130, 82, 64, 32),
-  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18, 9),
-  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5, 5),
+  nlevels = c(2L, 1L, 2L, 19L, 1L, 19L, 10L, 12L),
+  num_images = c(575, 468, 2402, 2604, 1894, 2202, 789, 4642),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
+  train_size_mb = c(13, 11, 75, 130, 82, 64, 32, 103),
+  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18, 9, 32),
+  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5, 5, 22),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -201,7 +202,8 @@ document <- data.frame(
                    "https://universe.roboflow.com/object-detection/activity-diagrams-qdobr",
                    "https://universe.roboflow.com/object-detection/signatures-xc8up",
                    "https://universe.roboflow.com/object-detection/paper-parts",
-                   "https://universe.roboflow.com/object-detection/currency-v4f8j"),
+                   "https://universe.roboflow.com/object-detection/currency-v4f8j",
+                   "https://universe.roboflow.com/object-detection/wine-labels"),
   stringsAsFactors = FALSE
 )
 

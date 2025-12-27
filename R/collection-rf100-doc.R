@@ -7,7 +7,7 @@ NULL
 #' bounding box annotations for object-detection task.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency")}.
+#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency", "wine_label")}.
 #' @param split the subset of the dataset to choose between \code{c("train", "test", "valid")}.
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
@@ -51,8 +51,8 @@ rf100_document_collection <- torch::dataset(
 
   resources = data.frame(
     dataset = rep(c("tweeter_post", "tweeter_profile", "document_part",
-                    "activity_diagram", "signature", "paper_part", "currency"), each = 3),
-    split   = rep(c("train", "test", "valid"), times = 7),
+                    "activity_diagram", "signature", "paper_part", "currency", "wine_label"), each = 3),
+    split   = rep(c("train", "test", "valid"), times = 8),
     url = c(
       # tweeter_post
       "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/train-00000-of-00001-5ca0e754c63f9a31.parquet",
@@ -87,7 +87,12 @@ rf100_document_collection <- torch::dataset(
       # currency
       "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/train-00000-of-00001-3c80a5c3981074e8.parquet",
       "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/test-00000-of-00001-06a9ff754a1f48d1.parquet",
-      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/validation-00000-of-00001-6dbf43e62bbf1c54.parquet"
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/validation-00000-of-00001-6dbf43e62bbf1c54.parquet",
+
+      # wine labels
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/train-00000-of-00001-e8550a2abd7d3aea.parquet",
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/test-00000-of-00001-8dea61f083eb4b77.parquet",
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/validation-00000-of-00001-ef878f604ee5efed.parquet"
     ),
 
     md5 = c(
@@ -118,10 +123,14 @@ rf100_document_collection <- torch::dataset(
       # currency
       "bfdca87eaf49018d16b13f9e08b1d8de",
       "b3c94d97b8fc3edf25ca0eaf31b5db4f",
-      "80b5c6352457d66ef1c2dccd607ec732"
+      "80b5c6352457d66ef1c2dccd607ec732",
+      # wine_label
+      "f124cc6ca0969bce4a9195fea1130775",
+      "a388d8b1abfaf15d45b330982e1e85a6",
+      "ca0b96eb696da512eed629895a433bad"
     ),
 
-    size = c(rep(50, 18), 32, 9, 5) * 1e6 # placeholder; optional
+    size = c(rep(50, 18), 32, 9, 5, 108, 32, 23) * 1e6 # placeholder; optional
   ),
 
   initialize = function(

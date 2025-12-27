@@ -7,6 +7,7 @@ test_that("rf100_document_collection handles missing dataset gracefully", {
   )
 })
 
+# small datasets
 dataset <- data.frame(name = c("tweeter_post", "tweeter_profile", "document_part",
                                 "activity_diagram", "signature", "currency"),
                        nlevels = c(2L, 1L, 2L, 19L, 1L, 10L)
@@ -33,26 +34,32 @@ for (ds_name in dataset$name) {
   })
 }
 
-test_that(paste0("rf100_document_collection loads paper_part correctly"), {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+dataset <- data.frame(name = c("paper_part", "wine_label"),
+                      nlevels = c(19L, 12L)
+)
+
+for (ds_name in dataset$name) {
+  test_that(paste0("rf100_document_collection loads ", ds_name, " correctly"), {
+    skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-  ds <- rf100_document_collection(dataset = "paper_part", split = "train", download = TRUE)
+    ds <- rf100_document_collection(dataset = ds_name, split = "test", download = TRUE)
 
-  expect_s3_class(ds, "rf100_document_collection")
-  expect_gt(ds$.length(), 1)
-  expect_type(ds$classes, "character")
-  expect_length(unique(ds$classes), 19)
+    expect_s3_class(ds, "rf100_document_collection")
+    expect_gt(ds$.length(), 1)
+    expect_type(ds$classes, "character")
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
 
-  item <- ds[1]
+    item <- ds[1]
 
-  expect_type(item$y, "list")
-  expect_named(item$y, c("image_id","labels","boxes"))
-  expect_type(item$y$labels, "integer")
-  expect_tensor(item$y$boxes)
-  expect_equal(item$y$boxes$ndim, 2)
-  expect_equal(item$y$boxes$size(2), 4)
-  expect_s3_class(item, "image_with_bounding_box")
-})
+    expect_type(item$y, "list")
+    expect_named(item$y, c("image_id","labels","boxes"))
+    expect_type(item$y$labels, "integer")
+    expect_tensor(item$y$boxes)
+    expect_equal(item$y$boxes$ndim, 2)
+    expect_equal(item$y$boxes$size(2), 4)
+    expect_s3_class(item, "image_with_bounding_box")
+  })
+}
 
 
 test_that("rf100_document_collection datasets can be turned into a dataloader wo transform", {
