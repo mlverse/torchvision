@@ -35,7 +35,7 @@ for (ds_name in small_dataset$name) {
   })
 }
 
-dataset <- data.frame(name = c("stomata_cell", "parasite", "cotton_desease", "phage", "liver_desease", "insects"),
+dataset <- data.frame(name = c("stomata_cell", "parasite", "cotton_desease", "phage", "liver_desease", "moth"),
                       nlevels = c(2L, 8L, 1L, 2L, 4L, 28L)
 )
 

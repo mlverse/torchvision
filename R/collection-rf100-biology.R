@@ -8,7 +8,7 @@ NULL
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",
-#' "bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "insects")}.
+#' "bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "moth")}.
 #' @inherit rf100_document_collection return
 #'
 #' @examples
@@ -34,7 +34,7 @@ rf100_biology_collection <- torch::dataset(
     dataset = rep(c(
       "stomata_cell", "blood_cell", "parasite", "cell",
       "bacteria", "cotton_desease",
-      "mitosis", "phage", "liver_desease", "insects"
+      "mitosis", "phage", "liver_desease", "moth"
     ),each = 3),
     split   = rep(c("train", "test", "valid"), times = 10),
     url = c(
@@ -74,7 +74,7 @@ rf100_biology_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/train-00000-of-00001-075b34404316815c.parquet",
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/test-00000-of-00001-d6b1dd29852bde4e.parquet",
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet",
-      # insects
+      # moth
       "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/train-00000-of-00001-a5be297b7b534376.parquet",
       "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/test-00000-of-00001-5c1caa13c9b39012.parquet",
       "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/validation-00000-of-00001-290a53c18d2f7a52.parquet"
@@ -98,8 +98,8 @@ rf100_biology_collection <- torch::dataset(
       "c7622fed8a37b697b9dd1c3ab0d0708f",      "4623461f1526e50c6badae08e28b1692",      "9610c62631166e65636d25d541b6911b",
       # liver_desease
       "9b5839ae524277eb1702a0db33030e9a",      "c97b80332d710b1378a9f3ceb5abc197",      "2f255ba7ed3c1ce0948d2fc06305ce54",
-      # insects
-      "53c4c82727cd36a3093be388f27c3b3e",      "2d8cd490d91bb9f25c17ff2ac332c010",      "2d8cd490d91bb9f25c17ff2ac332c010"
+      # moth
+      "53c4c82727cd36a3093be388f27c3b3e",      "79a9fb92f219ce24412cbb2836e79e0f",      "2d8cd490d91bb9f25c17ff2ac332c010"
     ),
     size = c(81, 24, 12, 6.4, 1.8, .9 , 65.1,17.9,9,  .3, .1, .05,
              1.4, 2.5, .8,   62, 16.8, 9,

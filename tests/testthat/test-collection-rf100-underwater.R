@@ -43,7 +43,7 @@ test_that(paste0("rf100_underwater_collection loads `aquarium` correctly"), {
   expect_s3_class(ds, "rf100_underwater_collection")
   expect_gt(ds$.length(), 1)
   expect_type(ds$classes, "character")
-  expect_gt(length(unique(ds$classes)), 1)
+  expect_length(unique(ds$classes), 7)
 
   item <- ds[1]
 

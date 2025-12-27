@@ -10,16 +10,17 @@
 #'   \item{dataset}{Dataset identifier used in collection functions}
 #'   \item{description}{Brief description of the dataset and its purpose}
 #'   \item{task}{Machine learning task type (currently all "object_detection")}
-#'   \item{num_images}{Total number of images across all splits}
+#'   \item{nlevels}{Number of levels that classify objects}
+#'   \item{num_images}{Total images across all splits}
 #'   \item{image_width}{Typical image width in pixels}
 #'   \item{image_height}{Typical image height in pixels}
 #'   \item{train_size_mb}{Size of training split in megabytes}
 #'   \item{test_size_mb}{Size of test split in megabytes}
 #'   \item{valid_size_mb}{Size of validation split in megabytes}
 #'   \item{total_size_mb}{Total size across all splits in megabytes}
-#'   \item{has_train}{Logical indicating if training split is available}
-#'   \item{has_test}{Logical indicating if test split is available}
-#'   \item{has_valid}{Logical indicating if validation split is available}
+#'   \item{has_train}{Is training split available}
+#'   \item{has_test}{Is test split available}
+#'   \item{has_valid}{Is validation split available}
 #'   \item{function_name}{R function name to load this dataset's collection}
 #'   \item{roboflow_url}{URL to the collection on RoboFlow Universe}
 #' }

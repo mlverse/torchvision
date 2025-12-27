@@ -4,12 +4,12 @@
 # This creates a comprehensive catalog of all 39 RF100 datasets
 
 
-# Biology Collection (9 datasets)
+# Biology Collection
 # Image counts and dimensions from RoboFlow dataset metadata
 biology <- data.frame(
   collection = "biology",
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell",
-              "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease"),
+              "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease", "moth"),
   description = c(
     "Stomata cells for plant biology research",
     "Blood cell detection (RBC, WBC, platelets)",
@@ -19,15 +19,17 @@ biology <- data.frame(
     "Cotton plant disease detection",
     "Mitosis phase detection in cell images",
     "Bacteriophage detection in microscopy",
-    "Liver disease pathology detection"
+    "Liver disease pathology detection",
+    "Moths for agriculture, entomology, and crop pest management, particularly in Asia"
   ),
   task = "object_detection",
-  num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756),
-  image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640),
-  image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640),
-  train_size_mb = c(81, 6.4, 65.1, 0.3, 1.4, 62, 19, 69, 192),
-  test_size_mb = c(24, 1.8, 17.9, 0.1, 2.5, 16.8, 5.3, 9.0, 55.6),
-  valid_size_mb = c(12, 0.9, 9, 0.05, 0.8, 9, 2.7, 5.7, 28),
+  nlevels = c(2L, 3L, 8L, 1L, 1L, 1L, 1L, 2L, 4L, 28L),
+  num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756, 711),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640, 640),
+  train_size_mb = c(81, 6.4, 65.1, 0.3, 1.4, 62, 19, 69, 192, 12),
+  test_size_mb = c(24, 1.8, 17.9, 0.1, 2.5, 16.8, 5.3, 9.0, 55.6, 43),
+  valid_size_mb = c(12, 0.9, 9, 0.05, 0.8, 9, 2.7, 5.7, 28, 4.3),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -39,7 +41,8 @@ biology <- data.frame(
                    "https://universe.roboflow.com/object-detection/cotton-plant-disease",
                    "https://universe.roboflow.com/object-detection/mitosis-gjs3g",
                    "https://universe.roboflow.com/object-detection/phages",
-                   "https://universe.roboflow.com/object-detection/liver-disease"),
+                   "https://universe.roboflow.com/object-detection/liver-disease",
+                   "https://universe.roboflow.com/roboflow-100/pests-2xlvx"),
   stringsAsFactors = FALSE
 )
 
@@ -60,6 +63,7 @@ medical <- data.frame(
     "Bone fracture detection in X-rays"
   ),
   task = "object_detection",
+  nlevels = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L),
   num_images = c(1320, 120, 1695, 1410, 148, 2620, 3064, 628),
   image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
   image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
@@ -92,6 +96,7 @@ infrared <- data.frame(
     "FLIR camera object detection in infrared"
   ),
   task = "object_detection",
+  nlevels = c(2L, 5L, 2L, 4L),
   num_images = c(203, 384, 96, 8862),
   image_width = c(640, 640, 640, 640),
   image_height = c(512, 640, 480, 512),
@@ -119,6 +124,7 @@ damage <- data.frame(
     "Asbestos detection for safety inspection"
   ),
   task = "object_detection",
+  nlevels = c(1L, 5L, 4L),
   num_images = c(614, 384, 748),
   image_width = c(640, 640, 640),
   image_height = c(640, 640, 640),
@@ -146,6 +152,7 @@ underwater <- data.frame(
     "Coral reef detection and monitoring"
   ),
   task = "object_detection",
+  nlevels = c(1L, 7L, 5L, 14L),
   num_images = c(5618, 638, 8174, 716),
   image_width = c(640, 640, 640, 640),
   image_height = c(480, 640, 480, 480),
@@ -163,26 +170,28 @@ underwater <- data.frame(
 )
 
 
-# Document Collection (6 datasets)
+# Document Collection
 document <- data.frame(
   collection = "document",
   dataset = c("tweeter_post", "tweeter_profile", "document_part",
-              "activity_diagram", "signature", "paper_part"),
+              "activity_diagram", "signature", "paper_part", "currency"),
   description = c(
     "Twitter post element detection and parsing",
     "Twitter profile element detection",
     "Document structure and part detection",
     "Activity diagram element detection",
     "Signature detection in documents",
-    "Academic paper structure and part detection"
+    "Academic paper structure and part detection",
+    "Combination of Dollar Bill Detection project from Alex Hyams and Coin Counter project from Dawson Mcgee."
   ),
   task = "object_detection",
-  num_images = c(575, 468, 2402, 2604, 1894, 2202),
-  image_width = c(640, 640, 640, 640, 640, 640),
-  image_height = c(640, 640, 640, 640, 640, 640),
-  train_size_mb = c(13, 11, 75, 130, 82, 64),
-  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18),
-  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5),
+  nlevels = c(2L, 1L, 2L, 19L, 1L, 19L, 10L),
+  num_images = c(575, 468, 2402, 2604, 1894, 2202, 789),
+  image_width = c(640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 640, 640, 640, 640, 640, 640),
+  train_size_mb = c(13, 11, 75, 130, 82, 64, 32),
+  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18, 9),
+  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5, 5),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -191,7 +200,8 @@ document <- data.frame(
                    "https://universe.roboflow.com/object-detection/document-parts",
                    "https://universe.roboflow.com/object-detection/activity-diagrams-qdobr",
                    "https://universe.roboflow.com/object-detection/signatures-xc8up",
-                   "https://universe.roboflow.com/object-detection/paper-parts"),
+                   "https://universe.roboflow.com/object-detection/paper-parts",
+                   "https://universe.roboflow.com/object-detection/currency-v4f8j"),
   stringsAsFactors = FALSE
 )
 
@@ -223,7 +233,7 @@ rf100_catalog$roboflow_url <- ifelse(is.na(rf100_catalog$roboflow_url),
 
 # Reorder columns for better readability
 rf100_catalog <- rf100_catalog[, c(
-  "collection", "dataset", "description", "task",
+  "collection", "dataset", "description", "task", "nlevels",
   "num_images", "image_width", "image_height",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
   "has_train", "has_test", "has_valid",
