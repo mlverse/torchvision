@@ -1,6 +1,6 @@
 context('dataset-pascal')
 
-t = withr::local_tempdir()
+t <- withr::local_tempdir()
 
 test_that("tests for the Pascal VOC Segmentation dataset for train split for year 2007", {
 
@@ -19,7 +19,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -40,7 +40,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for test split for year
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 4))
+  expect_identical(first_item$y$labels, c(1, 4))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -61,7 +61,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -82,7 +82,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 21))
+  expect_identical(first_item$y$labels, c(1, 21))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -103,7 +103,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -124,7 +124,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -145,7 +145,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 2))
+  expect_identical(first_item$y$labels, c(1, 2))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -166,7 +166,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -187,7 +187,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -208,7 +208,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 2))
+  expect_identical(first_item$y$labels, c(1, 2))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -229,7 +229,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -250,7 +250,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -271,7 +271,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 2))
+  expect_identical(first_item$y$labels, c(1, 2))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -292,7 +292,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -313,7 +313,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -334,7 +334,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 2))
+  expect_identical(first_item$y$labels, c(1, 2))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -355,7 +355,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for train split for yea
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -376,7 +376,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for trainval split for 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 3)
-  expect_equal(first_item$y$labels, c(1, 2, 16))
+  expect_identical(first_item$y$labels, c(1, 2, 16))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -397,7 +397,7 @@ test_that("tests for the Pascal VOC Segmentation dataset for val split for year 
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$labels, "integer")
   expect_length(first_item$y$labels, 2)
-  expect_equal(first_item$y$labels, c(1, 2))
+  expect_identical(first_item$y$labels, c(1, 2))
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 

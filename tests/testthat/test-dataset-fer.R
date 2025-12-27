@@ -16,7 +16,7 @@ test_that("tests for the FER-2013 dataset", {
   expect_length(first_item$x ,2304)
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 
   ds <- fer_dataset(root = t, train = FALSE)
   expect_length(ds, 7178)
@@ -25,7 +25,7 @@ test_that("tests for the FER-2013 dataset", {
   expect_length(first_item$x ,2304)
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 
   ds2 <- fer_dataset(root = t, train = TRUE)
   dl <- torch::dataloader(ds2, batch_size = 32)

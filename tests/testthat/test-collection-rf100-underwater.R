@@ -31,8 +31,8 @@ for (ds_name in dataset$name) {
     expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
-    expect_equal(item$y$boxes$ndim, 2)
-    expect_equal(item$y$boxes$size(2), 4)
+    expect_identical(item$y$boxes$ndim, 2)
+    expect_identical(item$y$boxes$size(2), 4)
     expect_s3_class(item, "image_with_bounding_box")
   })
 }
@@ -51,8 +51,8 @@ test_that(paste0("rf100_underwater_collection loads `aquarium` correctly"), {
   expect_named(item$y, c("image_id","labels","boxes"))
   expect_type(item$y$labels, "integer")
   expect_tensor(item$y$boxes)
-  expect_equal(item$y$boxes$ndim, 2)
-  expect_equal(item$y$boxes$size(2), 4)
+  expect_identical(item$y$boxes$ndim, 2)
+  expect_identical(item$y$boxes$size(2), 4)
   expect_s3_class(item, "image_with_bounding_box")
 
   ds <- rf100_underwater_collection(dataset = "aquarium", split = "test", download = TRUE)

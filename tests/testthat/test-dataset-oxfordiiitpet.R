@@ -1,6 +1,6 @@
 context("dataset-oxfordiiitpet")
 
-t = withr::local_tempdir()
+t <- withr::local_tempdir()
 
 test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split with target type category", {
 
@@ -18,7 +18,7 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split wi
   expect_tensor_shape(first_item$y$mask,c(3,500,394))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label, "integer")
-  expect_equal(first_item$y$label, 1)
+  expect_identical(first_item$y$label, 1)
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -38,7 +38,7 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split wi
   expect_tensor_shape(first_item$y$mask,c(3,500,394))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label,"integer")
-  expect_equal(first_item$y$label, 1)
+  expect_identical(first_item$y$label, 1)
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -58,7 +58,7 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for test split wit
   expect_tensor_shape(first_item$y$mask,c(3,225,300))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label,"integer")
-  expect_equal(first_item$y$label, 1)
+  expect_identical(first_item$y$label, 1)
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -78,7 +78,7 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for test split wit
   expect_tensor_shape(first_item$y$mask,c(3,225,300))
   expect_tensor_dtype(first_item$y$mask,torch_bool())
   expect_type(first_item$y$label,"integer")
-  expect_equal(first_item$y$label, 1)
+  expect_identical(first_item$y$label, 1)
   expect_s3_class(first_item, "image_with_segmentation_mask")
 })
 
@@ -132,7 +132,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for train split", {
   expect_length(first_item$x,591000)
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Oxford-IIIT Pet dataset for test split", {
@@ -147,7 +147,7 @@ test_that("tests for the Oxford-IIIT Pet dataset for test split", {
   expect_length(first_item$x,202500)
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Oxford-IIIT Pet dataset for dataloader", {
@@ -189,7 +189,7 @@ test_that("tests for the Oxford-IIIT Pet binary dataset for train split", {
   expect_length(first_item$x,591000)
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Oxford-IIIT Pet binary dataset for test split", {
@@ -204,7 +204,7 @@ test_that("tests for the Oxford-IIIT Pet binary dataset for test split", {
   expect_length(first_item$x,202500)
   expect_type(first_item$x, "double")
   expect_type(first_item$y,"integer")
-  expect_equal(first_item$y, 1)
+  expect_identical(first_item$y, 1)
 })
 
 test_that("tests for the Oxford-IIIT Pet binary dataset for dataloader", {

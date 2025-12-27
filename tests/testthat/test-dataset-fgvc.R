@@ -41,7 +41,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 56)
+  expect_identical(item$y, 56)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "variant")
   expect_length(fgvc, 3333)
@@ -50,7 +50,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 3)
+  expect_identical(item$y, 3)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "family")
   expect_length(fgvc, 6667)
@@ -59,7 +59,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 32)
+  expect_identical(item$y, 32)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "family")
   expect_length(fgvc, 3333)
@@ -68,7 +68,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 16)
+  expect_identical(item$y, 16)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "manufacturer")
   expect_length(fgvc, 6667)
@@ -77,7 +77,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 13)
+  expect_identical(item$y, 13)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "manufacturer")
   expect_length(fgvc, 3333)
@@ -86,7 +86,7 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(item$y, 5)
+  expect_identical(item$y, 5)
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "test", annotation_level = "all")
   expect_length(fgvc, 3333)
@@ -95,9 +95,9 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 2155620)
   expect_type(item$y, "integer")
-  expect_equal(fgvc$classes$manufacturer[item$y[1]],"Boeing")
-  expect_equal(fgvc$classes$family[item$y[2]],"Boeing 737")
-  expect_equal(fgvc$classes$variant[item$y[3]],"737-200")
+  expect_identical(fgvc$classes$manufacturer[item$y[1]], "Boeing")
+  expect_identical(fgvc$classes$family[item$y[2]], "Boeing 737")
+  expect_identical(fgvc$classes$variant[item$y[3]], "737-200")
 
   fgvc <- fgvc_aircraft_dataset(root = t, split = "trainval", annotation_level = "all")
   expect_length(fgvc, 6667)
@@ -106,9 +106,9 @@ test_that("tests for the FGVC-Aircraft dataset", {
   expect_type(item$x, "double")
   expect_length(item$x, 1854900)
   expect_type(item$y, "integer")
-  expect_equal(fgvc$classes$manufacturer[item$y[1]],"Douglas Aircraft Company")
-  expect_equal(fgvc$classes$family[item$y[2]],"DC-8")
-  expect_equal(fgvc$classes$variant[item$y[3]],"DC-8")
+  expect_identical(fgvc$classes$manufacturer[item$y[1]], "Douglas Aircraft Company")
+  expect_identical(fgvc$classes$family[item$y[2]], "DC-8")
+  expect_identical(fgvc$classes$variant[item$y[3]], "DC-8")
 
     resize_collate_fn <- function(batch) {
     xs <- lapply(batch, function(item) {

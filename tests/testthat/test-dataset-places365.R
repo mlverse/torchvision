@@ -19,8 +19,8 @@ test_that("places365_dataset loads and returns valid items", {
 
   # Check image
   expect_tensor(item$x)
-  expect_equal(item$x$ndim, 3)
-  expect_equal(item$x$shape[1], 3)
+  expect_identical(item$x$ndim, 3)
+  expect_identical(item$x$shape[1], 3)
   expect_gt(item$x$shape[2], 0)
   expect_gt(item$x$shape[3], 0)
   expect_tensor_dtype(item$x, torch::torch_float())
@@ -119,8 +119,8 @@ test_that("places365_dataset_large loads and returns valid items", {
 
   # Check image tensor has 3 channels and positive dims
   expect_tensor(item$x)
-  expect_equal(item$x$ndim, 3)
-  expect_equal(item$x$shape[1], 3)
+  expect_identical(item$x$ndim, 3)
+  expect_identical(item$x$shape[1], 3)
   expect_gt(item$x$shape[2], 0)
   expect_gt(item$x$shape[3], 0)
   expect_tensor_dtype(item$x, torch::torch_float())

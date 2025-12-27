@@ -7,7 +7,7 @@ test_that("vision_make_grid", {
   grid <- vision_make_grid(images, num_rows = 2, padding = 0)
 
 
-  expect_equal(grid$size(), c(3, 32, 32))
+  expect_identical(grid$size(), c(3, 32, 32))
   expect_equal(as.numeric(grid$max() - grid$min()), 1, tolerance = 1e-4)
 
 })
@@ -141,8 +141,8 @@ test_that("draw_bounding_boxes works with coco_detection_sample", {
 
   out <- draw_bounding_boxes(item)
   expect_tensor(out)
-  expect_equal(out$ndim, 3)
-  expect_equal(out$shape[1], 3)  # 3 color channels
+  expect_identical(out$ndim, 3)
+  expect_identical(out$shape[1], 3)  # 3 color channels
   expect_gt(out$shape[2], 100)   # image height is reasonable
   expect_gt(out$shape[3], 100)   # image width is reasonable
 })
@@ -159,8 +159,8 @@ test_that("draw_segmentation_masks works with coco_detection_sample", {
   if (item$y$masks$size(1) > 0) {
     out <- draw_segmentation_masks(item)
     expect_tensor(out)
-    expect_equal(out$ndim, 3)
-    expect_equal(out$shape[1], 3)
+    expect_identical(out$ndim, 3)
+    expect_identical(out$shape[1], 3)
     expect_gt(out$shape[2], 100)
     expect_gt(out$shape[3], 100)
   } else {

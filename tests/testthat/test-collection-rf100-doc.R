@@ -28,8 +28,8 @@ for (ds_name in dataset$name) {
     expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
-    expect_equal(item$y$boxes$ndim, 2)
-    expect_equal(item$y$boxes$size(2), 4)
+    expect_identical(item$y$boxes$ndim, 2)
+    expect_identical(item$y$boxes$size(2), 4)
     expect_s3_class(item, "image_with_bounding_box")
   })
 }
@@ -55,8 +55,8 @@ for (ds_name in dataset$name) {
     expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
-    expect_equal(item$y$boxes$ndim, 2)
-    expect_equal(item$y$boxes$size(2), 4)
+    expect_identical(item$y$boxes$ndim, 2)
+    expect_identical(item$y$boxes$size(2), 4)
     expect_s3_class(item, "image_with_bounding_box")
   })
 }
@@ -65,15 +65,15 @@ for (ds_name in dataset$name) {
 test_that("rf100_document_collection datasets can be turned into a dataloader wo transform", {
   ds <- rf100_document_collection(dataset = "document_part", split = "test", download = TRUE)
 
-  expect_equal(ds$.length(), 181)
+  expect_identical(ds$.length(), 181)
   expect_type(ds$classes, "character")
   expect_length(unique(ds$classes), 2)
 
   items <- ds[7:9]
   # Check shape, dtype, and values on X
   expect_named(items, c("x", "y"))
-  expect_equal(length(items$x), 3)
-  expect_equal(dim(items$x[[1]]), c(640, 640, 3))
+  expect_length(items$x, 3)
+  expect_identical(dim(items$x[[1]]), c(640, 640, 3))
   expect_lte(max(items$x[[1]]), 1)
   # Check shape, dtype and names on y
   expect_named(items$y,c("image_id","labels","boxes"))
@@ -91,8 +91,8 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wo
   )
   # Check shape, dtype, and values on X
   expect_named(i, c("x", "y"))
-  expect_equal(length(i$x), 10)
-  expect_equal(dim(i$x[[1]]), c(640, 640, 3))
+  expect_length(i$x, 10)
+  expect_identical(dim(i$x[[1]]), c(640, 640, 3))
   expect_lte(max(i$x[[1]])$item(), 1)
   # Check shape, dtype and names on y
   expect_named(i$y, c("image_id","labels","boxes"))
@@ -103,7 +103,7 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wo
   N <- i$y$boxes$shape[1]
   expect_gte(N, 10)
   box_points <- i$y$boxes$shape[2]
-  expect_equal(box_points, 4)
+  expect_identical(box_points, 4)
 
 })
 
@@ -140,6 +140,6 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wi
   N <- i$y$boxes$shape[1]
   expect_gte(N, 10)
   box_points <- i$y$boxes$shape[2]
-  expect_equal(box_points, 4)
+  expect_identical(box_points, 4)
 
 })
