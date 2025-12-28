@@ -172,6 +172,10 @@ for name, url in models.items():
     if name.startswith("convnext_") and name.endswith("k"):
       m = m["model"]
     
+    # openmmlab models weights are embedded in a named object
+    if name.startswith("convnext_") and "_upernet_" in name:
+      m = m["state_dict"]
+    
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)
