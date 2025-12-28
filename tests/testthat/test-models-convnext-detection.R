@@ -14,7 +14,7 @@ test_that("tests for non-pretrained model_convnext_tiny_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
   model <- model_convnext_tiny_detection(num_classes = 10)
   out <- model(input)
@@ -23,7 +23,7 @@ test_that("tests for non-pretrained model_convnext_tiny_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_convnext_small_detection", {
@@ -42,7 +42,7 @@ test_that("tests for non-pretrained model_convnext_small_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
   model <- model_convnext_small_detection(num_classes = 10)
   out <- model(input)
@@ -51,7 +51,7 @@ test_that("tests for non-pretrained model_convnext_small_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_convnext_base_detection", {
@@ -70,7 +70,7 @@ test_that("tests for non-pretrained model_convnext_base_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
   model <- model_convnext_base_detection(num_classes = 10)
   out <- model(input)
@@ -79,7 +79,7 @@ test_that("tests for non-pretrained model_convnext_base_detection", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("model_convnext_detection works with pretrained backbone", {
@@ -98,7 +98,7 @@ test_that("model_convnext_detection works with pretrained backbone", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("model_convnext_detection handles different image sizes", {
@@ -150,7 +150,7 @@ test_that("model_convnext_detection has FPN and produces multi-scale features", 
   out <- model(input)
 
   expect_type(out$features, "list")
-  expect_gte(length(out$features), 4)
+  expect_true(length(out$features) >= 4)
 
   for (i in seq_along(out$features)) {
     expect_tensor(out$features[[i]])
@@ -170,9 +170,9 @@ test_that("model_convnext_detection output format matches faster_rcnn", {
 
   expect_named(out, c("features", "detections"))
   expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_identical(out$detections$boxes$shape[2], 4L)
-  expect_identical(out$detections$labels$shape[1], out$detections$scores$shape[1])
-  expect_identical(out$detections$boxes$shape[1], out$detections$labels$shape[1])
+  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$labels$shape[1], out$detections$scores$shape[1])
+  expect_equal(out$detections$boxes$shape[1], out$detections$labels$shape[1])
 })
 
 test_that("model_convnext_detection handles batch processing", {

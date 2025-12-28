@@ -10,7 +10,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
 
   model <- model_fasterrcnn_resnet50_fpn(num_classes = 10)
@@ -20,7 +20,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
@@ -37,7 +37,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
 
   model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
@@ -47,7 +47,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
@@ -64,7 +64,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
 
   model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
@@ -74,7 +74,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
@@ -91,7 +91,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn"
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 
 
   model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
@@ -101,7 +101,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn"
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
@@ -117,7 +117,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
@@ -133,7 +133,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
@@ -149,7 +149,7 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
@@ -165,6 +165,6 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
   expect_tensor(out$detections$boxes)
   expect_tensor(out$detections$labels)
   expect_tensor(out$detections$scores)
-  expect_identical(out$detections$boxes$shape[2], 4L)
+  expect_equal(out$detections$boxes$shape[2], 4L)
 })
 

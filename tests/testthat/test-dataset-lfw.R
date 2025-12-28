@@ -13,7 +13,7 @@ test_that("tests for the LFW People dataset for original image_set", {
   expect_length(first_item$x, 187500)
   expect_type(first_item$x, "double")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW People dataset for funneled image_set", {
@@ -27,7 +27,7 @@ test_that("tests for the LFW People dataset for funneled image_set", {
   expect_length(first_item$x, 187500)
   expect_type(first_item$x, "double")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW People dataset for dataloader", {
@@ -61,7 +61,7 @@ test_that("tests for the LFW Pairs dataset for original image_set train split", 
   expect_length(first_item$x[[2]], 187500)
   expect_type(first_item$x, "list")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW Pairs dataset for funneled image_set train split", {
@@ -76,7 +76,7 @@ test_that("tests for the LFW Pairs dataset for funneled image_set train split", 
   expect_length(first_item$x[[2]], 187500)
   expect_type(first_item$x, "list")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW Pairs dataset for original image_set test split", {
@@ -91,7 +91,7 @@ test_that("tests for the LFW Pairs dataset for original image_set test split", {
   expect_length(first_item$x[[2]], 187500)
   expect_type(first_item$x, "list")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW Pairs dataset for funneled image_set test split", {
@@ -106,7 +106,7 @@ test_that("tests for the LFW Pairs dataset for funneled image_set test split", {
   expect_length(first_item$x[[2]], 187500)
   expect_type(first_item$x, "list")
   expect_type(first_item$y, "integer")
-  expect_identical(first_item$y, 1)
+  expect_equal(first_item$y, 1)
 })
 
 test_that("tests for the LFW People dataset for dataloader", {

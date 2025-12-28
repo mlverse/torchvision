@@ -105,9 +105,9 @@ test_that("we can prune head of mobilenetv3 models", {
   mobilenet <- model_mobilenet_v3_large(pretrained=TRUE)
 
   expect_no_error(prune <- nn_prune_head(mobilenet, 1))
-  expect_s3_class(prune, "nn_sequential")
-  expect_length(prune, 2)
-  expect_s3_class(prune[[1]][1], "nn_sequential")
+  expect_true(inherits(prune, "nn_sequential"))
+  expect_equal(length(prune), 2)
+  expect_true(inherits(prune[[1]][1], "nn_sequential"))
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)

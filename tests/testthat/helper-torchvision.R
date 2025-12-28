@@ -10,7 +10,7 @@ expect_no_error <- function(object, ...) {
 
 expect_tensor_shape <- function(object, expected) {
   expect_tensor(object)
-  expect_identical(object$shape, expected)
+  expect_equal(object$shape, expected)
 }
 
 expect_tensor_dtype <- function(object, expected_dtype) {

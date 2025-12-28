@@ -1,8 +1,8 @@
-x1 <- torch::torch_ones(5)
-y1 <- torch::torch_ones(5)
-x2 <- x1 + 1
-y2 <- y1 + 1
-boxes <- torch::torch_stack(list(x1,y1,x2,y2))$transpose(2,1)
+x1 = torch::torch_ones(5)
+y1 = torch::torch_ones(5)
+x2 = x1 + 1
+y2 = y1 + 1
+boxes = torch::torch_stack(list(x1,y1,x2,y2))$transpose(2,1)
 
 test_that("batched_nms", {
   expect_no_error(
@@ -16,7 +16,7 @@ test_that("batched_nms", {
   expect_tensor(x)
   expect_equal_to_r(x, 1L)
 
-  boxes <- torch::torch_stack(list(x1 + torch_randint(0,6,5),
+  boxes = torch::torch_stack(list(x1 + torch_randint(0,6,5),
                                   y1 + torch_randint(0,6,5),
                                   x2 + torch_randint(6,12,5),
                                   y2 + torch_randint(6,12,5)))$transpose(2,1)
@@ -29,7 +29,7 @@ test_that("batched_nms", {
     )
   )
   expect_tensor(x)
-  expect_gt(x$shape, 1L)
+  expect_true(x$shape > 1L)
 })
 
 test_that("remove_small_boxes", {

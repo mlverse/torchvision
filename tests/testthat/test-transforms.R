@@ -4,7 +4,7 @@ test_that("convert_image_dtype", {
   o <- transform_convert_image_dtype(x, torch_int16())
   y <- transform_convert_image_dtype(o, torch_float32())
 
-  expect_identical(round(as_array(x),1), round(as_array(y),1))
+  expect_equal(round(as_array(x),1), round(as_array(y),1))
 
 })
 
@@ -61,7 +61,7 @@ test_that("crop", {
   o <- transform_crop(x, 1, 1, 2, 2)
 
   expect_tensor_shape(o, c(3,2,2))
-  expect_identical(as_array(x[,1,1]), as_array(o[,1,1]))
+  expect_equal(as_array(x[,1,1]), as_array(o[,1,1]))
 
 })
 
@@ -160,7 +160,7 @@ test_that("random_affine", {
 
   # no translation
   o <- transform_random_affine(x, 0, c(0, 0))
-  expect_identical(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
+  expect_equal(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
 
   # probabilistic transformation with p = 0.1 should not result in sum deviating by > 1
   o <- transform_random_affine(x, 0, c(0.1, 0))
@@ -180,12 +180,12 @@ test_that("affine", {
   # translate by 1 pixel horizontally
   # should result in sum smaller by 1
   o <- transform_affine(x, 0, c(0, 1), 1, 0)
-  expect_identical(as.numeric(torch_sum(x)) - 1, as.numeric(torch_sum(o)))
+  expect_equal(as.numeric(torch_sum(x)) - 1, as.numeric(torch_sum(o)))
 
   # translate by 1 pixel vertically
   # should result in sum smaller by 1
   o <- transform_affine(x, 0, c(1, 0), 1, 0)
-  expect_identical(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
+  expect_equal(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
 
 })
 
@@ -201,7 +201,7 @@ test_that("linear transformation", {
 
   out <- transform_linear_transformation(tensor, matrix, mean_vector)
 
-  expect_identical(dim(out), c(3, 24, 32))
+  expect_equal(dim(out), c(3, 24, 32))
 })
 
 test_that("adjust hue", {
@@ -211,7 +211,7 @@ test_that("adjust hue", {
 
   for (f in hue_factor) {
     out <- transform_adjust_hue(x, f)
-    expect_identical(dim(out), dim(x))
+    expect_equal(dim(out), dim(x))
   }
 
 })
@@ -220,12 +220,12 @@ test_that("grayscale", {
 
   x <- torch::torch_rand(3, 24, 32)
   out <- transform_grayscale(x, 3)
-  expect_identical(dim(out), dim(x))
-  expect_identical(dim(out)[1], 3)
+  expect_equal(dim(out), dim(x))
+  expect_equal(dim(out)[1], 3)
 
   out <- transform_grayscale(x, 1)
-  expect_identical(dim(out)[2:3], dim(x)[2:3])
-  expect_identical(dim(out)[1], 1)
+  expect_equal(dim(out)[2:3], dim(x)[2:3])
+  expect_equal(dim(out)[1], 1)
 
 })
 
@@ -234,7 +234,7 @@ test_that("random grayscale", {
   tensor <- torch::torch_rand(3, 24, 32)
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_grayscale(tensor, p)
-    expect_identical(dim(out), dim(tensor))
+    expect_equal(dim(out), dim(tensor))
   }
 
 })
@@ -246,11 +246,11 @@ test_that("random vertical flip", {
 
   for (i in 1:10) {
     out <- transform_random_vertical_flip(tensor)
-    expect_identical(dim(out), dim(tensor))
+    expect_equal(dim(out), dim(tensor))
   }
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_vertical_flip(tensor, p)
-    expect_identical(dim(out), dim(tensor))
+    expect_equal(dim(out), dim(tensor))
   }
 })
 

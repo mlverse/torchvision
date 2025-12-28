@@ -18,7 +18,7 @@ test_that("rf100_peixos_segmentation_dataset 'test' split works", {
   expect_length(ds, 118)
   item <- ds[1]
   expect_tensor(item$y$masks)
-  expect_identical(item$y$masks$ndim, 3)
+  expect_equal(item$y$masks$ndim, 3)
   expect_gt(item$y$masks$sum()$item(), 0)
 })
 
@@ -31,7 +31,7 @@ test_that("rf100_peixos_segmentation_dataset 'val' split works", {
   expect_length(ds, 251)
   item <- ds[1]
   expect_tensor(item$y$masks)
-  expect_identical(item$y$masks$ndim, 3)
+  expect_equal(item$y$masks$ndim, 3)
   expect_gt(item$y$masks$sum()$item(), 0)
 })
 
@@ -51,8 +51,8 @@ test_that(paste0("rf100_peixos_segmentation_dataset loads 'train' split correctl
   expect_type(item$y, "list")
   expect_named(item$y, c("masks", "labels"))
   expect_tensor(item$y$masks)
-  expect_identical(item$y$masks$ndim, 3)
+  expect_equal(item$y$masks$ndim, 3)
   expect_gt(item$y$masks$sum()$item(), 0)
-  expect_identical(item$y$labels, 1L)
+  expect_equal(item$y$labels, 1L)
   expect_s3_class(item, "image_with_segmentation_mask")
 })

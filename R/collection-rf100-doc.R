@@ -166,9 +166,9 @@ rf100_document_collection <- torch::dataset(
 
     # single parquet file versus arrow dataset, and only keep bboxed images
     if (sum(sel) == 1) {
-      self$.data <- arrow::read_parquet(self$split_file) %>% subset(lengths(objects$bbox) > 0)
+      self$.data <- arrow::read_parquet(self$split_file) %>% subset(sapply(objects$bbox, length) > 0)
     } else {
-      self$.data <- ads$to_data_frame() %>% subset(lengths(objects$bbox) > 0)
+      self$.data <- ads$to_data_frame() %>% subset(sapply(objects$bbox, length) > 0)
     }
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
@@ -234,7 +234,7 @@ rf100_document_collection <- torch::dataset(
       }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
 
     # y, step 1 unnest and select `objects`
-    unnested_df <- do.call(rbind, lapply(seq_len(nrow(df)), function(row) {
+    unnested_df <- do.call(rbind, lapply(1:nrow(df), function(row) {
       obj_df <- df$objects[row, ]
       obj_df$bbox <- list(unlist(obj_df$bbox))
       obj_df$category <- list(unlist(obj_df$category))
@@ -244,7 +244,7 @@ rf100_document_collection <- torch::dataset(
     unnested_bbox <- box_xywh_to_xyxy(torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(-1, 4)))
     unnested_label <- unlist(unnested_df$category)
     # y step 3 repeat image_id along each of unnested value
-    image_id_rep <- rep(df$image_id, lengths(unnested_df$category))
+    image_id_rep <- rep(df$image_id, sapply(unnested_df$category, length))
 
     y <- list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox)
 
