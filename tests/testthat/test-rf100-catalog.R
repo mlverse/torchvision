@@ -16,7 +16,7 @@ test_that("RF100 catalog data exists and has correct structure", {
   expect_length(setdiff(expected_cols, names(catalog)), 0)
 
   # Should have datasets (allow for future additions)
-  expect_true(nrow(catalog) >= 34)
+  expect_gte(nrow(catalog), 34)
 
   # All datasets should have descriptions
   expect_true(all(nchar(catalog$description) > 10))
@@ -50,7 +50,7 @@ test_that("search_rf100 works with keyword search", {
   expect_gt(nrow(cell_results), 0)
 
   # All results should contain "cell" in name or description
-  has_cell <- sapply(1:nrow(cell_results), function(i) {
+  has_cell <- sapply(seq_len(nrow(cell_results)), function(i) {
     grepl("cell", cell_results$dataset[i], ignore.case = TRUE) ||
     grepl("cell", cell_results$description[i], ignore.case = TRUE)
   })
@@ -100,7 +100,7 @@ test_that("search_rf100 works with combined keyword and collection", {
   expect_true(all(results$collection == "biology"))
 
   # All results should contain "cell"
-  has_cell <- sapply(1:nrow(results), function(i) {
+  has_cell <- sapply(seq_len(nrow(results)), function(i) {
     grepl("cell", results$dataset[i], ignore.case = TRUE) ||
     grepl("cell", results$description[i], ignore.case = TRUE)
   })
@@ -127,7 +127,7 @@ test_that("list_rf100_datasets works correctly", {
   # List medical datasets
   medical_datasets <- list_rf100_datasets("medical")
   expect_type(medical_datasets, "character")
-  expect_equal(length(medical_datasets), 8)
+  expect_length(medical_datasets, 8)
 
   # Invalid collection should error
   expect_error(

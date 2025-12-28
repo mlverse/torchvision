@@ -28,7 +28,7 @@ test_that("coco_detection_dataset loads a single example correctly", {
   y <- item$y
 
   expect_is(item$x, "array")
-  expect_equal(length(dim(item$x)), 3)
+  expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
   expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
@@ -89,7 +89,7 @@ test_that("coco_caption_dataset loads a single example correctly", {
   y <- item$y
 
   expect_is(x, "array")
-  expect_equal(length(dim(x)), 3)
+  expect_length(dim(x), 3)
   expect_equal(dim(x)[3], 3)
 
   expect_type(y, "character")

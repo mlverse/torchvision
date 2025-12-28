@@ -72,7 +72,7 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wo
   items <- ds[7:9]
   # Check shape, dtype, and values on X
   expect_named(items, c("x", "y"))
-  expect_equal(length(items$x), 3)
+  expect_length(items$x, 3)
   expect_equal(dim(items$x[[1]]), c(640, 640, 3))
   expect_lte(max(items$x[[1]]), 1)
   # Check shape, dtype and names on y
@@ -91,7 +91,7 @@ test_that("rf100_document_collection datasets can be turned into a dataloader wo
   )
   # Check shape, dtype, and values on X
   expect_named(i, c("x", "y"))
-  expect_equal(length(i$x), 10)
+  expect_length(i$x, 10)
   expect_equal(dim(i$x[[1]]), c(640, 640, 3))
   expect_lte(max(i$x[[1]])$item(), 1)
   # Check shape, dtype and names on y
