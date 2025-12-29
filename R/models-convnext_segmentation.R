@@ -429,7 +429,7 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
     cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_tiny_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(convnext)
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
 
   # ConvNeXt Tiny dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -443,14 +443,14 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
   model <- convnext_upernet(backbone, decode_head, aux_classifier)
 
   if (pretrained) {
-    arch <- "convnext_upernet_tiny_512"
+    arch <- "convnext_tiny_upernet_512"
     info <- convnext_upernet_model_urls[[paste0(arch, "_ade20k")]]
     cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
     state_dict_path <- download_and_cache(info[1], prefix = "convnext")
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(state_dict)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
   }
   model
 }
@@ -464,10 +464,13 @@ model_convnext_small_upernet <- function(num_classes = 21,
                                          pretrained_backbone = FALSE,
                                          pool_scales = c(1, 2, 3, 6),
                                          ...) {
-  validate_num_classes(num_classes, pretrained)
+  validate_num_classes(num_classes, pretrained, label = "ade20k")
+
+  if (pretrained && pretrained_backbone)
+    cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_small_22k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(convnext)
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
 
   # ConvNeXt Small dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -476,9 +479,21 @@ model_convnext_small_upernet <- function(num_classes = 21,
     num_classes = num_classes,
     pool_scales = pool_scales
   )
-  aux_classifier <- if (aux_loss) fcn_head(384, 256, num_classes) else NULL
+  aux_classifier <- if (aux_loss || pretrained) fcn_head(384, 256, num_classes) else NULL
 
-  convnext_upernet(backbone, decode_head, aux_classifier)
+  model <- convnext_upernet(backbone, decode_head, aux_classifier)
+
+  if (pretrained) {
+    arch <- "convnext_small_upernet_512"
+    info <- convnext_upernet_model_urls[[paste0(arch, "_ade20k")]]
+    cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
+    state_dict_path <- download_and_cache(info[1], prefix = "convnext")
+    if (tools::md5sum(state_dict_path) != info[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    state_dict <- torch::load_state_dict(state_dict_path)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
+  }
+  model
 }
 
 
@@ -490,10 +505,13 @@ model_convnext_base_upernet <- function(num_classes = 21,
                                         pretrained_backbone = FALSE,
                                         pool_scales = c(1, 2, 3, 6),
                                         ...) {
-  validate_num_classes(num_classes, pretrained)
+  validate_num_classes(num_classes, pretrained, label = "ade20k")
+
+  if (pretrained && pretrained_backbone)
+    cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_base_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(convnext)
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
 
   # ConvNeXt Base dims: c(128, 256, 512, 1024)
   decode_head <- upernet_head(
@@ -502,9 +520,21 @@ model_convnext_base_upernet <- function(num_classes = 21,
     num_classes = num_classes,
     pool_scales = pool_scales
   )
-  aux_classifier <- if (aux_loss) fcn_head(512, 256, num_classes) else NULL
+  aux_classifier <- if (aux_loss || pretrained) fcn_head(512, 256, num_classes) else NULL
 
-  convnext_upernet(backbone, decode_head, aux_classifier)
+  model <- convnext_upernet(backbone, decode_head, aux_classifier)
+
+  if (pretrained) {
+    arch <- "convnext_base_upernet_512"
+    info <- convnext_upernet_model_urls[[paste0(arch, "_ade20k")]]
+    cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
+    state_dict_path <- download_and_cache(info[1], prefix = "convnext")
+    if (tools::md5sum(state_dict_path) != info[2])
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    state_dict <- torch::load_state_dict(state_dict_path)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
+  }
+  model
 }
 
 #' @importFrom stats setNames
@@ -521,7 +551,8 @@ model_convnext_base_upernet <- function(num_classes = 21,
     sub(pattern = "\\.(\\d)\\.1\\.bn\\.", replacement = ".\\1.2.", x = .) %>%
     sub(pattern = "\\.bn\\.", replacement = ".1.", x = .) %>%
     sub(pattern = "decode_head\\.conv_seg", replacement = "decode_head.cls_seg", x = .) %>%
-    sub(pattern = "auxiliary_head\\.convs\\.0\\.", replacement = "aux_classifier.", x = .)
+    sub(pattern = "auxiliary_head\\.convs\\.0\\.", replacement = "aux_classifier.", x = .) %>%
+    sub(pattern = "auxiliary_head\\.conv_seg\\.", replacement = "aux_classifier.4.", x = .)
 
   # Recreate a list with renamed keys
   setNames(state_dict[names(state_dict)], new_names)
