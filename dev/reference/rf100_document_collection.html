@@ -99,7 +99,7 @@
 
 <dl><dt id="arg-dataset">dataset<a class="anchor" aria-label="anchor" href="#arg-dataset"></a></dt>
 <dd><p>Dataset to select within <code>c("tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")</code>.</p></dd>
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency", "wine_label")</code>.</p></dd>
 
 
 <dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
@@ -120,7 +120,7 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A torch dataset. Each element is a named list with:</p><ul><li><p><code>x</code>: H x W x 3 array representing the image.</p></li>
+    <p>A torch dataset. Each element is a named list with:</p><ul><li><p><code>x</code>: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.</p></li>
 <li><p><code>y</code>: a list containing the target with:</p><ul><li><p><code>image_id</code>: numeric identifier of the x image.</p></li>
 <li><p><code>labels</code>: numeric identifier of the N bounding-box object class.</p></li>
 <li><p><code>boxes</code>: a torch_tensor of shape (N, 4) with bounding boxes, each in \((x_{min}, y_{min}, x_{max}, y_{max})\) format.</p></li>
@@ -130,8 +130,8 @@ visualised with helper functions such as <code><a href="draw_bounding_boxes.html
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Loads one of the <a href="https://universe.roboflow.com/browse/documents" class="external-link">RoboFlow 100 Document</a> datasets with COCO-style
-bounding box annotations for object detection tasks.</p>
+    <p>Loads one of the <a href="https://universe.roboflow.com/browse/documents" class="external-link">RoboFlow 100 Document</a> datasets with
+bounding box annotations for object-detection task.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

@@ -5,7 +5,8 @@ articles:
   examples/mnist-cnn: examples/mnist-cnn.html
   examples/mnist-dcgan: examples/mnist-dcgan.html
   examples/mnist-mlp: examples/mnist-mlp.html
+  rf100-datasets: rf100-datasets.html
   examples/style-transfer: examples/style-transfer.html
   examples/texture-nca: examples/texture-nca.html
   examples/tinyimagenet-alexnet: examples/tinyimagenet-alexnet.html
-last_built: 2025-12-26T14:59Z
+last_built: 2025-12-29T12:53Z

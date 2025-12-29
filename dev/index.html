@@ -115,6 +115,64 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"mlverse/torchvision@main"</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level2">
+<h2 id="rf100-dataset-catalog">RF100 Dataset Catalog<a class="anchor" aria-label="anchor" href="#rf100-dataset-catalog"></a>
+</h2>
+<p>torchvision includes 34 datasets from the RoboFlow 100 benchmark, organized into 6 collections. Use the catalog to easily discover and search for datasets:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://torchvision.mlverse.org" class="external-link">torchvision</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Search for datasets by keyword</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span><span class="st">"solar"</span><span class="op">)</span>       <span class="co"># Find solar/photovoltaic datasets</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span><span class="st">"cell"</span><span class="op">)</span>        <span class="co"># Find cell-related datasets</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span><span class="st">"medical"</span><span class="op">)</span>     <span class="co"># Find medical imaging datasets</span></span>
+<span></span>
+<span><span class="co"># Browse by collection</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span>collection <span class="op">=</span> <span class="st">"biology"</span><span class="op">)</span>    <span class="co"># All biology datasets</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span>collection <span class="op">=</span> <span class="st">"medical"</span><span class="op">)</span>    <span class="co"># All medical datasets</span></span>
+<span></span>
+<span><span class="co"># View complete catalog</span></span>
+<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="fu">get_rf100_catalog</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/View.html" class="external-link">View</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="available-collections">Available Collections<a class="anchor" aria-label="anchor" href="#available-collections"></a>
+</h3>
+<ul>
+<li>
+<strong>Biology</strong> (9 datasets): Microscopy, cells, bacteria, parasites, plant diseases</li>
+<li>
+<strong>Medical</strong> (8 datasets): X-rays, MRI, pathology, tumor detection</li>
+<li>
+<strong>Infrared</strong> (4 datasets): Thermal imaging, FLIR cameras, solar panels</li>
+<li>
+<strong>Damage</strong> (3 datasets): Infrastructure damage, defect detection</li>
+<li>
+<strong>Underwater</strong> (4 datasets): Marine life, coral reefs, underwater objects</li>
+<li>
+<strong>Document</strong> (6 datasets): OCR, document parsing, diagrams</li>
+</ul>
+<p>See <code><a href="articles/rf100-datasets.html">vignette("rf100-datasets")</a></code> for the complete catalog and detailed information.</p>
+</div>
+<div class="section level3">
+<h3 id="example-usage">Example Usage<a class="anchor" aria-label="anchor" href="#example-usage"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Search for a dataset</span></span>
+<span><span class="fu">search_rf100</span><span class="op">(</span><span class="st">"blood"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load the dataset</span></span>
+<span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rf100_biology_collection.html">rf100_biology_collection</a></span><span class="op">(</span></span>
+<span>  dataset <span class="op">=</span> <span class="st">"blood_cell"</span>,</span>
+<span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
+<span>  download <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Visualize a sample</span></span>
+<span><span class="va">item</span> <span class="op">&lt;-</span> <span class="va">ds</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">boxed</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/draw_bounding_boxes.html">draw_bounding_boxes</a></span><span class="op">(</span><span class="va">item</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">boxed</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
 </div>
   </div>
 

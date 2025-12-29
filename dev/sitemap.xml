@@ -8,6 +8,7 @@
 <url><loc>/articles/examples/texture-nca.html</loc></url>
 <url><loc>/articles/examples/tinyimagenet-alexnet.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/rf100-datasets.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
@@ -26,6 +27,7 @@
 <url><loc>/reference/coco_caption_dataset.html</loc></url>
 <url><loc>/reference/coco_detection_dataset.html</loc></url>
 <url><loc>/reference/coco_polygon_to_mask.html</loc></url>
+<url><loc>/reference/collection_catalog.html</loc></url>
 <url><loc>/reference/dot-rename_mobilenet_v3_state_dict.html</loc></url>
 <url><loc>/reference/draw_bounding_boxes.html</loc></url>
 <url><loc>/reference/draw_keypoints.html</loc></url>
@@ -36,10 +38,12 @@
 <url><loc>/reference/flickr_caption_dataset.html</loc></url>
 <url><loc>/reference/flowers102_dataset.html</loc></url>
 <url><loc>/reference/generalized_box_iou.html</loc></url>
+<url><loc>/reference/get_collection_catalog.html</loc></url>
 <url><loc>/reference/image_folder_dataset.html</loc></url>
 <url><loc>/reference/imagenet_classes.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/lfw_dataset.html</loc></url>
+<url><loc>/reference/list_collection_datasets.html</loc></url>
 <url><loc>/reference/magick_loader.html</loc></url>
 <url><loc>/reference/mnist_dataset.html</loc></url>
 <url><loc>/reference/model_alexnet.html</loc></url>
@@ -72,6 +76,7 @@
 <url><loc>/reference/rf100_medical_collection.html</loc></url>
 <url><loc>/reference/rf100_peixos_segmentation_dataset.html</loc></url>
 <url><loc>/reference/rf100_underwater_collection.html</loc></url>
+<url><loc>/reference/search_collection.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>
 <url><loc>/reference/tiny_imagenet_dataset.html</loc></url>
