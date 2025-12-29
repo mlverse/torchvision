@@ -1,13 +1,13 @@
-## code to prepare `collection_catalog` dataset goes here
+## code to prepare `collection_catalog` dataset
 
 
-# This creates a comprehensive catalog of all 39 RF100 datasets
+# This creates a comprehensive catalog of all datasets being parts of a collection.
 
 
 # Biology Collection
 # Image counts and dimensions from RoboFlow dataset metadata
 biology <- data.frame(
-  collection = "biology",
+  collection = "rf100_biology",
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell",
               "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease", "moth"),
   description = c(
@@ -49,7 +49,7 @@ biology <- data.frame(
 
 # Medical Collection
 medical <- data.frame(
-  collection = "medical",
+  collection = "rf100_medical",
   dataset = c("radio_signal", "rheumatology", "knee", "abdomen_mri",
               "brain_axial_mri", "gynecology_mri", "brain_tumor", "fracture"),
   description = c(
@@ -87,7 +87,7 @@ medical <- data.frame(
 
 # Infrared Collection (4 datasets)
 infrared <- data.frame(
-  collection = "infrared",
+  collection = "rf100_infrared",
   dataset = c("thermal_dog_and_people", "solar_panel", "thermal_cheetah", "ir_object"),
   description = c(
     "Thermal imaging of dogs and people",
@@ -116,7 +116,7 @@ infrared <- data.frame(
 
 # Damage Collection (3 datasets)
 damage <- data.frame(
-  collection = "damage",
+  collection = "rf100_damage",
   dataset = c("liquid_crystals", "solar_panel", "asbestos"),
   description = c(
     "4-fold defect detection in liquid crystal displays",
@@ -143,7 +143,7 @@ damage <- data.frame(
 
 # Underwater Collection (4 datasets)
 underwater <- data.frame(
-  collection = "underwater",
+  collection = "rf100_underwater",
   dataset = c("pipes", "aquarium", "objects", "coral"),
   description = c(
     "Underwater pipe detection for infrastructure inspection",
@@ -172,7 +172,7 @@ underwater <- data.frame(
 
 # Document Collection
 document <- data.frame(
-  collection = "document",
+  collection = "rf100_document",
   dataset = c("tweeter_post", "tweeter_profile", "document_part",
               "activity_diagram", "signature", "paper_part", "currency", "wine_label"),
   description = c(
@@ -208,6 +208,34 @@ document <- data.frame(
 )
 
 
+# MNIST Collection
+emnist <- data.frame(
+  collection = "emnist",
+  dataset = c("byclass", "bymerge", "balanced", "letters", "digits", "mnist"),
+  description = c(
+    "Digits, Capital letters and some lower letters",
+    "Digits, Capital letters and some lower letters",
+    "Digits, Capital letters and some lower letters",
+    "lower letters",
+    "Digits",
+    "Digits"
+  ),
+  task = "image classification",
+  num_classes = c(50L, 51L, 50L, 26L, 10L, 10L),
+  num_images = c(116323, 116323, 18800, 20800, 40000, 10000),
+  image_width = 28,
+  image_height = 28,
+  train_size_mb = 540,
+  test_size_mb = 540,
+  valid_size_mb = NA,
+  has_train = TRUE,
+  has_test = TRUE,
+  has_valid = FALSE,
+  roboflow_url = " ",
+  stringsAsFactors = FALSE
+)
+
+
 # Combine all catalogs
 collection_catalog <- rbind(
   biology,
@@ -215,18 +243,17 @@ collection_catalog <- rbind(
   infrared,
   damage,
   underwater,
-  document
+  document,
+  emnist
 )
 
 
 # Add additional metadata
-collection_catalog$total_size_mb <- collection_catalog$train_size_mb +
-  collection_catalog$test_size_mb +
-  collection_catalog$valid_size_mb
+collection_catalog$total_size_mb <- sum(c(collection_catalog$train_size_mb,  collection_catalog$test_size_mb,
+  collection_catalog$valid_size_mb), na.rm = TRUE)
 
 
-collection_catalog$function_name <- paste0("rf100_", collection_catalog$collection, "_collection")
-
+collection_catalog$function_name <- paste0(collection_catalog$collection, "_collection")
 
 collection_catalog$roboflow_url <- ifelse(is.na(collection_catalog$roboflow_url),
                                      paste0("https://universe.roboflow.com/browse/", collection_catalog$collection),
