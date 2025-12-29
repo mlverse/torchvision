@@ -1,4 +1,4 @@
-"collection","dataset","description","task","nlevels","num_images","image_width","image_height","train_size_mb","test_size_mb","valid_size_mb","total_size_mb","has_train","has_test","has_valid","function_name","roboflow_url"
+"collection","dataset","description","task","num_classes","num_images","image_width","image_height","train_size_mb","test_size_mb","valid_size_mb","total_size_mb","has_train","has_test","has_valid","function_name","roboflow_url"
 "biology","bacteria","Bacteria detection in microscopy images","object_detection",1,580,640,640,1.4,2.5,0.8,4.7,TRUE,TRUE,TRUE,"rf100_biology_collection","https://universe.roboflow.com/object-detection/bacteria-ptywi"
 "biology","blood_cell","Blood cell detection (RBC, WBC, platelets)","object_detection",3,364,640,480,6.4,1.8,0.9,9.1,TRUE,TRUE,TRUE,"rf100_biology_collection","https://universe.roboflow.com/object-detection/bccd-ouzjz"
 "biology","cell","General cell detection in microscopy","object_detection",1,52,640,640,0.3,0.1,0.05,0.45,TRUE,TRUE,TRUE,"rf100_biology_collection","https://universe.roboflow.com/object-detection/cells-uyemf"

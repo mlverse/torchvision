@@ -2,7 +2,7 @@ test_that("RF100 catalog data exists and has correct structure", {
   skip_on_cran()
 
   # Load catalog
-  catalog <- get_rf100_catalog()
+  catalog <- get_collection_catalog()
 
   # Should be a data frame
   expect_s3_class(catalog, "data.frame")
@@ -41,11 +41,11 @@ test_that("RF100 catalog data exists and has correct structure", {
   expect_true(all(catalog$has_valid))
 })
 
-test_that("search_rf100 works with keyword search", {
+test_that("search_collection works with keyword search", {
   skip_on_cran()
 
   # Search for cell-related datasets
-  cell_results <- search_rf100("cell")
+  cell_results <- search_collection("cell")
   expect_s3_class(cell_results, "data.frame")
   expect_gt(nrow(cell_results), 0)
 
@@ -57,45 +57,45 @@ test_that("search_rf100 works with keyword search", {
   expect_true(all(has_cell))
 
   # Search for solar datasets
-  solar_results <- search_rf100("solar")
+  solar_results <- search_collection("solar")
   expect_s3_class(solar_results, "data.frame")
   expect_gt(nrow(solar_results), 0)
 
   # Search for non-existent keyword
   expect_message(
-    result <- search_rf100("nonexistent_keyword_xyz"),
+    result <- search_collection("nonexistent_keyword_xyz"),
     "No datasets found"
   )
   expect_null(result)
 })
 
-test_that("search_rf100 works with collection filter", {
+test_that("search_collection works with collection filter", {
   skip_on_cran()
 
   # Search biology collection
-  biology_results <- search_rf100(collection = "biology")
+  biology_results <- search_collection(collection = "biology")
   expect_s3_class(biology_results, "data.frame")
   expect_gte(nrow(biology_results), 10)
   expect_true(all(biology_results$collection == "biology"))
 
   # Search medical collection
-  medical_results <- search_rf100(collection = "medical")
+  medical_results <- search_collection(collection = "medical")
   expect_s3_class(medical_results, "data.frame")
   expect_gte(nrow(medical_results), 8)
   expect_true(all(medical_results$collection == "medical"))
 
   # Invalid collection should error
   expect_error(
-    search_rf100(collection = "invalid_collection"),
+    search_collection(collection = "invalid_collection"),
     "Invalid collection"
   )
 })
 
-test_that("search_rf100 works with combined keyword and collection", {
+test_that("search_collection works with combined keyword and collection", {
   skip_on_cran()
 
   # Search for "cell" in biology collection
-  results <- search_rf100("cell", collection = "biology")
+  results <- search_collection("cell", collection = "biology")
   expect_s3_class(results, "data.frame")
   expect_true(all(results$collection == "biology"))
 
@@ -107,31 +107,31 @@ test_that("search_rf100 works with combined keyword and collection", {
   expect_true(all(has_cell))
 })
 
-test_that("search_rf100 with no arguments returns all datasets", {
+test_that("search_collection with no arguments returns all datasets", {
   skip_on_cran()
 
-  all_results <- search_rf100()
+  all_results <- search_collection()
   expect_s3_class(all_results, "data.frame")
   expect_gte(nrow(all_results), 37)
 })
 
-test_that("list_rf100_datasets works correctly", {
+test_that("list_collection_datasets works correctly", {
   skip_on_cran()
 
   # List biology datasets
-  biology_datasets <- list_rf100_datasets("biology")
+  biology_datasets <- list_collection_datasets("biology")
   expect_type(biology_datasets, "character")
   expect_gte(length(biology_datasets), 10)
   expect_true("blood_cell" %in% biology_datasets)
 
   # List medical datasets
-  medical_datasets <- list_rf100_datasets("medical")
+  medical_datasets <- list_collection_datasets("medical")
   expect_type(medical_datasets, "character")
   expect_length(medical_datasets, 8)
 
   # Invalid collection should error
   expect_error(
-    list_rf100_datasets("invalid_collection"),
+    list_collection_datasets("invalid_collection"),
     "Invalid collection"
   )
 })
@@ -139,7 +139,7 @@ test_that("list_rf100_datasets works correctly", {
 test_that("catalog has correct dataset counts per collection", {
   skip_on_cran()
 
-  catalog <- get_rf100_catalog()
+  catalog <- get_collection_catalog()
 
   # Check counts
   counts <- table(catalog$collection)
@@ -154,7 +154,7 @@ test_that("catalog has correct dataset counts per collection", {
 test_that("catalog includes known datasets", {
   skip_on_cran()
 
-  catalog <- get_rf100_catalog()
+  catalog <- get_collection_catalog()
 
   # Check for some known datasets
   expect_true("blood_cell" %in% catalog$dataset)
@@ -167,7 +167,7 @@ test_that("catalog includes known datasets", {
 test_that("CSV catalog file exists and is readable", {
   skip_on_cran()
 
-  csv_path <- system.file("extdata", "rf100_catalog.csv", package = "torchvision")
+  csv_path <- system.file("extdata", "collection_catalog.csv", package = "torchvision")
 
   # File should exist
   expect_true(file.exists(csv_path))

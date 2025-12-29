@@ -1,4 +1,4 @@
-## code to prepare `rf100_catalog` dataset goes here
+## code to prepare `collection_catalog` dataset goes here
 
 
 # This creates a comprehensive catalog of all 39 RF100 datasets
@@ -209,7 +209,7 @@ document <- data.frame(
 
 
 # Combine all catalogs
-rf100_catalog <- rbind(
+collection_catalog <- rbind(
   biology,
   medical,
   infrared,
@@ -220,21 +220,21 @@ rf100_catalog <- rbind(
 
 
 # Add additional metadata
-rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb +
-  rf100_catalog$test_size_mb +
-  rf100_catalog$valid_size_mb
+collection_catalog$total_size_mb <- collection_catalog$train_size_mb +
+  collection_catalog$test_size_mb +
+  collection_catalog$valid_size_mb
 
 
-rf100_catalog$function_name <- paste0("rf100_", rf100_catalog$collection, "_collection")
+collection_catalog$function_name <- paste0("rf100_", collection_catalog$collection, "_collection")
 
 
-rf100_catalog$roboflow_url <- ifelse(is.na(rf100_catalog$roboflow_url),
-                                     paste0("https://universe.roboflow.com/browse/", rf100_catalog$collection),
-                                     rf100_catalog$roboflow_url)
+collection_catalog$roboflow_url <- ifelse(is.na(collection_catalog$roboflow_url),
+                                     paste0("https://universe.roboflow.com/browse/", collection_catalog$collection),
+                                     collection_catalog$roboflow_url)
 
 
 # Reorder columns for better readability
-rf100_catalog <- rf100_catalog[, c(
+collection_catalog <- collection_catalog[, c(
   "collection", "dataset", "description", "task", "num_classes",
   "num_images", "image_width", "image_height",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
@@ -244,26 +244,26 @@ rf100_catalog <- rf100_catalog[, c(
 
 
 # Sort by collection and dataset
-rf100_catalog <- rf100_catalog[order(rf100_catalog$collection, rf100_catalog$dataset), ]
-rownames(rf100_catalog) <- NULL
+collection_catalog <- collection_catalog[order(collection_catalog$collection, collection_catalog$dataset), ]
+rownames(collection_catalog) <- NULL
 
 
 # Save as R data
-usethis::use_data(rf100_catalog, overwrite = TRUE)
+usethis::use_data(collection_catalog, overwrite = TRUE)
 
 
 # Also save as CSV for easy viewing
-write.csv(rf100_catalog, "inst/extdata/rf100_catalog.csv", row.names = FALSE)
+write.csv(collection_catalog, "inst/extdata/collection_catalog.csv", row.names = FALSE)
 
 
 # Summarize it
 cli::cli_h1("RF100 Dataset Catalog Summary")
-cli::cli_text("Total datasets: {nrow(rf100_catalog)}")
-cli::cli_text("Collections: {.val {paste(unique(rf100_catalog$collection), collapse = ', ')}}")
+cli::cli_text("Total datasets: {nrow(collection_catalog)}")
+cli::cli_text("Collections: {.val {paste(unique(collection_catalog$collection), collapse = ', ')}}")
 cli::cli_h2("Datasets by collection")
-cli::cli_verbatim(capture.output(print(table(rf100_catalog$collection))))
-cli::cli_text("Total size (all datasets): {.strong {prettyunits::pretty_bytes(sum(rf100_catalog$total_size_mb) * 1024^2)}}")
+cli::cli_verbatim(capture.output(print(table(collection_catalog$collection))))
+cli::cli_text("Total size (all datasets): {.strong {prettyunits::pretty_bytes(sum(collection_catalog$total_size_mb) * 1024^2)}}")
 cli::cli_h2("Catalog saved to:")
 cli::cli_ul()
-cli::cli_li("{.path data/rf100_catalog.rda}")
-cli::cli_li("{.path inst/extdata/rf100_catalog.csv}")
+cli::cli_li("{.path data/collection_catalog.rda}")
+cli::cli_li("{.path inst/extdata/collection_catalog.csv}")
