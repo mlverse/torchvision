@@ -2,12 +2,16 @@
 
 ## New features
 
-* Added RF100 dataset catalog with `search_rf100()`, `get_rf100_catalog()`, and `list_rf100_datasets()` functions for discovering and exploring RoboFlow 100 datasets (#271, @ANAMASGARD).
+* Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 
 ## New models
 
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
+
+## New datasets
+
+* Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
 ## Bug fixes and improvements
 
