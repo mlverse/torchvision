@@ -13,7 +13,7 @@ test_that("tests for the mnist dataset", {
   i <- ds[1]
   expect_equal(dim(i[[1]]), c(28, 28))
   expect_equal(i[[2]], 6)
-  expect_equal(length(ds), 60000)
+  expect_length(ds, 60000)
 
   ds <- mnist_dataset(dir, transform = transform_to_tensor)
   dl <- torch::dataloader(ds, batch_size = 32)
@@ -38,7 +38,7 @@ test_that("tests for the kmnist dataset", {
   i <- ds[1]
   expect_equal(dim(i[[1]]), c(28, 28))
   expect_equal(i[[2]], 6)
-  expect_equal(length(ds), 60000)
+  expect_length(ds, 60000)
 
   ds <- kmnist_dataset(dir, transform = transform_to_tensor)
   dl <- torch::dataloader(ds, batch_size = 32)
@@ -85,30 +85,30 @@ test_that("tests for the emnist dataset", {
   )
 
   emnist <- emnist_collection(dir, dataset = "balanced", download = TRUE)
-  expect_equal(length(emnist), 18800)
+  expect_length(emnist, 18800)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_s3_class(first_item$x, "array")
   expect_equal((first_item[[2]]), 42)
 
   emnist <- emnist_collection(dir, dataset = "byclass", split = "test", download = TRUE)
-  expect_equal(length(emnist), 116323)
+  expect_length(emnist, 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_s3_class(first_item$x, "array")
   expect_equal(dim(first_item$x), c(28,28))
   expect_equal((first_item[[2]]), 19)
 
   emnist <- emnist_collection(dir, dataset = "bymerge", download = TRUE)
-  expect_equal(length(emnist), 116323)
+  expect_length(emnist, 116323)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_s3_class(first_item$x, "array")
   expect_equal((first_item[[2]]), 25)
 
   emnist <- emnist_collection(dir, dataset = "letters", split = "train", download = TRUE,
                            transform = transform_to_tensor)
-  expect_equal(length(emnist), 124800)
+  expect_length(emnist, 124800)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_tensor(first_item$x)
@@ -116,17 +116,17 @@ test_that("tests for the emnist dataset", {
   expect_equal((first_item[[2]]), 24)
 
   emnist <- emnist_collection(dir, dataset = "digits", download = TRUE)
-  expect_equal(length(emnist), 40000)
+  expect_length(emnist, 40000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_s3_class(first_item$x, "array")
   expect_equal((first_item[[2]]), 1)
 
   emnist <- emnist_collection(dir, dataset = "mnist", split = "train", download = TRUE)
-  expect_equal(length(emnist), 60000)
+  expect_length(emnist, 60000)
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
-  expect_true(inherits(first_item$x, "array"))
+  expect_s3_class(first_item$x, "array")
   expect_equal((first_item[[2]]), 5)
 
   ds2 <- emnist_collection(
@@ -160,7 +160,7 @@ test_that("tests for the qmnist dataset", {
     expect_equal(dim(i[[1]]), c(28, 28))
     expect_true(i[[2]] %in% 1:10)
 
-    expect_true(length(ds) > 0)
+    expect_gt(length(ds), 0)
 
     ds <- qmnist_dataset(dir, split = split, transform = transform_to_tensor)
     dl <- torch::dataloader(ds, batch_size = 32)

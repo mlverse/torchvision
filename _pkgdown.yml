@@ -113,3 +113,5 @@ reference:
    - clip_boxes_to_image
    - generalized_box_iou
    - remove_small_boxes
+   - search_collection
+   - contains("collection_")

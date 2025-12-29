@@ -1,1 +1,1 @@
-utils::globalVariables(c("..", "N", "magick_loader", "self", "rf100_catalog"))
+utils::globalVariables(c("..", "N", "magick_loader", "self", "collection_catalog"))
