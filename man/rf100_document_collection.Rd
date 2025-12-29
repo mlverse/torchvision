@@ -14,7 +14,7 @@ rf100_document_collection(
 }
 \arguments{
 \item{dataset}{Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency")}.}
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency", "wine_label")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 

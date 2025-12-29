@@ -10,7 +10,7 @@ test_that("rf100_document_collection handles missing dataset gracefully", {
 # small datasets
 dataset <- data.frame(name = c("tweeter_post", "tweeter_profile", "document_part",
                                 "activity_diagram", "signature", "currency"),
-                       nlevels = c(2L, 1L, 2L, 19L, 1L, 10L)
+                       num_classes = c(2L, 1L, 2L, 19L, 1L, 10L)
 )
 
 for (ds_name in dataset$name) {
@@ -20,7 +20,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_document_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 
@@ -35,7 +35,7 @@ for (ds_name in dataset$name) {
 }
 
 dataset <- data.frame(name = c("paper_part", "wine_label"),
-                      nlevels = c(19L, 12L)
+                      num_classes = c(19L, 12L)
 )
 
 for (ds_name in dataset$name) {
@@ -47,7 +47,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_document_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 

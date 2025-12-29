@@ -23,7 +23,7 @@ biology <- data.frame(
     "Moths for agriculture, entomology, and crop pest management, particularly in Asia"
   ),
   task = "object_detection",
-  nlevels = c(2L, 3L, 8L, 1L, 1L, 1L, 1L, 2L, 4L, 28L),
+  num_classes = c(2L, 3L, 8L, 1L, 1L, 1L, 1L, 2L, 4L, 28L),
   num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756, 711),
   image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640, 640),
   image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640, 640),
@@ -63,7 +63,7 @@ medical <- data.frame(
     "Bone fracture detection in X-rays"
   ),
   task = "object_detection",
-  nlevels = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L),
+  num_classes = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L),
   num_images = c(1320, 120, 1695, 1410, 148, 2620, 3064, 628),
   image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
   image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
@@ -96,7 +96,7 @@ infrared <- data.frame(
     "FLIR camera object detection in infrared"
   ),
   task = "object_detection",
-  nlevels = c(2L, 5L, 2L, 4L),
+  num_classes = c(2L, 5L, 2L, 4L),
   num_images = c(203, 384, 96, 8862),
   image_width = c(640, 640, 640, 640),
   image_height = c(512, 640, 480, 512),
@@ -124,7 +124,7 @@ damage <- data.frame(
     "Asbestos detection for safety inspection"
   ),
   task = "object_detection",
-  nlevels = c(1L, 5L, 4L),
+  num_classes = c(1L, 5L, 4L),
   num_images = c(614, 384, 748),
   image_width = c(640, 640, 640),
   image_height = c(640, 640, 640),
@@ -152,7 +152,7 @@ underwater <- data.frame(
     "Coral reef detection and monitoring"
   ),
   task = "object_detection",
-  nlevels = c(1L, 7L, 5L, 14L),
+  num_classes = c(1L, 7L, 5L, 14L),
   num_images = c(5618, 638, 8174, 716),
   image_width = c(640, 640, 640, 640),
   image_height = c(480, 640, 480, 480),
@@ -186,7 +186,7 @@ document <- data.frame(
     "Wine Label elements detection"
   ),
   task = "object_detection",
-  nlevels = c(2L, 1L, 2L, 19L, 1L, 19L, 10L, 12L),
+  num_classes = c(2L, 1L, 2L, 19L, 1L, 19L, 10L, 12L),
   num_images = c(575, 468, 2402, 2604, 1894, 2202, 789, 4642),
   image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
   image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
@@ -235,7 +235,7 @@ rf100_catalog$roboflow_url <- ifelse(is.na(rf100_catalog$roboflow_url),
 
 # Reorder columns for better readability
 rf100_catalog <- rf100_catalog[, c(
-  "collection", "dataset", "description", "task", "nlevels",
+  "collection", "dataset", "description", "task", "num_classes",
   "num_images", "image_width", "image_height",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
   "has_train", "has_test", "has_valid",

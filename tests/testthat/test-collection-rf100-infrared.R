@@ -10,7 +10,7 @@ test_that("rf100_infrared_collection handles missing files gracefully", {
 })
 
 dataset <- data.frame(name = c("thermal_dog_and_people", "solar_panel", "thermal_cheetah"),
-                      nlevels = c(2L, 5L, 2L)
+                      num_classes = c(2L, 5L, 2L)
 )
 
 for (ds_name in dataset$name) {
@@ -20,7 +20,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_infrared_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[2] # as 2 datasets have their first item wo bbox
 

@@ -11,7 +11,7 @@ test_that("rf100_medical_collection handles missing files gracefully", {
 
 dataset <- data.frame(name = c("radio_signal", "rheumatology", "knee", "abdomen_mri", "brain_axial_mri",
                                "gynecology_mri", "brain_tumor", "fracture"),
-                      nlevels = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L)
+                      num_classes = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L)
 )
 
 for (ds_name in dataset$name) {
@@ -21,7 +21,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_medical_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[2] # as 2 datasets have their first item wo bbox
 

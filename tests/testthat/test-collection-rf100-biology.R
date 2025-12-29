@@ -10,7 +10,7 @@ test_that("rf100_biology_collection handles missing files gracefully", {
 })
 
 small_dataset <- data.frame(name = c("blood_cell",  "cell", "bacteria", "mitosis"),
-                            nlevels = c(3L, 1L, 1L, 1L)
+                            num_classes = c(3L, 1L, 1L, 1L)
 )
 
 for (ds_name in small_dataset$name) {
@@ -21,7 +21,7 @@ for (ds_name in small_dataset$name) {
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
     expect_length(unique(ds$classes),
-                  small_dataset[small_dataset$name == ds_name,]$nlevels)
+                  small_dataset[small_dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 
@@ -36,7 +36,7 @@ for (ds_name in small_dataset$name) {
 }
 
 dataset <- data.frame(name = c("stomata_cell", "parasite", "cotton_desease", "phage", "liver_desease", "moth"),
-                      nlevels = c(2L, 8L, 1L, 2L, 4L, 28L)
+                      num_classes = c(2L, 8L, 1L, 2L, 4L, 28L)
 )
 
 for (ds_name in dataset$name) {
@@ -48,7 +48,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_biology_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 

@@ -8,7 +8,7 @@ test_that("RF100 catalog data exists and has correct structure", {
   expect_s3_class(catalog, "data.frame")
 
   # Should have expected columns
-  expected_cols <- c("collection", "dataset", "description", "task", "nlevels",
+  expected_cols <- c("collection", "dataset", "description", "task", "num_classes",
                      "num_images", "image_width", "image_height",
                      "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
                      "has_train", "has_test", "has_valid",

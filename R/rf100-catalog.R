@@ -10,7 +10,7 @@
 #'   \item{dataset}{Dataset identifier used in collection functions}
 #'   \item{description}{Brief description of the dataset and its purpose}
 #'   \item{task}{Machine learning task type (currently all "object_detection")}
-#'   \item{nlevels}{Number of levels that classify objects}
+#'   \item{num_classes}{Number of different object classes}
 #'   \item{num_images}{Total images across all splits}
 #'   \item{image_width}{Typical image width in pixels}
 #'   \item{image_height}{Typical image height in pixels}

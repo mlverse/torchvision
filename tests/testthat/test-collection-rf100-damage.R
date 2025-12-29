@@ -10,7 +10,7 @@ test_that("rf100_damage_collection handles missing files gracefully", {
 })
 
 dataset <- data.frame(name = c("liquid_crystals", "solar_panel", "asbestos"),
-                      nlevels = c(1L, 5L, 4L)
+                      num_classes = c(1L, 5L, 4L)
 )
 
 for (ds_name in dataset$name) {
@@ -20,7 +20,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_damage_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 

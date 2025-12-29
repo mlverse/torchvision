@@ -11,7 +11,7 @@ test_that("rf100_underwater_collection handles missing files gracefully", {
 
 datasets <- c()
 dataset <- data.frame(name = c("pipes", "objects", "coral"),
-                      nlevels = c(1L, 5L, 14L)
+                      num_classes = c(1L, 5L, 14L)
 )
 
 for (ds_name in dataset$name) {
@@ -23,7 +23,7 @@ for (ds_name in dataset$name) {
     expect_s3_class(ds, "rf100_underwater_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$nlevels)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 
