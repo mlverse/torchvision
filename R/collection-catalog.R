@@ -1,25 +1,26 @@
-#' RF100 Dataset Catalog
+#' Dataset Collection Catalog
 #'
-#' A comprehensive catalog of all RF100 (RoboFlow 100) datasets available in torchvision.
+#' A comprehensive catalog of all collections RF100 (RoboFlow 100) and EMNIST datasets available in torchvision.
 #' This data frame contains metadata about each dataset including descriptions, sizes,
 #' available splits, and collection information.
 #'
-#' @format A data frame with datasets as rows and 16 columns:
+#' @format A data frame with datasets as rows and 17 columns:
 #' \describe{
-#'   \item{collection}{Collection name (biology, medical, infrared, damage, underwater, document)}
+#'   \item{collection}{Collection name (biology, medical, infrared, damage, underwater, document, mnist)}
 #'   \item{dataset}{Dataset identifier used in collection functions}
 #'   \item{description}{Brief description of the dataset and its purpose}
 #'   \item{task}{Machine learning task type (currently all "object_detection")}
-#'   \item{num_images}{Total number of images across all splits}
+#'   \item{num_classes}{Number of different object classes}
+#'   \item{num_images}{Total images across all splits}
 #'   \item{image_width}{Typical image width in pixels}
 #'   \item{image_height}{Typical image height in pixels}
 #'   \item{train_size_mb}{Size of training split in megabytes}
 #'   \item{test_size_mb}{Size of test split in megabytes}
 #'   \item{valid_size_mb}{Size of validation split in megabytes}
 #'   \item{total_size_mb}{Total size across all splits in megabytes}
-#'   \item{has_train}{Logical indicating if training split is available}
-#'   \item{has_test}{Logical indicating if test split is available}
-#'   \item{has_valid}{Logical indicating if validation split is available}
+#'   \item{has_train}{Is training split available}
+#'   \item{has_test}{Is test split available}
+#'   \item{has_valid}{Is validation split available}
 #'   \item{function_name}{R function name to load this dataset's collection}
 #'   \item{roboflow_url}{URL to the collection on RoboFlow Universe}
 #' }
@@ -27,22 +28,22 @@
 #' @examples
 #' \dontrun{
 #' # View the complete catalog
-#' data(rf100_catalog)
-#' View(rf100_catalog)
+#' data(collection_catalog)
+#' View(collection_catalog)
 #'
 #' # See all biology datasets
-#' subset(rf100_catalog, collection == "biology")
+#' subset(collection_catalog, collection == "biology")
 #'
 #' # Find large datasets (> 100 MB)
-#' subset(rf100_catalog, total_size_mb > 100)
+#' subset(collection_catalog, total_size_mb > 100)
 #' }
 #'
-#' @seealso [search_rf100()], [get_rf100_catalog()]
-"rf100_catalog"
+#' @seealso [search_collection()], [get_collection_catalog()]
+"collection_catalog"
 
-#' Search RF100 Dataset Catalog
+#' Search Collection Catalog
 #'
-#' Search through all RF100 datasets by keywords in name or description,
+#' Search through all Collection datasets by keywords in name or description,
 #' or filter by collection. This makes it easy to discover datasets relevant
 #' to your task without browsing each collection individually.
 #'
@@ -58,33 +59,33 @@
 #' @examples
 #' \dontrun{
 #' # Find all medical datasets
-#' search_rf100(collection = "medical")
+#' search_collection(collection = "medical")
 #'
 #' # Find datasets about cells
-#' search_rf100("cell")
+#' search_collection("cell")
 #'
 #' # Find photovoltaic/solar datasets
-#' search_rf100("solar")
-#' search_rf100("photovoltaic")
+#' search_collection("solar")
+#' search_collection("photovoltaic")
 #'
 #' # Find all biology datasets with "cell" in name/description
-#' search_rf100("cell", collection = "biology")
+#' search_collection("cell", collection = "biology")
 #'
 #' # List all available datasets
-#' search_rf100()
+#' search_collection()
 #' }
 #'
-#' @seealso [get_rf100_catalog()], [rf100_catalog]
+#' @seealso [get_collection_catalog()], [collection_catalog]
 #' @export
-search_rf100 <- function(keyword = NULL, collection = NULL) {
+search_collection <- function(keyword = NULL, collection = NULL) {
   # Load the catalog
-  utils::data("rf100_catalog", package = "torchvision", envir = environment())
+  utils::data("collection_catalog", package = "torchvision", envir = environment())
 
-  result <- rf100_catalog
+  result <- collection_catalog
 
   # Filter by collection first
   if (!is.null(collection)) {
-    valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document")
+    valid_collections <- c("rf100_biology", "rf100_medical", "rf100_infrared", "rf100_damage", "rf100_underwater", "rf100_document", "mnist")
     if (!collection %in% valid_collections) {
       stop("Invalid collection. Must be one of: ", paste(valid_collections, collapse = ", "))
     }
@@ -110,17 +111,17 @@ search_rf100 <- function(keyword = NULL, collection = NULL) {
   result
 }
 
-#' Get Complete RF100 Catalog
+#' Get Complete Collection Catalog
 #'
-#' Returns the complete catalog of all RF100 datasets with their metadata.
-#' This is a convenience function that loads and returns the rf100_catalog data.
+#' Returns the complete catalog of datasets in collections with their metadata.
+#' This is a convenience function that loads and returns the collection_catalog data.
 #'
-#' @return A data frame with all RF100 datasets and their metadata.
+#' @return A data frame with all datasets and their metadata.
 #'
 #' @examples
 #' \dontrun{
 #' # Get complete catalog
-#' catalog <- get_rf100_catalog()
+#' catalog <- get_collection_catalog()
 #'
 #' # View in RStudio
 #' View(catalog)
@@ -136,14 +137,14 @@ search_rf100 <- function(keyword = NULL, collection = NULL) {
 #' catalog[which.max(catalog$total_size_mb), ]
 #' }
 #'
-#' @seealso [search_rf100()], [rf100_catalog]
+#' @seealso [search_collection()], [collection_catalog]
 #' @export
-get_rf100_catalog <- function() {
-  utils::data("rf100_catalog", package = "torchvision", envir = environment())
-  rf100_catalog
+get_collection_catalog <- function() {
+  utils::data("collection_catalog", package = "torchvision", envir = environment())
+  collection_catalog
 }
 
-#' List Datasets in an RF100 Collection
+#' List Datasets in a Collection
 #'
 #' List all available datasets within a specific RF100 collection.
 #'
@@ -155,22 +156,22 @@ get_rf100_catalog <- function() {
 #' @examples
 #' \dontrun{
 #' # List all biology datasets
-#' list_rf100_datasets("biology")
+#' list_collection_datasets("biology")
 #'
 #' # List all medical datasets
-#' list_rf100_datasets("medical")
+#' list_collection_datasets("medical")
 #' }
 #'
-#' @seealso [search_rf100()], [get_rf100_catalog()]
+#' @seealso [search_collection()], [get_collection_catalog()]
 #' @export
-list_rf100_datasets <- function(collection) {
-  valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document")
+list_collection_datasets <- function(collection) {
+  valid_collections <- c("rf100_biology", "rf100_medical", "rf100_infrared", "rf100_damage", "rf100_underwater", "rf100_document", "mnist")
   if (!collection %in% valid_collections) {
     stop("Invalid collection. Must be one of: ", paste(valid_collections, collapse = ", "))
   }
 
-  utils::data("rf100_catalog", package = "torchvision", envir = environment())
-  datasets <- rf100_catalog[rf100_catalog$collection == collection, "dataset"]
+  utils::data("collection_catalog", package = "torchvision", envir = environment())
+  datasets <- collection_catalog[collection_catalog$collection == collection, "dataset"]
   sort(datasets)
 }
 

@@ -4,11 +4,11 @@ NULL
 #' RoboFlow 100  Biology dataset Collection
 #'
 #' Loads one of the [RoboFlow 100 Biology](https://universe.roboflow.com/browse/biology) datasets with
-#' bounding box annotations for object detection tasks.
+#' bounding box annotations for object-detection task.
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",
-#' "bacteria", "cotton_desease","mitosis", "phage", "liver_desease")}.
+#' "bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "moth")}.
 #' @inherit rf100_document_collection return
 #'
 #' @examples
@@ -34,9 +34,9 @@ rf100_biology_collection <- torch::dataset(
     dataset = rep(c(
       "stomata_cell", "blood_cell", "parasite", "cell",
       "bacteria", "cotton_desease",
-      "mitosis", "phage", "liver_desease"
+      "mitosis", "phage", "liver_desease", "moth"
     ),each = 3),
-    split   = rep(c("train", "test", "valid"), times = 9),
+    split   = rep(c("train", "test", "valid"), times = 10),
     url = c(
       # stomata_cell
       "https://huggingface.co/datasets/Francesco/stomata-cells/resolve/main/data/train-00000-of-00001-f3d24fcd68c928f1.parquet",
@@ -73,7 +73,11 @@ rf100_biology_collection <- torch::dataset(
       # liver_desease
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/train-00000-of-00001-075b34404316815c.parquet",
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/test-00000-of-00001-d6b1dd29852bde4e.parquet",
-      "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet"
+      "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet",
+      # moth
+      "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/train-00000-of-00001-a5be297b7b534376.parquet",
+      "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/test-00000-of-00001-5c1caa13c9b39012.parquet",
+      "https://huggingface.co/datasets/Francesco/pests-2xlvx/resolve/main/data/validation-00000-of-00001-290a53c18d2f7a52.parquet"
     ),
     md5 = c(
       # stomata_cell
@@ -93,10 +97,13 @@ rf100_biology_collection <- torch::dataset(
       # phage
       "c7622fed8a37b697b9dd1c3ab0d0708f",      "4623461f1526e50c6badae08e28b1692",      "9610c62631166e65636d25d541b6911b",
       # liver_desease
-      "9b5839ae524277eb1702a0db33030e9a",      "c97b80332d710b1378a9f3ceb5abc197",      "2f255ba7ed3c1ce0948d2fc06305ce54"
+      "9b5839ae524277eb1702a0db33030e9a",      "c97b80332d710b1378a9f3ceb5abc197",      "2f255ba7ed3c1ce0948d2fc06305ce54",
+      # moth
+      "53c4c82727cd36a3093be388f27c3b3e",      "79a9fb92f219ce24412cbb2836e79e0f",      "2d8cd490d91bb9f25c17ff2ac332c010"
     ),
-    size = c(81, 24, 12, 6.4, 1.8, .9 , 65.1,17.9,9,  .3, .1, .05,
-             1.4, 2.5, .8, 62, 16.8, 9,
-             19, 5.3, 2.7,   69,9.0, 5.7,   192,55.6, 28) * 1e6
+    size = c(81, 24, 12, 6.4, 1.8, 0.9 , 65.1,17.9,9,  0.3, 0.1, 0.05,
+             1.4, 2.5, 0.8,   62, 16.8, 9,
+             19, 5.3, 2.7,   69,9.0, 5.7,   192,55.6, 28,
+             45, 13, 4.5) * 1e6
   )
 )

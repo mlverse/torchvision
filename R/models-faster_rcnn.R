@@ -835,7 +835,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 
 #' Faster R-CNN Models
 #'
-#' Construct Faster R-CNN model variants for object detection tasks.
+#' Construct Faster R-CNN model variants for object-detection task.
 #'
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
