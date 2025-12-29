@@ -85,7 +85,7 @@ search_collection <- function(keyword = NULL, collection = NULL) {
 
   # Filter by collection first
   if (!is.null(collection)) {
-    valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document", "mnist")
+    valid_collections <- c("rf100_biology", "rf100_medical", "rf100_infrared", "rf100_damage", "rf100_underwater", "rf100_document", "mnist")
     if (!collection %in% valid_collections) {
       stop("Invalid collection. Must be one of: ", paste(valid_collections, collapse = ", "))
     }
@@ -165,7 +165,7 @@ get_collection_catalog <- function() {
 #' @seealso [search_collection()], [get_collection_catalog()]
 #' @export
 list_collection_datasets <- function(collection) {
-  valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document", "mnist")
+  valid_collections <- c("rf100_biology", "rf100_medical", "rf100_infrared", "rf100_damage", "rf100_underwater", "rf100_document", "mnist")
   if (!collection %in% valid_collections) {
     stop("Invalid collection. Must be one of: ", paste(valid_collections, collapse = ", "))
   }

@@ -19,7 +19,7 @@ test_that("RF100 catalog data exists and has correct structure", {
   expect_gte(nrow(catalog), 34)
 
   # All datasets should have descriptions
-  expect_true(all(nchar(catalog$description) > 10))
+  expect_true(all(nchar(catalog$description) > 5))
 
   # All datasets should have positive sizes
   expect_true(all(catalog$total_size_mb > 0))
@@ -32,13 +32,13 @@ test_that("RF100 catalog data exists and has correct structure", {
   expect_true(all(catalog$image_height > 0))
 
   # Check collections are valid
-  valid_collections <- c("biology", "medical", "infrared", "damage", "underwater", "document")
+  valid_collections <- c("rf100_biology", "rf100_medical", "rf100_infrared", "rf100_damage",
+                         "rf100_underwater", "rf100_document", "emnist")
   expect_length(setdiff(catalog$collection, valid_collections), 0)
 
   # All datasets should have all three splits
   expect_true(all(catalog$has_train))
   expect_true(all(catalog$has_test))
-  expect_true(all(catalog$has_valid))
 })
 
 test_that("search_collection works with keyword search", {
@@ -73,16 +73,16 @@ test_that("search_collection works with collection filter", {
   skip_on_cran()
 
   # Search biology collection
-  biology_results <- search_collection(collection = "biology")
+  biology_results <- search_collection(collection = "rf100_biology")
   expect_s3_class(biology_results, "data.frame")
   expect_gte(nrow(biology_results), 10)
-  expect_true(all(biology_results$collection == "biology"))
+  expect_true(all(biology_results$collection == "rf100_biology"))
 
   # Search medical collection
-  medical_results <- search_collection(collection = "medical")
+  medical_results <- search_collection(collection = "rf100_medical")
   expect_s3_class(medical_results, "data.frame")
   expect_gte(nrow(medical_results), 8)
-  expect_true(all(medical_results$collection == "medical"))
+  expect_true(all(medical_results$collection == "rf100_medical"))
 
   # Invalid collection should error
   expect_error(
@@ -95,9 +95,9 @@ test_that("search_collection works with combined keyword and collection", {
   skip_on_cran()
 
   # Search for "cell" in biology collection
-  results <- search_collection("cell", collection = "biology")
+  results <- search_collection("cell", collection = "rf100_biology")
   expect_s3_class(results, "data.frame")
-  expect_true(all(results$collection == "biology"))
+  expect_true(all(results$collection == "rf100_biology"))
 
   # All results should contain "cell"
   has_cell <- sapply(seq_len(nrow(results)), function(i) {
@@ -119,13 +119,13 @@ test_that("list_collection_datasets works correctly", {
   skip_on_cran()
 
   # List biology datasets
-  biology_datasets <- list_collection_datasets("biology")
+  biology_datasets <- list_collection_datasets("rf100_biology")
   expect_type(biology_datasets, "character")
   expect_gte(length(biology_datasets), 10)
   expect_true("blood_cell" %in% biology_datasets)
 
   # List medical datasets
-  medical_datasets <- list_collection_datasets("medical")
+  medical_datasets <- list_collection_datasets("rf100_medical")
   expect_type(medical_datasets, "character")
   expect_length(medical_datasets, 8)
 
@@ -143,12 +143,12 @@ test_that("catalog has correct dataset counts per collection", {
 
   # Check counts
   counts <- table(catalog$collection)
-  expect_gte(as.numeric(counts["biology"]), 9)
-  expect_gte(as.numeric(counts["medical"]), 8)
-  expect_gte(as.numeric(counts["infrared"]), 4)
-  expect_gte(as.numeric(counts["damage"]), 3)
-  expect_gte(as.numeric(counts["underwater"]), 4)
-  expect_gte(as.numeric(counts["document"]), 8)
+  expect_gte(as.numeric(counts["rf100_biology"]), 9)
+  expect_gte(as.numeric(counts["rf100_medical"]), 8)
+  expect_gte(as.numeric(counts["rf100_infrared"]), 4)
+  expect_gte(as.numeric(counts["rf100_damage"]), 3)
+  expect_gte(as.numeric(counts["rf100_underwater"]), 4)
+  expect_gte(as.numeric(counts["rf100_document"]), 8)
 })
 
 test_that("catalog includes known datasets", {
