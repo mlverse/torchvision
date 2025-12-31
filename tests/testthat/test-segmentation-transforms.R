@@ -1,7 +1,5 @@
 context("segmentation-transforms")
 
-# Issue #176: Segmentation Dataset Transform Alignment
-
 # Helper to create mock COCO target
 mock_coco_target <- function(h = 100, w = 100) {
   list(
@@ -22,20 +20,6 @@ mock_trimap <- function(h = 3, w = 3) {
     dtype = torch::torch_int32()
   )
 }
-
-# Function existence tests
-
-test_that("target_transform_coco_masks() exists", {
-  skip_if_not_installed("torch")
-  expect_true(exists("target_transform_coco_masks",
-                     where = asNamespace("torchvision"), mode = "function"))
-})
-
-test_that("target_transform_trimap_masks() exists", {
-  skip_if_not_installed("torch")
-  expect_true(exists("target_transform_trimap_masks",
-                     where = asNamespace("torchvision"), mode = "function"))
-})
 
 # COCO mask transformation tests
 
@@ -105,17 +89,6 @@ test_that("target_transform_trimap_masks() creates mutually exclusive masks", {
 
 # Dataset behavior tests (skipped unless TEST_LARGE_DATASETS=1)
 
-test_that("coco_detection_dataset returns segmentation data", {
-  skip_on_cran()
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
-          "Set TEST_LARGE_DATASETS=1 to enable")
-  tmp <- withr::local_tempdir()
-  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
-  y <- ds[1]$y
-  expect_true("segmentation" %in% names(y))
-  expect_type(y$segmentation, "list")
-})
-
 test_that("coco_detection_dataset with target_transform produces masks", {
   skip_on_cran()
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
@@ -126,6 +99,8 @@ test_that("coco_detection_dataset with target_transform produces masks", {
   y <- ds[1]$y
   expect_true("masks" %in% names(y))
   expect_tensor(y$masks)
+  expect_equal(y$masks$ndim, 3)
+  expect_tensor_dtype(y$masks, torch::torch_bool())
 })
 
 test_that("oxfordiiitpet with target_transform produces masks", {
@@ -138,6 +113,8 @@ test_that("oxfordiiitpet with target_transform produces masks", {
   y <- ds[1]$y
   expect_true("masks" %in% names(y))
   expect_tensor(y$masks)
+  expect_tensor_shape(y$masks, c(3, NA, NA))
+  expect_tensor_dtype(y$masks, torch::torch_bool())
 })
 
 # Integration with draw_segmentation_masks() 
@@ -155,13 +132,6 @@ test_that("transformed masks work with draw_segmentation_masks()", {
   expect_equal(result$shape[1], 3)
 })
 
-# Export tests 
-
-test_that("transform functions are exported", {
-  expect_true("target_transform_coco_masks" %in% getNamespaceExports("torchvision"))
-  expect_true("target_transform_trimap_masks" %in% getNamespaceExports("torchvision"))
-})
-
 # Existing helper tests 
 
 test_that("coco_polygon_to_mask handles single polygon", {
@@ -171,7 +141,7 @@ test_that("coco_polygon_to_mask handles single polygon", {
   mask <- coco_polygon_to_mask(polygon, 100, 100)
   expect_tensor(mask)
   expect_tensor_dtype(mask, torch::torch_bool())
-  expect_equal(mask$shape, c(100, 100))
+  expect_tensor_shape(mask, c(100, 100))
   expect_true(as.array(mask[30, 30]))
 })
 

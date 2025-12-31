@@ -29,6 +29,7 @@
 #'
 #' @examples
 #' \dontrun{
+#' # Load dataset without target transformation
 #' ds <- coco_detection_dataset(
 #'   train = FALSE,
 #'   year = "2017",
@@ -41,8 +42,18 @@
 #' boxed <- draw_bounding_boxes(item)
 #' tensor_image_browse(boxed)
 #'
-#' # Visualize segmentation masks (if present)
-#' masked <- draw_segmentation_masks(item)
+#' # Load dataset with explicit segmentation mask transformation
+#' ds_with_masks <- coco_detection_dataset(
+#'   train = FALSE,
+#'   year = "2017",
+#'   download = TRUE,
+#'   target_transform = target_transform_coco_masks
+#' )
+#'
+#' item_masked <- ds_with_masks[1]
+#'
+#' # Visualize segmentation masks
+#' masked <- draw_segmentation_masks(item_masked)
 #' tensor_image_browse(masked)
 #' }
 #' @family detection_dataset
