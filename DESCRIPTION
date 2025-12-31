@@ -62,6 +62,7 @@ Suggests:
     rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
+    'collection-catalog.R'
     'folder-dataset.R'
     'collection-rf100-doc.R'
     'collection-rf100-biology.R'
@@ -108,7 +109,6 @@ Collate:
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
-    'rf100-catalog.R'
     'tiny-imagenet-dataset.R'
     'transforms-array.R'
     'transforms-defaults.R'

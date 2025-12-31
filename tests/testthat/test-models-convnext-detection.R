@@ -150,7 +150,7 @@ test_that("model_convnext_detection has FPN and produces multi-scale features", 
   out <- model(input)
 
   expect_type(out$features, "list")
-  expect_true(length(out$features) >= 4)
+  expect_gte(length(out$features), 4)
 
   for (i in seq_along(out$features)) {
     expect_tensor(out$features[[i]])

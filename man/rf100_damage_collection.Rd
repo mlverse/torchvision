@@ -40,7 +40,7 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 }
 \description{
 Loads one of the \href{https://universe.roboflow.com/browse/damage-risk}{RoboFlow 100 Damage & Risk assesment} datasets with
-bounding box annotations for object detection tasks.
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

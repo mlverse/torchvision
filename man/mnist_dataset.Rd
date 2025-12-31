@@ -65,8 +65,9 @@ emnist_dataset(kind, ...)
 
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
 
-\item{dataset}{one of "byclass", "bymerge", "balanced" representing the subset of emnist collection
-made of a set of classes. You can look at dataset attribute \verb{$classes} to see the actual classes.}
+\item{dataset}{to select within \code{c("byclass", "bymerge", "balanced", "letters", "digits", "mnist")}
+representing the subset of emnist collection made of a set of classes.
+You can look at dataset attribute \verb{$classes} to see the actual classes.}
 
 \item{kind}{the \code{dataset} in \code{emnist_collection}.}
 

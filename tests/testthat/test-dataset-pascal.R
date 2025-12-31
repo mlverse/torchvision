@@ -1,6 +1,6 @@
 context('dataset-pascal')
 
-t = withr::local_tempdir()
+t <- withr::local_tempdir()
 
 test_that("tests for the Pascal VOC Segmentation dataset for train split for year 2007", {
 

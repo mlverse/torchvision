@@ -1,15 +1,15 @@
-## code to prepare `rf100_catalog` dataset goes here
+## code to prepare `collection_catalog` dataset
 
 
-# This creates a comprehensive catalog of all 39 RF100 datasets
+# This creates a comprehensive catalog of all datasets being parts of a collection.
 
 
-# Biology Collection (9 datasets)
+# Biology Collection
 # Image counts and dimensions from RoboFlow dataset metadata
 biology <- data.frame(
-  collection = "biology",
+  collection = "rf100_biology",
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell",
-              "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease"),
+              "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease", "moth"),
   description = c(
     "Stomata cells for plant biology research",
     "Blood cell detection (RBC, WBC, platelets)",
@@ -19,15 +19,17 @@ biology <- data.frame(
     "Cotton plant disease detection",
     "Mitosis phase detection in cell images",
     "Bacteriophage detection in microscopy",
-    "Liver disease pathology detection"
+    "Liver disease pathology detection",
+    "Moths for agriculture, entomology, and crop pest management, particularly in Asia"
   ),
   task = "object_detection",
-  num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756),
-  image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640),
-  image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640),
-  train_size_mb = c(81, 6.4, 65.1, 0.3, 1.4, 62, 19, 69, 192),
-  test_size_mb = c(24, 1.8, 17.9, 0.1, 2.5, 16.8, 5.3, 9.0, 55.6),
-  valid_size_mb = c(12, 0.9, 9, 0.05, 0.8, 9, 2.7, 5.7, 28),
+  num_classes = c(2L, 3L, 8L, 1L, 1L, 1L, 1L, 2L, 4L, 28L),
+  num_images = c(1046, 364, 2084, 52, 580, 1742, 515, 1361, 4756, 711),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 480, 640, 640, 640, 640, 640, 640, 640, 640),
+  train_size_mb = c(81, 6.4, 65.1, 0.3, 1.4, 62, 19, 69, 192, 12),
+  test_size_mb = c(24, 1.8, 17.9, 0.1, 2.5, 16.8, 5.3, 9.0, 55.6, 43),
+  valid_size_mb = c(12, 0.9, 9, 0.05, 0.8, 9, 2.7, 5.7, 28, 4.3),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -39,14 +41,15 @@ biology <- data.frame(
                    "https://universe.roboflow.com/object-detection/cotton-plant-disease",
                    "https://universe.roboflow.com/object-detection/mitosis-gjs3g",
                    "https://universe.roboflow.com/object-detection/phages",
-                   "https://universe.roboflow.com/object-detection/liver-disease"),
+                   "https://universe.roboflow.com/object-detection/liver-disease",
+                   "https://universe.roboflow.com/roboflow-100/pests-2xlvx"),
   stringsAsFactors = FALSE
 )
 
 
 # Medical Collection
 medical <- data.frame(
-  collection = "medical",
+  collection = "rf100_medical",
   dataset = c("radio_signal", "rheumatology", "knee", "abdomen_mri",
               "brain_axial_mri", "gynecology_mri", "brain_tumor", "fracture"),
   description = c(
@@ -60,6 +63,7 @@ medical <- data.frame(
     "Bone fracture detection in X-rays"
   ),
   task = "object_detection",
+  num_classes = c(2L, 12L, 1L, 1L, 2L, 3L, 3L, 4L),
   num_images = c(1320, 120, 1695, 1410, 148, 2620, 3064, 628),
   image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
   image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
@@ -83,7 +87,7 @@ medical <- data.frame(
 
 # Infrared Collection (4 datasets)
 infrared <- data.frame(
-  collection = "infrared",
+  collection = "rf100_infrared",
   dataset = c("thermal_dog_and_people", "solar_panel", "thermal_cheetah", "ir_object"),
   description = c(
     "Thermal imaging of dogs and people",
@@ -92,6 +96,7 @@ infrared <- data.frame(
     "FLIR camera object detection in infrared"
   ),
   task = "object_detection",
+  num_classes = c(2L, 5L, 2L, 4L),
   num_images = c(203, 384, 96, 8862),
   image_width = c(640, 640, 640, 640),
   image_height = c(512, 640, 480, 512),
@@ -111,7 +116,7 @@ infrared <- data.frame(
 
 # Damage Collection (3 datasets)
 damage <- data.frame(
-  collection = "damage",
+  collection = "rf100_damage",
   dataset = c("liquid_crystals", "solar_panel", "asbestos"),
   description = c(
     "4-fold defect detection in liquid crystal displays",
@@ -119,6 +124,7 @@ damage <- data.frame(
     "Asbestos detection for safety inspection"
   ),
   task = "object_detection",
+  num_classes = c(1L, 5L, 4L),
   num_images = c(614, 384, 748),
   image_width = c(640, 640, 640),
   image_height = c(640, 640, 640),
@@ -137,7 +143,7 @@ damage <- data.frame(
 
 # Underwater Collection (4 datasets)
 underwater <- data.frame(
-  collection = "underwater",
+  collection = "rf100_underwater",
   dataset = c("pipes", "aquarium", "objects", "coral"),
   description = c(
     "Underwater pipe detection for infrastructure inspection",
@@ -146,6 +152,7 @@ underwater <- data.frame(
     "Coral reef detection and monitoring"
   ),
   task = "object_detection",
+  num_classes = c(1L, 7L, 5L, 14L),
   num_images = c(5618, 638, 8174, 716),
   image_width = c(640, 640, 640, 640),
   image_height = c(480, 640, 480, 480),
@@ -163,26 +170,29 @@ underwater <- data.frame(
 )
 
 
-# Document Collection (6 datasets)
+# Document Collection
 document <- data.frame(
-  collection = "document",
+  collection = "rf100_document",
   dataset = c("tweeter_post", "tweeter_profile", "document_part",
-              "activity_diagram", "signature", "paper_part"),
+              "activity_diagram", "signature", "paper_part", "currency", "wine_label"),
   description = c(
     "Twitter post element detection and parsing",
     "Twitter profile element detection",
     "Document structure and part detection",
     "Activity diagram element detection",
     "Signature detection in documents",
-    "Academic paper structure and part detection"
+    "Academic paper structure and part detection",
+    "Combination of Dollar Bill Detection project from Alex Hyams and Coin Counter project from Dawson Mcgee.",
+    "Wine Label elements detection"
   ),
   task = "object_detection",
-  num_images = c(575, 468, 2402, 2604, 1894, 2202),
-  image_width = c(640, 640, 640, 640, 640, 640),
-  image_height = c(640, 640, 640, 640, 640, 640),
-  train_size_mb = c(13, 11, 75, 130, 82, 64),
-  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18),
-  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5),
+  num_classes = c(2L, 1L, 2L, 19L, 1L, 19L, 10L, 12L),
+  num_images = c(575, 468, 2402, 2604, 1894, 2202, 789, 4642),
+  image_width = c(640, 640, 640, 640, 640, 640, 640, 640),
+  image_height = c(640, 640, 640, 640, 640, 640, 640, 640),
+  train_size_mb = c(13, 11, 75, 130, 82, 64, 32, 103),
+  test_size_mb = c(3.3, 2.9, 21, 39, 23, 18, 9, 32),
+  valid_size_mb = c(2.0, 1.8, 11, 19, 12, 9.5, 5, 22),
   has_train = TRUE,
   has_test = TRUE,
   has_valid = TRUE,
@@ -191,39 +201,68 @@ document <- data.frame(
                    "https://universe.roboflow.com/object-detection/document-parts",
                    "https://universe.roboflow.com/object-detection/activity-diagrams-qdobr",
                    "https://universe.roboflow.com/object-detection/signatures-xc8up",
-                   "https://universe.roboflow.com/object-detection/paper-parts"),
+                   "https://universe.roboflow.com/object-detection/paper-parts",
+                   "https://universe.roboflow.com/object-detection/currency-v4f8j",
+                   "https://universe.roboflow.com/object-detection/wine-labels"),
+  stringsAsFactors = FALSE
+)
+
+
+# MNIST Collection
+emnist <- data.frame(
+  collection = "emnist",
+  dataset = c("byclass", "bymerge", "balanced", "letters", "digits", "mnist"),
+  description = c(
+    "Digits, Capital letters and some lower letters",
+    "Digits, Capital letters and some lower letters",
+    "Digits, Capital letters and some lower letters",
+    "lower letters",
+    "Digits",
+    "Digits"
+  ),
+  task = "image classification",
+  num_classes = c(50L, 51L, 50L, 26L, 10L, 10L),
+  num_images = c(116323, 116323, 18800, 20800, 40000, 10000),
+  image_width = 28,
+  image_height = 28,
+  train_size_mb = 540,
+  test_size_mb = 540,
+  valid_size_mb = NA,
+  has_train = TRUE,
+  has_test = TRUE,
+  has_valid = FALSE,
+  roboflow_url = " ",
   stringsAsFactors = FALSE
 )
 
 
 # Combine all catalogs
-rf100_catalog <- rbind(
+collection_catalog <- rbind(
   biology,
   medical,
   infrared,
   damage,
   underwater,
-  document
+  document,
+  emnist
 )
 
 
 # Add additional metadata
-rf100_catalog$total_size_mb <- rf100_catalog$train_size_mb +
-  rf100_catalog$test_size_mb +
-  rf100_catalog$valid_size_mb
+collection_catalog$total_size_mb <- sum(c(collection_catalog$train_size_mb,  collection_catalog$test_size_mb,
+  collection_catalog$valid_size_mb), na.rm = TRUE)
 
 
-rf100_catalog$function_name <- paste0("rf100_", rf100_catalog$collection, "_collection")
+collection_catalog$function_name <- paste0(collection_catalog$collection, "_collection")
 
-
-rf100_catalog$roboflow_url <- ifelse(is.na(rf100_catalog$roboflow_url),
-                                     paste0("https://universe.roboflow.com/browse/", rf100_catalog$collection),
-                                     rf100_catalog$roboflow_url)
+collection_catalog$roboflow_url <- ifelse(is.na(collection_catalog$roboflow_url),
+                                     paste0("https://universe.roboflow.com/browse/", collection_catalog$collection),
+                                     collection_catalog$roboflow_url)
 
 
 # Reorder columns for better readability
-rf100_catalog <- rf100_catalog[, c(
-  "collection", "dataset", "description", "task",
+collection_catalog <- collection_catalog[, c(
+  "collection", "dataset", "description", "task", "num_classes",
   "num_images", "image_width", "image_height",
   "train_size_mb", "test_size_mb", "valid_size_mb", "total_size_mb",
   "has_train", "has_test", "has_valid",
@@ -232,26 +271,26 @@ rf100_catalog <- rf100_catalog[, c(
 
 
 # Sort by collection and dataset
-rf100_catalog <- rf100_catalog[order(rf100_catalog$collection, rf100_catalog$dataset), ]
-rownames(rf100_catalog) <- NULL
+collection_catalog <- collection_catalog[order(collection_catalog$collection, collection_catalog$dataset), ]
+rownames(collection_catalog) <- NULL
 
 
 # Save as R data
-usethis::use_data(rf100_catalog, overwrite = TRUE)
+usethis::use_data(collection_catalog, overwrite = TRUE)
 
 
 # Also save as CSV for easy viewing
-write.csv(rf100_catalog, "inst/extdata/rf100_catalog.csv", row.names = FALSE)
+write.csv(collection_catalog, "inst/extdata/collection_catalog.csv", row.names = FALSE)
 
 
 # Summarize it
 cli::cli_h1("RF100 Dataset Catalog Summary")
-cli::cli_text("Total datasets: {nrow(rf100_catalog)}")
-cli::cli_text("Collections: {.val {paste(unique(rf100_catalog$collection), collapse = ', ')}}")
+cli::cli_text("Total datasets: {nrow(collection_catalog)}")
+cli::cli_text("Collections: {.val {paste(unique(collection_catalog$collection), collapse = ', ')}}")
 cli::cli_h2("Datasets by collection")
-cli::cli_verbatim(capture.output(print(table(rf100_catalog$collection))))
-cli::cli_text("Total size (all datasets): {.strong {prettyunits::pretty_bytes(sum(rf100_catalog$total_size_mb) * 1024^2)}}")
+cli::cli_verbatim(capture.output(print(table(collection_catalog$collection))))
+cli::cli_text("Total size (all datasets): {.strong {prettyunits::pretty_bytes(sum(collection_catalog$total_size_mb) * 1024^2)}}")
 cli::cli_h2("Catalog saved to:")
 cli::cli_ul()
-cli::cli_li("{.path data/rf100_catalog.rda}")
-cli::cli_li("{.path inst/extdata/rf100_catalog.csv}")
+cli::cli_li("{.path data/collection_catalog.rda}")
+cli::cli_li("{.path inst/extdata/collection_catalog.csv}")
