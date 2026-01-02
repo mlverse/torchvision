@@ -3,7 +3,6 @@
 ## New features
 
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
-* Added RF100 dataset catalog with `search_rf100()`, `get_rf100_catalog()`, and `list_rf100_datasets()` functions for discovering and exploring RoboFlow 100 datasets (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
 ## New models
