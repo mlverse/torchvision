@@ -116,6 +116,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="fu">model_convnext_tiny_upernet</span><span class="op">(</span></span>
 <span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pool_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -124,6 +125,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="fu">model_convnext_small_upernet</span><span class="op">(</span></span>
 <span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pool_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -132,6 +134,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="fu">model_convnext_base_upernet</span><span class="op">(</span></span>
 <span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pool_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -147,17 +150,20 @@ can be used for semantic segmentation tasks.</p>
 
 
 <dt id="arg-aux-loss">aux_loss<a class="anchor" aria-label="anchor" href="#arg-aux-loss"></a></dt>
-<dd><p>Logical. If TRUE, includes an auxiliary classifier branch.
-Default: FALSE.</p></dd>
+<dd><p>If TRUE, includes an auxiliary classifier branch. Default: FALSE.</p></dd>
 
 
 <dt id="arg-pretrained-backbone">pretrained_backbone<a class="anchor" aria-label="anchor" href="#arg-pretrained-backbone"></a></dt>
-<dd><p>Logical. If TRUE, loads ImageNet pretrained</p>
-<p>weights for the ConvNeXt backbone. Default: FALSE.</p></dd>
+<dd><p>If TRUE, loads ImageNet pretrained
+weights for the ConvNeXt backbone. Default: FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to the backbone.</p></dd>
+
+
+<dt id="arg-pretrained">pretrained<a class="anchor" aria-label="anchor" href="#arg-pretrained"></a></dt>
+<dd><p>If TRUE, loads convnext pretrained weights of backbone and segmentation heads.</p></dd>
 
 
 <dt id="arg-pool-scales">pool_scales<a class="anchor" aria-label="anchor" href="#arg-pool-scales"></a></dt>
