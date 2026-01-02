@@ -370,7 +370,7 @@ fasterrcnn_model <- function(backbone, num_classes,
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
-      
+
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
       self$nms_thresh <- nms_thresh
@@ -426,7 +426,7 @@ fasterrcnn_model <- function(backbone, num_classes,
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
-        
+
         # Apply NMS to remove overlapping detections
         if (final_boxes$shape[1] > 1) {
           nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
@@ -434,7 +434,7 @@ fasterrcnn_model <- function(backbone, num_classes,
           final_labels <- final_labels[nms_keep]
           final_scores <- final_scores[nms_keep]
         }
-        
+
         # Limit detections per image
         n_det <- final_scores$shape[1]
         if (n_det > self$detections_per_img) {
@@ -559,12 +559,12 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
-      
+
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
       self$nms_thresh <- nms_thresh
       self$detections_per_img <- detections_per_img
-      
+
       self$rpn <- torch::nn_module(
         initialize = function() {
           self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
@@ -612,7 +612,7 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
-        
+
         # Apply NMS to remove overlapping detections
         if (final_boxes$shape[1] > 1) {
           nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
@@ -620,7 +620,7 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
           final_labels <- final_labels[nms_keep]
           final_scores <- final_scores[nms_keep]
         }
-        
+
         # Limit detections per image
         n_det <- final_scores$shape[1]
         if (n_det > self$detections_per_img) {
@@ -716,12 +716,12 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
-      
+
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
       self$nms_thresh <- nms_thresh
       self$detections_per_img <- detections_per_img
-      
+
       self$rpn <- torch::nn_module(
         initialize = function() {
           self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)()
@@ -767,7 +767,7 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
-        
+
         # Apply NMS to remove overlapping detections
         if (final_boxes$shape[1] > 1) {
           nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
@@ -775,7 +775,7 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
           final_labels <- final_labels[nms_keep]
           final_scores <- final_scores[nms_keep]
         }
-        
+
         # Limit detections per image
         n_det <- final_scores$shape[1]
         if (n_det > self$detections_per_img) {
@@ -969,12 +969,10 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     cli_abort("Pretrained weights require num_classes = 91.")
 
   if (pretrained) {
-    # local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
-    # state_dict <- torch::load_state_dict(local_path)
     r <- rpn_model_urls$fasterrcnn_resnet50
     name <- "fasterrcnn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1008,7 +1006,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     r <- rpn_model_urls$fasterrcnn_resnet50_v2
     name <- "fasterrcnn_resnet50_v2"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1059,7 +1057,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
     name <- "fasterrcnn_mobilenet_v3_large"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1094,7 +1092,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320
     name <- "fasterrcnn_mobilenet_v3_large_320"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }

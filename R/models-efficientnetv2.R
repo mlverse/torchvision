@@ -199,7 +199,7 @@ effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, .
   if (pretrained) {
     r <- efficientnet_v2_model_urls[[arch]]
     cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "efficientnet")
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: torchvision 0.8.0.9000\n"
-"POT-Creation-Date: 2025-12-27 18:45+0100\n"
+"POT-Creation-Date: 2025-12-30 11:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -9,6 +9,18 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: collection-catalog.R:90 collection-catalog.R:170
+msgid "Invalid collection. Must be one of:"
+msgstr ""
+
+#: collection-catalog.R:90 collection-catalog.R:170
+msgid ","
+msgstr ""
+
+#: collection-catalog.R:104
+msgid "No datasets found matching criteria"
+msgstr ""
 
 #: collection-rf100-doc.R:157
 msgid ""
@@ -270,7 +282,7 @@ msgid ""
 "downloaded and processed if not already available."
 msgstr ""
 
-#: models-alexnet.R:61 models-deeplabv3.R:263 models-efficientnet.R:228 models-efficientnetv2.R:204 models-faster_rcnn.R:979 models-faster_rcnn.R:1013 models-faster_rcnn.R:1064 models-faster_rcnn.R:1099 models-fcn.R:185 models-fcn.R:233 models-inception.R:437 models-mobilenetv2.R:20 models-mobilenetv3.R:338 models-mobilenetv3_large.R:21 models-resnet.R:248 models-vgg.R:114
+#: models-alexnet.R:61 models-convnext_segmentation.R:451 models-convnext_segmentation.R:492 models-convnext_segmentation.R:533 models-deeplabv3.R:262 models-efficientnet.R:228 models-efficientnetv2.R:204 models-faster_rcnn.R:977 models-faster_rcnn.R:1011 models-faster_rcnn.R:1062 models-faster_rcnn.R:1097 models-fcn.R:185 models-fcn.R:233 models-inception.R:437 models-mobilenetv2.R:20 models-mobilenetv3.R:338 models-mobilenetv3_large.R:21 models-resnet.R:248 models-vgg.R:114
 msgid "Corrupt file! Delete the file in {state_dict_path} and try again."
 msgstr ""
 
@@ -294,19 +306,15 @@ msgstr ""
 msgid "is not available."
 msgstr ""
 
-#: models-convnext_detection.R:211 utils.R:37
+#: models-convnext_detection.R:211 utils.R:40
 msgid "{.var num_classes} must be positive"
 msgstr ""
 
-#: models-deeplabv3.R:225 models-fcn.R:162 models-fcn.R:210
-msgid "Pretrained weights require num_classes = 21."
-msgstr ""
-
-#: models-deeplabv3.R:232
+#: models-convnext_segmentation.R:429 models-convnext_segmentation.R:470 models-convnext_segmentation.R:511 models-deeplabv3.R:231
 msgid "`pretrained_backbone` ignored when `pretrained = TRUE`."
 msgstr ""
 
-#: models-deeplabv3.R:260
+#: models-convnext_segmentation.R:448 models-convnext_segmentation.R:489 models-convnext_segmentation.R:530 models-deeplabv3.R:259
 msgid "Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ..."
 msgstr ""
 
@@ -316,14 +324,18 @@ msgid ""
 "processed if not already available."
 msgstr ""
 
-#: models-faster_rcnn.R:969 models-faster_rcnn.R:1005 models-faster_rcnn.R:1056 models-faster_rcnn.R:1091
+#: models-faster_rcnn.R:969 models-faster_rcnn.R:1003 models-faster_rcnn.R:1054 models-faster_rcnn.R:1089
 msgid "Pretrained weights require num_classes = 91."
 msgstr ""
 
-#: models-faster_rcnn.R:976 models-faster_rcnn.R:1010 models-faster_rcnn.R:1061 models-faster_rcnn.R:1096 models-fcn.R:182 models-fcn.R:230 models-vit.R:44
+#: models-faster_rcnn.R:974 models-faster_rcnn.R:1008 models-faster_rcnn.R:1059 models-faster_rcnn.R:1094 models-fcn.R:182 models-fcn.R:230 models-vit.R:44
 msgid ""
 "Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and "
 "processed if not already available."
+msgstr ""
+
+#: models-fcn.R:162 models-fcn.R:210
+msgid "Pretrained weights require num_classes = 21."
 msgstr ""
 
 #: models-inception.R:16
@@ -384,18 +396,6 @@ msgstr ""
 
 #: ops-boxes.R:310
 msgid "(boxes2[, 3:N] >= boxes2[, 1:2])$all() not TRUE"
-msgstr ""
-
-#: rf100-catalog.R:90 rf100-catalog.R:170
-msgid "Invalid collection. Must be one of:"
-msgstr ""
-
-#: rf100-catalog.R:90 rf100-catalog.R:170
-msgid ","
-msgstr ""
-
-#: rf100-catalog.R:104
-msgid "No datasets found matching criteria"
 msgstr ""
 
 #: transforms-defaults.R:298
@@ -526,6 +526,15 @@ msgstr ""
 
 #: transforms-tensor.R:752
 msgid "gamma must be non-negative"
+msgstr ""
+
+#: utils.R:43
+msgid "Pretrained weights on COCO require {.var num_classes} to be {.val 21}."
+msgstr ""
+
+#: utils.R:46
+msgid ""
+"Pretrained weights on ADE20K require {.var num_classes} to be {.val 150}."
 msgstr ""
 
 #: vision_utils.R:109

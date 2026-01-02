@@ -34,6 +34,7 @@ model_convnext_base_fcn(
 model_convnext_tiny_upernet(
   num_classes = 21,
   aux_loss = FALSE,
+  pretrained = FALSE,
   pretrained_backbone = FALSE,
   pool_scales = c(1, 2, 3, 6),
   ...
@@ -42,6 +43,7 @@ model_convnext_tiny_upernet(
 model_convnext_small_upernet(
   num_classes = 21,
   aux_loss = FALSE,
+  pretrained = FALSE,
   pretrained_backbone = FALSE,
   pool_scales = c(1, 2, 3, 6),
   ...
@@ -50,6 +52,7 @@ model_convnext_small_upernet(
 model_convnext_base_upernet(
   num_classes = 21,
   aux_loss = FALSE,
+  pretrained = FALSE,
   pretrained_backbone = FALSE,
   pool_scales = c(1, 2, 3, 6),
   ...
@@ -58,14 +61,14 @@ model_convnext_base_upernet(
 \arguments{
 \item{num_classes}{Number of output segmentation classes. Default: 21 (PASCAL VOC).}
 
-\item{aux_loss}{Logical. If TRUE, includes an auxiliary classifier branch.
-Default: FALSE.}
+\item{aux_loss}{If TRUE, includes an auxiliary classifier branch. Default: FALSE.}
 
-\item{pretrained_backbone}{Logical. If TRUE, loads ImageNet pretrained
-
+\item{pretrained_backbone}{If TRUE, loads ImageNet pretrained
 weights for the ConvNeXt backbone. Default: FALSE.}
 
 \item{...}{Additional arguments passed to the backbone.}
+
+\item{pretrained}{If TRUE, loads convnext pretrained weights of backbone and segmentation heads.}
 
 \item{pool_scales}{Numeric vector. Pooling scales used in the Pyramid Pooling
 Module for UPerNet models. Default: c(1, 2, 3, 6).}
