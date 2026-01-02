@@ -130,7 +130,8 @@ test_that("tests for the LFW People dataset for dataloader", {
       pair[[1]] %>% transform_to_tensor()
       pair[[2]] %>% transform_to_tensor()
       pair
-    })
+    },
+    download = TRUE)
   dl <- dataloader(lfw, batch_size = 32)
   batch <- dataloader_next(dataloader_make_iter(dl))
   expect_named(batch, c("x", "y"))
