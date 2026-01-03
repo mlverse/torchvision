@@ -3,6 +3,7 @@
 ## New features
 
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
+* Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
 ## New models
 
@@ -40,7 +41,6 @@ to non-vectorized `transform_` operations (#264)
 * Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
 * Added 8 of the `model_convnext_()` family models for image classification, thanks to @horlar1 contribution. (@cregouby, #251)
 * Added 2 `model_fasterrcnn_resnet50_()` models and 2 `model_fasterrcnn_mobilenet_v3_large_()` for object detection. (@koshtiakanksha, #251)
-
 
 ## New features
 

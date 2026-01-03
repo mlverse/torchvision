@@ -114,6 +114,7 @@ Collate:
     'transforms-defaults.R'
     'transforms-generics.R'
     'transforms-magick.R'
+    'transforms-segmentation.R'
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
