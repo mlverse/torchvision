@@ -45,13 +45,13 @@ to enable automatic dispatch by visualization functions such as \code{draw_bound
 Loads the MS COCO dataset for object detection and segmentation.
 }
 \details{
-The returned image is in CHW format (channels, height, width), matching the torch convention.
+The returned image \code{x} is in CHW format (channels, height, width), matching the torch convention.
 The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
 areas, crowd indicators, and segmentation masks from the official COCO annotations.
 }
 \examples{
 \dontrun{
-# Load dataset without target transformation
+# Load dataset
 ds <- coco_detection_dataset(
   train = FALSE,
   year = "2017",
@@ -64,7 +64,8 @@ item <- ds[1]
 boxed <- draw_bounding_boxes(item)
 tensor_image_browse(boxed)
 
-# Load dataset with explicit segmentation mask transformation
+# In order to visualize segmentation masks, we
+# use the specific segmentation mask target transformation
 ds_with_masks <- coco_detection_dataset(
   train = FALSE,
   year = "2017",

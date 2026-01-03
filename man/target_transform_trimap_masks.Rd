@@ -13,7 +13,9 @@ target_transform_trimap_masks(y)
 Modified y list with added \code{masks} field (3, H, W) boolean tensor
 }
 \description{
-Converts Oxford-IIIT Pet trimap (values 1,2,3) to 3-channel boolean masks.
+Converts Oxford-IIIT Pet dataset target \verb{$trimap} variable (values 1,2,3) into
+3-channel boolean masks tensors as target \verb{$masks} variable in order to ease later-on visualisation
+via \code{draw_segmentation_mask()}.
 Use as \code{target_transform} in \code{oxfordiiitpet_segmentation_dataset()}.
 }
 \details{
@@ -35,3 +37,8 @@ draw_segmentation_masks(item)
 }
 
 }
+\seealso{
+Other target_transforms: 
+\code{\link{target_transform_coco_masks}()}
+}
+\concept{target_transforms}

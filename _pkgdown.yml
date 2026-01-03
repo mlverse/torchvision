@@ -42,11 +42,10 @@ reference:
     - has_concept("combining_transforms")
 - subtitle: Target transformations for segmentation
   desc: >
-    Functions to convert dataset annotations into segmentation masks compatible
+    Functions to convert dataset native targets annotations into segmentation masks compatible
     with draw_segmentation_masks() and segmentation models.
   contents:
-    - target_transform_coco_masks
-    - target_transform_trimap_masks
+    - has_concept("target_transforms")
 
 - title: Models
   desc: Computer Vision deep-learning Model architectures

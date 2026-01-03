@@ -7,13 +7,20 @@
 target_transform_coco_masks(y)
 }
 \arguments{
-\item{y}{List containing COCO target with \code{segmentation}, \code{image_height}, \code{image_width}}
+\item{y}{list being COCO dataset target variable, with names \code{segmentation}, \code{image_height}, \code{image_width}.}
+
+\item{height}{target tensor image height.}
+
+\item{width}{target tensor image width}
 }
 \value{
-Modified y list with added \code{masks} field (N, H, W) boolean tensor
+Modified \code{y} list with added \code{masks} field (N, H, W) boolean tensor, N being the number of
+classes.
 }
 \description{
-Converts COCO-style polygon segmentation annotations to boolean mask tensors.
+Converts COCO-style polygon segmentation annotations from target \verb{$segmentation} variable
+into boolean mask tensors as target \verb{$masks} variable in order to ease later-on visualisation
+via \code{draw_segmentation_mask()}.
 Use as \code{target_transform} in \code{coco_detection_dataset()}.
 }
 \examples{
@@ -27,3 +34,8 @@ draw_segmentation_masks(item)
 }
 
 }
+\seealso{
+Other target_transforms: 
+\code{\link{target_transform_trimap_masks}()}
+}
+\concept{target_transforms}

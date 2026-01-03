@@ -1,11 +1,16 @@
 #' Target Transform: COCO Polygon Segmentation to Masks
 #'
-#' Converts COCO-style polygon segmentation annotations to boolean mask tensors.
+#' Converts COCO-style polygon segmentation annotations from target `$segmentation` variable
+#' into boolean mask tensors as target `$masks` variable in order to ease later-on visualisation
+#' via `draw_segmentation_mask()`.
 #' Use as `target_transform` in `coco_detection_dataset()`.
 #'
-#' @param y List containing COCO target with `segmentation`, `image_height`, `image_width`
+#' @param y list being COCO dataset target variable, with names `segmentation`, `image_height`, `image_width`.
+#' @param height target tensor image height.
+#' @param width target tensor image width
 #'
-#' @return Modified y list with added `masks` field (N, H, W) boolean tensor
+#' @return Modified `y` list with added `masks` field (N, H, W) boolean tensor, N being the number of
+#' classes.
 #'
 #' @examples
 #' \dontrun{
@@ -17,6 +22,7 @@
 #' draw_segmentation_masks(item)
 #' }
 #'
+#' @family target_transforms
 #' @export
 target_transform_coco_masks <- function(y) {
 
@@ -27,12 +33,9 @@ target_transform_coco_masks <- function(y) {
     cli::cli_abort("Target must contain 'image_height' and 'image_width' fields")
   }
 
-  H <- y$image_height
-  W <- y$image_width
-
   masks_list <- lapply(y$segmentation, function(seg) {
     if (is.list(seg) && length(seg) > 0) {
-      mask <- coco_polygon_to_mask(seg, height = H, width = W)
+      mask <- coco_polygon_to_mask(seg, y$image_height, y$image_width)
       if (inherits(mask, "torch_tensor") && mask$ndim == 2) return(mask)
     }
     NULL
@@ -43,7 +46,7 @@ target_transform_coco_masks <- function(y) {
   if (length(valid_masks) > 0) {
     y$masks <- torch::torch_stack(valid_masks)
   } else {
-    y$masks <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
+    y$masks <- torch::torch_zeros(c(0, y$image_height, y$image_width), dtype = torch::torch_bool())
   }
 
   y
@@ -52,7 +55,9 @@ target_transform_coco_masks <- function(y) {
 
 #' Target Transform: Trimap to Boolean Masks
 #'
-#' Converts Oxford-IIIT Pet trimap (values 1,2,3) to 3-channel boolean masks.
+#' Converts Oxford-IIIT Pet dataset target `$trimap` variable (values 1,2,3) into
+#' 3-channel boolean masks tensors as target `$masks` variable in order to ease later-on visualisation
+#' via `draw_segmentation_mask()`.
 #' Use as `target_transform` in `oxfordiiitpet_segmentation_dataset()`.
 #'
 #' @param y List containing `trimap` field (H, W) tensor with values 1, 2, 3
@@ -77,6 +82,7 @@ target_transform_coco_masks <- function(y) {
 #' draw_segmentation_masks(item)
 #' }
 #'
+#' @family target_transforms
 #' @export
 target_transform_trimap_masks <- function(y) {
   if (!"trimap" %in% names(y)) {
