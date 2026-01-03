@@ -16,7 +16,7 @@ test_that("coco_detection_dataset handles missing files gracefully", {
 })
 
 test_that("coco_detection_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
@@ -47,7 +47,7 @@ test_that("coco_detection_dataset loads a single example correctly", {
 })
 
 test_that("coco_ dataset loads a single segmentation example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE,
@@ -64,14 +64,14 @@ test_that("coco_ dataset loads a single segmentation example correctly", {
   expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
-  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
+  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "image_height", "image_width", "masks"))
 
   expect_tensor(y$masks)
   expect_equal(y$masks$ndim, 3)
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
 
@@ -85,7 +85,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
   expect_type(batch$y, "list")
-  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation", "masks"))
+  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation"))
   expect_tensor(batch$y[[1]]$boxes)
   expect_equal(batch$y[[1]]$boxes$ndim, 2)
   expect_equal(batch$y[[1]]$boxes$size(2), 4)
@@ -99,8 +99,8 @@ test_that("coco_caption_dataset handles missing files gracefully", {
 })
 
 test_that("coco_caption_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 2,
-        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 2,
+        "Skipping test: set TEST_LARGE_DATASETS=2 to enable tests requiring huge downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
@@ -120,8 +120,8 @@ test_that("coco_caption_dataset loads a single example correctly", {
 })
 
 test_that("coco_caption_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 2,
-        "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 2,
+        "Skipping test: set TEST_LARGE_DATASETS=2 to enable tests requiring huge downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
