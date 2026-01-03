@@ -6,8 +6,6 @@
 #' Use as `target_transform` in `coco_detection_dataset()`.
 #'
 #' @param y list being COCO dataset target variable, with names `segmentation`, `image_height`, `image_width`.
-#' @param height target tensor image height.
-#' @param width target tensor image width
 #'
 #' @return Modified `y` list with added `masks` field (N, H, W) boolean tensor, N being the number of
 #' classes.

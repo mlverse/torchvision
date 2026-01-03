@@ -8,10 +8,6 @@ target_transform_coco_masks(y)
 }
 \arguments{
 \item{y}{list being COCO dataset target variable, with names \code{segmentation}, \code{image_height}, \code{image_width}.}
-
-\item{height}{target tensor image height.}
-
-\item{width}{target tensor image width}
 }
 \value{
 Modified \code{y} list with added \code{masks} field (N, H, W) boolean tensor, N being the number of
