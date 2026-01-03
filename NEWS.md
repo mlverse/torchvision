@@ -44,6 +44,7 @@ to non-vectorized `transform_` operations (#264)
 
 ## New features
 
+* Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `make_vision_grid()` (@DerrickUnleashed, #244).
 * Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 * `base_loader()` now accept URLs (@cregouby, #246).
 * `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
