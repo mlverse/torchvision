@@ -98,6 +98,7 @@ Collate:
     'models-efficientnetv2.R'
     'models-facenet.R'
     'models-faster_rcnn.R'
+    'models-mask_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
     'models-maxvit.R'
