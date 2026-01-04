@@ -1,4 +1,5 @@
 #' @include models-faster_rcnn.R
+#' @importFrom torch nn_conv_transpose2d
 NULL
 
 # Mask R-CNN Implementation
@@ -418,7 +419,8 @@ maskrcnn_model_v2 <- function(backbone, num_classes,
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #' 
 #' # Load an image
-#' url <- "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+#' url <- paste0(wmc, "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
 #' img <- base_loader(url)
 #'
 #' input <- img %>%
