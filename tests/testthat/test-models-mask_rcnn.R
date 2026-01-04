@@ -4,10 +4,10 @@ test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   
   model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
   expect_s3_class(model, "nn_module")
-  expect_true("backbone" %in% names(model))
-  expect_true("rpn" %in% names(model))
-  expect_true("roi_heads" %in% names(model))
-  expect_true("mask_head" %in% names(model))
+  expect_true(!is.null(model$backbone))
+  expect_true(!is.null(model$rpn))
+  expect_true(!is.null(model$roi_heads))
+  expect_true(!is.null(model$mask_head))
 })
 
 test_that("maskrcnn_resnet50_fpn_v2 loads without pretrained weights", {
@@ -16,10 +16,10 @@ test_that("maskrcnn_resnet50_fpn_v2 loads without pretrained weights", {
   
   model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91)
   expect_s3_class(model, "nn_module")
-  expect_true("backbone" %in% names(model))
-  expect_true("rpn" %in% names(model))
-  expect_true("roi_heads" %in% names(model))
-  expect_true("mask_head" %in% names(model))
+  expect_true(!is.null(model$backbone))
+  expect_true(!is.null(model$rpn))
+  expect_true(!is.null(model$roi_heads))
+  expect_true(!is.null(model$mask_head))
 })
 
 test_that("maskrcnn_resnet50_fpn forward pass works", {
@@ -37,7 +37,7 @@ test_that("maskrcnn_resnet50_fpn forward pass works", {
   
   # Check output structure
   expect_true("features" %in% names(output))
-  expect_true("detections" %in% names(output$detections))
+  expect_true("detections" %in% names(output))
   expect_true("boxes" %in% names(output$detections))
   expect_true("labels" %in% names(output$detections))
   expect_true("scores" %in% names(output$detections))
@@ -70,7 +70,7 @@ test_that("maskrcnn_resnet50_fpn_v2 forward pass works", {
   
   # Check output structure
   expect_true("features" %in% names(output))
-  expect_true("detections" %in% names(output$detections))
+  expect_true("detections" %in% names(output))
   expect_true("boxes" %in% names(output$detections))
   expect_true("labels" %in% names(output$detections))
   expect_true("scores" %in% names(output$detections))
