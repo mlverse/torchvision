@@ -57,9 +57,12 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2
+    xml2,
+    knitr,
+    rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
+    'collection-catalog.R'
     'folder-dataset.R'
     'collection-rf100-doc.R'
     'collection-rf100-biology.R'
@@ -88,8 +91,8 @@ Collate:
     'imagenet.R'
     'models-alexnet.R'
     'models-convnext.R'
-    'models-convnext_segmentation.R'
     'models-convnext_detection.R'
+    'models-convnext_segmentation.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
     'models-efficientnetv2.R'
@@ -114,3 +117,7 @@ Collate:
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
+Depends: 
+    R (>= 3.5)
+LazyData: true
+VignetteBuilder: knitr

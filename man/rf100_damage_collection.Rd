@@ -26,7 +26,7 @@ rf100_damage_collection(
 \value{
 A torch dataset. Each element is a named list with:
 \itemize{
-\item \code{x}: H x W x 3 array representing the image.
+\item \code{x}: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
 \item \code{y}: a list containing the target with:
 \itemize{
 \item \code{image_id}: numeric identifier of the x image.
@@ -39,8 +39,8 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the \href{https://universe.roboflow.com/browse/damage-risk}{RoboFlow 100 Damage & Risk assesment} datasets with COCO-style
-bounding box annotations for object detection tasks.
+Loads one of the \href{https://universe.roboflow.com/browse/damage-risk}{RoboFlow 100 Damage & Risk assesment} datasets with
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

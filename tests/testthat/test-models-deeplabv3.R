@@ -64,10 +64,10 @@ test_that("custom num_classes works with aux_loss = TRUE", {
   expect_tensor_shape(out$aux, c(1, 3, 32, 32))
 })
 
-test_that("pretrained requires num_classes = 21", {
+test_that("pretrained requires num_classes to be \'21\'", {
   expect_error(
     model_deeplabv3_resnet50(pretrained = TRUE, num_classes = 3),
-    "num_classes = 21"
+    "Pretrained weights on COCO require"
   )
 })
 

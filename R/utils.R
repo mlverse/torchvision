@@ -138,11 +138,20 @@ download_with_fallback <- function(
 #' Validate num_classes parameter
 #'
 #' @param num_classes Number of classes to validate
+#' @param pretrained shall the classes match a pretrained model
+#' @param label the label family for the classification head. Shall be "coco" or "ade20k"
 #' @keywords internal
 #' @noRd
-validate_num_classes <- function(num_classes) {
+validate_num_classes <- function(num_classes, pretrained, label = "coco") {
+  match.arg(label, c("coco","ade20k"))
   if (num_classes <= 0) {
     cli_abort("{.var num_classes} must be positive")
+  }
+  if (label == "coco" && pretrained && num_classes != 21) {
+    cli_abort("Pretrained weights on COCO require {.var num_classes} to be {.val 21}.")
+  }
+  if (label == "ade20k" && pretrained && num_classes != 150) {
+    cli_abort("Pretrained weights on ADE20K require {.var num_classes} to be {.val 150}.")
   }
 }
 

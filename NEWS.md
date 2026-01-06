@@ -1,9 +1,17 @@
 # torchvision (development version)
 
+## New features
+
+* Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
+
 ## New models
 
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
+
+## New datasets
+
+* Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
 ## Bug fixes and improvements
 
@@ -12,6 +20,7 @@
   function with informative error messages including manual download instructions when 
   downloads fail (#267, @ANAMASGARD).
 
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
 to non-vectorized `transform_` operations (#264)
 

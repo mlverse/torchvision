@@ -221,9 +221,8 @@ DeepLabV3 <- torch::nn_module(
 deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
                                      num_classes, aux_loss = NULL,
                                      pretrained_backbone = FALSE, ...) {
-  if (pretrained && num_classes != 21) {
-    cli_abort("Pretrained weights require num_classes = 21.")
-  }
+
+  validate_num_classes(num_classes, pretrained)
 
   if (is.null(aux_loss))
     aux_loss <- FALSE
@@ -258,7 +257,7 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
   if (pretrained) {
     info <- deeplabv3_model_urls[[paste0(arch, "_coco")]]
     cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
-    state_dict_path <- download_and_cache(info[1])
+    state_dict_path <- download_and_cache(info[1], prefix = "deeplabv3")
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)

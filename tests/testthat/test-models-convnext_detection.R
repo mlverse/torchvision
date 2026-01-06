@@ -190,4 +190,3 @@ test_that("model_convnext_detection handles batch processing", {
   expect_tensor(out_single$detections$labels)
   expect_tensor(out_single$detections$scores)
 })
-
