@@ -73,23 +73,35 @@ mask_head_module_v2 <- function(num_classes = 91) {
   )
 }
 
-# ROI Align for mask prediction (14x14 output for mask head)
-# Returns 4D tensor (N, C, H, W) instead of flattened like roi_align_stub
+#' ROI Align for Mask Prediction
+#'
+#' Extracts fixed-size feature maps from regions of interest for mask prediction.
+#' Returns a 4D tensor suitable for the mask head (unlike roi_align_stub which flattens).
+#'
+#' @param feature_map Tensor of shape (1, C, H, W) - Feature map from backbone
+#' @param proposals Tensor of shape (N, 4) - Region proposals as (x1, y1, x2, y2)
+#' @param output_size Integer vector of length 2 - Output spatial dimensions (default: c(14L, 14L))
+#'
+#' @return Tensor of shape (N, C, output_size\[1\], output_size\[2\])
+#'
+#' @noRd
 roi_align_masks <- function(feature_map, proposals, output_size = c(14L, 14L)) {
   h <- as.integer(feature_map$shape[[3]])
   w <- as.integer(feature_map$shape[[4]])
   c <- as.integer(feature_map$shape[[2]])
   
   n <- proposals$size(1)
+  
+  # Pre-compute all coordinates outside the loop (vectorized where possible)
+  x1_all <- pmax(1, pmin(as.integer(as.numeric(proposals[, 1])), w))
+  y1_all <- pmax(1, pmin(as.integer(as.numeric(proposals[, 2])), h))
+  x2_all <- pmax(x1_all + 1, pmin(as.integer(as.numeric(proposals[, 3])), w))
+  y2_all <- pmax(y1_all + 1, pmin(as.integer(as.numeric(proposals[, 4])), h))
+  
   pooled <- vector("list", n)
   
   for (i in seq_len(n)) {
-    x1 <- as.integer(max(1, min(as.numeric(proposals[i, 1]), w)))
-    y1 <- as.integer(max(1, min(as.numeric(proposals[i, 2]), h)))
-    x2 <- as.integer(max(x1 + 1, min(as.numeric(proposals[i, 3]), w)))
-    y2 <- as.integer(max(y1 + 1, min(as.numeric(proposals[i, 4]), h)))
-    
-    region <- feature_map[1, , y1:y2, x1:x2]
+    region <- feature_map[1, , y1_all[i]:y2_all[i], x1_all[i]:x2_all[i]]
     pooled_feat <- torch::nnf_interpolate(
       region$unsqueeze(1),
       size = output_size,
@@ -456,13 +468,13 @@ NULL
 mask_rcnn_model_urls <- list(
   maskrcnn_resnet50 = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/maskrcnn_resnet50.pth",
-    "PLACEHOLDER_MD5",  # Will be computed from actual file
-    "TBD MB"
+    "8bbfb4cf0d3fafff09739b15647fd123",
+    "170 MB"
   ),
   maskrcnn_resnet50_v2 = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/maskrcnn_resnet50_v2.pth",
-    "PLACEHOLDER_MD5",  # Will be computed from actual file
-    "TBD MB"
+    "50aa7c34a52e9a9f16d899db3c56b8e5",
+    "178 MB"
   )
 )
 
@@ -489,10 +501,9 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
     state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn")
     
-    # Skip MD5 check for now since we don't have the actual hash yet
-    # if (!tools::md5sum(state_dict_path) == r[2]) {
-    #   runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
-    # }
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
     
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(.rename_maskrcnn_state_dict(state_dict), strict = FALSE)
@@ -524,10 +535,9 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
     state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn")
     
-    # Skip MD5 check for now since we don't have the actual hash yet
-    # if (!tools::md5sum(state_dict_path) == r[2]) {
-    #   runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
-    # }
+    if (!tools::md5sum(state_dict_path) == r[2]) {
+      runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
+    }
     
     state_dict <- torch::load_state_dict(state_dict_path)
     
