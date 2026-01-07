@@ -1,5 +1,14 @@
 # torchvision (development version)
 
+## Breaking changes
+
+* **COCO datasets refactored**: Split `coco_detection_dataset()` into two separate datasets to reduce memory footprint and improve clarity:
+  - `coco_detection_dataset()` - Now only for object detection (bounding boxes). No longer includes segmentation polygons in the output.
+  - `coco_segmentation_dataset()` - New dataset specifically for instance segmentation tasks with polygon annotations and masks.
+  - Downloaded files are now organized in a `coco` subdirectory within the torch cache for better identification.
+  - This change reduces memory usage by ~50% (from 500MB+ to ~250MB per dataset) as each dataset only loads annotations relevant to its task.
+  - **Migration**: If you were using `coco_detection_dataset()` for segmentation tasks, switch to `coco_segmentation_dataset()` with `target_transform = target_transform_coco_masks`.
+
 ## New features
 
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).

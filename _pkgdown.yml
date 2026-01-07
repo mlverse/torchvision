@@ -71,29 +71,31 @@ reference:
 
 - title: Datasets
   desc: >
-    Datasets readily available. All have a `x` variable in each item
-    being the input image.
-- subtitle: for Image Classification
-  descr: Dataset having items with "y" for target class identifier.
+    Datasets readily available for various computer vision tasks. 
+    All datasets provide items with an `x` variable containing the input image.
+
+- subtitle: Classification Datasets
+  desc: >
+    Datasets for image classification tasks. Each item has a `y` variable 
+    containing the target class identifier.
   contents:
    - has_concept("classification_dataset")
-- subtitle: for Object Detection
-  descr: >
-    Dataset having items with "y" as a named list of bounding-box and
-    labels for object detection.
+
+- subtitle: Detection & Segmentation Datasets
+  desc: >
+    Datasets for object detection and instance segmentation tasks. 
+    Detection datasets provide bounding boxes, while segmentation datasets 
+    additionally provide pixel-level masks.
   contents:
    - has_concept("detection_dataset")
-- subtitle: for Image captionning
-  descr: >
-    Dataset having items with "y" as one or multiple captions of the image
+   - has_concept("segmentation_dataset")
+
+- subtitle: Caption Datasets
+  desc: >
+    Datasets for image captioning tasks. Each item has a `y` variable 
+    containing one or multiple captions describing the image.
   contents:
    - has_concept("caption_dataset")
-- subtitle: for Semantic segmentation
-  descr: >
-    Dataset having items with "y" as a named list containing a segmentation
-    mask and labels for image segmentation.
-  contents:
-   - has_concept("segmentation_dataset")
 
 - title: Displaying
 - subtitle: Images loading
