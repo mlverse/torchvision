@@ -152,15 +152,25 @@ It is commonly used for evaluating models on object segmentation tasks.</p>
 <span class="r-in"><span>   download <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Retrieve the image tensor, segmentation mask and label</span></span></span>
+<span class="r-in"><span><span class="co"># Retrieve the image tensor and label (trimap in raw format)</span></span></span>
 <span class="r-in"><span><span class="va">first_item</span> <span class="op">&lt;-</span> <span class="va">oxfordiiitpet</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">first_item</span><span class="op">$</span><span class="va">x</span>  <span class="co"># RGB image tensor of shape (3, H, W)</span></span></span>
-<span class="r-in"><span><span class="va">first_item</span><span class="op">$</span><span class="va">y</span><span class="op">$</span><span class="va">masks</span>   <span class="co"># (3, H, W) bool tensor: pet, background, outline</span></span></span>
+<span class="r-in"><span><span class="va">first_item</span><span class="op">$</span><span class="va">y</span><span class="op">$</span><span class="va">trimap</span>  <span class="co"># (H, W) integer tensor: 1=pet, 2=background, 3=outline</span></span></span>
 <span class="r-in"><span><span class="va">first_item</span><span class="op">$</span><span class="va">y</span><span class="op">$</span><span class="va">label</span>  <span class="co"># Integer label (1–37 or 1–2 depending on target_type)</span></span></span>
 <span class="r-in"><span><span class="va">oxfordiiitpet</span><span class="op">$</span><span class="va">classes</span><span class="op">[</span><span class="va">first_item</span><span class="op">$</span><span class="va">y</span><span class="op">$</span><span class="va">label</span><span class="op">]</span> <span class="co"># Class name of the label</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Visualize</span></span></span>
-<span class="r-in"><span><span class="va">overlay</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">first_item</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Load dataset with explicit segmentation mask transformation</span></span></span>
+<span class="r-in"><span><span class="va">oxfordiiitpet_masked</span> <span class="op">&lt;-</span> <span class="fu">oxfordiiitpet_segmentation_dataset</span><span class="op">(</span></span></span>
+<span class="r-in"><span>   transform <span class="op">=</span> <span class="va">transform_to_tensor</span>,</span></span>
+<span class="r-in"><span>   target_transform <span class="op">=</span> <span class="va">target_transform_trimap_masks</span>,</span></span>
+<span class="r-in"><span>   download <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">masked_item</span> <span class="op">&lt;-</span> <span class="va">oxfordiiitpet_masked</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">masked_item</span><span class="op">$</span><span class="va">y</span><span class="op">$</span><span class="va">masks</span>  <span class="co"># (3, H, W) bool tensor: pet, background, outline</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Visualize segmentation masks</span></span></span>
+<span class="r-in"><span><span class="va">overlay</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">masked_item</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="tensor_image_browse.html">tensor_image_browse</a></span><span class="op">(</span><span class="va">overlay</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
