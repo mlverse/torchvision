@@ -73,6 +73,7 @@ Collate:
     'conditions.R'
     'dataset-caltech.R'
     'dataset-cifar.R'
+    'dataset-cityscapes.R'
     'dataset-coco.R'
     'dataset-eurosat.R'
     'dataset-fer.R'
