@@ -59,6 +59,7 @@ tensor_image_browse(overlay)
 }
 \seealso{
 Other segmentation_dataset: 
+\code{\link{cityscapes_dataset}()},
 \code{\link{oxfordiiitpet_segmentation_dataset}()},
 \code{\link{pascal_voc_datasets}}
 }

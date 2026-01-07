@@ -182,8 +182,7 @@ cityscapes_dataset <- torch::dataset(
     invalid_types <- setdiff(target_type, valid_types)
     if (length(invalid_types) > 0) {
       cli::cli_abort(
-        "target_type must be one or more of: {.val {valid_types}}",
-        "Got invalid types: {.val {invalid_types}}"
+        "target_type must be one or more of: {.val {valid_types}}. Got invalid types: {.val {invalid_types}}"
       )
     }
     
