@@ -121,8 +121,8 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
 })
 
 test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
-  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
-          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+  # skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+  #         "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
   input <- base_loader("assets/class/cat/cat.5.jpg") %>%
