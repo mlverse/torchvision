@@ -40,6 +40,12 @@ reference:
 - subtitle: Combining / multiplying transformations
   contents:
     - has_concept("combining_transforms")
+- subtitle: Target transformations for segmentation
+  desc: >
+    Functions to convert dataset native targets annotations into segmentation masks compatible
+    with draw_segmentation_masks() and segmentation models.
+  contents:
+    - has_concept("target_transforms")
 
 - title: Models
   desc: Computer Vision deep-learning Model architectures
