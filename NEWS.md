@@ -16,6 +16,11 @@
 
 ## Bug fixes and improvements
 
+* Improved `lfw_people_dataset()` and `lfw_pairs_dataset()` download reliability with 
+  retry logic and better error handling. Added `download_with_fallback()` helper 
+  function with informative error messages including manual download instructions when 
+  downloads fail (#267, @ANAMASGARD).
+
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
 to non-vectorized `transform_` operations (#264)

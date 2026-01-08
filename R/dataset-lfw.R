@@ -78,10 +78,20 @@ lfw_people_dataset <- torch::dataset(
     "original" = "170 MB",
     "funneled" = "230 MB"
   ),
-  base_url = "https://ndownloader.figshare.com/files/",
+  # Mirror URLs for improved reliability (issue #267)
+  # Infrastructure supports multiple mirrors - add more as they become available
+  base_urls = list(
+    figshare = "https://ndownloader.figshare.com/files/"
+  ),
   resources = list(
-    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
-    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad")
+    original = list(
+      file_ids = c("5976018"),  # Figshare file ID
+      md5 = "a17d05bd522c52d84eca14327a23d494"
+    ),
+    funneled = list(
+      file_ids = c("5976015"),  # Figshare file ID
+      md5 = "1b42dfed7d15c9b2dd63d5e5840c86ad"
+    )
   ),
 
   initialize = function(
@@ -147,26 +157,32 @@ lfw_people_dataset <- torch::dataset(
 
     res <- self$resources[[self$split]]
 
-    archive <- download_and_cache(paste0(self$base_url, res[1]), prefix = class(self)[1])
+    # Build list of mirror URLs for fallback
+    urls <- c(
+      paste0(self$base_urls$figshare, res$file_ids[1])
+    )
 
-    expected_md5 <- res[2]
-    actual_md5 <- tools::md5sum(archive)
-    if (actual_md5 != expected_md5) {
-      runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
+    archive <- download_with_fallback(
+      urls = urls,
+      expected_md5 = res$md5,
+      prefix = class(self)[1]
+    )
 
     untar(archive, exdir = self$root)
 
     if (class(self)[[1]] == "lfw_pairs") {
       for (name in c("pairsDevTrain.txt", "pairsDevTest.txt", "pairs.txt")) {
         res <- self$resources[[name]]
-        archive <- download_and_cache(paste0(self$base_url, res[1]), prefix = class(self)[1])
 
-        expected_md5 <- res[2]
-        actual_md5 <- tools::md5sum(archive)
-        if (actual_md5 != expected_md5) {
-          runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-        }
+        urls <- c(
+          paste0(self$base_urls$figshare, res$file_ids[1])
+        )
+
+        archive <- download_with_fallback(
+          urls = urls,
+          expected_md5 = res$md5,
+          prefix = class(self)[1]
+        )
         dest_path <- file.path(self$root, name)
         fs::file_move(archive, dest_path)
       }
@@ -208,13 +224,31 @@ lfw_pairs_dataset <- torch::dataset(
     "original" = "170 MB",
     "funneled" = "230 MB"
   ),
-  base_url = "https://ndownloader.figshare.com/files/",
+  # Multiple mirror URLs for improved reliability (issue #267)
+  base_urls = list(
+    figshare = "https://ndownloader.figshare.com/files/"
+  ),
   resources = list(
-    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
-    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad"),
-    pairsDevTrain.txt = c("5976012", "4f27cbf15b2da4a85c1907eb4181ad21"),
-    pairsDevTest.txt = c("5976009", "5132f7440eb68cf58910c8a45a2ac10b"),
-    pairs.txt = c("5976006", "9f1ba174e4e1c508ff7cdf10ac338a7d")
+    original = list(
+      file_ids = c("5976018"),
+      md5 = "a17d05bd522c52d84eca14327a23d494"
+    ),
+    funneled = list(
+      file_ids = c("5976015"),
+      md5 = "1b42dfed7d15c9b2dd63d5e5840c86ad"
+    ),
+    pairsDevTrain.txt = list(
+      file_ids = c("5976012"),
+      md5 = "4f27cbf15b2da4a85c1907eb4181ad21"
+    ),
+    pairsDevTest.txt = list(
+      file_ids = c("5976009"),
+      md5 = "5132f7440eb68cf58910c8a45a2ac10b"
+    ),
+    pairs.txt = list(
+      file_ids = c("5976006"),
+      md5 = "9f1ba174e4e1c508ff7cdf10ac338a7d"
+    )
   ),
 
   initialize = function(
