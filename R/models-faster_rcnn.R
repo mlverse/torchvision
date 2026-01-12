@@ -1,22 +1,22 @@
 rpn_head <- torch::nn_module(
     "rpn_head",
     initialize = function(in_channels, num_anchors = 3) {
-      self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
+      self$conv <- nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1),
+                                 nn_relu())
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
     },
     forward = function(features) {
-      objectness_list <- list()
-      bbox_reg_list <- list()
+      objectness <- list()
+      bbox_deltas <- list()
 
-      for (i in seq_along(features)) {
-        x <- features[[i]]
-        t <- torch::nnf_relu(self$conv(x))
-        objectness_list[[i]] <- self$cls_logits(t)
-        bbox_reg_list[[i]] <- self$bbox_pred(t)
+      for (x in features) {
+        t <- self$conv(x)
+        objectness <- c(objectness, list(self$cls_logits(t)))
+        bbox_deltas <- c(bbox_deltas, list(self$bbox_pred(t)))
       }
 
-      list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
+      list(objectness = objectness, bbox_deltas = bbox_deltas)
     }
 )
 
@@ -26,14 +26,13 @@ rpn_head_v2 <- torch::nn_module(
       # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
       # blocks with bias disabled on the convolutions. Mirror that layout so
       # the parameter names and shapes line up with the weight file.
-      block <- function() {
-        nn_sequential(
+      block <- nn_sequential(
           nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = FALSE),
           nn_batch_norm2d(in_channels),
           nn_relu()
         )
-      }
-      self$conv <- nn_sequential(block(), block())
+
+      self$conv <- nn_sequential(block, block)
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1, bias = TRUE)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1, bias = TRUE)
     },
@@ -41,21 +40,21 @@ rpn_head_v2 <- torch::nn_module(
       objectness_list <- list()
       bbox_reg_list <- list()
 
-      for (i in seq_along(features)) {
-        x <- features[[i]]
+      for (x in features) {
         t <- self$conv(x)
-        objectness_list[[i]] <- self$cls_logits(t)
-        bbox_reg_list[[i]] <- self$bbox_pred(t)
+        objectness <- c(objectness, list(self$cls_logits(t)))
+        bbox_deltas <- c(bbox_deltas, list(self$bbox_pred(t)))
       }
 
-      list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
+      list(objectness = objectness, bbox_deltas = bbox_deltas)
     }
 )
 
 
 rpn_head_mobilenet <- torch::nn_module(
     initialize = function(in_channels, num_anchors = 15) {
-      self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
+      self$conv <- nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1),
+                                 nn_relu())
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
     },
@@ -64,9 +63,9 @@ rpn_head_mobilenet <- torch::nn_module(
       bbox_deltas <- list()
 
       for (x in features) {
-        t <- nnf_relu(self$conv(x))
-        objectness[[length(objectness) + 1]] <- self$cls_logits(t)
-        bbox_deltas[[length(bbox_deltas) + 1]] <- self$bbox_pred(t)
+        t <- self$conv(x)
+        objectness <- c(objectness, list(self$cls_logits(t)))
+        bbox_deltas <- c(bbox_deltas, list(self$bbox_pred(t)))
       }
 
       list(objectness = objectness, bbox_deltas = bbox_deltas)
