@@ -5,7 +5,7 @@
 #' Each identity has multiple images with large variations in pose, age, illumination,
 #' ethnicity, and profession.
 #'
-#' @inheritParams oxfordiiitpet_dataset
+#' @inheritParams flowers102_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/vggface2`.
 #'
 #' @return A torch dataset object `vggface2_dataset`:
@@ -125,7 +125,6 @@ vggface2_dataset <- torch::dataset(
             ),
             file.path(self$processed_folder, paste0(split, ".rds"))
         )
-    }
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },

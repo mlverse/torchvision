@@ -149,7 +149,8 @@ out <- mtcnn(image_tensor)
 out
 
 # Load an image from the web
-url <- "https://upload.wikimedia.org/wikipedia/commons/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+              "/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg")
 tmp_file <- tempfile(fileext = ".jpg")
 download.file(url, tmp_file, mode = "wb")
 img <- jpeg::readJPEG(tmp_file)

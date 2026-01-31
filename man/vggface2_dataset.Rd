@@ -6,7 +6,7 @@
 \usage{
 vggface2_dataset(
   root = tempdir(),
-  train = TRUE,
+  split = "val",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
@@ -15,13 +15,13 @@ vggface2_dataset(
 \arguments{
 \item{root}{Character. Root directory where the dataset will be stored under \code{root/vggface2}.}
 
-\item{train}{Logical. If TRUE, use the training set; otherwise, use the test set. Not applicable to all datasets.}
+\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
 
-\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
+\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
 
-\item{target_transform}{Optional. A function that transforms the label.}
+\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
 
-\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
+\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
 }
 \value{
 A torch dataset object \code{vggface2_dataset}:
