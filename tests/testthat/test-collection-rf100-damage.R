@@ -9,21 +9,23 @@ test_that("rf100_damage_collection handles missing files gracefully", {
   )
 })
 
-datasets <- c("liquid_crystals", "solar_panel", "asbestos")
+dataset <- data.frame(name = c("liquid_crystals", "solar_panel", "asbestos"),
+                      num_classes = c(1L, 5L, 4L)
+)
 
-for (ds_name in datasets) {
+for (ds_name in dataset$name) {
   test_that(paste0("rf100_damage_collection loads ", ds_name, " correctly"), {
     ds <- rf100_damage_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_damage_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 
     expect_type(item$y, "list")
-    expect_named(item$y, c("labels", "boxes"))
+    expect_named(item$y, c("image_id","labels","boxes"))
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)

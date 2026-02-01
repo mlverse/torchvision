@@ -72,8 +72,8 @@ vision_make_grid <- function(tensor,
 #' @param boxes Tensor of size (N, 4) containing N bounding boxes in
 #'            c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
 #'            format. Note that the boxes coordinates are absolute with respect
-#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < W } and
-#'            \eqn{0  \leq y_{min} < y_{max} < W }.
+#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
+#'            \eqn{0  \leq y_{min} < y_{max} < Width }.
 #' @param labels character vector containing the labels of bounding boxes.
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
@@ -106,7 +106,7 @@ draw_bounding_boxes <- function(x, ...) {
 #' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.default <- function(x, ...) {
-  type_error("The provided x class {.class {class(x)}} is not supported")
+  cli_abort("The provided x class {.class {class(x)}} is not supported")
 }
 
 #' @rdname draw_bounding_boxes
@@ -121,8 +121,12 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              font_size = 10, ...) {
   rlang::check_installed("magick")
 
+  # manage single batch images
+  if (x$ndim == 4 && x$size(1) == 1) {
+    x <- x$squeeze(1)
+  }
   if (x$ndim != 3) {
-    value_error("Pass individual `x`, not batches")
+    value_error("Pass an individual image as `x`, not a batch")
   }
   if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
@@ -135,7 +139,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
     type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
   }
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
-    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
+    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use `box_convert()` to convert them")
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {

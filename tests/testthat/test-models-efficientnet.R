@@ -66,6 +66,27 @@ test_that("large efficientnet models produce correct output shapes", {
   unlink_model_file()
 })
 
+test_that("efficientnet b7 model produce correct output shapes", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = "0") != "1",
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+
+  # without pretrained
+  model <- model_efficientnet_b7(pretrained = FALSE)
+  input <- torch::torch_randn(1, 3, 600, 600)
+  out <- model(input)
+  expect_tensor_shape(out, c(1, 1000))
+
+  # with pretrained
+  withr::with_options(list(timeout = 360), {
+    model <- model_efficientnet_b7(pretrained = TRUE)
+  })
+  input <- torch::torch_randn(1, 3, 600, 600)
+  out <- model(input)
+  expect_tensor_shape(out, c(1, 1000))
+
+  unlink_model_file()
+})
+
 test_that("efficientnet allows custom num_classes", {
   model <- model_efficientnet_b0(num_classes = 42)
   input <- torch::torch_randn(1, 3, 224, 224)

@@ -15,3 +15,13 @@ transform_to_tensor.array <- function(img) {
 
 #' @export
 transform_to_tensor.matrix <- transform_to_tensor.array
+
+#' @export
+transform_to_tensor.list <- function(img)
+  if (inherits(img[[1]], "array")) {
+    torch::torch_stack(lapply(img, transform_to_tensor))
+  } else {
+    not_implemented_for_class(img[[1]])
+  }
+
+

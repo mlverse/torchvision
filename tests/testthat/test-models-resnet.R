@@ -68,6 +68,8 @@ test_that("resnet101", {
 
 test_that("resnet152", {
   skip_on_os(c("windows", "mac"))
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_resnet152()
   input <- torch::torch_randn(1, 3, 256, 256)
@@ -122,6 +124,8 @@ test_that("resnext50_32x4d", {
 
 test_that("resnext101_32x8d", {
   skip_on_os(c("windows", "mac"))
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_resnext101_32x8d()
   input <- torch::torch_randn(1, 3, 256, 256)
@@ -158,6 +162,8 @@ test_that("wide_resnet50_2", {
 
 test_that("wide_resnet101_2", {
   skip_on_os(c("windows", "mac"))
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_wide_resnet101_2()
   input <- torch::torch_randn(1, 3, 256, 256)
@@ -179,8 +185,8 @@ test_that("we can prune head of resnet34 moels", {
 
   expect_error(prune <- nn_prune_head(resnet34, 1), NA)
   # expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)
@@ -192,9 +198,9 @@ test_that("we can prune head of resnet50 moels", {
   resnet50 <- model_resnet50(pretrained=TRUE)
 
   expect_error(prune <- nn_prune_head(resnet50, 1), NA)
-  expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_s3_class(prune, "nn_sequential")
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)
@@ -204,12 +210,15 @@ test_that("we can prune head of resnet50 moels", {
 })
 
 test_that("we can prune head of resnext101 moels", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
   resnext101 <- model_resnext101_32x8d(pretrained=TRUE)
 
   expect_error(prune <- torch:::nn_prune_head(resnext101, 1), NA)
-  expect_true(inherits(prune, "nn_sequential"))
-  expect_equal(length(prune), 9)
-  expect_true(inherits(prune[[length(prune)]], "nn_adaptive_avg_pool2d"))
+  expect_s3_class(prune, "nn_sequential")
+  expect_length(prune, 9)
+  expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")
 
   input <- torch::torch_randn(1, 3, 256, 256)
   out <- prune(input)

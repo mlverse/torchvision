@@ -1,6 +1,6 @@
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
-Version: 0.7.0.9000
+Version: 0.8.0.9000
 Authors@R: c(
     person(given = "Daniel",
            family = "Falbel",
@@ -19,6 +19,9 @@ Authors@R: c(
            family = "Richard",
            role = c("ctb"),
            email = "derrickrds@gmail.com"
+           ),
+    person(given = "ANAMASGARD",
+           role = c("ctb")
            ),
     person(family = "RStudio", role = c("cph"))
     )
@@ -54,9 +57,12 @@ Suggests:
     testthat,
     coro,
     R.matlab,
-    xml2
+    xml2,
+    knitr,
+    rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
+    'collection-catalog.R'
     'folder-dataset.R'
     'collection-rf100-doc.R'
     'collection-rf100-biology.R'
@@ -86,15 +92,19 @@ Collate:
     'imagenet.R'
     'models-alexnet.R'
     'models-convnext.R'
+    'models-convnext_detection.R'
+    'models-convnext_segmentation.R'
     'models-deeplabv3.R'
     'models-efficientnet.R'
     'models-efficientnetv2.R'
     'models-facenet.R'
+    'models-faster_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
     'models-maxvit.R'
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'
+    'models-mobilenetv3_large.R'
     'models-resnet.R'
     'models-vgg.R'
     'models-vit.R'
@@ -105,6 +115,11 @@ Collate:
     'transforms-defaults.R'
     'transforms-generics.R'
     'transforms-magick.R'
+    'transforms-segmentation.R'
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
+Depends: 
+    R (>= 3.5)
+LazyData: true
+VignetteBuilder: knitr

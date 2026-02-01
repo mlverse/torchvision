@@ -1,5 +1,27 @@
 # torchvision (development version)
 
+## New features
+
+* Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
+* Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
+
+## New models
+
+* Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
+* Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
+
+## New datasets
+
+* Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
+
+## Bug fixes and improvements
+
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
+to non-vectorized `transform_` operations (#264)
+
+# torchvision 0.8.0
+
 ## New datasets
 
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
@@ -20,13 +42,14 @@
 * Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
 * Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
 * Added 8 of the `model_convnext_()` family models for image classification, thanks to @horlar1 contribution. (@cregouby, #251)
-
+* Added 2 `model_fasterrcnn_resnet50_()` models and 2 `model_fasterrcnn_mobilenet_v3_large_()` for object detection. (@koshtiakanksha, #251)
 
 ## New features
 
 * Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
 * `base_loader()` now accept URLs (@cregouby, #246).
 * `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
+* MNIST datasets and Roboflow 100 collections now have a `.getbatch` attached method (@cregouby #255)
 
 ## Bug fixes and improvements
 
@@ -35,6 +58,7 @@
 * Breaking Change : Refactoring of `coco_*` dataset family now provides each `item$x` being an image array (for consistency with other datasets). 
 You can use `transform = transform_to_tensor` to restore the previous x output to be a `torch_tensor()`.
 * `transform_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
+* Deprecation : `emnist_dataset` is deprecated in favor of `emnist_collection()` (@cregouby, #260).
 
 # torchvision 0.7.0
 

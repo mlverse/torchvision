@@ -3,8 +3,8 @@ NULL
 
 #' RoboFlow 100 Medical dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Medical](https://universe.roboflow.com/browse/medical) datasets (COCO
-#' format) with per-dataset folders and train/valid/test splits.
+#' Loads one of the [RoboFlow 100 Medical](https://universe.roboflow.com/browse/medical) datasets
+#' with per-dataset folders and train/valid/test splits.
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("radio_signal",

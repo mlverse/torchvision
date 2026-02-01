@@ -3,21 +3,22 @@ NULL
 
 #' RoboFlow 100 Document dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with COCO-style
-#' bounding box annotations for object detection tasks.
+#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with
+#' bounding box annotations for object-detection task.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.
+#'   "activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency", "wine_label")}.
 #' @param split the subset of the dataset to choose between \code{c("train", "test", "valid")}.
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target.
 #'
 #' @return A torch dataset. Each element is a named list with:
-#' - `x`: H x W x 3 array representing the image.
+#' - `x`: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
 #' - `y`: a list containing the target with:
-#'     - `labels`: character vector of object class names.
-#'     - `boxes`: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
+#'     - `image_id`: numeric identifier of the x image.
+#'     - `labels`: numeric identifier of the N bounding-box object class.
+#'     - `boxes`: a torch_tensor of shape (N, 4) with bounding boxes, each in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 #'
 #' The returned item inherits the class `image_with_bounding_box` so it can be
 #' visualised with helper functions such as [draw_bounding_boxes()].
@@ -50,8 +51,8 @@ rf100_document_collection <- torch::dataset(
 
   resources = data.frame(
     dataset = rep(c("tweeter_post", "tweeter_profile", "document_part",
-                    "activity_diagram", "signature", "paper_part"), each = 3),
-    split   = rep(c("train", "test", "valid"), times = 6),
+                    "activity_diagram", "signature", "paper_part", "currency", "wine_label"), each = 3),
+    split   = rep(c("train", "test", "valid"), times = 8),
     url = c(
       # tweeter_post
       "https://huggingface.co/datasets/Francesco/tweeter-posts/resolve/main/data/train-00000-of-00001-5ca0e754c63f9a31.parquet",
@@ -81,7 +82,17 @@ rf100_document_collection <- torch::dataset(
       # paper_part
       "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/train-00000-of-00001-0f677be56de6ff94.parquet",
       "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/test-00000-of-00001-94db1ab1c191f5e2.parquet",
-      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/validation-00000-of-00001-2ce552e0b2a0aac5.parquet"
+      "https://huggingface.co/datasets/Francesco/paper-parts/resolve/main/data/validation-00000-of-00001-2ce552e0b2a0aac5.parquet",
+
+      # currency
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/train-00000-of-00001-3c80a5c3981074e8.parquet",
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/test-00000-of-00001-06a9ff754a1f48d1.parquet",
+      "https://huggingface.co/datasets/Francesco/currency-v4f8j/resolve/main/data/validation-00000-of-00001-6dbf43e62bbf1c54.parquet",
+
+      # wine labels
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/train-00000-of-00001-e8550a2abd7d3aea.parquet",
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/test-00000-of-00001-8dea61f083eb4b77.parquet",
+      "https://huggingface.co/datasets/Francesco/wine-labels/resolve/main/data/validation-00000-of-00001-ef878f604ee5efed.parquet"
     ),
 
     md5 = c(
@@ -108,10 +119,18 @@ rf100_document_collection <- torch::dataset(
       # paper_part
       "253fd2189e89eb4664e89e9ed4b08dcc",
       "23cebd238571b4d130a11a6df760a180",
-      "e02e6da02d92de11283739c5b0daeb4b"
+      "e02e6da02d92de11283739c5b0daeb4b",
+      # currency
+      "bfdca87eaf49018d16b13f9e08b1d8de",
+      "b3c94d97b8fc3edf25ca0eaf31b5db4f",
+      "80b5c6352457d66ef1c2dccd607ec732",
+      # wine_label
+      "f124cc6ca0969bce4a9195fea1130775",
+      "a388d8b1abfaf15d45b330982e1e85a6",
+      "ca0b96eb696da512eed629895a433bad"
     ),
 
-    size = rep(50e6, 18)  # placeholder; optional
+    size = c(rep(50, 18), 32, 9, 5, 108, 32, 23) * 1e6 # placeholder; optional
   ),
 
   initialize = function(
@@ -132,11 +151,7 @@ rf100_document_collection <- torch::dataset(
     self$archive_url  <- self$resources$url[sel]
     self$archive_size <- prettyunits::pretty_bytes(sum(self$resources$size[sel]))
     self$archive_md5  <- self$resources$md5[sel]
-    self$split_file   <- file.path(
-      rappdirs::user_cache_dir("torch"),
-      class(self)[1], self$dataset,
-      sub("\\?download=.*", "", basename(self$archive_url))
-    )
+    self$split_file   <- file.path(rappdirs::user_cache_dir("torch"), class(self)[1], self$dataset, basename(self$archive_url))
 
     if (download) {
       cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -147,12 +162,13 @@ rf100_document_collection <- torch::dataset(
       runtime_error("Dataset not found. Use download=TRUE or check that parquet files exist at the expected paths.")
 
     ads <- arrow::open_dataset(self$split_file)
-    self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names
+    self$classes <- jsonlite::parse_json(ads$metadata$huggingface, simplifyVector = TRUE)$info$features$objects$feature$category$names[-1]
 
+    # single parquet file versus arrow dataset, and only keep bboxed images
     if (sum(sel) == 1) {
-      self$.data <- arrow::read_parquet(self$split_file)
+      self$.data <- arrow::read_parquet(self$split_file) %>% subset(lengths(objects$bbox) > 0)
     } else {
-      self$.data <- ads$to_data_frame()
+      self$.data <- ads$to_data_frame() %>% subset(lengths(objects$bbox) > 0)
     }
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
@@ -174,35 +190,72 @@ rf100_document_collection <- torch::dataset(
 
   .getitem = function(index) {
     df <- self$.data[index, ]
-    x_raw <- unlist(df$image$bytes) |> as.raw()
+    x_raw <- unlist(df$image$bytes) %>% as.raw()
     if (tolower(tools::file_ext(df$image$path)) == "jpg") {
       x <- jpeg::readJPEG(x_raw)
     } else {
       x <- png::readPNG(x_raw)
     }
+    # remove alpha channel
     if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
 
-    if (!is.null(df$objects) && length(df$objects[[1]]) > 0) {
-      bbox <- df$objects$bbox
-      if (is.list(bbox)) {
-        bbox <- do.call(rbind, bbox[[1]])
-      }
-      boxes  <- torch::torch_tensor(bbox, dtype = torch::torch_float())
-      labels <- df$objects$category[[1]]
-      if (is.null(labels)) {
-        labels <- df$objects$label[[1]]
-      }
-      # labels <- as.character(unlist(labels))
-    } else {
-      boxes  <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
-      labels <- 0L
+    bbox <- df$objects$bbox
+    boxes  <- box_xywh_to_xyxy(torch::torch_tensor(unlist(bbox), dtype = torch::torch_float())$view(c(-1, 4)))
+    labels <- unlist(df$objects$category)
+    if (is.null(labels)) {
+      labels <- unlist(df$objects$label)
     }
 
-    y <- list(labels = labels, boxes = boxes)
+    y <- list(image_id = df$image_id, labels = labels, boxes = boxes)
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
     item <- list(x = x, y = y)
+    class(item) <- "image_with_bounding_box"
+    item
+  },
+
+  .getbatch = function(index) {
+    df <- self$.data[index, ]
+    # hoist bytes
+    df$bytes <- df$image$bytes
+
+    df$is_jpg <- tolower(tools::file_ext(df$image$path)) == "jpg"
+
+    x_lst <- mapply(function(bytes, is_jpg) {
+      if (is_jpg) {
+        x <- jpeg::readJPEG(as.raw(bytes))
+      } else {
+        x <- png::readPNG(as.raw(bytes))
+      }
+      # remove alpha channel if any
+      if (length(dim(x)) == 3 && dim(x)[3] == 4) x <- x[, , 1:3, drop = FALSE]
+      x
+      }, bytes = df$bytes, is_jpg = df$is_jpg, SIMPLIFY = FALSE)
+
+    # y, step 1 unnest and select `objects`
+    unnested_df <- do.call(rbind, lapply(seq_len(nrow(df)), function(row) {
+      obj_df <- df$objects[row, ]
+      obj_df$bbox <- list(unlist(obj_df$bbox))
+      obj_df$category <- list(unlist(obj_df$category))
+      return(obj_df[,c("bbox", "category")])
+    }))
+    # y step 2 select, and unnest_longer bbox and label
+    unnested_bbox <- box_xywh_to_xyxy(torch::torch_tensor(unlist(unnested_df$bbox), dtype = torch::torch_float())$view(c(-1, 4)))
+    unnested_label <- unlist(unnested_df$category)
+    # y step 3 repeat image_id along each of unnested value
+    image_id_rep <- rep(df$image_id, lengths(unnested_df$category))
+
+    y <- list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox)
+
+    if (!is.null(self$transform)) {
+      x_lst <- self$transform(x_lst)
+    }
+    if (!is.null(self$target_transform)) {
+      y <- self$target_transform(y)
+    }
+
+    item <- list(x = x_lst, y = y)
     class(item) <- "image_with_bounding_box"
     item
   },

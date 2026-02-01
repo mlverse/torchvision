@@ -14,7 +14,7 @@ rf100_document_collection(
 }
 \arguments{
 \item{dataset}{Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
-"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph")}.}
+"activity_diagram", "signature", "paper_part", "tabular_data", "paragraph", "currency", "wine_label")}.}
 
 \item{split}{the subset of the dataset to choose between \code{c("train", "test", "valid")}.}
 
@@ -27,11 +27,12 @@ rf100_document_collection(
 \value{
 A torch dataset. Each element is a named list with:
 \itemize{
-\item \code{x}: H x W x 3 array representing the image.
+\item \code{x}: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
 \item \code{y}: a list containing the target with:
 \itemize{
-\item \code{labels}: character vector of object class names.
-\item \code{boxes}: a tensor of shape (N, 4) with bounding boxes, if any, in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
+\item \code{image_id}: numeric identifier of the x image.
+\item \code{labels}: numeric identifier of the N bounding-box object class.
+\item \code{boxes}: a torch_tensor of shape (N, 4) with bounding boxes, each in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 }
 }
 
@@ -42,8 +43,8 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 RoboFlow 100 Document dataset Collection
 }
 \details{
-Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with COCO-style
-bounding box annotations for object detection tasks.
+Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with
+bounding box annotations for object-detection task.
 }
 \examples{
 \dontrun{

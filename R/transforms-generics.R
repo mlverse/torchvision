@@ -554,7 +554,7 @@ transform_adjust_saturation <- function(img, saturation_factor) {
 #' `hue_factor` is the amount of shift in H channel and must be in the
 #'   interval `[-0.5, 0.5]`.
 #'
-#' See [Hue](https://en.wikipedia.org/wiki/Hue) for more details.
+#' Search for Hue for more details.
 #'
 #' @param hue_factor (float):  How much to shift the hue channel. Should be in
 #'   `[-0.5, 0.5]`. 0.5 and -0.5 give complete reversal of hue channel in
@@ -631,7 +631,7 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
 #'     (\frac{I_{\mbox{in}}}{255}\right)^{\gamma}
 #'     }
 #'
-#' @details See [Gamma Correction](https://en.wikipedia.org/wiki/Gamma_correction) for more details.
+#' @details Search for Gamma Correction for more details.
 #'
 #' @param gamma (float): Non negative real number, same as \eqn{\gamma} in the
 #'   equation. gamma larger than 1 make the shadows darker, while gamma smaller
