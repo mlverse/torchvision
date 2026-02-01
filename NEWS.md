@@ -27,11 +27,13 @@ to non-vectorized `transform_` operations (#264)
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
+* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
   and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
   thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
 * Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 
 ## New models
 

@@ -111,9 +111,6 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       return()
     }
 
-    fs::dir_create(self$raw_folder)
-    fs::dir_create(self$processed_folder)
-
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     for (r in self$resources) {
@@ -213,9 +210,11 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
   active = list(
     raw_folder = function() {
+      fs::dir_create(self$root_path, "oxfordiiitpet", "raw")
       file.path(self$root_path, "oxfordiiitpet", "raw")
     },
     processed_folder = function() {
+      fs::dir_create(self$root_path, "oxfordiiitpet", "processed")
       file.path(self$root_path, "oxfordiiitpet", "processed")
     }
   )

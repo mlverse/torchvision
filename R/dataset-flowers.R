@@ -163,7 +163,7 @@ flowers102_dataset <- dataset(
   },
 
   active = list(
-    raw_folder = function() file.path(self$root_path, "flowers102", "raw"),
-    processed_folder = function() file.path(self$root_path, "flowers102", "processed")
+    raw_folder = function() file.path(self$root_path, class(self)[1], "raw"),
+    processed_folder = function() file.path(self$root_path, class(self)[1], "processed")
   )
 )
