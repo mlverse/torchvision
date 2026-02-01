@@ -333,8 +333,7 @@ coco_caption_dataset <- torch::dataset(
 #' COCO Class Labels
 #'
 #' Utilities for resolving COCO 80 class identifiers to their corresponding
-#' human readable labels. The labels are retrieved from the same source used by
-#' PyTorch's reference implementation.
+#' human readable labels. The labels are retrieved from ultralytics source
 #'
 #' @return A character vector with the COCO class names
 #' @family class_resolution

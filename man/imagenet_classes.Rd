@@ -23,3 +23,13 @@ Utilities for resolving ImageNet-1k class identifiers to their corresponding
 human readable labels. The labels are retrieved from the same source used by
 PyTorch's reference implementation.
 }
+\seealso{
+Other class_resolution: 
+\code{\link{coco_classes}()},
+\code{\link{voc_classes}}
+
+Other class_resolution: 
+\code{\link{coco_classes}()},
+\code{\link{voc_classes}}
+}
+\concept{class_resolution}

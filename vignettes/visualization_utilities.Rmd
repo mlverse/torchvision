@@ -94,7 +94,8 @@ batch <- torch_stack(c(dog1_tensor, dog2_tensor), dim = 1) %>%
   transform_normalize(norm_mean, norm_std)
 
 model <- model_fasterrcnn_resnet50_fpn(
-  pretrained = TRUE, score_thresh = 0.4, nms_thresh = 0.7, detections_per_img = 10)
+  pretrained = TRUE, score_thresh = 0.3, nms_thresh = 0.7, detections_per_img = 10
+)
 
 model$eval()
 
