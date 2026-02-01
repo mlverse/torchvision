@@ -22,8 +22,8 @@ vision_make_grid <- function(tensor,
                              pad_value = 0) {
 
   min_max_scale <- function(x) {
-    min = x$min()$item()
-    max = x$max()$item()
+    min <- x$min()$item()
+    max <- x$max()$item()
     x$clamp_(min = min, max = max)
     x$add_(-min)$div_(max - min + 1e-5)
     x
@@ -72,8 +72,8 @@ vision_make_grid <- function(tensor,
 #' @param boxes Tensor of size (N, 4) containing N bounding boxes in
 #'            c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
 #'            format. Note that the boxes coordinates are absolute with respect
-#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < W } and
-#'            \eqn{0  \leq y_{min} < y_{max} < W }.
+#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
+#'            \eqn{0  \leq y_{min} < y_{max} < Width }.
 #' @param labels character vector containing the labels of bounding boxes.
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
@@ -106,7 +106,7 @@ draw_bounding_boxes <- function(x, ...) {
 #' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.default <- function(x, ...) {
-  type_error("The provided x class {.class {class(x)}} is not supported")
+  cli_abort("The provided x class {.class {class(x)}} is not supported")
 }
 
 #' @rdname draw_bounding_boxes
@@ -121,8 +121,12 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              font_size = 10, ...) {
   rlang::check_installed("magick")
 
+  # manage single batch images
+  if (x$ndim == 4 && x$size(1) == 1) {
+    x <- x$squeeze(1)
+  }
   if (x$ndim != 3) {
-    value_error("Pass individual `x`, not batches")
+    value_error("Pass an individual image as `x`, not a batch")
   }
   if (!x$size(1) %in% c(1, 3)) {
     value_error("Only grayscale and RGB images are supported")
@@ -135,7 +139,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
     type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
   }
   if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
-    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use torchvision$ops$box_convert to convert them")
+    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use `box_convert()` to convert them")
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
@@ -338,14 +342,23 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (masks$ndim != 3) {
     value_error("`masks` must be of shape (H, W) or (num_masks, H, W)")
   }
-  if (masks$dtype != torch::torch_bool()) {
-    type_error("`masks` is expected to be of dtype torch_bool")
+  # datasets item include boolean masks, and models inference produce logits floats for masks
+  if (masks$dtype != torch::torch_bool() && masks$dtype != torch::torch_float() ) {
+    type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
   if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
     value_error("`masks` and `image` must have the same height and width")
   }
-
-  num_masks <- masks$size(1)
+  # if mask is a model inference output, we need to convert float mask to boolean mask
+  if (masks$dtype == torch::torch_float() ) {
+    mask_id <- masks$argmax(dim = 1)
+    masks_seq <- mask_id$aminmax()[[1]]$item():mask_id$aminmax()[[2]]$item()
+    # turn mask_id \code{[LongType{H,W}]} into a boolean mask \code{[BoolType{num_masks,H,W}]}
+    masks <- torch::torch_stack(lapply(masks_seq, function(x) mask_id$eq(x)), dim = 1)
+  } else {
+    masks_seq <- seq(masks$size(1))
+  }
+  num_masks <- length(masks_seq)
   if (num_masks == 0) {
     cli_warn("masks doesn't contain any mask. No mask was drawn")
     return(x)
@@ -364,7 +377,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
     torch::torch_tensor(dtype = out_dtype)
 
   colored_mask_stack <- torch::torch_stack(lapply(
-    seq(masks$size(1)),
+    masks_seq,
     function(i) color_tt[i, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[i:i, , ])
   ), dim = 1)
 
@@ -385,6 +398,7 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x,
     ...
   )
 }
+
 
 #' Draws Keypoints
 #'

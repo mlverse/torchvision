@@ -24,7 +24,7 @@
 #' @param ... Other parameters passed to the model implementation, such as
 #'   \code{num_classes} to change the output dimension.
 #'
-#' @family models
+#' @family classification_model
 #' @name model_efficientnet_v2
 #' @seealso \code{\link{model_efficientnet}}
 #' @examples
@@ -32,7 +32,12 @@
 #' model <- model_efficientnet_v2_s()
 #' input <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(input)
-#' which.max(as.numeric(output)) (see <https://image-net.org> to find class.)
+#'
+#' # Show Top-5 predictions
+#' topk <- output$topk(k = 5, dim = 2)
+#' indices <- as.integer(topk[[2]][1, ])
+#' scores <- as.numeric(topk[[1]][1, ])
+#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
 #' }
 NULL
 
@@ -194,7 +199,7 @@ effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, .
   if (pretrained) {
     r <- efficientnet_v2_model_urls[[arch]]
     cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "efficientnet")
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 

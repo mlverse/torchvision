@@ -6,7 +6,7 @@
 \alias{model_facenet_rnet}
 \alias{model_facenet_onet}
 \alias{model_mtcnn}
-\alias{model_inception_resnet_v1}
+\alias{model_facenet_inception_resnet_v1}
 \title{MTCNN Face Detection Networks}
 \usage{
 model_facenet_pnet(pretrained = TRUE, progress = FALSE, ...)
@@ -17,7 +17,7 @@ model_facenet_onet(pretrained = TRUE, progress = FALSE, ...)
 
 model_mtcnn(pretrained = TRUE, progress = TRUE, ...)
 
-model_inception_resnet_v1(
+model_facenet_inception_resnet_v1(
   pretrained = NULL,
   classify = FALSE,
   num_classes = 10,
@@ -54,7 +54,7 @@ left eye, right eye, nose, left mouth corner, right mouth corner.
 }
 (Here, \code{N} is the number of detected faces in the input image.)
 
-\code{model_inception_resnet_v1()} returns a tensor output depending on the \code{classify} argument:
+\code{model_facenet_inception_resnet_v1()} returns a tensor output depending on the \code{classify} argument:
 \itemize{
 \item When \code{classify = FALSE} (default):
 A tensor of shape \code{(N, 512)}, where each row is a normalized embedding
@@ -115,7 +115,7 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 
 \item \code{model_mtcnn()}: MTCNN (Multi-task Cascaded Convolutional Networks) — face detection and alignment using a cascade of three neural networks
 
-\item \code{model_inception_resnet_v1()}: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
+\item \code{model_facenet_inception_resnet_v1()}: Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
 
 }}
 \examples{
@@ -149,41 +149,51 @@ out <- mtcnn(image_tensor)
 out
 
 # Load an image from the web
-url <- "https://upload.wikimedia.org/wikipedia/commons/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+              "/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg")
 tmp_file <- tempfile(fileext = ".jpg")
 download.file(url, tmp_file, mode = "wb")
 img <- jpeg::readJPEG(tmp_file)
 
 # Convert to torch tensor [C, H, W] normalized
-arr <- as.array(img)  # img is already [H, W, C]
-input <- torch_tensor(arr, dtype = torch_float())  # [H, W, C]
-input <- input$permute(c(3, 1, 2))$unsqueeze(1)   # [1, C, H, W]
+input <- transform_to_tensor(img)  # [C, H, W]
+batch <- input$unsqueeze(1)   # [1, C, H, W]
 
 # Load pretrained model
-model <- model_inception_resnet_v1(pretrained = "vggface2")
+model <- model_facenet_inception_resnet_v1(pretrained = "vggface2")
 model$eval()
-output <- model(input)
+output <- model(batch)
 output
 
 # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
-model <- model_inception_resnet_v1(pretrained = "casia-webface")
+model <- model_facenet_inception_resnet_v1(pretrained = "casia-webface")
 model$eval()
-output <- model(input)
+output <- model(batch)
 output
 }
 
 }
 \seealso{
-Other models: 
+Other object_detection_model: 
+\code{\link{model_convnext_detection}},
+\code{\link{model_fasterrcnn}}
+
+Other object_detection_model: 
+\code{\link{model_convnext_detection}},
+\code{\link{model_fasterrcnn}}
+
+Other classification_model: 
 \code{\link{model_alexnet}()},
-\code{\link{model_deeplabv3}},
+\code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
-\code{\link{model_fcn_resnet}},
 \code{\link{model_inception_v3}()},
+\code{\link{model_maxvit}()},
 \code{\link{model_mobilenet_v2}()},
+\code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
 \code{\link{model_vit}}
 }
-\concept{models}
+\concept{classification_model}
+\concept{object_detection_model}

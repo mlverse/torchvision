@@ -97,10 +97,20 @@ models = {
   'vit_l_16': 'https://download.pytorch.org/models/vit_l_16-852ce7e3.pth',
   'vit_l_32': 'https://download.pytorch.org/models/vit_l_32-c7638314.pth',
   'vit_h_14': 'https://download.pytorch.org/models/vit_h_14_swag-80465313.pth',
-  'convnext_tiny': 'https://download.pytorch.org/models/convnext_tiny-983f1562.pth',
-  'convnext_small': 'https://download.pytorch.org/models/convnext_small-0c510722.pth',
-  'convnext_base': 'https://download.pytorch.org/models/convnext_base-6075fbad.pth',
-  'convnext_large': 'https://download.pytorch.org/models/convnext_large-ea097f82.pth',
+  'convnext_tiny_1k': 'https://dl.fbaipublicfiles.com/convnext/convnext_tiny_1k_224_ema.pth', # _224_1k
+  'convnext_tiny_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_tiny_22k_224.pth', # _224_22k
+  'convnext_small_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_small_22k_224.pth', # _224_22k
+  'convnext_small_22k1k': 'https://dl.fbaipublicfiles.com/convnext/convnext_small_22k_1k_224.pth', # _224_22k_1k
+  'convnext_base_1k': 'https://dl.fbaipublicfiles.com/convnext/convnext_base_1k_224_ema.pth', # _224_1k
+  'convnext_base_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_base_22k_224.pth', # _224_22k
+  'convnext_large_1k': 'https://dl.fbaipublicfiles.com/convnext/convnext_large_1k_224_ema.pth', # _224_1k
+  'convnext_large_22k': 'https://dl.fbaipublicfiles.com/convnext/convnext_large_22k_224.pth', # _224_22k
+  'convnext_tiny_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_tiny_fp16_512x512_160k_ade20k/upernet_convnext_tiny_fp16_512x512_160k_ade20k_20220227_124553-cad485de.pth',
+  'convnext_small_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_small_fp16_512x512_160k_ade20k/upernet_convnext_small_fp16_512x512_160k_ade20k_20220227_131208-1b1e394f.pth',
+  'convnext_base_upernet_512': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_base_fp16_512x512_160k_ade20k/upernet_convnext_base_fp16_512x512_160k_ade20k_20220227_181227-02a24fc6.pth',
+  'convnext_base_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_base_fp16_640x640_160k_ade20k/upernet_convnext_base_fp16_640x640_160k_ade20k_20220227_182859-9280e39b.pth',
+  'convnext_large_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_large_fp16_640x640_160k_ade20k/upernet_convnext_large_fp16_640x640_160k_ade20k_20220226_040532-e57aa54d.pth',
+  'convnext_xlarge_upernet_640': 'https://download.openmmlab.com/mmsegmentation/v0.5/convnext/upernet_convnext_xlarge_fp16_640x640_160k_ade20k/upernet_convnext_xlarge_fp16_640x640_160k_ade20k_20220226_080344-95fc38c2.pth',
   'maskrcnn_resnet50': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth',
   'maskrcnn_resnet50_v2': 'https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth',
   'mobilenet_v3_large': 'https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth', #IMAGENET1K_V2
@@ -157,6 +167,14 @@ for name, url in models.items():
     # yolo models weights are embedded in a BaseModel per https://github.com/ultralytics/ultralytics/blob/main/ultralytics/nn/tasks.py#L309
     if name.startswith("yolo_"):
       m = m["model"].model.float().state_dict()
+    
+    # fb models weights are embedded in a named object
+    if name.startswith("convnext_") and name.endswith("k"):
+      m = m["model"]
+    
+    # openmmlab models weights are embedded in a named object
+    if name.startswith("convnext_") and "_upernet_" in name:
+      m = m["state_dict"]
     
     for nm, par in m.items():
       converted.update([(nm, par.clone())])

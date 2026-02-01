@@ -47,7 +47,7 @@ alexnet <- torch::nn_module(
 #' @param ... other parameters passed to the model intializer. currently only
 #'   `num_classes` is used.
 #'
-#' @family models
+#' @family classification_model
 #'
 #' @export
 model_alexnet <- function(pretrained = FALSE, progress = TRUE, ...) {

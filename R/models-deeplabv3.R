@@ -23,46 +23,55 @@
 #' @param ... Other parameters passed to the model implementation.
 #'
 #' @importFrom torch nn_module
-#' @family models
+#' @family semantic_segmentation_model
 #'
 #' @examples
 #' \dontrun{
-#' # Use a publicly available image of an airplane
-#' img_url <- "https://cdn.jetphotos.com/full/1/50847_1230239149.jpg"
-#' img <- jpeg::readJPEG(img_url)
+#' library(magrittr)
+#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
+#' # https://pytorch.org/vision/stable/models.html
+#' norm_std  <- c(0.229, 0.224, 0.225)
+#' # Use a publicly available image of an animal
+#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+#' img <- base_loader(paste0(wmc,url))
 #'
-#' input <- transform_to_tensor(img)
-#' input <- transform_resize(input, c(520, 520))
-#' input <- input$unsqueeze(1)  # Add batch dimension (1, 3, H, W)
+#' input <- img %>%
+#'   transform_to_tensor() %>%
+#'   transform_resize(c(520, 520)) %>%
+#'  transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #'
 #' # DeepLabV3 with ResNet-50
 #' model <- model_deeplabv3_resnet50(pretrained = TRUE)
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
 #'
-#' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
+#' # visualize the result
+#' # `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
+#' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
+#' tensor_image_display(segmented)
 #'
 #' # Show most frequent class
-#' top_class_index <- mask_id$view(-1)$mode()[[1]]$item() + 1
-#' cat("Most frequent class (ResNet-50):", model$classes[top_class_index], "\n")
-#'
-#' # Only highlight 'aeroplane' class
-#' mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["aeroplane"]])$unsqueeze(1)
-#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
-#' tensor_image_browse(segmented)
+#' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
+#' class_contingency_with_background <- mask_id$view(-1)$bincount()
+#' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
+#' top_class_index <- class_contingency_with_background$argmax()$item()
+#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
 #'
 #' # DeepLabV3 with ResNet-101 (same steps)
 #' model <- model_deeplabv3_resnet101(pretrained = TRUE)
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
+#'
+#' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
+#' tensor_image_display(segmented)
 #'
 #' mask_id <- output$out$argmax(dim = 2)
-#' top_class_index <- mask_id$view(-1)$mode()[[1]]$item() + 1
-#' cat("Most frequent class (ResNet-101):", model$classes[top_class_index], "\n")
-#'
-#' mask_bool <- mask_id[1, ..]$eq(model$class_to_idx[["aeroplane"]])$unsqueeze(1)
-#' segmented <- draw_segmentation_masks(input$squeeze(1), mask_bool, alpha = 0.6)
-#' tensor_image_browse(segmented)
+#' class_contingency_with_background <- mask_id$view(-1)$bincount()
+#' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
+#' top_class_index <- class_contingency_with_background$argmax()$item()
+#' cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}")
 #' }
 #' @name model_deeplabv3
 #' @rdname model_deeplabv3
@@ -212,9 +221,8 @@ DeepLabV3 <- torch::nn_module(
 deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
                                      num_classes, aux_loss = NULL,
                                      pretrained_backbone = FALSE, ...) {
-  if (pretrained && num_classes != 21) {
-    cli_abort("Pretrained weights require num_classes = 21.")
-  }
+
+  validate_num_classes(num_classes, pretrained)
 
   if (is.null(aux_loss))
     aux_loss <- FALSE
@@ -249,7 +257,7 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
   if (pretrained) {
     info <- deeplabv3_model_urls[[paste0(arch, "_coco")]]
     cli_inform("Downloading {.cls {arch}} pretrained weights (~{.emph {info[3]}}) ...")
-    state_dict_path <- download_and_cache(info[1])
+    state_dict_path <- download_and_cache(info[1], prefix = "deeplabv3")
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)

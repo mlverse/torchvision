@@ -5,6 +5,7 @@
 \alias{kmnist_dataset}
 \alias{qmnist_dataset}
 \alias{fashion_mnist_dataset}
+\alias{emnist_collection}
 \alias{emnist_dataset}
 \title{MNIST and Derived Datasets}
 \usage{
@@ -40,13 +41,16 @@ fashion_mnist_dataset(
   download = FALSE
 )
 
-emnist_dataset(
+emnist_collection(
   root = tempdir(),
-  split = "balanced",
+  split = "test",
+  dataset = "balanced",
   transform = NULL,
   target_transform = NULL,
   download = FALSE
 )
+
+emnist_dataset(kind, ...)
 }
 \arguments{
 \item{root}{Root directory for dataset storage. The dataset will be stored under \verb{root/<dataset-name>}. Defaults to \code{tempdir()}.}
@@ -60,6 +64,14 @@ emnist_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 
 \item{split}{Character. Used in \code{emnist_dataset()} and \code{qmnist_dataset()} to specify the subset. See individual descriptions for valid values.}
+
+\item{dataset}{to select within \code{c("byclass", "bymerge", "balanced", "letters", "digits", "mnist")}
+representing the subset of emnist collection made of a set of classes.
+You can look at dataset attribute \verb{$classes} to see the actual classes.}
+
+\item{kind}{the \code{dataset} in \code{emnist_collection}.}
+
+\item{...}{the other \code{emnist_collection} parameters.}
 }
 \value{
 A torch dataset object, where each items is a list of \code{x} (image) and \code{y} (label).
@@ -74,7 +86,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 \item \strong{Fashion-MNIST}: Clothing item images for classification.
 \item \strong{Kuzushiji-MNIST}: Japanese cursive character dataset.
 \item \strong{QMNIST}: Extended MNIST with high-precision NIST data.
-\item \strong{EMNIST}: Letters and digits with multiple label splits.
+\item \strong{EMNIST}: A collection of letters and digits with multiple datasets and  splits.
 }
 }
 \section{Functions}{
@@ -85,10 +97,12 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 
 \item \code{fashion_mnist_dataset()}: Fashion-MNIST clothing image dataset.
 
-\item \code{emnist_dataset()}: EMNIST dataset with digits and letters and multiple split modes.
+\item \code{emnist_collection()}: EMNIST collection with digits and letters arranged in multiple datasets.
+
+\item \code{emnist_dataset()}: Deprecated. Please use emnist_collection.
 
 }}
-\section{Supported Splits for \code{emnist_dataset()}}{
+\section{Supported \code{dataset}s for \code{emnist_collection()}}{
 
 \itemize{
 \item \code{"byclass"}: 62 classes (digits + uppercase + lowercase)
@@ -100,7 +114,7 @@ Images are thumbnails images of 28 x 28 pixels of grayscale values encoded as in
 }
 }
 
-\section{Supported Splits for \code{qmnist_dataset()}}{
+\section{Supported \code{split}s for \code{qmnist_dataset()}}{
 
 \itemize{
 \item \code{"train"}: 60,000 training samples (MNIST-compatible)
@@ -121,13 +135,13 @@ item <- qmnist[1]
 item$x
 item$y
 
-emnist <- emnist_dataset(split = "balanced", download = TRUE)
+emnist <- emnist_collection(dataset = "balanced", split = "test", download = TRUE)
 item <- emnist[1]
 item$x
 item$y
 
-kmnist <- kmnist_dataset(download = TRUE)
-fmnist <- fashion_mnist_dataset(download = TRUE)
+kmnist <- kmnist_dataset(download = TRUE, train = FALSE)
+fmnist <- fashion_mnist_dataset(download = TRUE, train = TRUE)
 }
 
 }
@@ -139,10 +153,13 @@ Other classification_dataset:
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
 \code{\link{lfw_dataset}},
 \code{\link{oxfordiiitpet_dataset}()},
 \code{\link{places365_dataset}()},
 \code{\link{tiny_imagenet_dataset}()},
-\code{\link{whoi_plankton_dataset}()}
+\code{\link{vggface2_dataset}()},
+\code{\link{whoi_plankton_dataset}()},
+\code{\link{whoi_small_coralnet_dataset}()}
 }
 \concept{classification_dataset}

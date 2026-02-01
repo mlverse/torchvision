@@ -7,9 +7,9 @@ facenet_torchscript_urls <- list(
 #' MTCNN Face Detection Networks
 #'
 #' These models implement the three-stage Multi-task Cascaded Convolutional Networks (MTCNN)
-#' architecture from the paper 
+#' architecture from the paper
 #' [Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Networks](https://arxiv.org/abs/1604.02878).
-#' 
+#'
 #' MTCNN detects faces and facial landmarks in an image through a coarse-to-fine pipeline:
 #' - **PNet** (Proposal Network): Generates candidate face bounding boxes at multiple scales.
 #' - **RNet** (Refine Network): Refines candidate boxes, rejecting false positives.
@@ -23,8 +23,8 @@ facenet_torchscript_urls <- list(
 #' | RNet  | 24×24          | ~30k       | 400 kB    | 2-class face prob + bbox reg  | Dense layers, higher recall       |
 #' | ONet  | 48×48          | ~100k      | 2 MB      | 2-class prob + bbox + 5-point | Landmark detection stage          |
 #' ```
-#' Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules 
-#' with residual connections, designed for face recognition tasks. The model achieves high accuracy 
+#' Inception-ResNet-v1 is a convolutional neural network architecture combining Inception modules
+#' with residual connections, designed for face recognition tasks. The model achieves high accuracy
 #' on standard face verification benchmarks such as LFW (Labeled Faces in the Wild).
 #'
 #' ## Model Variants and Performance (LFW accuracy)
@@ -37,7 +37,7 @@ facenet_torchscript_urls <- list(
 #'
 #' - The CASIA-Webface pretrained weights provide strong baseline accuracy.
 #' - The VGGFace2 pretrained weights achieve higher accuracy, benefiting from a larger, more diverse dataset.
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' # Example usage of PNet
@@ -69,38 +69,39 @@ facenet_torchscript_urls <- list(
 #' out
 #'
 #' # Load an image from the web
-#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b4/Catherine_Bell_200101233d_hr_%28cropped%29.jpg"
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+#'               "/b/b4/Catherine_Bell_200101233d_hr_%28cropped%29.jpg")
 #' tmp_file <- tempfile(fileext = ".jpg")
 #' download.file(url, tmp_file, mode = "wb")
 #' img <- jpeg::readJPEG(tmp_file)
 #'
 #' # Convert to torch tensor [C, H, W] normalized
-#' arr <- as.array(img)  # img is already [H, W, C]
-#' input <- torch_tensor(arr, dtype = torch_float())  # [H, W, C]
-#' input <- input$permute(c(3, 1, 2))$unsqueeze(1)   # [1, C, H, W]
+#' input <- transform_to_tensor(img)  # [C, H, W]
+#' batch <- input$unsqueeze(1)   # [1, C, H, W]
 #'
 #' # Load pretrained model
-#' model <- model_inception_resnet_v1(pretrained = "vggface2")
+#' model <- model_facenet_inception_resnet_v1(pretrained = "vggface2")
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
 #' output
 #'
 #' # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
-#' model <- model_inception_resnet_v1(pretrained = "casia-webface")
+#' model <- model_facenet_inception_resnet_v1(pretrained = "casia-webface")
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
 #' output
 #' }
 #'
 #' @importFrom torch nn_module nn_conv2d nn_prelu nn_max_pool2d nn_softmax nn_linear nn_batch_norm2d nn_batch_norm1d
-#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat nnf_interpolate nnf_relu nnf_normalize
+#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat
+#' @importFrom torch nnf_interpolate nnf_relu nnf_normalize load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
 #' @param classify Logical, whether to include the classification head. Default is FALSE.
 #' @param num_classes Integer, number of output classes for classification. Default is 10.
 #' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
 #'
-#' @family models
+#' @family object_detection_model
 #' @rdname model_facenet
 #' @name model_facenet
 NULL
@@ -120,11 +121,11 @@ model_facenet_pnet <- nn_module(
     self$conv4_1 <- nn_conv2d(32, 2, kernel_size=1)
     self$softmax4_1 <- nn_softmax(dim=1)
     self$conv4_2 <- nn_conv2d(32, 4, kernel_size=1)
-    
+
     self$training <- FALSE
-    
+
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "pnet")
+      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -132,7 +133,7 @@ model_facenet_pnet <- nn_module(
       self$load_state_dict(state_dict)
     }
   },
-  
+
   forward = function(x) {
     x <- self$conv1(x)
     x <- self$prelu1(x)
@@ -166,11 +167,11 @@ model_facenet_rnet <- nn_module(
     self$dense5_1 <- nn_linear(128, 2)
     self$softmax5_1 <- nn_softmax(dim=1)
     self$dense5_2 <- nn_linear(128, 4)
-    
+
     self$training <- FALSE
-    
+
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "rnet")
+      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -178,7 +179,7 @@ model_facenet_rnet <- nn_module(
       self$load_state_dict(state_dict)
     }
   },
-  
+
   forward = function(x) {
     x <- self$conv1(x)
     x <- self$prelu1(x)
@@ -220,11 +221,11 @@ model_facenet_onet <- nn_module(
     self$softmax6_1 <- nn_softmax(dim=1)
     self$dense6_2 <- nn_linear(256, 4)
     self$dense6_3 <- nn_linear(256, 10)
-    
+
     self$training <- FALSE
-    
+
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "onet")
+      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -232,7 +233,7 @@ model_facenet_onet <- nn_module(
       self$load_state_dict(state_dict)
     }
   },
-  
+
   forward = function(x) {
     x <- self$conv1(x)
     x <- self$prelu1(x)
@@ -271,6 +272,7 @@ model_facenet_onet <- nn_module(
 #'         }
 #' }
 #' (Here, \code{N} is the number of detected faces in the input image.)
+#' @family object_detection_model
 #' @export
 model_mtcnn <- nn_module(
   classname = "MTCNN",
@@ -280,19 +282,19 @@ model_mtcnn <- nn_module(
     ...
   ) {
 
-    
+
     self$pnet <- model_facenet_pnet(pretrained=pretrained,...)
     self$rnet <- model_facenet_rnet(pretrained=pretrained,...)
     self$onet <- model_facenet_onet(pretrained=pretrained,...)
   },
-  
+
   forward = function(x) {
     pnet_out <- self$pnet(x)
     x_rnet <- nnf_interpolate(x, size = c(24, 24), mode = "bilinear", align_corners = FALSE)
     rnet_out <- self$rnet(x_rnet)
     x_onet <- nnf_interpolate(x_rnet, size = c(48, 48), mode = "bilinear", align_corners = FALSE)
     onet_out <- self$onet(x_onet)
-    
+
     list(boxes = onet_out$boxes, landmarks = onet_out$landmarks, cls = onet_out$cls)
   }
 )
@@ -301,13 +303,13 @@ model_mtcnn <- nn_module(
 load_inception_weights <- function(model, name) {
   if (name == "vggface2") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/vggface2.pth"
-    md5 = "c446a04f0b22763858226717ba1f7410"
+    md5 <- "c446a04f0b22763858226717ba1f7410"
   } else if (name == "casia-webface") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/casia-webface.pth"
-    md5 = "ff4aff482f6c1941784abba5131bae20"
+    md5 <- "ff4aff482f6c1941784abba5131bae20"
   }
 
-  archive <- download_and_cache(url,prefix = name)
+  archive <- download_and_cache(url,prefix = "facenet")
   if (tools::md5sum(archive) != md5){
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
   }
@@ -348,9 +350,9 @@ Block35 <- nn_module(
     branch0 <- self$branch0(x)
     branch1 <- self$branch1(x)
     branch2 <- self$branch2(x)
-    print(branch0$shape)  
-    print(branch1$shape) 
-    print(branch2$shape) 
+    print(branch0$shape)
+    print(branch1$shape)
+    print(branch2$shape)
     mixed <- torch_cat(list(branch0, branch1, branch2), dim = 2)
     up <- self$conv2d(mixed)
     x + self$scale * up %>% nnf_relu(inplace = TRUE)
@@ -456,20 +458,21 @@ Mixed_7a <- nn_module(
 #' @describeIn model_facenet Inception-ResNet-v1 — high-accuracy face recognition model combining Inception modules with residual connections, pretrained on VGGFace2 and CASIA-Webface datasets
 #'
 #' @return
-#' `model_inception_resnet_v1()` returns a tensor output depending on the \code{classify} argument:
+#' `model_facenet_inception_resnet_v1()` returns a tensor output depending on the \code{classify} argument:
 #' \itemize{
-#'   \item When \code{classify = FALSE} (default):  
+#'   \item When \code{classify = FALSE} (default):
 #'         A tensor of shape \code{(N, 512)}, where each row is a normalized embedding
-#'         vector (L2 norm = 1).  
+#'         vector (L2 norm = 1).
 #'         These 512-dimensional FaceNet embeddings can be compared using cosine
 #'         similarity or Euclidean distance for face verification and clustering.
 #'
-#'   \item When \code{classify = TRUE}:  
+#'   \item When \code{classify = TRUE}:
 #'         A tensor of shape \code{(N, num_classes)} containing class logits.
 #' }
 #'
+#' @family classification_model
 #' @export
-model_inception_resnet_v1 <- nn_module(
+model_facenet_inception_resnet_v1 <- nn_module(
   initialize = function(
     pretrained = NULL,
     classify = FALSE,
@@ -487,7 +490,7 @@ model_inception_resnet_v1 <- nn_module(
         pretrained <- NULL
       }
     }
-    
+
     self$conv2d_1a <- BasicConv2d(3, 32, kernel_size = 3, stride = 2)
     self$conv2d_2a <- BasicConv2d(32, 32, kernel_size = 3, stride = 1)
     self$conv2d_2b <- BasicConv2d(32, 64, kernel_size = 3, stride = 1, padding = 1)
@@ -495,18 +498,18 @@ model_inception_resnet_v1 <- nn_module(
     self$conv2d_3b <- BasicConv2d(64, 80, kernel_size = 1, stride = 1)
     self$conv2d_4a <- BasicConv2d(80, 192, kernel_size = 3, stride = 1)
     self$conv2d_4b <- BasicConv2d(192, 256, kernel_size = 3, stride = 2)
-    
+
     self$mixed_6a <- Mixed_6a()
     self$repeat_2 <- nn_sequential(!!!lapply(1:10, function(i) Block17(0.10)))
     self$mixed_7a <- Mixed_7a()
     self$repeat_3 <- nn_sequential(!!!lapply(1:5, function(i) Block8(0.20)))
     self$block8 <- Block8(noReLU = TRUE)
-    
+
     self$avgpool_1a <- nn_adaptive_avg_pool2d(output_size = 1)
     self$dropout <- nn_dropout(p = dropout_prob)
     self$last_linear <- nn_linear(1792, 512, bias = FALSE)
     self$last_bn <- nn_batch_norm1d(512, eps = 0.001, momentum = 0.1, affine = TRUE)
-    
+
     self$classify <- classify
     if (!is.null(pretrained)) {
       self$logits <- nn_linear(512, tmp_classes)

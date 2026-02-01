@@ -29,8 +29,8 @@ coco_detection_dataset(
 \value{
 An object of class \code{coco_detection_dataset}. Each item is a list:
 \itemize{
-\item \code{x}: a \verb{(C, H, W)} \code{torch_tensor} representing the image.
-\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format \code{c(x_min, y_min, x_max, y_max)}.
+\item \code{x}: a \verb{(C, H, W)} array representing the image.
+\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}.
 \item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
 \item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
@@ -45,12 +45,13 @@ to enable automatic dispatch by visualization functions such as \code{draw_bound
 Loads the MS COCO dataset for object detection and segmentation.
 }
 \details{
-The returned image is in CHW format (channels, height, width), matching the torch convention.
+The returned image \code{x} is in CHW format (channels, height, width), matching the torch convention.
 The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
 areas, crowd indicators, and segmentation masks from the official COCO annotations.
 }
 \examples{
 \dontrun{
+# Load dataset
 ds <- coco_detection_dataset(
   train = FALSE,
   year = "2017",
@@ -63,13 +64,30 @@ item <- ds[1]
 boxed <- draw_bounding_boxes(item)
 tensor_image_browse(boxed)
 
-# Visualize segmentation masks (if present)
-masked <- draw_segmentation_masks(item)
+# In order to visualize segmentation masks, we
+# use the specific segmentation mask target transformation
+ds_with_masks <- coco_detection_dataset(
+  train = FALSE,
+  year = "2017",
+  download = TRUE,
+  target_transform = target_transform_coco_masks
+)
+
+item_masked <- ds_with_masks[1]
+
+# Visualize segmentation masks
+masked <- draw_segmentation_masks(item_masked)
 tensor_image_browse(masked)
 }
 }
 \seealso{
 Other detection_dataset: 
-\code{\link{pascal_voc_datasets}}
+\code{\link{pascal_voc_datasets}},
+\code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
+\code{\link{rf100_document_collection}()},
+\code{\link{rf100_infrared_collection}()},
+\code{\link{rf100_medical_collection}()},
+\code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}

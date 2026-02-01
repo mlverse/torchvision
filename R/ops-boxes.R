@@ -26,29 +26,46 @@
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
-  # assert_has_ops()
-  # return(torch::torch_nms(boxes, scores, iou_threshold))
-  if (length(scores) == 0) {
-    return(integer())
+
+  # Handle empty inputs gracefully
+
+  n_boxes <- boxes$shape[1]
+  if (n_boxes == 0) {
+    return(torch::torch_empty(0L, dtype = torch::torch_long(), device = boxes$device))
   }
-
+  
   # Sort scores in descending order
-  order <- scores$sort(descending = TRUE)[[2]]
-  boxes <- boxes[order, ]
-  scores <- scores[order]
+  sort_result <- scores$sort(descending = TRUE)
+  order <- sort_result[[2]]
+  sorted_boxes <- boxes[order, ]
+  
+  # Pre-allocate keep list for efficiency
 
-  keep <- c(1L)
-
-  for (i in 2:length(scores)) {
-    # Compute IoU with the last kept box
-    iou <- box_iou(boxes[keep, , drop = FALSE], boxes[i, , drop = FALSE])
+  keep <- vector("integer", n_boxes)
+  keep[1] <- 1L
+  n_keep <- 1L
+  
+  for (i in 2:n_boxes) {
+    # Get current box - use unsqueeze to ensure 2D tensor [1, 4]
+    current_box <- sorted_boxes[i, ]$unsqueeze(1)
+    
+    # Get all kept boxes so far
+    kept_indices <- keep[1:n_keep]
+    kept_boxes <- sorted_boxes[kept_indices, , drop = FALSE]
+    
+    # Compute IoU with all kept boxes
+    iou <- box_iou(kept_boxes, current_box)
+    
     # Check if the current box has IoU <= iou_threshold with all kept boxes
     if (all(as.logical(iou <= iou_threshold))) {
-      keep <- c(keep, i)
+      n_keep <- n_keep + 1L
+      keep[n_keep] <- i
     }
   }
-
-  return(order[keep])
+  
+  # Return indices in original order
+  kept_indices <- keep[1:n_keep]
+  return(order[kept_indices])
 }
 
 
@@ -78,8 +95,8 @@ batched_nms <- function(
   idxs,
   iou_threshold
 ) {
-  boxes_dtype = boxes$dtype
-  boxes_device = boxes$device
+  boxes_dtype <- boxes$dtype
+  boxes_device <- boxes$device
 
   # strategy: in order to perform NMS independently per class.
   # we add an offset to all the boxes. The offset is dependent
@@ -89,10 +106,10 @@ batched_nms <- function(
     if(boxes$numel() == 0) {
       return(torch::torch_empty(0, dtype=torch::torch_int64(), device = boxes_device))
     } else {
-      max_coordinate = boxes$max()
-      offsets = idxs$to(device = boxes_device, dtype = boxes_dtype) * (max_coordinate + torch::torch_tensor(1)$to(device = boxes_device, dtype = boxes_dtype))
-      boxes_for_nms = boxes + offsets[, NULL]
-      keep = nms(boxes_for_nms, scores, iou_threshold)
+      max_coordinate <- boxes$max()
+      offsets <- idxs$to(device = boxes_device, dtype = boxes_dtype) * (max_coordinate + torch::torch_tensor(1)$to(device = boxes_device, dtype = boxes_dtype))
+      boxes_for_nms <- boxes + offsets[, NULL]
+      keep <- nms(boxes_for_nms, scores, iou_threshold)
       return(keep)
     }
 }
@@ -113,8 +130,8 @@ batched_nms <- function(
 #' @export
 remove_small_boxes <- function(boxes, min_size) {
   c(ws, hs) %<-% c(boxes[, 3] - boxes[, 1], boxes[, 4] - boxes[, 2])
-  keep = (ws >= min_size) & (hs >= min_size)
-  keep = torch::torch_where(keep)[[1]]
+  keep <- (ws >= min_size) & (hs >= min_size)
+  keep <- torch::torch_where(keep)[[1]]
   return(keep)
 }
 
@@ -132,9 +149,9 @@ remove_small_boxes <- function(boxes, min_size) {
 #'
 #' @export
 clip_boxes_to_image <- function(boxes, size) {
-  dim = boxes$dim()
-  boxes_x = boxes[.., seq(1, boxes$shape[2], 2)]
-  boxes_y = boxes[.., seq(2, boxes$shape[2], 2)]
+  dim <- boxes$dim()
+  boxes_x <- boxes[.., seq(1, boxes$shape[2], 2)]
+  boxes_y <- boxes[.., seq(2, boxes$shape[2], 2)]
   c(height, width) %<-% size
 
   # if(torchvision$_is_tracing()) {
@@ -143,10 +160,10 @@ clip_boxes_to_image <- function(boxes, size) {
   #   boxes_y = torch::torch_max(boxes_y, other = torch::torch_tensor(0, dtype=boxes$dtype, device=boxes$device))
   #   boxes_y = torch::torch_min(boxes_y, other = torch::torch_tensor(height, dtype=boxes$dtype, device=boxes$device))
   # } else {
-  boxes_x = boxes_x$clamp(min=0, max=width)
-  boxes_y = boxes_y$clamp(min=0, max=height)
+  boxes_x <- boxes_x$clamp(min=0, max=width)
+  boxes_y <- boxes_y$clamp(min=0, max=height)
 
-  clipped_boxes = torch::torch_stack(c(boxes_x, boxes_y), dim=dim+1)
+  clipped_boxes <- torch::torch_stack(c(boxes_x, boxes_y), dim=dim+1)
   return(clipped_boxes$reshape(boxes$shape))
 }
 
@@ -173,7 +190,7 @@ clip_boxes_to_image <- function(boxes, size) {
 #'
 #' @export
 box_convert <- function(boxes, in_fmt, out_fmt) {
-  allowed_fmts = c("xyxy", "xywh", "cxcywh")
+  allowed_fmts <- c("xyxy", "xywh", "cxcywh")
   if((!in_fmt %in% allowed_fmts) | (!out_fmt %in% allowed_fmts))
     value_error("Unsupported Bounding Box Conversions for given in_fmt and out_fmt")
 
@@ -183,23 +200,23 @@ box_convert <- function(boxes, in_fmt, out_fmt) {
   if(in_fmt != 'xyxy' & out_fmt != 'xyxy') {
     # convert to xyxy and change in_fmt xyxy
     if(in_fmt == "xywh") {
-      boxes = box_xywh_to_xyxy(boxes)
+      boxes <- box_xywh_to_xyxy(boxes)
     } else if(in_fmt == "cxcywh") {
-      boxes = box_cxcywh_to_xyxy(boxes)
+      boxes <- box_cxcywh_to_xyxy(boxes)
     }
-    in_fmt = 'xyxy'
+    in_fmt <- 'xyxy'
   }
   if(in_fmt == "xyxy") {
     if(out_fmt == "xywh") {
-      boxes = box_xyxy_to_xywh(boxes)
+      boxes <- box_xyxy_to_xywh(boxes)
     } else if(out_fmt == "cxcywh") {
-      boxes = box_xyxy_to_cxcywh(boxes)
+      boxes <- box_xyxy_to_cxcywh(boxes)
     }
   } else if(out_fmt == "xyxy") {
     if(in_fmt == "xywh") {
-      boxes = box_xywh_to_xyxy(boxes)
+      boxes <- box_xywh_to_xyxy(boxes)
     } else if(in_fmt == "cxcywh") {
-      boxes = box_cxcywh_to_xyxy(boxes)
+      boxes <- box_cxcywh_to_xyxy(boxes)
     }
   }
   return(boxes)
@@ -229,23 +246,23 @@ upcast <- function(t) {
 #'
 #' @export
 box_area <- function(boxes) {
-  boxes = upcast(boxes)
+  boxes <- upcast(boxes)
   return((boxes[, 3] - boxes[, 1]) * (boxes[, 4] - boxes[, 2]))
 }
 
 box_inter_union <- function(boxes1, boxes2) {
   # implementation from https://github.com/kuangliu/torchcv/blob/master/torchcv/utils/box.py
   # with slight modifications
-  area1 = box_area(boxes1)
-  area2 = box_area(boxes2)
+  area1 <- box_area(boxes1)
+  area2 <- box_area(boxes2)
 
-  lt = torch::torch_max(boxes1[, NULL, 1:2], other = boxes2[, 1:2]) # [N,M,2]
-  rb = torch::torch_min(boxes1[, NULL, 3:N], other = boxes2[, 3:N]) # [N,M,2]
+  lt <- torch::torch_max(boxes1[, NULL, 1:2], other = boxes2[, 1:2]) # [N,M,2]
+  rb <- torch::torch_min(boxes1[, NULL, 3:N], other = boxes2[, 3:N]) # [N,M,2]
 
-  wh = upcast(rb - lt)$clamp(min=0) # [N,M,2]
-  inter = wh[, , 1] * wh[, , 2] # [N,M]
+  wh <- upcast(rb - lt)$clamp(min=0) # [N,M,2]
+  inter <- wh[, , 1] * wh[, , 2] # [N,M]
 
-  union = area1[, NULL] + area2 - inter
+  union <- area1[, NULL] + area2 - inter
 
   return(list(inter, union))
 }
@@ -263,8 +280,8 @@ box_inter_union <- function(boxes1, boxes2) {
 #'
 #' @export
 box_iou <- function(boxes1, boxes2) {
-    c(inter, union) %<-% box_inter_union(boxes1, boxes2)
-    iou = inter / union
+    inter_union <- box_inter_union(boxes1, boxes2)
+    iou <- inter_union[[1]] / inter_union[[2]]
     return(iou)
 }
 
@@ -292,14 +309,14 @@ generalized_box_iou <- function(boxes1, boxes2) {
   if(as.numeric((boxes2[, 3:N] >= boxes2[, 1:2])$all()) != 1)
     value_error("(boxes2[, 3:N] >= boxes2[, 1:2])$all() not TRUE")
 
-  c(inter, union) %<-% box_inter_union(boxes1, boxes2)
-  iou = inter / union
+  inter_union <- box_inter_union(boxes1, boxes2)
+  iou <- inter_union[[1]] / inter_union[[2]]
 
-  lti = torch::torch_min(boxes1[, NULL, 1:2], other = boxes2[, 1:2])
-  rbi = torch::torch_max(boxes1[, NULL, 3:N], other = boxes2[, 3:N])
+  lti <- torch::torch_min(boxes1[, NULL, 1:2], other = boxes2[, 1:2])
+  rbi <- torch::torch_max(boxes1[, NULL, 3:N], other = boxes2[, 3:N])
 
-  whi = upcast(rbi - lti)$clamp(min=0) # [N,M,2]
-  areai = whi[, , 1] * whi[, , 2]
+  whi <- upcast(rbi - lti)$clamp(min=0) # [N,M,2]
+  areai <- whi[, , 1] * whi[, , 2]
 
-  return(iou - (areai - union) / areai)
+  return(iou - (areai - inter_union[[2]]) / areai)
 }

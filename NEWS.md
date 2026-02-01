@@ -1,24 +1,65 @@
 # torchvision (development version)
 
+## New features
+
+* Added vignette showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `make_vision_grid()` (@DerrickUnleashed, #244).
+* Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
+* Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
+
+## New models
+
+* Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
+* Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
+
+## New datasets
+
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
+* Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
+
+## Bug fixes and improvements
+
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
+to non-vectorized `transform_` operations (#264)
+
+# torchvision 0.8.0
+
 ## New datasets
 
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
+* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
+* Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
+  and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
+  thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
+* Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
 
 ## New models
 
+* Added `model_maxvit()` for MaxViT: Multi-Axis Vision Transformer (#229, @koshtiakanksha).
 * Added `model_facenet_pnet()`, `model_facenet_rnet()`, and `model_facenet_onet()` for Facenet MTCNN face detection models. (@DerrickUnleashed, #227)
 * Added `model_mtcnn()` and `model_inception_resnet_v1()` models for face detection and recognition. (@DerrickUnleashed, #217)
+* Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
+* Added 8 of the `model_convnext_()` family models for image classification, thanks to @horlar1 contribution. (@cregouby, #251)
+* Added 2 `model_fasterrcnn_resnet50_()` models and 2 `model_fasterrcnn_mobilenet_v3_large_()` for object detection. (@koshtiakanksha, #251)
 
 ## New features
 
-* Added vignette showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `make_vision_grid()` (@DerrickUnleashed, #244).
+* Added `imagenet_label()` and `imagenet_classes()` for ImageNet classes resolution (#229, @koshtiakanksha).
+* `base_loader()` now accept URLs (@cregouby, #246).
+* `draw_segmentation_masks()` now accepts semantic segmentation models torch_float() output. (@cregouby #247) 
+* MNIST datasets and Roboflow 100 collections now have a `.getbatch` attached method (@cregouby #255)
 
 ## Bug fixes and improvements
 
 * Switch pre 0.5.0 models to their `/v2/` URL in torch-cdn.mlverse.org. (#215)
+* Models are now separated in the documentation by tasks between classification, object detection, and semantic segmentation models (@cregouby, #247)
+* Breaking Change : Refactoring of `coco_*` dataset family now provides each `item$x` being an image array (for consistency with other datasets). 
+You can use `transform = transform_to_tensor` to restore the previous x output to be a `torch_tensor()`.
+* `transform_` are now documented into 3 different categories: unitary transformations, random transformations and combining transformations. (@cregouby, #250)
+* Deprecation : `emnist_dataset` is deprecated in favor of `emnist_collection()` (@cregouby, #260).
 
 # torchvision 0.7.0
 
@@ -34,8 +75,8 @@
 * Added `fer_dataset()` for loading the FER-2013 dataset (@DerrickUnleashed, #154).
 * Added `flowers102_dataset()` for loading the Flowers102 dataset (@DerrickUnleashed, #157).
 * Added `flickr8k_dataset()` and `flickr30k_dataset()` for loading the Flickr8k and Flickr30k datasets (@DerrickUnleashed, #159).
-* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `oxfordiiitpet_dataset()`, `oxfordiiitpet_binary_dataset()`, and `oxfordiiitpet_segmentation_dataset()` for loading the Oxford-IIIT Pet datasets (@DerrickUnleashed, #162).
+* Added `rf100_document_collection()`, `rf100_underwater_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, and `rf100_peixos_segmentation_dataset()` for loading Roboflow 100 datasets (@koshtiakanksha, #239).
 
 ## New models
 
@@ -46,7 +87,7 @@
 ## New features
 
 * `tensor_image_display()` and `tensor_image_browse()` now accept all `tensor_image` dtypes (@cregouby, #115).
-* `tensor_image_display()` and `tensor_image_browse()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
+* `draw_bounding_boxes()` and `draw_segmentation_masks()` now accept `image_with_bounding_box` and `image_with_segmentation_mask` inputs which are 
   the default items class for respectively detection datasets and segmentation datasets (@koshtiakanksha, #175).
 * `fgvc_aircraft_dataset()` gains support for `annotation_level = "all"` (@DerrickUnleashed, #168).
 * `folder_dataset()` now supports TIFF image formats (@cregouby, #169).

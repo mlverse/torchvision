@@ -118,10 +118,13 @@ Other classification_dataset:
 \code{\link{fer_dataset}()},
 \code{\link{fgvc_aircraft_dataset}()},
 \code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
 \code{\link{mnist_dataset}()},
 \code{\link{oxfordiiitpet_dataset}()},
 \code{\link{places365_dataset}()},
 \code{\link{tiny_imagenet_dataset}()},
-\code{\link{whoi_plankton_dataset}()}
+\code{\link{vggface2_dataset}()},
+\code{\link{whoi_plankton_dataset}()},
+\code{\link{whoi_small_coralnet_dataset}()}
 }
 \concept{classification_dataset}
