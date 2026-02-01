@@ -15,13 +15,13 @@ vggface2_dataset(
 \arguments{
 \item{root}{Character. Root directory where the dataset will be stored under \code{root/vggface2}.}
 
-\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"train"}.}
+\item{split}{One of \code{"train"}, \code{"val"}, or \code{"test"}. Default is \code{"val"}.}
 
-\item{transform}{Optional function to transform input images after loading. Default is \code{NULL}.}
+\item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
-\item{target_transform}{Optional function to transform labels. Default is \code{NULL}.}
+\item{target_transform}{Optional. A function that transforms the label.}
 
-\item{download}{Logical. Whether to download the dataset if not found locally. Default is \code{FALSE}.}
+\item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
 A torch dataset object \code{vggface2_dataset}:
@@ -39,8 +39,7 @@ A torch dataset object \code{vggface2_dataset}:
 \description{
 The VGGFace2 dataset is a large-scale face recognition dataset containing images
 of celebrities from a wide range of ethnicities, professions, and ages.
-Each identity has multiple images with large variations in pose, age, illumination,
-ethnicity, and profession.
+Each identity has multiple images with variations in context, pose, age, and illumination.
 }
 \examples{
 \dontrun{

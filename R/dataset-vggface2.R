@@ -2,10 +2,9 @@
 #'
 #' The VGGFace2 dataset is a large-scale face recognition dataset containing images
 #' of celebrities from a wide range of ethnicities, professions, and ages.
-#' Each identity has multiple images with large variations in pose, age, illumination,
-#' ethnicity, and profession.
+#' Each identity has multiple images with variations in context, pose, age, and illumination.
 #'
-#' @inheritParams flowers102_dataset
+#' @inheritParams eurosat_dataset
 #' @param root Character. Root directory where the dataset will be stored under `root/vggface2`.
 #'
 #' @return A torch dataset object `vggface2_dataset`:
@@ -50,7 +49,7 @@ vggface2_dataset <- torch::dataset(
             "bb7a323824d1004e14e00c23974facd3",
             "d08b10f12bc9889509364ef56d73c621",
             "d315386c7e8e166c4f60e27d9cc61acc"),
-    size = c(2.03e9, 62e6, 37.9e9, 3e6, 335e3)
+    size = c(37.9e9, 62e6, 2.03e9, 3e6, 335e3)
   ),
   initialize = function(
     root = tempdir(),
@@ -59,7 +58,7 @@ vggface2_dataset <- torch::dataset(
     target_transform = NULL,
     download = FALSE
   ) {
-    self$root <- root
+    self$root_path <- root
     self$split <- match.arg(split, c("train", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
@@ -78,13 +77,14 @@ vggface2_dataset <- torch::dataset(
     }
 
 
-    data <- readRDS(file.path(self$processed_folder, paste0(self$split,"Rds")))
+    data <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
 
     self$img_path <- data$img_path
     self$labels <- data$labels
-    self$classes <- data$classes
+    self$class_to_idx <- data$class_to_idx
+    self$identity_df <- data$identity_df
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
+    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {self$.length()} samples.")
   },
 
   download = function() {
@@ -100,42 +100,32 @@ vggface2_dataset <- torch::dataset(
     for (file_id in seq_along(archive)) {
       fs::file_move(archive[file_id], self$split_file[file_id])
     }
-    utils::untar(archive[[1]], exdir = self$root)
+    utils::untar(archive[[1]], exdir = self$raw_folder)
 
     identity_df <- read.csv(archive[[3]], sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
     identity_df$Gender <- factor(identity_df$Gender, labels = c("Female", "Male"))
 
     files <- read.delim(archive[[2]], sep = "/", col.names = c("Class_ID", "img_path"), header = F)
-    files$img_path <- file.path(self$raw_folder, self$split, files$img_path)
-        # class_ids <- sub("/.*$", "", files)
-        # unique_ids <- unique(class_ids)
-        #
-        # class_to_idx <- setNames(seq_along(unique_ids), unique_ids)
-        #
-        # labels <- as.integer(class_to_idx[class_ids])
-        #
-        # classes_list <- lapply(unique_ids, function(cid) {
-        #     identity_map[[cid]]
-        # })
-        #
-        saveRDS(
-            list(
-            files
-            ),
-            file.path(self$processed_folder, paste0(split, ".rds"))
-        )
+    files$img_path <- file.path(self$raw_folder, self$split, files$Class_ID, files$img_path)
+    class_to_idx <- setNames(seq_len(nlevels(as.factor(files$Class_ID))), levels(as.factor(files$Class_ID)))
+    labels <- names(class_to_idx)
+    saveRDS(list(img_path = files,identity_df = identity_df, labels = labels,
+                   class_to_idx = class_to_idx),
+              file.path(self$processed_folder, glue::glue("{self$split}.rds"))
+      )
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
 
   check_exists = function() {
-    all(fs::file_exists(self$split_file))
+    all(fs::file_exists(self$split_file)) &&
+      fs::file_exists(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
   },
 
   .getitem = function(index) {
-    x <- jpeg::readJPEG(self$img_path[index])
-    y <- self$labels[index]
+    x <- jpeg::readJPEG(self$img_path$img_path[index])
+    y <- self$class_to_idx[self$img_path$Class_ID[index]]
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
@@ -147,15 +137,17 @@ vggface2_dataset <- torch::dataset(
   },
 
   .length = function() {
-    length(self$img_path)
+    nrow(self$img_path)
   },
 
   active = list(
     raw_folder = function() {
-      file.path(self$root_path, "vggface2", "raw")
+      fs::dir_create(file.path(self$root_path, class(self)[1], "raw"))
+      file.path(self$root_path, class(self)[1], "raw")
     },
     processed_folder = function() {
-      file.path(self$root_path, "vggface2", "processed")
+      fs::dir_create(file.path(self$root_path, class(self)[1], "processed"))
+      file.path(self$root_path, class(self)[1], "processed")
     }
   )
 )
