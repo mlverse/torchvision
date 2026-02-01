@@ -129,7 +129,8 @@ decode_boxes <- function(anchors, deltas) {
   torch::torch_stack(list(x1, y1, x2, y2), dim = 2)
 }
 
-generate_proposals <- function(features, rpn_out, image_size, strides) {
+generate_proposals <- function(features, rpn_out, image_size, strides,
+                               score_thresh = 0.05, nms_thresh = 0.7) {
   device <- rpn_out$objectness[[1]]$device
   all_proposals <- torch::torch_empty(0L, 4L, device = device)
   all_scores <- torch::torch_empty(0L, device = device)
@@ -154,12 +155,12 @@ generate_proposals <- function(features, rpn_out, image_size, strides) {
   }
 
   scores <- all_scores$flatten()
-  keep <- scores > 0.05
+  keep <- scores > score_thresh
   proposals <- all_proposals[keep, ]
   scores <- scores[keep]
 
   if (proposals$shape[1] > 0) {
-    keep_idx <- nms(proposals, scores, 0.7)
+    keep_idx <- nms(proposals, scores, nms_thresh)
     proposals <- proposals[keep_idx, ]
   } else {
     proposals <- torch::torch_empty(c(0, 4), device = device, dtype = torch_float32())
@@ -362,10 +363,18 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model <- function(backbone, num_classes) {
+fasterrcnn_model <- function(backbone, num_classes,
+                             score_thresh = 0.05,
+                             nms_thresh = 0.5,
+                             detections_per_img = 100) {
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
+
+      # Store configurable detection parameters
+      self$score_thresh <- score_thresh
+      self$nms_thresh <- nms_thresh
+      self$detections_per_img <- detections_per_img
 
       self$rpn <- torch::nn_module(
         initialize = function() {
@@ -385,7 +394,9 @@ fasterrcnn_model <- function(backbone, num_classes) {
       rpn_out <- self$rpn(features)
 
       image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32))
+      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                  score_thresh = self$score_thresh,
+                                  nms_thresh = self$nms_thresh)
 
       if (props$proposals$shape[1] == 0) {
         empty <- list(
@@ -407,13 +418,32 @@ fasterrcnn_model <- function(backbone, num_classes) {
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      keep <- final_scores > 0.05
+      # Filter by score threshold
+      keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
 
       if (num_detections > 0) {
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
+
+        # Apply NMS to remove overlapping detections
+        if (final_boxes$shape[1] > 1) {
+          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
+          final_boxes <- final_boxes[nms_keep, ]
+          final_labels <- final_labels[nms_keep]
+          final_scores <- final_scores[nms_keep]
+        }
+
+        # Limit detections per image
+        n_det <- final_scores$shape[1]
+        if (n_det > self$detections_per_img) {
+          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
+          top_idx <- top_k[[2]]
+          final_boxes <- final_boxes[top_idx, ]
+          final_labels <- final_labels[top_idx]
+          final_scores <- final_scores[top_idx]
+        }
       } else {
         final_boxes <- torch::torch_empty(c(0, 4))
         final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
@@ -429,7 +459,7 @@ fasterrcnn_model <- function(backbone, num_classes) {
         )
       )
     }
-  )  # <- Removed the () here
+  )
 }
 
 
@@ -522,10 +552,19 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model_v2 <- function(backbone, num_classes) {
+fasterrcnn_model_v2 <- function(backbone, num_classes,
+                                score_thresh = 0.05,
+                                nms_thresh = 0.5,
+                                detections_per_img = 100) {
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
+
+      # Store configurable detection parameters
+      self$score_thresh <- score_thresh
+      self$nms_thresh <- nms_thresh
+      self$detections_per_img <- detections_per_img
+
       self$rpn <- torch::nn_module(
         initialize = function() {
           self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
@@ -541,7 +580,9 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
       rpn_out <- self$rpn(features)
 
       image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32))
+      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                  score_thresh = self$score_thresh,
+                                  nms_thresh = self$nms_thresh)
 
       if (props$proposals$shape[1] == 0) {
         empty <- list(
@@ -563,13 +604,32 @@ fasterrcnn_model_v2 <- function(backbone, num_classes) {
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      keep <- final_scores > 0.05
+      # Filter by score threshold
+      keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
 
       if (num_detections > 0) {
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
+
+        # Apply NMS to remove overlapping detections
+        if (final_boxes$shape[1] > 1) {
+          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
+          final_boxes <- final_boxes[nms_keep, ]
+          final_labels <- final_labels[nms_keep]
+          final_scores <- final_scores[nms_keep]
+        }
+
+        # Limit detections per image
+        n_det <- final_scores$shape[1]
+        if (n_det > self$detections_per_img) {
+          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
+          top_idx <- top_k[[2]]
+          final_boxes <- final_boxes[top_idx, ]
+          final_labels <- final_labels[top_idx]
+          final_scores <- final_scores[top_idx]
+        }
       } else {
         final_boxes <- torch::torch_empty(c(0, 4))
         final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
@@ -649,10 +709,19 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
   backbone
 }
 
-fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
+fasterrcnn_mobilenet_model <- function(backbone, num_classes,
+                                       score_thresh = 0.05,
+                                       nms_thresh = 0.5,
+                                       detections_per_img = 100) {
   torch::nn_module(
     initialize = function() {
       self$backbone <- backbone
+
+      # Store configurable detection parameters
+      self$score_thresh <- score_thresh
+      self$nms_thresh <- nms_thresh
+      self$detections_per_img <- detections_per_img
+
       self$rpn <- torch::nn_module(
         initialize = function() {
           self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)()
@@ -668,7 +737,9 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
       rpn_out <- self$rpn(features)
 
       image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(8, 16))
+      props <- generate_proposals(features, rpn_out, image_size, c(8, 16),
+                                  score_thresh = self$score_thresh,
+                                  nms_thresh = self$nms_thresh)
 
       if (props$proposals$shape[1] == 0) {
         empty <- list(
@@ -690,11 +761,30 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes) {
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      keep <- final_scores > 0.05
+      # Filter by score threshold
+      keep <- final_scores > self$score_thresh
       if (torch::torch_sum(keep)$item() > 0) {
         final_boxes <- final_boxes[keep, ]
         final_labels <- final_labels[keep]
         final_scores <- final_scores[keep]
+
+        # Apply NMS to remove overlapping detections
+        if (final_boxes$shape[1] > 1) {
+          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
+          final_boxes <- final_boxes[nms_keep, ]
+          final_labels <- final_labels[nms_keep]
+          final_scores <- final_scores[nms_keep]
+        }
+
+        # Limit detections per image
+        n_det <- final_scores$shape[1]
+        if (n_det > self$detections_per_img) {
+          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
+          top_idx <- top_k[[2]]
+          final_boxes <- final_boxes[top_idx, ]
+          final_labels <- final_labels[top_idx]
+          final_scores <- final_scores[top_idx]
+        }
       } else {
         final_boxes <- torch::torch_empty(c(0, 4))
         final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
@@ -745,17 +835,16 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 
 #' Faster R-CNN Models
 #'
-#' Construct Faster R-CNN model variants for object detection tasks.
+#' Construct Faster R-CNN model variants for object-detection task.
 #'
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
 #' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
+#' @param nms_thresh Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).
+#' @param detections_per_img Integer. Maximum number of detections per image (default: 100).
 #' @param ... Other arguments (unused).
 #' @return A `fasterrcnn_model` nn_module.
-#'
-#' @section Task:
-#' Object detection over images with bounding boxes and class labels.
-#'
 #'
 #' @section Task:
 #' Object detection over images with bounding boxes and class labels.
@@ -866,19 +955,24 @@ rpn_model_urls <- list(
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
 #' @export
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
-                                          num_classes = 91, ...) {
+                                          num_classes = 91,
+                                          score_thresh = 0.05,
+                                          nms_thresh = 0.5,
+                                          detections_per_img = 100,
+                                          ...) {
   backbone <- resnet_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)()
+  model <- fasterrcnn_model(backbone, num_classes = num_classes,
+                            score_thresh = score_thresh,
+                            nms_thresh = nms_thresh,
+                            detections_per_img = detections_per_img)()
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
 
   if (pretrained) {
-    # local_path <- "tools/models/fasterrcnn_resnet50_fpn.pth"
-    # state_dict <- torch::load_state_dict(local_path)
     r <- rpn_model_urls$fasterrcnn_resnet50
     name <- "fasterrcnn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -894,9 +988,16 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN V2
 #' @export
 model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
-                                             num_classes = 91, ...) {
+                                             num_classes = 91,
+                                             score_thresh = 0.05,
+                                             nms_thresh = 0.5,
+                                             detections_per_img = 100,
+                                             ...) {
   backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
-  model <- fasterrcnn_model_v2(backbone, num_classes = num_classes)
+  model <- fasterrcnn_model_v2(backbone, num_classes = num_classes,
+                               score_thresh = score_thresh,
+                               nms_thresh = nms_thresh,
+                               detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
@@ -905,7 +1006,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     r <- rpn_model_urls$fasterrcnn_resnet50_v2
     name <- "fasterrcnn_resnet50_v2"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -938,9 +1039,16 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
 #' @export
 model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                                     progress = TRUE,
-                                                    num_classes = 91, ...) {
+                                                    num_classes = 91,
+                                                    score_thresh = 0.05,
+                                                    nms_thresh = 0.5,
+                                                    detections_per_img = 100,
+                                                    ...) {
   backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
+                                      score_thresh = score_thresh,
+                                      nms_thresh = nms_thresh,
+                                      detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
@@ -949,7 +1057,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
     name <- "fasterrcnn_mobilenet_v3_large"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -966,9 +1074,16 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
 #' @export
 model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         progress = TRUE,
-                                                        num_classes = 91, ...) {
+                                                        num_classes = 91,
+                                                        score_thresh = 0.05,
+                                                        nms_thresh = 0.5,
+                                                        detections_per_img = 100,
+                                                        ...) {
   backbone <- mobilenet_v3_320_fpn_backbone(pretrained = pretrained)
-  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
+                                      score_thresh = score_thresh,
+                                      nms_thresh = nms_thresh,
+                                      detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
@@ -977,7 +1092,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320
     name <- "fasterrcnn_mobilenet_v3_large_320"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -991,6 +1106,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
 #' @importFrom stats setNames
 .rename_fasterrcnn_state_dict <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
     sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
@@ -1004,6 +1120,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
 
 
 .rename_fasterrcnn_large_state_dict <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(.rename_fasterrcnn_state_dict(state_dict)) %>%
     # turn bn into 'O' value and conv into '1' value
     sub(pattern = "(block\\.[0-3]\\.)0\\.", replacement = "\\1conv\\.", x = .) %>%

@@ -10,7 +10,7 @@ test_that("Caltech101 dataset works correctly", {
   )
 
   ds <- caltech101_dataset(root = t, download = TRUE)
-  expect_equal(length(ds), 8677)
+  expect_length(ds, 8677)
   first_item <- ds[1]
   expect_named(first_item, c("x", "y"))
   expect_type(first_item$x, "double")

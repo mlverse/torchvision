@@ -149,9 +149,11 @@ out <- mtcnn(image_tensor)
 out
 
 # Load an image from the web
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/"
-url <- "b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
-img <- base_loader(paste0(wmc,url))
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+              "/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg")
+tmp_file <- tempfile(fileext = ".jpg")
+download.file(url, tmp_file, mode = "wb")
+img <- jpeg::readJPEG(tmp_file)
 
 # Convert to torch tensor [C, H, W] normalized
 input <- transform_to_tensor(img)  # [C, H, W]
@@ -173,9 +175,11 @@ output
 }
 \seealso{
 Other object_detection_model: 
+\code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}}
 
 Other object_detection_model: 
+\code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}}
 
 Other classification_model: 

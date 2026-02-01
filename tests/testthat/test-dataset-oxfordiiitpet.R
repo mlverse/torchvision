@@ -1,6 +1,6 @@
 context("dataset-oxfordiiitpet")
 
-t = withr::local_tempdir()
+t <- withr::local_tempdir()
 
 test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split with target type category", {
 

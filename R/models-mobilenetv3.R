@@ -370,7 +370,9 @@ model_mobilenet_v3_small <- function(
 #' Rename state_dict keys to match current MobileNetV3 model structure
 #' @param state_dict Named list of model parameters
 #' @return Named list with updated key names
+#' @keywords internal
 .rename_mobilenet_v3_state_dict <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     # features.N.0 -> features.N.conv
     gsub(pattern = "^features\\.([0-9]+)\\.0\\.", replacement = "features.\\1.conv.", x = .) %>%

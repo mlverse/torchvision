@@ -9,9 +9,12 @@ test_that("rf100_underwater_collection handles missing files gracefully", {
   )
 })
 
-datasets <- c("pipes", "objects", "coral")
+datasets <- c()
+dataset <- data.frame(name = c("pipes", "objects", "coral"),
+                      num_classes = c(1L, 5L, 14L)
+)
 
-for (ds_name in datasets) {
+for (ds_name in dataset$name) {
   test_that(paste0("rf100_underwater_collection loads ", ds_name, " correctly"), {
     skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
             "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
@@ -20,7 +23,7 @@ for (ds_name in datasets) {
     expect_s3_class(ds, "rf100_underwater_collection")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
-    expect_gt(length(unique(ds$classes)), 1)
+    expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
 
     item <- ds[1]
 
@@ -40,7 +43,7 @@ test_that(paste0("rf100_underwater_collection loads `aquarium` correctly"), {
   expect_s3_class(ds, "rf100_underwater_collection")
   expect_gt(ds$.length(), 1)
   expect_type(ds$classes, "character")
-  expect_gt(length(unique(ds$classes)), 1)
+  expect_length(unique(ds$classes), 7)
 
   item <- ds[1]
 

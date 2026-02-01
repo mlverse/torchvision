@@ -166,7 +166,7 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls[["resnet50"]][1])
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet50"]][1], prefix = "fcn")
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }
@@ -180,7 +180,7 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
     r <- fcn_model_urls$fcn_resnet50_coco
     name <- "model_fcn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fcn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -214,7 +214,7 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
                            ...)
 
   if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls[["resnet101"]][1])
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet101"]][1], prefix = "fcn")
     state_dict <- torch::load_state_dict(state_dict_path)
     backbone$load_state_dict(state_dict, strict = FALSE)
   }
@@ -228,7 +228,7 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
     r <- fcn_model_urls$fcn_resnet101_coco
     name <- "model_fcn_resnet101"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], prefix = "fcn")
     if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }

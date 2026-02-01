@@ -24,7 +24,7 @@ The image is then converted back to original image mode.
 \code{hue_factor} is the amount of shift in H channel and must be in the
 interval \verb{[-0.5, 0.5]}.
 
-See \href{https://en.wikipedia.org/wiki/Hue}{Hue} for more details.
+Search for Hue for more details.
 }
 \seealso{
 Other unitary_transforms: 

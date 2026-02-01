@@ -16,8 +16,8 @@ test_that("deeplabv3_resnet50 works with default aux_loss=NULL", {
 })
 
 test_that("deeplabv3_resnet101 works with default aux_loss=NULL", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = "0") != "1",
-          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = "0") != "1",
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
   model <- model_deeplabv3_resnet101(num_classes = 21)
   input <- torch::torch_randn(1, 3, 32, 32)
@@ -64,17 +64,14 @@ test_that("custom num_classes works with aux_loss = TRUE", {
   expect_tensor_shape(out$aux, c(1, 3, 32, 32))
 })
 
-test_that("pretrained requires num_classes = 21", {
+test_that("pretrained requires num_classes to be \'21\'", {
   expect_error(
     model_deeplabv3_resnet50(pretrained = TRUE, num_classes = 3),
-    "num_classes = 21"
+    "Pretrained weights on COCO require"
   )
 })
 
 test_that("model_deeplabv3_resnet50 detects cat in Wikipedia image", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = "0") != "1",
-          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
-
   voc_classes <- c(
     "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
     "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",

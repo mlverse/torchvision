@@ -3,8 +3,8 @@ NULL
 
 #' RoboFlow 100 Infrared dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Infrared](https://universe.roboflow.com/browse/infrared) datasets (COCO
-#' format) with per-dataset folders and train/valid/test splits.
+#' Loads one of the [RoboFlow 100 Infrared](https://universe.roboflow.com/browse/infrared) datasets
+#' with per-dataset folders and train/valid/test splits.
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("thermal_dog_and_people", "solar_panel", "thermal_cheetah", "ir_object")}.

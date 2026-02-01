@@ -69,9 +69,11 @@ facenet_torchscript_urls <- list(
 #' out
 #'
 #' # Load an image from the web
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/"
-#' url <- "b/b4/Catherine_Bell_200101233d_hr_%28cropped%29.jpg"
-#' img <- base_loader(paste0(wmc,url))
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+#'               "/b/b4/Catherine_Bell_200101233d_hr_%28cropped%29.jpg")
+#' tmp_file <- tempfile(fileext = ".jpg")
+#' download.file(url, tmp_file, mode = "wb")
+#' img <- jpeg::readJPEG(tmp_file)
 #'
 #' # Convert to torch tensor [C, H, W] normalized
 #' input <- transform_to_tensor(img)  # [C, H, W]
@@ -301,10 +303,10 @@ model_mtcnn <- nn_module(
 load_inception_weights <- function(model, name) {
   if (name == "vggface2") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/vggface2.pth"
-    md5 = "c446a04f0b22763858226717ba1f7410"
+    md5 <- "c446a04f0b22763858226717ba1f7410"
   } else if (name == "casia-webface") {
     url <- "https://torch-cdn.mlverse.org/models/vision/v2/models/casia-webface.pth"
-    md5 = "ff4aff482f6c1941784abba5131bae20"
+    md5 <- "ff4aff482f6c1941784abba5131bae20"
   }
 
   archive <- download_and_cache(url,prefix = "facenet")

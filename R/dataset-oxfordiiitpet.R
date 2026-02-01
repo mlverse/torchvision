@@ -24,15 +24,25 @@
 #'    download = TRUE
 #' )
 #'
-#' # Retrieve the image tensor, segmentation mask and label
+#' # Retrieve the image tensor and label (trimap in raw format)
 #' first_item <- oxfordiiitpet[1]
 #' first_item$x  # RGB image tensor of shape (3, H, W)
-#' first_item$y$masks   # (3, H, W) bool tensor: pet, background, outline
+#' first_item$y$trimap  # (H, W) integer tensor: 1=pet, 2=background, 3=outline
 #' first_item$y$label  # Integer label (1–37 or 1–2 depending on target_type)
 #' oxfordiiitpet$classes[first_item$y$label] # Class name of the label
 #'
-#' # Visualize
-#' overlay <- draw_segmentation_masks(first_item)
+#' # Load dataset with explicit segmentation mask transformation
+#' oxfordiiitpet_masked <- oxfordiiitpet_segmentation_dataset(
+#'    transform = transform_to_tensor,
+#'    target_transform = target_transform_trimap_masks,
+#'    download = TRUE
+#' )
+#'
+#' masked_item <- oxfordiiitpet_masked[1]
+#' masked_item$y$masks  # (3, H, W) bool tensor: pet, background, outline
+#'
+#' # Visualize segmentation masks
+#' overlay <- draw_segmentation_masks(masked_item)
 #' tensor_image_browse(overlay)
 #' }
 #'
@@ -100,9 +110,6 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     if (self$check_exists()) {
       return()
     }
-
-    fs::dir_create(self$raw_folder)
-    fs::dir_create(self$processed_folder)
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
@@ -203,9 +210,11 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
   active = list(
     raw_folder = function() {
+      fs::dir_create(self$root_path, "oxfordiiitpet", "raw")
       file.path(self$root_path, "oxfordiiitpet", "raw")
     },
     processed_folder = function() {
+      fs::dir_create(self$root_path, "oxfordiiitpet", "processed")
       file.path(self$root_path, "oxfordiiitpet", "processed")
     }
   )
