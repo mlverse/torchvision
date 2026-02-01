@@ -73,10 +73,11 @@ labels <- c("tree", "dog")
 result <- draw_bounding_boxes(dog1_tensor, boxes_tensor, colors=colors, labels = labels, width=5, font_size = 18)
 tensor_image_browse(result)
 ```
-
 ```{r, fig.alt = "An sitting dog with two bounding boxes, one blue in the top left corner, one yellow over the dog forefront with a label `dog`"}
 knitr::include_graphics("examples/assets/dog_with_two_bbox.png")
 ```
+
+
 Naturally, we can also plot bounding boxes produced by torchvision detection models. Here is a demo with a Faster R-CNN model loaded from \code{fasterrcnn_resnet50_fpn()} model. For more details on the output of such models, you may refer to [Instance segmentation models](https://torchvision.mlverse.org/reference/#object-detection-models).
 
 ```{r}
@@ -93,12 +94,11 @@ batch <- torch_stack(c(dog1_tensor, dog2_tensor), dim = 1) %>%
   transform_normalize(norm_mean, norm_std)
 
 model <- model_fasterrcnn_resnet50_fpn(
-  pretrained = TRUE)
+  pretrained = TRUE, score_thresh = 0.4, nms_thresh = 0.7, detections_per_img = 10)
 
 model$eval()
 
 outputs <- model(batch)
-print(outputs)
 
 
 ```

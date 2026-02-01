@@ -95,6 +95,12 @@ reference:
   contents:
    - has_concept("segmentation_dataset")
 
+- title: Classes resolution
+  descr: >
+    Classical Dataset classes and labels.
+  contents:
+   - has_concept("class_resolution")
+
 - title: Displaying
 - subtitle: Images loading
   desc: Tools for Images loading

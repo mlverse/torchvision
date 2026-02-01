@@ -70,7 +70,7 @@ coco_detection_dataset <- torch::dataset(
             rep("http://images.cocodataset.org/annotations/annotations_trainval2017.zip", time = 2),
             "http://images.cocodataset.org/zips/train2014.zip", "http://images.cocodataset.org/zips/val2014.zip",
             rep("http://images.cocodataset.org/annotations/annotations_trainval2014.zip", time = 2)),
-    size = c("800 MB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
+    size = c("18.4 GB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
     md5 = c(c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
             rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
             c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3"),
@@ -329,3 +329,28 @@ coco_caption_dataset <- torch::dataset(
     list(x = x, y = y)
   }
 )
+
+#' COCO Class Labels
+#'
+#' Utilities for resolving COCO 80 class identifiers to their corresponding
+#' human readable labels. The labels are retrieved from the same source used by
+#' PyTorch's reference implementation.
+#'
+#' @return A character vector with the COCO class names
+#' @family class_resolution
+#' @export
+coco_classes <- function() {
+  url <- "https://github.com/ultralytics/ultralytics/raw/refs/heads/main/ultralytics/cfg/datasets/coco.yaml"
+  labels <- read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2]
+  labels[nzchar(labels)]
+}
+
+#' @rdname coco_classes
+#' @param id Integer vector of 1-based class identifiers.
+#' @return A character vector with the labels associated with `id`.
+#' @family class_resolution
+#' @export
+coco_label <- function(id) {
+  classes <- coco_classes()
+  classes[id]
+}
