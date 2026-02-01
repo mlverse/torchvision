@@ -78,7 +78,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     self$archive_url <- self$resources[self$resources$split == split,]$url
     self$archive_size <- prettyunits::pretty_bytes(sum(self$resources[self$resources$split == split,]$size))
     self$archive_md5 <- self$resources[self$resources$split == split,]$md5
-    self$split_file <- sapply(self$archive_url, \(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], sub("\\?download=.*", "", basename(x))))
+    self$split_file <- sapply(self$archive_url, function(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], sub("\\?download=.*", "", basename(x))))
 
     if (download) {
       cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -100,7 +100,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     # Download the dataset parquet
-    archive <- sapply(self$archive_url, \(x)  download_and_cache(x, prefix = class(self)[1]))
+    archive <- sapply(self$archive_url, download_and_cache, prefix = class(self)[1])
     if (!all(tools::md5sum(archive) == self$archive_md5))
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     for (file_id in seq_along(archive)) {
@@ -108,7 +108,7 @@ whoi_small_plankton_dataset <- torch::dataset(
     }
   },
   check_exists = function() {
-    all(sapply(self$split_file, \(x) fs::file_exists(x)))
+    all(fs::file_exists(self$split_file))
   },
 
   .getitem = function(index) {

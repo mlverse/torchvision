@@ -62,6 +62,7 @@ ds$classes[item$y]  # list(name=..., gender=...)
 \seealso{
 Other segmentation_dataset: 
 \code{\link{oxfordiiitpet_segmentation_dataset}()},
-\code{\link{pascal_voc_datasets}}
+\code{\link{pascal_voc_datasets}},
+\code{\link{rf100_peixos_segmentation_dataset}()}
 }
 \concept{segmentation_dataset}

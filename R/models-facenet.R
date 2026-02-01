@@ -76,32 +76,32 @@ facenet_torchscript_urls <- list(
 #' img <- jpeg::readJPEG(tmp_file)
 #'
 #' # Convert to torch tensor [C, H, W] normalized
-#' arr <- as.array(img)  # img is already [H, W, C]
-#' input <- torch_tensor(arr, dtype = torch_float())  # [H, W, C]
-#' input <- input$permute(c(3, 1, 2))$unsqueeze(1)   # [1, C, H, W]
+#' input <- transform_to_tensor(img)  # [C, H, W]
+#' batch <- input$unsqueeze(1)   # [1, C, H, W]
 #'
 #' # Load pretrained model
 #' model <- model_inception_resnet_v1(pretrained = "vggface2")
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
 #' output
 #'
 #' # Example usage of Inception-ResNet-v1 with CASIA-Webface Weights
 #' model <- model_inception_resnet_v1(pretrained = "casia-webface")
 #' model$eval()
-#' output <- model(input)
+#' output <- model(batch)
 #' output
 #' }
 #'
 #' @importFrom torch nn_module nn_conv2d nn_prelu nn_max_pool2d nn_softmax nn_linear nn_batch_norm2d nn_batch_norm1d
-#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat nnf_interpolate nnf_relu nnf_normalize
+#' @importFrom torch nn_relu nn_dropout nn_adaptive_avg_pool2d nn_sequential torch_randn torch_cat
+#' @importFrom torch nnf_interpolate nnf_relu nnf_normalize load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
 #' @param classify Logical, whether to include the classification head. Default is FALSE.
 #' @param num_classes Integer, number of output classes for classification. Default is 10.
 #' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
 #'
-#' @family models
+#' @family object_detection_model
 #' @rdname model_facenet
 #' @name model_facenet
 NULL
@@ -125,7 +125,7 @@ model_facenet_pnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "pnet")
+      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -171,7 +171,7 @@ model_facenet_rnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "rnet")
+      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -225,7 +225,7 @@ model_facenet_onet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "onet")
+      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "facenet")
       if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -308,7 +308,7 @@ load_inception_weights <- function(model, name) {
     md5 = "ff4aff482f6c1941784abba5131bae20"
   }
 
-  archive <- download_and_cache(url,prefix = name)
+  archive <- download_and_cache(url,prefix = "facenet")
   if (tools::md5sum(archive) != md5){
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
   }

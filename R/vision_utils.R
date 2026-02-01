@@ -22,8 +22,8 @@ vision_make_grid <- function(tensor,
                              pad_value = 0) {
 
   min_max_scale <- function(x) {
-    min = x$min()$item()
-    max = x$max()$item()
+    min <- x$min()$item()
+    max <- x$max()$item()
     x$clamp_(min = min, max = max)
     x$add_(-min)$div_(max - min + 1e-5)
     x
@@ -338,14 +338,23 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (masks$ndim != 3) {
     value_error("`masks` must be of shape (H, W) or (num_masks, H, W)")
   }
-  if (masks$dtype != torch::torch_bool()) {
-    type_error("`masks` is expected to be of dtype torch_bool")
+  # datasets item include boolean masks, and models inference produce logits floats for masks
+  if (masks$dtype != torch::torch_bool() && masks$dtype != torch::torch_float() ) {
+    type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
   if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
     value_error("`masks` and `image` must have the same height and width")
   }
-
-  num_masks <- masks$size(1)
+  # if mask is a model inference output, we need to convert float mask to boolean mask
+  if (masks$dtype == torch::torch_float() ) {
+    mask_id <- masks$argmax(dim = 1)
+    masks_seq <- mask_id$aminmax()[[1]]$item():mask_id$aminmax()[[2]]$item()
+    # turn mask_id \code{[LongType{H,W}]} into a boolean mask \code{[BoolType{num_masks,H,W}]}
+    masks <- torch::torch_stack(lapply(masks_seq, function(x) mask_id$eq(x)), dim = 1)
+  } else {
+    masks_seq <- seq(masks$size(1))
+  }
+  num_masks <- length(masks_seq)
   if (num_masks == 0) {
     cli_warn("masks doesn't contain any mask. No mask was drawn")
     return(x)
@@ -364,7 +373,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
     torch::torch_tensor(dtype = out_dtype)
 
   colored_mask_stack <- torch::torch_stack(lapply(
-    seq(masks$size(1)),
+    masks_seq,
     function(i) color_tt[i, ]$unsqueeze(2)$unsqueeze(2)$mul(masks[i:i, , ])
   ), dim = 1)
 
@@ -385,6 +394,7 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x,
     ...
   )
 }
+
 
 #' Draws Keypoints
 #'

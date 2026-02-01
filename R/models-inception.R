@@ -116,11 +116,10 @@ Inception3 <- torch::nn_module(
     # N x 768 x 17 x 17
     x <- self$Mixed_6e(x)
     # N x 768 x 17 x 17
-    aux <- NULL
-    if (!is.null(self$AuxLogits)) {
-      if (self$training) {
-        aux <- self$AuxLogits(x)
-      }
+    if (!is.null(self$AuxLogits) && self$training) {
+      aux <- self$AuxLogits(x)
+    } else {
+      aux <- NULL
     }
     # N x 768 x 17 x 17
     x <- self$Mixed_7a(x)
@@ -411,7 +410,7 @@ inception_model_urls <- list(
 #'  - transform_input (bool): If `TRUE`, preprocess the input according to the method with which it
 #'  was trained on ImageNet. Default: *FALSE*
 #'
-#' @family models
+#' @family classification_model
 #' @export
 model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
   args <- rlang::list2(...)

@@ -27,7 +27,7 @@
 #'
 #' - The \code{split} argument in Python (e.g., ``train``, ``test``, ``10fold``) is simplified to a \code{train} boolean flag in R.
 #'   The ``10fold`` split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.
-#' 
+#'
 #' - The \code{split} parameter in R controls which version of the dataset to use: `"original"` (unaligned) or `"funneled"` (aligned using funneling).
 #'   The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
 #'
@@ -146,13 +146,11 @@ lfw_people_dataset <- torch::dataset(
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     res <- self$resources[[self$split]]
-    filename <- res[1]
+
+    archive <- download_and_cache(paste0(self$base_url, res[1]), prefix = class(self)[1])
+
     expected_md5 <- res[2]
-
-    url <- file.path(self$base_url, filename)
-    archive <- download_and_cache(url, prefix = class(self)[1])
     actual_md5 <- tools::md5sum(archive)
-
     if (actual_md5 != expected_md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
@@ -162,12 +160,10 @@ lfw_people_dataset <- torch::dataset(
     if (class(self)[[1]] == "lfw_pairs") {
       for (name in c("pairsDevTrain.txt", "pairsDevTest.txt", "pairs.txt")) {
         res <- self$resources[[name]]
-        filename <- res[1]
-        expected_md5 <- res[2]
-        url <- file.path(self$base_url, filename)
-        archive <- download_and_cache(url, prefix = class(self)[1])
-        actual_md5 <- tools::md5sum(archive)
+        archive <- download_and_cache(paste0(self$base_url, res[1]), prefix = class(self)[1])
 
+        expected_md5 <- res[2]
+        actual_md5 <- tools::md5sum(archive)
         if (actual_md5 != expected_md5) {
           runtime_error("Corrupt file! Delete the file in {archive} and try again.")
         }
@@ -258,7 +254,7 @@ lfw_pairs_dataset <- torch::dataset(
     }
 
     lines <- readLines(pair_file)
-    lines <- lines[-1]  
+    lines <- lines[-1]
     pair_list <- lapply(lines, function(line) {
       parts <- strsplit(line, "\\s+")[[1]]
       if (length(parts) == 3) {

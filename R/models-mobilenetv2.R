@@ -1,10 +1,12 @@
+#' MobileNetV2 Model
+#'
 #' Constructs a MobileNetV2 architecture from
 #' [MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381).
 #'
 #' @inheritParams model_resnet18
 #' @param ... Other parameters passed to the model implementation.
 #'
-#' @family models
+#' @family classification_model
 #' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   # resources
@@ -46,7 +48,7 @@ mobilenet_v2 <- torch::nn_module(
     last_channel <- 1280
 
     if (is.null(inverted_residual_setting)) {
-      inverted_residual_setting = list(
+      inverted_residual_setting <- list(
         # t, c, n, s
         c(1, 16, 1, 1),
         c(6, 24, 2, 2),

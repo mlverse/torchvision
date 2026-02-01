@@ -10,7 +10,7 @@
 #'
 #' @param img A `magick-image`, `array` or `torch_tensor`.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_to_tensor <- function(img) {
@@ -27,7 +27,7 @@ transform_to_tensor <- function(img) {
 #'   values are **not** mapped exactly. If converted back and forth, this
 #'   mismatch has no effect.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_convert_image_dtype <- function(img, dtype = torch::torch_float()) {
@@ -49,7 +49,7 @@ transform_convert_image_dtype <- function(img, dtype = torch::torch_float()) {
 #' @param std (sequence): Sequence of standard deviations for each channel.
 #' @param inplace (bool,optional): Bool to make this operation in-place.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_normalize <- function(img, mean, std, inplace = FALSE) {
@@ -72,7 +72,7 @@ transform_normalize <- function(img, mean, std, inplace = FALSE) {
 #'   `0 = nearest`, `2 = bilinear`, and `3 = bicubic` or a name from
 #'   [magick::filter_types()].
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_resize <- function(img, size, interpolation = 2) {
@@ -91,7 +91,7 @@ transform_resize <- function(img, size, interpolation = 2) {
 #'   made. If provided a tuple or list of length 1, it will be interpreted as
 #'   `c(size, size)`.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_center_crop <- function(img, size) {
@@ -130,7 +130,7 @@ transform_center_crop <- function(img, size) {
 #'    the edge) padding `[1, 2, 3, 4]` with 2 elements on both sides in
 #'    symmetric mode will result in `[2, 1, 1, 2, 3, 4, 4, 3]`
 #'
-#' @family transforms
+#' @family unitary_transforms
 #'
 #' @export
 transform_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
@@ -143,7 +143,7 @@ transform_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
 #' @param transforms (list or tuple): list of transformations.
 #' @param p (float): probability.
 #'
-#' @family transforms
+#' @family combining_transforms
 #'
 #' @export
 transform_random_apply <- function(img, transforms, p = 0.5) {
@@ -154,7 +154,7 @@ transform_random_apply <- function(img, transforms, p = 0.5) {
 #'
 #' @inheritParams transform_random_apply
 #'
-#' @family transforms
+#' @family combining_transforms
 #'
 #' @export
 transform_random_choice <- function(img, transforms) {
@@ -164,7 +164,7 @@ transform_random_choice <- function(img, transforms) {
 #' Apply a list of transformations in a random order
 #'
 #' @inheritParams transform_random_apply
-#' @family transforms
+#' @family combining_transforms
 #' @export
 transform_random_order <- function(img, transforms) {
   UseMethod("transform_random_order", img)
@@ -182,7 +182,7 @@ transform_random_order <- function(img, transforms) {
 #'   desired size to avoid raising an exception. Since cropping is done
 #'   after padding, the padding seems to be done at a random offset.
 #'
-#' @family transforms
+#' @family random_transforms
 #'
 #' @export
 transform_random_crop <- function(img, size, padding=NULL, pad_if_needed=FALSE,
@@ -201,7 +201,7 @@ transform_random_crop <- function(img, size, padding=NULL, pad_if_needed=FALSE,
 #' @param p (float): probability of the image being flipped.
 #'   Default value is 0.5
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_horizontal_flip <- function(img, p = 0.5) {
   UseMethod("transform_random_horizontal_flip", img)
@@ -215,7 +215,7 @@ transform_random_horizontal_flip <- function(img, p = 0.5) {
 #'
 #' @inheritParams transform_random_horizontal_flip
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_vertical_flip <- function(img, p = 0.5) {
   UseMethod("transform_random_vertical_flip", img)
@@ -239,7 +239,7 @@ transform_random_vertical_flip <- function(img, p = 0.5) {
 #' @param ratio (tuple of float): range of aspect ratio of the origin aspect
 #'   ratio cropped.
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_resized_crop <- function(img, size, scale=c(0.08, 1.0),
                                           ratio=c(3. / 4., 4. / 3.),
@@ -255,7 +255,7 @@ transform_random_resized_crop <- function(img, size, scale=c(0.08, 1.0),
 #'
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family combining_transforms
 #' @export
 transform_five_crop <- function(img, size) {
   UseMethod("transform_five_crop", img)
@@ -271,7 +271,7 @@ transform_five_crop <- function(img, size) {
 #' @inheritParams transform_five_crop
 #' @param vertical_flip (bool): Use vertical flipping instead of horizontal
 #'
-#' @family transforms
+#' @family combining_transforms
 #' @export
 transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   UseMethod("transform_ten_crop", img)
@@ -294,7 +294,7 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #' @param transformation_matrix (Tensor): tensor `[D x D]`, D = C x H x W.
 #' @param mean_vector (Tensor): tensor [D], D = C x H x W.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_linear_transformation <- function(img, transformation_matrix, mean_vector) {
   UseMethod("transform_linear_transformation", img)
@@ -319,7 +319,7 @@ transform_linear_transformation <- function(img, transformation_matrix, mean_vec
 #'   `[min, max]`. Should have 0<= hue <= 0.5 or -0.5 <= min <= max <= 0.5.
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, hue=0) {
   UseMethod("transform_color_jitter", img)
@@ -345,7 +345,7 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #'   value for the area outside the transform in the output image is always 0.
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_rotation <- function(img, degrees, resample = 0, expand=FALSE,
                                       center=NULL, fill=NULL) {
@@ -376,7 +376,7 @@ transform_random_rotation <- function(img, degrees, resample = 0, expand=FALSE,
 #'   (Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
 #'   for the area outside the transform in the output image is always 0.
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
                                     shear=NULL, resample=0, fillcolor=0) {
@@ -389,7 +389,7 @@ transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
 #' @param num_output_channels (int): (1 or 3) number of channels desired for
 #'   output image
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_grayscale <- function(img, num_output_channels) {
   UseMethod("transform_grayscale", img)
@@ -403,7 +403,7 @@ transform_grayscale <- function(img, num_output_channels) {
 #' @param p (float): probability that image should be converted to grayscale
 #'   (default 0.1).
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_grayscale <- function(img, p = 0.1) {
   UseMethod("transform_random_grayscale", img)
@@ -421,7 +421,7 @@ transform_random_grayscale <- function(img, p = 0.1) {
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
                                          interpolation=2, fill=0) {
@@ -443,7 +443,7 @@ transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
 #'   If a str of 'random', erasing each pixel with random values.
 #' @param inplace boolean to make this transform inplace. Default set to FALSE.
 #'
-#' @family transforms
+#' @family random_transforms
 #' @export
 transform_random_erasing <- function(img, p=0.5, scale=c(0.02, 0.33), ratio=c(0.3, 3.3),
                                      value=0, inplace=FALSE) {
@@ -461,7 +461,7 @@ transform_random_erasing <- function(img, p=0.5, scale=c(0.02, 0.33), ratio=c(0.
 #' @param height (int): Height of the crop box.
 #' @param width (int): Width of the crop box.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_crop <- function(img, top, left, height, width) {
   UseMethod("transform_crop", img)
@@ -471,7 +471,7 @@ transform_crop <- function(img, top, left, height, width) {
 #'
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_hflip <- function(img) {
   UseMethod("transform_hflip", img)
@@ -481,7 +481,7 @@ transform_hflip <- function(img) {
 #'
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_vflip <- function(img) {
   UseMethod("transform_vflip", img)
@@ -496,7 +496,7 @@ transform_vflip <- function(img) {
 #' @param width (int): Width of the crop box.
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family combining_transforms
 #' @export
 transform_resized_crop <- function(img, top, left, height, width, size,
                                    interpolation = 2) {
@@ -511,7 +511,7 @@ transform_resized_crop <- function(img, top, left, height, width, size,
 #'   original image while 2 increases the brightness by a factor of 2.
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_adjust_brightness <- function(img, brightness_factor) {
   UseMethod("transform_adjust_brightness", img)
@@ -525,7 +525,7 @@ transform_adjust_brightness <- function(img, brightness_factor) {
 #'
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_adjust_contrast <- function(img, contrast_factor) {
   UseMethod("transform_adjust_contrast", img)
@@ -539,7 +539,7 @@ transform_adjust_contrast <- function(img, contrast_factor) {
 #'
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_adjust_saturation <- function(img, saturation_factor) {
   UseMethod("transform_adjust_saturation", img)
@@ -564,7 +564,7 @@ transform_adjust_saturation <- function(img, saturation_factor) {
 #'
 #' @inheritParams transform_resize
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_adjust_hue <- function(img, hue_factor) {
   UseMethod("transform_adjust_hue", img)
@@ -577,7 +577,7 @@ transform_adjust_hue <- function(img, hue_factor) {
 #' @param angle (float or int): rotation angle value in degrees,
 #'   counter-clockwise.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
                              center = NULL, fill = NULL) {
@@ -596,7 +596,7 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
 #'  to a shear parallel to the x-axis, while the second value corresponds to a
 #'  shear parallel to the y-axis.
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_affine <- function(img, angle, translate, scale, shear,
                              resample = 0, fillcolor = NULL) {
@@ -615,7 +615,7 @@ transform_affine <- function(img, angle, translate, scale, shear,
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_perspective <- function(img, startpoints, endpoints, interpolation = 2,
                                   fill = NULL) {
@@ -639,7 +639,7 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
 #' @param gain (float): The constant multiplier.
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_adjust_gamma <- function(img, gamma, gain = 1) {
   UseMethod("transform_adjust_gamma", img)
@@ -652,7 +652,7 @@ transform_adjust_gamma <- function(img, gamma, gain = 1) {
 #'
 #' @inheritParams transform_to_tensor
 #'
-#' @family transforms
+#' @family unitary_transforms
 #' @export
 transform_rgb_to_grayscale <- function(img) {
   UseMethod("transform_rgb_to_grayscale")

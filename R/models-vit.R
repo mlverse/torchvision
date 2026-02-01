@@ -1,8 +1,8 @@
 #' Vision Transformer Implementation
 #'
-#' Vision Transformer (ViT) models implement the architecture proposed in the paper 
+#' Vision Transformer (ViT) models implement the architecture proposed in the paper
 #' [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929).
-#' These models are designed for image classification tasks and operate by treating 
+#' These models are designed for image classification tasks and operate by treating
 #' image patches as tokens in a Transformer model.
 #'
 #' ## Model Variants and Performance (ImageNet-1k)
@@ -18,14 +18,14 @@
 #' - **TorchVision Recipe**: <https://github.com/pytorch/vision/tree/main/references/classification>
 #' - **SWAG Recipe**: <https://github.com/facebookresearch/SWAG>
 #'
-#' **Weights Selection**:  
-#' - All models use the default `IMAGENET1K_V1` weights for consistency, stability, and official support from TorchVision.  
-#' - These are supervised weights trained on ImageNet-1k.  
+#' **Weights Selection**:
+#' - All models use the default `IMAGENET1K_V1` weights for consistency, stability, and official support from TorchVision.
+#' - These are supervised weights trained on ImageNet-1k.
 #' - For `vit_h_14`, the default weight is `IMAGENET1K_SWAG_E2E_V1`, pretrained on SWAG and fine-tuned on ImageNet.
 #'
 #' @inheritParams model_mobilenet_v2
 #'
-#' @family models
+#' @family classification_model
 #' @rdname model_vit
 #' @name model_vit
 NULL
@@ -47,7 +47,7 @@ load_vit_torchscript_model <- function(name, ...) {
 
   if (tools::md5sum(archive) != r[2])
     runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-  
+
   model <- model_vit_base(name = name, pretrained = FALSE, progress = FALSE, ...)
   state_dict <- torch::load_state_dict(archive)
 

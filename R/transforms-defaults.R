@@ -31,8 +31,8 @@ transform_center_crop.default <- function(img, size) {
 
   size <- get_image_size(img)
 
-  image_height <- size[1]
-  image_width <- size[2]
+  image_height <- size[2]
+  image_width <- size[1]
 
   crop_height <- output_size[1]
   crop_width <- output_size[2]
@@ -171,7 +171,7 @@ transform_random_vertical_flip.default <- function(img, p = 0.5) {
 get_random_resized_crop_params <- function(img, scale, ratio) {
 
   img_size <- get_image_size(img)
-  width <- img_size[2]; height <- img_size[1]
+  width <- img_size[1]; height <- img_size[2]
 
   area <- height * width
 
@@ -302,7 +302,7 @@ check_color_jitter_input <- function(value, center = 1, bound = c(0, Inf),
     if (clip_first_on_zero)
       value[1] <- max(value[1], 0.0)
 
-  } else if (length(value == 2)) {
+  } else if (length(value) == 2) {
 
     if (value[1] < bound[1] || value[2] > bound[2])
       value_error("out of bounds.")
@@ -364,10 +364,10 @@ get_random_affine_params <- function(degrees,
 
   angle <- as.numeric(torch::torch_empty(1)$uniform_(degrees[1], degrees[2]))
   if (!is.null(translate)) {
-    max_dx = as.numeric(translate[1] * img_size[1])
-    max_dy = as.numeric(translate[2] * img_size[2])
-    tx = as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dx, max_dx))))
-    ty = as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dy, max_dy))))
+    max_dx <- as.numeric(translate[1] * img_size[1])
+    max_dy <- as.numeric(translate[2] * img_size[2])
+    tx <- as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dx, max_dx))))
+    ty <- as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dy, max_dy))))
     translations <- c(tx, ty)
   } else {
     translations <- c(0,0)
@@ -446,7 +446,7 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
 
   img_size <- get_image_size(img)
 
-  ret = get_random_affine_params(degrees, translate, scale, shear, img_size)
+  ret <- get_random_affine_params(degrees, translate, scale, shear, img_size)
 
   transform_affine(img, ret[[1]], ret[[2]], ret[[3]], ret[[4]],
                    resample=resample, fillcolor=fillcolor)
@@ -463,26 +463,26 @@ transform_random_grayscale.default <- function(img, p = 0.1) {
 }
 
 get_random_perspective_params <- function(width, height, distortion_scale) {
-  half_height = height %/% 2
-  half_width = width %/% 2
-  topleft = c(
+  half_height <- height %/% 2
+  half_width <- width %/% 2
+  topleft <- c(
     as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_width) + 1, size=1)),
     as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_height) + 1, size=1))
   )
-  topright = c(
+  topright <- c(
     as.integer(torch::torch_randint(1 + width -as.integer(distortion_scale * half_width) - 1, width, size=1)),
     as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_height) + 1, size=1))
   )
-  botright = c(
+  botright <- c(
     as.integer(torch::torch_randint(1 + width -as.integer(distortion_scale * half_width) - 1, width, size=1)),
     as.integer(torch::torch_randint(1 + height -as.integer(distortion_scale * half_height) - 1, height, size=1))
   )
-  botleft = c(
+  botleft <- c(
     as.integer(torch::torch_randint(1 + 0,as.integer(distortion_scale * half_width) + 1, size=1)),
     as.integer(torch::torch_randint(1 + height -as.integer(distortion_scale * half_height) - 1, height, size=1))
   )
-  startpoints = list(c(1 + 0, 1 + 0), c(1 + width - 1, 1 + 0), c(1 + width - 1, 1 + height - 1), c(1 + 0, 1 + height - 1))
-  endpoints = list(topleft, topright, botright, botleft)
+  startpoints <- list(c(1 + 0, 1 + 0), c(1 + width - 1, 1 + 0), c(1 + width - 1, 1 + height - 1), c(1 + 0, 1 + height - 1))
+  endpoints <- list(topleft, topright, botright, botleft)
   list(startpoints, endpoints)
 }
 

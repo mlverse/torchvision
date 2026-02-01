@@ -45,12 +45,32 @@ test_that("draw_bounding_boxes correctly mask a complete image", {
 
 })
 
-test_that("draw_segmentation_masks works", {
+test_that("draw_segmentation_masks works with boolean mask", {
 
   image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
   image_uint <- torch::torch_randint(low = 190, high = 255, size = c(3, 360, 360))$to(torch::torch_uint8())
   lower_mask <- torch::torch_tril(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch::torch_bool())
   upper_mask <- torch::torch_triu(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch::torch_bool())
+  masks <- torch::torch_stack(c(lower_mask, upper_mask), dim = 1)
+
+  expect_no_error(masked_image <- draw_segmentation_masks(image_float, masks))
+  expect_tensor_dtype(masked_image, torch::torch_uint8())
+  expect_tensor_shape(masked_image, c(3, 360, 360))
+
+  expect_no_error(masked_image <- draw_segmentation_masks(image_uint, masks))
+  expect_tensor_dtype(masked_image, torch::torch_uint8())
+  expect_tensor_shape(masked_image, c(3, 360, 360))
+
+  colors <-  c("navyblue", "orange3")
+  expect_no_error(masked_image <- draw_segmentation_masks(image_uint, masks, colors = colors, alpha = 0.5))
+})
+
+test_that("draw_segmentation_masks works with float mask", {
+
+  image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
+  image_uint <- torch::torch_randint(low = 190, high = 255, size = c(3, 360, 360))$to(torch::torch_uint8())
+  lower_mask <- torch::torch_tril(torch::torch_ones(c(360, 360)), diagonal = FALSE)
+  upper_mask <- torch::torch_triu(torch::torch_ones(c(360, 360))*2, diagonal = FALSE)
   masks <- torch::torch_stack(c(lower_mask, upper_mask), dim = 1)
 
   expect_no_error(masked_image <- draw_segmentation_masks(image_float, masks))
@@ -102,7 +122,7 @@ test_that("tensor_image_browse works", {
 
   # error cases : shape
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 3, 360, 360))$to(torch::torch_uint8())
-  expect_error(tensor_image_browse(image), "Pass individual `image`")
+  expect_error(tensor_image_browse(image), "Pass individual `image`, not batches")
   image <- torch::torch_randint(low = 1, high = 200, size = c(4, 360, 360))$to(torch::torch_uint8())
   expect_error(tensor_image_browse(image), "Only grayscale and RGB")
 
