@@ -418,6 +418,9 @@ fasterrcnn_model <- function(backbone, num_classes,
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
+      final_boxes <- decode_boxes(props$proposals, final_boxes)
+      final_boxes <- clip_boxes_to_image(final_boxes, image_size)
+
       # Filter by score threshold
       keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
@@ -604,6 +607,9 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
+      final_boxes <- decode_boxes(props$proposals, final_boxes)
+      final_boxes <- clip_boxes_to_image(final_boxes, image_size)
+
       # Filter by score threshold
       keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
@@ -760,6 +766,9 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
       box_reg <- detections$boxes$view(c(-1, num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
+
+      final_boxes <- decode_boxes(props$proposals, final_boxes)
+      final_boxes <- clip_boxes_to_image(final_boxes, image_size)
 
       # Filter by score threshold
       keep <- final_scores > self$score_thresh
