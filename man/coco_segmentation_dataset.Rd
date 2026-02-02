@@ -24,7 +24,7 @@ coco_segmentation_dataset(
 
 \item{transform}{Optional transform function applied to the image.}
 
-\item{target_transform}{Optional transform function applied to the target. 
+\item{target_transform}{Optional transform function applied to the target.
 Use \code{target_transform_coco_masks} to convert polygon annotations to binary masks.}
 }
 \value{

@@ -69,7 +69,7 @@ tensor_image_browse(boxed)
 }
 \seealso{
 \code{\link{coco_segmentation_dataset}} for instance segmentation tasks
-\seealso{
+
 Other detection_dataset: 
 \code{\link{pascal_voc_datasets}},
 \code{\link{rf100_biology_collection}()},
