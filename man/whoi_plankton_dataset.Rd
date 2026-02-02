@@ -89,6 +89,7 @@ Other classification_dataset:
 \code{\link{oxfordiiitpet_dataset}()},
 \code{\link{places365_dataset}()},
 \code{\link{tiny_imagenet_dataset}()},
+\code{\link{vggface2_dataset}()},
 \code{\link{whoi_small_coralnet_dataset}()}
 }
 \concept{classification_dataset}

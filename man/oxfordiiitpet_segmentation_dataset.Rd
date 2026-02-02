@@ -78,7 +78,6 @@ tensor_image_browse(overlay)
 \seealso{
 Other segmentation_dataset: 
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_peixos_segmentation_dataset}()},
-\code{\link{vggface2_dataset}()}
+\code{\link{rf100_peixos_segmentation_dataset}()}
 }
 \concept{segmentation_dataset}

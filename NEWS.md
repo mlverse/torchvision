@@ -2,6 +2,7 @@
 
 ## New features
 
+* Added segmentation article on `model_fcn_resnet50()` with two images (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
@@ -12,6 +13,7 @@
 
 ## New datasets
 
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
 ## Bug fixes and improvements
@@ -33,7 +35,6 @@ to non-vectorized `transform_` operations (#264)
   and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
   thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
 * Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
-* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 
 ## New models
 

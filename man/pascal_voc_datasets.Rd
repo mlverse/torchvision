@@ -129,8 +129,7 @@ tensor_image_browse(boxed_img)
 \seealso{
 Other segmentation_dataset: 
 \code{\link{oxfordiiitpet_segmentation_dataset}()},
-\code{\link{rf100_peixos_segmentation_dataset}()},
-\code{\link{vggface2_dataset}()}
+\code{\link{rf100_peixos_segmentation_dataset}()}
 
 Other detection_dataset: 
 \code{\link{coco_detection_dataset}()},
