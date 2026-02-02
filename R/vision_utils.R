@@ -347,7 +347,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (masks$dtype != torch::torch_bool() && masks$dtype != torch::torch_float() ) {
     type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
-  if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
+  if (any(masks$shape[-2:-1] != img_to_draw$shape[-2:-1])) {
     value_error("`masks` and `image` must have the same height and width")
   }
   # if mask is a model inference output, we need to convert float mask to boolean mask

@@ -32,7 +32,7 @@
 #' ds$classes[item$y]  # list(name=..., gender=...)
 #' }
 #'
-#' @family segmentation_dataset
+#' @family classification_dataset
 #' @export
 vggface2_dataset <- torch::dataset(
   name = "vggface2",

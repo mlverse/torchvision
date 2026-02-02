@@ -60,9 +60,20 @@ ds$classes[item$y]  # list(name=..., gender=...)
 
 }
 \seealso{
-Other segmentation_dataset: 
-\code{\link{oxfordiiitpet_segmentation_dataset}()},
-\code{\link{pascal_voc_datasets}},
-\code{\link{rf100_peixos_segmentation_dataset}()}
+Other classification_dataset: 
+\code{\link{caltech_dataset}},
+\code{\link{cifar10_dataset}()},
+\code{\link{eurosat_dataset}()},
+\code{\link{fer_dataset}()},
+\code{\link{fgvc_aircraft_dataset}()},
+\code{\link{flowers102_dataset}()},
+\code{\link{image_folder_dataset}()},
+\code{\link{lfw_dataset}},
+\code{\link{mnist_dataset}()},
+\code{\link{oxfordiiitpet_dataset}()},
+\code{\link{places365_dataset}()},
+\code{\link{tiny_imagenet_dataset}()},
+\code{\link{whoi_plankton_dataset}()},
+\code{\link{whoi_small_coralnet_dataset}()}
 }
-\concept{segmentation_dataset}
+\concept{classification_dataset}
