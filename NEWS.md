@@ -6,6 +6,7 @@
 
 ## New features
 
+* Added segmentation article on `model_fcn_resnet50()` with two images (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
@@ -16,6 +17,7 @@
 
 ## New datasets
 
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
 ## Bug fixes and improvements
@@ -31,6 +33,7 @@ to non-vectorized `transform_` operations (#264)
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
+* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
   and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 

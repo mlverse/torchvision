@@ -16,7 +16,7 @@ test_that("coco_detection_dataset handles missing files gracefully", {
 })
 
 test_that("coco_detection_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
@@ -46,8 +46,8 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_false("segmentation" %in% names(y))
 })
 
-test_that("coco_segmentation_dataset loads a single segmentation example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
+test_that("coco_ dataset loads a single segmentation example correctly", {
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   ds <- coco_segmentation_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE,
@@ -71,7 +71,7 @@ test_that("coco_segmentation_dataset loads a single segmentation example correct
 })
 
 test_that("coco_detection_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 1,
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
 
@@ -99,8 +99,8 @@ test_that("coco_caption_dataset handles missing files gracefully", {
 })
 
 test_that("coco_caption_dataset loads a single example correctly", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 2,
-        "Skipping test: set TEST_LARGE_DATASETS=2 to enable tests requiring huge downloads.")
+  skip_if(Sys.getenv("TEST_HUGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_HUGE_DATASETS=1 to enable tests requiring huge downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
@@ -120,8 +120,8 @@ test_that("coco_caption_dataset loads a single example correctly", {
 })
 
 test_that("coco_caption_dataset batches correctly using dataloader", {
-  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) < 2,
-        "Skipping test: set TEST_LARGE_DATASETS=2 to enable tests requiring huge downloads.")
+  skip_if(Sys.getenv("TEST_HUGE_DATASETS", unset = 0) != 1,
+        "Skipping test: set TEST_HUGE_DATASETS=1 to enable tests requiring huge downloads.")
 
   ds <- coco_caption_dataset(root = tmp, train = FALSE, download = TRUE)
 
