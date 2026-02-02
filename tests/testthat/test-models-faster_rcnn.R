@@ -1,80 +1,81 @@
 test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
 
-  model <- model_fasterrcnn_resnet50_fpn()
+  model <- model_fasterrcnn_resnet50_fpn(score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   input <- base_loader("assets/class/cat/cat.0.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(200,200)) %>% torch_unsqueeze(1)
   model$eval()
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
 
-  model <- model_fasterrcnn_resnet50_fpn(num_classes = 10)
+  model <- model_fasterrcnn_resnet50_fpn(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_resnet50_fpn_v2()
+  model <- model_fasterrcnn_resnet50_fpn_v2(score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   input <- base_loader("assets/class/cat/cat.1.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   model$eval()
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
 
-  model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
+  model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_mobilenet_v3_large_fpn()
+  model <- model_fasterrcnn_mobilenet_v3_large_fpn(score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   input <- base_loader("assets/class/cat/cat.2.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   model$eval()
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
 
-  model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10)
+  model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
@@ -87,38 +88,38 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn"
   model$eval()
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
-  model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(num_classes = 10)
+  model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 10)
+  model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   input <- base_loader("assets/class/cat/cat.4.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
-  if (out$detections$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections$boxes)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  if (out$detections[[1]]$boxes$shape[1] > 0) {
+    boxes <- as.matrix(out$detections[[1]]$boxes)
 
     # bbox must be positive and within (180x180)
     expect_true(all(boxes >= 0))
@@ -130,7 +131,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
     expect_true(all(boxes[, 4] >= boxes[, 2]))
 
     # scores must be within [0, 1]
-    scores <- as.numeric(out$detections$scores)
+    scores <- as.numeric(out$detections[[1]]$scores)
     expect_true(all(scores >= 0 && scores <= 1))
   }
 })
@@ -139,18 +140,18 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 10)
+  model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
   input <- base_loader("assets/class/cat/cat.5.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
-  if (out$detections$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections$boxes)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  if (out$detections[[1]]$boxes$shape[1] > 0) {
+    boxes <- as.matrix(out$detections[[1]]$boxes)
 
     # bbox must be positive and within (180x180)
     expect_true(all(boxes >= 0))
@@ -162,7 +163,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
     expect_true(all(boxes[, 4] >= boxes[, 2]))
 
     # scores must be within [0, 1]
-    scores <- as.numeric(out$detections$scores)
+    scores <- as.numeric(out$detections[[1]]$scores)
     expect_true(all(scores >= 0 && scores <= 1))
   }
 })
@@ -176,13 +177,13 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
-  if (out$detections$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections$boxes)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  if (out$detections[[1]]$boxes$shape[1] > 0) {
+    boxes <- as.matrix(out$detections[[1]]$boxes)
 
     # bbox must be positive and within (180x180)
     expect_true(all(boxes >= 0))
@@ -194,7 +195,7 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
     expect_true(all(boxes[, 4] >= boxes[, 2]))
 
     # scores must be within [0, 1]
-    scores <- as.numeric(out$detections$scores)
+    scores <- as.numeric(out$detections[[1]]$scores)
     expect_true(all(scores >= 0 && scores <= 1))
   }
 })
@@ -208,13 +209,13 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   out <- model(input)
   expect_named(out, c("features","detections"))
-  expect_named(out$detections, c("boxes","labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
-  if (out$detections$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections$boxes)
+  expect_named(out$detections[[1]], c("boxes","labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  if (out$detections[[1]]$boxes$shape[1] > 0) {
+    boxes <- as.matrix(out$detections[[1]]$boxes)
 
     # bbox must be positive and within (180x180)
     expect_true(all(boxes >= 0))
@@ -226,7 +227,7 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
     expect_true(all(boxes[, 4] >= boxes[, 2]))
 
     # scores must be within [0, 1]
-    scores <- as.numeric(out$detections$scores)
+    scores <- as.numeric(out$detections[[1]]$scores)
     expect_true(all(scores >= 0 && scores <= 1))
   }
 })
