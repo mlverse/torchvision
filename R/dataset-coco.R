@@ -337,6 +337,7 @@ coco_caption_dataset <- torch::dataset(
 #'
 #' @return A character vector with the COCO class names
 #' @family class_resolution
+#' @importFrom utils read.delim
 #' @export
 coco_classes <- function() {
   url <- "https://github.com/ultralytics/ultralytics/raw/refs/heads/main/ultralytics/cfg/datasets/coco.yaml"
