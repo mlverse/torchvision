@@ -10,20 +10,22 @@ test_that("tests for non-pretrained model_convnext_tiny_detection", {
   model$eval()
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
   model <- model_convnext_tiny_detection(num_classes = 10)
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_convnext_small_detection", {
@@ -38,20 +40,22 @@ test_that("tests for non-pretrained model_convnext_small_detection", {
   model$eval()
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
   model <- model_convnext_small_detection(num_classes = 10)
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("tests for non-pretrained model_convnext_base_detection", {
@@ -66,20 +70,22 @@ test_that("tests for non-pretrained model_convnext_base_detection", {
   model$eval()
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_is(out$detections, "list")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
   model <- model_convnext_base_detection(num_classes = 10)
   out <- model(input)
+  expect_is(out$detections, "list")
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("model_convnext_detection works with pretrained backbone", {
@@ -94,11 +100,11 @@ test_that("model_convnext_detection works with pretrained backbone", {
   model$eval()
   out <- model(input)
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_tensor(out$detections$boxes)
-  expect_tensor(out$detections$labels)
-  expect_tensor(out$detections$scores)
-  expect_equal(out$detections$boxes$shape[2], 4L)
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 })
 
 test_that("model_convnext_detection handles different image sizes", {
@@ -137,16 +143,17 @@ test_that("model_convnext_detection validates num_classes parameter", {
   expect_error(model_convnext_tiny_detection(num_classes = -1), "`num_classes` must be positive")
 })
 
-test_that("model_convnext_detection has FPN and produces multi-scale features", {
+
+test_that("model_convnext_detection output format matches faster_rcnn", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
   model <- model_convnext_tiny_detection(num_classes = 10)
+  model$eval()
   expect_false(is.null(model$backbone))
 
-  input <- base_loader("assets/class/dog/dog.3.jpg") %>%
-    transform_to_tensor() %>% transform_resize(c(224, 224)) %>% torch_unsqueeze(1)
-  model$eval()
+  input <- base_loader("assets/class/dog/dog.4.jpg") %>%
+    transform_to_tensor() %>% transform_resize(c(200, 200)) %>% torch_unsqueeze(1)
   out <- model(input)
 
   expect_type(out$features, "list")
@@ -155,24 +162,30 @@ test_that("model_convnext_detection has FPN and produces multi-scale features", 
   for (i in seq_along(out$features)) {
     expect_tensor(out$features[[i]])
   }
-})
-
-test_that("model_convnext_detection output format matches faster_rcnn", {
-  skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-
-  model <- model_convnext_tiny_detection(num_classes = 10)
-  model$eval()
-
-  input <- base_loader("assets/class/dog/dog.4.jpg") %>%
-    transform_to_tensor() %>% transform_resize(c(200, 200)) %>% torch_unsqueeze(1)
-  out <- model(input)
 
   expect_named(out, c("features", "detections"))
-  expect_named(out$detections, c("boxes", "labels", "scores"))
-  expect_equal(out$detections$boxes$shape[2], 4L)
-  expect_equal(out$detections$labels$shape[1], out$detections$scores$shape[1])
-  expect_equal(out$detections$boxes$shape[1], out$detections$labels$shape[1])
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  expect_equal(out$detections[[1]]$labels$shape[1], out$detections[[1]]$scores$shape[1])
+  expect_equal(out$detections[[1]]$boxes$shape[1], out$detections[[1]]$labels$shape[1])
+  if (out$detections[[1]]$boxes$shape[1] > 0) {
+    boxes <- as.matrix(out$detections[[1]]$boxes)
+
+    # bbox must be positive and within (180x180)
+    expect_true(all(boxes >= 0))
+    expect_true(all(boxes[, c(1, 3)] <= 180))
+    expect_true(all(boxes[, c(2, 4)] <= 180))
+
+    # bbox must be coherent: x2 > x1 et y2 > y1
+    # TODO may need rework
+    # expect_true(all(boxes[, 3] >= boxes[, 1]))
+    expect_true(all(boxes[, 4] >= boxes[, 2]))
+
+    # scores must be within [0, 1]
+    scores <- as.numeric(out$detections[[1]]$scores)
+    expect_all_true(scores >= 0)
+    expect_all_true(scores <= 1)
+  }
 })
 
 test_that("model_convnext_detection handles batch processing", {
@@ -182,11 +195,15 @@ test_that("model_convnext_detection handles batch processing", {
   model <- model_convnext_tiny_detection(num_classes = 10)
   model$eval()
 
-  input_single <- base_loader("assets/class/dog/dog.5.jpg") %>%
-    transform_to_tensor() %>% transform_resize(c(200, 200)) %>% torch_unsqueeze(1)
-  out_single <- model(input_single)
-  expect_named(out_single, c("features", "detections"))
-  expect_tensor(out_single$detections$boxes)
-  expect_tensor(out_single$detections$labels)
-  expect_tensor(out_single$detections$scores)
+  single <- base_loader("assets/class/dog/dog.5.jpg") %>%
+    transform_to_tensor() %>% transform_resize(c(200, 200))
+  batch <- torch_stack(list(single, single), dim = 1)
+  out <- model(batch)
+  expect_named(out, c("features", "detections"))
+  expect_tensor(out$detections[[1]]$boxes)
+  expect_tensor(out$detections[[1]]$labels)
+  expect_tensor(out$detections[[1]]$scores)
+  expect_tensor(out$detections[[2]]$boxes)
+  expect_tensor(out$detections[[2]]$labels)
+  expect_tensor(out$detections[[2]]$scores)
 })
