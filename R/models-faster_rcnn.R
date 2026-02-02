@@ -169,33 +169,6 @@ generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx
   list(proposals = proposals)
 }
 
-# roi_align_stub <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)) {
-#   h <- as.integer(feature_map$shape[[3]])
-#   w <- as.integer(feature_map$shape[[4]])
-#
-#   n <- proposals$size(1)
-#   pooled <- vector("list", n)
-#
-#   for (i in seq_len(n)) {
-#     x1 <- max(1, min(as.numeric(proposals[i, 1]), w))
-#     y1 <- max(1, min(as.numeric(proposals[i, 2]), h))
-#     x2 <- max(x1 + 1, min(as.numeric(proposals[i, 3]), w))
-#     y2 <- max(y1 + 1, min(as.numeric(proposals[i, 4]), h))
-#
-#     region <- feature_map[batch_idx, , y1:y2, x1:x2]
-#     pooled_feat <- torch::nnf_interpolate(
-#       region$unsqueeze(1),
-#       size = output_size,
-#       mode = "bilinear",
-#       align_corners = FALSE
-#     )[1, , , ]
-#
-#     pooled[[i]] <- pooled_feat$reshape(-1)
-#   }
-#
-#   torch::torch_stack(pooled)
-# }
-
 #' @importFrom torch nnf_grid_sample torch_empty
 roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)) {
   # A vectorized version of roi_align_stub for feature_map: [B, C, H, W] and proposals: [N, 4] (x1, y1, x2, y2)
@@ -279,7 +252,7 @@ roi_heads_module <- function(num_classes = 91) {
     forward = function(features, proposals, batch_idx) {
       feature_maps <- features[c("p2", "p3", "p4", "p5")]
       pooled <- roi_align(feature_maps[[1]], proposals, batch_idx)
-      x <- self$box_head(pooled)
+      x <- self$box_head(pooled$flatten(start_dim = 2))
       self$box_predictor(x)
     }
   )
@@ -325,7 +298,7 @@ roi_heads_module_v2 <- function(num_classes = 91) {
     },
     forward = function(features, proposals, batch_idx) {
       pooled <- roi_align(features[[1]], proposals, batch_idx)
-      x <- self$box_head(pooled)
+      x <- self$box_head(pooled$flatten(start_dim = 2))
       self$box_predictor(x)
     }
   )
