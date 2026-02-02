@@ -27,6 +27,8 @@ navbar:
         href: articles/examples/style-transfer.html
       - text: texture-nca
         href: articles/examples/texture-nca.html
+      - text: fcnresnet
+        href: articles/examples/fcnresnet.html
 
 reference:
 - title: Transforms
@@ -94,12 +96,6 @@ reference:
     mask and labels for image segmentation.
   contents:
    - has_concept("segmentation_dataset")
-
-- title: Classes resolution
-  descr: >
-    Classical Dataset classes and labels.
-  contents:
-   - has_concept("class_resolution")
 
 - title: Displaying
 - subtitle: Images loading
