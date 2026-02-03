@@ -118,19 +118,19 @@ test_that("model_convnext_detection handles different image sizes", {
     transform_to_tensor() %>% transform_resize(c(224, 224)) %>% torch_unsqueeze(1)
   out_224 <- model(input_224)
   expect_named(out_224, c("features", "detections"))
-  expect_named(out_224$detections, c("boxes", "labels", "scores"))
+  expect_named(out_224$detections[[1]], c("boxes", "labels", "scores"))
 
   input_320 <- base_loader("assets/class/dog/dog.1.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(320, 320)) %>% torch_unsqueeze(1)
   out_320 <- model(input_320)
   expect_named(out_320, c("features", "detections"))
-  expect_named(out_320$detections, c("boxes", "labels", "scores"))
+  expect_named(out_320$detections[[1]], c("boxes", "labels", "scores"))
 
   input_512 <- base_loader("assets/class/dog/dog.2.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(512, 512)) %>% torch_unsqueeze(1)
   out_512 <- model(input_512)
   expect_named(out_512, c("features", "detections"))
-  expect_named(out_512$detections, c("boxes", "labels", "scores"))
+  expect_named(out_512$detections[[1]], c("boxes", "labels", "scores"))
 })
 
 test_that("model_convnext_detection validates num_classes parameter", {

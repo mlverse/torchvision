@@ -939,7 +939,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' # ResNet-50 FPN V2
 #' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
 #' model$eval()
-#' pred <- model(batch)$detections
+#' pred <- model(batch)$detections[[1]]
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' keep <- seq_len(min(5, num_boxes))
 #' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -952,7 +952,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' # MobileNet V3 Large FPN
 #' model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
 #' model$eval()
-#' pred <- model(batch)$detections
+#' pred <- model(batch)$detections[[1]]
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' keep <- seq_len(min(5, num_boxes))
 #' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
@@ -965,7 +965,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' # MobileNet V3 Large 320 FPN
 #' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
 #' model$eval()
-#' pred <- model(batch)$detections
+#' pred <- model(batch)$detections[[1]]
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' keep <- seq_len(min(5, num_boxes))
 #' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
