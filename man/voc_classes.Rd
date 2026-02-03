@@ -28,10 +28,12 @@ human readable labels. The labels are retrieved from the dataset.
 \seealso{
 Other class_resolution: 
 \code{\link{coco_classes}()},
+\code{\link{imagenet_21k_classes}()},
 \code{\link{imagenet_classes}()}
 
 Other class_resolution: 
 \code{\link{coco_classes}()},
+\code{\link{imagenet_21k_classes}()},
 \code{\link{imagenet_classes}()}
 }
 \concept{class_resolution}

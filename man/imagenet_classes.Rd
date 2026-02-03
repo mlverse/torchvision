@@ -3,11 +3,14 @@
 \name{imagenet_classes}
 \alias{imagenet_classes}
 \alias{imagenet_label}
+\alias{imagenet_21k_label}
 \title{ImageNet Class Labels}
 \usage{
 imagenet_classes()
 
 imagenet_label(id)
+
+imagenet_21k_label(id)
 }
 \arguments{
 \item{id}{Integer vector of 1-based class identifiers.}
@@ -15,6 +18,8 @@ imagenet_label(id)
 \value{
 A character vector with 1000 entries representing the ImageNet-1k
 class labels.
+
+A character vector with the labels associated with \code{id}.
 
 A character vector with the labels associated with \code{id}.
 }
@@ -26,10 +31,17 @@ PyTorch's reference implementation.
 \seealso{
 Other class_resolution: 
 \code{\link{coco_classes}()},
+\code{\link{imagenet_21k_classes}()},
 \code{\link{voc_classes}}
 
 Other class_resolution: 
 \code{\link{coco_classes}()},
+\code{\link{imagenet_21k_classes}()},
+\code{\link{voc_classes}}
+
+Other class_resolution: 
+\code{\link{coco_classes}()},
+\code{\link{imagenet_21k_classes}()},
 \code{\link{voc_classes}}
 }
 \concept{class_resolution}
