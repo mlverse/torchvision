@@ -6,7 +6,7 @@
 
 ## New features
 
-* Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #244).
+* Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
@@ -17,6 +17,7 @@
 
 ## New datasets
 
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
 ## Bug fixes and improvements
