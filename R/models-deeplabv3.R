@@ -98,24 +98,24 @@ deeplabv3_model_urls <- list(
 #' @return A character vector with the PASCAL VOC class names
 #' @family class_resolution
 #' @export
-voc_classes <- c(
+pascal_voc_classes <- c(
   "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
   "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
   "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
 )
 
-#' @rdname voc_classes
+#' @rdname pascal_voc_classes
 #' @param id Integer vector of 1-based class identifiers.
 #' @return A character vector with the labels associated with `id`.
 #' @family class_resolution
 #' @export
 voc_label <- function(id) {
-  voc_classes[id]
+ pascal_voc_classes[id]
 }
 
 deeplabv3_meta <- list(
-  classes = voc_classes,
-  class_to_idx = setNames(seq_along(voc_classes) - 1, voc_classes)
+  classes = pascal_voc_classes(),
+  class_to_idx = setNames(seq_along(pascal_voc_classes()) - 1, pascal_voc_classes())
 )
 
 
