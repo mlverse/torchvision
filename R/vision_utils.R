@@ -231,6 +231,13 @@ draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
 coco_polygon_to_mask <- function(segmentation, height, width) {
   rlang::check_installed("magick")
 
+  # Handle empty polygon list early to avoid graphics device issues
+  if (length(segmentation) == 0) {
+    mask_logical <- matrix(FALSE, nrow = height, ncol = width)
+    mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
+    return(mask_tensor)
+  }
+
   mask_img <- magick::image_blank(width = width, height = height, color = "black")
   mask_img <- magick::image_draw(mask_img)
 
