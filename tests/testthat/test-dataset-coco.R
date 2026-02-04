@@ -32,7 +32,7 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
-  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation"))
+  expect_named(y, c("boxes", "labels", "area", "iscrowd"))
 
   expect_tensor(y$boxes)
   expect_equal(y$boxes$ndim, 2)
@@ -43,17 +43,17 @@ test_that("coco_detection_dataset loads a single example correctly", {
 
   expect_tensor(y$area)
   expect_tensor(y$iscrowd)
-  expect_true(is.list(y$segmentation))
+  expect_false("segmentation" %in% names(y))
 })
 
-test_that("coco_ dataset loads a single segmentation example correctly", {
+test_that("coco_segmentation_dataset loads a single segmentation example correctly", {
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE,
+  ds <- coco_segmentation_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE,
                                target_transform = target_transform_coco_masks)
 
-  expect_s3_class(ds, "coco_detection_dataset")
+  expect_s3_class(ds, "coco_segmentation_dataset")
   expect_gt(length(ds), 0)
 
   item <- ds[15]
@@ -64,7 +64,7 @@ test_that("coco_ dataset loads a single segmentation example correctly", {
   expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
-  expect_named(y, c("boxes", "labels", "area", "iscrowd", "segmentation", "image_height", "image_width", "masks"))
+  expect_named(y, c("labels", "iscrowd", "segmentation", "image_height", "image_width", "masks"))
 
   expect_tensor(y$masks)
   expect_equal(y$masks$ndim, 3)
@@ -85,7 +85,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
   expect_type(batch$y, "list")
-  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "segmentation"))
+  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd"))
   expect_tensor(batch$y[[1]]$boxes)
   expect_equal(batch$y[[1]]$boxes$ndim, 2)
   expect_equal(batch$y[[1]]$boxes$size(2), 4)

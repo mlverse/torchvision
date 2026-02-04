@@ -90,7 +90,32 @@ deeplabv3_model_urls <- list(
   )
 )
 
+<<<<<<< HEAD
 
+=======
+#' PASCAL VOC Class Labels
+#'
+#' Utilities for resolving PASCAL VOC class identifiers to their corresponding
+#' human readable labels. The labels are retrieved from the dataset.
+#'
+#' @return A character vector with the PASCAL VOC class names
+#' @family class_resolution
+#' @export
+voc_classes <- c(
+  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
+  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
+)
+>>>>>>> upstream/main
+
+#' @rdname voc_classes
+#' @param id Integer vector of 1-based class identifiers.
+#' @return A character vector with the labels associated with `id`.
+#' @family class_resolution
+#' @export
+voc_label <- function(id) {
+  voc_classes[id]
+}
 
 deeplabv3_meta <- list(
   classes = pascal_voc_classes(),
