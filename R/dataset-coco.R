@@ -220,7 +220,7 @@ coco_detection_dataset <- torch::dataset(
 #' @param year Character. Dataset version year. One of \code{"2014"} or \code{"2017"}.
 #' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
 #' @param transform Optional transform function applied to the image.
-#' @param target_transform Optional transform function applied to the target. 
+#' @param target_transform Optional transform function applied to the target.
 #'   Use \code{target_transform_coco_masks} to convert polygon annotations to binary masks.
 #'
 #' @return An object of class `coco_segmentation_dataset`. Each item is a list:
@@ -341,28 +341,20 @@ coco_segmentation_dataset <- torch::dataset(
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
     if (nrow(anns) > 0) {
-      boxes_wh <- torch::torch_tensor(do.call(rbind, anns$bbox), dtype = torch::torch_float())
-      boxes <- box_xywh_to_xyxy(boxes_wh)
 
       label_ids <- anns$category_id
       labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
-
-      area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
 
     } else {
       # empty annotation
-      boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- character()
-      area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 
     y <- list(
-      boxes = boxes,
       labels = labels,
-      area = area,
       iscrowd = iscrowd,
       segmentation = anns$segmentation
     )
