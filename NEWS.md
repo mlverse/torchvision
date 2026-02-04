@@ -2,7 +2,8 @@
 
 ## Breaking changes
 
-* **COCO datasets refactored**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation). This reduces memory usage by ~50%. Files now stored in `/coco` cache subdirectory. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #170, developed with LLM assistance).
+* **COCO datasets refactored**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
+  This reduces memory usage by ~50%. Files now stored in `/coco` cache subdirectory. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
 
 ## New features
 
