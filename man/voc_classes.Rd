@@ -28,11 +28,13 @@ human readable labels. The labels are retrieved from the dataset.
 \seealso{
 Other class_resolution: 
 \code{\link{coco_classes}()},
-\code{\link{imagenet_classes}()}
+\code{\link{imagenet_classes}()},
+\code{\link{voc_segmentation_classes}}
 
 Other class_resolution: 
 \code{\link{coco_classes}()},
-\code{\link{imagenet_classes}()}
+\code{\link{imagenet_classes}()},
+\code{\link{voc_segmentation_classes}}
 }
 \concept{class_resolution}
 \keyword{datasets}

@@ -183,3 +183,4 @@ test_that("model_convnext_detection validates num_classes parameter", {
   expect_error(model_convnext_tiny_detection(num_classes = -1), "must be positive")
 })
 
+

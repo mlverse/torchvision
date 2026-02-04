@@ -2,7 +2,7 @@
 
 ## New features
 
-* Added resolution function for coco and pascal_voc classes and labels (#284).
+* Added resolution function for coco imagenet_21k and and pascal_voc classes and labels (#284).
 * Added segmentation article on `model_fcn_resnet50()` with two images (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).

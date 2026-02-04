@@ -60,7 +60,11 @@
 #' }
 NULL
 
-
+#' PASCAL-VOC Class Labels
+#' @return A character vector with 21 entries representing the PASCAL-VOC
+#'   class labels.
+#' @family class_resolution
+#' @export
 voc_segmentation_classes <- c(
   "background", "aeroplane", "bicycle", "bird", "boat",
   "bottle", "bus", "car", "cat", "chair",
