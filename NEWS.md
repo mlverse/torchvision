@@ -7,6 +7,7 @@
 
 ## New features
 
+* Added resolution function for coco imagenet_21k and and pascal_voc classes and labels (#284).
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
@@ -23,6 +24,7 @@
 
 ## Bug fixes and improvements
 
+* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
 to non-vectorized `transform_` operations (#264)

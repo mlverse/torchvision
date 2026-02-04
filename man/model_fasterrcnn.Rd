@@ -108,24 +108,25 @@ norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 # https://pytorch.org/vision/stable/models.html
 norm_std  <- c(0.229, 0.224, 0.225)
 # Use a publicly available image of an animal
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-img <- base_loader(paste0(wmc,url))
-
-input <- img \%>\%
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+       "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+img <- magick_loader(url) \%>\%
   transform_to_tensor() \%>\%
-  transform_resize(c(520, 520)) \%>\%
+  transform_resize(c(520, 520))
+
+input <- img  \%>\%
   transform_normalize(norm_mean, norm_std)
 batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 
 # ResNet-50 FPN
-model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
+model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5,
+                                        nms_thresh = 0.8, detections_per_img = 3)
 model$eval()
-pred <- model(batch)$detections
+pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+labels <- coco_label(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)
@@ -134,24 +135,24 @@ if (num_boxes > 0) {
 # ResNet-50 FPN V2
 model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
 model$eval()
-pred <- model(batch)$detections
+pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+labels <- coco_label(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
-  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
+  boxed <- draw_bounding_boxes(img, boxes, labels = labels)
   tensor_image_browse(boxed)
 }
 
 # MobileNet V3 Large FPN
 model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
 model$eval()
-pred <- model(batch)$detections
+pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+labels <- coco_label(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)
@@ -160,11 +161,11 @@ if (num_boxes > 0) {
 # MobileNet V3 Large 320 FPN
 model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
 model$eval()
-pred <- model(batch)$detections
+pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
+labels <- coco_label(as.integer(pred$labels[keep]))]
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)
