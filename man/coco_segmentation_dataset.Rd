@@ -31,9 +31,7 @@ Use \code{target_transform_coco_masks} to convert polygon annotations to binary 
 An object of class \code{coco_segmentation_dataset}. Each item is a list:
 \itemize{
 \item \code{x}: a \verb{(C, H, W)} array representing the image.
-\item \code{y$boxes}: a \verb{(N, 4)} \code{torch_tensor} of bounding boxes in the format  \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}.
 \item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
-\item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
 \item \code{y$segmentation}: a list of segmentation polygons for each object.
 \item \code{y$masks}: a \verb{(N, H, W)} boolean \code{torch_tensor} containing binary segmentation masks (when using target_transform_coco_masks).
@@ -49,8 +47,8 @@ Loads the MS COCO dataset for instance segmentation tasks.
 }
 \details{
 The returned image \code{x} is in CHW format (channels, height, width), matching the torch convention.
-The dataset \code{y} offers instance segmentation annotations including bounding boxes, labels,
-areas, crowd indicators, and segmentation masks from the official COCO annotations.
+The dataset \code{y} offers instance segmentation annotations including labels,
+crowd indicators, and segmentation masks from the official COCO annotations.
 
 Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
 }
