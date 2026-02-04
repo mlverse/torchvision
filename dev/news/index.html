@@ -52,6 +52,9 @@
     <li>
       <a href="../articles/examples/texture-nca.html">texture-nca</a>
     </li>
+    <li>
+      <a href="../articles/examples/fcnresnet.html">fcnresnet</a>
+    </li>
   </ul></li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -81,8 +84,15 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
 <div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<ul><li>
+<strong>COCO datasets refactored</strong>: Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation). This reduces memory usage by ~50%. Files now stored in <code>/coco</code> cache subdirectory. Migration: use <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> for segmentation tasks (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>, developed with LLM assistance).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>Added collection dataset catalog with <code><a href="../reference/search_collection.html">search_collection()</a></code>, <code><a href="../reference/get_collection_catalog.html">get_collection_catalog()</a></code>, and <code><a href="../reference/list_collection_datasets.html">list_collection_datasets()</a></code> functions for discovering and exploring collections (<a href="https://github.com/mlverse/torchvision/issues/271" class="external-link">#271</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
+<ul><li>Added resolution function for coco imagenet_21k and and pascal_voc classes and labels (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>).</li>
+<li>Added article showcasing <code><a href="../reference/model_fcn_resnet.html">model_fcn_resnet50()</a></code> with visualization utilities <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/vision_make_grid.html">vision_make_grid()</a></code> (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/281" class="external-link">#281</a>).</li>
+<li>Added collection dataset catalog with <code><a href="../reference/search_collection.html">search_collection()</a></code>, <code><a href="../reference/get_collection_catalog.html">get_collection_catalog()</a></code>, and <code><a href="../reference/list_collection_datasets.html">list_collection_datasets()</a></code> functions for discovering and exploring collections (<a href="https://github.com/mlverse/torchvision/issues/271" class="external-link">#271</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
 <li>Added <code><a href="../reference/target_transform_coco_masks.html">target_transform_coco_masks()</a></code> and <code><a href="../reference/target_transform_trimap_masks.html">target_transform_trimap_masks()</a></code> transformation functions for explicit segmentation mask generation (<a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
 </ul></div>
 <div class="section level3">
@@ -92,11 +102,13 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-datasets-development-version">New datasets<a class="anchor" aria-label="anchor" href="#new-datasets-development-version"></a></h3>
-<ul><li>Added <code>moth</code> dataset to <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code> and <code>currency</code> and <code>wine_label</code> to <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/274" class="external-link">#274</a>).</li>
+<ul><li>Added <code><a href="../reference/vggface2_dataset.html">vggface2_dataset()</a></code> for loading the VGGFace2 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/238" class="external-link">#238</a>).</li>
+<li>Added <code>moth</code> dataset to <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code> and <code>currency</code> and <code>wine_label</code> to <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/274" class="external-link">#274</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
-<ul><li>fix rf100 collection bounding-box now consider the correct native COCO format being ‘xywh’ (<a href="https://github.com/mlverse/torchvision/issues/272" class="external-link">#272</a>)</li>
+<ul><li>fix <code>model_fasterrcnn_*</code> did not provide boxes output normalized to image size, did not manage batches, fix performance of the <code>roi_align()</code> function (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>)</li>
+<li>fix rf100 collection bounding-box now consider the correct native COCO format being ‘xywh’ (<a href="https://github.com/mlverse/torchvision/issues/272" class="external-link">#272</a>)</li>
 <li>Remove <code>.getbatch</code> method from MNIST as it is providing inconsistent tensor dimensions with <code>.getitem</code> due to non-vectorized <code>transform_</code> operations (<a href="https://github.com/mlverse/torchvision/issues/264" class="external-link">#264</a>)</li>
 </ul></div>
 </div>
@@ -107,11 +119,9 @@
 <ul><li>Added <code><a href="../reference/lfw_dataset.html">lfw_people_dataset()</a></code> and <code><a href="../reference/lfw_dataset.html">lfw_pairs_dataset()</a></code> for loading Labelled Faces in the Wild (LFW) datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/203" class="external-link">#203</a>).</li>
 <li>Added <code><a href="../reference/places365_dataset.html">places365_dataset()</a></code>for loading the Places365 dataset (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/mlverse/torchvision/issues/196" class="external-link">#196</a>).</li>
 <li>Added <code><a href="../reference/pascal_voc_datasets.html">pascal_segmentation_dataset()</a></code>, and <code><a href="../reference/pascal_voc_datasets.html">pascal_detection_dataset()</a></code> for loading the Pascal Visual Object Classes datasets (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/209" class="external-link">#209</a>).</li>
-<li>Added <code><a href="../reference/whoi_plankton_dataset.html">whoi_plankton_dataset()</a></code>, and <code><a href="../reference/whoi_plankton_dataset.html">whoi_small_plankton_dataset()</a></code> (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/236" class="external-link">#236</a>).</li>
 <li>Added <code><a href="../reference/whoi_plankton_dataset.html">whoi_plankton_dataset()</a></code>, <code><a href="../reference/whoi_plankton_dataset.html">whoi_small_plankton_dataset()</a></code>, and <code>whoi_small_coral_dataset()</code> (<a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/236" class="external-link">#236</a>).</li>
 <li>Added <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code>, <code><a href="../reference/rf100_medical_collection.html">rf100_medical_collection()</a></code>, <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code>, <code><a href="../reference/rf100_damage_collection.html">rf100_damage_collection()</a></code>, <code><a href="../reference/rf100_infrared_collection.html">rf100_infrared_collection()</a></code>, and <code><a href="../reference/rf100_underwater_collection.html">rf100_underwater_collection()</a></code> . Those are collection of datasets from RoboFlow 100 under the same thematic, for a total of 35 datasets (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/239" class="external-link">#239</a>).</li>
 <li>Added <code><a href="../reference/rf100_peixos_segmentation_dataset.html">rf100_peixos_segmentation_dataset()</a></code>. (<a href="https://github.com/koshtiakanksha" class="external-link">@koshtiakanksha</a>, <a href="https://github.com/cregouby" class="external-link">@cregouby</a>, <a href="https://github.com/mlverse/torchvision/issues/250" class="external-link">#250</a>).</li>
-<li>Added <code><a href="../reference/vggface2_dataset.html">vggface2_dataset()</a></code> for loading the VGGFace2 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/238" class="external-link">#238</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-models-0-8-0">New models<a class="anchor" aria-label="anchor" href="#new-models-0-8-0"></a></h3>

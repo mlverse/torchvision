@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/LICENSE-text.html</loc></url>
 <url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/examples/fcnresnet.html</loc></url>
+<url><loc>/articles/examples/image_segmentation.html</loc></url>
 <url><loc>/articles/examples/mnist-cnn.html</loc></url>
 <url><loc>/articles/examples/mnist-dcgan.html</loc></url>
 <url><loc>/articles/examples/mnist-mlp.html</loc></url>
@@ -25,8 +27,10 @@
 <url><loc>/reference/cifar_datasets.html</loc></url>
 <url><loc>/reference/clip_boxes_to_image.html</loc></url>
 <url><loc>/reference/coco_caption_dataset.html</loc></url>
+<url><loc>/reference/coco_classes.html</loc></url>
 <url><loc>/reference/coco_detection_dataset.html</loc></url>
 <url><loc>/reference/coco_polygon_to_mask.html</loc></url>
+<url><loc>/reference/coco_segmentation_dataset.html</loc></url>
 <url><loc>/reference/collection_catalog.html</loc></url>
 <url><loc>/reference/dot-rename_mobilenet_v3_state_dict.html</loc></url>
 <url><loc>/reference/draw_bounding_boxes.html</loc></url>
@@ -120,6 +124,8 @@
 <url><loc>/reference/transform_vflip.html</loc></url>
 <url><loc>/reference/vggface2_dataset.html</loc></url>
 <url><loc>/reference/vision_make_grid.html</loc></url>
+<url><loc>/reference/voc_classes.html</loc></url>
+<url><loc>/reference/voc_segmentation_classes.html</loc></url>
 <url><loc>/reference/whoi_plankton_dataset.html</loc></url>
 <url><loc>/reference/whoi_small_coralnet_dataset.html</loc></url>
 </urlset>

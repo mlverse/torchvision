@@ -54,6 +54,9 @@ PyTorch's reference implementation."><meta name="robots" content="noindex"><!-- 
     <li>
       <a href="../articles/examples/texture-nca.html">texture-nca</a>
     </li>
+    <li>
+      <a href="../articles/examples/fcnresnet.html">fcnresnet</a>
+    </li>
   </ul></li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -77,7 +80,7 @@ PyTorch's reference implementation."><meta name="robots" content="noindex"><!-- 
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>ImageNet Class Labels</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/imagenet.R" class="external-link"><code>R/imagenet.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/dataset-imagenet.R" class="external-link"><code>R/dataset-imagenet.R</code></a></small>
     <div class="hidden name"><code>imagenet_classes.Rd</code></div>
     </div>
 
@@ -90,7 +93,11 @@ PyTorch's reference implementation.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imagenet_classes</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">imagenet_label</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">imagenet_label</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">imagenet_21k_classes</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">imagenet_21k_label</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -106,6 +113,28 @@ PyTorch's reference implementation.</p>
     <p>A character vector with 1000 entries representing the ImageNet-1k
 class labels.</p>
 <p>A character vector with the labels associated with <code>id</code>.</p>
+<p>A character vector with 21k entries representing the ImageNet-21k
+class labels.</p>
+<p>A character vector with the labels associated with <code>id</code>.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other class_resolution:
+<code><a href="coco_classes.html">coco_classes()</a></code>,
+<code><a href="voc_classes.html">voc_classes</a></code>,
+<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<p>Other class_resolution:
+<code><a href="coco_classes.html">coco_classes()</a></code>,
+<code><a href="voc_classes.html">voc_classes</a></code>,
+<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<p>Other class_resolution:
+<code><a href="coco_classes.html">coco_classes()</a></code>,
+<code><a href="voc_classes.html">voc_classes</a></code>,
+<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<p>Other class_resolution:
+<code><a href="coco_classes.html">coco_classes()</a></code>,
+<code><a href="voc_classes.html">voc_classes</a></code>,
+<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p></div>
     </div>
 
   </div>
