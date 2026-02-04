@@ -23,6 +23,11 @@ Authors@R: c(
     person(given = "ANAMASGARD",
            role = c("ctb")
            ),
+    person(given = "Chandraveer",
+           family = "Singh",
+           role = c("ctb"),
+           email = "chandraveersingh1717@gmail.com"
+           ),
     person(family = "RStudio", role = c("cph"))
     )
 Description: Provides access to datasets, models and preprocessing

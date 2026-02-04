@@ -1,6 +1,6 @@
 #' COCO Detection Dataset
 #'
-#' Loads the MS COCO dataset for object detection and segmentation.
+#' Loads the MS COCO dataset for object detection tasks only.
 #'
 #' @rdname coco_detection_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
@@ -16,20 +16,22 @@
 #' - `y$labels`: an integer `torch_tensor` with the class label for each object.
 #' - `y$area`: a float `torch_tensor` indicating the area of each object.
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
-#' - `y$segmentation`: a list of segmentation polygons for each object.
-#' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks.
 #'
-#' The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
-#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
+#' The returned object has S3 class \code{"image_with_bounding_box"}
+#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+#'
+#' For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 #'
 #' @details
 #' The returned image `x` is in CHW format (channels, height, width), matching the torch convention.
 #' The dataset `y` offers object detection annotations such as bounding boxes, labels,
-#' areas, crowd indicators, and segmentation masks from the official COCO annotations.
+#' areas, and crowd indicators from the official COCO annotations.
+#'
+#' Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
 #'
 #' @examples
 #' \dontrun{
-#' # Load dataset
+#' # Load dataset for object detection
 #' ds <- coco_detection_dataset(
 #'   train = FALSE,
 #'   year = "2017",
@@ -41,23 +43,9 @@
 #' # Visualize bounding boxes
 #' boxed <- draw_bounding_boxes(item)
 #' tensor_image_browse(boxed)
-#'
-#' # In order to visualize segmentation masks, we
-#' # use the specific segmentation mask target transformation
-#' ds_with_masks <- coco_detection_dataset(
-#'   train = FALSE,
-#'   year = "2017",
-#'   download = TRUE,
-#'   target_transform = target_transform_coco_masks
-#' )
-#'
-#' item_masked <- ds_with_masks[1]
-#'
-#' # Visualize segmentation masks
-#' masked <- draw_segmentation_masks(item_masked)
-#' tensor_image_browse(masked)
 #' }
 #' @family detection_dataset
+#' @seealso \code{\link{coco_segmentation_dataset}} for instance segmentation tasks
 #' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
@@ -159,8 +147,7 @@ coco_detection_dataset <- torch::dataset(
       boxes = boxes,
       labels = labels,
       area = area,
-      iscrowd = iscrowd,
-      segmentation = anns$segmentation
+      iscrowd = iscrowd
     )
 
     if (!is.null(self$transform)) {
@@ -176,9 +163,6 @@ coco_detection_dataset <- torch::dataset(
     result <- list(x = x, y = y)
     class(result) <- c("image_with_bounding_box", class(result))
 
-    if (!is.null(y$masks)) {
-      class(result) <- c("image_with_segmentation_mask", class(result))
-    }
     result
   },
 
@@ -192,8 +176,8 @@ coco_detection_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco_dataset")
-    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco_dataset")
+    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco")
+    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco")
 
     if (tools::md5sum(archive) != self$resources[image_filter, ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
@@ -222,6 +206,108 @@ coco_detection_dataset <- torch::dataset(
                             sapply(ids, function(id) self$image_metadata[[as.character(id)]]$file_name))
     exist <- fs::file_exists(image_paths)
     self$image_ids <- ids[exist]
+  }
+)
+
+
+#' COCO Segmentation Dataset
+#'
+#' Loads the MS COCO dataset for instance segmentation tasks.
+#'
+#' @rdname coco_segmentation_dataset
+#' @inheritParams coco_detection_dataset
+#' @param target_transform Optional transform function applied to the target.
+#'   Use \code{target_transform_coco_masks} to convert polygon annotations to binary masks.
+#'
+#' @return An object of class `coco_segmentation_dataset`. Each item is a list:
+#' - `x`: a `(C, H, W)` array representing the image.
+#' - `y$labels`: an integer `torch_tensor` with the class label for each object.
+#' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
+#' - `y$segmentation`: a list of segmentation polygons for each object.
+#' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks (when using target_transform_coco_masks).
+#'
+#' The returned object has S3 class \code{"image_with_segmentation_mask"}
+#' to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()}.
+#'
+#' For object detection tasks without segmentation, use \code{\link{coco_detection_dataset}} instead.
+#'
+#' @details
+#' The returned image `x` is in CHW format (channels, height, width), matching the torch convention.
+#' The dataset `y` offers instance segmentation annotations including labels,
+#' crowd indicators, and segmentation masks from the official COCO annotations.
+#'
+#' Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
+#'
+#' @examples
+#' \dontrun{
+#' # Load dataset for instance segmentation
+#' ds <- coco_segmentation_dataset(
+#'   train = FALSE,
+#'   year = "2017",
+#'   download = TRUE,
+#'   target_transform = target_transform_coco_masks
+#' )
+#'
+#' item <- ds[1]
+#'
+#' # Visualize segmentation masks
+#' masked <- draw_segmentation_masks(item)
+#' tensor_image_browse(masked)
+#' }
+#' @family segmentation_dataset
+#' @seealso \code{\link{coco_detection_dataset}} for object detection tasks
+#' @export
+coco_segmentation_dataset <- torch::dataset(
+  name = "coco_segmentation_dataset",
+  inherit = coco_detection_dataset,
+
+  .getitem = function(index) {
+    image_id <- self$image_ids[index]
+    image_info <- self$image_metadata[[as.character(image_id)]]
+
+    img_path <- fs::path(self$image_dir, image_info$file_name)
+
+    x <- base_loader(img_path)
+
+    height <- dim(x)[1]
+    width <- dim(x)[2]
+
+    anns <- self$annotations[self$annotations$image_id == image_id, ]
+
+    if (nrow(anns) > 0) {
+      label_ids <- anns$category_id
+      labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
+      iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
+    } else {
+      # empty annotation
+      labels <- character()
+      iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
+      anns$segmentation <- list()
+    }
+
+    y <- list(
+      labels = labels,
+      iscrowd = iscrowd,
+      segmentation = anns$segmentation
+    )
+
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+
+    if (!is.null(self$target_transform)) {
+      y$image_height <- height
+      y$image_width <- width
+      y <- self$target_transform(y)
+    }
+
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_bounding_box", class(result))
+
+    if (!is.null(y$masks)) {
+      class(result) <- c("image_with_segmentation_mask", class(result))
+    }
+    result
   }
 )
 
