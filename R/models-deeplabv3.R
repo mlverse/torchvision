@@ -90,15 +90,11 @@ deeplabv3_model_urls <- list(
   )
 )
 
-voc_classes <- c(
-  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
-  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
-)
+
 
 deeplabv3_meta <- list(
-  classes = voc_classes,
-  class_to_idx = setNames(seq_along(voc_classes) - 1, voc_classes)
+  classes = pascal_voc_classes(),
+  class_to_idx = setNames(seq_along(pascal_voc_classes()) - 1, pascal_voc_classes())
 )
 
 
