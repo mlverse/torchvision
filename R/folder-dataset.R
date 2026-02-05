@@ -153,7 +153,7 @@ base_loader <- function(path) {
   if (length(dim(img)) == 2)
     img <- abind::abind(img, img, img, along = 3)
   else if (length(dim(img)) == 3 && dim(img)[1] == 1)
-    img <- abind::abind(img, img, img, along = 1) %>% aperm(c(3,1,2))
+    img <- abind::abind(img[1,,], img[1,,], img[1,,], along = 3)
 
   # all readers default to channel last
   img
