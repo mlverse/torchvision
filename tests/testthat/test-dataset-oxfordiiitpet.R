@@ -7,7 +7,8 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split wi
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "category", train = TRUE, download = TRUE)
+  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "category", train = TRUE, download = TRUE,
+                                                      target_transform = target_transform_trimap_masks)
   expect_length(oxfordiiitpet, 3680)
   first_item <- oxfordiiitpet[1]
   expect_named(first_item, c("x", "y"))
@@ -27,7 +28,8 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for train split wi
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "binary-category", train = TRUE)
+  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "binary-category", train = TRUE,
+                                                      target_transform = target_transform_trimap_masks)
   expect_length(oxfordiiitpet, 3680)
   first_item <- oxfordiiitpet[1]
   expect_named(first_item, c("x", "y"))
@@ -47,7 +49,8 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for test split wit
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "category", train = FALSE)
+  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "category", train = FALSE,
+                                                      target_transform = target_transform_trimap_masks)
   expect_length(oxfordiiitpet, 3669)
   first_item <- oxfordiiitpet[1]
   expect_named(first_item, c("x", "y"))
@@ -67,7 +70,8 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for test split wit
   skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
-  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "binary-category", train = FALSE)
+  oxfordiiitpet <- oxfordiiitpet_segmentation_dataset(root = t, target_type = "binary-category", train = FALSE,
+                                                      target_transform = target_transform_trimap_masks)
   expect_length(oxfordiiitpet, 3669)
   first_item <- oxfordiiitpet[1]
   expect_named(first_item, c("x", "y"))
@@ -93,7 +97,8 @@ test_that("tests for the Oxford-IIIT Pet Segmentation dataset for dataloader", {
       x %>% transform_to_tensor() %>% transform_resize(c(224, 224))
     },
     target_transform = function(y) {
-      y$masks <- y$masks %>% transform_resize(c(224, 224))
+       y <- target_transform_trimap_masks(y)
+       y$masks <- y$masks %>% transform_resize(c(224, 224))
       y
     }
   )

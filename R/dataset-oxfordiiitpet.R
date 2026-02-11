@@ -171,9 +171,8 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     label <- self$labels[index]
 
     seg_name <- basename(self$img_path[index])
-    mask_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
-    mask_int <- torch_tensor(png::readPNG(mask_path) * 255)
-    masks <- torch_stack(list(mask_int == 1, mask_int == 2, mask_int == 3))
+    trimap_png_path <- file.path(self$raw_folder, "annotations", "trimaps", sub("\\.jpg$", ".png", seg_name))
+    trimap <- torch_tensor(png::readPNG(trimap_png_path) * 255)
 
     if (self$target_type == "binary-category") {
       class_name <- names(self$class_to_idx)[label]
@@ -187,7 +186,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     }
 
     y <- list(
-      masks = masks,
+      trimap = trimap,
       label = label
     )
 
@@ -200,7 +199,12 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     }
 
     result <- list(x = x, y = y)
-    class(result) <- c("image_with_segmentation_mask", class(result))
+
+    # Add segmentation mask class if target_transform_trimap_masks was applied
+    if (is.list(y) && "masks" %in% names(y)) {
+      class(result) <- c("image_with_segmentation_mask", class(result))
+    }
+
     result
   },
 
