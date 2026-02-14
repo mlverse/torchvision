@@ -23,12 +23,13 @@
 #' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
 #'
 #' @details
-#' The returned image is in CHW format (channels, height, width), matching the torch convention.
+#' The returned image `x` is in CHW format (channels, height, width), matching the torch convention.
 #' The dataset `y` offers object detection annotations such as bounding boxes, labels,
 #' areas, crowd indicators, and segmentation masks from the official COCO annotations.
 #'
 #' @examples
 #' \dontrun{
+#' # Load dataset
 #' ds <- coco_detection_dataset(
 #'   train = FALSE,
 #'   year = "2017",
@@ -41,8 +42,19 @@
 #' boxed <- draw_bounding_boxes(item)
 #' tensor_image_browse(boxed)
 #'
-#' # Visualize segmentation masks (if present)
-#' masked <- draw_segmentation_masks(item)
+#' # In order to visualize segmentation masks, we
+#' # use the specific segmentation mask target transformation
+#' ds_with_masks <- coco_detection_dataset(
+#'   train = FALSE,
+#'   year = "2017",
+#'   download = TRUE,
+#'   target_transform = target_transform_coco_masks
+#' )
+#'
+#' item_masked <- ds_with_masks[1]
+#'
+#' # Visualize segmentation masks
+#' masked <- draw_segmentation_masks(item_masked)
 #' tensor_image_browse(masked)
 #' }
 #' @family detection_dataset
@@ -119,8 +131,8 @@ coco_detection_dataset <- torch::dataset(
 
     x <- base_loader(img_path)
 
-    H <- dim(x)[1]
-    W <- dim(x)[2]
+    height <- dim(x)[1]
+    width <- dim(x)[2]
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -134,30 +146,12 @@ coco_detection_dataset <- torch::dataset(
       area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
 
-      masks <- lapply(seq_len(nrow(anns)), function(i) {
-        seg <- anns$segmentation[[i]]
-        if (is.list(seg) && length(seg) > 0) {
-          mask <- coco_polygon_to_mask(seg, height = H, width = W)
-          if (inherits(mask, "torch_tensor") && mask$ndim == 2) return(mask)
-        }
-        NULL
-      })
-
-      masks <- Filter(function(m) inherits(m, "torch_tensor") && m$ndim == 2, masks)
-
-      if (length(masks) > 0) {
-        masks_tensor <- torch::torch_stack(masks)
-      } else {
-        masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
-      }
-
     } else {
       # empty annotation
       boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
       labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
-      masks_tensor <- torch::torch_empty(c(0, H, W), dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 
@@ -166,18 +160,25 @@ coco_detection_dataset <- torch::dataset(
       labels = labels,
       area = area,
       iscrowd = iscrowd,
-      segmentation = anns$segmentation,
-      masks = masks_tensor
+      segmentation = anns$segmentation
     )
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
+      y$image_height <- height
+      y$image_width <- width
       y <- self$target_transform(y)
+    }
 
     result <- list(x = x, y = y)
-    class(result) <- c("image_with_bounding_box", "image_with_segmentation_mask", class(result))
+    class(result) <- c("image_with_bounding_box", class(result))
+
+    if (!is.null(y$masks)) {
+      class(result) <- c("image_with_segmentation_mask", class(result))
+    }
     result
   },
 

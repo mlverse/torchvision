@@ -3,6 +3,7 @@
 ## New features
 
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
+* Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 
 ## New models
 
@@ -26,11 +27,13 @@ to non-vectorized `transform_` operations (#264)
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
 * Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
+* Added `whoi_plankton_dataset()`, and `whoi_small_plankton_dataset()` (@cregouby, #236).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
   and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
   thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
 * Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
+* Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 
 ## New models
 
@@ -40,7 +43,6 @@ to non-vectorized `transform_` operations (#264)
 * Added `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` models for efficient image classification. (@DerrickUnleashed, #237)
 * Added 8 of the `model_convnext_()` family models for image classification, thanks to @horlar1 contribution. (@cregouby, #251)
 * Added 2 `model_fasterrcnn_resnet50_()` models and 2 `model_fasterrcnn_mobilenet_v3_large_()` for object detection. (@koshtiakanksha, #251)
-
 
 ## New features
 
