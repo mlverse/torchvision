@@ -6,15 +6,14 @@ NULL
 # Instance Segmentation model extending Faster R-CNN with mask prediction
 
 # Mask Head Module - Predicts segmentation masks for detected objects
-mask_head_module <- function(num_classes = 91) {
-  torch::nn_module(
+mask_head_module <- torch::nn_module(
     "mask_head",
-    initialize = function() {
+    initialize = function(num_classes = 91) {
       # 4 convolutional layers for feature extraction
-      self$conv1 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
-      self$conv2 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
-      self$conv3 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
-      self$conv4 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
+      self$mask_fcn1 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
+      self$mask_fcn2 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
+      self$mask_fcn3 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
+      self$mask_fcn4 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
 
       # Deconvolution layer to upsample from 14x14 to 28x28
       self$deconv <- nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2)
@@ -23,21 +22,19 @@ mask_head_module <- function(num_classes = 91) {
       self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
     },
     forward = function(x) {
-      x <- nnf_relu(self$conv1(x))
-      x <- nnf_relu(self$conv2(x))
-      x <- nnf_relu(self$conv3(x))
-      x <- nnf_relu(self$conv4(x))
+      x <- nnf_relu(self$mask_fcn1(x))
+      x <- nnf_relu(self$mask_fcn2(x))
+      x <- nnf_relu(self$mask_fcn3(x))
+      x <- nnf_relu(self$mask_fcn4(x))
       x <- nnf_relu(self$deconv(x))
       self$mask_fcn_logits(x)
     }
-  )
-}
+)
 
 # Mask Head Module V2 - With batch normalization
-mask_head_module_v2 <- function(num_classes = 91) {
-  torch::nn_module(
+mask_head_module_v2 <- torch::nn_module(
     "mask_head_v2",
-    initialize = function() {
+    initialize = function(num_classes = 91) {
       # Convolutional blocks with batch normalization
       conv_block <- function() {
         nn_sequential(
@@ -47,10 +44,10 @@ mask_head_module_v2 <- function(num_classes = 91) {
         )
       }
 
-      self$conv1 <- conv_block()
-      self$conv2 <- conv_block()
-      self$conv3 <- conv_block()
-      self$conv4 <- conv_block()
+      self$mask_fcn1 <- conv_block()
+      self$mask_fcn2 <- conv_block()
+      self$mask_fcn3 <- conv_block()
+      self$mask_fcn4 <- conv_block()
 
       # Deconvolution with batch norm
       self$deconv <- nn_sequential(
@@ -63,15 +60,15 @@ mask_head_module_v2 <- function(num_classes = 91) {
       self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
     },
     forward = function(x) {
-      x <- self$conv1(x)
-      x <- self$conv2(x)
-      x <- self$conv3(x)
-      x <- self$conv4(x)
+      x <- self$mask_fcn1(x)
+      x <- self$mask_fcn2(x)
+      x <- self$mask_fcn3(x)
+      x <- self$mask_fcn4(x)
       x <- self$deconv(x)
       self$mask_fcn_logits(x)
     }
-  )
-}
+)
+
 
 #' ROI Align for Mask Prediction
 #'
@@ -144,14 +141,14 @@ roi_align_masks <- function(feature_map, proposals, output_size = c(14L, 14L)) {
 
 
 # Mask R-CNN Model - Extends Faster R-CNN with mask prediction
-maskrcnn_model <- function(backbone, num_classes,
-                           score_thresh = 0.05,
-                           nms_thresh = 0.5,
-                           detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+maskrcnn_model <- torch::nn_module(
+  "maskrcnn_model",
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
-
+      self$num_classes <- num_classes
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
       self$nms_thresh <- nms_thresh
@@ -160,7 +157,7 @@ maskrcnn_model <- function(backbone, num_classes,
       # RPN (Region Proposal Network)
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head(in_channels = backbone$out_channels)()
+          self$head <- rpn_head(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
@@ -168,10 +165,10 @@ maskrcnn_model <- function(backbone, num_classes,
       )()
 
       # ROI heads for box prediction
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
 
       # Mask head for mask prediction
-      self$mask_head <- mask_head_module(num_classes = num_classes)()
+      self$mask_head <- mask_head_module(num_classes = num_classes)
     },
 
     forward = function(images) {
@@ -207,7 +204,7 @@ maskrcnn_model <- function(backbone, num_classes,
       final_scores <- max_scores[[1]]
       final_labels <- max_scores[[2]]
 
-      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+      box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
@@ -274,17 +271,18 @@ maskrcnn_model <- function(backbone, num_classes,
         )
       )
     }
-  )
-}
+)
+
 
 # Mask R-CNN Model V2 - With batch normalization
-maskrcnn_model_v2 <- function(backbone, num_classes,
-                              score_thresh = 0.05,
-                              nms_thresh = 0.5,
-                              detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+maskrcnn_model_v2 <- torch::nn_module(
+  "maskrcnn_model_v2",
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -294,7 +292,7 @@ maskrcnn_model_v2 <- function(backbone, num_classes,
       # RPN with V2 head
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_v2(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
@@ -302,10 +300,10 @@ maskrcnn_model_v2 <- function(backbone, num_classes,
       )()
 
       # ROI heads V2 for box prediction
-      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)
 
       # Mask head V2 for mask prediction
-      self$mask_head <- mask_head_module_v2(num_classes = num_classes)()
+      self$mask_head <- mask_head_module_v2(num_classes = num_classes)
     },
 
     forward = function(images) {
@@ -341,7 +339,7 @@ maskrcnn_model_v2 <- function(backbone, num_classes,
       final_scores <- max_scores[[1]]
       final_labels <- max_scores[[2]]
 
-      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+      box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
       final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
@@ -408,8 +406,8 @@ maskrcnn_model_v2 <- function(backbone, num_classes,
         )
       )
     }
-  )
-}
+)
+
 
 #' Mask R-CNN Models
 #'
@@ -518,7 +516,7 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
   model <- maskrcnn_model(backbone, num_classes = num_classes,
                          score_thresh = score_thresh,
                          nms_thresh = nms_thresh,
-                         detections_per_img = detections_per_img)()
+                         detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
@@ -552,7 +550,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
   model <- maskrcnn_model_v2(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
-                            detections_per_img = detections_per_img)()
+                            detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
@@ -598,7 +596,9 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
     sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     sub(pattern = "(layer_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     # add ".0.0" to rpn.head.conv
-    sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .)
+    sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .) %>%
+    # remove roi_head prefix to mask_head
+    sub(pattern = "roi_heads\\.mask", replacement = "mask", x = .)
 
   # Recreate a list with renamed keys
   setNames(state_dict[names(state_dict)], new_names)

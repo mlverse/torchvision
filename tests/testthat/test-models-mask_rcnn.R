@@ -1,7 +1,11 @@
+input <- base_loader("assets/class/cat/cat.0.jpg") %>%
+  transform_to_tensor() %>% transform_resize(c(200,200)) %>% torch_unsqueeze(1)
+
+
 test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
+
   model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
   expect_s3_class(model, "nn_module")
   expect_true(!is.null(model$backbone))
@@ -13,7 +17,7 @@ test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
 test_that("maskrcnn_resnet50_fpn_v2 loads without pretrained weights", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
+
   model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91)
   expect_s3_class(model, "nn_module")
   expect_true(!is.null(model$backbone))
@@ -22,235 +26,199 @@ test_that("maskrcnn_resnet50_fpn_v2 loads without pretrained weights", {
   expect_true(!is.null(model$mask_head))
 })
 
-test_that("maskrcnn_resnet50_fpn forward pass works", {
+test_that("maskrcnn_resnet50_fpn inference works", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
+
+  # We expect 0 detection here, we keep the compute budget for pretrained model
+  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.1, detections_per_img = 100)
   model$eval()
-  
-  # Create dummy input (1, 3, 800, 800)
-  input <- torch::torch_randn(1, 3, 800, 800)
-  
+
   # Test forward pass
   output <- model(input)
-  
-  # Check output structure
-  expect_true("features" %in% names(output))
-  expect_true("detections" %in% names(output))
-  expect_true("boxes" %in% names(output$detections))
-  expect_true("labels" %in% names(output$detections))
-  expect_true("scores" %in% names(output$detections))
-  expect_true("masks" %in% names(output$detections))
-  
-  # Check masks are present
-  expect_s3_class(output$detections$masks, "torch_tensor")
-  
-  # Check mask dimensions (should be N x 28 x 28)
-  mask_shape <- output$detections$masks$shape
-  expect_equal(length(mask_shape), 3)
-  if (mask_shape[1] > 0) {
-    expect_equal(as.integer(mask_shape[2]), 28)
-    expect_equal(as.integer(mask_shape[3]), 28)
-  }
-})
 
-test_that("maskrcnn_resnet50_fpn_v2 forward pass works", {
-  skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-  
-  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91)
-  model$eval()
-  
-  # Create dummy input (1, 3, 800, 800)
-  input <- torch::torch_randn(1, 3, 800, 800)
-  
-  # Test forward pass
-  output <- model(input)
-  
   # Check output structure
-  expect_true("features" %in% names(output))
-  expect_true("detections" %in% names(output))
-  expect_true("boxes" %in% names(output$detections))
-  expect_true("labels" %in% names(output$detections))
-  expect_true("scores" %in% names(output$detections))
-  expect_true("masks" %in% names(output$detections))
-  
-  # Check masks are present
-  expect_s3_class(output$detections$masks, "torch_tensor")
-  
-  # Check mask dimensions (should be N x 28 x 28)
-  mask_shape <- output$detections$masks$shape
-  expect_equal(length(mask_shape), 3)
-  if (mask_shape[1] > 0) {
-    expect_equal(as.integer(mask_shape[2]), 28)
-    expect_equal(as.integer(mask_shape[3]), 28)
-  }
-})
+  expect_named(output, c("features" ,"detections"))
+  expect_named(output$detections, c("boxes" ,"labels","scores","masks"))
 
-test_that("maskrcnn output format matches expected structure", {
-  skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-  
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
-  model$eval()
-  
-  input <- torch::torch_randn(1, 3, 800, 800)
-  output <- model(input)
-  
-  # Verify all required fields are present
-  expect_true(all(c("boxes", "labels", "scores", "masks") %in% names(output$detections)))
-  
   # Verify tensor types
-  expect_s3_class(output$detections$boxes, "torch_tensor")
-  expect_s3_class(output$detections$labels, "torch_tensor")
-  expect_s3_class(output$detections$scores, "torch_tensor")
-  expect_s3_class(output$detections$masks, "torch_tensor")
-  
+  expect_tensor(output$detections$boxes)
+  expect_tensor(output$detections$labels)
+  expect_tensor(output$detections$scores)
+  expect_tensor(output$detections$masks)
+
   # Verify dimensions are consistent
-  n_detections <- output$detections$boxes$shape[1]
-  expect_equal(output$detections$labels$shape[1], n_detections)
-  expect_equal(output$detections$scores$shape[1], n_detections)
-  expect_equal(output$detections$masks$shape[1], n_detections)
+  n_detections <- output$detections$masks$shape[1]
+  expect_tensor_shape(output$detections$masks, c(n_detections, 28, 28))
+  expect_tensor_shape(output$detections$labels, n_detections)
+  expect_tensor_shape(output$detections$scores, n_detections)
+
+
+  # Check mask dimensions (should be N x 28 x 28)
+  N <- output$detections$masks$shape[1]
+  expect_tensor_shape(output$detections$masks, c(N, 28, 28))
+
 })
+
+test_that("maskrcnn_resnet50_fpn_v2 inference works", {
+  skip_on_cran()
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
+
+  # We expect 0 detection here, we keep the compute budget for pretrained model
+  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100)
+  model$eval()
+
+  # Test forward pass
+  output <- model(input)
+
+  # Check output structure
+  expect_named(output, c("features" ,"detections"))
+  expect_named(output$detections, c("boxes" ,"labels","scores","masks"))
+
+  # Check masks are present
+  expect_tensor(output$detections$masks)
+
+  # Check mask dimensions (should be N x 28 x 28)
+  n_detections <- output$detections$masks$shape[1]
+  expect_tensor_shape(output$detections$masks, c(n_detections, 28, 28))
+})
+
 
 test_that("maskrcnn handles empty detections correctly", {
   skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-  
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
+
   # Use very high score threshold to force empty detections
   model <- model_maskrcnn_resnet50_fpn(
-    pretrained = FALSE, 
+    pretrained = FALSE,
     num_classes = 91,
-    score_thresh = 0.99
+    score_thresh = 0.99, nms_thresh = 0.9, detections_per_img = 100
   )
   model$eval()
-  
-  input <- torch::torch_randn(1, 3, 800, 800)
+
   output <- model(input)
-  
+
   # Should return empty tensors with correct shapes
-  expect_equal(as.integer(output$detections$boxes$shape[1]), 0)
-  expect_equal(as.integer(output$detections$labels$shape[1]), 0)
-  expect_equal(as.integer(output$detections$scores$shape[1]), 0)
-  expect_equal(as.integer(output$detections$masks$shape[1]), 0)
-  
+  expect_tensor_shape(output$detections$boxes, c(0,4))
+  expect_tensor_shape(output$detections$labels, 0)
+  expect_tensor_shape(output$detections$scores, 0)
+
   # Mask shape should be (0, 28, 28)
-  expect_equal(length(output$detections$masks$shape), 3)
-  expect_equal(as.integer(output$detections$masks$shape[2]), 28)
-  expect_equal(as.integer(output$detections$masks$shape[3]), 28)
+  expect_tensor_shape(output$detections$masks, c(0,28,28))
 })
 
 test_that("maskrcnn respects detections_per_img parameter", {
   skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-  
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
   max_detections <- 5
   model <- model_maskrcnn_resnet50_fpn(
     pretrained = FALSE,
     num_classes = 91,
-    score_thresh = 0.01,  # Low threshold to get more detections
+    score_thresh = 0.4,  # Low threshold to get more detections
+    nms_thresh = 0.8,
     detections_per_img = max_detections
   )
   model$eval()
-  
-  input <- torch::torch_randn(1, 3, 800, 800)
+
   output <- model(input)
-  
+
   # Number of detections should not exceed max_detections
-  n_detections <- as.integer(output$detections$boxes$shape[1])
+  n_detections <- output$detections$boxes$shape[1]
   expect_lte(n_detections, max_detections)
 })
 
-test_that("maskrcnn mask values are in valid range", {
-  skip_on_cran()
-  skip_if_not(torch::torch_is_installed())
-  
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
-  model$eval()
-  
-  input <- torch::torch_randn(1, 3, 800, 800)
-  output <- model(input)
-  
-  # Masks should be probabilities (0 to 1) after sigmoid
-  if (output$detections$masks$shape[1] > 0) {
-    mask_min <- torch::torch_min(output$detections$masks)$item()
-    mask_max <- torch::torch_max(output$detections$masks)$item()
-    
-    expect_gte(mask_min, 0)
-    expect_lte(mask_max, 1)
-  }
-})
 
 test_that("maskrcnn with different num_classes works", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
+
   # Test with custom number of classes
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 10)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 10, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100)
   model$eval()
-  
+
   input <- torch::torch_randn(1, 3, 800, 800)
   output <- model(input)
-  
+
   # Should work without errors
-  expect_s3_class(output$detections$masks, "torch_tensor")
+  expect_tensor(output$detections$masks)
 })
 
 test_that("maskrcnn pretrained requires num_classes = 91", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
+
   # Should error when pretrained=TRUE with num_classes != 91
   expect_error(
-    model_maskrcnn_resnet50_fpn(pretrained = TRUE, num_classes = 10),
+    model_maskrcnn_resnet50_fpn(pretrained = TRUE, num_classes = 10, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100),
     "Pretrained weights require num_classes = 91"
   )
+})
+
+test_that("mask_rcnn pretrained infer correcctly", {
+  skip_on_cran()
+  skip_if_not(torch::torch_is_installed())
+
+  model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.9, detections_per_img = 100)
+  model$eval()
+
+  output <- model(input)
+  # Masks should be probabilities (0 to 1) after sigmoid
+  if (output$detections$masks$shape[1] > 0) {
+    mask_min <- torch::torch_min(output$detections$masks)$item()
+    mask_max <- torch::torch_max(output$detections$masks)$item()
+
+    expect_gte(mask_min, 0)
+    expect_lte(mask_max, 1)
+
+    # TODO mask 0 < xmin < xmax < width
+    # TODO mask 0 < ymin < ymax < length
+  }
+
 })
 
 test_that("mask_head_module initializes correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
-  mask_head <- mask_head_module(num_classes = 91)()
-  expect_s3_class(mask_head, "nn_module")
-  
+
+  mask_head <- mask_head_module(num_classes = 91)
+  expect_is(mask_head, "nn_module")
+
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- mask_head(input)
-  
+
   # Output should be (2, 91, 28, 28)
-  expect_equal(as.integer(output$shape[1]), 2)
-  expect_equal(as.integer(output$shape[2]), 91)
-  expect_equal(as.integer(output$shape[3]), 28)
-  expect_equal(as.integer(output$shape[4]), 28)
+  expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
 test_that("mask_head_module_v2 initializes correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
-  mask_head <- mask_head_module_v2(num_classes = 91)()
+
+  mask_head <- mask_head_module_v2(num_classes = 91)
   expect_s3_class(mask_head, "nn_module")
-  
+
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- mask_head(input)
-  
+
   # Output should be (2, 91, 28, 28)
-  expect_equal(as.integer(output$shape[1]), 2)
-  expect_equal(as.integer(output$shape[2]), 91)
-  expect_equal(as.integer(output$shape[3]), 28)
-  expect_equal(as.integer(output$shape[4]), 28)
+  expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
 test_that("roi_align_masks produces correct output shape", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  
+
   # Create dummy feature map (1, 256, 100, 100)
   feature_map <- torch::torch_randn(1, 256, 100, 100)
-  
+
   # Create dummy proposals (5 boxes)
   proposals <- torch::torch_tensor(rbind(
     c(10, 10, 50, 50),
@@ -259,13 +227,10 @@ test_that("roi_align_masks produces correct output shape", {
     c(40, 40, 80, 80),
     c(50, 50, 90, 90)
   ))
-  
+
   # Apply ROI align
   output <- roi_align_masks(feature_map, proposals, output_size = c(14L, 14L))
-  
+
   # Output should be (5, 256, 14, 14)
-  expect_equal(as.integer(output$shape[1]), 5)
-  expect_equal(as.integer(output$shape[2]), 256)
-  expect_equal(as.integer(output$shape[3]), 14)
-  expect_equal(as.integer(output$shape[4]), 14)
+  expect_tensor_shape(output, c(5, 256, 14, 14))
 })

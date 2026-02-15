@@ -1,7 +1,6 @@
-rpn_head <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+rpn_head <- torch::nn_module(
     "rpn_head",
-    initialize = function() {
+    initialize = function(in_channels, num_anchors = 3) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -20,12 +19,11 @@ rpn_head <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_v2 <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+
+rpn_head_v2 <- torch::nn_module(
     "rpn_head_v2",
-    initialize = function() {
+    initialize = function(in_channels, num_anchors = 3) {
       # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
       # blocks with bias disabled on the convolutions. Mirror that layout so
       # the parameter names and shapes line up with the weight file.
@@ -54,11 +52,11 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
-  torch::nn_module(
-    initialize = function() {
+
+rpn_head_mobilenet <- torch::nn_module(
+  "rpn_head_mobilenet",
+    initialize = function(in_channels, num_anchors = 15) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -76,7 +74,6 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
       list(objectness = objectness, bbox_deltas = bbox_deltas)
     }
   )
-}
 
 #' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like torch_max torch_float32
 generate_level_anchors <- function(h, w, stride, scales) {
@@ -197,9 +194,9 @@ roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
 }
 
 
-roi_heads_module <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
+roi_heads_module <- torch::nn_module(
+  "roi_heads",
+    initialize = function(num_classes = 91) {
       # Define box_head with named layers to match expected state dict structure
       self$box_head <- torch::nn_module(
         initialize = function() {
@@ -233,11 +230,11 @@ roi_heads_module <- function(num_classes = 91) {
       self$box_predictor(x)
     }
   )
-}
 
-roi_heads_module_v2 <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
+
+roi_heads_module_v2 <- torch::nn_module(
+  "roi_heads_v2",
+  initialize = function(num_classes = 91) {
       # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
       # followed by a final linear layer at index "4".
       block <- function() {
@@ -279,11 +276,10 @@ roi_heads_module_v2 <- function(num_classes = 91) {
       self$box_predictor(x)
     }
   )
-}
 
-fpn_module <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+fpn_module <- torch::nn_module(
+  "Feature Pyramid Network",
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(torch::nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -310,7 +306,7 @@ fpn_module <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 
 resnet_fpn_backbone <- function(pretrained = TRUE) {
@@ -349,7 +345,7 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -378,7 +374,7 @@ fasterrcnn_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head(in_channels = backbone$out_channels)()
+          self$head <- rpn_head(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
@@ -386,7 +382,7 @@ fasterrcnn_model <- function(backbone, num_classes,
       )()
 
       # Use the roi_heads_module instead of inline definition
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
 
     forward = function(images) {
@@ -463,9 +459,9 @@ fasterrcnn_model <- function(backbone, num_classes,
 }
 
 
-fpn_module_v2 <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+fpn_module_v2 <- torch::nn_module(
+  "Feature Pyramid Network v2",
+  initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(
           nn_conv2d(c, out_channels, kernel_size = 1, bias = FALSE),
@@ -500,7 +496,6 @@ fpn_module_v2 <- function(in_channels, out_channels) {
       results
     }
   )
-}
 
 resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
   resnet <- model_resnet50(pretrained = pretrained)
@@ -538,7 +533,7 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_v2(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -567,13 +562,13 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_v2(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
@@ -649,9 +644,9 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
 }
 
 
-fpn_module_2level <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+fpn_module_2level <- torch::nn_module(
+  "Feature Pyramid Network v2 Level",
+  initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -673,7 +668,7 @@ fpn_module_2level <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 
 mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
@@ -685,7 +680,7 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
@@ -724,13 +719,13 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
@@ -808,7 +803,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),  # output channels of layer 13 and 16
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
