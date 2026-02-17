@@ -8,25 +8,34 @@ NULL
 # Mask Head Module - Predicts segmentation masks for detected objects
 mask_head_module <- torch::nn_module(
     "mask_head",
-    initialize = function(num_classes = 91) {
+    initialize = function() {
       # 4 convolutional layers for feature extraction
       self$mask_fcn1 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
       self$mask_fcn2 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
       self$mask_fcn3 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
       self$mask_fcn4 <- nn_conv2d(256, 256, kernel_size = 3, padding = 1)
 
-      # Deconvolution layer to upsample from 14x14 to 28x28
-      self$deconv <- nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2)
-
-      # Final 1x1 conv for class-specific mask logits
-      self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
     },
     forward = function(x) {
       x <- nnf_relu(self$mask_fcn1(x))
       x <- nnf_relu(self$mask_fcn2(x))
       x <- nnf_relu(self$mask_fcn3(x))
-      x <- nnf_relu(self$mask_fcn4(x))
-      x <- nnf_relu(self$deconv(x))
+      nnf_relu(self$mask_fcn4(x))
+    }
+)
+
+# Mask RCNN predictor - Predicts segmentation masks for detected objects
+mask_rcnn_predictor <- torch::nn_module(
+    "mask_rcnn_predictor",
+    initialize = function(num_classes = 91) {
+      # Deconvolution layer to upsample from 14x14 to 28x28
+      self$conv5_mask <- nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2)
+
+      # Final 1x1 conv for class-specific mask logits
+      self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
+    },
+    forward = function(x) {
+      x <- nnf_relu(self$conv5_mask(x))
       self$mask_fcn_logits(x)
     }
 )
@@ -44,28 +53,27 @@ mask_head_module_v2 <- torch::nn_module(
         )
       }
 
-      self$mask_fcn1 <- conv_block()
-      self$mask_fcn2 <- conv_block()
-      self$mask_fcn3 <- conv_block()
-      self$mask_fcn4 <- conv_block()
+      self$mask_head.0 <- conv_block()
+      self$mask_head.1 <- conv_block()
+      self$mask_head.2 <- conv_block()
+      self$mask_head.3 <- conv_block()
 
-      # Deconvolution with batch norm
-      self$deconv <- nn_sequential(
-        nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2, bias = FALSE),
-        nn_batch_norm2d(256),
+      # Deconvolution without batch norm
+      self$mask_predictor.conv5_mask <- nn_sequential(
+        nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2),
         nn_relu()
       )
 
       # Final 1x1 conv for class-specific mask logits
-      self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
+      self$mask_predictor.mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
     },
     forward = function(x) {
-      x <- self$mask_fcn1(x)
-      x <- self$mask_fcn2(x)
-      x <- self$mask_fcn3(x)
-      x <- self$mask_fcn4(x)
-      x <- self$deconv(x)
-      self$mask_fcn_logits(x)
+      x <- self$mask_head.0(x)
+      x <- self$mask_head.1(x)
+      x <- self$mask_head.2(x)
+      x <- self$mask_head.3(x)
+      x <- self$mask_predictor.conv5_mask(x)
+      self$mask_predictor.mask_fcn_logits(x)
     }
 )
 
@@ -168,7 +176,10 @@ maskrcnn_model <- torch::nn_module(
       self$roi_heads <- roi_heads_module(num_classes = num_classes)
 
       # Mask head for mask prediction
-      self$mask_head <- mask_head_module(num_classes = num_classes)
+      self$mask_head <- mask_head_module()
+
+      # Mask predictor for mask prediction
+      self$mask_predictor <- mask_rcnn_predictor(num_classes = num_classes)
     },
 
     forward = function(images) {
@@ -206,19 +217,65 @@ maskrcnn_model <- torch::nn_module(
 
       box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
+      # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
+      deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-      # Filter by score threshold
+      # Filter by score threshold before decoding
       keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
 
       if (num_detections > 0) {
-        final_boxes <- final_boxes[keep, ]
-        final_labels <- final_labels[keep]
+        # Apply filters to deltas, scores, labels, and proposals
+        final_deltas <- deltas[keep, ]
         final_scores <- final_scores[keep]
+        final_labels <- final_labels[keep]
+
+        # We need the proposals that correspond to these kept detections
+        # 'props$proposals' are the reference boxes (anchors)
         kept_proposals <- props$proposals[keep, ]
 
-        # Apply NMS to remove overlapping detections
+        # 3. Decode Deltas to Absolute Coordinates
+        # Formula: pred_box = proposal + delta
+        # Standard Faster R-CNN decoding:
+
+        # Widths and Heights of proposals
+        widths <- kept_proposals[, 3] - kept_proposals[, 1]
+        heights <- kept_proposals[, 4] - kept_proposals[, 2]
+
+        # Centers of proposals
+        ctr_x <- kept_proposals[, 1] + 0.5 * widths
+        ctr_y <- kept_proposals[, 2] + 0.5 * heights
+
+        # Extract predicted deltas
+        dx <- final_deltas[, 1]
+        dy <- final_deltas[, 2]
+        dw <- final_deltas[, 3]
+        dh <- final_deltas[, 4]
+
+        # Apply deltas
+        pred_ctr_x <- dx * widths + ctr_x
+        pred_ctr_y <- dy * heights + ctr_y
+        pred_w <- torch_exp(dw) * widths
+        pred_h <- torch_exp(dh) * heights
+
+        # Convert back to (x1, y1, x2, y2)
+        final_boxes <- torch_zeros_like(final_deltas)
+        final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
+        final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
+        final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
+        final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
+
+        # Clip Boxes to Image Boundary
+        img_h <- images$shape[3]
+        img_w <- images$shape[4]
+
+        final_boxes <- torch_clamp(final_boxes, min = 0.0)
+        final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
+        final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
+        final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
+        final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+
+        # Apply NMS and Limit Detections
         if (final_boxes$shape[1] > 1) {
           nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
           final_boxes <- final_boxes[nms_keep, ]
@@ -240,7 +297,8 @@ maskrcnn_model <- torch::nn_module(
 
         # Predict masks for kept detections
         mask_features <- roi_align_masks(features[[1]], kept_proposals, output_size = c(14L, 14L))
-        mask_logits <- self$mask_head(mask_features)  # Shape: (N, num_classes, 28, 28)
+        mask_conv <- self$mask_head(mask_features)
+        mask_logits <- self$mask_predictor(mask_conv)  # Shape: (N, num_classes, 28, 28)
 
         # Extract masks for predicted classes
         n_kept <- final_labels$shape[1]
@@ -341,19 +399,60 @@ maskrcnn_model_v2 <- torch::nn_module(
 
       box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
       gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
+      # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
+      deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
 
       # Filter by score threshold
       keep <- final_scores > self$score_thresh
       num_detections <- torch::torch_sum(keep)$item()
 
       if (num_detections > 0) {
-        final_boxes <- final_boxes[keep, ]
-        final_labels <- final_labels[keep]
+        # Apply filters to deltas, scores, labels, and proposals
+        final_deltas <- deltas[keep, ]
         final_scores <- final_scores[keep]
+        final_labels <- final_labels[keep]
         kept_proposals <- props$proposals[keep, ]
 
-        # Apply NMS to remove overlapping detections
+        # Decode Deltas to Absolute Coordinates $pred_box = proposal + delta$
+
+        # Widths and Heights of proposals
+        widths <- kept_proposals[, 3] - kept_proposals[, 1]
+        heights <- kept_proposals[, 4] - kept_proposals[, 2]
+
+        # Centers of proposals
+        ctr_x <- kept_proposals[, 1] + 0.5 * widths
+        ctr_y <- kept_proposals[, 2] + 0.5 * heights
+
+        # Extract predicted deltas
+        dx <- final_deltas[, 1]
+        dy <- final_deltas[, 2]
+        dw <- final_deltas[, 3]
+        dh <- final_deltas[, 4]
+
+        # Apply deltas
+        pred_ctr_x <- dx * widths + ctr_x
+        pred_ctr_y <- dy * heights + ctr_y
+        pred_w <- torch_exp(dw) * widths
+        pred_h <- torch_exp(dh) * heights
+
+        # Convert back to (x1, y1, x2, y2)
+        final_boxes <- torch_zeros_like(final_deltas)
+        final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
+        final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
+        final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
+        final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
+
+        # Clip Boxes to Image Boundary
+        img_h <- images$shape[3]
+        img_w <- images$shape[4]
+
+        final_boxes <- torch_clamp(final_boxes, min = 0.0)
+        final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
+        final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
+        final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
+        final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+
+        # Apply NMS and Limit Detections
         if (final_boxes$shape[1] > 1) {
           nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
           final_boxes <- final_boxes[nms_keep, ]
@@ -361,6 +460,7 @@ maskrcnn_model_v2 <- torch::nn_module(
           final_scores <- final_scores[nms_keep]
           kept_proposals <- kept_proposals[nms_keep, ]
         }
+
 
         # Limit detections per image
         n_det <- final_scores$shape[1]
@@ -457,8 +557,8 @@ maskrcnn_model_v2 <- torch::nn_module(
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #'
 #' # Load an image
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- paste0(wmc, "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'               "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
 #' img <- base_loader(url)
 #'
 #' input <- img %>%
@@ -593,12 +693,24 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
   . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
-    sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
+    sub(pattern = "(inner_blocks\\.[0-3]\\.)\\d\\.", replacement = "\\10\\.", x = .) %>%
     sub(pattern = "(layer_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     # add ".0.0" to rpn.head.conv
     sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .) %>%
     # remove roi_head prefix to mask_head
     sub(pattern = "roi_heads\\.mask", replacement = "mask", x = .)
+
+  # Recreate a list with renamed keys
+  setNames(state_dict[names(state_dict)], new_names)
+}
+
+.rename_maskrcnn_state_dict_v2 <- function(state_dict) {
+  . <- NULL # Nulling strategy for no visible binding check Note
+  new_names <- names(state_dict) %>%
+    # change roi_head prefix into mask_head.mask_
+    sub(pattern = "roi_heads\\.mask_", replacement = "mask_head\\.mask_", x = .) %>%
+    sub(pattern = "roi_heads\\.box_head\\.5\\.", replacement = "roi_heads\\.box_head\\.4\\.", x = .) %>%
+    sub(pattern = "(mask_head\\.mask_predictor\\.conv5_mask)", replacement = "\\1\\.0", x = .)
 
   # Recreate a list with renamed keys
   setNames(state_dict[names(state_dict)], new_names)

@@ -29,8 +29,7 @@ rpn_head_v2 <- torch::nn_module(
       # the parameter names and shapes line up with the weight file.
       block <- function() {
         nn_sequential(
-          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = FALSE),
-          nn_batch_norm2d(in_channels),
+          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1),
           nn_relu()
         )
       }
@@ -196,86 +195,86 @@ roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
 
 roi_heads_module <- torch::nn_module(
   "roi_heads",
-    initialize = function(num_classes = 91) {
-      # Define box_head with named layers to match expected state dict structure
-      self$box_head <- torch::nn_module(
-        initialize = function() {
-          self$fc6 <- torch::nn_linear(256 * 7 * 7, 1024, bias = TRUE)
-          self$fc7 <- torch::nn_linear(1024, 1024, bias = TRUE)
-        },
-        forward = function(x) {
-          x <- torch::nnf_relu(self$fc6(x))
-          x <- torch::nnf_relu(self$fc7(x))
-          x
-        }
-      )()
+  initialize = function(num_classes = 91) {
+    # Define box_head with named layers to match expected state dict structure
+    self$box_head <- torch::nn_module(
+      initialize = function() {
+        self$fc6 <- torch::nn_linear(256 * 7 * 7, 1024, bias = TRUE)
+        self$fc7 <- torch::nn_linear(1024, 1024, bias = TRUE)
+      },
+      forward = function(x) {
+        x <- torch::nnf_relu(self$fc6(x))
+        x <- torch::nnf_relu(self$fc7(x))
+        x
+      }
+    )()
 
-      self$box_predictor <- torch::nn_module(
-        initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
-        },
-        forward = function(x) {
-          list(
-            scores = self$cls_score(x),
-            boxes = self$bbox_pred(x)
-          )
-        }
-      )()
-    },
-    forward = function(features, proposals) {
-      feature_maps <- features[c("p2", "p3", "p4", "p5")]
-      pooled <- roi_align_stub(feature_maps[[1]], proposals)
-      x <- self$box_head(pooled)
-      self$box_predictor(x)
-    }
-  )
+    self$box_predictor <- torch::nn_module(
+      initialize = function() {
+        self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
+        self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+      },
+      forward = function(x) {
+        list(
+          scores = self$cls_score(x),
+          boxes = self$bbox_pred(x)
+        )
+      }
+    )()
+  },
+  forward = function(features, proposals) {
+    feature_maps <- features[c("p2", "p3", "p4", "p5")]
+    pooled <- roi_align_stub(feature_maps[[1]], proposals)
+    x <- self$box_head(pooled)
+    self$box_predictor(x)
+  }
+)
 
 
 roi_heads_module_v2 <- torch::nn_module(
   "roi_heads_v2",
   initialize = function(num_classes = 91) {
-      # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
-      # followed by a final linear layer at index "4".
-      block <- function() {
-        nn_sequential(
-          nn_linear(1024, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
+    # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
+    # followed by a final linear layer at index "4".
+    block <- function() {
+      nn_sequential(
+        nn_linear(1024, 1024, bias = FALSE),
+        nn_batch_norm1d(1024),
+        nn_relu()
+      )
+    }
+
+    layers <- list(
+      nn_sequential(
+        nn_linear(256 * 7 * 7, 1024, bias = FALSE),
+        nn_batch_norm1d(1024),
+        nn_relu()
+      ),
+      block(),
+      block(),
+      block(),
+      nn_linear(1024, 1024, bias = TRUE)
+    )
+    self$box_head <- do.call(nn_sequential, layers)
+    self$box_predictor <- torch::nn_module(
+      initialize = function() {
+        self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
+        self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+      },
+      forward = function(x) {
+        list(
+          scores = self$cls_score(x),
+          boxes = self$bbox_pred(x)
         )
       }
-
-      layers <- list(
-        nn_sequential(
-          nn_linear(256 * 7 * 7, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        block(),
-        block(),
-        block(),
-        nn_linear(1024, 1024, bias = TRUE)
-      )
-      self$box_head <- do.call(nn_sequential, layers)
-      self$box_predictor <- torch::nn_module(
-        initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
-        },
-        forward = function(x) {
-          list(
-            scores = self$cls_score(x),
-            boxes = self$bbox_pred(x)
-          )
-        }
-      )()
-    },
-    forward = function(features, proposals) {
-      pooled <- roi_align_stub(features[[1]], proposals)
-      x <- self$box_head(pooled)
-      self$box_predictor(x)
-    }
-  )
+    )()
+  },
+  forward = function(features, proposals) {
+    pooled <- roi_align_stub(features[[1]], proposals)
+    x <- self$box_head(pooled)
+    self$box_predictor(x)
+  }
+)
 
 fpn_module <- torch::nn_module(
   "Feature Pyramid Network",
@@ -863,9 +862,9 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' # https://pytorch.org/vision/stable/models.html
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #' # Use a publicly available image of an animal
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc,url))
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'              "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' img <- base_loader(url)
 #'
 #' input <- img %>%
 #'   transform_to_tensor() %>%

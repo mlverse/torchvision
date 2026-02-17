@@ -1,5 +1,8 @@
 input <- base_loader("assets/class/cat/cat.0.jpg") %>%
-  transform_to_tensor() %>% transform_resize(c(200,200)) %>% torch_unsqueeze(1)
+  transform_to_tensor() %>%
+  transform_normalize(c(0.485, 0.456, 0.406), c(0.229, 0.224, 0.225)) %>%
+  transform_resize(c(200,200)) %>%
+  torch_unsqueeze(1)
 
 
 test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
@@ -85,7 +88,6 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
   expect_tensor_shape(output$detections$masks, c(n_detections, 28, 28))
 })
 
-
 test_that("maskrcnn handles empty detections correctly", {
   skip_on_cran()
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
@@ -133,7 +135,6 @@ test_that("maskrcnn respects detections_per_img parameter", {
   expect_lte(n_detections, max_detections)
 })
 
-
 test_that("maskrcnn with different num_classes works", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
@@ -160,11 +161,11 @@ test_that("maskrcnn pretrained requires num_classes = 91", {
   )
 })
 
-test_that("mask_rcnn pretrained infer correcctly", {
+test_that("mask_rcnn pretrained infer correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.9, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.4, nms_thresh = 0.7, detections_per_img = 100)
   model$eval()
 
   output <- model(input)
