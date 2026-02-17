@@ -693,7 +693,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
   . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     # add ".0" to inner_blocks + layer_blocks layer renaming
-    sub(pattern = "(inner_blocks\\.[0-3]\\.)\\d\\.", replacement = "\\10\\.", x = .) %>%
+    sub(pattern = "(inner_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     sub(pattern = "(layer_blocks\\.[0-3]\\.)", replacement = "\\10\\.", x = .) %>%
     # add ".0.0" to rpn.head.conv
     sub(pattern = "(rpn\\.head\\.conv\\.)", replacement = "\\10\\.0\\.", x = .) %>%

@@ -97,8 +97,8 @@ norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 
 # Load an image
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-url <- paste0(wmc, "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+              "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
 img <- base_loader(url)
 
 input <- img \%>\%

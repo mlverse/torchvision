@@ -108,9 +108,9 @@ norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 # https://pytorch.org/vision/stable/models.html
 norm_std  <- c(0.229, 0.224, 0.225)
 # Use a publicly available image of an animal
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-img <- base_loader(paste0(wmc,url))
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+             "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+img <- base_loader(url)
 
 input <- img \%>\%
   transform_to_tensor() \%>\%

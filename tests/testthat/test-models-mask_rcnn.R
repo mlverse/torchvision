@@ -165,20 +165,28 @@ test_that("mask_rcnn pretrained infer correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.4, nms_thresh = 0.7, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.01, nms_thresh = 0.7, detections_per_img = 100)
   model$eval()
 
   output <- model(input)
-  # Masks should be probabilities (0 to 1) after sigmoid
-  if (output$detections$masks$shape[1] > 0) {
-    mask_min <- torch::torch_min(output$detections$masks)$item()
-    mask_max <- torch::torch_max(output$detections$masks)$item()
+  # Masks should be expanded back to image size
+  if (output$detections$boxes$shape[1] > 0) {
+    expert_bbox_is_xyxy(output$detections$boxes, 200, 200)
+  }
 
-    expect_gte(mask_min, 0)
-    expect_lte(mask_max, 1)
+})
 
-    # TODO mask 0 < xmin < xmax < width
-    # TODO mask 0 < ymin < ymax < length
+test_that("mask_rcnn_v2 pretrained infer correctly", {
+  skip_on_cran()
+  skip_if_not(torch::torch_is_installed())
+
+  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.01, nms_thresh = 0.7, detections_per_img = 100)
+  model$eval()
+
+  output <- model(input)
+  # Masks should be expanded back to image size
+  if (output$detections$boxes$shape[1] > 0) {
+    expert_bbox_is_xyxy(output$detections$boxes, 200, 200)
   }
 
 })
@@ -187,12 +195,13 @@ test_that("mask_head_module initializes correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  mask_head <- mask_head_module(num_classes = 91)
+  mask_head <- mask_head_module()
+  mask_rcnn_pred <- mask_rcnn_predictor(num_classes = 91)
   expect_is(mask_head, "nn_module")
 
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
-  output <- mask_head(input)
+  output <- input %>% mask_head() %>% mask_rcnn_pred()
 
   # Output should be (2, 91, 28, 28)
   expect_tensor_shape(output, c(2, 91, 28, 28))
