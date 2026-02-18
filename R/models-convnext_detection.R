@@ -97,7 +97,7 @@ convnext_fpn_backbone_tiny <- function(pretrained_backbone = FALSE, ...) {
       self$fpn <- fpn_module(
         in_channels = c(96, 192, 384, 768),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -145,7 +145,7 @@ convnext_fpn_backbone_small <- function(pretrained_backbone = FALSE, ...) {
       self$fpn <- fpn_module(
         in_channels = c(96, 192, 384, 768),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -193,7 +193,7 @@ convnext_fpn_backbone_base <- function(pretrained_backbone = FALSE, ...) {
       self$fpn <- fpn_module(
         in_channels = c(128, 256, 512, 1024),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
