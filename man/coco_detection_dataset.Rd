@@ -34,24 +34,26 @@ An object of class \code{coco_detection_dataset}. Each item is a list:
 \item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
 \item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
-\item \code{y$segmentation}: a list of segmentation polygons for each object.
-\item \code{y$masks}: a \verb{(N, H, W)} boolean \code{torch_tensor} containing binary segmentation masks.
 }
 
-The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
-to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
+The returned object has S3 class \code{"image_with_bounding_box"}
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+
+For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 }
 \description{
-Loads the MS COCO dataset for object detection and segmentation.
+Loads the MS COCO dataset for object detection tasks only.
 }
 \details{
 The returned image \code{x} is in CHW format (channels, height, width), matching the torch convention.
 The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
-areas, crowd indicators, and segmentation masks from the official COCO annotations.
+areas, and crowd indicators from the official COCO annotations.
+
+Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
 }
 \examples{
 \dontrun{
-# Load dataset
+# Load dataset for object detection
 ds <- coco_detection_dataset(
   train = FALSE,
   year = "2017",
@@ -63,24 +65,11 @@ item <- ds[1]
 # Visualize bounding boxes
 boxed <- draw_bounding_boxes(item)
 tensor_image_browse(boxed)
-
-# In order to visualize segmentation masks, we
-# use the specific segmentation mask target transformation
-ds_with_masks <- coco_detection_dataset(
-  train = FALSE,
-  year = "2017",
-  download = TRUE,
-  target_transform = target_transform_coco_masks
-)
-
-item_masked <- ds_with_masks[1]
-
-# Visualize segmentation masks
-masked <- draw_segmentation_masks(item_masked)
-tensor_image_browse(masked)
 }
 }
 \seealso{
+\code{\link{coco_segmentation_dataset}} for instance segmentation tasks
+
 Other detection_dataset: 
 \code{\link{pascal_voc_datasets}},
 \code{\link{rf100_biology_collection}()},

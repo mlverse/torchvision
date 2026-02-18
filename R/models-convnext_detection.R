@@ -31,28 +31,29 @@
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #'
 #' # Use a publicly available image
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc, url))
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'        "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' img <- magick_loader(url) %>%
+#'   transform_to_tensor() %>%
+#'   transform_resize(c(520, 520))
 #'
 #' input <- img %>%
-#'   transform_to_tensor() %>%
-#'   transform_resize(c(520, 520)) %>%
 #'   transform_normalize(norm_mean, norm_std)
 #' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #'
 #' # ConvNeXt Tiny detection
 #' model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
 #' model$eval()
-#' pred <- model(batch)$detections
+#' # Please wait 2 mins + on CPU
+#' pred <- model(batch)$detections[[1]]
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' topk <- pred$scores$topk(k = 5)[[2]]
 #' boxes <- pred$boxes[topk, ]
-#' labels <- as.character(as.integer(pred$labels[topk]))
+#' labels <- imagenet_label(as.integer(pred$labels[topk]))
 #'
 #' # `draw_bounding_box()` may fail if bbox values are not consistent.
 #' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(input, boxes, labels = labels)
+#'   boxed <- draw_bounding_boxes(img, boxes, labels = labels)
 #'   tensor_image_browse(boxed)
 #' }
 #' }

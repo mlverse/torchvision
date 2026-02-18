@@ -174,18 +174,19 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x <- x$tile(c(4, 2, 2))
   }
 
-  img_bb <- boxes$to(torch::torch_int64()) %>% as.array
+  img_bb <- boxes$to(torch::torch_int64()) %>% as.array()
 
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4], col = fill_col, border = colors)
+  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4],
+                 col = fill_col, border = colors, lwd = width)
 
   if (!is.null(labels)) {
     graphics::text(
-      img_bb[, 1] + width,
-      img_bb[, 2] + width,
+      img_bb[, 1] + 2 * width + font_size,
+      img_bb[, 2] + 2 * width,
       labels = labels,
       col = colors,
       vfont = font,
@@ -229,6 +230,13 @@ draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
 #' @keywords internal
 coco_polygon_to_mask <- function(segmentation, height, width) {
   rlang::check_installed("magick")
+
+  # Handle empty polygon list early to avoid graphics device issues
+  if (length(segmentation) == 0) {
+    mask_logical <- matrix(FALSE, nrow = height, ncol = width)
+    mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
+    return(mask_tensor)
+  }
 
   mask_img <- magick::image_blank(width = width, height = height, color = "black")
   mask_img <- magick::image_draw(mask_img)
@@ -346,7 +354,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (masks$dtype != torch::torch_bool() && masks$dtype != torch::torch_float() ) {
     type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
-  if (any(masks$shape[2:3] != img_to_draw$shape[2:3])) {
+  if (any(masks$shape[-2:-1] != img_to_draw$shape[-2:-1])) {
     value_error("`masks` and `image` must have the same height and width")
   }
   # if mask is a model inference output, we need to convert float mask to boolean mask
