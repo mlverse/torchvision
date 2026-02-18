@@ -226,7 +226,7 @@ model_convnext_tiny_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)()
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)
   model
 }
 
@@ -243,7 +243,7 @@ model_convnext_small_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)()
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)
   model
 }
 
@@ -260,7 +260,7 @@ model_convnext_base_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)()
+  model <- fasterrcnn_model(backbone, num_classes = num_classes)
   model
 }
 
