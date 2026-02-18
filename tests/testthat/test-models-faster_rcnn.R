@@ -151,27 +151,11 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   out <- model(input)
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
-  expect_tensor(out$detections[[1]]$boxes)
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
-  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
-  if (out$detections[[1]]$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections[[1]]$boxes)
-
-    # bbox must be positive and within (240x240)
-    expect_true(all(boxes >= 0))
-    expect_true(all(boxes[, c(1, 3)] <= 240))
-    expect_true(all(boxes[, c(2, 4)] <= 240))
-
-    # bbox must be coherent: x2 > x1 et y2 > y1
-    expect_true(all(boxes[, 3] >= boxes[, 1]))
-    expect_true(all(boxes[, 4] >= boxes[, 2]))
-
-    # scores must be within [0, 1]
-    scores <- as.numeric(out$detections[[1]]$scores)
-    expect_all_true(scores >= 0)
-    expect_all_true(scores <= 1)
-    }
+  if (out$detections$boxes$shape[1] > 0) {
+    expert_bbox_is_xyxy(out$detections$boxes, 240, 240)
+  }
 })
 
 test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
@@ -184,26 +168,10 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
   out <- model(input)
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
-  expect_tensor(out$detections[[1]]$boxes)
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
-  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
-  if (out$detections[[1]]$boxes$shape[1] > 0) {
-    boxes <- as.matrix(out$detections[[1]]$boxes)
-
-    # bbox must be positive and within (360x360)
-    expect_true(all(boxes >= 0))
-    expect_true(all(boxes[, c(1, 3)] <= 360))
-    expect_true(all(boxes[, c(2, 4)] <= 360))
-
-    # bbox must be coherent: x2 > x1 et y2 > y1
-    expect_true(all(boxes[, 3] >= boxes[, 1]))
-    expect_true(all(boxes[, 4] >= boxes[, 2]))
-
-    # scores must be within [0, 1]
-    scores <- as.numeric(out$detections[[1]]$scores)
-    expect_all_true(scores >= 0)
-    expect_all_true(scores <= 1)
+  if (out$detections$boxes$shape[1] > 0) {
+    expert_bbox_is_xyxy(out$detections$boxes, 360, 360)
   }
 })
 
