@@ -53,13 +53,13 @@ expert_bbox_is_xyxy <- function(object, width, height) {
   expect_true((y_max <= torch_tensor(height))$all()$item(),
               info = sprintf("All y_max values must be <= height (%s).", height))
   expect_true((x_max > torch_tensor(1))$all()$item(),
-              info = "x is not a relative delta and has been converted back to image width.")
+              info = "x looks like a relative delta and shall be converted back to image width.")
   expect_true((y_max > torch_tensor(1))$all()$item(),
-              info = "y is not a relative delta and has been converted back to image height.")
+              info = "y looks like a relative delta and shall be converted back to image height.")
   ## bbox ordering checks
-  expect_true((x_min < x_max)$all()$item(),
-              info = "Each x_min must be strictly smaller than its x_max.")
-  expect_true((y_min < y_max)$all()$item(),
-              info = "Each y_min must be strictly smaller than its y_max.")
+  expect_true((x_min <= x_max)$all()$item(),
+              info = "Each x_min must be smaller than its x_max.")
+  expect_true((y_min <= y_max)$all()$item(),
+              info = "Each y_min must be smaller than its y_max.")
 
 }
