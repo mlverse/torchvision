@@ -106,6 +106,7 @@ Collate:
     'models-faster_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
+    'models-mask_rcnn.R'
     'models-maxvit.R'
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'
