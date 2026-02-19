@@ -119,7 +119,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor(out$detections[[1]]$scores)
   expect_tensor(out$detections[[1]]$boxes)
   # we cannot succesfully assert bbox here :
-  #   expert_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
+  #   expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
   #
 })
 
@@ -137,7 +137,7 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
+    expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
   }
 })
 
@@ -154,7 +154,7 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(out$detections[[1]]$boxes, 240, 240)
+    expect_bbox_is_xyxy(out$detections[[1]]$boxes, 240, 240)
   }
 })
 
@@ -171,7 +171,7 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(out$detections[[1]]$boxes, 360, 360)
+    expect_bbox_is_xyxy(out$detections[[1]]$boxes, 360, 360)
   }
 })
 

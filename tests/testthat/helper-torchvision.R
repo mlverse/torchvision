@@ -33,7 +33,7 @@ unlink_model_file <- function() {
   unlink(model_file)
 }
 
-expert_bbox_is_xyxy <- function(object, width, height) {
+expect_bbox_is_xyxy <- function(object, width, height) {
   expect_tensor(object)
   N <- object$shape[1]
   expect_tensor_shape(object, c(N, 4))

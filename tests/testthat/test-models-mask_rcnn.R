@@ -42,24 +42,24 @@ test_that("maskrcnn_resnet50_fpn inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections, c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
 
   # Verify tensor types
-  expect_tensor(output$detections$boxes)
-  expect_tensor(output$detections$labels)
-  expect_tensor(output$detections$scores)
-  expect_tensor(output$detections$masks)
+  expect_tensor(output$detections[[1]]$boxes)
+  expect_tensor(output$detections[[1]]$labels)
+  expect_tensor(output$detections[[1]]$scores)
+  expect_tensor(output$detections[[1]]$masks)
 
   # Verify dimensions are consistent
-  n_detections <- output$detections$masks$shape[1]
-  expect_tensor_shape(output$detections$masks, c(n_detections, 28, 28))
-  expect_tensor_shape(output$detections$labels, n_detections)
-  expect_tensor_shape(output$detections$scores, n_detections)
+  n_masks <- output$detections[[1]]$masks$shape[1]
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$labels, n_masks)
+  expect_tensor_shape(output$detections[[1]]$scores, n_masks)
 
 
   # Check mask dimensions (should be N x 28 x 28)
-  N <- output$detections$masks$shape[1]
-  expect_tensor_shape(output$detections$masks, c(N, 28, 28))
+  N <- output$detections[[1]]$masks$shape[1]
+  expect_tensor_shape(output$detections[[1]]$masks, c(N, 28, 28))
 
 })
 
@@ -78,14 +78,14 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections, c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
 
   # Check masks are present
-  expect_tensor(output$detections$masks)
+  expect_tensor(output$detections[[1]]$masks)
 
   # Check mask dimensions (should be N x 28 x 28)
-  n_detections <- output$detections$masks$shape[1]
-  expect_tensor_shape(output$detections$masks, c(n_detections, 28, 28))
+  n_masks <- output$detections[[1]]$masks$shape[1]
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
 })
 
 test_that("maskrcnn handles empty detections correctly", {
@@ -94,7 +94,7 @@ test_that("maskrcnn handles empty detections correctly", {
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
 
-  # Use very high score threshold to force empty detections
+  # Use very high score threshold to force empty detections[[1]]
   model <- model_maskrcnn_resnet50_fpn(
     pretrained = FALSE,
     num_classes = 91,
@@ -105,12 +105,12 @@ test_that("maskrcnn handles empty detections correctly", {
   output <- model(input)
 
   # Should return empty tensors with correct shapes
-  expect_tensor_shape(output$detections$boxes, c(0,4))
-  expect_tensor_shape(output$detections$labels, 0)
-  expect_tensor_shape(output$detections$scores, 0)
+  expect_tensor_shape(output$detections[[1]]$boxes, c(0,4))
+  expect_tensor_shape(output$detections[[1]]$labels, 0)
+  expect_tensor_shape(output$detections[[1]]$scores, 0)
 
   # Mask shape should be (0, 28, 28)
-  expect_tensor_shape(output$detections$masks, c(0,28,28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(0,28,28))
 })
 
 test_that("maskrcnn respects detections_per_img parameter", {
@@ -130,9 +130,9 @@ test_that("maskrcnn respects detections_per_img parameter", {
 
   output <- model(input)
 
-  # Number of detections should not exceed max_detections
-  n_detections <- output$detections$boxes$shape[1]
-  expect_lte(n_detections, max_detections)
+  # Number of boxes should not exceed max_detections
+  n_boxes <- output$detections[[1]]$boxes$shape[1]
+  expect_lte(n_boxes, max_detections)
 })
 
 test_that("maskrcnn with different num_classes works", {
@@ -147,7 +147,7 @@ test_that("maskrcnn with different num_classes works", {
   output <- model(input)
 
   # Should work without errors
-  expect_tensor(output$detections$masks)
+  expect_tensor(output$detections[[1]]$masks)
 })
 
 test_that("maskrcnn pretrained requires num_classes = 91", {
@@ -170,8 +170,8 @@ test_that("mask_rcnn pretrained infer correctly", {
 
   output <- model(input)
   # Masks should be expanded back to image size
-  if (output$detections$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(output$detections$boxes, 200, 200)
+  if (output$detections[[1]]$boxes$shape[1] > 0) {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
   }
 
 })
@@ -185,8 +185,8 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
 
   output <- model(input)
   # Masks should be expanded back to image size
-  if (output$detections$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(output$detections$boxes, 200, 200)
+  if (output$detections[[1]]$boxes$shape[1] > 0) {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
   }
 
 })

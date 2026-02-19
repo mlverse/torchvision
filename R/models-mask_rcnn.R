@@ -83,70 +83,132 @@ mask_head_module_v2 <- torch::nn_module(
 #' Extracts fixed-size feature maps from regions of interest for mask prediction.
 #' Returns a 4D tensor suitable for the mask head (unlike roi_align_stub which flattens).
 #'
-#' @param feature_map Tensor of shape (1, C, H, W) - Feature map from backbone
-#' @param proposals Tensor of shape (N, 4) - Region proposals as (x1, y1, x2, y2)
-#' @param output_size Integer vector of length 2 - Output spatial dimensions (default: c(14L, 14L))
+#' ROI Align for mask prediction – single FPN level
 #'
-#' @return Tensor of shape (N, C, output_size\[1\], output_size\[2\])
+#' This is a thin wrapper around the low‑level C++ op
+#' torch::nnf_roi_align.  It **expects** the proposals in *image* coordinates
+#' and applies the supplied `spatial_scale` before the ROI‑Align.
 #'
+#' @param feature_map   Tensor of shape (1, C, H, W) – one FPN level.
+#' @param proposals     Tensor of shape (N, 4) with boxes (x1, y1, x2, y2) in
+#'                       the original image coordinate system.
+#' @param output_size   integer vector of length 2, e.g. c(14L, 14L).
+#' @param spatial_scale Scaling factor between the original image and the
+#'                       feature map.  For the first FPN level (stride 4) use
+#'                       1/4, for the second level (stride 8) use 1/8, …
+#' @param sampling_ratio Integer – number of sampling points per output
+#'                       element (default = 2, the same as Torchvision).
+#' @param aligned       Logical – if TRUE uses the “aligned” mode (default FALSE).
+#'
+#' @return Tensor of shape (N, C, output_size\[1\], output_size\[2\]).
 #' @noRd
-roi_align_masks <- function(feature_map, proposals, output_size = c(14L, 14L)) {
+roi_align_masks <- function(feature_map,
+                            proposals,
+                            output_size = c(14L, 14L),
+                            spatial_scale = 1.0,
+                            sampling_ratio = 2L,
+                            aligned = FALSE) {
 
-  # 1. Retrieve dimensions
-  n <- proposals$size(1)
-  c_channels <- feature_map$size(2)
-  h <- feature_map$size(3)
-  w <- feature_map$size(4)
+  #  Scale the boxes to the feature‑map resolution
 
-  if (n == 0) {
-    return(torch_zeros(c(0, c_channels, output_size[1], output_size[2]),
-                       dtype = feature_map$dtype,
-                       device = feature_map$device))
-  }
+  # proposals are float, keep them float for the scaling
+  boxes_scaled <- proposals$to(dtype = torch_float())$mul(spatial_scale)
 
-  # 2. Vectorized Coordinate Handling
-  # Perform clamping on the GPU first to avoid multiple transfers
-  bounds <- torch_tensor(c(1, 1, 1, 1, w, h, w, h),
-                         dtype = proposals$dtype,
-                         device = proposals$device)
+  #   Add the batch‑index column
+  # torch::nnf_roi_align expects a (N, 5) tensor:
+  # (batch_idx, x1, y1, x2, y2). Because we are inside a
+  # loop over a single image we set batch_idx = 0 for every ROI.
+  batch_idx <- torch_full(c(boxes_scaled$size(1), 1),
+                          0L,
+                          dtype = torch_long(),
+                          device = boxes_scaled$device)
+  rois <- torch_cat(list(batch_idx, boxes_scaled), dim = 2)
 
-  proposals_clamped <- torch_clamp(proposals,
-                                   min = bounds[1:4]$view(c(1, 4)),
-                                   max = bounds[5:8]$view(c(1, 4)))
+  #   Call the low‑level functional ROI‑Align operator
+  pooled <- torchvisionlib::ops_ps_roi_align(
+    input          = feature_map,
+    boxes          = rois,
+    output_size    = output_size,
+    spatial_scale  = 1,          # already applied above
+    sampling_ratio = sampling_ratio
+  )
 
-  # Transfer coordinates to CPU in one go for R indexing
-  boxes <- as_array(proposals_clamped$to(dtype = torch_int32(), device = "cpu"))
-
-  # Ensure minimum boxes size of 1 pixel (questionable)
-  # boxes[, 3] <- pmax(boxes[, 1] + 1L, boxes[, 3])
-  # boxes[, 4] <- pmax(boxes[, 2] + 1L, boxes[, 4])
-
-  # 3. Optimized loop
-  # Store the full 4D output (1, C, H, W) to avoid slicing inside the loop.
-  pooled <- vector("list", n)
-
-  # We process each proposal individually (to avoid padding overhead)
-  # and write directly into the pre-allocated result tensor.
-  for (i in seq_len(n)) {
-    # Get 1-based integer coordinates
-    region <- feature_map[1, , boxes[i, 2]:boxes[i, 4], boxes[i, 1]:boxes[i, 3]]
-
-    # nnf_interpolate returns (1, C, 14, 14)
-    pooled[[i]] <- nnf_interpolate(
-      region$unsqueeze(1),
-      size = output_size,
-      mode = "bilinear",
-      align_corners = FALSE
-    )
-  }
-
-  # Stack list of (1, C, H, W) tensors -> (N, 1, C, H, W)
-  stacked <- torch_stack(pooled)
-
-  # Remove the extra dimension (dim=2) to get (N, C, H, W)
-  stacked$squeeze(2)
+  # `pooled` already has shape (N, C, out_h, out_w)
+  pooled
 }
 
+
+#' Multi‑scale ROI Align for Mask‑RCNN (FPN)
+#'
+#'
+#' @param feature_maps   List of 4 tensors, each of shape (1, C, H_l, W_l)
+#'                       – the four FPN levels P2, P3, P4, P5.
+#' @param proposals      Tensor (N, 4) – boxes in image coordinates.
+#' @param output_size    Integer vector, default c(14L, 14L).
+#' @param sampling_ratio Sampling ratio passed to the low‑level op (default 2L).
+#' @param aligned        Whether to use the aligned ROI‑Align mode (default FALSE).
+#'
+#' @return Tensor (N, C, out_h, out_w) – pooled mask features.
+#' @noRd
+roi_align_masks_fpn <- function(feature_maps,
+                                proposals,
+                                output_size = c(14L, 14L),
+                                sampling_ratio = 2L,
+                                aligned = FALSE) {
+  #  Compute the level for each ROI (FPN paper Eq. (1))
+  # width and height in original image space
+  widths  <- proposals[, 3] - proposals[, 1]
+  heights <- proposals[, 4] - proposals[, 2]
+
+  # Guard against degenerate boxes (avoid log2(0))
+  widths[widths <= 0]   <- 1
+  heights[heights <= 0] <- 1
+
+  # sqrt(area) / 224  (224 is the reference size in the paper)
+  area_sqrt <- (widths * heights)$sqrt()
+  target_level <- (torch_log2(area_sqrt / 224) + 4)$floor()   # level in {2,3,4,5}
+  target_level <- torch_clamp(target_level, min = 2, max = 5) # clamp to existing levels
+
+  # Convert from the level {2,3,4,5} to an index in feature_maps list (1‑based)
+  level_idx <- (target_level - 2L)$to(dtype = torch_long()) + 1L   # 1,2,3,4
+
+  #  Allocate output tensor
+  n_boxes   <- proposals$size(1)
+  c_channels <- feature_maps[[1]]$size(2)    # same number of channels for all levels
+  out       <- torch_zeros(c(n_boxes, c_channels,
+                             output_size[1], output_size[2]),
+                           dtype = feature_maps[[1]]$dtype,
+                           device = feature_maps[[1]]$device)
+
+  #  Loop over the four levels and pool the ROIs belonging to it
+  spatial_scales <- list(1/4, 1/8, 1/16, 1/32)   # stride of each level
+
+  for (lvl in seq_along(feature_maps)) {
+    # mask of boxes that belong to the current level
+    lvl_mask <- level_idx$eq(lvl)$squeeze()
+    idx      <- torch_nonzero(lvl_mask)$squeeze()   # indices (0‑based)
+
+    if (idx$shape[1] == 0L) next
+
+    # pick the subset of proposals that belong to this level
+    rois_lvl <- proposals[idx + 1L, , drop = FALSE]   # +1 for 1‑based R indexing
+
+    # call the *single‑scale* wrapper (it adds the batch column internally)
+    pooled_lvl <- roi_align_masks(
+      feature_map   = feature_maps[[lvl]],
+      proposals     = rois_lvl,
+      output_size   = output_size,
+      spatial_scale = spatial_scales[[lvl]],
+      sampling_ratio = sampling_ratio,
+      aligned        = aligned
+    )   # shape (M, C, out_h, out_w)
+
+    # write the result back into the pre‑allocated output tensor
+    out[idx + 1L, , , ] <- pooled_lvl
+  }
+
+  out
+}
 
 # Mask R-CNN Model - Extends Faster R-CNN with mask prediction
 maskrcnn_model <- torch::nn_module(
@@ -186,148 +248,158 @@ maskrcnn_model <- torch::nn_module(
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                  score_thresh = self$score_thresh,
-                                  nms_thresh = self$nms_thresh)
 
-      if (props$proposals$shape[1] == 0) {
-        empty <- list(
-          boxes = torch::torch_empty(c(0, 4)),
-          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-          scores = torch::torch_empty(c(0)),
-          masks = torch::torch_empty(c(0, 28, 28))
-        )
-        return(list(features = features, detections = empty))
-      }
+      batch_size <- images$shape[1]
+      image_size <- images$shape[3:4]
+      final_results <- list()
 
-      # Limit proposals to avoid slow ROI pooling (common practice in detection)
-      max_proposals <- 1000
-      if (props$proposals$shape[1] > max_proposals) {
-        props$proposals <- props$proposals[1:max_proposals, ]
-      }
+      for (b in seq_len(batch_size)) {
 
-      # Box predictions
-      detections <- self$roi_heads(features, props$proposals)
+        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    nms_thresh = self$nms_thresh)
 
-      scores <- torch::nnf_softmax(detections$scores, dim = 2)
-      max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores[[1]]
-      final_labels <- max_scores[[2]]
-
-      box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
-      deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-      # Filter by score threshold before decoding
-      keep <- final_scores > self$score_thresh
-      num_detections <- torch::torch_sum(keep)$item()
-
-      if (num_detections > 0) {
-        # Apply filters to deltas, scores, labels, and proposals
-        final_deltas <- deltas[keep, ]
-        final_scores <- final_scores[keep]
-        final_labels <- final_labels[keep]
-
-        # We need the proposals that correspond to these kept detections
-        # 'props$proposals' are the reference boxes (anchors)
-        kept_proposals <- props$proposals[keep, ]
-
-        # 3. Decode Deltas to Absolute Coordinates
-        # Formula: pred_box = proposal + delta
-        # Standard Faster R-CNN decoding:
-
-        # Widths and Heights of proposals
-        widths <- kept_proposals[, 3] - kept_proposals[, 1]
-        heights <- kept_proposals[, 4] - kept_proposals[, 2]
-
-        # Centers of proposals
-        ctr_x <- kept_proposals[, 1] + 0.5 * widths
-        ctr_y <- kept_proposals[, 2] + 0.5 * heights
-
-        # Extract predicted deltas
-        dx <- final_deltas[, 1]
-        dy <- final_deltas[, 2]
-        dw <- final_deltas[, 3]
-        dh <- final_deltas[, 4]
-
-        # Apply deltas
-        pred_ctr_x <- dx * widths + ctr_x
-        pred_ctr_y <- dy * heights + ctr_y
-        pred_w <- torch_exp(dw) * widths
-        pred_h <- torch_exp(dh) * heights
-
-        # Convert back to (x1, y1, x2, y2)
-        final_boxes <- torch_zeros_like(final_deltas)
-        final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
-        final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
-        final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
-        final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
-
-        # Clip Boxes to Image Boundary
-        img_h <- images$shape[3]
-        img_w <- images$shape[4]
-
-        final_boxes <- torch_clamp(final_boxes, min = 0.0)
-        final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
-        final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
-        final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
-        final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
-
-        # Apply NMS and Limit Detections
-        if (final_boxes$shape[1] > 1) {
-          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-          final_boxes <- final_boxes[nms_keep, ]
-          final_labels <- final_labels[nms_keep]
-          final_scores <- final_scores[nms_keep]
-          kept_proposals <- kept_proposals[nms_keep, ]
+        if (props$proposals$shape[1] == 0) {
+          empty <- list(
+            boxes = torch::torch_empty(c(0, 4)),
+            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch::torch_empty(c(0)),
+            masks = torch::torch_empty(c(0, 28, 28))
+          )
+          return(list(features = features, detections = list(empty)))
         }
 
-        # Limit detections per image
-        n_det <- final_scores$shape[1]
-        if (n_det > self$detections_per_img) {
-          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-          top_idx <- top_k[[2]]
-          final_boxes <- final_boxes[top_idx, ]
-          final_labels <- final_labels[top_idx]
-          final_scores <- final_scores[top_idx]
-          kept_proposals <- kept_proposals[top_idx, ]
+        # Limit proposals to avoid slow ROI pooling (common practice in detection)
+        max_proposals <- 1000
+        if (props$proposals$shape[1] > max_proposals) {
+          props$proposals <- props$proposals[1:max_proposals, ]
         }
 
-        # Predict masks for kept detections
-        mask_features <- roi_align_masks(features[[1]], kept_proposals, output_size = c(14L, 14L))
-        mask_conv <- self$mask_head(mask_features)
-        mask_logits <- self$mask_predictor(mask_conv)  # Shape: (N, num_classes, 28, 28)
+        # Box predictions
+        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        # Extract masks for predicted classes
-        n_kept <- final_labels$shape[1]
-        final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+        scores <- torch::nnf_softmax(detections$scores, dim = 2)
+        max_scores <- torch::torch_max(scores, dim = 2)
+        final_scores <- max_scores[[1]]
+        final_labels <- max_scores[[2]]
 
-        for (i in seq_len(n_kept)) {
-          class_idx <- as.integer(final_labels[i]$item())
-          final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
+        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
+        # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
+        deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
+
+        # Filter by score threshold before decoding
+        keep <- final_scores > self$score_thresh
+        num_detections <- torch::torch_sum(keep)$item()
+
+        if (num_detections > 0) {
+          # Apply filters to deltas, scores, labels, and proposals
+          final_deltas <- deltas[keep, ]
+          final_scores <- final_scores[keep]
+          final_labels <- final_labels[keep]
+
+          # We need the proposals that correspond to these kept detections
+          # 'props$proposals' are the reference boxes (anchors)
+          kept_proposals <- props$proposals[keep, ]
+
+          # 3. Decode Deltas to Absolute Coordinates
+          # Formula: pred_box = proposal + delta
+          # Standard Faster R-CNN decoding:
+
+          # Widths and Heights of proposals
+          widths <- kept_proposals[, 3] - kept_proposals[, 1]
+          heights <- kept_proposals[, 4] - kept_proposals[, 2]
+
+          # Centers of proposals
+          ctr_x <- kept_proposals[, 1] + 0.5 * widths
+          ctr_y <- kept_proposals[, 2] + 0.5 * heights
+
+          # Extract predicted deltas
+          dx <- final_deltas[, 1]
+          dy <- final_deltas[, 2]
+          dw <- final_deltas[, 3]
+          dh <- final_deltas[, 4]
+
+          # Apply deltas
+          pred_ctr_x <- dx * widths + ctr_x
+          pred_ctr_y <- dy * heights + ctr_y
+          pred_w <- torch_exp(dw) * widths
+          pred_h <- torch_exp(dh) * heights
+
+          # Convert back to (x1, y1, x2, y2)
+          final_boxes <- torch_zeros_like(final_deltas)
+          final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
+          final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
+          final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
+          final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
+
+          # Clip Boxes to Image Boundary
+          img_h <- images$shape[3]
+          img_w <- images$shape[4]
+
+          final_boxes <- torch_clamp(final_boxes, min = 0.0)
+          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
+          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
+          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
+          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+
+          # Apply NMS and Limit Detections
+          if (final_boxes$shape[1] > 0L) {
+            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
+            final_boxes <- final_boxes[nms_keep, ]
+            final_labels <- final_labels[nms_keep]
+            final_scores <- final_scores[nms_keep]
+            kept_proposals <- kept_proposals[nms_keep, ]
+          }
+
+          # Limit detections per image
+          n_det <- final_scores$shape[1]
+          if (n_det > self$detections_per_img) {
+            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
+            top_idx <- top_k[[2]]
+            final_boxes <- final_boxes[top_idx, ]
+            final_labels <- final_labels[top_idx]
+            final_scores <- final_scores[top_idx]
+            kept_proposals <- kept_proposals[top_idx, ]
+          }
+
+          # Predict masks for kept detections
+          mask_features <- roi_align_masks_fpn(
+            feature_maps = features,
+            proposals    = kept_proposals,
+            output_size  = c(14L, 14L),
+            sampling_ratio = 2L,
+            aligned        = FALSE
+          )
+          mask_conv <- self$mask_head(mask_features)
+          mask_logits <- self$mask_predictor(mask_conv)  # Shape: (N, num_classes, 28, 28)
+
+          # Extract masks for predicted classes
+          n_kept <- final_labels$shape[1]
+          final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+
+          for (i in seq_len(n_kept)) {
+            class_idx <- as.integer(final_labels[i]$item())
+            final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+          }
+
+          # Apply sigmoid to get probabilities
+          final_masks <- torch::torch_sigmoid(final_masks)
+
+        } else {
+          final_boxes <- torch::torch_empty(c(0, 4))
+          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
+          final_scores <- torch::torch_empty(c(0))
+          final_masks <- torch::torch_empty(c(0, 28, 28))
         }
-
-        # Apply sigmoid to get probabilities
-        final_masks <- torch::torch_sigmoid(final_masks)
-
-      } else {
-        final_boxes <- torch::torch_empty(c(0, 4))
-        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-        final_scores <- torch::torch_empty(c(0))
-        final_masks <- torch::torch_empty(c(0, 28, 28))
-      }
-
-      list(
-        features = features,
-        detections = list(
+        final_results[[b]] <- list(
           boxes = final_boxes,
           labels = final_labels,
           scores = final_scores,
           masks = final_masks
         )
-      )
+      }
+      list(features = features, detections = final_results)
     }
 )
 
@@ -368,144 +440,169 @@ maskrcnn_model_v2 <- torch::nn_module(
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                  score_thresh = self$score_thresh,
-                                  nms_thresh = self$nms_thresh)
+      batch_size <- images$shape[1]
+      image_size <- images$shape[3:4]
+      final_results <- list()
 
-      if (props$proposals$shape[1] == 0) {
-        empty <- list(
-          boxes = torch::torch_empty(c(0, 4)),
-          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-          scores = torch::torch_empty(c(0)),
-          masks = torch::torch_empty(c(0, 28, 28))
-        )
-        return(list(features = features, detections = empty))
-      }
+      for (b in seq_len(batch_size)) {
+        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    nms_thresh = self$nms_thresh)
 
-      # Limit proposals to avoid slow ROI pooling (common practice in detection)
-      max_proposals <- 1000
-      if (props$proposals$shape[1] > max_proposals) {
-        props$proposals <- props$proposals[1:max_proposals, ]
-      }
-
-      # Box predictions
-      detections <- self$roi_heads(features, props$proposals)
-
-      scores <- torch::nnf_softmax(detections$scores, dim = 2)
-      max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores[[1]]
-      final_labels <- max_scores[[2]]
-
-      box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
-      deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-      # Filter by score threshold
-      keep <- final_scores > self$score_thresh
-      num_detections <- torch::torch_sum(keep)$item()
-
-      if (num_detections > 0) {
-        # Apply filters to deltas, scores, labels, and proposals
-        final_deltas <- deltas[keep, ]
-        final_scores <- final_scores[keep]
-        final_labels <- final_labels[keep]
-        kept_proposals <- props$proposals[keep, ]
-
-        # Decode Deltas to Absolute Coordinates $pred_box = proposal + delta$
-
-        # Widths and Heights of proposals
-        widths <- kept_proposals[, 3] - kept_proposals[, 1]
-        heights <- kept_proposals[, 4] - kept_proposals[, 2]
-
-        # Centers of proposals
-        ctr_x <- kept_proposals[, 1] + 0.5 * widths
-        ctr_y <- kept_proposals[, 2] + 0.5 * heights
-
-        # Extract predicted deltas
-        dx <- final_deltas[, 1]
-        dy <- final_deltas[, 2]
-        dw <- final_deltas[, 3]
-        dh <- final_deltas[, 4]
-
-        # Apply deltas
-        pred_ctr_x <- dx * widths + ctr_x
-        pred_ctr_y <- dy * heights + ctr_y
-        pred_w <- torch_exp(dw) * widths
-        pred_h <- torch_exp(dh) * heights
-
-        # Convert back to (x1, y1, x2, y2)
-        final_boxes <- torch_zeros_like(final_deltas)
-        final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
-        final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
-        final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
-        final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
-
-        # Clip Boxes to Image Boundary
-        img_h <- images$shape[3]
-        img_w <- images$shape[4]
-
-        final_boxes <- torch_clamp(final_boxes, min = 0.0)
-        final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
-        final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
-        final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
-        final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
-
-        # Apply NMS and Limit Detections
-        if (final_boxes$shape[1] > 1) {
-          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-          final_boxes <- final_boxes[nms_keep, ]
-          final_labels <- final_labels[nms_keep]
-          final_scores <- final_scores[nms_keep]
-          kept_proposals <- kept_proposals[nms_keep, ]
+        if (props$proposals$shape[1] == 0L) {
+          empty <- list(
+            boxes = torch::torch_empty(c(0, 4)),
+            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch::torch_empty(c(0)),
+            masks = torch::torch_empty(c(0, 28, 28))
+          )
+          final_results[[b]] <- empty
+          next
         }
 
-
-        # Limit detections per image
-        n_det <- final_scores$shape[1]
-        if (n_det > self$detections_per_img) {
-          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-          top_idx <- top_k[[2]]
-          final_boxes <- final_boxes[top_idx, ]
-          final_labels <- final_labels[top_idx]
-          final_scores <- final_scores[top_idx]
-          kept_proposals <- kept_proposals[top_idx, ]
+        # Limit proposals to avoid slow ROI pooling (common practice in detection)
+        max_proposals <- 1000
+        if (props$proposals$shape[1] > max_proposals) {
+          props$proposals <- props$proposals[1:max_proposals, ]
         }
 
-        # Predict masks for kept detections
-        mask_features <- roi_align_masks(features[[1]], kept_proposals, output_size = c(14L, 14L))
-        mask_logits <- self$mask_head(mask_features)  # Shape: (N, num_classes, 28, 28)
+        # Box predictions
+        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        # Extract masks for predicted classes
-        n_kept <- final_labels$shape[1]
-        final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+        scores <- torch::nnf_softmax(detections$scores, dim = 2)
+        max_scores <- torch::torch_max(scores, dim = 2)
+        final_scores <- max_scores[[1]]
+        final_labels <- max_scores[[2]]
 
-        for (i in seq_len(n_kept)) {
-          class_idx <- as.integer(final_labels[i]$item())
-          final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
+        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
+        # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
+        deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
+
+        # Filter by score threshold
+        keep <- final_scores > self$score_thresh
+        num_detections <- torch::torch_sum(keep)$item()
+
+        if (num_detections > 0) {
+          # Apply filters to deltas, scores, labels, and proposals
+          final_deltas <- deltas[keep, ]
+          final_scores <- final_scores[keep]
+          final_labels <- final_labels[keep]
+          kept_proposals <- props$proposals[keep, ]
+
+          # Decode Deltas to Absolute Coordinates $pred_box = proposal + delta$
+
+          # Widths and Heights of proposals
+          widths <- kept_proposals[, 3] - kept_proposals[, 1]
+          heights <- kept_proposals[, 4] - kept_proposals[, 2]
+
+          # Centers of proposals
+          ctr_x <- kept_proposals[, 1] + 0.5 * widths
+          ctr_y <- kept_proposals[, 2] + 0.5 * heights
+
+          # Extract predicted deltas
+          dx <- final_deltas[, 1]
+          dy <- final_deltas[, 2]
+          dw <- final_deltas[, 3]
+          dh <- final_deltas[, 4]
+
+          # Apply deltas
+          pred_ctr_x <- dx * widths + ctr_x
+          pred_ctr_y <- dy * heights + ctr_y
+          pred_w <- torch_exp(dw) * widths
+          pred_h <- torch_exp(dh) * heights
+
+          # Convert back to (x1, y1, x2, y2)
+          final_boxes <- torch_zeros_like(final_deltas)
+          final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
+          final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
+          final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
+          final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
+
+          # Clip Boxes to Image Boundary
+          img_h <- images$shape[3]
+          img_w <- images$shape[4]
+
+          final_boxes <- torch_clamp(final_boxes, min = 0.0)
+          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
+          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
+          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
+          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+
+          # Apply NMS and Limit Detections
+          if (final_boxes$shape[1] > 1L) {
+            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
+            final_boxes <- final_boxes[nms_keep, ]
+            final_labels <- final_labels[nms_keep]
+            final_scores <- final_scores[nms_keep]
+            kept_proposals <- kept_proposals[nms_keep, ]
+          }
+
+
+          # drop degenerate boxes before ROI‑Align
+          valid_boxes_mask <- (kept_proposals[,3] > kept_proposals[,1]) &
+            (kept_proposals[,4] > kept_proposals[,2])
+
+          if (valid_boxes_mask$sum()$item() == 0L) {
+            # nothing to pool → empty mask tensor
+            final_masks <- torch::torch_empty(c(0, 28, 28))
+          } else {
+            final_boxes <- final_boxes[valid_boxes_mask, ]
+            final_labels <- final_labels[valid_boxes_mask]
+            final_scores <- final_scores[valid_boxes_mask]
+            kept_proposals <- kept_proposals[valid_boxes_mask, ]
+          }
+
+          # Limit detections per image
+          n_det <- final_scores$shape[1]
+          if (n_det > self$detections_per_img) {
+            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
+            top_idx <- top_k[[2]]
+            final_boxes <- final_boxes[top_idx, ]
+            final_labels <- final_labels[top_idx]
+            final_scores <- final_scores[top_idx]
+            kept_proposals <- kept_proposals[top_idx, ]
+          }
+
+          # Predict masks for kept detections
+          mask_features <- roi_align_masks_fpn(
+            feature_maps = features,
+            proposals    = kept_proposals,      # still in image space
+            output_size  = c(14L, 14L),
+            sampling_ratio = 2L,
+            aligned        = FALSE
+          )
+          mask_conv   <- self$mask_head(mask_features)       # (N, 256, 14, 14)
+          mask_logits <- self$mask_predictor(mask_conv)      # (N, num_classes, 28, 28)
+
+
+          # Extract masks for predicted classes
+          n_kept <- final_labels$shape[1]
+          final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+
+          for (i in seq_len(n_kept)) {
+            class_idx <- as.integer(final_labels[i]$item())
+            final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+          }
+
+          # Apply sigmoid to get probabilities
+          final_masks <- torch::torch_sigmoid(final_masks)
+
+        } else {
+          final_boxes <- torch::torch_empty(c(0, 4))
+          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
+          final_scores <- torch::torch_empty(c(0))
+          final_masks <- torch::torch_empty(c(0, 28, 28))
         }
-
-        # Apply sigmoid to get probabilities
-        final_masks <- torch::torch_sigmoid(final_masks)
-
-      } else {
-        final_boxes <- torch::torch_empty(c(0, 4))
-        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-        final_scores <- torch::torch_empty(c(0))
-        final_masks <- torch::torch_empty(c(0, 28, 28))
-      }
-
-      list(
-        features = features,
-        detections = list(
+        final_results[[b]] <- list(
           boxes = final_boxes,
           labels = final_labels,
           scores = final_scores,
           masks = final_masks
         )
-      )
     }
+  list(features = features, detections = final_results)
+  }
 )
 
 

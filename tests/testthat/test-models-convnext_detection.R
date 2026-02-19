@@ -57,7 +57,7 @@ test_that("tests for pretrained / non-pretrained model_convnext_small_detection"
   expect_tensor(out$detections[[1]]$scores)
   expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
   # we cannot succesfully assert bbox here :
-  #   expert_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
+  #   expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
   # }
 
   model <- model_convnext_small_detection(num_classes = 10)
@@ -89,7 +89,7 @@ test_that("tests for pretrained / non-pretrained model_convnext_base_detection",
   expect_tensor(out$detections[[1]]$scores)
   expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
-    expert_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
+    expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
   }
 })
 
