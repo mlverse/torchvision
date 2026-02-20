@@ -24,8 +24,8 @@ class labels.
 
 A character vector with the labels associated with \code{id}.
 
-A character vector with 21k entries representing the ImageNet-21k
-class labels.
+A data.frame with 21k entries containing columns \code{id} and \code{label}
+representing the ImageNet-21k class identifiers and labels.
 
 A character vector with the labels associated with \code{id}.
 }

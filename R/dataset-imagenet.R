@@ -98,8 +98,8 @@ imagenet_label <- function(id) {
 imagenet_1k_classes <- imagenet_classes
 imagenet_1k_label <- imagenet_label
 
-#' @return A character vector with 21k entries representing the ImageNet-21k
-#'   class labels.
+#' @return A data.frame with 21k entries containing columns `id` and `label`
+#'   representing the ImageNet-21k class identifiers and labels.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
