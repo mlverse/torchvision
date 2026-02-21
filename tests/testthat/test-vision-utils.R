@@ -103,6 +103,12 @@ test_that("draw_keypoints works", {
   expect_tensor_dtype(keypoint_image, torch::torch_uint8())
   expect_tensor_shape(keypoint_image, c(3, 360, 360))
   expect_no_error(keypoint_image <- draw_keypoints(image_uint, keypoints, colors = colors, radius = 7))
+  
+  # Test connectivity
+  connectivity <- matrix(c(1,2, 2,3, 3,4, 4,5), ncol = 2, byrow = TRUE)
+  expect_no_error(keypoint_image <- draw_keypoints(image_uint, keypoints, connectivity = connectivity, width = 2))
+  expect_tensor_dtype(keypoint_image, torch::torch_uint8())
+  expect_tensor_shape(keypoint_image, c(3, 360, 360))
 })
 
 test_that("tensor_image_browse works", {
