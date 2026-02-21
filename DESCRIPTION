@@ -54,7 +54,8 @@ Imports:
     withr,
     cli,
     glue,
-    zeallot
+    zeallot,
+    Rcpp (>= 1.0.0)
 Suggests:
     arrow,
     magick,
@@ -66,7 +67,9 @@ Suggests:
     knitr,
     rmarkdown
 BugReports: https://github.com/mlverse/torchvision/issues
+LinkingTo: Rcpp
 Collate: 
+    'RcppExports.R'
     'collection-catalog.R'
     'folder-dataset.R'
     'collection-rf100-doc.R'
@@ -115,6 +118,7 @@ Collate:
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
+    'box_operations_cpp.R'
     'transforms-array.R'
     'transforms-defaults.R'
     'transforms-generics.R'
