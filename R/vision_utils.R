@@ -164,7 +164,6 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
     if (length(flat) %% 2 != 0) flat <- flat[-length(flat)]
     if (length(flat) >= 6) {
       coords <- matrix(flat, ncol=2, byrow=TRUE)
-      coords[,2] <- height - coords[,2]
       graphics::polygon(coords[,1], coords[,2], col="white", border=NA)
     }
   }
