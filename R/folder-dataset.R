@@ -86,9 +86,9 @@ folder_dataset <- torch::dataset(
   .find_classes = function(dir) {
     dirs <- fs::dir_ls(dir, recurse = FALSE, type = "directory")
     dirs <- sapply(fs::path_split(dirs), function(x) tail(x, 1))
-    class_too_idx <- seq_along(dirs)
-    names(class_too_idx) <- sort(dirs)
-    class_too_idx
+    class_to_idx <- seq_along(dirs)
+    names(class_to_idx) <- sort(dirs)
+    class_to_idx
   },
   .getitem = function(index) {
 
@@ -153,7 +153,7 @@ base_loader <- function(path) {
   if (length(dim(img)) == 2)
     img <- abind::abind(img, img, img, along = 3)
   else if (length(dim(img)) == 3 && dim(img)[1] == 1)
-    img <- abind::abind(img, img, img, along = 1) %>% aperm(c(3,1,2))
+    img <- abind::abind(img[1,,], img[1,,], img[1,,], along = 3)
 
   # all readers default to channel last
   img

@@ -161,7 +161,7 @@ generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx
 
   if (proposals$shape[1] > 0) {
     keep_idx <- nms(proposals, scores, nms_thresh)
-    proposals <- proposals[keep_idx, ]
+    proposals <- proposals[keep_idx, , drop = FALSE]
   } else {
     proposals <- torch::torch_empty(c(0, 4), device = device, dtype = torch_float32())
   }
