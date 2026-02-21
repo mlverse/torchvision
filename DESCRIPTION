@@ -58,6 +58,7 @@ Imports:
     Rcpp (>= 1.0.0)
 Suggests:
     arrow,
+    bench,
     magick,
     prettyunits,
     testthat,
