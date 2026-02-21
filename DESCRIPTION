@@ -57,6 +57,7 @@ Imports:
     zeallot
 Suggests:
     arrow,
+    bench,
     magick,
     prettyunits,
     testthat,
