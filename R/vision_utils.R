@@ -415,7 +415,7 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x,
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #' @param keypoints Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
-#' @param connectivity Vector of pair of keypoints to be connected (currently unavailable)
+#' @param connectivity Optional matrix with 2 columns specifying pairs of keypoint indices to connect.
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints
@@ -427,10 +427,11 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x,
 #' @examples
 #' if (torch::torch_is_installed()) {
 #' \dontrun{
-#' image <- torch::torch_randint(190, 255, size = c(3, 360, 360))$to(torch::torch_uint8())
-#' keypoints <- torch::torch_randint(low = 60, high = 300, size = c(4, 5, 2))
-#' keypoint_image <- draw_keypoints(image, keypoints)
-#' tensor_image_browse(keypoint_image)
+#' image <- torch::torch_randint(190, 255, size = c(3, 400, 300))$to(torch::torch_uint8())
+#' kpts <- torch::torch_tensor(array(c(150,50, 120,100, 180,100, 130,200, 170,200), 
+#'                                   dim=c(1,5,2)))
+#' skeleton <- matrix(c(1,2, 1,3, 2,3, 2,4, 3,5, 4,5), ncol=2, byrow=TRUE)
+#' result <- draw_keypoints(image, kpts, connectivity=skeleton, radius=3)
 #' }
 #' }
 #' @family image display
@@ -470,27 +471,25 @@ draw_keypoints <- function(image,
     magick::image_draw()
 
   for (pose in dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
-
+    kpt <- img_kpts[pose,,]
+    
+    if (!is.null(connectivity)) {
+      for (i in seq_len(nrow(connectivity))) {
+        start_idx <- connectivity[i, 1]
+        end_idx <- connectivity[i, 2]
+        graphics::segments(
+          kpt[start_idx, 1], kpt[start_idx, 2],
+          kpt[end_idx, 1], kpt[end_idx, 2],
+          col = colors, lwd = width
+        )
+      }
+    }
+    
+    graphics::points(kpt[,1], kpt[,2], pch = ".", col = colors, cex = radius)
   }
-  # TODO need R-isation and vectorisation
-  # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
-  #     if (connectivity) {
-  #         for (connection in connectivity) {
-  #             start_pt_x <- kpt_inst[connection[0]][0]
-  #             start_pt_y <- kpt_inst[connection[0]][1]
-  #
-  #             end_pt_x <- kpt_inst[connection[1]][0]
-  #             end_pt_y <- kpt_inst[connection[1]][1]
-  #
-  #             draw$line(
-  #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
-  #                 widt = width,
-  #             )
-  #         }
-  #     }
-  # }
+  
   grDevices::dev.off()
+  
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
 
