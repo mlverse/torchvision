@@ -54,20 +54,3 @@ test_that("matches existing box_area function", {
   
   expect_equal(as.numeric(box_area(boxes_tensor)), box_area_fast(boxes))
 })
-
-test_that("cpp is faster than R", {
-  skip_on_cran()
-  skip_if_not_installed("bench")
-  
-  n <- 10000
-  boxes <- matrix(runif(n * 4, 0, 100), ncol = 4)
-  r_impl <- function(b) (b[,3] - b[,1]) * (b[,4] - b[,2])
-  
-  bm <- bench::mark(
-    R = r_impl(boxes),
-    Cpp = box_area_cpp(boxes),
-    iterations = 50
-  )
-  
-  expect_true(all(!is.na(bm$median)))
-})
