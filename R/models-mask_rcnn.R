@@ -1,5 +1,5 @@
 #' @include models-faster_rcnn.R
-#' @importFrom torch nn_conv_transpose2d torch_int32
+#' @importFrom torch nn_conv_transpose2d torch_int32 torch_float torch_log2 torch_nonzero
 NULL
 
 # Mask R-CNN Implementation
