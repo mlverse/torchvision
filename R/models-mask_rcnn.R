@@ -81,12 +81,12 @@ mask_head_module_v2 <- torch::nn_module(
 #' ROI Align for Mask Prediction
 #'
 #' Extracts fixed-size feature maps from regions of interest for mask prediction.
-#' Returns a 4D tensor suitable for the mask head (unlike roi_align_stub which flattens).
+#' Returns a 4D tensor suitable for the mask head (unlike roi_align which flattens).
 #'
 #' ROI Align for mask prediction – single FPN level
 #'
-#' This is a thin wrapper around the low‑level C++ op
-#' torch::nnf_roi_align.  It **expects** the proposals in *image* coordinates
+#' This uses grid_sample for bilinear interpolation.
+#' It **expects** the proposals in *image* coordinates
 #' and applies the supplied `spatial_scale` before the ROI‑Align.
 #'
 #' @param feature_map   Tensor of shape (1, C, H, W) – one FPN level.
@@ -109,32 +109,55 @@ roi_align_masks <- function(feature_map,
                             sampling_ratio = 2L,
                             aligned = FALSE) {
 
-  #  Scale the boxes to the feature‑map resolution
-
-  # proposals are float, keep them float for the scaling
+  # Scale the boxes to the feature map resolution
   boxes_scaled <- proposals$to(dtype = torch_float())$mul(spatial_scale)
 
-  #   Add the batch‑index column
-  # torch::nnf_roi_align expects a (N, 5) tensor:
-  # (batch_idx, x1, y1, x2, y2). Because we are inside a
-  # loop over a single image we set batch_idx = 0 for every ROI.
-  batch_idx <- torch_full(c(boxes_scaled$size(1), 1),
-                          0L,
-                          dtype = torch_long(),
-                          device = boxes_scaled$device)
-  rois <- torch_cat(list(batch_idx, boxes_scaled), dim = 2)
+  num_rois <- boxes_scaled$size(1)
+  if (num_rois == 0) {
+    return(torch_empty(c(0, feature_map$size(2), output_size[1], output_size[2]),
+                       device = feature_map$device))
+  }
 
-  #   Call the low‑level functional ROI‑Align operator
-  pooled <- torchvisionlib::ops_ps_roi_align(
-    input          = feature_map,
-    boxes          = rois,
-    output_size    = output_size,
-    spatial_scale  = 1,          # already applied above
-    sampling_ratio = sampling_ratio
+  channels <- feature_map$size(2)
+  h_feat <- feature_map$size(3)
+  w_feat <- feature_map$size(4)
+
+  # Normalize coordinates to match grid_sample [-1 to 1]
+  x1 <- (boxes_scaled[, 1] / (w_feat - 1) * 2) - 1
+  y1 <- (boxes_scaled[, 2] / (h_feat - 1) * 2) - 1
+  x2 <- (boxes_scaled[, 3] / (w_feat - 1) * 2) - 1
+  y2 <- (boxes_scaled[, 4] / (h_feat - 1) * 2) - 1
+
+  # Create a grid of output_size
+  grid_y <- torch_linspace(0, 1, output_size[1], device = feature_map$device)
+  grid_x <- torch_linspace(0, 1, output_size[2], device = feature_map$device)
+
+  # Meshgrid to get relative coordinates
+  grids <- torch_meshgrid(list(grid_y, grid_x), indexing = "ij")
+  rel_y <- grids[[1]]
+  rel_x <- grids[[2]]
+
+  # Linear interpolation for each ROI [N, output_size[1], output_size[2]]
+  sampling_x <- x1$view(c(-1, 1, 1)) + rel_x$view(c(1, output_size[1], output_size[2])) * (x2 - x1)$view(c(-1, 1, 1))
+  sampling_y <- y1$view(c(-1, 1, 1)) + rel_y$view(c(1, output_size[1], output_size[2])) * (y2 - y1)$view(c(-1, 1, 1))
+
+  # Concat to get a grid of [N, output_size[1], output_size[2], 2]
+  grid <- torch_stack(list(sampling_x, sampling_y), dim = -1)
+
+  # Bilinear sampling
+  # Feature map is (1, C, H, W), expand to (N, C, H, W) for all ROIs
+  input_expanded <- feature_map$squeeze(1)$unsqueeze(1)$expand(c(num_rois, channels, h_feat, w_feat))
+
+  pooled_features <- nnf_grid_sample(
+    input_expanded,
+    grid,
+    mode = "bilinear",
+    padding_mode = "border",
+    align_corners = FALSE
   )
 
-  # `pooled` already has shape (N, C, out_h, out_w)
-  pooled
+  # Return [N, C, output_size[1], output_size[2]]
+  pooled_features
 }
 
 
@@ -186,12 +209,16 @@ roi_align_masks_fpn <- function(feature_maps,
   for (lvl in seq_along(feature_maps)) {
     # mask of boxes that belong to the current level
     lvl_mask <- level_idx$eq(lvl)$squeeze()
-    idx      <- torch_nonzero(lvl_mask)$squeeze()   # indices (0‑based)
+    idx      <- torch_nonzero(lvl_mask)$squeeze()   # indices
 
-    if (idx$shape[1] == 0L) next
+    # Check if there are any boxes at this level
+    if (idx$numel() == 0) next
+
+    # Ensure idx is 1D for consistent indexing
+    if (idx$dim() == 0) idx <- idx$unsqueeze(1)  # scalar -> (1,)
 
     # pick the subset of proposals that belong to this level
-    rois_lvl <- proposals[idx + 1L, , drop = FALSE]   # +1 for 1‑based R indexing
+    rois_lvl <- proposals[idx, , drop = FALSE]  # idx is already 1-based
 
     # call the *single‑scale* wrapper (it adds the batch column internally)
     pooled_lvl <- roi_align_masks(
@@ -204,7 +231,7 @@ roi_align_masks_fpn <- function(feature_maps,
     )   # shape (M, C, out_h, out_w)
 
     # write the result back into the pre‑allocated output tensor
-    out[idx + 1L, , , ] <- pooled_lvl
+    out[idx, , , ] <- pooled_lvl  # idx is already 1-based
   }
 
   out

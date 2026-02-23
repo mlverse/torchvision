@@ -64,7 +64,8 @@ Suggests:
     R.matlab,
     xml2,
     knitr,
-    rmarkdown
+    rmarkdown,
+    torchvisionlib
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
     'collection-catalog.R'
