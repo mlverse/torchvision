@@ -415,10 +415,12 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x,
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #' @param keypoints Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
-#' @param connectivity Vector of pair of keypoints to be connected (currently unavailable)
+#' @param connectivity List of integer pairs `c(i, j)` specifying which
+#'            keypoints to connect with a line, e.g. `list(c(1, 2), c(2, 3))`.
+#'            `NULL` (default) draws no connecting lines.
 #' @param colors character vector containing the colors
-#'            of the boxes or single color for all boxes. The color can be represented as
-#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints
+#'            of the keypoints or single color for all keypoints. The color can be represented as
+#'            strings e.g. "red" or "#FF00FF". By default, rainbow colors are generated for keypoints
 #' @param radius radius of the plotted keypoint.
 #' @param width width of line connecting keypoints.
 #'
@@ -461,7 +463,7 @@ draw_keypoints <- function(image,
   }
 
   if (keypoints$ndim != 3) {
-    cli_abort("{.var keypoints} must be of shape (num_instances, K, 2), but is current shape is {.value {keypoints$shape}}")
+    cli_abort("{.var keypoints} must be of shape (num_instances, K, 2), but current shape is {.value {keypoints$shape}}")
   }
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
