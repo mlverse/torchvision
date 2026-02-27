@@ -103,13 +103,11 @@ draw_bounding_boxes <- function(x, ...) {
   UseMethod("draw_bounding_boxes")
 }
 
-#' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.default <- function(x, ...) {
   cli_abort("The provided x class {.class {class(x)}} is not supported")
 }
 
-#' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.torch_tensor <- function(x,
                                              boxes,
@@ -204,7 +202,6 @@ draw_bounding_boxes.torch_tensor <- function(x,
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
-#' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
   draw_bounding_boxes(
@@ -282,51 +279,16 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 
 
 #' Draw segmentation masks
-#'
-#' Draw segmentation masks with their respective colors on top of a given RGB tensor image
-#'
-#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
-#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-#'              C value for channel can only be 1 (grayscale) or 3 (RGB).
-#' @param masks torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
-#' @param alpha number between 0 and 1 denoting the transparency of the masks.
-#   0 means full transparency, 1 means no transparency.
-#' @param colors character vector containing the colors
-#'            of the boxes or single color for all boxes. The color can be represented as
-#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
-#' @param ... Additional arguments passed to methods.
-#'
-#' @importFrom graphics polygon
-#' @importFrom grDevices dev.off
-#' @importFrom torch as_array
-#'
-#' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
-#'
-#' @examples
-#' if (torch::torch_is_installed()) {
-#' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-#' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
-#' masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
-#' tensor_image_browse(masked_image)
-#' }
-#' @family image display
 #' @export
-draw_segmentation_masks <- function(x, ...) {
-  UseMethod("draw_segmentation_masks")
-}
+draw_segmentation_masks <- function(x, ...) UseMethod("draw_segmentation_masks")
 
-#' @rdname draw_segmentation_masks
 #' @export
 draw_segmentation_masks.default <- function(x, ...) {
   type_error("The provided object of class {.cls {class(x)}} is not supported by draw_segmentation_masks.")
 }
 
-#' @rdname draw_segmentation_masks
 #' @export
-draw_segmentation_masks.torch_tensor <- function(x,
-                                                 masks,
-                                                 alpha = 0.8,
-                                                 colors = NULL, ...) {
+draw_segmentation_masks.torch_tensor <- function(x, masks, alpha=0.8, colors=NULL, ...) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
@@ -393,18 +355,9 @@ draw_segmentation_masks.torch_tensor <- function(x,
   return(out$to(out_dtype))
 }
 
-#' @rdname draw_segmentation_masks
 #' @export
-draw_segmentation_masks.image_with_segmentation_mask <- function(x,
-                                                                 alpha = 0.5,
-                                                                 colors = NULL, ...) {
-  draw_segmentation_masks(
-    x = x$x,
-    masks = x$y$masks,
-    alpha = alpha,
-    colors = colors,
-    ...
-  )
+draw_segmentation_masks.image_with_segmentation_mask <- function(x, alpha=0.5, colors=NULL, ...) {
+  draw_segmentation_masks(x$x, masks=x$y$masks, alpha=alpha, colors=colors, ...)
 }
 
 

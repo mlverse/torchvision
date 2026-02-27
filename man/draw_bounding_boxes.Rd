@@ -2,80 +2,36 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_bounding_boxes}
 \alias{draw_bounding_boxes}
-\alias{draw_bounding_boxes.default}
-\alias{draw_bounding_boxes.torch_tensor}
-\alias{draw_bounding_boxes.image_with_bounding_box}
-\title{Draws bounding boxes on image.}
+\title{Draw bounding boxes on image}
 \usage{
 draw_bounding_boxes(x, ...)
-
-\method{draw_bounding_boxes}{default}(x, ...)
-
-\method{draw_bounding_boxes}{torch_tensor}(
-  x,
-  boxes,
-  labels = NULL,
-  colors = NULL,
-  fill = FALSE,
-  width = 1,
-  font = c("serif", "plain"),
-  font_size = 10,
-  ...
-)
-
-\method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
 }
 \arguments{
-\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-C value for channel can only be 1 (grayscale) or 3 (RGB).}
+\item{x}{Tensor (C x H x W) uint8 or float (\link{0,1})}
 
-\item{...}{Additional arguments passed to methods.}
+\item{boxes}{Tensor (N x 4) in c(xmin, ymin, xmax, ymax)}
 
-\item{boxes}{Tensor of size (N, 4) containing N bounding boxes in
-c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
-format. Note that the boxes coordinates are absolute with respect
-to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
-\eqn{0  \leq y_{min} < y_{max} < Width }.}
+\item{labels}{character vector of box labels}
 
-\item{labels}{character vector containing the labels of bounding boxes.}
+\item{colors}{character vector or single color}
 
-\item{colors}{character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
-strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
+\item{fill}{whether to fill the box}
 
-\item{fill}{If \code{TRUE} fills the bounding box with specified color.}
+\item{width}{width of the box border}
 
-\item{width}{Width of text shift to the bounding box.}
+\item{font}{font family vector}
 
-\item{font}{NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
-
-\item{font_size}{The requested font size in points.}
+\item{font_size}{font size in points}
 }
 \value{
-torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
+torch_tensor (C x H x W) with boxes drawn
 }
 \description{
-Draws bounding boxes on top of one image tensor
-}
-\examples{
-if (torch::torch_is_installed()) {
-\dontrun{
-image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
-y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
-boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", fill = TRUE)
-tensor_image_browse(bboxed)
-}
-}
+Draw bounding boxes on image
 }
 \seealso{
 Other image display: 
 \code{\link{draw_keypoints}()},
-\code{\link{draw_segmentation_masks}()},
-\code{\link{tensor_image_browse}()},
-\code{\link{tensor_image_display}()},
 \code{\link{vision_make_grid}()}
 }
 \concept{image display}
