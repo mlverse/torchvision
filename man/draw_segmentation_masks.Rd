@@ -2,9 +2,26 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_segmentation_masks}
 \alias{draw_segmentation_masks}
+\alias{draw_segmentation_masks.torch_tensor}
 \title{Draw segmentation masks}
 \usage{
 draw_segmentation_masks(x, ...)
+
+\method{draw_segmentation_masks}{torch_tensor}(x, masks, alpha = 0.8, colors = NULL, ...)
+}
+\arguments{
+\item{x}{Image tensor}
+
+\item{...}{Additional arguments passed to methods}
+
+\item{masks}{Tensor of masks}
+
+\item{alpha}{Opacity of masks (0-1)}
+
+\item{colors}{Colors for masks}
+}
+\value{
+torch_tensor with masks drawn
 }
 \description{
 Draw segmentation masks

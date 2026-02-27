@@ -2,12 +2,27 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_bounding_boxes}
 \alias{draw_bounding_boxes}
+\alias{draw_bounding_boxes.torch_tensor}
 \title{Draw bounding boxes on image}
 \usage{
 draw_bounding_boxes(x, ...)
+
+\method{draw_bounding_boxes}{torch_tensor}(
+  x,
+  boxes,
+  labels = NULL,
+  colors = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
 }
 \arguments{
-\item{x}{Tensor (C x H x W) uint8 or float (\link{0,1})}
+\item{x}{Tensor (C x H x W) uint8 or float in range 0 to 1}
+
+\item{...}{Additional arguments passed to methods}
 
 \item{boxes}{Tensor (N x 4) in c(xmin, ymin, xmax, ymax)}
 

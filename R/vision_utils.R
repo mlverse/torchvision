@@ -61,42 +61,11 @@ vision_make_grid <- function(tensor,
   grid
 }
 
-
-#' Draws bounding boxes on image.
-#'
-#' Draws bounding boxes on top of one image tensor
-#'
-#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
-#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
-#'              C value for channel can only be 1 (grayscale) or 3 (RGB).
-#' @param boxes Tensor of size (N, 4) containing N bounding boxes in
-#'            c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
-#'            format. Note that the boxes coordinates are absolute with respect
-#'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
-#'            \eqn{0  \leq y_{min} < y_{max} < Width }.
-#' @param labels character vector containing the labels of bounding boxes.
-#' @param colors character vector containing the colors
-#'            of the boxes or single color for all boxes. The color can be represented as
-#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
-#' @param fill If `TRUE` fills the bounding box with specified color.
-#' @param width  Width of text shift to the bounding box.
-#' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
-#' @param font_size The requested font size in points.
-#' @param ... Additional arguments passed to methods.
-#'
-#' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
-#'
-#' @examples
-#' if (torch::torch_is_installed()) {
-#' \dontrun{
-#' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-#' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
-#' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
-#' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", fill = TRUE)
-#' tensor_image_browse(bboxed)
-#' }
-#' }
+# ============================================================================ #
+#' Draw bounding boxes on image
+#' @param x Tensor (C x H x W) uint8 or float in range 0 to 1
+#' @param ... Additional arguments passed to methods
+#' @return torch_tensor (C x H x W) with boxes drawn
 #' @family image display
 #' @export
 draw_bounding_boxes <- function(x, ...) {
@@ -108,6 +77,14 @@ draw_bounding_boxes.default <- function(x, ...) {
   cli_abort("The provided x class {.class {class(x)}} is not supported")
 }
 
+#' @param boxes Tensor (N x 4) in c(xmin, ymin, xmax, ymax)
+#' @param labels character vector of box labels
+#' @param colors character vector or single color
+#' @param fill whether to fill the box
+#' @param width width of the box border
+#' @param font font family vector
+#' @param font_size font size in points
+#' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.torch_tensor <- function(x,
                                              boxes,
@@ -279,6 +256,9 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 
 
 #' Draw segmentation masks
+#' @param x Image tensor
+#' @param ... Additional arguments passed to methods
+#' @return torch_tensor with masks drawn
 #' @export
 draw_segmentation_masks <- function(x, ...) UseMethod("draw_segmentation_masks")
 
@@ -287,6 +267,10 @@ draw_segmentation_masks.default <- function(x, ...) {
   type_error("The provided object of class {.cls {class(x)}} is not supported by draw_segmentation_masks.")
 }
 
+#' @param masks Tensor of masks
+#' @param alpha Opacity of masks (0-1)
+#' @param colors Colors for masks
+#' @rdname draw_segmentation_masks
 #' @export
 draw_segmentation_masks.torch_tensor <- function(x, masks, alpha=0.8, colors=NULL, ...) {
   rlang::check_installed("magick")
