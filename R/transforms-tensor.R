@@ -393,8 +393,12 @@ transform_adjust_saturation.torch_tensor <- function(img, saturation_factor) {
 }
 
 #' @export
-transform_rotate.torch_tensor <- function(img, angle, resample = 0, expand = FALSE,
-                                          center = NULL, fill = NULL) {
+transform_rotate.torch_tensor <- function(img, angle, interpolation = 0, expand = FALSE,
+                                          center = NULL, fill = NULL, resample) {
+  if (!missing(resample)) {
+    warning("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
 
   center_f <- c(0.0, 0.0)
   if (!is.null(center)) {
@@ -408,12 +412,21 @@ transform_rotate.torch_tensor <- function(img, angle, resample = 0, expand = FAL
   # rotate implementations we need to set -angle.
   matrix <- get_inverse_affine_matrix(center_f, -angle, c(0.0, 0.0), 1.0, c(0.0, 0.0))
 
-  rotate_impl(img, matrix=matrix, resample=resample, expand=expand, fill=fill)
+  rotate_impl(img, matrix=matrix, interpolation=interpolation, expand=expand, fill=fill)
 }
 
 #' @export
 transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
-                                          resample = 0, fillcolor = NULL) {
+                                          interpolation = 0, fill = NULL,
+                                          resample, fillcolor) {
+  if (!missing(resample)) {
+    warning("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
+  if (!missing(fillcolor)) {
+    warning("'fillcolor' is deprecated, use 'fill' instead")
+    fill <- fillcolor
+  }
 
   if (!is.numeric(angle))
     value_error("`angle` should be int or float")
@@ -433,7 +446,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
   img_size <- get_image_size(img)
 
   matrix <- get_inverse_affine_matrix(c(1, 1), angle, translate, scale, shear)
-  affine_impl(img, matrix=matrix, resample=resample, fillcolor=fillcolor)
+  affine_impl(img, matrix=matrix, interpolation=interpolation, fill=fill)
 }
 
 #' @export
@@ -591,7 +604,7 @@ get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
   matrix
 }
 
-assert_grid_transform_inputs <- function(img, matrix, resample, fillcolor,
+assert_grid_transform_inputs <- function(img, matrix, interpolation, fill,
                                          interpolation_modes, coeffs) {
   check_img(img)
 }
@@ -672,14 +685,14 @@ rotate_compute_output_size <- function(theta, w, h) {
   as.integer(c(size[1]$item(), size[2]$item()))
 }
 
-rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
+rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = NULL) {
 
   interpolation_modes <- c(
     "0" =  "nearest",
     "2" = "bilinear"
   )
 
-  assert_grid_transform_inputs(img, matrix, resample, fill, interpolation_modes)
+  assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
   theta <- torch::torch_tensor(matrix)$reshape(c(1, 2, 3))
   w <- tail(img$shape, 2)[1]
   h <- tail(img$shape, 2)[2]
@@ -694,25 +707,25 @@ rotate_impl <- function(img, matrix, resample = 0, expand = FALSE, fill= NULL) {
   }
 
   grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
-  mode <- interpolation_modes[as.character(as.integer(resample))]
+  mode <- interpolation_modes[as.character(as.integer(interpolation))]
 
   apply_grid_transform(img, grid, mode)
 }
 
-affine_impl <- function(img, matrix, resample = 0, fillcolor = NULL) {
+affine_impl <- function(img, matrix, interpolation = 0, fill = NULL) {
 
   interpolation_modes <- c(
     "0"= "nearest",
     "2"= "bilinear"
   )
 
-  assert_grid_transform_inputs(img, matrix, resample, fillcolor, interpolation_modes)
+  assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
 
   theta <- torch::torch_tensor(matrix, dtype=torch::torch_float())$reshape(c(1, 2, 3))
   shape <- img$shape
   grid <- gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
                          ow=rev(shape)[1], oh=rev(shape)[2])
-  mode <- interpolation_modes[as.character(resample)]
+  mode <- interpolation_modes[as.character(interpolation)]
   apply_grid_transform(img, grid, mode)
 }
 
