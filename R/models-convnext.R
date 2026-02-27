@@ -190,6 +190,13 @@ convnext_model_urls <- c(
 
 
 .convnext <- function(arch, channels, depths, dims, num_classes, pretrained, progress, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   if (!is.character(arch) || length(arch) != 1) {
     stop("arch must be a single character string.")
   }

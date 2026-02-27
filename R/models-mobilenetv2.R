@@ -9,6 +9,13 @@
 #' @family classification_model
 #' @export
 model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   # resources
   r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v2.pth", "06af6062e42ad3c80e430219a6560ca0", "~13 MB")
   model <- mobilenet_v2(...)

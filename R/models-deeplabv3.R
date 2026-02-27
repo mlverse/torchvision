@@ -238,6 +238,12 @@ DeepLabV3 <- torch::nn_module(
 deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
                                      num_classes, aux_loss = NULL,
                                      pretrained_backbone = FALSE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
 
   validate_num_classes(num_classes, pretrained)
 

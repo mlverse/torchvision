@@ -1005,6 +1005,13 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                           nms_thresh = 0.5,
                                           detections_per_img = 100,
                                           ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   backbone <- resnet_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_model(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
@@ -1038,6 +1045,13 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
                                              nms_thresh = 0.5,
                                              detections_per_img = 100,
                                              ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
   model <- fasterrcnn_model_v2(backbone, num_classes = num_classes,
                                score_thresh = score_thresh,
@@ -1089,6 +1103,13 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                                     nms_thresh = 0.5,
                                                     detections_per_img = 100,
                                                     ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
                                       score_thresh = score_thresh,
@@ -1124,6 +1145,13 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         nms_thresh = 0.5,
                                                         detections_per_img = 100,
                                                         ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   backbone <- mobilenet_v3_320_fpn_backbone(pretrained = pretrained)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
                                       score_thresh = score_thresh,

@@ -9,6 +9,13 @@
 #' @name model_mobilenet_v3
 #' @export
 model_mobilenet_v3_large_quantized <- function(pretrained = FALSE, progress = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   # resources
   r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large_quantized.pth",
          "06af6062e42ad3c80e430219a6560ca0", "~13 MB")

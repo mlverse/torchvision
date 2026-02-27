@@ -410,6 +410,13 @@ maxvit_impl <- nn_module(
 #'
 #' @export
 model_maxvit <- function(pretrained = FALSE, progress = TRUE, num_classes = 1000, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   model <- maxvit_impl(num_classes = num_classes)
 
   if (pretrained) {

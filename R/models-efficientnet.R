@@ -213,6 +213,13 @@ efficientnet <- torch::nn_module(
 )
 
 effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   args <- rlang::list2(...)
   model <- do.call(efficientnet, append(args, list(
     width_coefficient = width,

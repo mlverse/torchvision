@@ -413,6 +413,13 @@ inception_model_urls <- list(
 #' @family classification_model
 #' @export
 model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   args <- rlang::list2(...)
 
   if (pretrained) {

@@ -51,6 +51,13 @@ alexnet <- torch::nn_module(
 #'
 #' @export
 model_alexnet <- function(pretrained = FALSE, progress = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/alexnet.pth", "41ac4efd60b7e72480c4b9ba75618507", "~235 MB" )
   model <- alexnet(...)
 

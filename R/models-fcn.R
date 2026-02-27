@@ -160,6 +160,13 @@ fcn <- torch::nn_module(
 #' @export
 model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes = 21,
                                aux_loss = NULL, pretrained_backbone = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   if (is.null(aux_loss)) aux_loss <- pretrained
 
   if (pretrained && num_classes != 21)
@@ -208,6 +215,13 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
 #' @export
 model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes = 21,
                                 aux_loss = NULL, pretrained_backbone = TRUE, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   if (is.null(aux_loss)) aux_loss <- pretrained
 
   if (pretrained && num_classes != 21)

@@ -326,6 +326,12 @@ model_mobilenet_v3_large <- function(
   num_classes = 1000,
   width_mult = 1.0
 ) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
 
   config <- mobilenet_v3_large_config(width_mult)
   last_channel <- make_divisible(1280 * width_mult)
@@ -352,6 +358,12 @@ model_mobilenet_v3_small <- function(
   num_classes = 1000,
   width_mult = 1.0
 ) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
 
   config <- mobilenet_v3_small_config(width_mult)
   last_channel <- make_divisible(1024 * width_mult)

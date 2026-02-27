@@ -238,6 +238,13 @@ resnet <- torch::nn_module(
 )
 
 .resnet <- function(arch, block, layers, pretrained, progress, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
+  
   model <- resnet(block, layers, ...)
 
   if (pretrained) {

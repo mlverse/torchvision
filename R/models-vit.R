@@ -66,6 +66,12 @@ load_vit_torchscript_model <- function(name, ...) {
 }
 
 model_vit_base <- function(name, pretrained, progress, ...) {
+  # validate inputs
+  if (!is.logical(pretrained) || length(pretrained) != 1)
+    value_error("'pretrained' must be a single logical value")
+  
+  if (!is.logical(progress) || length(progress) != 1)
+    value_error("'progress' must be a single logical value")
 
   if (pretrained) {
     return(load_vit_torchscript_model(name,...))
