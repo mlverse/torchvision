@@ -10,8 +10,10 @@ transform_affine(
   translate,
   scale,
   shear,
-  resample = 0,
-  fillcolor = NULL
+  interpolation = 0,
+  fill = NULL,
+  resample,
+  fillcolor
 )
 }
 \arguments{
@@ -30,13 +32,13 @@ clockwise direction. If a sequence is specified, the first value corresponds
 to a shear parallel to the x-axis, while the second value corresponds to a
 shear parallel to the y-axis.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(int): Interpolation mode. Default is 0 (nearest).}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.}
+\item{fill}{Fill color for area outside the transform. Default is NULL.}
+
+\item{resample}{Deprecated. Use interpolation instead.}
+
+\item{fillcolor}{Deprecated. Use fill instead.}
 }
 \description{
 Apply affine transformation on an image keeping image center invariant
