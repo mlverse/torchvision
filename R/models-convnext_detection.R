@@ -49,7 +49,7 @@
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' topk <- pred$scores$topk(k = 5)[[2]]
 #' boxes <- pred$boxes[topk, ]
-#' labels <- imagenet_label(as.integer(pred$labels[topk]))
+#' labels <- imagenet_classes(as.integer(pred$labels[topk]))
 #'
 #' # `draw_bounding_box()` may fail if bbox values are not consistent.
 #' if (num_boxes > 0) {
