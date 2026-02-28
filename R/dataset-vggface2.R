@@ -65,7 +65,7 @@ vggface2_dataset <- torch::dataset(
     self$archive_url <- self$resources[self$resources$split %in% c(split, "identity"),]$url
     self$archive_size <- prettyunits::pretty_bytes(sum(self$resources[self$resources$split %in% c(split, "identity"),]$size))
     self$archive_md5 <- self$resources[self$resources$split %in% c(split, "identity"),]$md5
-    self$split_file <- sapply(self$archive_url, \(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], basename(x)))
+    self$split_file <- sapply(self$archive_url, function(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], basename(x)))
 
     if (download) {
       cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -94,7 +94,7 @@ vggface2_dataset <- torch::dataset(
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
     # Download and extract archives
-    archive <- sapply(self$archive_url, \(x)  download_and_cache(x, prefix = class(self)[1]))
+    archive <- sapply(self$archive_url, function(x)  download_and_cache(x, prefix = class(self)[1]))
     if (!all(tools::md5sum(archive) == self$archive_md5))
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     for (file_id in seq_along(archive)) {

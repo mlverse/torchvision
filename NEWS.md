@@ -14,6 +14,7 @@
 
 ## New models
 
+* Added `model_maskrcnn_resnet50_fpn()` and `model_maskrcnn_resnet50_fpn_v2()` for instance segmentation (#278, @ANAMASGARD).
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
 
