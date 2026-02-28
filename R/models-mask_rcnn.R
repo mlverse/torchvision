@@ -264,7 +264,7 @@ maskrcnn_model <- torch::nn_module(
       # ROI heads for box prediction
       self$roi_heads <- roi_heads_module(num_classes = num_classes)
 
-      # Mask head for mask prediction
+      # Mask head without mask predictor
       self$mask_head <- mask_head_module()
 
       # Mask predictor for mask prediction
@@ -475,6 +475,7 @@ maskrcnn_model_v2 <- torch::nn_module(
 
       # Mask head V2 for mask prediction
       self$mask_head <- mask_head_module_v2(num_classes = num_classes)
+
     },
 
     forward = function(images) {
@@ -613,9 +614,7 @@ maskrcnn_model_v2 <- torch::nn_module(
             sampling_ratio = 2L,
             aligned        = FALSE
           )
-          mask_conv   <- self$mask_head(mask_features)       # (N, 256, 14, 14)
-          mask_logits <- self$mask_predictor(mask_conv)      # (N, num_classes, 28, 28)
-
+          mask_logits   <- self$mask_head(mask_features)       # (N, num_classes, 28, 28)
 
           # Extract masks for predicted classes
           n_kept <- final_labels$shape[1]
