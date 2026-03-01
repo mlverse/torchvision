@@ -3,17 +3,17 @@
 \name{imagenet_classes}
 \alias{imagenet_classes}
 \alias{imagenet_1k_classes}
+\alias{imagenet_21k_df}
 \alias{imagenet_21k_classes}
-\alias{imagenet_21k_label}
 \title{ImageNet Class Labels}
 \usage{
-imagenet_classes(class_id)
+imagenet_classes(class_id = 1:1000)
 
-imagenet_1k_classes(class_id)
+imagenet_1k_classes(class_id = 1:1000)
+
+imagenet_21k_df(class_id = 1:21843)
 
 imagenet_21k_classes(class_id)
-
-imagenet_21k_label(class_id)
 }
 \arguments{
 \item{class_id}{Integer vector of 1-based class identifiers.}
@@ -22,7 +22,7 @@ imagenet_21k_label(class_id)
 A character vector with 1000 entries representing the ImageNet-1k
 class labels.
 
-A data.frame with 21k rows representing the ImageNet-21k
+A data.frame with 21.8k rows representing the ImageNet-21k
 class labels.
 
 A character vector with the labels associated with \code{class_id}.
@@ -34,18 +34,22 @@ PyTorch's reference implementation.
 }
 \seealso{
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
 \code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
 \code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
 \code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
 \code{\link{pascal_voc_classes}()}
 }

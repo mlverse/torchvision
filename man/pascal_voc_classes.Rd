@@ -25,6 +25,7 @@ They are available through the \code{classes} variable of the dataset object.
 }
 \seealso{
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
 \code{\link{imagenet_classes}()}
 }

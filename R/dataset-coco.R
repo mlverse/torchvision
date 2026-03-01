@@ -426,7 +426,7 @@ coco_caption_dataset <- torch::dataset(
 #' @family class_resolution
 #' @importFrom utils read.delim
 #' @export
-coco_classes <- function(class_id) {
+coco_classes <- function(class_id = 1:80) {
   if (any(class_id > 80)) {
     cli_warn("MS COCO {.var class_id} cannot be > 80")
   }

@@ -4,7 +4,7 @@
 \alias{coco_classes}
 \title{MS COCO Class Labels}
 \usage{
-coco_classes(class_id)
+coco_classes(class_id = 1:80)
 }
 \arguments{
 \item{class_id}{Integer vector of 1-based class identifiers.}
@@ -18,6 +18,7 @@ human readable labels. The labels are retrieved from ultralytics source
 }
 \seealso{
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{imagenet_classes}()},
 \code{\link{pascal_voc_classes}()}
 }

@@ -80,7 +80,7 @@ tiny_imagenet_dataset <- torch::dataset(
 #'   class labels.
 #' @family class_resolution
 #' @export
-imagenet_classes <- function(class_id) {
+imagenet_classes <- function(class_id = 1:1000) {
   if (any(class_id > 1000)) {
     cli_warn("Imagenet {.var class_id} cannot be > 1000")
   }
@@ -94,28 +94,30 @@ imagenet_classes <- function(class_id) {
 #' @export
 imagenet_1k_classes <- imagenet_classes
 
-#' @return A data.frame with 21k rows representing the ImageNet-21k
+#' @param class_id Integer vector of 1-based class identifiers.
+#' @return A data.frame with 21.8k rows representing the ImageNet-21k
 #'   class labels.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
-imagenet_21k_classes <- function(class_id) {
+imagenet_21k_df <- function(class_id = 1:21843) {
   if (any(class_id > 21000)) {
-    cli_warn("Imagenet {.var class_id} cannot be > 21000")
+    cli_warn("Imagenet {.var class_id} cannot be > 21843")
   }
-  url <- download_and_cache("https://storage.googleapis.com/bit_models/imagenet21k_wordnet_ids.txt")
+  url <- download_and_cache("https://raw.githubusercontent.com/ailia-ai/ailia-models/refs/heads/master/object_detection/detic/datasets_detic/imagenet21k_wordnet_ids.txt")
   ids <- readLines(url, warn = FALSE)
-  url <- download_and_cache("https://storage.googleapis.com/bit_models/imagenet21k_wordnet_lemmas.txt")
+  url <- download_and_cache("https://raw.githubusercontent.com/vkinakh/stable-diffusion-imagenet/refs/heads/main/imagenet21k_wordnet_lemmas.txt")
   labels <- readLines(url, warn = FALSE)
 
   data.frame(id = ids, label = labels)[class_id,]
 }
 
+#' @param class_id Integer vector of 1-based class identifiers.
 #' @return A character vector with the labels associated with `class_id`.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
-imagenet_21k_label <- function(class_id) {
-  imagenet_21k_classes(class_id)$label
+imagenet_21k_classes <- function(class_id) {
+  imagenet_21k_df(class_id)$label
 }
 
