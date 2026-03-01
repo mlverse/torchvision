@@ -222,6 +222,7 @@ caltech256_dataset <- torch::dataset(
 #' @return A character vector with 257 entries representing the Caltech 257
 #'   class labels.
 #' @family class_resolution
+#' @importFrom utils read.csv
 #' @export
 caltech_classes <- function(class_id = 1:257) {
   if (any(class_id > 257)) {
