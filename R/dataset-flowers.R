@@ -89,7 +89,7 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 

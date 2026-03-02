@@ -65,9 +65,10 @@ flickr8k_caption_dataset <- torch::dataset(
     self$train <- train
     self$split <- ifelse(train, "train", "test")
 
-    if (download)
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+    if (download) {
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. Use `download = TRUE` to download it.")
@@ -227,9 +228,10 @@ flickr30k_caption_dataset <- torch::dataset(
     self$train <- train
     self$split <- ifelse(train, "train", "test")
 
-    if (download)
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+    if (download) {
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. Use `download = TRUE` to download it.")

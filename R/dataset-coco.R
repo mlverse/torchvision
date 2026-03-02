@@ -94,7 +94,7 @@ coco_detection_dataset <- torch::dataset(
                                      glue::glue("instances_{split}{year}.json"))
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -373,7 +373,7 @@ coco_caption_dataset <- torch::dataset(
     self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
