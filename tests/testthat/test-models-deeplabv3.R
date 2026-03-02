@@ -72,11 +72,6 @@ test_that("pretrained requires num_classes to be \'21\'", {
 })
 
 test_that("model_deeplabv3_resnet50 detects cat in Wikipedia image", {
-  voc_classes <- c(
-    "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-    "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
-    "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
-  )
 
   img_url <- "https://upload.wikimedia.org/wikipedia/commons/3/36/United_Airlines_Boeing_777-200_Meulemans.jpg"
   img <- magick::image_read(img_url)
@@ -96,7 +91,7 @@ test_that("model_deeplabv3_resnet50 detects cat in Wikipedia image", {
   mask <- output$out$argmax(dim = 2)  # shape (1, H, W)
 
   label_array <- mask %>% torch::as_array()  # convert to R array
-  label_table <- table(factor(label_array, levels = 0:20, labels = voc_classes))
+  label_table <- table(factor(label_array, levels = 0:20, labels = pascal_voc_classes()))
 
   expect_gt(label_table[["aeroplane"]], 0)
   expect_gt(label_table[["aeroplane"]], label_table[["dog"]])

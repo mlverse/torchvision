@@ -70,21 +70,6 @@ Each element is a named list:
 }
 }
 \description{
-Pascal VOC Segmentation Dataset
-}
-\details{
-The Pascal Visual Object Classes (VOC) dataset is a widely used benchmark for object detection and semantic segmentation tasks in computer vision.
-
-This dataset provides RGB images along with per-pixel class segmentation masks for 20 object categories, plus a background class.
-Each pixel in the mask is labeled with a class index corresponding to one of the predefined semantic categories.
-
-The VOC dataset was released in yearly editions (2007 to 2012), with slight variations in data splits and annotation formats.
-Notably, only the 2007 edition includes a separate \code{test} split; all other years (2008–2012) provide only the \code{train}, \code{val}, and \code{trainval} splits.
-
-The dataset defines 21 semantic classes: \code{"background"}, \code{"aeroplane"}, \code{"bicycle"}, \code{"bird"}, \code{"boat"}, \code{"bottle"}, \code{"bus"}, \code{"car"}, \code{"cat"}, \code{"chair"},
-\code{"cow"}, \code{"dining table"}, \code{"dog"}, \code{"horse"}, \code{"motorbike"}, \code{"person"}, \code{"potted plant"}, \code{"sheep"}, \code{"sofa"}, \code{"train"}, and \code{"tv/monitor"}.
-They are available through the \code{classes} variable of the dataset object.
-
 This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 }
 \examples{
@@ -101,7 +86,7 @@ first_item <- pascal_seg[1]
 first_item$x  # Image
 first_item$y$masks  # Segmentation mask
 first_item$y$labels  # Unique class labels in the mask
-pascal_seg$classes[first_item$y$labels]  # Class names
+pascal_voc_classes(first_item$y$labels)  # Class names
 
 # Visualise the first image and its mask
 masked_img <- draw_segmentation_masks(first_item)
