@@ -91,20 +91,20 @@ PyTorch's reference implementation.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imagenet_classes</span><span class="op">(</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imagenet_classes</span><span class="op">(</span>class_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">imagenet_label</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="fu">imagenet_1k_classes</span><span class="op">(</span>class_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">imagenet_21k_classes</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">imagenet_21k_df</span><span class="op">(</span>class_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">21843</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">imagenet_21k_label</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">imagenet_21k_classes</span><span class="op">(</span><span class="va">class_id</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
+<dl><dt id="arg-class-id">class_id<a class="anchor" aria-label="anchor" href="#arg-class-id"></a></dt>
 <dd><p>Integer vector of 1-based class identifiers.</p></dd>
 
 </dl></div>
@@ -112,29 +112,28 @@ PyTorch's reference implementation.</p>
     <h2>Value</h2>
     <p>A character vector with 1000 entries representing the ImageNet-1k
 class labels.</p>
-<p>A character vector with the labels associated with <code>id</code>.</p>
-<p>A character vector with 21k entries representing the ImageNet-21k
+<p>A data.frame with 21.8k rows representing the ImageNet-21k
 class labels.</p>
-<p>A character vector with the labels associated with <code>id</code>.</p>
+<p>A character vector with the labels associated with <code>class_id</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other class_resolution:
+<code><a href="caltech_classes.html">caltech_classes()</a></code>,
 <code><a href="coco_classes.html">coco_classes()</a></code>,
-<code><a href="voc_classes.html">voc_classes</a></code>,
-<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<code><a href="pascal_voc_classes.html">pascal_voc_classes()</a></code></p>
 <p>Other class_resolution:
+<code><a href="caltech_classes.html">caltech_classes()</a></code>,
 <code><a href="coco_classes.html">coco_classes()</a></code>,
-<code><a href="voc_classes.html">voc_classes</a></code>,
-<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<code><a href="pascal_voc_classes.html">pascal_voc_classes()</a></code></p>
 <p>Other class_resolution:
+<code><a href="caltech_classes.html">caltech_classes()</a></code>,
 <code><a href="coco_classes.html">coco_classes()</a></code>,
-<code><a href="voc_classes.html">voc_classes</a></code>,
-<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p>
+<code><a href="pascal_voc_classes.html">pascal_voc_classes()</a></code></p>
 <p>Other class_resolution:
+<code><a href="caltech_classes.html">caltech_classes()</a></code>,
 <code><a href="coco_classes.html">coco_classes()</a></code>,
-<code><a href="voc_classes.html">voc_classes</a></code>,
-<code><a href="voc_segmentation_classes.html">voc_segmentation_classes</a></code></p></div>
+<code><a href="pascal_voc_classes.html">pascal_voc_classes()</a></code></p></div>
     </div>
 
   </div>

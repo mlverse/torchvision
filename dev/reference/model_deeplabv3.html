@@ -153,7 +153,7 @@ ImageNet weights for the ResNet backbone.</p></dd>
     <h2>Task</h2>
 
 
-<p>Semantic image segmentation with 21 output classes by default (COCO).</p>
+<p>Semantic image segmentation with 21 output classes by default (PASCAL VOC).</p>
     </div>
     <div id="input-format">
     <h2>Input Format</h2>
@@ -177,10 +177,9 @@ training uses 520x520 images.</p>
 <span class="r-in"><span><span class="co"># https://pytorch.org/vision/stable/models.html</span></span></span>
 <span class="r-in"><span><span class="va">norm_std</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Use a publicly available image of an animal</span></span></span>
-<span class="r-in"><span><span class="va">wmc</span> <span class="op">&lt;-</span> <span class="st">"https://upload.wikimedia.org/wikipedia/commons/thumb/"</span></span></span>
-<span class="r-in"><span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"</span></span></span>
-<span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="base_loader.html">base_loader</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">wmc</span>,<span class="va">url</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"https://upload.wikimedia.org/wikipedia/commons/thumb/"</span>,</span></span>
+<span class="r-in"><span>              <span class="st">"e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="base_loader.html">base_loader</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">input</span> <span class="op">&lt;-</span> <span class="va">img</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="transform_to_tensor.html">transform_to_tensor</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="transform_resize.html">transform_resize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">520</span>, <span class="fl">520</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
@@ -202,7 +201,7 @@ training uses 520x520 images.</p>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="fu">bincount</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0L</span> <span class="co"># we clean the counter for background class id 1</span></span></span>
 <span class="r-in"><span><span class="va">top_class_index</span> <span class="op">&lt;-</span> <span class="va">class_contingency_with_background</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># DeepLabV3 with ResNet-101 (same steps)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_deeplabv3_resnet101</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -216,7 +215,7 @@ training uses 520x520 images.</p>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span> <span class="op">&lt;-</span> <span class="va">mask_id</span><span class="op">$</span><span class="fu">view</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="fu">bincount</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">class_contingency_with_background</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0L</span> <span class="co"># we clean the counter for background class id 1</span></span></span>
 <span class="r-in"><span><span class="va">top_class_index</span> <span class="op">&lt;-</span> <span class="va">class_contingency_with_background</span><span class="op">$</span><span class="fu">argmax</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">item</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">cli</span><span class="fu">::</span><span class="fu"><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli_inform</a></span><span class="op">(</span><span class="st">"Majority class {.pkg ResNet-101}: {.emph {pascal_voc_classes(top_class_index)}}"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
