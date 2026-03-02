@@ -86,7 +86,9 @@
 <div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
 <ul><li>
-<strong>COCO datasets refactored</strong>: Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation). This reduces memory usage by ~50%. Files now stored in <code>/coco</code> cache subdirectory. Migration: use <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> for segmentation tasks (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>, developed with LLM assistance).</li>
+<strong>COCO datasets</strong>: Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation). This reduces memory usage by ~50%. Migration: use <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> for segmentation tasks (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>, developed with LLM assistance).</li>
+<li>
+<strong>COCO datasets</strong>: Renamed <code>$categories</code> to <code>$classes</code> for consistency (character vector of class names; old attribute is deprecated with a warning) (<a href="https://github.com/mlverse/torchvision/issues/300" class="external-link">#300</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
@@ -108,7 +110,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
-<ul><li>fix <code>model_fasterrcnn_*</code> did not provide boxes output normalized to image size, did not manage batches, fix performance of the <code>roi_align()</code> function (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>)</li>
+<ul><li>Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.</li>
+<li>fix <code>model_fasterrcnn_*</code> did not provide boxes output normalized to image size, did not manage batches, fix performance of the <code>roi_align()</code> function (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>)</li>
 <li>fix rf100 collection bounding-box now consider the correct native COCO format being ‘xywh’ (<a href="https://github.com/mlverse/torchvision/issues/272" class="external-link">#272</a>)</li>
 <li>Remove <code>.getbatch</code> method from MNIST as it is providing inconsistent tensor dimensions with <code>.getitem</code> due to non-vectorized <code>transform_</code> operations (<a href="https://github.com/mlverse/torchvision/issues/264" class="external-link">#264</a>)</li>
 </ul></div>
