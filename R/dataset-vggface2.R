@@ -68,7 +68,7 @@ vggface2_dataset <- torch::dataset(
     self$split_file <- sapply(self$archive_url, function(x) file.path(rappdirs::user_cache_dir("torch"), class(self)[1], basename(x)))
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -84,7 +84,7 @@ vggface2_dataset <- torch::dataset(
     self$class_to_idx <- data$class_to_idx
     self$identity_df <- data$identity_df
 
-    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {self$.length()} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$class_to_idx)} classes.")
   },
 
   download = function() {

@@ -2,8 +2,9 @@
 
 ## Breaking changes
 
-* **COCO datasets refactored**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
-  This reduces memory usage by ~50%. Files now stored in `/coco` cache subdirectory. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
+  This reduces memory usage by ~50%. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
 
@@ -25,9 +26,10 @@
 
 ## Bug fixes and improvements
 
+* Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
 * fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
-* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due
 to non-vectorized `transform_` operations (#264)
 
 # torchvision 0.8.0
