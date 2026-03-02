@@ -125,7 +125,11 @@ places365_dataset <- torch::dataset(
       self$files <- fs::dir_ls(self$test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self)} samples.")
+    if (self$split == "test") {
+      cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images.")
+    } else {
+      cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
+    }
   },
 
   .length = function() {

@@ -84,7 +84,7 @@ vggface2_dataset <- torch::dataset(
     self$class_to_idx <- data$class_to_idx
     self$identity_df <- data$identity_df
 
-    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {self$.length()} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$class_to_idx)} classes.")
   },
 
   download = function() {

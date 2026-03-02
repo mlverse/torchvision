@@ -100,7 +100,7 @@ mnist_dataset <- dataset(
     self$data <- data[[1]]
     self$targets <- data[[2]] + 1L
 
-    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$targets)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -402,7 +402,7 @@ emnist_collection <- dataset(
     self$data <- dataset_lst[[1]]
     self$targets <- dataset_lst[[2]] + 1L
 
-    cli_inform("Split {.val {self$split}} of dataset {.val {self$dataset}} from {.cls {class(self)[[1]]}} processed successfully!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$class)} classes.")
   },
 
   download = function() {

@@ -75,6 +75,8 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     }
 
     self$load_annotations()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {

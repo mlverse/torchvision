@@ -104,7 +104,7 @@ coco_detection_dataset <- torch::dataset(
 
     self$load_annotations()
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {
@@ -129,7 +129,7 @@ coco_detection_dataset <- torch::dataset(
       boxes <- box_xywh_to_xyxy(boxes_wh)
 
       label_ids <- anns$category_id
-      labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
+      labels <- self$category_names[as.character(label_ids)]
 
       area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
@@ -198,15 +198,25 @@ coco_detection_dataset <- torch::dataset(
     )
 
     self$annotations <- data$annotations
-    self$categories <- data$categories
-    self$category_names <- setNames(self$categories$name, self$categories$id)
+    self$classes <- data$categories$name
+    self$category_ids <- data$categories$id
+    self$category_names <- setNames(self$classes, self$category_ids)
 
     ids <- as.numeric(names(self$image_metadata))
     image_paths <- fs::path(self$image_dir,
                             sapply(ids, function(id) self$image_metadata[[as.character(id)]]$file_name))
     exist <- fs::file_exists(image_paths)
     self$image_ids <- ids[exist]
-  }
+  },
+
+  active = list(
+    categories = function() {
+      .Deprecated(
+        msg = "The `$categories` attribute is deprecated. Please use `$classes` instead for class names."
+      )
+      data.frame(id = self$category_ids, name = self$classes)
+    }
+  )
 )
 
 
@@ -276,7 +286,7 @@ coco_segmentation_dataset <- torch::dataset(
 
     if (nrow(anns) > 0) {
       label_ids <- anns$category_id
-      labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
+      labels <- self$category_names[as.character(label_ids)]
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
     } else {
       # empty annotation
@@ -383,7 +393,7 @@ coco_caption_dataset <- torch::dataset(
 
     self$load_annotations()
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images.")
   },
 
   load_annotations = function() {

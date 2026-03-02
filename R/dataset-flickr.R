@@ -126,7 +126,7 @@ flickr8k_caption_dataset <- torch::dataset(
     self$captions <- data$captions
     self$classes <- readRDS(file.path(self$processed_folder, self$class_index_file))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -255,7 +255,7 @@ flickr30k_caption_dataset <- torch::dataset(
     self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
     self$classes <- captions_map
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {
