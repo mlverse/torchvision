@@ -38,7 +38,7 @@
 #' model <- model_efficientnet_b0()
 #' image_batch <- torch::torch_randn(1, 3, 224, 224)
 #' output <- model(image_batch)
-#' imagenet_label(which.max(as.numeric(output)))
+#' imagenet_classes(which.max(as.numeric(output)))
 #' }
 #'
 #' \dontrun{
@@ -46,7 +46,7 @@
 #' model <- model_efficientnet_b5()
 #' image_batch <- torch::torch_randn(1, 3, 456, 456)
 #' output <- model(image_batch)
-#' imagenet_label(which.max(as.numeric(output)))
+#' imagenet_classes(which.max(as.numeric(output)))
 #' }
 #'
 #' @name model_efficientnet
