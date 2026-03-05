@@ -8,7 +8,7 @@
 #' multi-scale context.
 #'
 #' @section Task:
-#' Semantic image segmentation with 21 output classes by default (COCO).
+#' Semantic image segmentation with 21 output classes by default (PASCAL VOC).
 #'
 #' @section Input Format:
 #' The models expect input tensors of shape \code{(batch_size, 3, H, W)}. Typical
@@ -32,10 +32,10 @@
 #' # https://pytorch.org/vision/stable/models.html
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #' # Use a publicly available image of an animal
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc,url))
-#'
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'               "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' img <- base_loader(url)
+#
 #' input <- img %>%
 #'   transform_to_tensor() %>%
 #'   transform_resize(c(520, 520)) %>%
@@ -57,7 +57,7 @@
 #' class_contingency_with_background <- mask_id$view(-1)$bincount()
 #' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 #' top_class_index <- class_contingency_with_background$argmax()$item()
-#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
+#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
 #'
 #' # DeepLabV3 with ResNet-101 (same steps)
 #' model <- model_deeplabv3_resnet101(pretrained = TRUE)
@@ -71,7 +71,7 @@
 #' class_contingency_with_background <- mask_id$view(-1)$bincount()
 #' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 #' top_class_index <- class_contingency_with_background$argmax()$item()
-#' cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}")
+#' cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {pascal_voc_classes(top_class_index)}}")
 #' }
 #' @name model_deeplabv3
 #' @rdname model_deeplabv3
@@ -90,32 +90,9 @@ deeplabv3_model_urls <- list(
   )
 )
 
-#' PASCAL VOC Class Labels
-#'
-#' Utilities for resolving PASCAL VOC class identifiers to their corresponding
-#' human readable labels. The labels are retrieved from the dataset.
-#'
-#' @return A character vector with the PASCAL VOC class names
-#' @family class_resolution
-#' @export
-voc_classes <- c(
-  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
-  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
-)
-
-#' @rdname voc_classes
-#' @param id Integer vector of 1-based class identifiers.
-#' @return A character vector with the labels associated with `id`.
-#' @family class_resolution
-#' @export
-voc_label <- function(id) {
-  voc_classes[id]
-}
-
 deeplabv3_meta <- list(
-  classes = voc_classes,
-  class_to_idx = setNames(seq_along(voc_classes) - 1, voc_classes)
+  classes = pascal_voc_classes(),
+  class_to_idx = setNames(seq_along(pascal_voc_classes()) - 1, pascal_voc_classes())
 )
 
 

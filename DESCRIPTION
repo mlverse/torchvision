@@ -66,7 +66,8 @@ Suggests:
     R.matlab,
     xml2,
     knitr,
-    rmarkdown
+    rmarkdown,
+    torchvisionlib
 BugReports: https://github.com/mlverse/torchvision/issues
 LinkingTo: Rcpp
 Collate: 
@@ -110,6 +111,7 @@ Collate:
     'models-faster_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
+    'models-mask_rcnn.R'
     'models-maxvit.R'
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'

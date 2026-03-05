@@ -76,50 +76,50 @@ tiny_imagenet_dataset <- torch::dataset(
 #' human readable labels. The labels are retrieved from the same source used by
 #' PyTorch's reference implementation.
 #'
+#' @param class_id Integer vector of 1-based class identifiers.
 #' @return A character vector with 1000 entries representing the ImageNet-1k
 #'   class labels.
 #' @family class_resolution
 #' @export
-imagenet_classes <- function() {
-  url <- "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
+imagenet_classes <- function(class_id = 1:1000) {
+  if (any(class_id > 1000)) {
+    cli_warn("Imagenet {.var class_id} cannot be > 1000")
+  }
+  url <- download_and_cache("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt")
   labels <- readLines(url, warn = FALSE)
-  labels[nzchar(labels)]
+  labels[nzchar(labels)][class_id]
 }
 
-#' @param id Integer vector of 1-based class identifiers.
-#' @return A character vector with the labels associated with `id`.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
-imagenet_label <- function(id) {
-  classes <- imagenet_classes()
-  classes[id]
-}
-
 imagenet_1k_classes <- imagenet_classes
-imagenet_1k_label <- imagenet_label
 
-#' @return A data.frame with 21k entries containing columns `id` and `label`
-#'   representing the ImageNet-21k class identifiers and labels.
+
+#' @param class_id Integer vector of 1-based class identifiers.
+#' @return A data.frame with 21.8k rows representing the ImageNet-21k
+#'   class labels.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
-imagenet_21k_classes <- function() {
-  url <- "https://storage.googleapis.com/bit_models/imagenet21k_wordnet_ids.txt"
+imagenet_21k_df <- function(class_id = 1:21843) {
+  if (any(class_id > 21000)) {
+    cli_warn("Imagenet {.var class_id} cannot be > 21843")
+  }
+  url <- download_and_cache("https://raw.githubusercontent.com/ailia-ai/ailia-models/refs/heads/master/object_detection/detic/datasets_detic/imagenet21k_wordnet_ids.txt")
   ids <- readLines(url, warn = FALSE)
-  url <- "https://storage.googleapis.com/bit_models/imagenet21k_wordnet_lemmas.txt"
+  url <- download_and_cache("https://raw.githubusercontent.com/vkinakh/stable-diffusion-imagenet/refs/heads/main/imagenet21k_wordnet_lemmas.txt")
   labels <- readLines(url, warn = FALSE)
 
-  data.frame(id = ids, label = labels)
+  data.frame(id = ids, label = labels)[class_id,]
 }
 
-#' @param id Integer vector of 1-based class identifiers.
-#' @return A character vector with the labels associated with `id`.
+#' @param class_id Integer vector of 1-based class identifiers.
+#' @return A character vector with the labels associated with `class_id`.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
-imagenet_21k_label <- function(id) {
-  classes <- imagenet_21k_classes()$label
-  classes[id]
+imagenet_21k_classes <- function(class_id) {
+  imagenet_21k_df(class_id)$label
 }
 
