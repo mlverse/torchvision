@@ -4,7 +4,7 @@
 \alias{model_deeplabv3}
 \alias{model_deeplabv3_resnet50}
 \alias{model_deeplabv3_resnet101}
-\title{DeepLabV3 Models}
+\title{DeepLabV3 Semantic Segmentation Models}
 \usage{
 model_deeplabv3_resnet50(
   pretrained = FALSE,
@@ -30,21 +30,76 @@ model_deeplabv3_resnet101(
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{num_classes}{Number of output classes.}
+\item{num_classes}{Integer. Number of output segmentation classes including
+background. Default: \code{21} (Pascal VOC). Set to \code{NULL} to infer from
+pretrained weights.}
 
-\item{aux_loss}{Logical or NULL. If \code{TRUE}, includes an auxiliary classifier branch.
-If \code{NULL} (default), the presence of aux classifier is inferred from pretrained weights.}
+\item{aux_loss}{Logical or \code{NULL}. If \code{TRUE}, adds an auxiliary FCN classifier
+head at an intermediate backbone layer, used as a secondary loss during
+training. If \code{NULL} (default), inferred from pretrained weights.}
 
-\item{pretrained_backbone}{If \code{TRUE} and \code{pretrained = FALSE}, loads
-ImageNet weights for the ResNet backbone.}
+\item{pretrained_backbone}{Logical. If \code{TRUE} and \code{pretrained = FALSE}, loads
+\code{IMAGENET1K_V1} weights for the backbone only. Ignored when \code{pretrained = TRUE}.
+Default: \code{TRUE}.}
 
-\item{...}{Other parameters passed to the model implementation.}
+\item{...}{Other parameters passed to the resnet model.}
 }
 \description{
-Constructs DeepLabV3 semantic segmentation models with a ResNet backbone as
-described in \emph{Rethinking Atrous Convolution for Semantic Image
-Segmentation}. These models employ atrous spatial pyramid pooling to capture
-multi-scale context.
+Semantic segmentation models implementing the DeepLabV3 architecture from
+\href{https://arxiv.org/abs/1706.05587}{Rethinking Atrous Convolution for Semantic Image Segmentation}.
+These models use Atrous Spatial Pyramid Pooling (ASPP) to capture multi-scale
+context, and are available with ResNet-50 and ResNet-101 backbones.
+\subsection{Available Models}{
+\itemize{
+\item \code{model_deeplabv3_resnet50()}
+\item \code{model_deeplabv3_resnet101()}
+}
+}
+
+\subsection{Model Variants and Performance (COCO val2017, VOC labels)}{
+
+All models are trained on a 20-class subset of COCO that corresponds to
+Pascal VOC categories, plus background (21 classes total).
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{| Model                     | mIoU  | Pixel Acc | Params | GFLOPS | File Size | Weights Used              |
+|---------------------------|-------|-----------|--------|--------|-----------|---------------------------|
+| model_deeplabv3_resnet50  | 66.4\% | 92.4\%     | 42.0M  | 178.72 | 161 MB    | COCO_WITH_VOC_LABELS_V1   |
+| model_deeplabv3_resnet101 | 67.4\% | 92.4\%     | 61.0M  | 258.74 | 233 MB    | COCO_WITH_VOC_LABELS_V1   |
+}\if{html}{\out{</div>}}
+\itemize{
+\item \strong{TorchVision Recipe (ResNet-50)}: \url{https://github.com/pytorch/vision/tree/main/references/segmentation#deeplabv3_resnet50}
+\item \strong{TorchVision Recipe (ResNet-101)}: \url{https://github.com/pytorch/vision/tree/main/references/segmentation#fcn_resnet101}
+}
+}
+
+\subsection{Weights Selection}{
+\itemize{
+\item All models use \code{COCO_WITH_VOC_LABELS_V1} weights, trained on COCO with the
+20 Pascal VOC categories (+ background = 21 classes).
+\item Backbone weights default to \code{IMAGENET1K_V1} (supervised ImageNet-1k) when
+\code{pretrained = FALSE} and \code{pretrained_backbone = TRUE}.
+\item When \code{pretrained = TRUE}, backbone weights are overridden by the full
+segmentation model weights and \code{pretrained_backbone} is ignored.
+\item The auxiliary classifier branch (\code{aux_loss}) is automatically enabled when
+loading pretrained weights; set explicitly when training from scratch.
+}
+}
+
+\subsection{Input Format}{
+
+Models expect input tensors of shape \verb{(batch_size, 3, H, W)}, normalized
+with ImageNet mean \code{c(0.485, 0.456, 0.406)} and std \code{c(0.229, 0.224, 0.225)}.
+Training resolution is 520x520.
+}
+
+\subsection{Output Format}{
+
+Returns a named list with:
+\itemize{
+\item \verb{$out} — main segmentation logits, shape \verb{(batch, num_classes, H, W)}
+\item \verb{$aux} — auxiliary logits from an intermediate backbone layer (only when \code{aux_loss = TRUE})
+}
+}
 }
 \section{Functions}{
 \itemize{
@@ -53,64 +108,50 @@ multi-scale context.
 \item \code{model_deeplabv3_resnet101()}: DeepLabV3 with ResNet-101 backbone
 
 }}
-\section{Task}{
-
-Semantic image segmentation with 21 output classes by default (PASCAL VOC).
-}
-
-\section{Input Format}{
-
-The models expect input tensors of shape \code{(batch_size, 3, H, W)}. Typical
-training uses 520x520 images.
-}
-
 \examples{
 \dontrun{
 library(magrittr)
-norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
-# https://pytorch.org/vision/stable/models.html
+norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
-# Use a publicly available image of an animal
-url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
-              "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+
+url <- "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
 img <- base_loader(url)
+
 input <- img \%>\%
   transform_to_tensor() \%>\%
   transform_resize(c(520, 520)) \%>\%
- transform_normalize(norm_mean, norm_std)
-batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+  transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)    # Add batch dimension: (1, 3, H, W)
 
-# DeepLabV3 with ResNet-50
+# --- ResNet-50 backbone ---
 model <- model_deeplabv3_resnet50(pretrained = TRUE)
 model$eval()
 output <- model(batch)
 
-# visualize the result
-# `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
 segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
-tensor_image_display(segmented)
+tensor_image_browse(segmented)
 
-# Show most frequent class
-mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
-class_contingency_with_background <- mask_id$view(-1)$bincount()
-class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
-top_class_index <- class_contingency_with_background$argmax()$item()
-cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
+mask_id <- output$out$argmax(dim = 2)
+counts  <- mask_id$view(-1)$bincount()
+counts[1] <- 0L  # zero out background (class 0)
+top_class <- counts$argmax()$item()
+cat("Majority class (ResNet-50):", pascal_voc_classes(top_class), "\n")
 
-# DeepLabV3 with ResNet-101 (same steps)
+# --- ResNet-101 backbone ---
 model <- model_deeplabv3_resnet101(pretrained = TRUE)
 model$eval()
 output <- model(batch)
 
 segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
-tensor_image_display(segmented)
+tensor_image_browse(segmented)
 
 mask_id <- output$out$argmax(dim = 2)
-class_contingency_with_background <- mask_id$view(-1)$bincount()
-class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
-top_class_index <- class_contingency_with_background$argmax()$item()
-cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {pascal_voc_classes(top_class_index)}}")
+counts  <- mask_id$view(-1)$bincount()
+counts[1] <- 0L
+top_class <- counts$argmax()$item()
+cat("Majority class (ResNet-101):", pascal_voc_classes(top_class), "\n")
 }
+
 }
 \seealso{
 Other semantic_segmentation_model: 
