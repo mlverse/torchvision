@@ -9,7 +9,7 @@
 biology <- data.frame(
   collection = "rf100_biology",
   dataset = c("stomata_cell", "blood_cell", "parasite", "cell",
-              "bacteria", "cotton_desease", "mitosis", "phage", "liver_desease", "moth"),
+              "bacteria", "cotton_disease", "mitosis", "phage", "liver_disease", "moth"),
   description = c(
     "Stomata cells for plant biology research",
     "Blood cell detection (RBC, WBC, platelets)",
