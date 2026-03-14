@@ -29,6 +29,8 @@ navbar:
         href: articles/examples/texture-nca.html
       - text: fcnresnet
         href: articles/examples/fcnresnet.html
+      - text: fasterrcnn
+        href: articles/examples/fasterrcnn.html
 
 reference:
 - title: Transforms
