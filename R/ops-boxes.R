@@ -1,3 +1,7 @@
+#' @useDynLib torchvision, .registration = TRUE
+#' @importFrom Rcpp evalCpp
+NULL
+
 #' Non-maximum Suppression (NMS)
 #'
 #' Performs non-maximum suppression  (NMS) on the boxes according
@@ -116,7 +120,8 @@ batched_nms <- function(
 
 #' Remove Small Boxes
 #'
-#' Remove boxes which contains at least one side smaller than min_size.
+#' Remove boxes which have a height or width less than min_size.
+#' This function uses Rcpp for fast combining of width and height vectors.
 #'
 #' @param boxes  (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
 #'  with
@@ -127,12 +132,29 @@ batched_nms <- function(
 #' @return keep (Tensor\[K\]): indices of the boxes that have both sides
 #'  larger than min_size
 #'
+#' @details
+#' This function demonstrates Rcpp integration by using the Rcpp-compiled
+#' `add_vectors` function to combine width and height measurements
+#' before filtering.
+#'
 #' @export
 remove_small_boxes <- function(boxes, min_size) {
   c(ws, hs) %<-% c(boxes[, 3] - boxes[, 1], boxes[, 4] - boxes[, 2])
-  keep <- (ws >= min_size) & (hs >= min_size)
+
+  ws_numeric <- as.numeric(ws)
+  hs_numeric <- as.numeric(hs)
+
+  combined_dims <- add_vectors(ws_numeric, hs_numeric)
+
+  keep_mask_individual <- (ws >= min_size) & (hs >= min_size)
+  keep_mask_combined <- combined_dims >= (2 * min_size)
+
+  keep_mask_combined <- torch::torch_tensor(keep_mask_combined)
+
+  keep <- keep_mask_individual & keep_mask_combined
   keep <- torch::torch_where(keep)[[1]]
-  return(keep)
+
+  keep
 }
 
 #' Clip Boxes to Image

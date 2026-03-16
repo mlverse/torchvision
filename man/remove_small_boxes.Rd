@@ -21,5 +21,11 @@ keep (Tensor[K]): indices of the boxes that have both sides
 larger than min_size
 }
 \description{
-Remove boxes which contains at least one side smaller than min_size.
+Remove boxes which have a height or width less than min_size.
+This function uses Rcpp for fast combining of width and height vectors.
+}
+\details{
+This function demonstrates Rcpp integration by using the Rcpp-compiled
+\code{add_vectors} function to combine width and height measurements
+before filtering.
 }
