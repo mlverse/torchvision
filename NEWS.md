@@ -12,6 +12,7 @@
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
+* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
 
 ## New models
 
@@ -31,6 +32,7 @@
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due
 to non-vectorized `transform_` operations (#264)
+* Added article for `draw_keypoints()` (@DerrickUnleashed #303)
 
 # torchvision 0.8.0
 
