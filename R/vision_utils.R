@@ -289,6 +289,9 @@ draw_keypoints <- function(image, keypoints, connectivity=NULL, colors=NULL, rad
   K <- dim(img_kpts)[2]
 
   if (!is.null(connectivity)) {
+    if (!is.matrix(connectivity) || ncol(connectivity) != 2) {
+      cli_abort("connectivity must be a matrix with 2 columns")
+    }
     if (any(connectivity < 1 | connectivity > K)) value_error("connectivity indices exceed number of keypoints")
   }
 
@@ -300,19 +303,18 @@ draw_keypoints <- function(image, keypoints, connectivity=NULL, colors=NULL, rad
   draw <- magick::image_read(tmp) %>% magick::image_draw()
   unlink(tmp)
 
-  H <- dim(img_to_draw)[1]
   for (pose in seq_len(num_instances)) {
     kpt <- img_kpts[pose,,]
     pose_color <- colors[pose]
     if (!is.null(connectivity)) {
       for (i in seq_len(nrow(connectivity))) {
         a <- connectivity[i,1]; b <- connectivity[i,2]
-        graphics::segments(round(kpt[a,1]), H-round(kpt[a,2]),
-                           round(kpt[b,1]), H-round(kpt[b,2]),
+        graphics::segments(round(kpt[a,1]), round(kpt[a,2]),
+                           round(kpt[b,1]), round(kpt[b,2]),
                            col=pose_color, lwd=width)
       }
     }
-    graphics::points(round(kpt[,1]), H-round(kpt[,2]), pch=20, col=pose_color, cex=radius)
+    graphics::points(round(kpt[,1]), round(kpt[,2]), pch=20, col=pose_color, cex=radius)
   }
 
   grDevices::dev.off()
