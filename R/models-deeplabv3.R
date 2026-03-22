@@ -92,11 +92,12 @@
 #' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
 #' tensor_image_browse(segmented)
 #'
-#' mask_id <- output$out$argmax(dim = 2)
-#' counts  <- mask_id$view(-1)$bincount()
-#' counts[1] <- 0L
-#' top_class <- counts$argmax()$item()
-#' cat("Majority class (ResNet-101):", pascal_voc_classes(top_class), "\n")
+#' # Show most frequent class
+#' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
+#' class_contingency_with_background <- mask_id$view(-1)$bincount()
+#' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
+#' top_class_index <- class_contingency_with_background$argmax()$item()
+#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
 #' }
 #'
 #' @importFrom torch nn_module
