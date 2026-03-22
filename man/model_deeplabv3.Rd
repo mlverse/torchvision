@@ -66,10 +66,6 @@ Pascal VOC categories, plus background (21 classes total).
 | model_deeplabv3_resnet50  | 66.4\% | 92.4\%     | 42.0M  | 178.72 | 161 MB    | COCO_WITH_VOC_LABELS_V1   |
 | model_deeplabv3_resnet101 | 67.4\% | 92.4\%     | 61.0M  | 258.74 | 233 MB    | COCO_WITH_VOC_LABELS_V1   |
 }\if{html}{\out{</div>}}
-\itemize{
-\item \strong{TorchVision Recipe (ResNet-50)}: \url{https://github.com/pytorch/vision/tree/main/references/segmentation#deeplabv3_resnet50}
-\item \strong{TorchVision Recipe (ResNet-101)}: \url{https://github.com/pytorch/vision/tree/main/references/segmentation#fcn_resnet101}
-}
 }
 
 \subsection{Weights Selection}{

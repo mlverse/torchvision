@@ -22,9 +22,6 @@
 #' | model_deeplabv3_resnet101 | 67.4% | 92.4%     | 61.0M  | 258.74 | 233 MB    | COCO_WITH_VOC_LABELS_V1   |
 #' ```
 #'
-#' - **TorchVision Recipe (ResNet-50)**: <https://github.com/pytorch/vision/tree/main/references/segmentation#deeplabv3_resnet50>
-#' - **TorchVision Recipe (ResNet-101)**: <https://github.com/pytorch/vision/tree/main/references/segmentation#fcn_resnet101>
-#'
 #' ## Weights Selection
 #' - All models use `COCO_WITH_VOC_LABELS_V1` weights, trained on COCO with the
 #'   20 Pascal VOC categories (+ background = 21 classes).
