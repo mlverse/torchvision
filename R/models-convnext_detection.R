@@ -65,7 +65,8 @@
 #' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #'
-#' url <- "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'               "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
 #' img <- base_loader(url) %>%
 #'   transform_to_tensor() %>%
 #'   transform_resize(c(520, 520))
