@@ -67,14 +67,15 @@ pred1$scores
 boxed1 <- draw_bounding_boxes(
   dog1 %>% transform_resize(c(800, 800)),
   boxes = pred1$boxes,
-  labels = coco_label(as.integer(pred1$labels))
+  labels = coco_classes(as.integer(pred1$labels))
 )
 
 boxed2 <- draw_bounding_boxes(
   dog2 %>% transform_resize(c(800, 800)),
   boxes = pred2$boxes,
-  labels = coco_label(as.integer(pred2$labels))
+  labels = coco_classes(as.integer(pred2$labels))
 )
 
-tensor_image_browse(boxed1)
-tensor_image_browse(boxed2)
+boxed <- torch_stack(list(boxed1, boxed2))
+grid <- vision_make_grid(boxed, scale = FALSE, num_rows = 2)
+tensor_image_browse(grid)
