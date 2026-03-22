@@ -98,6 +98,7 @@
 #' cat("Majority class (ResNet-101):", pascal_voc_classes(top_class), "\n")
 #' }
 #'
+#' @importFrom torch nn_module
 #' @family semantic_segmentation_model
 #' @rdname model_deeplabv3
 #' @name model_deeplabv3

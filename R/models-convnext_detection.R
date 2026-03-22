@@ -88,6 +88,7 @@
 #' }
 #' }
 #'
+#' @importFrom torch nn_module
 #' @family object_detection_model
 #' @rdname model_convnext_detection
 #' @name model_convnext_detection
