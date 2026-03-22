@@ -47,9 +47,6 @@
 #'   predictions are meaningless without fine-tuning on labelled detection data.
 #' - Set `pretrained_backbone = TRUE` to load ImageNet backbone weights.
 #'
-#' - **TorchVision Recipe**: <https://github.com/pytorch/vision/tree/main/references/classification#convnext>
-#' - **Paper**: <https://arxiv.org/abs/2201.03545>
-#'
 #' @inheritParams model_fasterrcnn_resnet50_fpn
 #' @param pretrained_backbone Logical. If `TRUE`, loads ImageNet-pretrained
 #'   ConvNeXt backbone weights. Default: `FALSE`.
@@ -84,7 +81,7 @@
 #' boxes    <- pred$boxes[topk, ]
 #' labels   <- imagenet_classes(as.integer(pred$labels[topk]))
 #'
-# `draw_bounding_box()` may fail if bbox values are not consistent.
+#' # `draw_bounding_box()` may fail if bbox values are not consistent.
 #' if (num_boxes > 0) {
 #'   boxed <- draw_bounding_boxes(img, boxes, labels = labels)
 #'   tensor_image_browse(boxed)
