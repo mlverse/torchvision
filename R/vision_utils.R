@@ -226,11 +226,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 
     if (length(flat) >= 6) {  # At least 3 points to form a polygon
       coords <- matrix(flat, ncol = 2, byrow = TRUE)
-      polygon(coords[, 1], coords[, 2], col = "white", border = NA)
+      graphics::polygon(coords[, 1], coords[, 2], col = "white", border = NA)
     }
   }
 
-  dev.off()
+  grDevices::dev.off()
 
   gray <- magick::image_data(mask_img, channels = "gray")
 

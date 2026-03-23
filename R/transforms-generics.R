@@ -620,6 +620,7 @@ transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
 #' @param fill Fill color for area outside the transform. Default is NULL.
 #' @param resample Deprecated. Use interpolation instead.
 #' @param fillcolor Deprecated. Use fill instead.
+#' @param center Optional center of rotation, c(x, y). Default is image center.
 #'
 #' @family unitary_transforms
 #' @export
