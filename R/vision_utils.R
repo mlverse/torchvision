@@ -78,6 +78,7 @@ vision_make_grid <- function(tensor,
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
+#' @param color Deprecated alias for `colors`.
 #' @param fill If `TRUE` fills the bounding box with specified color.
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
