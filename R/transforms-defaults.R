@@ -340,7 +340,6 @@ get_random_rotation_params <- function(degrees) {
 transform_random_rotation.default <- function(img, degrees, interpolation=0,
                                               expand=FALSE, center=NULL, fill=NULL, resample) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
 
@@ -401,11 +400,9 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
                                             shear=NULL, interpolation=0, fill=0,
                                             resample, fillcolor) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   if (!missing(fillcolor)) {
-    warning("'fillcolor' is deprecated, use 'fill' instead")
     fill <- fillcolor
   }
 
@@ -566,7 +563,6 @@ transform_adjust_saturation.default <- function(img, saturation_factor) {
 transform_rotate.default <- function(img, angle, interpolation = 0, expand = FALSE,
                                      center = NULL, fill = NULL, resample) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   not_implemented_for_class(img)
@@ -575,13 +571,11 @@ transform_rotate.default <- function(img, angle, interpolation = 0, expand = FAL
 #' @export
 transform_affine.default <- function(img, angle, translate, scale, shear,
                                      interpolation = 0, fill = NULL,
-                                     resample, fillcolor) {
+                                     resample, fillcolor, center = NULL) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   if (!missing(fillcolor)) {
-    warning("'fillcolor' is deprecated, use 'fill' instead")
     fill <- fillcolor
   }
   not_implemented_for_class(img)

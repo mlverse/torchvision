@@ -396,7 +396,6 @@ transform_adjust_saturation.torch_tensor <- function(img, saturation_factor) {
 transform_rotate.torch_tensor <- function(img, angle, interpolation = 0, expand = FALSE,
                                           center = NULL, fill = NULL, resample) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
 
@@ -418,13 +417,11 @@ transform_rotate.torch_tensor <- function(img, angle, interpolation = 0, expand 
 #' @export
 transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
                                           interpolation = 0, fill = NULL,
-                                          resample, fillcolor) {
+                                          resample, fillcolor, center = NULL) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   if (!missing(fillcolor)) {
-    warning("'fillcolor' is deprecated, use 'fill' instead")
     fill <- fillcolor
   }
 
@@ -434,7 +431,7 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
   if (!length(translate) == 2)
     value_error("`translate` should be length 2")
 
-  if (scale < 0)
+  if (scale <= 0)
     value_error("`scale` should be positive")
 
   if (!is.numeric(shear))
@@ -443,9 +440,14 @@ transform_affine.torch_tensor <- function(img, angle, translate, scale, shear,
   if (length(shear) == 1)
     shear <- c(shear, 0)
 
-  img_size <- get_image_size(img)
+  center_f <- c(0.0, 0.0)
+  if (!is.null(center)) {
+    img_size <- get_image_size(img)
+    # Center values should be in pixel coordinates but translated such that (0, 0) corresponds to image center.
+    center_f <- mapply(function(c, s) 1 * (c - s * 0.5), center, img_size)
+  }
 
-  matrix <- get_inverse_affine_matrix(c(1, 1), angle, translate, scale, shear)
+  matrix <- get_inverse_affine_matrix(center_f, angle, translate, scale, shear)
   affine_impl(img, matrix=matrix, interpolation=interpolation, fill=fill)
 }
 
@@ -688,8 +690,11 @@ rotate_compute_output_size <- function(theta, w, h) {
 rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = NULL) {
 
   interpolation_modes <- c(
-    "0" =  "nearest",
-    "2" = "bilinear"
+    "0" = "nearest",
+    "2" = "bilinear",
+    "nearest" = "nearest",
+    "nearest-exact" = "nearest",
+    "bilinear" = "bilinear"
   )
 
   assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
@@ -707,7 +712,7 @@ rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = N
   }
 
   grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
-  mode <- interpolation_modes[as.character(as.integer(interpolation))]
+  mode <- normalize_interpolation_mode(interpolation, interpolation_modes)
 
   apply_grid_transform(img, grid, mode)
 }
@@ -715,8 +720,11 @@ rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = N
 affine_impl <- function(img, matrix, interpolation = 0, fill = NULL) {
 
   interpolation_modes <- c(
-    "0"= "nearest",
-    "2"= "bilinear"
+    "0" = "nearest",
+    "2" = "bilinear",
+    "nearest" = "nearest",
+    "nearest-exact" = "nearest",
+    "bilinear" = "bilinear"
   )
 
   assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
@@ -725,8 +733,26 @@ affine_impl <- function(img, matrix, interpolation = 0, fill = NULL) {
   shape <- img$shape
   grid <- gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
                          ow=rev(shape)[1], oh=rev(shape)[2])
-  mode <- interpolation_modes[as.character(interpolation)]
+  mode <- normalize_interpolation_mode(interpolation, interpolation_modes)
   apply_grid_transform(img, grid, mode)
+}
+
+normalize_interpolation_mode <- function(interpolation, interpolation_modes) {
+  if (is.numeric(interpolation) && length(interpolation) == 1) {
+    key <- as.character(as.integer(interpolation))
+  } else if (is.character(interpolation) && length(interpolation) == 1) {
+    key <- tolower(interpolation)
+    key <- sub("^interpolationmode\\.", "", key)
+    key <- gsub("_", "-", key, fixed = TRUE)
+  } else {
+    value_error("`interpolation` should be an integer code or a single character mode")
+  }
+
+  if (!key %in% names(interpolation_modes)) {
+    value_error("Unsupported interpolation mode")
+  }
+
+  interpolation_modes[[key]]
 }
 
 pad_symmetric <- function(img, padding) {

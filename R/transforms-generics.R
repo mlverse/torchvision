@@ -378,7 +378,8 @@ transform_random_rotation <- function(img, degrees, interpolation = 0, expand=FA
 #'   will be applied. Will not apply shear by default.
 #' @param fill (tuple or int): Fill color for the area outside the transform.
 #'   Default is 0. This option is not supported for Tensor input.
-#' @param interpolation (int, optional): Interpolation mode. Default is 0.
+#' @param interpolation (int or character, optional): Interpolation mode.
+#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
 #' @param fillcolor Deprecated. Use fill instead.
 #' @param resample Deprecated. Use interpolation instead.
 #'
@@ -614,7 +615,8 @@ transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
 #'  clockwise direction. If a sequence is specified, the first value corresponds
 #'  to a shear parallel to the x-axis, while the second value corresponds to a
 #'  shear parallel to the y-axis.
-#' @param interpolation (int): Interpolation mode. Default is 0 (nearest).
+#' @param interpolation (int or character): Interpolation mode.
+#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
 #' @param fill Fill color for area outside the transform. Default is NULL.
 #' @param resample Deprecated. Use interpolation instead.
 #' @param fillcolor Deprecated. Use fill instead.
@@ -623,7 +625,7 @@ transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
 #' @export
 transform_affine <- function(img, angle, translate, scale, shear,
                              interpolation = 0, fill = NULL,
-                             resample, fillcolor) {
+                             resample, fillcolor, center = NULL) {
   if (!missing(resample)) {
     warning("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
