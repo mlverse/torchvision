@@ -5,7 +5,16 @@ transform_to_tensor.array <- function(img) {
   if (length(dim(img)) == 2)
     dim(img) <- c(dim(img), 1)
 
-  res <- torch::torch_tensor(img)$permute(c(3, 1, 2))
+  dims <- dim(img)
+  if (length(dims) != 3)
+    stop("Expected a 2D or 3D array.")
+
+  # Support both HWC (default image arrays) and CHW (channel-first arrays).
+  if (dims[1] <= 4 && dims[3] > 4) {
+    res <- torch::torch_tensor(img)
+  } else {
+    res <- torch::torch_tensor(img)$permute(c(3, 1, 2))
+  }
 
   if (res$dtype == torch::torch_long())
     res <- res/255

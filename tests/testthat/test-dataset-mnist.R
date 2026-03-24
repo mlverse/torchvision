@@ -11,11 +11,21 @@ test_that("tests for the mnist dataset", {
   ds <- mnist_dataset(dir, download = TRUE)
 
   i <- ds[1]
-  expect_equal(dim(i[[1]]), c(28, 28))
+  expect_equal(dim(i[[1]]), c(1, 28, 28))
   expect_equal(i[[2]], 6)
   expect_length(ds, 60000)
 
+  raw_items <- ds$.getitem(c(1, 2))
+  expect_length(raw_items, 2)
+  expect_named(raw_items[[1]], c("x", "y"))
+  expect_equal(dim(raw_items[[1]]$x), c(1, 28, 28))
+
   ds <- mnist_dataset(dir, transform = transform_to_tensor)
+  items <- ds$.getitem(c(1, 2))
+  expect_length(items, 2)
+  expect_named(items[[1]], c("x", "y"))
+  expect_tensor_shape(items[[1]]$x, c(1, 28, 28))
+
   dl <- torch::dataloader(ds, batch_size = 32)
   expect_length(dl, 1875)
   iter <- dataloader_make_iter(dl)
@@ -24,6 +34,12 @@ test_that("tests for the mnist dataset", {
   expect_tensor_shape(i[[2]], 32)
   expect_true((torch_max(i[[1]]) <= 1)$item())
   expect_named(i, c("x", "y"))
+
+  # Regression: grayscale channel must be preserved for larger batches.
+  dl_128 <- torch::dataloader(ds, batch_size = 128)
+  i_128 <- dataloader_next(dataloader_make_iter(dl_128))
+  expect_tensor_shape(i_128$x, c(128, 1, 28, 28))
+  expect_tensor_shape(i_128$y, 128)
 
 })
 
@@ -36,7 +52,7 @@ test_that("tests for the kmnist dataset", {
   ds <- kmnist_dataset(dir, download = TRUE)
 
   i <- ds[1]
-  expect_equal(dim(i[[1]]), c(28, 28))
+  expect_equal(dim(i[[1]]), c(1, 28, 28))
   expect_equal(i[[2]], 6)
   expect_length(ds, 60000)
 
@@ -62,7 +78,7 @@ test_that("fashion_mnist_dataset loads correctly", {
   expect_s3_class(ds, "fashion_mnist_dataset")
   expect_type(ds$.getitem(1), "list")
   expect_named(ds$.getitem(1), c("x", "y"))
-  expect_equal(dim(as.array(ds$.getitem(1)$x)), c(28, 28))
+  expect_equal(dim(as.array(ds$.getitem(1)$x)), c(1, 28, 28))
   expect_true(ds$.getitem(1)$y >= 1 && ds$.getitem(1)$y <= 10)
 
   ds2 <- fashion_mnist_dataset(dir, transform = transform_to_tensor)
@@ -96,7 +112,7 @@ test_that("tests for the emnist dataset", {
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_s3_class(first_item$x, "array")
-  expect_equal(dim(first_item$x), c(28,28))
+  expect_equal(dim(first_item$x), c(1, 28, 28))
   expect_equal((first_item[[2]]), 19)
 
   emnist <- emnist_collection(dir, dataset = "bymerge", download = TRUE)
@@ -157,7 +173,7 @@ test_that("tests for the qmnist dataset", {
     ds <- qmnist_dataset(dir, split = split, download = TRUE)
 
     i <- ds[1]
-    expect_equal(dim(i[[1]]), c(28, 28))
+    expect_equal(dim(i[[1]]), c(1, 28, 28))
     expect_true(i[[2]] %in% 1:10)
 
     expect_gt(length(ds), 0)
