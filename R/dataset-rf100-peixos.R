@@ -63,14 +63,20 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     self$image_dir <- fs::path(self$data_dir, self$split)
     fs::dir_create(self$image_dir, recurse = TRUE)
     self$annotation_file <- fs::path(self$image_dir, "_annotations.coco.json")
+    self$archive_size <- self$resources$size
 
-    if (download) self$download()
+    if (download) {
+      cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      self$download()
+    }
 
     if (!self$check_exists()) {
       runtime_error("Dataset not found. You can use `download = TRUE` to download it.")
     }
 
     self$load_annotations()
+
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {

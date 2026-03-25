@@ -81,9 +81,10 @@ mnist_dataset <- dataset(
     self$transform <- transform
     self$target_transform <- target_transform
     self$train <- train
+    self$split <- ifelse(train, "train", "test")
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -99,7 +100,7 @@ mnist_dataset <- dataset(
     self$data <- data[[1]]
     self$targets <- data[[2]] + 1L
 
-    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$targets)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -241,7 +242,7 @@ qmnist_dataset <- dataset(
     self$target_transform <- target_transform
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -404,8 +405,7 @@ emnist_collection <- dataset(
     self$class <- self$classes
 
     if (download) {
-      cli_warn("This is a large dataset (~540 MB). Download may take a while.")
-      cli_inform("{.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -416,7 +416,7 @@ emnist_collection <- dataset(
     self$data <- dataset_lst[[1]]
     self$targets <- dataset_lst[[2]] + 1L
 
-    cli_inform("Split {.val {self$split}} of dataset {.val {self$dataset}} from {.cls {class(self)[[1]]}} processed successfully!")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$class)} classes.")
   },
 
   download = function() {

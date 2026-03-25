@@ -54,7 +54,7 @@ indices <- as.integer(topk[[2]][1, ])
 scores <- as.numeric(topk[[1]][1, ])
 
 # 7. Show Top-5 predictions
-glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\%)")
+glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}\%)")
 }
 
 }
