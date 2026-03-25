@@ -1,5 +1,13 @@
 # torchvision (development version)
 
+## Bug fixes and improvements
+
+* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter
+  type from `Vector` to `List`, removed stale "(currently unavailable)" note,
+  fixed `colors` description to say "rainbow" instead of "viridis", and fixed
+  a grammatical typo in the error message ("but is current shape is" ->
+  "but current shape is") (#).
+
 ## Breaking changes
 
 * **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
