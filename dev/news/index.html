@@ -84,6 +84,10 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
 <div class="section level3">
+<h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
+<ul><li>Fixed <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> documentation: corrected <code>connectivity</code> parameter type from <code>Vector</code> to <code>List</code>, removed stale “(currently unavailable)” note, fixed <code>colors</code> description to say “rainbow” instead of “viridis”, and fixed a grammatical typo in the error message (“but is current shape is” -&gt; “but current shape is”) (#).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
 <ul><li>
 <strong>COCO datasets</strong>: Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation). This reduces memory usage by ~50%. Migration: use <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> for segmentation tasks (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>, developed with LLM assistance).</li>
@@ -109,7 +113,7 @@
 <li>Added <code>moth</code> dataset to <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code> and <code>currency</code> and <code>wine_label</code> to <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/274" class="external-link">#274</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-improvements-development-version-1">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version-1"></a></h3>
 <ul><li>Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.</li>
 <li>fix <code>model_fasterrcnn_*</code> did not provide boxes output normalized to image size, did not manage batches, fix performance of the <code>roi_align()</code> function (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>)</li>
 <li>fix rf100 collection bounding-box now consider the correct native COCO format being ‘xywh’ (<a href="https://github.com/mlverse/torchvision/issues/272" class="external-link">#272</a>)</li>

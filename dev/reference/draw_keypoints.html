@@ -111,13 +111,15 @@ In case of dtype float, values are assumed to be in range \([0, 1]\).</p></dd>
 
 
 <dt id="arg-connectivity">connectivity<a class="anchor" aria-label="anchor" href="#arg-connectivity"></a></dt>
-<dd><p>Vector of pair of keypoints to be connected (currently unavailable)</p></dd>
+<dd><p>List of integer pairs <code>c(i, j)</code> specifying which
+keypoints to connect with a line, e.g. <code>list(c(1, 2), c(2, 3))</code>.
+<code>NULL</code> (default) draws no connecting lines.</p></dd>
 
 
 <dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
-strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints</p></dd>
+of the keypoints or single color for all keypoints. The color can be represented as
+strings e.g. "red" or "#FF00FF". By default, rainbow colors are generated for keypoints</p></dd>
 
 
 <dt id="arg-radius">radius<a class="anchor" aria-label="anchor" href="#arg-radius"></a></dt>
