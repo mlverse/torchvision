@@ -7,7 +7,7 @@ transform_to_tensor.array <- function(img) {
 
   dims <- dim(img)
   if (length(dims) != 3)
-    stop("Expected a 2D or 3D array.")
+    value_error("Expected a 2D or 3D array.")
 
   # Support both HWC (default image arrays) and CHW (channel-first arrays).
   if (dims[1] <= 4 && dims[3] > 4) {

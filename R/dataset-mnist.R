@@ -149,13 +149,8 @@ mnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    if (length(index) != 1) {
-      return(lapply(as.integer(index), function(i) self$.getitem(i)))
-    }
-
-    idx <- as.integer(index)
-    x <- self$data[idx, , , drop = FALSE]
-    y <- self$targets[idx]
+    x <- self$data[index, , , drop = FALSE]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -164,6 +159,10 @@ mnist_dataset <- dataset(
       y <- self$target_transform(y)
 
     list(x = x, y = y)
+  },
+
+  .getbatch = function(index) {
+    lapply(as.integer(index), function(i) self$.getitem(i))
   },
 
   .length = function() {
@@ -451,13 +450,8 @@ emnist_collection <- dataset(
   },
 
   .getitem = function(index) {
-    if (length(index) != 1) {
-      return(lapply(as.integer(index), function(i) self$.getitem(i)))
-    }
-
-    idx <- as.integer(index)
-    x <- self$data[idx, , , drop = FALSE]
-    y <- self$targets[idx]
+    x <- self$data[index, , , drop = FALSE]
+    y <- self$targets[index]
 
     if (!is.null(self$transform))
       x <- self$transform(x)
@@ -466,6 +460,10 @@ emnist_collection <- dataset(
       y <- self$target_transform(y)
 
     list(x = x, y = y)
+  },
+
+  .getbatch = function(index) {
+    lapply(as.integer(index), function(i) self$.getitem(i))
   },
 
   .length = function() {
