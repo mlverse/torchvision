@@ -1,9 +1,18 @@
 # torchvision (development version)
 
+## Bug fixes and improvements
+
+* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter
+  type from `Vector` to `List`, removed stale "(currently unavailable)" note,
+  fixed `colors` description to say "rainbow" instead of "viridis", and fixed
+  a grammatical typo in the error message ("but is current shape is" ->
+  "but current shape is") (#).
+
 ## Breaking changes
 
-* **COCO datasets refactored**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
-  This reduces memory usage by ~50%. Files now stored in `/coco` cache subdirectory. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
+  This reduces memory usage by ~50%. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
 
@@ -14,6 +23,7 @@
 
 ## New models
 
+* Added `model_maskrcnn_resnet50_fpn()` and `model_maskrcnn_resnet50_fpn_v2()` for instance segmentation (#278, @ANAMASGARD).
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
 
@@ -27,6 +37,7 @@
 * Fixed incorrect return value documentation for `imagenet_21k_classes()` (was documented as character vector but returns data.frame).
 * Fixed documentation typos in NEWS.md: corrected double word "and and", improved capitalization consistency, fixed spacing and phrasing issues.
 * Fixed variable naming typo in `.find_classes()` method: `class_too_idx` corrected to `class_to_idx` for consistency with the rest of the codebase.
+* Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
 * Fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
 * Fix rf100 collection bounding-box now consider the correct native COCO format 'XYWH' (#272)
 * Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 

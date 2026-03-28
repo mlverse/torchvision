@@ -55,7 +55,7 @@ multi-scale context.
 }}
 \section{Task}{
 
-Semantic image segmentation with 21 output classes by default (COCO).
+Semantic image segmentation with 21 output classes by default (PASCAL VOC).
 }
 
 \section{Input Format}{
@@ -71,10 +71,9 @@ norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
 # https://pytorch.org/vision/stable/models.html
 norm_std  <- c(0.229, 0.224, 0.225)
 # Use a publicly available image of an animal
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-img <- base_loader(paste0(wmc,url))
-
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+              "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+img <- base_loader(url)
 input <- img \%>\%
   transform_to_tensor() \%>\%
   transform_resize(c(520, 520)) \%>\%
@@ -96,7 +95,7 @@ mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
 class_contingency_with_background <- mask_id$view(-1)$bincount()
 class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 top_class_index <- class_contingency_with_background$argmax()$item()
-cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
+cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
 
 # DeepLabV3 with ResNet-101 (same steps)
 model <- model_deeplabv3_resnet101(pretrained = TRUE)
@@ -110,7 +109,7 @@ mask_id <- output$out$argmax(dim = 2)
 class_contingency_with_background <- mask_id$view(-1)$bincount()
 class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 top_class_index <- class_contingency_with_background$argmax()$item()
-cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}")
+cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {pascal_voc_classes(top_class_index)}}")
 }
 }
 \seealso{

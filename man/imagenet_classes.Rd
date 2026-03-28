@@ -2,32 +2,30 @@
 % Please edit documentation in R/dataset-imagenet.R
 \name{imagenet_classes}
 \alias{imagenet_classes}
-\alias{imagenet_label}
+\alias{imagenet_1k_classes}
+\alias{imagenet_21k_df}
 \alias{imagenet_21k_classes}
-\alias{imagenet_21k_label}
 \title{ImageNet Class Labels}
 \usage{
-imagenet_classes()
+imagenet_classes(class_id = 1:1000)
 
-imagenet_label(id)
+imagenet_1k_classes(class_id = 1:1000)
 
-imagenet_21k_classes()
+imagenet_21k_df(class_id = 1:21843)
 
-imagenet_21k_label(id)
+imagenet_21k_classes(class_id)
 }
 \arguments{
-\item{id}{Integer vector of 1-based class identifiers.}
+\item{class_id}{Integer vector of 1-based class identifiers.}
 }
 \value{
 A character vector with 1000 entries representing the ImageNet-1k
 class labels.
 
-A character vector with the labels associated with \code{id}.
+A data.frame containing columns \code{id} and \code{label} representing 
+the ImageNet-21k class identifiers and labels. By default, returns all 21.8K rows.
 
-A data.frame with 21k entries containing columns \code{id} and \code{label}
-representing the ImageNet-21k class identifiers and labels.
-
-A character vector with the labels associated with \code{id}.
+A character vector with the labels associated with \code{class_id}.
 }
 \description{
 Utilities for resolving ImageNet-1k class identifiers to their corresponding
@@ -36,23 +34,23 @@ PyTorch's reference implementation.
 }
 \seealso{
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
-\code{\link{voc_classes}},
-\code{\link{voc_segmentation_classes}}
+\code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
-\code{\link{voc_classes}},
-\code{\link{voc_segmentation_classes}}
+\code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
-\code{\link{voc_classes}},
-\code{\link{voc_segmentation_classes}}
+\code{\link{pascal_voc_classes}()}
 
 Other class_resolution: 
+\code{\link{caltech_classes}()},
 \code{\link{coco_classes}()},
-\code{\link{voc_classes}},
-\code{\link{voc_segmentation_classes}}
+\code{\link{pascal_voc_classes}()}
 }
 \concept{class_resolution}

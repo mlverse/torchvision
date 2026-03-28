@@ -19,11 +19,13 @@ In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.}
 
 \item{keypoints}{Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,}
 
-\item{connectivity}{Vector of pair of keypoints to be connected (currently unavailable)}
+\item{connectivity}{List of integer pairs \code{c(i, j)} specifying which
+keypoints to connect with a line, e.g. \code{list(c(1, 2), c(2, 3))}.
+\code{NULL} (default) draws no connecting lines.}
 
 \item{colors}{character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
-strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints}
+of the keypoints or single color for all keypoints. The color can be represented as
+strings e.g. "red" or "#FF00FF". By default, rainbow colors are generated for keypoints}
 
 \item{radius}{radius of the plotted keypoint.}
 
