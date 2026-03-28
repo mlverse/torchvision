@@ -17,14 +17,16 @@ test_that("tests for the mnist dataset", {
 
   raw_items <- ds$.getitem(c(1, 2))
   expect_length(raw_items, 2)
-  expect_named(raw_items[[1]], c("x", "y"))
-  expect_equal(dim(raw_items[[1]]$x), c(1, 28, 28))
+  expect_named(raw_items, c("x", "y"))
+  expect_equal(dim(raw_items$x), c(2, 28, 28))
+  expect_equal(length(raw_items$y), 2)
 
   ds <- mnist_dataset(dir, transform = transform_to_tensor)
   items <- ds$.getitem(c(1, 2))
   expect_length(items, 2)
-  expect_named(items[[1]], c("x", "y"))
-  expect_tensor_shape(items[[1]]$x, c(1, 28, 28))
+  expect_named(items, c("x", "y"))
+  expect_tensor_shape(items$x, c(2, 1, 28, 28))
+  expect_equal(length(items$y), 2)
 
   dl <- torch::dataloader(ds, batch_size = 32)
   expect_length(dl, 1875)

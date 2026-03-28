@@ -149,20 +149,43 @@ mnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
+    index <- as.integer(index)
     x <- self$data[index, , , drop = FALSE]
     y <- self$targets[index]
 
-    if (!is.null(self$transform))
-      x <- self$transform(x)
+    if (!is.null(self$transform)) {
+      if (length(index) > 1) {
+        x_list <- lapply(seq_along(index), function(i) {
+          self$transform(x[i, , , drop = FALSE])
+        })
+        if (length(x_list) > 0 && inherits(x_list[[1]], "torch_tensor")) {
+          x <- torch::torch_stack(x_list)
+        } else {
+          x <- x_list
+        }
+      } else {
+        x <- self$transform(x)
+      }
+    }
 
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
+    if (!is.null(self$target_transform)) {
+      if (length(index) > 1) {
+        y_list <- lapply(as.list(y), self$target_transform)
+        if (length(y_list) > 0 && inherits(y_list[[1]], "torch_tensor")) {
+          y <- torch::torch_stack(y_list)
+        } else {
+          y <- unlist(y_list, use.names = FALSE)
+        }
+      } else {
+        y <- self$target_transform(y)
+      }
+    }
 
     list(x = x, y = y)
   },
 
   .getbatch = function(index) {
-    lapply(as.integer(index), function(i) self$.getitem(i))
+    self$.getitem(index)
   },
 
   .length = function() {
@@ -450,20 +473,43 @@ emnist_collection <- dataset(
   },
 
   .getitem = function(index) {
+    index <- as.integer(index)
     x <- self$data[index, , , drop = FALSE]
     y <- self$targets[index]
 
-    if (!is.null(self$transform))
-      x <- self$transform(x)
+    if (!is.null(self$transform)) {
+      if (length(index) > 1) {
+        x_list <- lapply(seq_along(index), function(i) {
+          self$transform(x[i, , , drop = FALSE])
+        })
+        if (length(x_list) > 0 && inherits(x_list[[1]], "torch_tensor")) {
+          x <- torch::torch_stack(x_list)
+        } else {
+          x <- x_list
+        }
+      } else {
+        x <- self$transform(x)
+      }
+    }
 
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
+    if (!is.null(self$target_transform)) {
+      if (length(index) > 1) {
+        y_list <- lapply(as.list(y), self$target_transform)
+        if (length(y_list) > 0 && inherits(y_list[[1]], "torch_tensor")) {
+          y <- torch::torch_stack(y_list)
+        } else {
+          y <- unlist(y_list, use.names = FALSE)
+        }
+      } else {
+        y <- self$target_transform(y)
+      }
+    }
 
     list(x = x, y = y)
   },
 
   .getbatch = function(index) {
-    lapply(as.integer(index), function(i) self$.getitem(i))
+    self$.getitem(index)
   },
 
   .length = function() {
