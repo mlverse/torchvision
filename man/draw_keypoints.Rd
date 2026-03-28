@@ -19,8 +19,8 @@ In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.}
 
 \item{keypoints}{Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,}
 
-\item{connectivity}{Optional matrix with two columns defining skeleton edges.
-Each row specifies the pair of keypoint indices to connect with a segment.}
+\item{connectivity}{Optional matrix with 2 columns. Each row contains a pair
+of keypoint indices to connect with a line segment.}
 
 \item{colors}{character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
