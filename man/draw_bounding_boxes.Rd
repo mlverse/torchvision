@@ -25,6 +25,7 @@ draw_bounding_boxes(
   boxes,
   labels = NULL,
   colors = NULL,
+  color = NULL,
   fill = FALSE,
   width = 1,
   font = c("serif", "plain"),
@@ -42,10 +43,14 @@ C value for channel can only be 1 (grayscale) or 3 (RGB).}
 \item{labels}{character vector of box labels}
 
 \item{colors}{character vector or single color}
+  
+\item{color}{Deprecated alias for \code{colors}.}
 
 \item{fill}{whether to fill the box}
 
 \item{width}{width of the box border}
+
+\item{fill}{If \code{TRUE} fills the bounding box with specified color.}
 
 \item{font}{font family vector}
 

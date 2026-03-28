@@ -77,6 +77,7 @@ vision_make_grid <- function(tensor,
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
+#' @param color Deprecated alias for `colors`.
 #' @param fill If `TRUE` fills the bounding box with specified color.
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
@@ -129,31 +130,34 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              boxes,
                                              labels = NULL,
                                              colors = NULL,
+                                             color = NULL,
                                              fill = FALSE,
                                              width = 1,
                                              font = c("serif", "plain"),
                                              font_size = 10, ...) {
   rlang::check_installed("magick")
 
-  # manage single batch images
-  if (x$ndim == 4 && x$size(1) == 1) {
-    x <- x$squeeze(1)
+  if (!is.null(color)) {
+    if (!is.null(colors)) {
+      cli_abort("Use either {.arg colors} or {.arg color}, not both.")
+    }
+    cli_warn("{.arg color} is deprecated; use {.arg colors} instead.")
+    colors <- color
   }
-  if (x$ndim != 3) {
-    value_error("Pass an individual image as `x`, not a batch")
-  }
-  if (!x$size(1) %in% c(1, 3)) {
-    value_error("Only grayscale and RGB images are supported")
-  }
-  if (x$dtype == torch::torch_uint8()) {
-    img_to_draw <- x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+
+  if (x$ndim == 4 && x$size(1) == 1) x <- x$squeeze(1)
+  if (x$ndim != 3) value_error("Pass an individual image as `x`, not a batch")
+  if (!x$size(1) %in% c(1, 3)) value_error("Only grayscale and RGB images are supported")
+
+  img_to_draw <- if (x$dtype == torch::torch_uint8()) {
+    x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else if (x$dtype == torch::torch_float()) {
-    img_to_draw <- x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
-  } else {
-    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
-  }
-  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
-    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use `box_convert()` to convert them")
+    x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+  } else type_error("`x` should be torch_uint8 or torch_float")
+
+  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() ||
+      (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
+    value_error("Boxes must be in c(xmin, ymin, xmax, ymax) format")
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
@@ -420,10 +424,12 @@ draw_segmentation_masks.image_with_segmentation_mask <- function(x, masks = NULL
 #'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #' @param keypoints Tensor of shape (N, K, 2) the K keypoints location for each of the N detected poses instance,
 #         in the format c(x, y).
-#' @param connectivity Vector of pair of keypoints to be connected (currently unavailable)
+#' @param connectivity List of integer pairs `c(i, j)` specifying which
+#'            keypoints to connect with a line, e.g. `list(c(1, 2), c(2, 3))`.
+#'            `NULL` (default) draws no connecting lines.
 #' @param colors character vector containing the colors
-#'            of the boxes or single color for all boxes. The color can be represented as
-#'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for keypoints
+#'            of the keypoints or single color for all keypoints. The color can be represented as
+#'            strings e.g. "red" or "#FF00FF". By default, rainbow colors are generated for keypoints
 #' @param radius radius of the plotted keypoint.
 #' @param width width of line connecting keypoints.
 #'
@@ -466,35 +472,34 @@ draw_keypoints <- function(image,
   }
 
   if (keypoints$ndim != 3) {
-    cli_abort("{.var keypoints} must be of shape (num_instances, K, 2), but is current shape is {.value {keypoints$shape}}")
+    cli_abort("{.var keypoints} must be of shape (num_instances, K, 2), but current shape is {.value {keypoints$shape}}")
   }
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
-  draw <- png::writePNG(img_to_draw / 255) %>%
+
+  if (is.null(colors)) {
+    colors <- grDevices::hcl.colors(n = dim(img_kpts)[[2]])
+  }
+
+  draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+  for (pose in 1:dim(img_kpts)[[1]]) {
+    graphics::points(img_kpts[pose,,1], img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
 
+    if (!is.null(connectivity)) {
+      for (conn in connectivity) {
+        start_idx <- conn[1]
+        end_idx <- conn[2]
+        start_x <- img_kpts[pose, start_idx, 1]
+        start_y <- img_kpts[pose, start_idx, 2]
+        end_x <- img_kpts[pose, end_idx, 1]
+        end_y <- img_kpts[pose, end_idx, 2]
+        graphics::lines(c(start_x, end_x), c(start_y, end_y), col = colors[start_idx], lwd = width)
+      }
+    }
   }
-  # TODO need R-isation and vectorisation
-  # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
-  #     if (connectivity) {
-  #         for (connection in connectivity) {
-  #             start_pt_x <- kpt_inst[connection[0]][0]
-  #             start_pt_y <- kpt_inst[connection[0]][1]
-  #
-  #             end_pt_x <- kpt_inst[connection[1]][0]
-  #             end_pt_y <- kpt_inst[connection[1]][1]
-  #
-  #             draw$line(
-  #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
-  #                 widt = width,
-  #             )
-  #         }
-  #     }
-  # }
   grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())

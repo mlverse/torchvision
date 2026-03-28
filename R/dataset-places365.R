@@ -39,7 +39,8 @@
 #' # Show class index and label
 #' label_idx <- item$y
 #' label_name <- ds$classes[label_idx]
-#' cat("Label index:", label_idx, "Class name:", label_name, "\n")
+#' label_idx  # Class Index
+#' label_name  # Name of the Label
 #'
 #' dl <- dataloader(ds, batch_size = 2)
 #' batch <- dataloader_next(dataloader_make_iter(dl))
@@ -95,7 +96,7 @@ places365_dataset <- torch::dataset(
     self$loader <- loader
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -125,7 +126,11 @@ places365_dataset <- torch::dataset(
       self$files <- fs::dir_ls(self$test_dir, recurse = FALSE, type = "file", glob = "*.jpg")
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} Split '{self$split}' loaded with {length(self)} samples.")
+    if (self$split == "test") {
+      cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images.")
+    } else {
+      cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
+    }
   },
 
   .length = function() {

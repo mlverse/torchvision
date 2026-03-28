@@ -95,7 +95,7 @@ B7 \tab 2.0 \tab 3.1 \tab 600 \tab 66.0 \tab 37.0 \tab 84.3
 model <- model_efficientnet_b0()
 image_batch <- torch::torch_randn(1, 3, 224, 224)
 output <- model(image_batch)
-imagenet_label(which.max(as.numeric(output)))
+imagenet_classes(which.max(as.numeric(output)))
 }
 
 \dontrun{
@@ -103,7 +103,7 @@ imagenet_label(which.max(as.numeric(output)))
 model <- model_efficientnet_b5()
 image_batch <- torch::torch_randn(1, 3, 456, 456)
 output <- model(image_batch)
-imagenet_label(which.max(as.numeric(output)))
+imagenet_classes(which.max(as.numeric(output)))
 }
 
 }
