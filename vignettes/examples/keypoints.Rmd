@@ -1,5 +1,5 @@
 ---
-title: "draw_keypoints"
+title: keypoints
 type: docs
 ---
 
