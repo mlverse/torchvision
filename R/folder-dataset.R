@@ -86,9 +86,9 @@ folder_dataset <- torch::dataset(
   .find_classes = function(dir) {
     dirs <- fs::dir_ls(dir, recurse = FALSE, type = "directory")
     dirs <- sapply(fs::path_split(dirs), function(x) tail(x, 1))
-    class_too_idx <- seq_along(dirs)
-    names(class_too_idx) <- sort(dirs)
-    class_too_idx
+    class_to_idx <- seq_along(dirs)
+    names(class_to_idx) <- sort(dirs)
+    class_to_idx
   },
   .getitem = function(index) {
 
