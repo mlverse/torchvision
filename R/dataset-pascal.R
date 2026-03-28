@@ -12,6 +12,22 @@
 #' `"cow"`, `"dining table"`, `"dog"`, `"horse"`, `"motorbike"`, `"person"`, `"potted plant"`, `"sheep"`, `"sofa"`, `"train"`, and `"tv/monitor"`.
 #' They are available through the `classes` variable of the dataset object.
 #'
+#' @param class_id Integer vector of 1-based class identifiers. Must be within \[1, 21\].
+#'
+#' @family class_resolution
+#' @export
+pascal_voc_classes <- function(class_id = 1:21) {
+  if (any(class_id > 21)) {
+    cli_warn("PASCAL VOC {.var class_id} cannot be > 21")
+  }
+  c(
+    "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
+    "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
+    "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
+  )[class_id]
+}
+
+#'
 #' This dataset is frequently used for training and evaluating semantic segmentation models, and supports tasks requiring dense, per-pixel annotations.
 #'
 #' @inheritParams oxfordiiitpet_dataset
@@ -45,7 +61,7 @@
 #' first_item$x  # Image
 #' first_item$y$masks  # Segmentation mask
 #' first_item$y$labels  # Unique class labels in the mask
-#' pascal_seg$classes[first_item$y$labels]  # Class names
+#' pascal_voc_classes(first_item$y$labels)  # Class names
 #'
 #' # Visualise the first image and its mask
 #' masked_img <- draw_segmentation_masks(first_item)
@@ -96,13 +112,7 @@ pascal_segmentation_dataset <- torch::dataset(
             "6cd6e144f989b92b3379bac3b3de84fd"),
     size = c("440 MB", "440 MB", "550 MB", "890 MB", "1.3 GB", "1.7 GB", "1.9 GB")
   ),
-  classes = c(
-    "background", "aeroplane", "bicycle", "bird", "boat",
-    "bottle", "bus", "car", "cat", "chair",
-    "cow", "dining table", "dog", "horse", "motorbike",
-    "person", "potted plant", "sheep", "sofa", "train",
-    "tv/monitor"
-  ),
+  classes = pascal_voc_classes(),
   voc_colormap = c(
     c(0, 0, 0), c(128, 0, 0), c(0, 128, 0), c(128, 128, 0),
     c(0, 0, 128), c(128, 0, 128), c(0, 128, 128), c(128, 128, 128),
@@ -133,7 +143,7 @@ pascal_segmentation_dataset <- torch::dataset(
     self$archive_size <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]$size
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -293,7 +303,7 @@ pascal_detection_dataset <- torch::dataset(
     self$archive_size <- self$resources[self$resources$year == self$year & self$resources$type == self$archive_key,]$size
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
