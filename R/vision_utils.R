@@ -471,31 +471,30 @@ draw_keypoints <- function(image,
   }
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
-  draw <- png::writePNG(img_to_draw / 255) %>%
+
+  if (is.null(colors)) {
+    colors <- grDevices::hcl.colors(n = dim(img_kpts)[[2]])
+  }
+
+  draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1],img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+  for (pose in 1:dim(img_kpts)[[1]]) {
+    graphics::points(img_kpts[pose,,1], img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
 
+    if (!is.null(connectivity)) {
+      for (conn in connectivity) {
+        start_idx <- conn[1]
+        end_idx <- conn[2]
+        start_x <- img_kpts[pose, start_idx, 1]
+        start_y <- img_kpts[pose, start_idx, 2]
+        end_x <- img_kpts[pose, end_idx, 1]
+        end_y <- img_kpts[pose, end_idx, 2]
+        graphics::lines(c(start_x, end_x), c(start_y, end_y), col = colors[start_idx], lwd = width)
+      }
+    }
   }
-  # TODO need R-isation and vectorisation
-  # for (kpt_id, kpt_inst in enumerate(img_kpts)) {
-  #     if (connectivity) {
-  #         for (connection in connectivity) {
-  #             start_pt_x <- kpt_inst[connection[0]][0]
-  #             start_pt_y <- kpt_inst[connection[0]][1]
-  #
-  #             end_pt_x <- kpt_inst[connection[1]][0]
-  #             end_pt_y <- kpt_inst[connection[1]][1]
-  #
-  #             draw$line(
-  #                 ((start_pt_x, start_pt_y), (end_pt_x, end_pt_y)),
-  #                 widt = width,
-  #             )
-  #         }
-  #     }
-  # }
   grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
