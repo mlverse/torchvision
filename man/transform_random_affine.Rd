@@ -42,7 +42,8 @@ will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
 will be applied. Will not apply shear by default.}
 
-\item{interpolation}{(int, optional): Interpolation mode. Default is 0.}
+\item{interpolation}{(int or character, optional): Interpolation mode.
+Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.}
 
 \item{fill}{(tuple or int): Fill color for the area outside the transform.
 Default is 0. This option is not supported for Tensor input.}

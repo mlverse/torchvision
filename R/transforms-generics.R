@@ -351,7 +351,7 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 transform_random_rotation <- function(img, degrees, interpolation = 0, expand=FALSE,
                                       center=NULL, fill=NULL, resample) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   UseMethod("transform_random_rotation", img)
@@ -389,11 +389,11 @@ transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
                                     shear=NULL, interpolation=0, fill=0,
                                     resample, fillcolor) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   if (!missing(fillcolor)) {
-    warning("'fillcolor' is deprecated, use 'fill' instead")
+    deprecated("'fillcolor' is deprecated, use 'fill' instead")
     fill <- fillcolor
   }
   UseMethod("transform_random_affine", img)
@@ -598,7 +598,7 @@ transform_adjust_hue <- function(img, hue_factor) {
 transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
                              center = NULL, fill = NULL, resample) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   UseMethod("transform_rotate", img)
@@ -628,11 +628,11 @@ transform_affine <- function(img, angle, translate, scale, shear,
                              interpolation = 0, fill = NULL,
                              resample, fillcolor, center = NULL) {
   if (!missing(resample)) {
-    warning("'resample' is deprecated, use 'interpolation' instead")
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
     interpolation <- resample
   }
   if (!missing(fillcolor)) {
-    warning("'fillcolor' is deprecated, use 'fill' instead")
+    deprecated("'fillcolor' is deprecated, use 'fill' instead")
     fill <- fillcolor
   }
   UseMethod("transform_affine", img)

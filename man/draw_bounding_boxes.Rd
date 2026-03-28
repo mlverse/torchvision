@@ -2,10 +2,23 @@
 % Please edit documentation in R/vision_utils.R
 \name{draw_bounding_boxes}
 \alias{draw_bounding_boxes}
+\alias{draw_bounding_boxes.default}
 \alias{draw_bounding_boxes.torch_tensor}
-\title{Draw bounding boxes on image}
+\title{Draws bounding boxes on image.}
 \usage{
-draw_bounding_boxes(x, ...)
+draw_bounding_boxes(
+  x,
+  boxes,
+  labels = NULL,
+  colors = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
+
+\method{draw_bounding_boxes}{default}(x, ...)
 
 \method{draw_bounding_boxes}{torch_tensor}(
   x,
@@ -20,9 +33,9 @@ draw_bounding_boxes(x, ...)
 )
 }
 \arguments{
-\item{x}{Tensor (C x H x W) uint8 or float in range 0 to 1}
-
-\item{...}{Additional arguments passed to methods}
+\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
+In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+C value for channel can only be 1 (grayscale) or 3 (RGB).}
 
 \item{boxes}{Tensor (N x 4) in c(xmin, ymin, xmax, ymax)}
 
@@ -37,16 +50,33 @@ draw_bounding_boxes(x, ...)
 \item{font}{font family vector}
 
 \item{font_size}{font size in points}
+
+\item{...}{Additional method arguments (currently unused).}
 }
 \value{
-torch_tensor (C x H x W) with boxes drawn
+torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 }
 \description{
-Draw bounding boxes on image
+Draws bounding boxes on top of one image tensor
+}
+\examples{
+if (torch::torch_is_installed()) {
+\dontrun{
+image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
+x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
+y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
+boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
+bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", fill = TRUE)
+tensor_image_browse(bboxed)
+}
+}
 }
 \seealso{
 Other image display: 
 \code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{tensor_image_display}()},
 \code{\link{vision_make_grid}()}
 }
 \concept{image display}

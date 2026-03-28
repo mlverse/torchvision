@@ -198,20 +198,20 @@ test_that("affine deprecated arguments still work", {
 
   x <- torch_eye(8)$view(c(1, 1, 8, 8))
 
-  warn_msgs <- character(0)
-  old <- withCallingHandlers(
-    transform_affine(x, 0, c(0, 1), 1, 0, resample = 0, fillcolor = 0),
-    warning = function(w) {
-      warn_msgs <<- c(warn_msgs, conditionMessage(w))
-      invokeRestart("muffleWarning")
-    }
+  old_resample <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, resample = 0, fill = 0),
+    "resample"
+  )
+
+  old_fillcolor <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fillcolor = 0),
+    "fillcolor"
   )
 
   new <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fill = 0)
 
-  expect_equal(sum(grepl("resample", warn_msgs)), 1)
-  expect_equal(sum(grepl("fillcolor", warn_msgs)), 1)
-  expect_equal_to_r(old, as_array(new))
+  expect_equal_to_r(old_resample, as_array(new))
+  expect_equal_to_r(old_fillcolor, as_array(new))
 
 })
 
