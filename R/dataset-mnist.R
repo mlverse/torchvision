@@ -149,45 +149,36 @@ mnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    index <- as.integer(index)
     x <- self$data[index, , , drop = FALSE]
     y <- self$targets[index]
 
     if (!is.null(self$transform)) {
-      if (length(index) > 1) {
-        x_list <- lapply(seq_along(index), function(i) {
-          self$transform(x[i, , , drop = FALSE])
-        })
-        if (length(x_list) > 0 && inherits(x_list[[1]], "torch_tensor")) {
-          x <- torch::torch_stack(x_list)
-        } else {
-          x <- x_list
-        }
-      } else {
         x <- self$transform(x)
-      }
     }
 
     if (!is.null(self$target_transform)) {
-      if (length(index) > 1) {
-        y_list <- lapply(as.list(y), self$target_transform)
-        if (length(y_list) > 0 && inherits(y_list[[1]], "torch_tensor")) {
-          y <- torch::torch_stack(y_list)
-        } else {
-          y <- unlist(y_list, use.names = FALSE)
-        }
-      } else {
         y <- self$target_transform(y)
-      }
     }
 
     list(x = x, y = y)
   },
 
   .getbatch = function(index) {
-    self$.getitem(index)
-  },
+    x_flat <- self$data[index, , , drop = FALSE]
+    # unsqueeze(2) on array
+    x <- array(x_flat, dim = c(length(index), 1, dim(x_flat)[2:3]))
+    y <- self$targets[index]
 
+    if (!is.null(self$transform)) {
+      x <- torch::torch_stack(lapply(seq_len(dim(x)[1]), function(i) self$transform(x[i,,,])))
+    }
+
+    if (!is.null(self$target_transform)) {
+      y <- self$target_transform(y)
+    }
+
+    list(x = x, y = y)
+  },
   .length = function() {
     dim(self$data)[1]
   },
@@ -380,6 +371,7 @@ fashion_mnist_dataset <- dataset(
 #' @export
 emnist_collection <- dataset(
   name = "emnist_collection",
+  inherit = mnist_dataset,
   archive_size = "540 MB",
 
   resources = list(
@@ -419,8 +411,6 @@ emnist_collection <- dataset(
     self$split <- match.arg(split, choices = c("train", "test"))
     self$dataset <- match.arg(dataset,  choices = names(self$classes_all_dataset))
     self$root_path <- root
-    self$raw_folder <- file.path(root, class(self)[1], "raw")
-    self$processed_folder <- file.path(root, class(self)[1], "processed")
     self$transform <- transform
     self$target_transform <- target_transform
     self$classes <- self$classes_all_dataset[[self$dataset]]
@@ -472,50 +462,15 @@ emnist_collection <- dataset(
     fs::file_exists(file.path(self$processed_folder, self$rds_file(self$split, self$dataset)))
   },
 
-  .getitem = function(index) {
-    index <- as.integer(index)
-    x <- self$data[index, , , drop = FALSE]
-    y <- self$targets[index]
+  active = list(
+    raw_folder = function() {
+      file.path(self$root_path, "emnist_collection", "raw")
+    },
 
-    if (!is.null(self$transform)) {
-      if (length(index) > 1) {
-        x_list <- lapply(seq_along(index), function(i) {
-          self$transform(x[i, , , drop = FALSE])
-        })
-        if (length(x_list) > 0 && inherits(x_list[[1]], "torch_tensor")) {
-          x <- torch::torch_stack(x_list)
-        } else {
-          x <- x_list
-        }
-      } else {
-        x <- self$transform(x)
-      }
+    processed_folder = function() {
+      file.path(self$root_path, "emnist_collection", "processed")
     }
-
-    if (!is.null(self$target_transform)) {
-      if (length(index) > 1) {
-        y_list <- lapply(as.list(y), self$target_transform)
-        if (length(y_list) > 0 && inherits(y_list[[1]], "torch_tensor")) {
-          y <- torch::torch_stack(y_list)
-        } else {
-          y <- unlist(y_list, use.names = FALSE)
-        }
-      } else {
-        y <- self$target_transform(y)
-      }
-    }
-
-    list(x = x, y = y)
-  },
-
-  .getbatch = function(index) {
-    self$.getitem(index)
-  },
-
-  .length = function() {
-    dim(self$data)[1]
-  }
-
+  )
 )
 
 read_sn3_pascalvincent <- function(path) {
