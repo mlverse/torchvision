@@ -1,9 +1,18 @@
 # torchvision (development version)
 
+## Bug fixes and improvements
+
+* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter
+  type from `Vector` to `List`, removed stale "(currently unavailable)" note,
+  fixed `colors` description to say "rainbow" instead of "viridis", and fixed
+  a grammatical typo in the error message ("but is current shape is" ->
+  "but current shape is") (#).
+
 ## Breaking changes
 
-* **COCO datasets refactored**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
-  This reduces memory usage by ~50%. Files now stored in `/coco` cache subdirectory. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
+  This reduces memory usage by ~50%. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
+* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
 
@@ -11,9 +20,11 @@
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
+* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
 
 ## New models
 
+* Added `model_maskrcnn_resnet50_fpn()` and `model_maskrcnn_resnet50_fpn_v2()` for instance segmentation (#278, @ANAMASGARD).
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
 
@@ -24,10 +35,13 @@
 
 ## Bug fixes and improvements
 
+* Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
 * fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
-* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due 
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due
 to non-vectorized `transform_` operations (#264)
+* Added article for `draw_keypoints()` (@DerrickUnleashed #303)
+* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency.(@DerrickUnleashed #302)
 
 # torchvision 0.8.0
 

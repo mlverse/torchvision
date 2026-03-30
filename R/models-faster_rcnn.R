@@ -1,7 +1,6 @@
-rpn_head <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+rpn_head <- torch::nn_module(
     "rpn_head",
-    initialize = function() {
+    initialize = function(in_channels, num_anchors = 3) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -20,12 +19,11 @@ rpn_head <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_v2 <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+
+rpn_head_v2 <- torch::nn_module(
     "rpn_head_v2",
-    initialize = function() {
+    initialize = function(in_channels, num_anchors = 3) {
       # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
       # blocks with bias disabled on the convolutions. Mirror that layout so
       # the parameter names and shapes line up with the weight file.
@@ -54,11 +52,10 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
-  torch::nn_module(
-    initialize = function() {
+
+rpn_head_mobilenet <- torch::nn_module(
+    initialize = function(in_channels, num_anchors = 15) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -76,7 +73,7 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
       list(objectness = objectness, bbox_deltas = bbox_deltas)
     }
   )
-}
+
 
 #' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like torch_max torch_float32
 generate_level_anchors <- function(h, w, stride, scales) {
@@ -129,11 +126,12 @@ decode_boxes <- function(anchors, deltas) {
   torch::torch_stack(list(x1, y1, x2, y2), dim = 2)
 }
 
+#' @importFrom torch nnf_grid_sample torch_empty
 generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx,
                                score_thresh = 0.05, nms_thresh = 0.7) {
   device <- rpn_out$objectness[[1]]$device
-  all_proposals <- torch::torch_empty(0L, 4L, device = device)
-  all_scores <- torch::torch_empty(0L, device = device)
+  all_proposals <- torch_empty(0L, 4L, device = device)
+  all_scores <- torch_empty(0L, device = device)
 
   for (i in seq_along(features)) {
     objectness <- rpn_out$objectness[[i]][batch_idx, , , ]
@@ -163,13 +161,12 @@ generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx
     keep_idx <- nms(proposals, scores, nms_thresh)
     proposals <- proposals[keep_idx, ]
   } else {
-    proposals <- torch::torch_empty(c(0, 4), device = device, dtype = torch_float32())
+    proposals <- torch_empty(c(0, 4), device = device, dtype = torch_float32())
   }
 
   list(proposals = proposals)
 }
 
-#' @importFrom torch nnf_grid_sample torch_empty
 roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)) {
   # A vectorized version of roi_align_stub for feature_map: [B, C, H, W] and proposals: [N, 4] (x1, y1, x2, y2)
 
@@ -220,9 +217,9 @@ roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)
   pooled_features
 }
 
-roi_heads_module <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
+roi_heads_module <-  torch::nn_module(
+    "region-of-interest head v2",
+    initialize = function(num_classes = 91) {
       # Define box_head with named layers to match expected state dict structure
       self$box_head <- torch::nn_module(
         initialize = function() {
@@ -256,11 +253,11 @@ roi_heads_module <- function(num_classes = 91) {
       self$box_predictor(x)
     }
   )
-}
 
-roi_heads_module_v2 <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
+
+roi_heads_module_v2 <- torch::nn_module(
+    "region-of-interest head v2",
+    initialize = function(num_classes = 91) {
       # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
       # followed by a final linear layer at index "4".
       block <- function() {
@@ -302,11 +299,11 @@ roi_heads_module_v2 <- function(num_classes = 91) {
       self$box_predictor(x)
     }
   )
-}
 
-fpn_module <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module <- torch::nn_module(
+    "feature pyramid network",
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(torch::nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -333,7 +330,6 @@ fpn_module <- function(in_channels, out_channels) {
       results
     }
   )
-}
 
 
 resnet_fpn_backbone <- function(pretrained = TRUE) {
@@ -372,7 +368,7 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -386,13 +382,13 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model <- function(backbone, num_classes,
-                             score_thresh = 0.05,
-                             nms_thresh = 0.5,
-                             detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_model <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -401,7 +397,7 @@ fasterrcnn_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head(in_channels = backbone$out_channels)()
+          self$head <- rpn_head(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
@@ -409,7 +405,7 @@ fasterrcnn_model <- function(backbone, num_classes,
       )()
 
       # Use the roi_heads_module instead of inline definition
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
 
     forward = function(images) {
@@ -427,11 +423,11 @@ fasterrcnn_model <- function(backbone, num_classes,
 
         if (props$proposals$shape[1] == 0) {
           empty <- list(
-            boxes = torch::torch_empty(c(0, 4)),
-            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch::torch_empty(c(0))
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = empty))
+          return(list(features = features, detections = list(empty)))
         }
 
         detections <- self$roi_heads(features, props$proposals, batch_idx = b)
@@ -441,7 +437,7 @@ fasterrcnn_model <- function(backbone, num_classes,
         final_scores <- max_scores[[1]]
         final_labels <- max_scores[[2]]
 
-        box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
         gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
         final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
@@ -475,9 +471,9 @@ fasterrcnn_model <- function(backbone, num_classes,
             final_scores <- final_scores[top_idx]
           }
         } else {
-          final_boxes <- torch::torch_empty(c(0, 4))
-          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch::torch_empty(c(0))
+          final_boxes <- torch_empty(c(0, 4))
+          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
+          final_scores <- torch_empty(c(0))
         }
         final_results[[b]] <- list(
           boxes = final_boxes,
@@ -488,12 +484,12 @@ fasterrcnn_model <- function(backbone, num_classes,
       list(features = features, detections = final_results)
     }
   )
-}
 
 
-fpn_module_v2 <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module_v2 <- torch::nn_module(
+    "feature pyramid network v2",
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(
           nn_conv2d(c, out_channels, kernel_size = 1, bias = FALSE),
@@ -528,7 +524,7 @@ fpn_module_v2 <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
   resnet <- model_resnet50(pretrained = pretrained)
@@ -566,7 +562,7 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_v2(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -580,13 +576,13 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model_v2 <- function(backbone, num_classes,
-                                score_thresh = 0.05,
-                                nms_thresh = 0.5,
-                                detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_model_v2 <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -595,13 +591,13 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_v2(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
@@ -618,21 +614,21 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
 
         if (props$proposals$shape[1] == 0) {
           empty <- list(
-            boxes = torch::torch_empty(c(0, 4)),
-            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch::torch_empty(c(0))
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = empty))
+          return(list(features = features, detections = list(empty)))
         }
 
         detections <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- torch::nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch::torch_max(scores, dim = 2)
+        scores <- nnf_softmax(detections$scores, dim = 2)
+        max_scores <- torch_max(scores, dim = 2)
         final_scores <- max_scores[[1]]
         final_labels <- max_scores[[2]]
 
-        box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
         gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
         final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
@@ -666,9 +662,9 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
             final_scores <- final_scores[top_idx]
           }
         } else {
-          final_boxes <- torch::torch_empty(c(0, 4))
-          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch::torch_empty(c(0))
+          final_boxes <- torch_empty(c(0, 4))
+          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
+          final_scores <- torch_empty(c(0))
         }
         final_results[[b]] <- list(
           boxes = final_boxes,
@@ -678,13 +674,12 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
       }
       list(features = features, detections = final_results)
     }
-  )()
-}
+  )
 
 
-fpn_module_2level <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module_2level <- torch::nn_module(
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -706,7 +701,7 @@ fpn_module_2level <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 
 mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
@@ -718,7 +713,7 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
@@ -742,13 +737,13 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
   backbone
 }
 
-fasterrcnn_mobilenet_model <- function(backbone, num_classes,
-                                       score_thresh = 0.05,
-                                       nms_thresh = 0.5,
-                                       detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_mobilenet_model <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -757,13 +752,13 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
@@ -780,11 +775,11 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
 
         if (props$proposals$shape[1] == 0) {
           empty <- list(
-            boxes = torch::torch_empty(c(0, 4)),
-            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch::torch_empty(c(0))
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = empty))
+          return(list(features = features, detections = list(empty)))
         }
 
         detections <- self$roi_heads(features, props$proposals, batch_idx = b)
@@ -794,7 +789,7 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
         final_scores <- max_scores[[1]]
         final_labels <- max_scores[[2]]
 
-        box_reg <- detections$boxes$view(c(-1, num_classes, 4))
+        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
         gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
         final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
 
@@ -826,9 +821,9 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
             final_scores <- final_scores[top_idx]
           }
         } else {
-          final_boxes <- torch::torch_empty(c(0, 4))
-          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch::torch_empty(c(0))
+          final_boxes <- torch_empty(c(0, 4))
+          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
+          final_scores <- torch_empty(c(0))
         }
         final_results[[b]] <- list(
           boxes = final_boxes,
@@ -838,8 +833,8 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
       }
       list(features = features, detections = final_results)
     }
-  )()
-}
+  )
+
 
 
 
@@ -852,7 +847,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),  # output channels of layer 13 and 16
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
@@ -1009,7 +1004,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
   model <- fasterrcnn_model(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
-                            detections_per_img = detections_per_img)()
+                            detections_per_img = detections_per_img)
   if (pretrained && num_classes != 91)
     cli_abort("Pretrained weights require num_classes = 91.")
 

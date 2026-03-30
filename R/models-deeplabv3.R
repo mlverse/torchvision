@@ -1,80 +1,109 @@
-# DeepLabV3 model family with auxiliary classifier
-
-#' DeepLabV3 Models
+#' DeepLabV3 Semantic Segmentation Models
 #'
-#' Constructs DeepLabV3 semantic segmentation models with a ResNet backbone as
-#' described in \emph{Rethinking Atrous Convolution for Semantic Image
-#' Segmentation}. These models employ atrous spatial pyramid pooling to capture
-#' multi-scale context.
+#' @description
+#' Semantic segmentation models implementing the DeepLabV3 architecture from
+#' [Rethinking Atrous Convolution for Semantic Image Segmentation](https://arxiv.org/abs/1706.05587).
+#' These models use Atrous Spatial Pyramid Pooling (ASPP) to capture multi-scale
+#' context, and are available with ResNet-50 and ResNet-101 backbones.
 #'
-#' @section Task:
-#' Semantic image segmentation with 21 output classes by default (COCO).
+#' ## Available Models
+#' - `model_deeplabv3_resnet50()`
+#' - `model_deeplabv3_resnet101()`
 #'
-#' @section Input Format:
-#' The models expect input tensors of shape \code{(batch_size, 3, H, W)}. Typical
-#' training uses 520x520 images.
+#' ## Model Variants and Performance (COCO val2017, VOC labels)
+#'
+#' All models are trained on a 20-class subset of COCO that corresponds to
+#' Pascal VOC categories, plus background (21 classes total).
+#'
+#' ```
+#' | Model                     | mIoU  | Pixel Acc | Params | GFLOPS | File Size | Weights Used              |
+#' |---------------------------|-------|-----------|--------|--------|-----------|---------------------------|
+#' | model_deeplabv3_resnet50  | 66.4% | 92.4%     | 42.0M  | 178.72 | 161 MB    | COCO_WITH_VOC_LABELS_V1   |
+#' | model_deeplabv3_resnet101 | 67.4% | 92.4%     | 61.0M  | 258.74 | 233 MB    | COCO_WITH_VOC_LABELS_V1   |
+#' ```
+#'
+#' ## Weights Selection
+#' - All models use `COCO_WITH_VOC_LABELS_V1` weights, trained on COCO with the
+#'   20 Pascal VOC categories (+ background = 21 classes).
+#' - Backbone weights default to `IMAGENET1K_V1` (supervised ImageNet-1k) when
+#'   `pretrained = FALSE` and `pretrained_backbone = TRUE`.
+#' - When `pretrained = TRUE`, backbone weights are overridden by the full
+#'   segmentation model weights and `pretrained_backbone` is ignored.
+#' - The auxiliary classifier branch (`aux_loss`) is automatically enabled when
+#'   loading pretrained weights; set explicitly when training from scratch.
+#'
+#' ## Input Format
+#' Models expect input tensors of shape `(batch_size, 3, H, W)`, normalized
+#' with ImageNet mean `c(0.485, 0.456, 0.406)` and std `c(0.229, 0.224, 0.225)`.
+#' Training resolution is 520x520.
+#'
+#' ## Output Format
+#' Returns a named list with:
+#' - `$out` — main segmentation logits, shape `(batch, num_classes, H, W)`
+#' - `$aux` — auxiliary logits from an intermediate backbone layer (only when `aux_loss = TRUE`)
 #'
 #' @inheritParams model_resnet18
-#' @param num_classes Number of output classes.
-#' @param aux_loss Logical or NULL. If `TRUE`, includes an auxiliary classifier branch.
-#'   If `NULL` (default), the presence of aux classifier is inferred from pretrained weights.
-#' @param pretrained_backbone If `TRUE` and `pretrained = FALSE`, loads
-#'   ImageNet weights for the ResNet backbone.
-#' @param ... Other parameters passed to the model implementation.
-#'
-#' @importFrom torch nn_module
-#' @family semantic_segmentation_model
+#' @param num_classes Integer. Number of output segmentation classes including
+#'   background. Default: `21` (Pascal VOC). Set to `NULL` to infer from
+#'   pretrained weights.
+#' @param aux_loss Logical or `NULL`. If `TRUE`, adds an auxiliary FCN classifier
+#'   head at an intermediate backbone layer, used as a secondary loss during
+#'   training. If `NULL` (default), inferred from pretrained weights.
+#' @param pretrained_backbone Logical. If `TRUE` and `pretrained = FALSE`, loads
+#'   `IMAGENET1K_V1` weights for the backbone only. Ignored when `pretrained = TRUE`.
+#'   Default: `TRUE`.
 #'
 #' @examples
 #' \dontrun{
 #' library(magrittr)
-#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
-#' # https://pytorch.org/vision/stable/models.html
+#' norm_mean <- c(0.485, 0.456, 0.406)
 #' norm_std  <- c(0.229, 0.224, 0.225)
-#' # Use a publicly available image of an animal
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc,url))
+#'
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'            "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' img <- base_loader(url)
 #'
 #' input <- img %>%
 #'   transform_to_tensor() %>%
 #'   transform_resize(c(520, 520)) %>%
-#'  transform_normalize(norm_mean, norm_std)
-#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+#'   transform_normalize(norm_mean, norm_std)
+#' batch <- input$unsqueeze(1)    # Add batch dimension: (1, 3, H, W)
 #'
-#' # DeepLabV3 with ResNet-50
+#' # --- ResNet-50 backbone ---
 #' model <- model_deeplabv3_resnet50(pretrained = TRUE)
 #' model$eval()
 #' output <- model(batch)
 #'
-#' # visualize the result
-#' # `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
 #' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
-#' tensor_image_display(segmented)
+#' tensor_image_browse(segmented)
 #'
 #' # Show most frequent class
 #' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
 #' class_contingency_with_background <- mask_id$view(-1)$bincount()
 #' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 #' top_class_index <- class_contingency_with_background$argmax()$item()
-#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {model$classes[top_class_index]}}")
+#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
 #'
-#' # DeepLabV3 with ResNet-101 (same steps)
+#' # --- ResNet-101 backbone ---
 #' model <- model_deeplabv3_resnet101(pretrained = TRUE)
 #' model$eval()
 #' output <- model(batch)
 #'
 #' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
-#' tensor_image_display(segmented)
+#' tensor_image_browse(segmented)
 #'
-#' mask_id <- output$out$argmax(dim = 2)
+#' # Show most frequent class
+#' mask_id <- output$out$argmax(dim = 2)  # (1, H, W)
 #' class_contingency_with_background <- mask_id$view(-1)$bincount()
 #' class_contingency_with_background[1] <- 0L # we clean the counter for background class id 1
 #' top_class_index <- class_contingency_with_background$argmax()$item()
-#' cli::cli_inform("Majority class {.pkg ResNet-101}: {.emph {model$classes[top_class_index]}}")
+#' cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top_class_index)}}")
 #' }
-#' @name model_deeplabv3
+#'
+#' @importFrom torch nn_module
+#' @family semantic_segmentation_model
 #' @rdname model_deeplabv3
+#' @name model_deeplabv3
 NULL
 
 deeplabv3_model_urls <- list(
@@ -90,32 +119,9 @@ deeplabv3_model_urls <- list(
   )
 )
 
-#' PASCAL VOC Class Labels
-#'
-#' Utilities for resolving PASCAL VOC class identifiers to their corresponding
-#' human readable labels. The labels are retrieved from the dataset.
-#'
-#' @return A character vector with the PASCAL VOC class names
-#' @family class_resolution
-#' @export
-voc_classes <- c(
-  "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
-  "bus", "car", "cat", "chair", "cow", "dining table", "dog", "horse",
-  "motorbike", "person", "potted plant", "sheep", "sofa", "train", "tv/monitor"
-)
-
-#' @rdname voc_classes
-#' @param id Integer vector of 1-based class identifiers.
-#' @return A character vector with the labels associated with `id`.
-#' @family class_resolution
-#' @export
-voc_label <- function(id) {
-  voc_classes[id]
-}
-
 deeplabv3_meta <- list(
-  classes = voc_classes,
-  class_to_idx = setNames(seq_along(voc_classes) - 1, voc_classes)
+  classes = pascal_voc_classes(),
+  class_to_idx = setNames(seq_along(pascal_voc_classes()) - 1, pascal_voc_classes())
 )
 
 
