@@ -78,6 +78,7 @@ vision_make_grid <- function(tensor,
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
+#' @param color Deprecated alias for `colors`.
 #' @param fill If `TRUE` fills the bounding box with specified color.
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
@@ -115,31 +116,34 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              boxes,
                                              labels = NULL,
                                              colors = NULL,
+                                             color = NULL,
                                              fill = FALSE,
                                              width = 1,
                                              font = c("serif", "plain"),
                                              font_size = 10, ...) {
   rlang::check_installed("magick")
 
-  # manage single batch images
-  if (x$ndim == 4 && x$size(1) == 1) {
-    x <- x$squeeze(1)
+  if (!is.null(color)) {
+    if (!is.null(colors)) {
+      cli_abort("Use either {.arg colors} or {.arg color}, not both.")
+    }
+    cli_warn("{.arg color} is deprecated; use {.arg colors} instead.")
+    colors <- color
   }
-  if (x$ndim != 3) {
-    value_error("Pass an individual image as `x`, not a batch")
-  }
-  if (!x$size(1) %in% c(1, 3)) {
-    value_error("Only grayscale and RGB images are supported")
-  }
-  if (x$dtype == torch::torch_uint8()) {
-    img_to_draw <- x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
+
+  if (x$ndim == 4 && x$size(1) == 1) x <- x$squeeze(1)
+  if (x$ndim != 3) value_error("Pass an individual image as `x`, not a batch")
+  if (!x$size(1) %in% c(1, 3)) value_error("Only grayscale and RGB images are supported")
+
+  img_to_draw <- if (x$dtype == torch::torch_uint8()) {
+    x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else if (x$dtype == torch::torch_float()) {
-    img_to_draw <- x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array
-  } else {
-    type_error("`x` should be of dtype `torch_uint8` or `torch_float`")
-  }
-  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() || (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
-    value_error("Boxes need to be in c(xmin, ymin, xmax, ymax) format. Use `box_convert()` to convert them")
+    x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+  } else type_error("`x` should be torch_uint8 or torch_float")
+
+  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() ||
+      (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
+    value_error("Boxes must be in c(xmin, ymin, xmax, ymax) format")
   }
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {

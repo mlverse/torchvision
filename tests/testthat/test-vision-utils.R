@@ -30,7 +30,7 @@ test_that("draw_bounding_boxes works", {
   expect_tensor_dtype(bboxed_image, torch::torch_uint8())
   expect_tensor_shape(bboxed_image, c(3, 360, 360))
 
-  expect_no_error(bboxed_image <- draw_bounding_boxes(image_uint, boxes, color = "black", fill = TRUE))
+  expect_no_error(bboxed_image <- draw_bounding_boxes(image_uint, boxes, colors = "black", fill = TRUE))
 })
 
 test_that("draw_bounding_boxes correctly mask a complete image", {
@@ -39,12 +39,24 @@ test_that("draw_bounding_boxes correctly mask a complete image", {
   image_uint <- torch::torch_randint(low = 1, high = 240, size = c(3, 360, 360))$to(torch::torch_uint8())
   boxes <- torch::torch_tensor(c(0,0,360,360))$unsqueeze(1)
 
-  expect_no_error(bboxed_image <- draw_bounding_boxes(image_float, boxes, color = "black", fill = TRUE))
-  expect_no_error(bboxed_image <- draw_bounding_boxes(image_uint, boxes, color = "black", fill = TRUE))
+  expect_no_error(bboxed_image <- draw_bounding_boxes(image_float, boxes, colors = "black", fill = TRUE))
+  expect_no_error(bboxed_image <- draw_bounding_boxes(image_uint, boxes, colors = "black", fill = TRUE))
   # some invisible glitch remains
   expect_lte(bboxed_image$sum() %>% as.numeric, 3000)
 
 
+})
+
+test_that("draw_bounding_boxes supports deprecated color alias", {
+  image_uint <- torch::torch_randint(low = 1, high = 240, size = c(3, 64, 64))$to(torch::torch_uint8())
+  boxes <- torch::torch_tensor(c(1, 1, 40, 40))$unsqueeze(1)
+
+  expect_warning(
+    bboxed_image <- draw_bounding_boxes(image_uint, boxes, color = "black", fill = TRUE),
+    "deprecated"
+  )
+  expect_tensor_dtype(bboxed_image, torch::torch_uint8())
+  expect_tensor_shape(bboxed_image, c(3, 64, 64))
 })
 
 test_that("draw_segmentation_masks works with boolean mask", {
