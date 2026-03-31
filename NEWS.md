@@ -35,6 +35,8 @@
 
 ## Bug fixes and improvements
 
+* `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
+* Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
 * fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
 * fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
