@@ -118,7 +118,7 @@ mnist_dataset <- dataset(
       archive <- download_and_cache(r[1], prefix = class(self)[1])
       fs::file_copy(archive, destpath)
 
-      if (!(tools::md5sum(destpath) == r[2]))
+      if (tools::md5sum(destpath) != r[2])
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     }
@@ -163,22 +163,6 @@ mnist_dataset <- dataset(
     list(x = x, y = y)
   },
 
-  .getbatch = function(index) {
-    x_flat <- self$data[index, , , drop = FALSE]
-    # unsqueeze(2) on array
-    x <- array(x_flat, dim = c(length(index), 1, dim(x_flat)[2:3]))
-    y <- self$targets[index]
-
-    if (!is.null(self$transform)) {
-      x <- torch::torch_stack(lapply(seq_len(dim(x)[1]), function(i) self$transform(x[i,,,])))
-    }
-
-    if (!is.null(self$target_transform)) {
-      y <- self$target_transform(y)
-    }
-
-    list(x = x, y = y)
-  },
   .length = function() {
     dim(self$data)[1]
   },
@@ -292,7 +276,7 @@ qmnist_dataset <- dataset(
         archive <- download_and_cache(r[1], prefix = glue::glue("qmnist-{split_name}"))
         fs::file_copy(archive, destpath, overwrite = TRUE)
 
-        if (!(tools::md5sum(destpath) == r[2]))
+        if (tools::md5sum(destpath) != r[2])
           runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
 
@@ -440,7 +424,7 @@ emnist_collection <- dataset(
     url <- self$resources[[1]][1]
     archive <- download_and_cache(url, prefix = class(self)[1])
 
-    if (!(tools::md5sum(archive) == self$resources[[1]][2]))
+    if (tools::md5sum(archive) != self$resources[[1]][2])
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     unzip_dir <- file.path(self$raw_folder, "unzipped")

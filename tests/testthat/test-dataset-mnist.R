@@ -11,7 +11,7 @@ test_that("tests for the mnist dataset", {
   ds <- mnist_dataset(dir, download = TRUE)
 
   i <- ds[1]
-  expect_equal(dim(i[[1]]), c(1, 1, 28, 28))
+  expect_equal(dim(i[[1]]), c(1, 28, 28))
   expect_equal(i[[2]], 6)
   expect_length(ds, 60000)
 
@@ -21,18 +21,7 @@ test_that("tests for the mnist dataset", {
   expect_equal(dim(raw_item$x), c(1, 28, 28))
   expect_equal(length(raw_item$y), 1)
 
-  raw_batch <- ds$.getbatch(c(1, 2))
-  expect_length(raw_batch, 2)
-  expect_named(raw_batch, c("x", "y"))
-  expect_equal(dim(raw_batch$x), c(2, 1, 28, 28))
-  expect_equal(length(raw_batch$y), 2)
-
   ds <- mnist_dataset(dir, transform = transform_to_tensor)
-  batch <- ds$.getbatch(c(1, 2))
-  expect_length(batch, 2)
-  expect_named(batch, c("x", "y"))
-  expect_tensor_shape(batch$x, c(2, 1, 28, 28))
-  expect_equal(length(batch$y), 2)
 
   dl <- torch::dataloader(ds, batch_size = 32)
   expect_length(dl, 1875)
@@ -60,7 +49,7 @@ test_that("tests for the kmnist dataset", {
   ds <- kmnist_dataset(dir, download = TRUE)
 
   i <- ds[1]
-  expect_equal(dim(i[[1]]), c(1, 1, 28, 28))
+  expect_equal(dim(i[[1]]), c(1, 28, 28))
   expect_equal(i[[2]], 6)
   expect_length(ds, 60000)
 
@@ -181,7 +170,7 @@ test_that("tests for the qmnist dataset", {
     ds <- qmnist_dataset(dir, split = split, download = TRUE)
 
     i <- ds[1]
-    expect_equal(dim(i[[1]]), c(1, 1, 28, 28))
+    expect_equal(dim(i[[1]]), c(1, 28, 28))
     expect_true(i[[2]] %in% 1:10)
 
     expect_gt(length(ds), 0)
