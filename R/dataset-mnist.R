@@ -164,13 +164,13 @@ mnist_dataset <- dataset(
   },
 
   .getbatch = function(index) {
-    x_flat <- self$data[index, , , drop = FALSE]
+    x <- self$data[index, , , drop = FALSE]
     # unsqueeze(2) on array
-    x <- array(x_flat, dim = c(length(index), 1, dim(x_flat)[2:3]))
+    dim(x) = c(length(index), 1, dim(x)[2:3])
     y <- self$targets[index]
 
     if (!is.null(self$transform)) {
-      x <- torch::torch_stack(lapply(seq_len(dim(x)[1]), function(i) self$transform(x[i,,,])))
+      x <- self$transform(x)
     }
 
     if (!is.null(self$target_transform)) {

@@ -1,16 +1,19 @@
 
 #' @export
 transform_to_tensor.array <- function(img) {
-
+  # HW to HWC format for grayscale img
   if (length(dim(img)) == 2)
     dim(img) <- c(dim(img), 1)
-
   dims <- dim(img)
-  if (length(dims) != 3)
-    value_error("Expected a 2D or 3D array.")
+  ndim <- length(dims)
 
-  # Support both HWC (default image arrays) and CHW (channel-first arrays).
-  if (dims[1] <= 4 && dims[3] > 4) {
+  is_3d_chw <- (ndim == 3 && dims[1] <= 4 && dims[3] > 4)
+
+  if (ndim < 3 || ndim > 4)
+    value_error("Expected a 2D (grayscale), 3D (image) or 4D (batch) array.")
+
+  # Support both CHW / BCHW (channel-first arrays) and HWC (default image arrays) .
+  if (is_3d_chw || ndim == 4) {
     res <- torch::torch_tensor(img)
   } else {
     res <- torch::torch_tensor(img)$permute(c(3, 1, 2))

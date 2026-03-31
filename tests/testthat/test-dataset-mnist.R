@@ -120,7 +120,7 @@ test_that("tests for the emnist dataset", {
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_true(is.array(first_item$x))
-  expect_equal(dim(first_item$x), c(1, 28, 28))
+  expect_equal(dim(first_item$x), c(1, 1, 28, 28))
   expect_equal((first_item[[2]]), 19)
 
   emnist <- emnist_collection(dir, dataset = "bymerge", download = TRUE)
@@ -136,7 +136,7 @@ test_that("tests for the emnist dataset", {
   first_item <- emnist[1]
   expect_named(first_item, c("x", "y"))
   expect_tensor(first_item$x)
-  expect_tensor_shape(first_item$x, c(1,28,28))
+  expect_tensor_shape(first_item$x, c(1, 1,28,28))
   expect_equal((first_item[[2]]), 24)
 
   emnist <- emnist_collection(dir, dataset = "digits", download = TRUE)
