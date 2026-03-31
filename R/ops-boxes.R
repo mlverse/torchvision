@@ -33,36 +33,36 @@ nms <- function(boxes, scores, iou_threshold) {
   if (n_boxes == 0) {
     return(torch::torch_empty(0L, dtype = torch::torch_long(), device = boxes$device))
   }
-  
+
   # Sort scores in descending order
   sort_result <- scores$sort(descending = TRUE)
   order <- sort_result[[2]]
   sorted_boxes <- boxes[order, ]
-  
+
   # Pre-allocate keep list for efficiency
 
   keep <- vector("integer", n_boxes)
   keep[1] <- 1L
   n_keep <- 1L
-  
+
   for (i in 2:n_boxes) {
     # Get current box - use unsqueeze to ensure 2D tensor [1, 4]
     current_box <- sorted_boxes[i, ]$unsqueeze(1)
-    
+
     # Get all kept boxes so far
     kept_indices <- keep[1:n_keep]
     kept_boxes <- sorted_boxes[kept_indices, , drop = FALSE]
-    
+
     # Compute IoU with all kept boxes
     iou <- box_iou(kept_boxes, current_box)
-    
+
     # Check if the current box has IoU <= iou_threshold with all kept boxes
     if (all(as.logical(iou <= iou_threshold))) {
       n_keep <- n_keep + 1L
       keep[n_keep] <- i
     }
   }
-  
+
   # Return indices in original order
   kept_indices <- keep[1:n_keep]
   return(order[kept_indices])
@@ -191,13 +191,13 @@ clip_boxes_to_image <- function(boxes, size) {
 #' @export
 box_convert <- function(boxes, in_fmt, out_fmt) {
   allowed_fmts <- c("xyxy", "xywh", "cxcywh")
-  if((!in_fmt %in% allowed_fmts) | (!out_fmt %in% allowed_fmts))
+  if((!in_fmt %in% allowed_fmts) || (!out_fmt %in% allowed_fmts))
     value_error("Unsupported Bounding Box Conversions for given in_fmt and out_fmt")
 
   if(in_fmt == out_fmt)
     return(boxes$clone())
 
-  if(in_fmt != 'xyxy' & out_fmt != 'xyxy') {
+  if(in_fmt != 'xyxy' && out_fmt != 'xyxy') {
     # convert to xyxy and change in_fmt xyxy
     if(in_fmt == "xywh") {
       boxes <- box_xywh_to_xyxy(boxes)
