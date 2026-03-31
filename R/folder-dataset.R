@@ -139,6 +139,10 @@ base_loader <- function(path) {
     path <- download_and_cache(path)
   }
 
+  if (!fs::file_exists(path)) {
+    runtime_error("File not found: {path}")
+  }
+
   ext <- tolower(fs::path_ext(path))
 
   if (ext %in% c("jpg", "jpeg"))

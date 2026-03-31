@@ -93,10 +93,10 @@ search_rf100(collection = "biology")
 - `parasite`: Parasite detection in microscopy images
 - `cell`: General cell detection in microscopy
 - `bacteria`: Bacteria detection in microscopy images
-- `cotton_desease`: Cotton plant disease detection
+- `cotton_disease`: Cotton plant disease detection
 - `mitosis`: Mitosis phase detection in cell images
 - `phage`: Bacteriophage detection in microscopy
-- `liver_desease`: Liver disease pathology detection
+- `liver_disease`: Liver disease pathology detection
 
 ### Medical Collection (8 datasets)
 
