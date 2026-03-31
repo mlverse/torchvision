@@ -1,3 +1,4 @@
+# each test runs on single tensor image (dim = 3) and with the `b` suffix on batch tensor images (dim = 4)
 test_that("convert_image_dtype", {
 
   x <- torch::torch_rand(1, 2, 2, dtype = torch_float32())
