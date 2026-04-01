@@ -28,19 +28,62 @@ model_convnext_base_detection(
 \arguments{
 \item{num_classes}{Number of output classes (default: 91 for COCO).}
 
-\item{pretrained_backbone}{Logical, if \code{TRUE} the ConvNeXt backbone
-weights are loaded from ImageNet pretraining.}
+\item{pretrained_backbone}{Logical. If \code{TRUE}, loads ImageNet-pretrained
+ConvNeXt backbone weights. Default: \code{FALSE}.}
 
 \item{...}{Other arguments (unused).}
 }
 \description{
-Object detection models that use a ConvNeXt backbone with a Feature
-Pyramid Network (FPN) and the same detection head as the Faster R-CNN
-models implemented in \verb{model_fasterrcnn_*}.
+Object detection models combining a ConvNeXt backbone with a Feature Pyramid
+Network (FPN) and the Faster R-CNN detection head. The architecture mirrors
+\code{\link[=model_fasterrcnn_resnet50_fpn]{model_fasterrcnn_resnet50_fpn()}}, with the ResNet backbone replaced by
+ConvNeXt variants. The design follows the paper
+\href{https://arxiv.org/abs/2201.03545}{A ConvNet for the 2020s}.
+\subsection{Available Models}{
+\itemize{
+\item \code{model_convnext_tiny_detection()}
+\item \code{model_convnext_small_detection()}
+\item \code{model_convnext_base_detection()}
+}
+}
 
-These helpers mirror the architecture used in
-\code{model_fasterrcnn_resnet50_fpn()}, but swap the ResNet backbone for
-ConvNeXt variants.
+\subsection{Backbone Performance (ImageNet-1k)}{
+
+Accuracy metrics reflect backbone classification performance only.
+Detection head weights are randomly initialized and must be fine-tuned
+on task-specific labelled data before meaningful predictions are produced.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{| Model                             | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | File Size | Backbone Weights              | Notes                    |
+|-----------------------------------|-----------|-----------|---------|--------|-----------|-------------------------------|--------------------------|
+| model_convnext_tiny_detection     | 82.5\%     | 96.1\%     | 28.6M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
+| model_convnext_small_detection    | 83.6\%     | 96.7\%     | 50.2M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
+| model_convnext_base_detection     | 84.1\%     | 96.9\%     | 88.6M   | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
+}\if{html}{\out{</div>}}
+}
+
+\subsection{FPN Channel Configuration}{
+
+Each ConvNeXt variant produces four feature maps (C2–C5) fed into the FPN.
+Channel widths differ between Tiny/Small and Base:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{| Variant | FPN in_channels          | FPN out_channels |
+|---------|--------------------------|------------------|
+| Tiny    | c(96, 192, 384, 768)     | 256              |
+| Small   | c(96, 192, 384, 768)     | 256              |
+| Base    | c(128, 256, 512, 1024)   | 256              |
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Weights Selection}{
+\itemize{
+\item All variants use \code{IMAGENET1K_V1} backbone weights by default (supervised ImageNet-1k).
+\item The Small variant backbone (\code{model_convnext_small_22k}) was additionally
+pretrained on ImageNet-22k prior to fine-tuning on ImageNet-1k.
+\item Detection head weights are \strong{randomly initialized} — bounding-box
+predictions are meaningless without fine-tuning on labelled detection data.
+\item Set \code{pretrained_backbone = TRUE} to load ImageNet backbone weights.
+}
+}
 }
 \section{Functions}{
 \itemize{
@@ -52,45 +95,34 @@ ConvNeXt variants.
 
 }}
 \note{
-Currently, detection head weights are randomly initialized, so predicted
-bounding-boxes are random. For meaningful results, you need to train the model
-detection head on your data.
+Detection head weights are randomly initialized. Predicted bounding boxes
+will be arbitrary until the detection head is trained on labelled data.
+Only the backbone benefits from \code{pretrained_backbone = TRUE}.
 }
-\section{Available Models}{
-
-\itemize{
-\item \code{model_convnext_tiny_detection()}
-\item \code{model_convnext_small_detection()}
-\item \code{model_convnext_base_detection()}
-}
-}
-
 \examples{
 \dontrun{
 library(magrittr)
 norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants
 norm_std  <- c(0.229, 0.224, 0.225)
 
-# Use a publicly available image
 url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
-       "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
-img <- magick_loader(url) \%>\%
+              "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+img <- base_loader(url) \%>\%
   transform_to_tensor() \%>\%
   transform_resize(c(520, 520))
 
-input <- img \%>\%
-  transform_normalize(norm_mean, norm_std)
-batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+input <- img \%>\% transform_normalize(norm_mean, norm_std)
+batch <- input$unsqueeze(1)    # Add batch dimension: (1, 3, H, W)
 
 # ConvNeXt Tiny detection
 model <- model_convnext_tiny_detection(pretrained_backbone = TRUE)
 model$eval()
 # Please wait 2 mins + on CPU
-pred <- model(batch)$detections[[1]]
+pred     <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
-topk <- pred$scores$topk(k = 5)[[2]]
-boxes <- pred$boxes[topk, ]
-labels <- imagenet_classes(as.integer(pred$labels[topk]))
+topk     <- pred$scores$topk(k = 5)[[2]]
+boxes    <- pred$boxes[topk, ]
+labels   <- imagenet_classes(as.integer(pred$labels[topk]))
 
 # `draw_bounding_box()` may fail if bbox values are not consistent.
 if (num_boxes > 0) {

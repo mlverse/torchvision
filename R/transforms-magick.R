@@ -53,6 +53,8 @@
 
 # Utils -------------------------------------------------------------------
 
+#' @method get_image_size magick-image
+#' @export
 `get_image_size.magick-image` <- function(img) {
   info <- magick::image_info(img)
   c(info$width, info$height)

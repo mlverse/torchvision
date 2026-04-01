@@ -8,7 +8,7 @@ NULL
 #'
 #' @inheritParams rf100_document_collection
 #' @param dataset Dataset to select within \code{c("stomata_cell", "blood_cell", "parasite", "cell",
-#' "bacteria", "cotton_desease","mitosis", "phage", "liver_desease", "moth")}.
+#' "bacteria", "cotton_disease","mitosis", "phage", "liver_disease", "moth")}.
 #' @inherit rf100_document_collection return
 #'
 #' @examples
@@ -33,8 +33,8 @@ rf100_biology_collection <- torch::dataset(
   resources = data.frame(
     dataset = rep(c(
       "stomata_cell", "blood_cell", "parasite", "cell",
-      "bacteria", "cotton_desease",
-      "mitosis", "phage", "liver_desease", "moth"
+      "bacteria", "cotton_disease",
+      "mitosis", "phage", "liver_disease", "moth"
     ),each = 3),
     split   = rep(c("train", "test", "valid"), times = 10),
     url = c(
@@ -58,7 +58,7 @@ rf100_biology_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/train-00000-of-00001-4874c525c9b5291f.parquet",
       "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/test-00000-of-00001-515eb8a6a2a9bb07.parquet",
       "https://huggingface.co/datasets/Francesco/bacteria-ptywi/resolve/main/data/validation-00000-of-00001-2d3417d16e44ab71.parquet",
-      # cotton_desease
+      # cotton_disease
       "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/train-00000-of-00001-fb83220158d0bab1.parquet",
       "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/test-00000-of-00001-cb05eef9488873d3.parquet",
       "https://huggingface.co/datasets/Francesco/cotton-plant-disease/resolve/main/data/validation-00000-of-00001-d9b9a7655deebe71.parquet",
@@ -70,7 +70,7 @@ rf100_biology_collection <- torch::dataset(
       "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/train-00000-of-00001-b9eccf55a37a9c14.parquet",
       "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/test-00000-of-00001-4fee5dee9a0c8f17.parquet",
       "https://huggingface.co/datasets/Francesco/phages/resolve/main/data/validation-00000-of-00001-5d783205edb8aef3.parquet",
-      # liver_desease
+      # liver_disease
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/train-00000-of-00001-075b34404316815c.parquet",
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/test-00000-of-00001-d6b1dd29852bde4e.parquet",
       "https://huggingface.co/datasets/Francesco/liver-disease/resolve/main/data/validation-00000-of-00001-ba8e36e9bd143c60.parquet",
@@ -90,13 +90,13 @@ rf100_biology_collection <- torch::dataset(
       "6b23b8be679a0eff434147adec24c30a",      "24340cf1332e32241ca453f7277e4b43",      "2d9d19a6f8280bc72a7377f94a0d745d",
       # bacteria
       "c6641ee845c254e398d746c4286ae9af",      "7468dc6ae120a82d2f750a0bd051d338",      "ed9d0b920cb96cfa707b8f648675c07f",
-      # cotton_desease
+      # cotton_disease
       "475743a07c9ffb2ad106c112f83fd110",      "8773a3dba89c3bf86879d12c1bb93007",      "45082d626c19fd3e5c3d3d955ae83f7b",
       # mitosis
       "6d7a45051cbb8bda5203004e04bb6639",      "64c4e2470e47556d3736dd2279f6457e",      "9f915191ff92498d1c9250bd1994afdf",
       # phage
       "c7622fed8a37b697b9dd1c3ab0d0708f",      "4623461f1526e50c6badae08e28b1692",      "9610c62631166e65636d25d541b6911b",
-      # liver_desease
+      # liver_disease
       "9b5839ae524277eb1702a0db33030e9a",      "c97b80332d710b1378a9f3ceb5abc197",      "2f255ba7ed3c1ce0948d2fc06305ce54",
       # moth
       "53c4c82727cd36a3093be388f27c3b3e",      "79a9fb92f219ce24412cbb2836e79e0f",      "2d8cd490d91bb9f25c17ff2ac332c010"

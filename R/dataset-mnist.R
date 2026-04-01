@@ -118,7 +118,7 @@ mnist_dataset <- dataset(
       archive <- download_and_cache(r[1], prefix = class(self)[1])
       fs::file_copy(archive, destpath)
 
-      if (!tools::md5sum(destpath) == r[2])
+      if (tools::md5sum(destpath) != r[2])
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     }
@@ -149,14 +149,16 @@ mnist_dataset <- dataset(
   },
 
   .getitem = function(index) {
-    x <- self$data[index, ,]
+    x <- self$data[index, , , drop = FALSE]
     y <- self$targets[index]
 
-    if (!is.null(self$transform))
-      x <- self$transform(x)
+    if (!is.null(self$transform)) {
+        x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
+    if (!is.null(self$target_transform)) {
+        y <- self$target_transform(y)
+    }
 
     list(x = x, y = y)
   },
@@ -179,7 +181,7 @@ mnist_dataset <- dataset(
 #' @describeIn mnist_dataset Kuzushiji-MNIST cursive Japanese character dataset.
 #' @export
 kmnist_dataset <- dataset(
-  name = "kminst_dataset",
+  name = "kmnist_dataset",
   inherit = mnist_dataset,
   archive_size = "21 MB",
   resources = list(
@@ -252,55 +254,63 @@ qmnist_dataset <- dataset(
   },
 
   download = function() {
-    if (self$check_exists())
-      return(NULL)
-
     fs::dir_create(self$raw_folder)
     fs::dir_create(self$processed_folder)
 
+    split_exists <- function(split_name) {
+      fs::file_exists(file.path(self$processed_folder, self$files[[split_name]]))
+    }
+
+    if (all(vapply(names(self$resources), split_exists, logical(1))))
+      return(NULL)
+
     cli_inform("Downloading {.cls {class(self)[[1]]}} ...")
-    for (r in self$resources[[self$split]]) {
-      filename <- basename(r[1])
-      destpath <- file.path(self$raw_folder, filename)
+    for (split_name in names(self$resources)) {
+      if (split_exists(split_name))
+        next
 
-      archive <- download_and_cache(r[1], prefix = glue::glue("qmnist-{self$split}"))
-      fs::file_copy(archive, destpath, overwrite = TRUE)
+      for (r in self$resources[[split_name]]) {
+        filename <- basename(r[1])
+        destpath <- file.path(self$raw_folder, filename)
 
-      if (!tools::md5sum(destpath) == r[2])
-        runtime_error("Corrupt file! Delete the file in {archive} and try again.")
-    }
+        archive <- download_and_cache(r[1], prefix = glue::glue("qmnist-{split_name}"))
+        fs::file_copy(archive, destpath, overwrite = TRUE)
 
-    cli_inform("Processing {.cls {class(self)[[1]]}} ...")
+        if (tools::md5sum(destpath) != r[2])
+          runtime_error("Corrupt file! Delete the file in {archive} and try again.")
+      }
 
+      cli_inform("Processing {.val {split_name}} split for {.cls {class(self)[[1]]}} ...")
 
-    if (self$split == "train") {
-      saveRDS(
-        list(
-          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-images-idx3-ubyte.gz")),
-          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-labels-idx2-int.gz"))
-        ),
-        file.path(self$processed_folder, self$files$train)
-      )
-    }
+      if (split_name == "train") {
+        saveRDS(
+          list(
+            read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-images-idx3-ubyte.gz")),
+            read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-train-labels-idx2-int.gz"))
+          ),
+          file.path(self$processed_folder, self$files$train)
+        )
+      }
 
-    if (self$split == "test") {
-      saveRDS(
-        list(
-          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-images-idx3-ubyte.gz")),
-          read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-labels-idx2-int.gz"))
-        ),
-        file.path(self$processed_folder, self$files$test)
-      )
-    }
+      if (split_name == "test") {
+        saveRDS(
+          list(
+            read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-images-idx3-ubyte.gz")),
+            read_sn3_pascalvincent(file.path(self$raw_folder, "qmnist-test-labels-idx2-int.gz"))
+          ),
+          file.path(self$processed_folder, self$files$test)
+        )
+      }
 
-    if (self$split == "nist") {
-      saveRDS(
-        list(
-          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-images-idx3-ubyte.xz")),
-          read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-labels-idx2-int.xz"))
-        ),
-        file.path(self$processed_folder, self$files$nist)
-      )
+      if (split_name == "nist") {
+        saveRDS(
+          list(
+            read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-images-idx3-ubyte.xz")),
+            read_sn3_pascalvincent(file.path(self$raw_folder, "xnist-labels-idx2-int.xz"))
+          ),
+          file.path(self$processed_folder, self$files$nist)
+        )
+      }
     }
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
@@ -345,6 +355,7 @@ fashion_mnist_dataset <- dataset(
 #' @export
 emnist_collection <- dataset(
   name = "emnist_collection",
+  inherit = mnist_dataset,
   archive_size = "540 MB",
 
   resources = list(
@@ -384,11 +395,10 @@ emnist_collection <- dataset(
     self$split <- match.arg(split, choices = c("train", "test"))
     self$dataset <- match.arg(dataset,  choices = names(self$classes_all_dataset))
     self$root_path <- root
-    self$raw_folder <- file.path(root, class(self)[1], "raw")
-    self$processed_folder <- file.path(root, class(self)[1], "processed")
     self$transform <- transform
     self$target_transform <- target_transform
-    self$class <- self$classes_all_dataset[[self$dataset]]
+    self$classes <- self$classes_all_dataset[[self$dataset]]
+    self$class <- self$classes
 
     if (download) {
       cli_inform("Dataset {.val {self$dataset}} split {.val {self$split}} of {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
@@ -414,7 +424,7 @@ emnist_collection <- dataset(
     url <- self$resources[[1]][1]
     archive <- download_and_cache(url, prefix = class(self)[1])
 
-    if (!tools::md5sum(archive) == self$resources[[1]][2])
+    if (tools::md5sum(archive) != self$resources[[1]][2])
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     unzip_dir <- file.path(self$raw_folder, "unzipped")
@@ -436,28 +446,23 @@ emnist_collection <- dataset(
     fs::file_exists(file.path(self$processed_folder, self$rds_file(self$split, self$dataset)))
   },
 
-  .getitem = function(index) {
+  active = list(
+    raw_folder = function() {
+      file.path(self$root_path, "emnist_collection", "raw")
+    },
 
-    x <- self$data[index, , ]
-    y <- self$targets[index]
-
-    if (!is.null(self$transform))
-      x <- self$transform(x)
-
-    if (!is.null(self$target_transform))
-      y <- self$target_transform(y)
-
-    list(x = x, y = y)
-  },
-
-  .length = function() {
-    dim(self$data)[1]
-  }
-
+    processed_folder = function() {
+      file.path(self$root_path, "emnist_collection", "processed")
+    }
+  )
 )
 
 read_sn3_pascalvincent <- function(path) {
-  x <- gzfile(path, open = "rb")
+  x <- if (grepl("\\\\.xz$", path, ignore.case = TRUE)) {
+    xzfile(path, open = "rb")
+  } else {
+    gzfile(path, open = "rb")
+  }
   on.exit({close(x)})
 
   magic <- readBin(x, endian = "big", what = integer(), n = 1)

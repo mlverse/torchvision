@@ -33,3 +33,9 @@ test_that("default_loader works as expected", {
   dog5 <- base_loader("assets/class/dog/dog.5.jpg")
   expect_equal(dim(dog5)[3], 3L)
 })
+
+test_that("default_loader gives clear error for missing file", {
+  missing_path <- file.path(tempdir(), "missing-image.jpg")
+  expect_false(file.exists(missing_path))
+  expect_error(base_loader(missing_path), "File not found")
+})
