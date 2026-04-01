@@ -30,12 +30,13 @@ transform_to_tensor.matrix <- transform_to_tensor.array
 
 #' @export
 transform_to_tensor.list <- function(img) {
-  ndim <- length(dim(img[[1]]))
-  if (ndim > 3) {
-    value_error("Expected a list of 2D or 3D arrays.")
-  }
-
   if (inherits(img[[1]], "array")) {
+    ndim <- length(dim(img[[1]]))
+    if (ndim > 3) {
+      value_error("Expected a list of 2D or 3D arrays.")
+    }
+    torch::torch_stack(lapply(img, transform_to_tensor))
+  } else if (inherits(img[[1]], "magick-image")) {
     torch::torch_stack(lapply(img, transform_to_tensor))
   } else {
     not_implemented_for_class(img[[1]])
