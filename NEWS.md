@@ -21,6 +21,7 @@
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
 * Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
+* Added article showcasing `model_fasterrcnn_resnet50_fpn()` with visualization utilities `draw_bounding_boxes()` and `vision_make_grid()` (@DerrickUnleashed, #301).
 
 ## New models
 

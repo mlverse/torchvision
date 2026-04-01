@@ -126,7 +126,7 @@ pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_label(as.integer(pred$labels[keep]))
+labels <- coco_classes(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)
@@ -139,7 +139,7 @@ pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_label(as.integer(pred$labels[keep]))
+labels <- coco_classes(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(img, boxes, labels = labels)
   tensor_image_browse(boxed)
@@ -152,7 +152,7 @@ pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_label(as.integer(pred$labels[keep]))
+labels <- coco_classes(as.integer(pred$labels[keep]))
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)
@@ -165,7 +165,7 @@ pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 keep <- seq_len(min(5, num_boxes))
 boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_label(as.integer(pred$labels[keep]))]
+labels <- coco_classes(as.integer(pred$labels[keep]))]
 if (num_boxes > 0) {
   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
   tensor_image_browse(boxed)

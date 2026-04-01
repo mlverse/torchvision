@@ -31,6 +31,8 @@ navbar:
         href: articles/examples/fcnresnet.html
       - text: keypoints
         href: articles/examples/keypoints.html
+      - text: fasterrcnn
+        href: articles/examples/fasterrcnn.html
 
 reference:
 - title: Transforms
