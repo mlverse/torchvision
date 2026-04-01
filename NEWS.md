@@ -2,8 +2,8 @@
 
 ## Breaking changes
 
-* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50%. (@Chandraveersingh1717, #280)
-* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
+* Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50%. (@Chandraveersingh1717, #280)
+* Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
 
