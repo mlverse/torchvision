@@ -215,7 +215,7 @@ test_that("we can prune head of resnext101 moels", {
 
   resnext101 <- model_resnext101_32x8d(pretrained=TRUE)
 
-  expect_error(prune <- torch:::nn_prune_head(resnext101, 1), NA)
+  expect_error(prune <- torch::nn_prune_head(resnext101, 1), NA)
   expect_s3_class(prune, "nn_sequential")
   expect_length(prune, 9)
   expect_s3_class(prune[[length(prune)]], "nn_adaptive_avg_pool2d")

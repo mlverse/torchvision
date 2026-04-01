@@ -31,7 +31,7 @@
 fer_dataset <- dataset(
   name = "fer_dataset",
   archive_size = "90 MB",
-  url = "https://huggingface.co/datasets/JimmyUnleashed/FER-2013/resolve/main/fer2013.tar.gz",
+  url = "https://huggingface.co/datasets/DerrickUnleashed/FER-2013/resolve/main/fer2013.tar.gz",
   md5 = "ca95d94fe42f6ce65aaae694d18c628a",
   classes = c(
     "Angry",
