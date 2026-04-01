@@ -24,7 +24,7 @@
 * Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
-## Bug fixes and improvements
+## Minor bug fixes and improvements
 
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
