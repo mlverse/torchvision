@@ -5,3 +5,9 @@ test_that("transform works for magick images", {
   ii <- magick::image_info(im)
   expect_equal(c(ii$width, ii$height), c(224,224))
 })
+
+test_that("transform_to_tensor works with magick image lists", {
+  im <- magick::image_read("assets/class/horse/horse-2.tif")
+  o <- transform_to_tensor(list(im, im, im))
+  expect_tensor_shape(o, c(3, 3, 142, 180))
+})
