@@ -106,7 +106,7 @@ vggface2_dataset <- torch::dataset(
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
     identity_df$Gender <- factor(identity_df$Gender, labels = c("Female", "Male"))
 
-    files <- read.delim(archive[[2]], sep = "/", col.names = c("Class_ID", "img_path"), header = F)
+    files <- read.delim(archive[[2]], sep = "/", col.names = c("Class_ID", "img_path"), header = FALSE)
     files$img_path <- file.path(self$raw_folder, self$split, files$Class_ID, files$img_path)
     class_to_idx <- setNames(seq_len(nlevels(as.factor(files$Class_ID))), levels(as.factor(files$Class_ID)))
     labels <- names(class_to_idx)
