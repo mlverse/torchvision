@@ -26,9 +26,6 @@
 
 ## Minor bug fixes and improvements
 
-* Fixed incorrect return value documentation for `imagenet_21k_classes()` (was documented as character vector but returns data.frame).
-* Fixed documentation typos in NEWS.md: corrected double word "and and", improved capitalization consistency, fixed spacing and phrasing issues.
-* Fixed variable naming typo in `.find_classes()` method: `class_too_idx` corrected to `class_to_idx` for consistency with the rest of the codebase.
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
