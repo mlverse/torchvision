@@ -1,26 +1,17 @@
 # torchvision (development version)
 
-## Bug fixes and improvements
-
-* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter
-  type from `Vector` to `List`, removed stale "(currently unavailable)" note,
-  fixed `colors` description to say "rainbow" instead of "viridis", and fixed
-  a grammatical typo in the error message ("but is current shape is" ->
-  "but current shape is") (#).
-
 ## Breaking changes
 
-* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
-  This reduces memory usage by ~50%. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
-* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
+* Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50% (@Chandraveersingh1717, #280).
+* Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
 
-* Added resolution function for coco imagenet_21k and and pascal_voc classes and labels (#284).
+* Added resolution function for COCO Imagenet_21k and Pascal_VOC classes and labels (#284).
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
-* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
+* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed, #303).
 
 ## New models
 
@@ -33,17 +24,17 @@
 * Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
-## Bug fixes and improvements
+## Minor bug fixes and improvements
 
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
-* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
-* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
-* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due
-to non-vectorized `transform_` operations (#264)
-* Added article for `draw_keypoints()` (@DerrickUnleashed #303)
-* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency.(@DerrickUnleashed #302)
+* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284).
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272).
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due to non-vectorized `transform_` operations (#264).
+* Added article for `draw_keypoints()` (@DerrickUnleashed, #303).
+* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency (@DerrickUnleashed #302).
+* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter type, obsolete note,  `colors` description default (@srishtiii28 #296).
 
 # torchvision 0.8.0
 
