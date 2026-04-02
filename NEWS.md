@@ -7,7 +7,7 @@
 
 ## New features
 
-* Added resolution function for COCO Imagenet_21k and Pascal_VOC classes and labels (#284).
+* Added resolution function for COCO, ImageNet-21k and Pascal VOC classes and labels (#284).
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
@@ -29,11 +29,11 @@
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
-* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284).
-* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272).
-* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due to non-vectorized `transform_` operations (#264).
-* Added article for `draw_keypoints()` (@DerrickUnleashed, #303).
-* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency (@DerrickUnleashed #302).
+* Fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
+* Fix rf100 collection bounding-box now consider the correct native COCO format 'XYWH' (#272).
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due to some non-vectorized `transform_` operations (#264).
+* Added article for `draw_keypoints()` (@DerrickUnleashed #303).
+* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency.(@DerrickUnleashed #302)
 * Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter type, obsolete note,  `colors` description default (@srishtiii28 #296).
 
 # torchvision 0.8.0
@@ -41,12 +41,12 @@
 ## New datasets
 
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
-* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
+* Added `places365_dataset()` for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
-  and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
-  thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
+  and `rf100_underwater_collection()`. These are collections of datasets from Roboflow 100 under the same 
+  theme, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
 * Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
 
 ## New models

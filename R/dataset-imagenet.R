@@ -95,13 +95,13 @@ imagenet_classes <- function(class_id = 1:1000) {
 imagenet_1k_classes <- imagenet_classes
 
 #' @param class_id Integer vector of 1-based class identifiers.
-#' @return A data.frame with 21.8k rows representing the ImageNet-21k
-#'   class labels.
+#' @return A data.frame containing columns `id` and `label` representing 
+#'   the ImageNet-21k class identifiers and labels. By default, returns all 21.8K rows.
 #' @family class_resolution
 #' @rdname imagenet_classes
 #' @export
 imagenet_21k_df <- function(class_id = 1:21843) {
-  if (any(class_id > 21000)) {
+  if (any(class_id > 21843)) {
     cli_warn("Imagenet {.var class_id} cannot be > 21843")
   }
   url <- download_and_cache("https://raw.githubusercontent.com/ailia-ai/ailia-models/refs/heads/master/object_detection/detic/datasets_detic/imagenet21k_wordnet_ids.txt")
