@@ -4,10 +4,20 @@
 \alias{draw_bounding_boxes}
 \alias{draw_bounding_boxes.default}
 \alias{draw_bounding_boxes.torch_tensor}
-\alias{draw_bounding_boxes.image_with_bounding_box}
 \title{Draws bounding boxes on image.}
 \usage{
-draw_bounding_boxes(x, ...)
+draw_bounding_boxes(
+  x,
+  boxes,
+  labels = NULL,
+  colors = NULL,
+  color = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
 
 \method{draw_bounding_boxes}{default}(x, ...)
 
@@ -23,37 +33,29 @@ draw_bounding_boxes(x, ...)
   font_size = 10,
   ...
 )
-
-\method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
 }
 \arguments{
 \item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
 In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
 
-\item{...}{Additional arguments passed to methods.}
+\item{boxes}{Tensor (N x 4) in c(xmin, ymin, xmax, ymax)}
 
-\item{boxes}{Tensor of size (N, 4) containing N bounding boxes in
-c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
-format. Note that the boxes coordinates are absolute with respect
-to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
-\eqn{0  \leq y_{min} < y_{max} < Width }.}
+\item{labels}{character vector of box labels}
 
-\item{labels}{character vector containing the labels of bounding boxes.}
-
-\item{colors}{character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
-strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
+\item{colors}{character vector or single color}
 
 \item{color}{Deprecated alias for \code{colors}.}
 
-\item{fill}{If \code{TRUE} fills the bounding box with specified color.}
+\item{fill}{whether to fill the box}
 
-\item{width}{Width of text shift to the bounding box.}
+\item{width}{width of the box border}
 
-\item{font}{NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.}
+\item{font}{font family vector}
 
-\item{font_size}{The requested font size in points.}
+\item{font_size}{font size in points}
+
+\item{...}{Additional method arguments (currently unused).}
 }
 \value{
 torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.

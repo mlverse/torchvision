@@ -61,7 +61,6 @@ vision_make_grid <- function(tensor,
   grid
 }
 
-
 #' Draws bounding boxes on image.
 #'
 #' Draws bounding boxes on top of one image tensor
@@ -83,7 +82,7 @@ vision_make_grid <- function(tensor,
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 #' @param font_size The requested font size in points.
-#' @param ... Additional arguments passed to methods.
+#' @param ... Additional method arguments (currently unused).
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
 #'
@@ -100,7 +99,16 @@ vision_make_grid <- function(tensor,
 #' }
 #' @family image display
 #' @export
-draw_bounding_boxes <- function(x, ...) {
+draw_bounding_boxes <- function(x,
+                                boxes,
+                                labels = NULL,
+                                colors = NULL,
+                                color = NULL,
+                                fill = FALSE,
+                                width = 1,
+                                font = c("serif", "plain"),
+                                font_size = 10,
+                                ...) {
   UseMethod("draw_bounding_boxes")
 }
 
@@ -111,6 +119,13 @@ draw_bounding_boxes.default <- function(x, ...) {
 }
 
 #' @rdname draw_bounding_boxes
+#' @param boxes Tensor (N x 4) in c(xmin, ymin, xmax, ymax)
+#' @param labels character vector of box labels
+#' @param colors character vector or single color
+#' @param fill whether to fill the box
+#' @param width width of the box border
+#' @param font font family vector
+#' @param font_size font size in points
 #' @export
 draw_bounding_boxes.torch_tensor <- function(x,
                                              boxes,
@@ -208,7 +223,6 @@ draw_bounding_boxes.torch_tensor <- function(x,
   return(draw_tt$permute(c(3, 1, 2)))
 }
 
-#' @rdname draw_bounding_boxes
 #' @export
 draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
   draw_bounding_boxes(
@@ -256,11 +270,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 
     if (length(flat) >= 6) {  # At least 3 points to form a polygon
       coords <- matrix(flat, ncol = 2, byrow = TRUE)
-      polygon(coords[, 1], coords[, 2], col = "white", border = NA)
+      graphics::polygon(coords[, 1], coords[, 2], col = "white", border = NA)
     }
   }
 
-  dev.off()
+  grDevices::dev.off()
 
   gray <- magick::image_data(mask_img, channels = "gray")
 
@@ -294,15 +308,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
 #' @param masks torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.
 #' @param alpha number between 0 and 1 denoting the transparency of the masks.
-#   0 means full transparency, 1 means no transparency.
+#'   0 means full transparency, 1 means no transparency.
 #' @param colors character vector containing the colors
 #'            of the boxes or single color for all boxes. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks
-#' @param ... Additional arguments passed to methods.
-#'
-#' @importFrom graphics polygon
-#' @importFrom grDevices dev.off
-#' @importFrom torch as_array
+#' @param ... Additional method arguments (currently unused).
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
@@ -315,7 +325,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #' }
 #' @family image display
 #' @export
-draw_segmentation_masks <- function(x, ...) {
+draw_segmentation_masks <- function(x,
+                                    masks,
+                                    alpha = 0.8,
+                                    colors = NULL,
+                                    ...) {
   UseMethod("draw_segmentation_masks")
 }
 
@@ -326,11 +340,11 @@ draw_segmentation_masks.default <- function(x, ...) {
 }
 
 #' @rdname draw_segmentation_masks
+#' @param masks Tensor of masks
+#' @param alpha Opacity of masks (0-1)
+#' @param colors Colors for masks
 #' @export
-draw_segmentation_masks.torch_tensor <- function(x,
-                                                 masks,
-                                                 alpha = 0.8,
-                                                 colors = NULL, ...) {
+draw_segmentation_masks.torch_tensor <- function(x, masks, alpha=0.8, colors=NULL, ...) {
   rlang::check_installed("magick")
   out_dtype <- torch::torch_uint8()
 
@@ -399,16 +413,8 @@ draw_segmentation_masks.torch_tensor <- function(x,
 
 #' @rdname draw_segmentation_masks
 #' @export
-draw_segmentation_masks.image_with_segmentation_mask <- function(x,
-                                                                 alpha = 0.5,
-                                                                 colors = NULL, ...) {
-  draw_segmentation_masks(
-    x = x$x,
-    masks = x$y$masks,
-    alpha = alpha,
-    colors = colors,
-    ...
-  )
+draw_segmentation_masks.image_with_segmentation_mask <- function(x, masks = NULL, alpha=0.5, colors=NULL, ...) {
+  draw_segmentation_masks(x$x, masks=x$y$masks, alpha=alpha, colors=colors, ...)
 }
 
 

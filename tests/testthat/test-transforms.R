@@ -187,6 +187,40 @@ test_that("affine", {
   o <- transform_affine(x, 0, c(1, 0), 1, 0)
   expect_equal(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
 
+  # interpolation accepts enum-style string values
+  o_int <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0)
+  o_chr <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = "nearest")
+  expect_equal_to_r(o_chr, as_array(o_int))
+
+})
+
+test_that("affine deprecated arguments still work", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+
+  old_resample <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, resample = 0, fill = 0),
+    "resample"
+  )
+
+  old_fillcolor <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fillcolor = 0),
+    "fillcolor"
+  )
+
+  new <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fill = 0)
+
+  expect_equal_to_r(old_resample, as_array(new))
+  expect_equal_to_r(old_fillcolor, as_array(new))
+
+})
+
+test_that("affine validates positive scale", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  expect_error(transform_affine(x, 0, c(0, 0), 0, 0), "positive")
+  expect_error(transform_affine(x, 0, c(0, 0), 1, 0, interpolation = "bicubic"), "Unsupported interpolation mode")
+
 })
 
 test_that("linear transformation", {

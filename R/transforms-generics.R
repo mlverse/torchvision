@@ -330,8 +330,9 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #' @param degrees (sequence or float or int): Range of degrees to select from.
 #'   If degrees is a number instead of sequence like c(min, max), the range of
 #'   degrees will be (-degrees, +degrees).
-#' @param resample (int, optional): An optional resampling filter. See interpolation
-#'   modes.
+#' @param interpolation (int, optional): Interpolation mode. 0 for nearest, 2 for bilinear.
+#'   Default is 0 (nearest).
+#' @param resample Deprecated. Use interpolation instead.
 #' @param expand (bool, optional): Optional expansion flag. If true, expands the
 #'   output to make it large enough to hold the entire rotated image. If false
 #'   or omitted, make the output image the same size as the input image. Note
@@ -347,8 +348,12 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #'
 #' @family random_transforms
 #' @export
-transform_random_rotation <- function(img, degrees, resample = 0, expand=FALSE,
-                                      center=NULL, fill=NULL) {
+transform_random_rotation <- function(img, degrees, interpolation = 0, expand=FALSE,
+                                      center=NULL, fill=NULL, resample) {
+  if (!missing(resample)) {
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
   UseMethod("transform_random_rotation", img)
 }
 
@@ -371,15 +376,26 @@ transform_random_rotation <- function(img, degrees, resample = 0, expand=FALSE,
 #'   will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 #'   shear in `(shear[1], shear[2])` and y-axis shear in `(shear[3], shear[4])`
 #'   will be applied. Will not apply shear by default.
-#' @param fillcolor (tuple or int): Optional fill color (Tuple for RGB Image and
-#'   int for grayscale) for the area outside the transform in the output image
-#'   (Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-#'   for the area outside the transform in the output image is always 0.
+#' @param fill (tuple or int): Fill color for the area outside the transform.
+#'   Default is 0. This option is not supported for Tensor input.
+#' @param interpolation (int or character, optional): Interpolation mode.
+#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
+#' @param fillcolor Deprecated. Use fill instead.
+#' @param resample Deprecated. Use interpolation instead.
 #'
 #' @family random_transforms
 #' @export
 transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
-                                    shear=NULL, resample=0, fillcolor=0) {
+                                    shear=NULL, interpolation=0, fill=0,
+                                    resample, fillcolor) {
+  if (!missing(resample)) {
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
+  if (!missing(fillcolor)) {
+    deprecated("'fillcolor' is deprecated, use 'fill' instead")
+    fill <- fillcolor
+  }
   UseMethod("transform_random_affine", img)
 }
 
@@ -579,8 +595,12 @@ transform_adjust_hue <- function(img, hue_factor) {
 #'
 #' @family unitary_transforms
 #' @export
-transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
-                             center = NULL, fill = NULL) {
+transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
+                             center = NULL, fill = NULL, resample) {
+  if (!missing(resample)) {
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
   UseMethod("transform_rotate", img)
 }
 
@@ -595,11 +615,26 @@ transform_rotate <- function(img, angle, resample = 0, expand = FALSE,
 #'  clockwise direction. If a sequence is specified, the first value corresponds
 #'  to a shear parallel to the x-axis, while the second value corresponds to a
 #'  shear parallel to the y-axis.
+#' @param interpolation (int or character): Interpolation mode.
+#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
+#' @param fill Fill color for area outside the transform. Default is NULL.
+#' @param resample Deprecated. Use interpolation instead.
+#' @param fillcolor Deprecated. Use fill instead.
+#' @param center Optional center of rotation, c(x, y). Default is image center.
 #'
 #' @family unitary_transforms
 #' @export
 transform_affine <- function(img, angle, translate, scale, shear,
-                             resample = 0, fillcolor = NULL) {
+                             interpolation = 0, fill = NULL,
+                             resample, fillcolor, center = NULL) {
+  if (!missing(resample)) {
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
+  if (!missing(fillcolor)) {
+    deprecated("'fillcolor' is deprecated, use 'fill' instead")
+    fill <- fillcolor
+  }
   UseMethod("transform_affine", img)
 }
 

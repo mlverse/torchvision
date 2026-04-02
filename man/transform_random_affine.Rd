@@ -10,8 +10,10 @@ transform_random_affine(
   translate = NULL,
   scale = NULL,
   shear = NULL,
-  resample = 0,
-  fillcolor = 0
+  interpolation = 0,
+  fill = 0,
+  resample,
+  fillcolor
 )
 }
 \arguments{
@@ -40,13 +42,15 @@ will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
 will be applied. Will not apply shear by default.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(int or character, optional): Interpolation mode.
+Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.}
+\item{fill}{(tuple or int): Fill color for the area outside the transform.
+Default is 0. This option is not supported for Tensor input.}
+
+\item{resample}{Deprecated. Use interpolation instead.}
+
+\item{fillcolor}{Deprecated. Use fill instead.}
 }
 \description{
 Random affine transformation of the image keeping center invariant
