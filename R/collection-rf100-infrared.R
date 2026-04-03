@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Infrared dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Infrared](https://universe.roboflow.com/browse/infrared) datasets
+#' Loads one of the RoboFlow 100 Infrared datasets
 #' with per-dataset folders and train/valid/test splits.
 #'
 #' @inheritParams rf100_document_collection

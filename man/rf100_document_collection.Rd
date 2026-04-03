@@ -43,7 +43,7 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 RoboFlow 100 Document dataset Collection
 }
 \details{
-Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with
+Loads one of the RoboFlow 100 Document datasets with
 bounding box annotations for object-detection task.
 }
 \examples{

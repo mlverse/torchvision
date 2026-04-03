@@ -39,7 +39,7 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the underwater related \href{https://universe.roboflow.com/browse/environmental}{RoboFlow 100 Environmental}
+Loads one of the underwater related RoboFlow 100 Environmental
 datasets: "pipes", "aquarium", "objects", or "coral". Images are provided with
 bounding box annotations for object-detection task.
 }
