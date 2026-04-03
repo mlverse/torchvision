@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Medical dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Medical](https://universe.roboflow.com/browse/medical) datasets
+#' Loads one of the RoboFlow 100 Medical datasets
 #' with per-dataset folders and train/valid/test splits.
 #'
 #' @inheritParams rf100_document_collection

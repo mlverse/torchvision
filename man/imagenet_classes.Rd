@@ -22,7 +22,7 @@ imagenet_21k_classes(class_id)
 A character vector with 1000 entries representing the ImageNet-1k
 class labels.
 
-A data.frame containing columns \code{id} and \code{label} representing 
+A data.frame containing columns \code{id} and \code{label} representing
 the ImageNet-21k class identifiers and labels. By default, returns all 21.8K rows.
 
 A character vector with the labels associated with \code{class_id}.
