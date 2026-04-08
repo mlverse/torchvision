@@ -73,14 +73,12 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
   }
 
   if (mean$dim() == 1)
-    mean <- mean[,NULL,NULL]
+    mean <- mean$view(rep(1, img$ndim))
 
   if (std$dim() == 1)
-    std <- std[,NULL,NULL]
+    std <- std$view(rep(1, img$ndim))
 
   img$sub_(mean)$div_(std)
-
-  img
 }
 
 #' @export
@@ -309,8 +307,8 @@ transform_random_grayscale.torch_tensor <- function(img, p = 0.1) {
 #' @export
 transform_grayscale.torch_tensor <- function(img, num_output_channels) {
   check_img(img)
-
-  transform_rgb_to_grayscale(img)$`repeat`(c(num_output_channels, 1, 1))
+  repeat_on_channel <- if(img$ndim == 3) c(num_output_channels, 1, 1) else c(1, num_output_channels, 1, 1)
+  transform_rgb_to_grayscale(img)$`repeat`(repeat_on_channel)
 }
 
 #' @export
@@ -445,7 +443,7 @@ transform_perspective.torch_tensor <- function(img, startpoints, endpoints, inte
 #' @export
 transform_rgb_to_grayscale.torch_tensor <- function(img) {
   check_img(img)
-  (0.2989 * img[1] + 0.5870 * img[2] + 0.1140 * img[3])$to(img$dtype)
+  (0.2989 * img[..,1,,] + 0.5870 * img[..,2,,] + 0.1140 * img[..,3,,])$to(img$dtype)
 }
 
 # Helpers -----------------------------------------------------------------
