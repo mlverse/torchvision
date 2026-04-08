@@ -160,14 +160,16 @@ test_that("vflip", {
 
 test_that("five_crop", {
 
-  x <- torch_randn(3, 10, 10)
+  x <- torch_randn(3, 10, 12)
   o <- transform_five_crop(x, c(3, 3))
 
   expect_length(o, 5)
+  expect_tensor_shape(o[[1]], c(3,3,3))
 
   ob <- transform_five_crop(x$unsqueeze(1), c(3, 3))
 
   expect_length(ob, 5)
+  expect_tensor_shape(ob[[1]], c(1,3,3,3))
 
 })
 
@@ -177,10 +179,12 @@ test_that("ten_crop", {
   o <- transform_ten_crop(x, c(3, 3))
 
   expect_length(o, 10)
+  expect_tensor_shape(o[[1]], c(3,3,3))
 
   ob <- transform_ten_crop(x$unsqueeze(1), c(3, 3))
 
   expect_length(ob, 10)
+  expect_tensor_shape(ob[[1]], c(1,3,3,3))
 })
 
 test_that("rotate", {
@@ -225,7 +229,7 @@ test_that("rotate a rectangle image", {
 
 test_that("random_affine", {
 
-  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  x <- torch_eye(8)$view(c(1, 8, 8))
 
   # no translation
   o <- transform_random_affine(x, 0, c(0, 0))
@@ -255,7 +259,7 @@ test_that("random_affine", {
 
 test_that("affine", {
 
-  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  x <- torch_eye(8)$view(c(1, 8, 8))
 
   # translate by 1 pixel horizontally
   # should result in sum smaller by 1
@@ -418,7 +422,7 @@ test_that("random rotation works", {
 test_that("random choice transform works", {
 
   # Example Image
-  x <- array(1, dim = c(3, 200, 200))
+  x <- torch_ones(c(3, 200, 200))
 
   # Transforms
   color_transform <- function(img) transform_color_jitter(
@@ -433,7 +437,7 @@ test_that("random choice transform works", {
   # Select a Random Transform to Apply
   expect_error(regexp = NA, {
     transform_random_choice(
-      torch_tensor(x),
+      x,
       list(
         color_transform,
         resize_crop,
@@ -447,7 +451,7 @@ test_that("random choice transform works", {
 
   expect_error(regexp = NA, {
     transform_random_choice(
-      torch_tensor(x$unsqueeze(1)),
+      x$unsqueeze(1),
       list(
         color_transform,
         resize_crop,
