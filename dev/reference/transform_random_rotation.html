@@ -93,10 +93,11 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transform_random_rotation</span><span class="op">(</span></span>
 <span>  <span class="va">img</span>,</span>
 <span>  <span class="va">degrees</span>,</span>
-<span>  resample <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  interpolation <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  expand <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  center <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  fill <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">resample</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,9 +115,9 @@ If degrees is a number instead of sequence like c(min, max), the range of
 degrees will be (-degrees, +degrees).</p></dd>
 
 
-<dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
-<dd><p>(int, optional): An optional resampling filter. See interpolation
-modes.</p></dd>
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
+<dd><p>(int, optional): Interpolation mode. 0 for nearest, 2 for bilinear.
+Default is 0 (nearest).</p></dd>
 
 
 <dt id="arg-expand">expand<a class="anchor" aria-label="anchor" href="#arg-expand"></a></dt>
@@ -137,6 +138,10 @@ rotated image. If int or float, the value is used for all bands
 respectively. Defaults to 0 for all bands. This option is only available
 for Pillow&gt;=5.2.0. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.</p></dd>
+
+
+<dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
+<dd><p>Deprecated. Use interpolation instead.</p></dd>
 
 </dl></div>
     <div id="see-also">

@@ -96,8 +96,11 @@
 <span>  <span class="va">translate</span>,</span>
 <span>  <span class="va">scale</span>,</span>
 <span>  <span class="va">shear</span>,</span>
-<span>  resample <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  fillcolor <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  interpolation <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">resample</span>,</span>
+<span>  <span class="va">fillcolor</span>,</span>
+<span>  center <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,16 +133,25 @@ to a shear parallel to the x-axis, while the second value corresponds to a
 shear parallel to the y-axis.</p></dd>
 
 
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
+<dd><p>(int or character): Interpolation mode.
+Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.</p></dd>
+
+
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
+<dd><p>Fill color for area outside the transform. Default is NULL.</p></dd>
+
+
 <dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
-<dd><p>(int, optional): An optional resampling filter. See interpolation
-modes.</p></dd>
+<dd><p>Deprecated. Use interpolation instead.</p></dd>
 
 
 <dt id="arg-fillcolor">fillcolor<a class="anchor" aria-label="anchor" href="#arg-fillcolor"></a></dt>
-<dd><p>(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow&gt;=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.</p></dd>
+<dd><p>Deprecated. Use fill instead.</p></dd>
+
+
+<dt id="arg-center">center<a class="anchor" aria-label="anchor" href="#arg-center"></a></dt>
+<dd><p>Optional center of rotation, c(x, y). Default is image center.</p></dd>
 
 </dl></div>
     <div id="see-also">
