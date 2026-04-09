@@ -19,14 +19,14 @@ test_that("transform_to_tensor works for 2D, 3D, 4D array", {
 
 
   x <- array(1L:120L, dim = c(2, 1, 4,5))
-  o <- transform_to_tensor(x)
-  expect_tensor_shape(o, c(2, 1, 4, 5))
-  expect_tensor_dtype(o, torch_float())
+  ob <- transform_to_tensor(x)
+  expect_tensor_shape(ob, c(2, 1, 4, 5))
+  expect_tensor_dtype(ob, torch_float())
 
   x <- array(1L:120L, dim = c(2, 3, 10,12))
-  o <- transform_to_tensor(x)
-  expect_tensor_shape(o, c(2, 3,10,12))
-  expect_tensor_dtype(o, torch_float())
+  ob <- transform_to_tensor(x)
+  expect_tensor_shape(ob, c(2, 3,10,12))
+  expect_tensor_dtype(ob, torch_float())
 
 })
 
