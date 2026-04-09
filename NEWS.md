@@ -27,6 +27,7 @@
 ## Minor bug fixes and improvements
 
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
+* `transform_affine()`, `transform_rotate()` and random derivatives now use `interpolation` and `fill` parameter in favor of `resample`and `fillcolor` (@Chandraveersingh1717, #299).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
 * Fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)

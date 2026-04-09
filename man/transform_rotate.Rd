@@ -7,10 +7,11 @@
 transform_rotate(
   img,
   angle,
-  resample = 0,
+  interpolation = 0,
   expand = FALSE,
   center = NULL,
-  fill = NULL
+  fill = NULL,
+  resample
 )
 }
 \arguments{
@@ -19,8 +20,8 @@ transform_rotate(
 \item{angle}{(float or int): rotation angle value in degrees,
 counter-clockwise.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(int, optional): Interpolation mode. 0 for nearest, 2 for bilinear.
+Default is 0 (nearest).}
 
 \item{expand}{(bool, optional): Optional expansion flag. If true, expands the
 output to make it large enough to hold the entire rotated image. If false
@@ -35,6 +36,8 @@ rotated image. If int or float, the value is used for all bands
 respectively. Defaults to 0 for all bands. This option is only available
 for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.}
+
+\item{resample}{Deprecated. Use interpolation instead.}
 }
 \description{
 Angular rotation of an image
