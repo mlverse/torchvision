@@ -157,7 +157,7 @@ but deviates in a few key aspects due to dataset availability and R API conventi
 The <code>10fold</code> split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.</p></li>
 <li><p>The <code>split</code> parameter in R controls which version of the dataset to use: <code>"original"</code> (unaligned) or <code>"funneled"</code> (aligned using funneling).
 The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.</p></li>
-<li><p>The dataset is downloaded from <a href="https://figshare.com/authors/_/3118605" class="external-link">Figshare</a>,
+<li><p>The dataset is downloaded from Figshare,
 which hosts the same files referenced in <code>scikit-learn</code>'s dataset utilities.</p></li>
 <li><p><code>lfw_people_dataset</code>: 13,233 images across multiple identities (using either <code>"original"</code> or <code>"funneled"</code> splits)</p></li>
 <li><p><code>lfw_pairs_dataset</code>:</p><ul><li><p>Training split (<code>train = TRUE</code>): 2,200 image pairs</p></li>
