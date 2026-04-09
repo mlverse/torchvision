@@ -7,26 +7,28 @@
 \alias{draw_segmentation_masks.image_with_segmentation_mask}
 \title{Draw segmentation masks}
 \usage{
-draw_segmentation_masks(x, masks, alpha = 0.8, colors = NULL, ...)
+draw_segmentation_masks(x, ...)
 
 \method{draw_segmentation_masks}{default}(x, ...)
 
 \method{draw_segmentation_masks}{torch_tensor}(x, masks, alpha = 0.8, colors = NULL, ...)
 
-\method{draw_segmentation_masks}{image_with_segmentation_mask}(x, masks = NULL, alpha = 0.5, colors = NULL, ...)
+\method{draw_segmentation_masks}{image_with_segmentation_mask}(x, alpha = 0.5, colors = NULL, ...)
 }
 \arguments{
 \item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
 In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
 
-\item{masks}{Tensor of masks}
+\item{...}{Additional arguments passed to methods.}
 
-\item{alpha}{Opacity of masks (0-1)}
+\item{masks}{torch_tensor of shape (num_masks, H, W) or (H, W) and dtype bool.}
 
-\item{colors}{Colors for masks}
+\item{alpha}{number between 0 and 1 denoting the transparency of the masks.}
 
-\item{...}{Additional method arguments (currently unused).}
+\item{colors}{character vector containing the colors
+of the boxes or single color for all boxes. The color can be represented as
+strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for masks}
 }
 \value{
 torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
