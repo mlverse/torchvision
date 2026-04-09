@@ -31,7 +31,7 @@
 #' - The \code{split} parameter in R controls which version of the dataset to use: `"original"` (unaligned) or `"funneled"` (aligned using funneling).
 #'   The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
 #'
-#' - The dataset is downloaded from [Figshare](https://figshare.com/authors/_/3118605),
+#' - The dataset is downloaded from Figshare,
 #'   which hosts the same files referenced in `scikit-learn`'s dataset utilities.
 #'
 #' - `lfw_people_dataset`: 13,233 images across multiple identities (using either `"original"` or `"funneled"` splits)

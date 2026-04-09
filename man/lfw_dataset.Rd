@@ -71,7 +71,7 @@ but deviates in a few key aspects due to dataset availability and R API conventi
 The \verb{10fold} split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.
 \item The \code{split} parameter in R controls which version of the dataset to use: \code{"original"} (unaligned) or \code{"funneled"} (aligned using funneling).
 The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
-\item The dataset is downloaded from \href{https://figshare.com/authors/_/3118605}{Figshare},
+\item The dataset is downloaded from Figshare,
 which hosts the same files referenced in \code{scikit-learn}'s dataset utilities.
 \item \code{lfw_people_dataset}: 13,233 images across multiple identities (using either \code{"original"} or \code{"funneled"} splits)
 \item \code{lfw_pairs_dataset}:

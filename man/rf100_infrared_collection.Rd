@@ -39,7 +39,7 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the \href{https://universe.roboflow.com/browse/infrared}{RoboFlow 100 Infrared} datasets
+Loads one of the RoboFlow 100 Infrared datasets
 with per-dataset folders and train/valid/test splits.
 }
 \examples{
