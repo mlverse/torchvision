@@ -72,11 +72,12 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
     value_error("std evaluated to zero after conversion to {dtype}, leading to division by zero.")
   }
 
+  unsqueezed <- if (img$ndim == 3) c(-1, 1, 1) else c(1, -1, 1, 1)
   if (mean$dim() == 1)
-    mean <- mean$view(rep(1, img$ndim))
+    mean <- mean$view(unsqueezed)
 
   if (std$dim() == 1)
-    std <- std$view(rep(1, img$ndim))
+    std <- std$view(unsqueezed)
 
   img$sub_(mean)$div_(std)
 }
