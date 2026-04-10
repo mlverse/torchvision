@@ -26,6 +26,7 @@
 
 ## Minor bug fixes and improvements
 
+* `transform_` now correctly manage batched 4D torch tensors and 4D arrays (#313).
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * `transform_affine()`, `transform_rotate()` and random derivatives now use `interpolation` and `fill` parameter in favor of `resample`and `fillcolor` (@Chandraveersingh1717, #299).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).

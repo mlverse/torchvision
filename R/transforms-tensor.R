@@ -72,15 +72,14 @@ transform_normalize.torch_tensor <- function(img, mean, std, inplace = FALSE) {
     value_error("std evaluated to zero after conversion to {dtype}, leading to division by zero.")
   }
 
+  unsqueezed <- if (img$ndim == 3) c(-1, 1, 1) else c(1, -1, 1, 1)
   if (mean$dim() == 1)
-    mean <- mean[,NULL,NULL]
+    mean <- mean$view(unsqueezed)
 
   if (std$dim() == 1)
-    std <- std[,NULL,NULL]
+    std <- std$view(unsqueezed)
 
   img$sub_(mean)$div_(std)
-
-  img
 }
 
 #' @export
@@ -245,8 +244,8 @@ transform_five_crop.torch_tensor <- function(img, size) {
   if (!length(size) == 2)
     value_error("Please provide only 2 dimensions (h, w) for size.")
 
-  image_width <- img$size(2)
-  image_height <- img$size(3)
+  image_width <- img$size(-2)
+  image_height <- img$size(-1)
 
   crop_height <- size[1]
   crop_width <- size[2]
@@ -286,7 +285,8 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
 #' @export
 transform_linear_transformation.torch_tensor <- function(img, transformation_matrix,
                                                          mean_vector) {
-  flat_tensor <- img$view(c(1, -1)) - mean_vector
+  flat_dim <- if (img$ndim == 3) c(1, -1) else c(img$size(1), -1)
+  flat_tensor <- img$view(flat_dim) - mean_vector
   transformed_tensor <- torch::torch_mm(flat_tensor, transformation_matrix)
 
   transformed_tensor$view(img$size())
@@ -309,8 +309,8 @@ transform_random_grayscale.torch_tensor <- function(img, p = 0.1) {
 #' @export
 transform_grayscale.torch_tensor <- function(img, num_output_channels) {
   check_img(img)
-
-  transform_rgb_to_grayscale(img)$`repeat`(c(num_output_channels, 1, 1))
+  repeat_on_channel <- if(img$ndim == 3) c(num_output_channels, 1, 1) else c(1, num_output_channels, 1, 1)
+  transform_rgb_to_grayscale(img)$`repeat`(repeat_on_channel)
 }
 
 #' @export
@@ -368,10 +368,12 @@ transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
     img <- img$to(dtype = torch::torch_float32())/255
 
   img <-rgb2hsv(img)
-  hsv <- img$unbind(1)
+
+  channel_dim <- if (img$ndim == 3) 1 else 2
+  hsv <- img$unbind(channel_dim)
   hsv[[1]] <- hsv[[1]] + hue_factor
   hsv[[1]] <- hsv[[1]] %% 1
-  img <- torch::torch_stack(hsv)
+  img <- torch::torch_stack(hsv, dim=channel_dim)
   img_hue_adj <- hsv2rgb(img)
 
   if (orig_dtype == torch::torch_uint8())
@@ -460,7 +462,7 @@ transform_perspective.torch_tensor <- function(img, startpoints, endpoints, inte
 #' @export
 transform_rgb_to_grayscale.torch_tensor <- function(img) {
   check_img(img)
-  (0.2989 * img[1] + 0.5870 * img[2] + 0.1140 * img[3])$to(img$dtype)
+  (0.2989 * img[..,1,,] + 0.5870 * img[..,2,,] + 0.1140 * img[..,3,,])$to(img$dtype)
 }
 
 # Helpers -----------------------------------------------------------------
@@ -492,12 +494,13 @@ blend <- function(img1, img2, ratio) {
 }
 
 rgb2hsv <- function(img) {
+  channel_dim <- if (img$ndim == 3) 1 else 2
 
-  rgb <- img$unbind(1)
+  rgb <- img$unbind(channel_dim)
   r <- rgb[[1]]; g <- rgb[[2]]; b <- rgb[[3]]
 
-  maxc <- torch::torch_max(img, dim=1)[[1]]
-  minc <- torch::torch_min(img, dim=1)[[1]]
+  maxc <- torch::torch_max(img, dim=channel_dim)[[1]]
+  minc <- torch::torch_min(img, dim=channel_dim)[[1]]
 
   # The algorithm erases S and H channel where `maxc = minc`. This avoids NaN
   # from happening in the results, because
@@ -527,12 +530,14 @@ rgb2hsv <- function(img) {
   hb <- ((maxc != g) & (maxc != r)) * (4.0 + gc - rc)
   h <- (hr + hg + hb)
   h <- torch::torch_fmod((h / 6.0 + 1.0), 1.0)
-  torch::torch_stack(list(h, s, maxc))
+  torch::torch_stack(list(h, s, maxc), dim=channel_dim)
 }
 
 hsv2rgb <- function(img) {
 
-  hsv <- img$unbind(1)
+  channel_dim <- if (img$ndim == 3) 1 else 2
+
+  hsv <- img$unbind(channel_dim)
   i <- torch::torch_floor(hsv[[1]] * 6)
   f <- (hsv[[1]] * 6) - 1
   i <- i$to(dtype = torch::torch_int32())
@@ -542,14 +547,20 @@ hsv2rgb <- function(img) {
   t <- torch::torch_clamp((hsv[[3]] * (1 - f)), 0, 1)
   i <- i %% 6
 
-  mask <- i == torch::torch_arange(start= 0, end = 5)[,NULL,NULL]
+  mask <- if (img$ndim == 3)
+    i == torch::torch_arange(start= 0, end = 5)[,NULL,NULL]
+  else
+    i == torch::torch_arange(start= 0, end = 5)[,NULL,NULL,NULL]
 
   a1 <- torch::torch_stack(list(hsv[[3]], q, p, p, t, hsv[[3]]))
   a2 <- torch::torch_stack(list(t, hsv[[3]], hsv[[3]], q, p, p))
   a3 <- torch::torch_stack(list(p, p, t, hsv[[3]], hsv[[3]], q))
   a4 <- torch::torch_stack(list(a1, a2, a3))
 
-  torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype), a4))
+  if (img$ndim == 3)
+    torch::torch_einsum("ijk, xijk -> xjk", list(mask$to(dtype = img$dtype), a4))
+  else
+    torch::torch_einsum("ibjk, xibjk -> bxjk", list(mask$to(dtype = img$dtype), a4))
 }
 
 # https://stackoverflow.com/questions/32370485/convert-radians-to-degree-degree-to-radians
