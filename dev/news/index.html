@@ -113,6 +113,8 @@
 <div class="section level3">
 <h3 id="minor-bug-fixes-and-improvements-development-version">Minor bug fixes and improvements<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code>transform_</code> now correctly manage batched 4D torch tensors and 4D arrays (<a href="https://github.com/mlverse/torchvision/issues/313" class="external-link">#313</a>).</li>
+<li>
 <code>mnist_datataset()</code> and derivatives now correctly return item x() values with a 1-channel dimension (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/307" class="external-link">#307</a>).</li>
 <li>
 <code><a href="../reference/transform_affine.html">transform_affine()</a></code>, <code><a href="../reference/transform_rotate.html">transform_rotate()</a></code> and random derivatives now use <code>interpolation</code> and <code>fill</code> parameter in favor of <code>resample</code>and <code>fillcolor</code> (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/299" class="external-link">#299</a>).</li>
