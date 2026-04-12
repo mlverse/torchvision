@@ -428,7 +428,7 @@ coco_caption_dataset <- torch::dataset(
 
 #' MS COCO Class Labels
 #'
-#' Utilities for resolving COCO 80 class identifiers to their corresponding
+#' Utilities for resolving COCO 81 class identifiers to their corresponding
 #' human readable labels. The labels are retrieved from ultralytics source
 #'
 #' @param class_id Integer vector of 1-based class identifiers.
@@ -436,12 +436,12 @@ coco_caption_dataset <- torch::dataset(
 #' @family class_resolution
 #' @importFrom utils read.delim
 #' @export
-coco_classes <- function(class_id = 1:80) {
-  if (any(class_id > 80)) {
-    cli_warn("MS COCO {.var class_id} cannot be > 80")
+coco_classes <- function(class_id = 1:81) {
+  if (any(class_id > 81)) {
+    cli_warn("MS COCO {.var class_id} cannot be > 81")
   }
   url <- download_and_cache("https://github.com/ultralytics/ultralytics/raw/refs/heads/main/ultralytics/cfg/datasets/coco.yaml")
-  labels <- read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2]
+  labels <- c(NA, read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2])
   labels[nzchar(labels)][class_id]
 }
 

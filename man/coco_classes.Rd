@@ -4,7 +4,7 @@
 \alias{coco_classes}
 \title{MS COCO Class Labels}
 \usage{
-coco_classes(class_id = 1:80)
+coco_classes(class_id = 1:81)
 }
 \arguments{
 \item{class_id}{Integer vector of 1-based class identifiers.}
@@ -13,7 +13,7 @@ coco_classes(class_id = 1:80)
 A character vector with the COCO class names
 }
 \description{
-Utilities for resolving COCO 80 class identifiers to their corresponding
+Utilities for resolving COCO 81 class identifiers to their corresponding
 human readable labels. The labels are retrieved from ultralytics source
 }
 \seealso{
