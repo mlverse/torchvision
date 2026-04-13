@@ -441,7 +441,7 @@ coco_classes <- function(class_id = 1:81) {
     cli_warn("MS COCO {.var class_id} cannot be > 81")
   }
   url <- download_and_cache("https://github.com/ultralytics/ultralytics/raw/refs/heads/main/ultralytics/cfg/datasets/coco.yaml")
-  labels <- c(NA, read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2])
+  labels <- c("_background_", read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2])
   labels[nzchar(labels)][class_id]
 }
 
