@@ -76,30 +76,45 @@ rpn_head_mobilenet <- torch::nn_module(
 
 
 #' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like torch_max torch_float32
-generate_level_anchors <- function(h, w, stride, scales) {
+generate_level_anchors <- function(h, w, stride, base_sizes = c(32, 64, 128, 256, 512), aspect_ratios = c(0.5, 1.0, 2.0), device = "cpu") {
   # Grid centers
-  shift_x <- torch_arange(0.5, w - 0.5, 1.0) * stride
-  shift_y <- torch_arange(0.5, h - 0.5, 1.0) * stride
+  shift_x <- torch_arange(0.5, w - 0.5, 1.0, device = device) * stride
+  shift_y <- torch_arange(0.5, h - 0.5, 1.0, device = device) * stride
   shifts <- torch_meshgrid(list(shift_x, shift_y), indexing = "xy")
-  shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], shifts[[1]], shifts[[2]]), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
+  shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], torch_zeros_like(shifts[[1]]), torch_zeros_like(shifts[[2]])), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
 
-  # Anchor sizes (width/height)
-  # Example: square anchors per scale
-  anchor_sizes <- torch_tensor(scales) * stride  # [A]
-  anchor_widths <- anchor_sizes
-  anchor_heights <- anchor_sizes
+  # Create anchors for each combination of base_size and aspect_ratio
+  anchor_list <- list()
 
-  # Create base anchors [A, 4] (xc, yc, w, h)
+  for (base_size in base_sizes) {
+    for (ratio in aspect_ratios) {
+      w_anchor <- base_size * sqrt(ratio)
+      h_anchor <- base_size / sqrt(ratio)
+      anchor_list[[length(anchor_list) + 1]] <- c(w_anchor, h_anchor)
+    }
+  }
+
+  # Stack anchors [A, 2]
+  anchors_wh <- do.call(rbind, anchor_list)
+  anchor_widths <- torch_tensor(anchors_wh[, 1], device = device)
+  anchor_heights <- torch_tensor(anchors_wh[, 2], device = device)
+
+  # Create base anchors [4, A] then transpose to [A, 4] (xc, yc, w, h)
   anchors <- torch_stack(list(
-    torch_zeros_like(anchor_sizes),
-    torch_zeros_like(anchor_sizes),
+    torch_zeros_like(anchor_widths),
+    torch_zeros_like(anchor_heights),
     anchor_widths,
     anchor_heights
-  ), dim = 1)  # [A, 4]
+  ), dim = 1)$permute(c(2, 1))
 
   # Expand to [H, W, A, 4]
   anchors <- anchors$reshape(c(1, 1, -1, 4)) + shift_grid  # Broadcasting
-  anchors
+
+  # Convert from (xc, yc, w, h) to (x1, y1, x2, y2)
+  orig_shape <- anchors$shape
+  anchors <- anchors$reshape(c(-1, 4))
+  anchors <- box_cxcywh_to_xyxy(anchors)
+  anchors$reshape(orig_shape)
 }
 
 decode_boxes <- function(anchors, deltas) {
@@ -139,7 +154,14 @@ generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx
 
     c(a, h, w) %<-% objectness$shape
 
-    anchors <- generate_level_anchors(h, w, strides[[i]], scales = seq_len(a))
+    if (a == 15) {
+      base_sizes <- c(32, 64, 128, 256, 512)
+    } else if (a == 3) {
+      base_sizes <- c(4.0 * strides[[i]])
+    } else {
+      value_error("Unexpected number of anchors: {a}. Expected 3 or 15.")
+    }
+    anchors <- generate_level_anchors(h, w, strides[[i]], base_sizes = base_sizes, aspect_ratios = c(0.5, 1.0, 2.0), device = device)
     anchors <- anchors$reshape(c(-1, 4))  # [H*W*A, 4]
 
     objectness <- objectness$sigmoid()$flatten() ## [H*W*A]
@@ -199,6 +221,10 @@ roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)
   sampling_x <- x1$view(c(-1, 1, 1)) + rel_x$view(c(1, output_size[1], output_size[2])) * (x2 - x1)$view(c(-1, 1, 1))
   sampling_y <- y1$view(c(-1, 1, 1)) + rel_y$view(c(1, output_size[1], output_size[2])) * (y2 - y1)$view(c(-1, 1, 1))
 
+  # Clamp grid to [-1, 1] to avoid needing padding (especially for MPS compatibility)
+  sampling_x <- sampling_x$clamp(-1, 1)
+  sampling_y <- sampling_y$clamp(-1, 1)
+
   # Concat to get a grid of [N, 7, 7, 2]
   grid <- torch_stack(list(sampling_x, sampling_y), dim = -1)
 
@@ -209,7 +235,7 @@ roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)
     input_selected,
     grid,
     mode = "bilinear",
-    padding_mode = "border",
+    padding_mode = "zeros",
     align_corners = FALSE
   )
 
