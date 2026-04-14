@@ -172,6 +172,14 @@ test_that("mask_rcnn pretrained infer correctly", {
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    # Verify no background class (class 1) is returned
+    labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
+    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
+    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")
+    # Verify masks match number of detections
+    expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),
+                 info = "Number of masks should match number of detections")
   }
 
 })
@@ -187,6 +195,14 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    # Verify no background class (class 1) is returned
+    labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
+    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
+    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")
+    # Verify masks match number of detections
+    expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),
+                 info = "Number of masks should match number of detections")
   }
 
 })
