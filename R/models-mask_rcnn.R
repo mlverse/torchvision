@@ -141,6 +141,10 @@ roi_align_masks <- function(feature_map,
   sampling_x <- x1$view(c(-1, 1, 1)) + rel_x$view(c(1, output_size[1], output_size[2])) * (x2 - x1)$view(c(-1, 1, 1))
   sampling_y <- y1$view(c(-1, 1, 1)) + rel_y$view(c(1, output_size[1], output_size[2])) * (y2 - y1)$view(c(-1, 1, 1))
 
+  # Clamp grid to [-1, 1] to avoid needing padding (especially for MPS compatibility)
+  sampling_x <- sampling_x$clamp(-1, 1)
+  sampling_y <- sampling_y$clamp(-1, 1)
+
   # Concat to get a grid of [N, output_size[1], output_size[2], 2]
   grid <- torch_stack(list(sampling_x, sampling_y), dim = -1)
 
@@ -152,7 +156,7 @@ roi_align_masks <- function(feature_map,
     input_expanded,
     grid,
     mode = "bilinear",
-    padding_mode = "border",
+    padding_mode = "zeros",
     align_corners = FALSE
   )
 
@@ -283,7 +287,7 @@ maskrcnn_model <- torch::nn_module(
       for (b in seq_len(batch_size)) {
 
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    batch_idx = b, score_thresh = 0,
                                     nms_thresh = self$nms_thresh)
 
         if (props$proposals$shape[1] == 0) {
@@ -315,8 +319,8 @@ maskrcnn_model <- torch::nn_module(
         # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
         deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
 
-        # Filter by score threshold before decoding
-        keep <- final_scores > self$score_thresh
+        # Filter by score threshold AND remove background predictions (class 1)
+        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
         num_detections <- torch::torch_sum(keep)$item()
 
         if (num_detections > 0) {
@@ -365,10 +369,12 @@ maskrcnn_model <- torch::nn_module(
           img_w <- images$shape[4]
 
           final_boxes <- torch_clamp(final_boxes, min = 0.0)
-          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
-          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
-          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
-          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+          img_w_tensor <- torch_tensor(img_w, device = final_boxes$device)
+          img_h_tensor <- torch_tensor(img_h, device = final_boxes$device)
+          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w_tensor)
+          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h_tensor)
+          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w_tensor)
+          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h_tensor)
 
           # Apply NMS and Limit Detections
           if (final_boxes$shape[1] > 0L) {
@@ -488,7 +494,7 @@ maskrcnn_model_v2 <- torch::nn_module(
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    batch_idx = b, score_thresh = 0,
                                     nms_thresh = self$nms_thresh)
 
         if (props$proposals$shape[1] == 0L) {
@@ -566,10 +572,12 @@ maskrcnn_model_v2 <- torch::nn_module(
           img_w <- images$shape[4]
 
           final_boxes <- torch_clamp(final_boxes, min = 0.0)
-          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w)
-          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h)
-          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w)
-          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h)
+          img_w_tensor <- torch_tensor(img_w, device = final_boxes$device)
+          img_h_tensor <- torch_tensor(img_h, device = final_boxes$device)
+          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w_tensor)
+          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h_tensor)
+          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w_tensor)
+          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h_tensor)
 
           # Apply NMS and Limit Detections
           if (final_boxes$shape[1] > 1L) {

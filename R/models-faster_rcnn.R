@@ -444,7 +444,7 @@ fasterrcnn_model <- torch::nn_module(
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    batch_idx = b, score_thresh = 0,
                                     nms_thresh = self$nms_thresh)
 
         if (props$proposals$shape[1] == 0) {
@@ -470,8 +470,8 @@ fasterrcnn_model <- torch::nn_module(
         final_boxes <- decode_boxes(props$proposals, final_boxes)
         final_boxes <- clip_boxes_to_image(final_boxes, image_size)
 
-        # Filter by score threshold
-        keep <- final_scores > self$score_thresh
+        # Filter by score threshold AND remove background predictions (class 1)
+        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
         num_detections <- torch::torch_sum(keep)$item()
 
         if (num_detections > 0) {
@@ -635,7 +635,7 @@ fasterrcnn_model_v2 <- torch::nn_module(
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    batch_idx = b, score_thresh = 0,
                                     nms_thresh = self$nms_thresh)
 
         if (props$proposals$shape[1] == 0) {
@@ -661,8 +661,8 @@ fasterrcnn_model_v2 <- torch::nn_module(
         final_boxes <- decode_boxes(props$proposals, final_boxes)
         final_boxes <- clip_boxes_to_image(final_boxes, image_size)
 
-        # Filter by score threshold
-        keep <- final_scores > self$score_thresh
+        # Filter by score threshold AND remove background predictions (class 1)
+        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
         num_detections <- torch::torch_sum(keep)$item()
 
         if (num_detections > 0) {
@@ -796,7 +796,7 @@ fasterrcnn_mobilenet_model <- torch::nn_module(
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(8, 16),
-                                    batch_idx = b, score_thresh = self$score_thresh,
+                                    batch_idx = b, score_thresh = 0,
                                     nms_thresh = self$nms_thresh)
 
         if (props$proposals$shape[1] == 0) {
