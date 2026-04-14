@@ -141,6 +141,109 @@ decode_boxes <- function(anchors, deltas) {
   torch::torch_stack(list(x1, y1, x2, y2), dim = 2)
 }
 
+#' Postprocess Detections
+#'
+#' Processes class logits and box regression to produce final detections.
+#' Keeps all class predictions before filtering, rather than taking max across
+#' classes first, allowing proper per-class NMS.
+#'
+#' @param class_logits Tensor of shape [N, num_classes] - raw classification scores
+#' @param box_regression Tensor of shape [N, num_classes * 4] - box deltas for each class
+#' @param proposals Tensor of shape [N, 4] - proposal boxes in (x1, y1, x2, y2) format
+#' @param image_size Integer vector of length 2: [height, width]
+#' @param num_classes Integer - total number of classes including background
+#' @param score_thresh Numeric - minimum score threshold for detections
+#' @param nms_thresh Numeric - NMS IoU threshold
+#' @param detections_per_img Integer - maximum detections to return
+#'
+#' @return List with boxes, labels, scores tensors
+#' @noRd
+postprocess_detections <- function(class_logits, box_regression, proposals,
+                                   image_size, num_classes, score_thresh,
+                                   nms_thresh, detections_per_img) {
+  device <- class_logits$device
+  num_proposals <- proposals$shape[1]
+
+  # Decode boxes for all classes: [N, num_classes, 4]
+  pred_boxes <- box_regression$view(c(num_proposals, num_classes, 4))
+
+  # Decode boxes using proposals as anchors (expand proposals for all classes)
+  proposals_expanded <- proposals$unsqueeze(2)$expand(c(num_proposals, num_classes, 4))
+
+  # Decode for each class
+  decoded_boxes <- torch_zeros_like(pred_boxes)
+  for (cls_idx in seq_len(num_classes)) {
+    decoded_boxes[, cls_idx, ] <- decode_boxes(proposals, pred_boxes[, cls_idx, ])
+  }
+
+  # Clip to image boundaries
+  decoded_boxes <- clip_boxes_to_image(decoded_boxes$view(c(-1, 4)), image_size)
+  decoded_boxes <- decoded_boxes$view(c(num_proposals, num_classes, 4))
+
+  # Apply softmax to get class probabilities: [N, num_classes]
+  pred_scores <- torch::nnf_softmax(class_logits, dim = 2)
+
+  # Remove background class (class 1 in 1-based indexing)
+  # Keep classes 2 through num_classes
+  pred_boxes <- pred_boxes[, 2:num_classes, ]      # [N, num_classes-1, 4]
+  pred_scores <- pred_scores[, 2:num_classes]       # [N, num_classes-1]
+
+  num_classes_no_bg <- num_classes - 1L
+
+  # Create labels for each prediction: [num_classes-1]
+  # These are the actual class indices (2, 3, 4, ... num_classes)
+  labels <- torch_arange(2L, num_classes, device = device, dtype = torch_long())
+  # Expand to match scores: [N, num_classes-1]
+  labels <- labels$view(c(1, -1))$expand_as(pred_scores)
+
+  # Flatten everything: treat each (proposal, class) pair as a separate detection
+  boxes <- pred_boxes$reshape(c(-1, 4))           # [N * (num_classes-1), 4]
+  scores <- pred_scores$reshape(c(-1))            # [N * (num_classes-1)]
+  labels <- labels$reshape(c(-1))                 # [N * (num_classes-1)]
+
+  # Remove low scoring boxes
+  keep <- scores > score_thresh
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  if (boxes$shape[1] == 0) {
+    return(list(
+      boxes = torch_empty(c(0, 4), device = device),
+      labels = torch_empty(c(0), dtype = torch_long(), device = device),
+      scores = torch_empty(c(0), device = device)
+    ))
+  }
+
+  # Remove small boxes
+  keep <- remove_small_boxes(boxes, min_size = 1e-2)
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  if (boxes$shape[1] == 0) {
+    return(list(
+      boxes = torch_empty(c(0, 4), device = device),
+      labels = torch_empty(c(0), dtype = torch_long(), device = device),
+      scores = torch_empty(c(0), device = device)
+    ))
+  }
+
+  # Apply per-class NMS
+  keep <- batched_nms(boxes, scores, labels, nms_thresh)
+
+  # Keep only top k detections
+  if (keep$shape[1] > detections_per_img) {
+    keep <- keep[1:detections_per_img]
+  }
+
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  list(boxes = boxes, labels = labels, scores = scores)
+}
+
 #' @importFrom torch nnf_grid_sample torch_empty
 generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx,
                                score_thresh = 0.05, nms_thresh = 0.7) {
@@ -453,59 +556,26 @@ fasterrcnn_model <- torch::nn_module(
             labels = torch_empty(c(0), dtype = torch::torch_long()),
             scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = list(empty)))
+          final_results[[b]] <- empty
+          next
         }
 
-        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- torch::nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch::torch_max(scores, dim = 2)
-        final_scores <- max_scores[[1]]
-        final_labels <- max_scores[[2]]
-
-        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-        final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-        final_boxes <- decode_boxes(props$proposals, final_boxes)
-        final_boxes <- clip_boxes_to_image(final_boxes, image_size)
-
-        # Filter by score threshold AND remove background predictions (class 1)
-        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
-        num_detections <- torch::torch_sum(keep)$item()
-
-        if (num_detections > 0) {
-          final_boxes <- final_boxes[keep, ]
-          final_labels <- final_labels[keep]
-          final_scores <- final_scores[keep]
-
-          # Apply NMS to remove overlapping detections
-          if (final_boxes$shape[1] > 1) {
-            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-            final_boxes <- final_boxes[nms_keep, ]
-            final_labels <- final_labels[nms_keep]
-            final_scores <- final_scores[nms_keep]
-          }
-
-          # Limit detections per image
-          n_det <- final_scores$shape[1]
-          if (n_det > self$detections_per_img) {
-            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-            top_idx <- top_k[[2]]
-            final_boxes <- final_boxes[top_idx, ]
-            final_labels <- final_labels[top_idx]
-            final_scores <- final_scores[top_idx]
-          }
-        } else {
-          final_boxes <- torch_empty(c(0, 4))
-          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch_empty(c(0))
-        }
-        final_results[[b]] <- list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
+
+        final_results[[b]] <- result
       }
       list(features = features, detections = final_results)
     }
@@ -644,59 +714,26 @@ fasterrcnn_model_v2 <- torch::nn_module(
             labels = torch_empty(c(0), dtype = torch::torch_long()),
             scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = list(empty)))
+          final_results[[b]] <- empty
+          next
         }
 
-        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch_max(scores, dim = 2)
-        final_scores <- max_scores[[1]]
-        final_labels <- max_scores[[2]]
-
-        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-        final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-        final_boxes <- decode_boxes(props$proposals, final_boxes)
-        final_boxes <- clip_boxes_to_image(final_boxes, image_size)
-
-        # Filter by score threshold AND remove background predictions (class 1)
-        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
-        num_detections <- torch::torch_sum(keep)$item()
-
-        if (num_detections > 0) {
-          final_boxes <- final_boxes[keep, ]
-          final_labels <- final_labels[keep]
-          final_scores <- final_scores[keep]
-
-          # Apply NMS to remove overlapping detections
-          if (final_boxes$shape[1] > 1) {
-            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-            final_boxes <- final_boxes[nms_keep, ]
-            final_labels <- final_labels[nms_keep]
-            final_scores <- final_scores[nms_keep]
-          }
-
-          # Limit detections per image
-          n_det <- final_scores$shape[1]
-          if (n_det > self$detections_per_img) {
-            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-            top_idx <- top_k[[2]]
-            final_boxes <- final_boxes[top_idx, ]
-            final_labels <- final_labels[top_idx]
-            final_scores <- final_scores[top_idx]
-          }
-        } else {
-          final_boxes <- torch_empty(c(0, 4))
-          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch_empty(c(0))
-        }
-        final_results[[b]] <- list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
+
+        final_results[[b]] <- result
       }
       list(features = features, detections = final_results)
     }
@@ -805,57 +842,26 @@ fasterrcnn_mobilenet_model <- torch::nn_module(
             labels = torch_empty(c(0), dtype = torch::torch_long()),
             scores = torch_empty(c(0))
           )
-          return(list(features = features, detections = list(empty)))
+          final_results[[b]] <- empty
+          next
         }
 
-        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch_max(scores, dim = 2)
-        final_scores <- max_scores[[1]]
-        final_labels <- max_scores[[2]]
-
-        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-        final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-        final_boxes <- decode_boxes(props$proposals, final_boxes)
-        final_boxes <- clip_boxes_to_image(final_boxes, image_size)
-
-        # Filter by score threshold
-        keep <- final_scores > self$score_thresh
-        if (torch::torch_sum(keep)$item() > 0) {
-          final_boxes <- final_boxes[keep, ]
-          final_labels <- final_labels[keep]
-          final_scores <- final_scores[keep]
-
-          # Apply NMS to remove overlapping detections
-          if (final_boxes$shape[1] > 1) {
-            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-            final_boxes <- final_boxes[nms_keep, ]
-            final_labels <- final_labels[nms_keep]
-            final_scores <- final_scores[nms_keep]
-          }
-
-          # Limit detections per image
-          n_det <- final_scores$shape[1]
-          if (n_det > self$detections_per_img) {
-            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-            top_idx <- top_k[[2]]
-            final_boxes <- final_boxes[top_idx, ]
-            final_labels <- final_labels[top_idx]
-            final_scores <- final_scores[top_idx]
-          }
-        } else {
-          final_boxes <- torch_empty(c(0, 4))
-          final_labels <- torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch_empty(c(0))
-        }
-        final_results[[b]] <- list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
+
+        final_results[[b]] <- result
       }
       list(features = features, detections = final_results)
     }

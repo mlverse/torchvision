@@ -279,7 +279,6 @@ maskrcnn_model <- torch::nn_module(
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
       final_results <- list()
@@ -297,123 +296,44 @@ maskrcnn_model <- torch::nn_module(
             scores = torch::torch_empty(c(0)),
             masks = torch::torch_empty(c(0, 28, 28))
           )
-          return(list(features = features, detections = list(empty)))
+          final_results[[b]] <- empty
+          next
         }
 
-        # Limit proposals to avoid slow ROI pooling (common practice in detection)
+        # Limit proposals to avoid slow ROI pooling
         max_proposals <- 1000
         if (props$proposals$shape[1] > max_proposals) {
           props$proposals <- props$proposals[1:max_proposals, ]
         }
 
-        # Box predictions
-        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- torch::nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch::torch_max(scores, dim = 2)
-        final_scores <- max_scores[[1]]
-        final_labels <- max_scores[[2]]
+        # Postprocess detections
+        det_result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
+        )
 
-        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-        # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
-        deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
+        final_boxes <- det_result$boxes
+        final_labels <- det_result$labels
+        final_scores <- det_result$scores
 
-        # Filter by score threshold AND remove background predictions (class 1)
-        keep <- (final_scores > self$score_thresh) & (final_labels != 1)
-        num_detections <- torch::torch_sum(keep)$item()
+        # Predict masks for detected objects
+        if (final_boxes$shape[1] > 0) {
+          # For mask prediction, we need to map final boxes back to proposals
+          # Since postprocess_detections decodes boxes, we need the original proposals
+          # that correspond to the kept detections. We'll use the final_boxes directly.
 
-        if (num_detections > 0) {
-          # Apply filters to deltas, scores, labels, and proposals
-          final_deltas <- deltas[keep, ]
-          final_scores <- final_scores[keep]
-          final_labels <- final_labels[keep]
-
-          # We need the proposals that correspond to these kept detections
-          # 'props$proposals' are the reference boxes (anchors)
-          kept_proposals <- props$proposals[keep, ]
-
-          # 3. Decode Deltas to Absolute Coordinates
-          # Formula: pred_box = proposal + delta
-          # Standard Faster R-CNN decoding:
-
-          # Widths and Heights of proposals
-          widths <- kept_proposals[, 3] - kept_proposals[, 1]
-          heights <- kept_proposals[, 4] - kept_proposals[, 2]
-
-          # Centers of proposals
-          ctr_x <- kept_proposals[, 1] + 0.5 * widths
-          ctr_y <- kept_proposals[, 2] + 0.5 * heights
-
-          # Extract predicted deltas
-          dx <- final_deltas[, 1]
-          dy <- final_deltas[, 2]
-          dw <- final_deltas[, 3]
-          dh <- final_deltas[, 4]
-
-          # Apply deltas
-          pred_ctr_x <- dx * widths + ctr_x
-          pred_ctr_y <- dy * heights + ctr_y
-          pred_w <- torch_exp(dw) * widths
-          pred_h <- torch_exp(dh) * heights
-
-          # Convert back to (x1, y1, x2, y2)
-          final_boxes <- torch_zeros_like(final_deltas)
-          final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
-          final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
-          final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
-          final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
-
-          # Clip Boxes to Image Boundary
-          img_h <- images$shape[3]
-          img_w <- images$shape[4]
-
-          final_boxes <- torch_clamp(final_boxes, min = 0.0)
-          img_w_tensor <- torch_tensor(img_w, device = final_boxes$device)
-          img_h_tensor <- torch_tensor(img_h, device = final_boxes$device)
-          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w_tensor)
-          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h_tensor)
-          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w_tensor)
-          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h_tensor)
-
-          # Apply NMS and Limit Detections
-          if (final_boxes$shape[1] > 0L) {
-            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-            final_boxes <- final_boxes[nms_keep, ]
-            final_labels <- final_labels[nms_keep]
-            final_scores <- final_scores[nms_keep]
-            kept_proposals <- kept_proposals[nms_keep, ]
-          }
-
-          # drop degenerate boxes before ROI‑Align
-          valid_boxes_mask <- (kept_proposals[,3] > kept_proposals[,1]) &
-            (kept_proposals[,4] > kept_proposals[,2])
-
-          if (valid_boxes_mask$sum()$item() == 0L) {
-            # nothing to pool → empty mask tensor
-            final_masks <- torch::torch_empty(c(0, 28, 28))
-          } else {
-            final_boxes <- final_boxes[valid_boxes_mask, ]
-            final_labels <- final_labels[valid_boxes_mask]
-            final_scores <- final_scores[valid_boxes_mask]
-            kept_proposals <- kept_proposals[valid_boxes_mask, ]
-          }
-
-          # Limit detections per image
-          n_det <- final_scores$shape[1]
-          if (n_det > self$detections_per_img) {
-            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-            top_idx <- top_k[[2]]
-            final_boxes <- final_boxes[top_idx, ]
-            final_labels <- final_labels[top_idx]
-            final_scores <- final_scores[top_idx]
-            kept_proposals <- kept_proposals[top_idx, ]
-          }
-
-          # Predict masks for kept detections
           mask_features <- roi_align_masks_fpn(
             feature_maps = features,
-            proposals    = kept_proposals,
+            proposals    = final_boxes,
             output_size  = c(14L, 14L),
             sampling_ratio = 2L,
             aligned        = FALSE
@@ -423,7 +343,7 @@ maskrcnn_model <- torch::nn_module(
 
           # Extract masks for predicted classes
           n_kept <- final_labels$shape[1]
-          final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+          final_masks <- torch::torch_zeros(c(n_kept, 28, 28), device = final_boxes$device)
 
           for (i in seq_len(n_kept)) {
             class_idx <- as.integer(final_labels[i]$item())
@@ -434,11 +354,9 @@ maskrcnn_model <- torch::nn_module(
           final_masks <- torch::torch_sigmoid(final_masks)
 
         } else {
-          final_boxes <- torch::torch_empty(c(0, 4))
-          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch::torch_empty(c(0))
           final_masks <- torch::torch_empty(c(0, 28, 28))
         }
+
         final_results[[b]] <- list(
           boxes = final_boxes,
           labels = final_labels,
@@ -508,125 +426,45 @@ maskrcnn_model_v2 <- torch::nn_module(
           next
         }
 
-        # Limit proposals to avoid slow ROI pooling (common practice in detection)
+        # Limit proposals to avoid slow ROI pooling
         max_proposals <- 1000
         if (props$proposals$shape[1] > max_proposals) {
           props$proposals <- props$proposals[1:max_proposals, ]
         }
 
-        # Box predictions
-        detections <- self$roi_heads(features, props$proposals, batch_idx = b)
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-        scores <- torch::nnf_softmax(detections$scores, dim = 2)
-        max_scores <- torch::torch_max(scores, dim = 2)
-        final_scores <- max_scores[[1]]
-        final_labels <- max_scores[[2]]
+        # Postprocess detections
+        det_result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
+        )
 
-        box_reg <- detections$boxes$view(c(-1, self$num_classes, 4))
-        gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-        # 'deltas' now contains the predicted dx, dy, dw, dh for the best class
-        deltas <- box_reg$gather(2, gather_idx)$squeeze(2)
+        final_boxes <- det_result$boxes
+        final_labels <- det_result$labels
+        final_scores <- det_result$scores
 
-        # Filter by score threshold
-        keep <- final_scores > self$score_thresh
-        num_detections <- torch::torch_sum(keep)$item()
-
-        if (num_detections > 0) {
-          # Apply filters to deltas, scores, labels, and proposals
-          final_deltas <- deltas[keep, ]
-          final_scores <- final_scores[keep]
-          final_labels <- final_labels[keep]
-          kept_proposals <- props$proposals[keep, ]
-
-          # Decode Deltas to Absolute Coordinates $pred_box = proposal + delta$
-
-          # Widths and Heights of proposals
-          widths <- kept_proposals[, 3] - kept_proposals[, 1]
-          heights <- kept_proposals[, 4] - kept_proposals[, 2]
-
-          # Centers of proposals
-          ctr_x <- kept_proposals[, 1] + 0.5 * widths
-          ctr_y <- kept_proposals[, 2] + 0.5 * heights
-
-          # Extract predicted deltas
-          dx <- final_deltas[, 1]
-          dy <- final_deltas[, 2]
-          dw <- final_deltas[, 3]
-          dh <- final_deltas[, 4]
-
-          # Apply deltas
-          pred_ctr_x <- dx * widths + ctr_x
-          pred_ctr_y <- dy * heights + ctr_y
-          pred_w <- torch_exp(dw) * widths
-          pred_h <- torch_exp(dh) * heights
-
-          # Convert back to (x1, y1, x2, y2)
-          final_boxes <- torch_zeros_like(final_deltas)
-          final_boxes[, 1] <- pred_ctr_x - 0.5 * pred_w # x1
-          final_boxes[, 2] <- pred_ctr_y - 0.5 * pred_h # y1
-          final_boxes[, 3] <- pred_ctr_x + 0.5 * pred_w # x2
-          final_boxes[, 4] <- pred_ctr_y + 0.5 * pred_h # y2
-
-          # Clip Boxes to Image Boundary
-          img_h <- images$shape[3]
-          img_w <- images$shape[4]
-
-          final_boxes <- torch_clamp(final_boxes, min = 0.0)
-          img_w_tensor <- torch_tensor(img_w, device = final_boxes$device)
-          img_h_tensor <- torch_tensor(img_h, device = final_boxes$device)
-          final_boxes[, 1] <- torch_minimum(final_boxes[, 1], img_w_tensor)
-          final_boxes[, 2] <- torch_minimum(final_boxes[, 2], img_h_tensor)
-          final_boxes[, 3] <- torch_minimum(final_boxes[, 3], img_w_tensor)
-          final_boxes[, 4] <- torch_minimum(final_boxes[, 4], img_h_tensor)
-
-          # Apply NMS and Limit Detections
-          if (final_boxes$shape[1] > 1L) {
-            nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-            final_boxes <- final_boxes[nms_keep, ]
-            final_labels <- final_labels[nms_keep]
-            final_scores <- final_scores[nms_keep]
-            kept_proposals <- kept_proposals[nms_keep, ]
-          }
-
-
-          # drop degenerate boxes before ROI‑Align
-          valid_boxes_mask <- (kept_proposals[,3] > kept_proposals[,1]) &
-            (kept_proposals[,4] > kept_proposals[,2])
-
-          if (valid_boxes_mask$sum()$item() == 0L) {
-            # nothing to pool → empty mask tensor
-            final_masks <- torch::torch_empty(c(0, 28, 28))
-          } else {
-            final_boxes <- final_boxes[valid_boxes_mask, ]
-            final_labels <- final_labels[valid_boxes_mask]
-            final_scores <- final_scores[valid_boxes_mask]
-            kept_proposals <- kept_proposals[valid_boxes_mask, ]
-          }
-
-          # Limit detections per image
-          n_det <- final_scores$shape[1]
-          if (n_det > self$detections_per_img) {
-            top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-            top_idx <- top_k[[2]]
-            final_boxes <- final_boxes[top_idx, ]
-            final_labels <- final_labels[top_idx]
-            final_scores <- final_scores[top_idx]
-            kept_proposals <- kept_proposals[top_idx, ]
-          }
-
-          # Predict masks for kept detections
+        # Predict masks for detected objects
+        if (final_boxes$shape[1] > 0) {
           mask_features <- roi_align_masks_fpn(
             feature_maps = features,
-            proposals    = kept_proposals,      # still in image space
+            proposals    = final_boxes,
             output_size  = c(14L, 14L),
             sampling_ratio = 2L,
             aligned        = FALSE
           )
-          mask_logits   <- self$mask_head(mask_features)       # (N, num_classes, 28, 28)
+          mask_logits <- self$mask_head(mask_features)  # (N, num_classes, 28, 28)
 
           # Extract masks for predicted classes
           n_kept <- final_labels$shape[1]
-          final_masks <- torch::torch_zeros(c(n_kept, 28, 28))
+          final_masks <- torch::torch_zeros(c(n_kept, 28, 28), device = final_boxes$device)
 
           for (i in seq_len(n_kept)) {
             class_idx <- as.integer(final_labels[i]$item())
@@ -637,11 +475,9 @@ maskrcnn_model_v2 <- torch::nn_module(
           final_masks <- torch::torch_sigmoid(final_masks)
 
         } else {
-          final_boxes <- torch::torch_empty(c(0, 4))
-          final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-          final_scores <- torch::torch_empty(c(0))
           final_masks <- torch::torch_empty(c(0, 28, 28))
         }
+
         final_results[[b]] <- list(
           boxes = final_boxes,
           labels = final_labels,
