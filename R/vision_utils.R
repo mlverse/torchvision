@@ -471,29 +471,42 @@ draw_keypoints <- function(image,
   }
 
   img_kpts <- keypoints$to(torch::torch_int64()) %>% as.array
+  num_instances <- dim(img_kpts)[1]
+  num_keypoints <- dim(img_kpts)[2]
 
-  if (is.null(colors)) {
-    colors <- grDevices::hcl.colors(n = dim(img_kpts)[[2]])
+  if (!is.null(connectivity)) {
+    if (!is.matrix(connectivity) || ncol(connectivity) != 2) {
+      cli_abort("`connectivity` must be a matrix with 2 columns")
+    }
+    if (any(connectivity < 1 | connectivity > num_keypoints)) {
+      value_error("`connectivity` indices exceed number of keypoints")
+    }
   }
 
-  draw <- png::writePNG(img_to_draw) %>%
+  if (is.null(colors)) {
+    colors <- grDevices::hcl.colors(n = max(num_instances, 1))
+  }
+  colors <- rep(colors, length.out = num_instances)
+
+  draw <- png::writePNG(img_to_draw / 255) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in 1:dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1], img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+  for (pose in seq_len(num_instances)) {
+    kpt <- img_kpts[pose, , ]
+    pose_color <- colors[pose]
 
     if (!is.null(connectivity)) {
-      for (conn in connectivity) {
-        start_idx <- conn[1]
-        end_idx <- conn[2]
-        start_x <- img_kpts[pose, start_idx, 1]
-        start_y <- img_kpts[pose, start_idx, 2]
-        end_x <- img_kpts[pose, end_idx, 1]
-        end_y <- img_kpts[pose, end_idx, 2]
-        graphics::lines(c(start_x, end_x), c(start_y, end_y), col = colors[start_idx], lwd = width)
+      for (i in seq_len(nrow(connectivity))) {
+        idx1 <- connectivity[i, 1]
+        idx2 <- connectivity[i, 2]
+        graphics::segments(kpt[idx1, 1], kpt[idx1, 2],
+                           kpt[idx2, 1], kpt[idx2, 2],
+                           col = pose_color, lwd = width)
       }
     }
+
+    graphics::points(kpt[, 1], kpt[, 2], pch = 20, col = pose_color, cex = radius)
   }
   grDevices::dev.off()
   draw_tt <-
