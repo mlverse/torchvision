@@ -45,6 +45,11 @@ nms <- function(boxes, scores, iou_threshold) {
   keep[1] <- 1L
   n_keep <- 1L
 
+  # Handle single box case
+  if (n_boxes == 1) {
+    return(order[1:1])
+  }
+
   for (i in 2:n_boxes) {
     # Get current box - use unsqueeze to ensure 2D tensor [1, 4]
     current_box <- sorted_boxes[i, ]$unsqueeze(1)

@@ -185,7 +185,7 @@ postprocess_detections <- function(class_logits, box_regression, proposals,
 
   # Remove background class (class 1 in 1-based indexing)
   # Keep classes 2 through num_classes
-  pred_boxes <- pred_boxes[, 2:num_classes, ]      # [N, num_classes-1, 4]
+  pred_boxes <- decoded_boxes[, 2:num_classes, ]   # [N, num_classes-1, 4]
   pred_scores <- pred_scores[, 2:num_classes]       # [N, num_classes-1]
 
   num_classes_no_bg <- num_classes - 1L
