@@ -27,7 +27,7 @@ mask_head_module <- torch::nn_module(
 # Mask RCNN predictor - Predicts segmentation masks for detected objects
 mask_rcnn_predictor <- torch::nn_module(
     "mask_rcnn_predictor",
-    initialize = function(num_classes = 91) {
+    initialize = function(num_classes = 90) {
       # Deconvolution layer to upsample from 14x14 to 28x28
       self$conv5_mask <- nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2)
 
@@ -43,7 +43,7 @@ mask_rcnn_predictor <- torch::nn_module(
 # Mask Head Module V2 - With batch normalization
 mask_head_module_v2 <- torch::nn_module(
     "mask_head_v2",
-    initialize = function(num_classes = 91) {
+    initialize = function(num_classes = 90) {
       # Convolutional blocks with batch normalization
       conv_block <- function() {
         nn_sequential(
@@ -588,7 +588,7 @@ mask_rcnn_model_urls <- list(
 #' @describeIn model_maskrcnn Mask R-CNN with ResNet-50 FPN
 #' @export
 model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
-                                        num_classes = 91,
+                                        num_classes = 90,
                                         score_thresh = 0.05,
                                         nms_thresh = 0.5,
                                         detections_per_img = 100,
@@ -600,7 +600,7 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                          detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+    cli_abort("Pretrained weights require num_classes = 90.")
 
   if (pretrained) {
     r <- mask_rcnn_model_urls$maskrcnn_resnet50
@@ -622,7 +622,7 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
 #' @describeIn model_maskrcnn Mask R-CNN with ResNet-50 FPN V2
 #' @export
 model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
-                                           num_classes = 91,
+                                           num_classes = 90,
                                            score_thresh = 0.05,
                                            nms_thresh = 0.5,
                                            detections_per_img = 100,
@@ -634,7 +634,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
                             detections_per_img = detections_per_img)
 
   if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+    cli_abort("Pretrained weights require num_classes = 90.")
 
   if (pretrained) {
     r <- mask_rcnn_model_urls$maskrcnn_resnet50_v2

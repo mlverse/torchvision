@@ -150,14 +150,14 @@ test_that("maskrcnn with different num_classes works", {
   expect_tensor(output$detections[[1]]$masks)
 })
 
-test_that("maskrcnn pretrained requires num_classes = 91", {
+test_that("maskrcnn pretrained requires num_classes = 90", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
   # Should error when pretrained=TRUE with num_classes != 91
   expect_error(
     model_maskrcnn_resnet50_fpn(pretrained = TRUE, num_classes = 10, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100),
-    "Pretrained weights require num_classes = 91"
+    "Pretrained weights require num_classes = 90"
   )
 })
 
@@ -175,7 +175,7 @@ test_that("mask_rcnn pretrained infer correctly", {
     # Verify no background class (class 1) is returned
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")
     # Verify masks match number of detections
     expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),
@@ -198,7 +198,7 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
     # Verify no background class (class 1) is returned
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")
     # Verify masks match number of detections
     expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),

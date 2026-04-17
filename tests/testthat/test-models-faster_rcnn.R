@@ -119,11 +119,10 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   expect_tensor(out$detections[[1]]$boxes)
-  # Verify no background class (class 1) is returned
+  # Verify background class is removed, labels should be COCO IDs [1, 90]
   if (out$detections[[1]]$labels$shape[1] > 0) {
     labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")
   }
   # we cannot succesfully assert bbox here :
@@ -147,10 +146,9 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
-    # Verify no background class (class 1) is returned
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")  }
 })
 
@@ -168,10 +166,9 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 240, 240)
-    # Verify no background class (class 1) is returned
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 18), info = "model found a dog")  }
 })
 
@@ -189,10 +186,9 @@ test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 360, 360)
-    # Verify no background class (class 1) is returned
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
-    expect_true(all(labels_vec >= 2 & labels_vec <= 91), info = "All labels are in range [2, 91]")
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 18), info = "model found a dog")  }
 })
 

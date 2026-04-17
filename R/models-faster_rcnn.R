@@ -117,16 +117,22 @@ generate_level_anchors <- function(h, w, stride, base_sizes = c(32, 64, 128, 256
   anchors$reshape(orig_shape)
 }
 
-decode_boxes <- function(anchors, deltas) {
+decode_boxes <- function(anchors, deltas, weights = c(10.0, 10.0, 5.0, 5.0)) {
   widths <- anchors[, 3] - anchors[, 1]
   heights <- anchors[, 4] - anchors[, 2]
   ctr_x <- anchors[, 1] + widths / 2
   ctr_y <- anchors[, 2] + heights / 2
 
-  dx <- deltas[, 1]
-  dy <- deltas[, 2]
-  dw <- deltas[, 3]
-  dh <- deltas[, 4]
+  # Apply bbox regression weights (default: 10.0, 10.0, 5.0, 5.0)
+  dx <- deltas[, 1] / weights[1]
+  dy <- deltas[, 2] / weights[2]
+  dw <- deltas[, 3] / weights[3]
+  dh <- deltas[, 4] / weights[4]
+
+  # Clamp dw and dh to prevent numerical instability in exp()
+  bbox_xform_clip <- log(1000.0 / 16.0)  # ~4.135
+  dw <- torch::torch_clamp(dw, max = bbox_xform_clip)
+  dh <- torch::torch_clamp(dh, max = bbox_xform_clip)
 
   pred_ctr_x <- ctr_x + dx * widths
   pred_ctr_y <- ctr_y + dy * heights
@@ -147,14 +153,19 @@ decode_boxes <- function(anchors, deltas) {
 #' Keeps all class predictions before filtering, rather than taking max across
 #' classes first, allowing proper per-class NMS.
 #'
-#' @param class_logits Tensor of shape [N, num_classes] - raw classification scores
-#' @param box_regression Tensor of shape [N, num_classes * 4] - box deltas for each class
+#' @param class_logits Tensor of shape [N, num_classes_with_bg] - raw classification scores including background
+#' @param box_regression Tensor of shape [N, num_classes_with_bg * 4] - box deltas for each class
 #' @param proposals Tensor of shape [N, 4] - proposal boxes in (x1, y1, x2, y2) format
 #' @param image_size Integer vector of length 2: [height, width]
-#' @param num_classes Integer - total number of classes including background
+#' @param num_classes Integer - number of classes excluding background (e.g., 90 for COCO)
 #' @param score_thresh Numeric - minimum score threshold for detections
 #' @param nms_thresh Numeric - NMS IoU threshold
 #' @param detections_per_img Integer - maximum detections to return
+#'
+#' @details
+#' Box regression uses standard Faster R-CNN decoding with weights (10, 10, 5, 5).
+#' Background class (index 1 in class_logits) is removed, returning labels
+#' in range [1, num_classes] which correspond to COCO classes [1=person, 2=bicycle, ..., 90=toothbrush].
 #'
 #' @return List with boxes, labels, scores tensors
 #' @noRd
@@ -164,42 +175,45 @@ postprocess_detections <- function(class_logits, box_regression, proposals,
   device <- class_logits$device
   num_proposals <- proposals$shape[1]
 
-  # Decode boxes for all classes: [N, num_classes, 4]
-  pred_boxes <- box_regression$view(c(num_proposals, num_classes, 4))
+  # class_logits and box_regression include background class
+  # num_classes excludes background, so total classes = num_classes + 1
+  num_classes_with_bg <- num_classes + 1L
+
+  # Decode boxes for all classes: [N, num_classes_with_bg, 4]
+  pred_boxes <- box_regression$view(c(num_proposals, num_classes_with_bg, 4))
 
   # Decode boxes using proposals as anchors (expand proposals for all classes)
-  proposals_expanded <- proposals$unsqueeze(2)$expand(c(num_proposals, num_classes, 4))
+  proposals_expanded <- proposals$unsqueeze(2)$expand(c(num_proposals, num_classes_with_bg, 4))
 
   # Decode for each class
   decoded_boxes <- torch_zeros_like(pred_boxes)
-  for (cls_idx in seq_len(num_classes)) {
+  for (cls_idx in seq_len(num_classes_with_bg)) {
     decoded_boxes[, cls_idx, ] <- decode_boxes(proposals, pred_boxes[, cls_idx, ])
   }
 
   # Clip to image boundaries
   decoded_boxes <- clip_boxes_to_image(decoded_boxes$view(c(-1, 4)), image_size)
-  decoded_boxes <- decoded_boxes$view(c(num_proposals, num_classes, 4))
+  decoded_boxes <- decoded_boxes$view(c(num_proposals, num_classes_with_bg, 4))
 
-  # Apply softmax to get class probabilities: [N, num_classes]
+  # Apply softmax to get class probabilities: [N, num_classes_with_bg]
   pred_scores <- torch::nnf_softmax(class_logits, dim = 2)
 
   # Remove background class (class 1 in 1-based indexing)
-  # Keep classes 2 through num_classes
-  pred_boxes <- decoded_boxes[, 2:num_classes, ]   # [N, num_classes-1, 4]
-  pred_scores <- pred_scores[, 2:num_classes]       # [N, num_classes-1]
+  # Keep classes 2 through num_classes_with_bg
+  pred_boxes <- decoded_boxes[, 2:num_classes_with_bg, ]   # [N, num_classes, 4]
+  pred_scores <- pred_scores[, 2:num_classes_with_bg]       # [N, num_classes]
 
-  num_classes_no_bg <- num_classes - 1L
-
-  # Create labels for each prediction: [num_classes-1]
-  # These are the actual class indices (2, 3, 4, ... num_classes)
-  labels <- torch_arange(2L, num_classes, device = device, dtype = torch_long())
-  # Expand to match scores: [N, num_classes-1]
+  # Create labels for each prediction: [num_classes]
+  # These are the actual class indices (1, 2, 3, ... num_classes)
+  # torch_arange in R is inclusive on both ends
+  labels <- torch_arange(1L, num_classes, device = device, dtype = torch_long())
+  # Expand to match scores: [N, num_classes]
   labels <- labels$view(c(1, -1))$expand_as(pred_scores)
 
   # Flatten everything: treat each (proposal, class) pair as a separate detection
-  boxes <- pred_boxes$reshape(c(-1, 4))           # [N * (num_classes-1), 4]
-  scores <- pred_scores$reshape(c(-1))            # [N * (num_classes-1)]
-  labels <- labels$reshape(c(-1))                 # [N * (num_classes-1)]
+  boxes <- pred_boxes$reshape(c(-1, 4))           # [N * num_classes, 4]
+  scores <- pred_scores$reshape(c(-1))            # [N * num_classes]
+  labels <- labels$reshape(c(-1))                 # [N * num_classes]
 
   # Remove low scoring boxes
   keep <- scores > score_thresh
@@ -348,7 +362,10 @@ roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)
 
 roi_heads_module <-  torch::nn_module(
     "region-of-interest head v2",
-    initialize = function(num_classes = 91) {
+    initialize = function(num_classes = 90) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
+
       # Define box_head with named layers to match expected state dict structure
       self$box_head <- torch::nn_module(
         initialize = function() {
@@ -364,8 +381,8 @@ roi_heads_module <-  torch::nn_module(
 
       self$box_predictor <- torch::nn_module(
         initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+          self$cls_score <- torch::nn_linear(1024, num_classes_with_bg, bias = TRUE)
+          self$bbox_pred <- torch::nn_linear(1024, num_classes_with_bg * 4, bias = TRUE)
         },
         forward = function(x) {
           list(
@@ -386,7 +403,10 @@ roi_heads_module <-  torch::nn_module(
 
 roi_heads_module_v2 <- torch::nn_module(
     "region-of-interest head v2",
-    initialize = function(num_classes = 91) {
+    initialize = function(num_classes = 90) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
+
       # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
       # followed by a final linear layer at index "4".
       block <- function() {
@@ -411,8 +431,8 @@ roi_heads_module_v2 <- torch::nn_module(
       self$box_head <- do.call(nn_sequential, layers)
       self$box_predictor <- torch::nn_module(
         initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+          self$cls_score <- torch::nn_linear(1024, num_classes_with_bg, bias = TRUE)
+          self$bbox_pred <- torch::nn_linear(1024, num_classes_with_bg * 4, bias = TRUE)
         },
         forward = function(x) {
           list(
@@ -910,7 +930,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
-#' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param num_classes Number of output classes excluding background (default: 90 for COCO).
 #' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
 #' @param nms_thresh Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).
 #' @param detections_per_img Integer. Maximum number of detections per image (default: 100).
@@ -1036,7 +1056,7 @@ rpn_model_urls <- list(
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
 #' @export
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
-                                          num_classes = 91,
+                                          num_classes = 90,
                                           score_thresh = 0.05,
                                           nms_thresh = 0.5,
                                           detections_per_img = 100,
@@ -1046,8 +1066,8 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
                             detections_per_img = detections_per_img)
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_resnet50
@@ -1069,7 +1089,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN V2
 #' @export
 model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
-                                             num_classes = 91,
+                                             num_classes = 90,
                                              score_thresh = 0.05,
                                              nms_thresh = 0.5,
                                              detections_per_img = 100,
@@ -1080,8 +1100,8 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
                                nms_thresh = nms_thresh,
                                detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_resnet50_v2
@@ -1120,7 +1140,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
 #' @export
 model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                                     progress = TRUE,
-                                                    num_classes = 91,
+                                                    num_classes = 90,
                                                     score_thresh = 0.05,
                                                     nms_thresh = 0.5,
                                                     detections_per_img = 100,
@@ -1131,8 +1151,8 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                       nms_thresh = nms_thresh,
                                       detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
@@ -1155,7 +1175,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
 #' @export
 model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         progress = TRUE,
-                                                        num_classes = 91,
+                                                        num_classes = 90,
                                                         score_thresh = 0.05,
                                                         nms_thresh = 0.5,
                                                         detections_per_img = 100,
@@ -1166,8 +1186,8 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                       nms_thresh = nms_thresh,
                                       detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320

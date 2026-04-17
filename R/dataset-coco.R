@@ -428,20 +428,111 @@ coco_caption_dataset <- torch::dataset(
 
 #' MS COCO Class Labels
 #'
-#' Utilities for resolving COCO 81 class identifiers to their corresponding
-#' human readable labels. The labels are retrieved from ultralytics source
+#' Utilities for resolving COCO 90 class identifiers to their corresponding
+#' human readable labels. The labels are retrieved from pytorch/vision source to be compliant
+#' with torchvision pretrained models.
 #'
 #' @param class_id Integer vector of 1-based class identifiers.
 #' @return A character vector with the COCO class names
 #' @family class_resolution
 #' @importFrom utils read.delim
 #' @export
-coco_classes <- function(class_id = 1:81) {
-  if (any(class_id > 81)) {
-    cli_warn("MS COCO {.var class_id} cannot be > 81")
+coco_classes <- function(class_id = 1:90) {
+  if (any(class_id > 90)) {
+    cli_warn("MS COCO {.var class_id} cannot be > 90")
   }
-  url <- download_and_cache("https://github.com/ultralytics/ultralytics/raw/refs/heads/main/ultralytics/cfg/datasets/coco.yaml")
-  labels <- c("_background_", read.delim(url, skip = 18, sep = ":", nrows = 80, strip.white = TRUE, header = FALSE)[,2])
+
+  labels <- c("person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush"
+  )
   labels[nzchar(labels)][class_id]
 }
 
