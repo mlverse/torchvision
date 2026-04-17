@@ -9,7 +9,7 @@ test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 90)
   expect_s3_class(model, "nn_module")
   expect_true(!is.null(model$backbone))
   expect_true(!is.null(model$rpn))
@@ -172,9 +172,8 @@ test_that("mask_rcnn pretrained infer correctly", {
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
-    # Verify no background class (class 1) is returned
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")
     # Verify masks match number of detections
@@ -195,9 +194,8 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
-    # Verify no background class (class 1) is returned
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
-    expect_false(any(labels_vec == 1), info = "Background class (1) is not in detections")
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
     expect_true(any(labels_vec == 17), info = "model found a cat")
     # Verify masks match number of detections
@@ -212,14 +210,14 @@ test_that("mask_head_module initializes correctly", {
   skip_if_not(torch::torch_is_installed())
 
   mask_head <- mask_head_module()
-  mask_rcnn_pred <- mask_rcnn_predictor(num_classes = 91)
+  mask_rcnn_pred <- mask_rcnn_predictor(num_classes = 90)
   expect_is(mask_head, "nn_module")
 
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- input %>% mask_head() %>% mask_rcnn_pred()
 
-  # Output should be (2, 91, 28, 28)
+  # Output should be (2, 91, 28, 28) - 90 classes + 1 background
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
@@ -227,14 +225,14 @@ test_that("mask_head_module_v2 initializes correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  mask_head <- mask_head_module_v2(num_classes = 91)
+  mask_head <- mask_head_module_v2(num_classes = 90)
   expect_s3_class(mask_head, "nn_module")
 
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- mask_head(input)
 
-  # Output should be (2, 91, 28, 28)
+  # Output should be (2, 91, 28, 28) - 90 classes + 1 background
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 

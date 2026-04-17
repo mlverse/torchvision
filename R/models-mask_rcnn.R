@@ -28,11 +28,14 @@ mask_head_module <- torch::nn_module(
 mask_rcnn_predictor <- torch::nn_module(
     "mask_rcnn_predictor",
     initialize = function(num_classes = 90) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
+
       # Deconvolution layer to upsample from 14x14 to 28x28
       self$conv5_mask <- nn_conv_transpose2d(256, 256, kernel_size = 2, stride = 2)
 
       # Final 1x1 conv for class-specific mask logits
-      self$mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
+      self$mask_fcn_logits <- nn_conv2d(256, num_classes_with_bg, kernel_size = 1)
     },
     forward = function(x) {
       x <- nnf_relu(self$conv5_mask(x))
@@ -44,6 +47,9 @@ mask_rcnn_predictor <- torch::nn_module(
 mask_head_module_v2 <- torch::nn_module(
     "mask_head_v2",
     initialize = function(num_classes = 90) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
+
       # Convolutional blocks with batch normalization
       conv_block <- function() {
         nn_sequential(
@@ -65,7 +71,7 @@ mask_head_module_v2 <- torch::nn_module(
       )
 
       # Final 1x1 conv for class-specific mask logits
-      self$mask_predictor.mask_fcn_logits <- nn_conv2d(256, num_classes, kernel_size = 1)
+      self$mask_predictor.mask_fcn_logits <- nn_conv2d(256, num_classes_with_bg, kernel_size = 1)
     },
     forward = function(x) {
       x <- self$mask_head.0(x)
@@ -498,7 +504,7 @@ maskrcnn_model_v2 <- torch::nn_module(
 #'
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
-#' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param num_classes Number of output classes excluding background (default: 90 for COCO).
 #' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
 #' @param nms_thresh Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).
 #' @param detections_per_img Integer. Maximum number of detections per image (default: 100).
@@ -599,8 +605,8 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                          nms_thresh = nms_thresh,
                          detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 90.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- mask_rcnn_model_urls$maskrcnn_resnet50
@@ -633,8 +639,8 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
                             nms_thresh = nms_thresh,
                             detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 90.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- mask_rcnn_model_urls$maskrcnn_resnet50_v2
