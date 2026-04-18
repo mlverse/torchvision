@@ -26,7 +26,7 @@ model_convnext_base_detection(
 )
 }
 \arguments{
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{pretrained_backbone}{Logical. If \code{TRUE}, loads ImageNet-pretrained
 ConvNeXt backbone weights. Default: \code{FALSE}.}

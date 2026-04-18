@@ -152,10 +152,10 @@ decode_boxes <- function(anchors, deltas, weights = c(10.0, 10.0, 5.0, 5.0)) {
 #' Keeps all class predictions before filtering, rather than taking max across
 #' classes first, allowing proper per-class NMS.
 #'
-#' @param class_logits Tensor of shape [N, num_classes_with_bg] - raw classification scores including background
-#' @param box_regression Tensor of shape [N, num_classes_with_bg * 4] - box deltas for each class
-#' @param proposals Tensor of shape [N, 4] - proposal boxes in (x1, y1, x2, y2) format
-#' @param image_size Integer vector of length 2: [height, width]
+#' @param class_logits Tensor of shape \[N, num_classes_with_bg\] - raw classification scores including background
+#' @param box_regression Tensor of shape \[N, num_classes_with_bg * 4\] - box deltas for each class
+#' @param proposals Tensor of shape \[N, 4\] - proposal boxes in (x1, y1, x2, y2) format
+#' @param image_size Integer vector of length 2: \[height, width\]
 #' @param num_classes Integer - number of classes excluding background (e.g., 90 for COCO)
 #' @param score_thresh Numeric - minimum score threshold for detections
 #' @param nms_thresh Numeric - NMS IoU threshold
@@ -164,7 +164,7 @@ decode_boxes <- function(anchors, deltas, weights = c(10.0, 10.0, 5.0, 5.0)) {
 #' @details
 #' Box regression uses standard Faster R-CNN decoding with weights (10, 10, 5, 5).
 #' Background class (index 1 in class_logits) is removed, returning labels
-#' in range [1, num_classes] which correspond to COCO classes [1=person, 2=bicycle, ..., 90=toothbrush].
+#' in range \[1, num_classes\] which correspond to COCO classes \[1=person, 2=bicycle, ..., 90=toothbrush\].
 #'
 #' @return List with boxes, labels, scores tensors
 #' @noRd

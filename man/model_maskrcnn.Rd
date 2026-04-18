@@ -9,7 +9,7 @@
 model_maskrcnn_resnet50_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -19,7 +19,7 @@ model_maskrcnn_resnet50_fpn(
 model_maskrcnn_resnet50_fpn_v2(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -31,7 +31,7 @@ model_maskrcnn_resnet50_fpn_v2(
 
 \item{progress}{Logical. Show progress bar during download (unused).}
 
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
 
