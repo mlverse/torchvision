@@ -116,22 +116,21 @@ generate_level_anchors <- function(h, w, stride, base_sizes = c(32, 64, 128, 256
   anchors$reshape(orig_shape)
 }
 
-decode_boxes <- function(anchors, deltas, weights = c(10.0, 10.0, 5.0, 5.0)) {
+decode_boxes <- function(anchors, deltas, weights = c(10, 10, 5, 5)) {
   widths <- anchors[, 3] - anchors[, 1]
   heights <- anchors[, 4] - anchors[, 2]
   ctr_x <- anchors[, 1] + widths / 2
   ctr_y <- anchors[, 2] + heights / 2
 
-  # Apply bbox regression weights (default: 10.0, 10.0, 5.0, 5.0)
+  # Apply bbox regression weights (default: 10, 10, 5, 5)
   dx <- deltas[, 1] / weights[1]
   dy <- deltas[, 2] / weights[2]
   dw <- deltas[, 3] / weights[3]
   dh <- deltas[, 4] / weights[4]
 
-  # Clamp dw and dh to prevent numerical instability in exp()
-  bbox_xform_clip <- log(1000.0 / 16.0)  # ~4.135
-  dw <- torch::torch_clamp(dw, max = bbox_xform_clip)
-  dh <- torch::torch_clamp(dh, max = bbox_xform_clip)
+  # Clamp dw and dh to prevent numerical instability in exp() to log(1000 / 16)  # ~4.135
+  dw <- torch::torch_clamp(dw, max = 4.135)
+  dh <- torch::torch_clamp(dh, max = 4.135)
 
   pred_ctr_x <- ctr_x + dx * widths
   pred_ctr_y <- ctr_y + dy * heights
@@ -273,11 +272,11 @@ generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx
     if (a == 15) {
       base_sizes <- c(32, 64, 128, 256, 512)
     } else if (a == 3) {
-      base_sizes <- c(4.0 * strides[[i]])
+      base_sizes <- c(4 * strides[[i]])
     } else {
       value_error("Unexpected number of anchors: {a}. Expected 3 or 15.")
     }
-    anchors <- generate_level_anchors(h, w, strides[[i]], base_sizes = base_sizes, aspect_ratios = c(0.5, 1.0, 2.0), device = device)
+    anchors <- generate_level_anchors(h, w, strides[[i]], base_sizes = base_sizes, aspect_ratios = c(0.5, 1, 2), device = device)
     anchors <- anchors$reshape(c(-1, 4))  # [H*W*A, 4]
 
     objectness <- objectness$sigmoid()$flatten() ## [H*W*A]
