@@ -24,13 +24,12 @@ rpn_head <- torch::nn_module(
 rpn_head_v2 <- torch::nn_module(
     "rpn_head_v2",
     initialize = function(in_channels, num_anchors = 3) {
-      # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
-      # blocks with bias disabled on the convolutions. Mirror that layout so
-      # the parameter names and shapes line up with the weight file.
+      # PyTorch V2 uses Conv2dNormActivation with norm_layer=None, which creates
+      # Conv2d with bias=True, NO batch norm, and ReLU activation.
+      # This matches torchvision.ops.misc.Conv2dNormActivation behavior when norm_layer=None.
       block <- function() {
         nn_sequential(
-          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = FALSE),
-          nn_batch_norm2d(in_channels),
+          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
           nn_relu()
         )
       }
@@ -361,7 +360,7 @@ roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)
 }
 
 roi_heads_module <-  torch::nn_module(
-    "region-of-interest head v2",
+    "region-of-interest head",
     initialize = function(num_classes = 90) {
       # num_classes excludes background, but predictor needs background + all classes
       num_classes_with_bg <- num_classes + 1L
@@ -400,35 +399,45 @@ roi_heads_module <-  torch::nn_module(
     }
   )
 
-
-roi_heads_module_v2 <- torch::nn_module(
+roi_heads_module_v2 <-  torch::nn_module(
     "region-of-interest head v2",
-    initialize = function(num_classes = 90) {
+    initialize = function(num_classes = 90, in_channels = 256) {
       # num_classes excludes background, but predictor needs background + all classes
       num_classes_with_bg <- num_classes + 1L
 
-      # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
-      # followed by a final linear layer at index "4".
-      block <- function() {
-        nn_sequential(
-          nn_linear(1024, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        )
-      }
+      # V2 uses FastRCNNConvFCHead: 4 conv layers + 1 FC layer
+      # PyTorch: FastRCNNConvFCHead((256, 7, 7), [256, 256, 256, 256], [1024], norm_layer=BatchNorm2d)
+      self$box_head <- torch::nn_module(
+        initialize = function() {
+          # 4 Conv2d + BatchNorm + ReLU blocks
+          conv_block <- function(in_ch, out_ch) {
+            nn_sequential(
+              nn_conv2d(in_ch, out_ch, kernel_size = 3, padding = 1, bias = TRUE),
+              nn_batch_norm2d(out_ch),
+              nn_relu()
+            )
+          }
+          self[[0]] <- conv_block(in_channels, 256)
+          self[[1]] <- conv_block(256, 256)
+          self[[2]] <- conv_block(256, 256)
+          self[[3]] <- conv_block(256, 256)
+          # Flatten happens in forward()
+          # FC layer: 256 * 7 * 7 = 12544 -> 1024
+          self[[4]] <- nn_linear(256 * 7 * 7, 1024, bias = TRUE)
+        },
+        forward = function(x) {
+          # x is [N, 256, 7, 7]
+          x <- self[[0]](x)
+          x <- self[[1]](x)
+          x <- self[[2]](x)
+          x <- self[[3]](x)
+          x <- x$flatten(start_dim = 1)  # [N, 256*7*7]
+          x <- self[[4]](x)              # [N, 1024]
+          x <- nnf_relu(x)
+          x
+        }
+      )()
 
-      layers <- list(
-        nn_sequential(
-          nn_linear(256 * 7 * 7, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        block(),
-        block(),
-        block(),
-        nn_linear(1024, 1024, bias = TRUE)
-      )
-      self$box_head <- do.call(nn_sequential, layers)
       self$box_predictor <- torch::nn_module(
         initialize = function() {
           self$cls_score <- torch::nn_linear(1024, num_classes_with_bg, bias = TRUE)
@@ -443,8 +452,9 @@ roi_heads_module_v2 <- torch::nn_module(
       )()
     },
     forward = function(features, proposals, batch_idx) {
-      pooled <- roi_align(features[[1]], proposals, batch_idx)
-      x <- self$box_head(pooled$flatten(start_dim = 2))
+      feature_maps <- features[c("p2", "p3", "p4", "p5")]
+      pooled <- roi_align(feature_maps[[1]], proposals, batch_idx)
+      x <- self$box_head(pooled)
       self$box_predictor(x)
     }
   )
@@ -969,21 +979,6 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'   transform_normalize(norm_mean, norm_std)
 #' batch_normalized <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #'
-#' # ResNet-50 FPN
-#' model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5,
-#'                                         nms_thresh = 0.8, detections_per_img = 3)
-#' model$eval()
-#' torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
-#'
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- coco_classes(as.integer(pred$labels[keep]))
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
-#'
 #' # ResNet-50 FPN V2
 #' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
 #' model$eval()
@@ -997,26 +992,8 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'   tensor_image_browse(boxed)
 #' }
 #'
-#' # MobileNet V3 Large FPN
-#' batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
-#'
-#' model <- model_fasterrcnn_mobilenet_v3_large_fpn(
-#'   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.9, detections_per_img = 5
-#' )
-#' model$eval()
-#' torch::with_no_grad({
-#'   pred <- model(batch)$detections[[1]]
-#' })
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- coco_classes(as.integer(pred$labels[keep]))
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
-#'
 #' # MobileNet V3 Large 320 FPN
+#' batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(
 #'   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
 #' )

@@ -353,7 +353,10 @@ maskrcnn_model <- torch::nn_module(
 
           for (i in seq_len(n_kept)) {
             class_idx <- as.integer(final_labels[i]$item())
-            final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+            # mask_logits has channels [background, class1, ..., class90]
+            # labels are [1, 2, ..., 90], so we need to skip channel 1 (background)
+            # In 1-based R indexing: label 1 should access channel 2 (class 1)
+            final_masks[i, , ] <- mask_logits[i, class_idx + 1L, , ]
           }
 
           # Apply sigmoid to get probabilities
@@ -474,7 +477,10 @@ maskrcnn_model_v2 <- torch::nn_module(
 
           for (i in seq_len(n_kept)) {
             class_idx <- as.integer(final_labels[i]$item())
-            final_masks[i, , ] <- mask_logits[i, class_idx, , ]
+            # mask_logits has channels [background, class1, ..., class90]
+            # labels are [1, 2, ..., 90], so we need to skip channel 1 (background)
+            # In 1-based R indexing: label 1 should access channel 2 (class 1)
+            final_masks[i, , ] <- mask_logits[i, class_idx + 1L, , ]
           }
 
           # Apply sigmoid to get probabilities
@@ -653,6 +659,9 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
     }
 
     state_dict <- torch::load_state_dict(state_dict_path)
+
+    # Rename state dict keys to match model structure
+    state_dict <- .rename_maskrcnn_state_dict_v2(state_dict)
 
     # Load with flexible matching (similar to fasterrcnn_v2)
     model_state <- model$state_dict()
