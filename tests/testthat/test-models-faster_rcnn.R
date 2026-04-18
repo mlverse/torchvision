@@ -4,7 +4,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
   input <- base_loader("assets/class/cat/cat.0.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(200,200)) %>% torch_unsqueeze(1)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_is(out$detections, "list")
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
@@ -15,7 +15,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn", {
 
 
   model <- model_fasterrcnn_resnet50_fpn(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -32,7 +32,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
   input <- base_loader("assets/class/cat/cat.1.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -42,7 +42,7 @@ test_that("tests for non-pretrained model_fasterrcnn_resnet50_fpn_v2", {
 
 
   model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -59,7 +59,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   input <- base_loader("assets/class/cat/cat.2.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -69,7 +69,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
 
 
   model <- model_fasterrcnn_resnet50_fpn_v2(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -86,7 +86,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn"
   input <- base_loader("assets/class/cat/cat.3.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>% torch_unsqueeze(1)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -95,7 +95,7 @@ test_that("tests for non-pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn"
   expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
 
   model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(num_classes = 10, score_thresh = 0.5, nms_thresh = 0.8, detections_per_img = 3)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$boxes)
@@ -110,15 +110,21 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn", {
 
   input <- base_loader("assets/class/cat/cat.4.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>%
-    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %<% torch_unsqueeze(1)
+    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>% torch_unsqueeze(1)
   model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.35, nms_thresh = 0.9, detections_per_img = 10)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   expect_tensor(out$detections[[1]]$boxes)
+  # Verify background class is removed, labels should be COCO IDs [1, 90]
+  if (out$detections[[1]]$labels$shape[1] > 0) {
+    labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")
+  }
   # we cannot succesfully assert bbox here :
   #   expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
   #
@@ -130,50 +136,59 @@ test_that("tests for pretrained model_fasterrcnn_resnet50_fpn_v2", {
 
   input <- base_loader("assets/class/cat/cat.4.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(180,180)) %>%
-    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %<% torch_unsqueeze(1)
+    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>% torch_unsqueeze(1)
   model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.4, nms_thresh = 0.9, detections_per_img = 10)
   model$eval()
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 180, 180)
-  }
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
+    labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")  }
 })
 
 test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_fpn", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.9, detections_per_img = 10)
+  model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE, detections_per_img = 10)
   input <- base_loader("assets/class/dog/dog.0.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(240,240)) %>% torch_unsqueeze(1)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 240, 240)
-  }
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
+    labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 18), info = "model found a dog")  }
 })
 
 test_that("tests for pretrained model_fasterrcnn_mobilenet_v3_large_320_fpn", {
   skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
           "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
 
-  model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 10)
+  model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE, detections_per_img = 10)
   input <- base_loader("assets/class/dog/dog.1.jpg") %>%
     transform_to_tensor() %>% transform_resize(c(360,360)) %>% torch_unsqueeze(1)
-  out <- model(input)
+  torch::with_no_grad({out <- model(input)})
   expect_named(out, c("features","detections"))
   expect_named(out$detections[[1]], c("boxes","labels", "scores"))
   expect_tensor(out$detections[[1]]$labels)
   expect_tensor(out$detections[[1]]$scores)
   if (out$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(out$detections[[1]]$boxes, 360, 360)
-  }
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
+    labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 18), info = "model found a dog")  }
 })
 

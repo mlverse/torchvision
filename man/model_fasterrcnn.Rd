@@ -11,7 +11,7 @@
 model_fasterrcnn_resnet50_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -21,7 +21,7 @@ model_fasterrcnn_resnet50_fpn(
 model_fasterrcnn_resnet50_fpn_v2(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -31,7 +31,7 @@ model_fasterrcnn_resnet50_fpn_v2(
 model_fasterrcnn_mobilenet_v3_large_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -41,7 +41,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn(
 model_fasterrcnn_mobilenet_v3_large_320_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -53,7 +53,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 
 \item{progress}{Logical. Show progress bar during download (unused).}
 
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
 
@@ -104,8 +104,8 @@ Input images should be \code{torch_tensor}s of shape
 \examples{
 \dontrun{
 library(magrittr)
-norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
-# https://pytorch.org/vision/stable/models.html
+# ImageNet normalization constants, see https://pytorch.org/vision/stable/models.html
+norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 # Use a publicly available image of an animal
 url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
@@ -118,67 +118,29 @@ input <- image  \%>\%
   transform_normalize(norm_mean, norm_std)
 batch_normalized <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 
-# ResNet-50 FPN
-model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5,
-                                        nms_thresh = 0.8, detections_per_img = 3)
-model$eval()
-torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
-
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_classes(as.integer(pred$labels[keep]))
-if (num_boxes > 0) {
-  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-  tensor_image_browse(boxed)
-}
-
 # ResNet-50 FPN V2
-model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, , detections_per_img = 5 )
 model$eval()
 torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_classes(as.integer(pred$labels[keep]))
-if (num_boxes > 0) {
-  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-  tensor_image_browse(boxed)
-}
+labels <- coco_classes(as.integer(pred$labels))
 
-# MobileNet V3 Large FPN
-batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
-
-model <- model_fasterrcnn_mobilenet_v3_large_fpn(
-  pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.9, detections_per_img = 5
-)
-model$eval()
-torch::with_no_grad({
-  pred <- model(batch)$detections[[1]]
-})
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_classes(as.integer(pred$labels[keep]))
-if (num_boxes > 0) {
-  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-  tensor_image_browse(boxed)
-}
+# Visualize boxes
+labels <- coco_classes(as.integer(pred$labels))
+boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+tensor_image_browse(boxed)
 
 # MobileNet V3 Large 320 FPN
+batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(
   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
 )
 model$eval()
 torch::with_no_grad({pred <- model(batch)$detections[[1]]})
-num_boxes <- as.integer(pred$boxes$size()[1])
-keep <- seq_len(min(5, num_boxes))
-boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-labels <- coco_classes(as.integer(pred$labels[keep]))
-if (num_boxes > 0) {
-  boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-  tensor_image_browse(boxed)
-}
+
+# Visualize boxes
+labels <- coco_classes(as.integer(pred$labels))
+boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+tensor_image_browse(boxed)
 }
 
 }

@@ -9,7 +9,7 @@
 model_maskrcnn_resnet50_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -19,7 +19,7 @@ model_maskrcnn_resnet50_fpn(
 model_maskrcnn_resnet50_fpn_v2(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -31,7 +31,7 @@ model_maskrcnn_resnet50_fpn_v2(
 
 \item{progress}{Logical. Show progress bar during download (unused).}
 
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
 
@@ -93,6 +93,7 @@ Returns a list with:
 \examples{
 \dontrun{
 library(magrittr)
+# ImageNet normalization constants, see https://pytorch.org/vision/stable/models.html
 norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 
@@ -108,21 +109,15 @@ input <- img \%>\%
 batch <- input$unsqueeze(1)
 
 # Mask R-CNN ResNet-50 FPN
-model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE)
+model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, , detections_per_img = 5)
 model$eval()
-pred <- model(batch)$detections
 
-# Access predictions
-boxes <- pred$boxes
-labels <- pred$labels
-scores <- pred$scores
-masks <- pred$masks  # Segmentation masks (N, 28, 28)
+torch::with_no_grad({pred <- model(batch)$detections[[1]]})
 
 # Visualize boxes
-if (boxes$size(1) > 0) {
-  boxed <- draw_bounding_boxes(input, boxes[1:5, ])
-  tensor_image_browse(boxed)
-}
+labels <- coco_classes(as.integer(pred$labels))
+boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+tensor_image_browse(boxed)
 }
 
 }

@@ -3,6 +3,7 @@
 ## Breaking changes
 
 * Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50% (@Chandraveersingh1717, #280).
+* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (@318).
 * Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
@@ -24,8 +25,9 @@
 * Added `vggface2_dataset()` for loading the VGGFace2 dataset (@DerrickUnleashed, #238).
 * Added `moth` dataset to `rf100_biology_collection()` and `currency` and `wine_label` to `rf100_document_collection()` (#274).
 
-## Minor bug fixes and improvements
+## Bug fixes and improvements
 
+* `model_maskrcnn_*()` and `model_fasterrcnn_*()` now match the pytorch implementation (#318).
 * `transform_` now correctly manage batched 4D torch tensors and 4D arrays (#313).
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
 * `transform_affine()`, `transform_rotate()` and random derivatives now use `interpolation` and `fill` parameter in favor of `resample`and `fillcolor` (@Chandraveersingh1717, #299).
