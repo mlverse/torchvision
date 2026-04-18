@@ -89,6 +89,8 @@
 <div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
 <ul><li>Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation) reducing memory usage by ~50% (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>).</li>
+<li>
+<code><a href="../reference/coco_classes.html">coco_classes()</a></code> is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (<a href="https://github.com/318" class="external-link">@318</a>).</li>
 <li>Renamed <code>$categories</code> to <code>$classes</code> for consistency (character vector of class names; old attribute is deprecated with a warning) (<a href="https://github.com/mlverse/torchvision/issues/300" class="external-link">#300</a>).</li>
 </ul></div>
 <div class="section level3">
@@ -111,8 +113,10 @@
 <li>Added <code>moth</code> dataset to <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code> and <code>currency</code> and <code>wine_label</code> to <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/274" class="external-link">#274</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="minor-bug-fixes-and-improvements-development-version">Minor bug fixes and improvements<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-and-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code>model_maskrcnn_*()</code> and <code>model_fasterrcnn_*()</code> now match the pytorch implementation (<a href="https://github.com/mlverse/torchvision/issues/318" class="external-link">#318</a>).</li>
+<li>
 <code>transform_</code> now correctly manage batched 4D torch tensors and 4D arrays (<a href="https://github.com/mlverse/torchvision/issues/313" class="external-link">#313</a>).</li>
 <li>
 <code>mnist_datataset()</code> and derivatives now correctly return item x() values with a 1-channel dimension (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/307" class="external-link">#307</a>).</li>
