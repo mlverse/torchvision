@@ -93,6 +93,7 @@ Returns a list with:
 \examples{
 \dontrun{
 library(magrittr)
+# ImageNet normalization constants, see https://pytorch.org/vision/stable/models.html
 norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 
@@ -108,21 +109,15 @@ input <- img \%>\%
 batch <- input$unsqueeze(1)
 
 # Mask R-CNN ResNet-50 FPN
-model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE)
+model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, , detections_per_img = 5)
 model$eval()
-pred <- model(batch)$detections
 
-# Access predictions
-boxes <- pred$boxes
-labels <- pred$labels
-scores <- pred$scores
-masks <- pred$masks  # Segmentation masks (N, 28, 28)
+torch::with_no_grad({pred <- model(batch)$detections[[1]]})
 
 # Visualize boxes
-if (boxes$size(1) > 0) {
-  boxed <- draw_bounding_boxes(input, boxes[1:5, ])
-  tensor_image_browse(boxed)
-}
+labels <- coco_classes(as.integer(pred$labels))
+boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+tensor_image_browse(boxed)
 }
 
 }
