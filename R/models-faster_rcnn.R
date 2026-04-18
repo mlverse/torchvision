@@ -409,7 +409,6 @@ roi_heads_module_v2 <-  torch::nn_module(
       # PyTorch: FastRCNNConvFCHead((256, 7, 7), [256, 256, 256, 256], [1024], norm_layer=BatchNorm2d)
       self$box_head <- torch::nn_module(
         initialize = function() {
-          # 4 Conv2d + BatchNorm + ReLU blocks
           conv_block <- function(in_ch, out_ch) {
             nn_sequential(
               nn_conv2d(in_ch, out_ch, kernel_size = 3, padding = 1, bias = TRUE),
@@ -417,22 +416,22 @@ roi_heads_module_v2 <-  torch::nn_module(
               nn_relu()
             )
           }
-          self[[0]] <- conv_block(in_channels, 256)
-          self[[1]] <- conv_block(256, 256)
-          self[[2]] <- conv_block(256, 256)
-          self[[3]] <- conv_block(256, 256)
-          # Flatten happens in forward()
-          # FC layer: 256 * 7 * 7 = 12544 -> 1024
-          self[[4]] <- nn_linear(256 * 7 * 7, 1024, bias = TRUE)
+          # State dict expects numeric indices: 0, 1, 2, 3, 4
+          # Use character names that will be accessed as self[["0"]], etc.
+          self[["0"]] <- conv_block(in_channels, 256)
+          self[["1"]] <- conv_block(256, 256)
+          self[["2"]] <- conv_block(256, 256)
+          self[["3"]] <- conv_block(256, 256)
+          self[["4"]] <- nn_linear(256 * 7 * 7, 1024, bias = TRUE)
         },
         forward = function(x) {
           # x is [N, 256, 7, 7]
-          x <- self[[0]](x)
-          x <- self[[1]](x)
-          x <- self[[2]](x)
-          x <- self[[3]](x)
-          x <- x$flatten(start_dim = 1)  # [N, 256*7*7]
-          x <- self[[4]](x)              # [N, 1024]
+          x <- self[["0"]](x)
+          x <- self[["1"]](x)
+          x <- self[["2"]](x)
+          x <- self[["3"]](x)
+          x <- x$flatten(start_dim = 2)  # [N, 256*7*7]
+          x <- self[["4"]](x)            # [N, 1024]
           x <- nnf_relu(x)
           x
         }
