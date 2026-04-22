@@ -17,7 +17,7 @@ i.e, if height > width, then image will be rescaled to
 
 \item{interpolation}{(int, optional) Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 }
 \description{
 The image can be a Magic Image or a torch Tensor, in which case it is

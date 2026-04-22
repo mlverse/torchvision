@@ -28,7 +28,7 @@ ratio cropped.}
 
 \item{interpolation}{(int, optional) Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 }
 \description{
 Crop the given image to a random size and aspect ratio. The image can be a
