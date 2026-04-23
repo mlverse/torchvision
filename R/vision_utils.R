@@ -306,13 +306,11 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'
 #' @return torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation masks drawn on top.
 #'
-#' @examples
-#' if (torch::torch_is_installed()) {
+#' @examplesIf torch::torch_is_installed() && rlang::is_installed("magick")
 #' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 #' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
 #' masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
 #' tensor_image_browse(masked_image)
-#' }
 #' @family image display
 #' @export
 draw_segmentation_masks <- function(x, ...) {

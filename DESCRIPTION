@@ -1,39 +1,26 @@
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
-Version: 0.8.0.9000
+Version: 0.9.0
 Authors@R: c(
-    person(given = "Daniel",
-           family = "Falbel",
-           role = c("aut", "cre"),
-           email = "daniel@posit.co"
-           ),
-    person(given = "Christophe",
-           family = "Regouby",
-           role = c("ctb"),
-           email = "christophe.regouby@free.fr"
-           ),
-    person(given = "Akanksha", 
-           family = "Koshti", 
-           role = c("ctb")),
-    person(given = "Derrick",
-           family = "Richard",
-           role = c("ctb"),
-           email = "derrickrds@gmail.com"
-           ),
-    person(given = "ANAMASGARD",
-           role = c("ctb")
-           ),
-    person(given = "Chandraveer",
-           family = "Singh",
-           role = c("ctb"),
-           email = "chandraveersingh1717@gmail.com"
-           ),
-    person(family = "RStudio", role = c("cph"))
+    person("Tomasz", "Kalinowski", role = c("ctb", "cre"),
+           email = "tomasz@posit.co"),
+    person("Daniel", "Falbel", role = c("aut", "cph"),
+           email = "dfalbel@gmail.com"),
+    person("Christophe", "Regouby", role = c("ctb"),
+           email = "christophe.regouby@free.fr"),
+    person("Akanksha", "Koshti", role = c("ctb")),
+    person("Derrick", "Richard", role = c("ctb"),
+           email = "derrickrds@gmail.com"),
+    person("ANAMASGARD", role = c("ctb")),
+    person("Chandraveer", "Singh", role = c("ctb"),
+           email = "chandraveersingh1717@gmail.com"),
+    person("Posit Software, PBC", role = c("cph", "fnd"),
+           comment = c(ROR = "03wc8by49"))
     )
 Description: Provides access to datasets, models and preprocessing
     facilities for deep learning with images. Integrates seamlessly
-    with the 'torch' package and it's 'API' borrows heavily from
-    'PyTorch' vision package.
+    with the 'torch' package and its API borrows heavily from
+    the 'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd"))
