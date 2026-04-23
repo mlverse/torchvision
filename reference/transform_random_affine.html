@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -51,6 +51,12 @@
     </li>
     <li>
       <a href="../articles/examples/texture-nca.html">texture-nca</a>
+    </li>
+    <li>
+      <a href="../articles/examples/fcnresnet.html">fcnresnet</a>
+    </li>
+    <li>
+      <a href="../articles/examples/keypoints.html">keypoints</a>
     </li>
   </ul></li>
 <li>
@@ -90,8 +96,10 @@
 <span>  translate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shear <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  resample <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  fillcolor <span class="op">=</span> <span class="fl">0</span></span>
+<span>  interpolation <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  fill <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">resample</span>,</span>
+<span>  <span class="va">fillcolor</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -134,30 +142,36 @@ shear in <code>(shear[1], shear[2])</code> and y-axis shear in <code>(shear[3], 
 will be applied. Will not apply shear by default.</p></dd>
 
 
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
+<dd><p>(int or character, optional): Interpolation mode.
+Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.</p></dd>
+
+
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
+<dd><p>(tuple or int): Fill color for the area outside the transform.
+Default is 0. This option is not supported for Tensor input.</p></dd>
+
+
 <dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
-<dd><p>(int, optional): An optional resampling filter. See interpolation
-modes.</p></dd>
+<dd><p>Deprecated. Use interpolation instead.</p></dd>
 
 
 <dt id="arg-fillcolor">fillcolor<a class="anchor" aria-label="anchor" href="#arg-fillcolor"></a></dt>
-<dd><p>(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow&gt;=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.</p></dd>
+<dd><p>Deprecated. Use fill instead.</p></dd>
 
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other random_transforms:
-<code><a href="transform_color_jitter.html">transform_color_jitter</a>()</code>,
-<code><a href="transform_random_crop.html">transform_random_crop</a>()</code>,
-<code><a href="transform_random_erasing.html">transform_random_erasing</a>()</code>,
-<code><a href="transform_random_grayscale.html">transform_random_grayscale</a>()</code>,
-<code><a href="transform_random_horizontal_flip.html">transform_random_horizontal_flip</a>()</code>,
-<code><a href="transform_random_perspective.html">transform_random_perspective</a>()</code>,
-<code><a href="transform_random_resized_crop.html">transform_random_resized_crop</a>()</code>,
-<code><a href="transform_random_rotation.html">transform_random_rotation</a>()</code>,
-<code><a href="transform_random_vertical_flip.html">transform_random_vertical_flip</a>()</code></p></div>
+<code><a href="transform_color_jitter.html">transform_color_jitter()</a></code>,
+<code><a href="transform_random_crop.html">transform_random_crop()</a></code>,
+<code><a href="transform_random_erasing.html">transform_random_erasing()</a></code>,
+<code><a href="transform_random_grayscale.html">transform_random_grayscale()</a></code>,
+<code><a href="transform_random_horizontal_flip.html">transform_random_horizontal_flip()</a></code>,
+<code><a href="transform_random_perspective.html">transform_random_perspective()</a></code>,
+<code><a href="transform_random_resized_crop.html">transform_random_resized_crop()</a></code>,
+<code><a href="transform_random_rotation.html">transform_random_rotation()</a></code>,
+<code><a href="transform_random_vertical_flip.html">transform_random_vertical_flip()</a></code></p></div>
     </div>
 
   </div>
@@ -168,11 +182,11 @@ for the area outside the transform in the output image is always 0.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Tomasz Kalinowski, Daniel Falbel, Posit Software, PBC.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>

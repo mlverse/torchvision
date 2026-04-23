@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -51,6 +51,12 @@
     </li>
     <li>
       <a href="../articles/examples/texture-nca.html">texture-nca</a>
+    </li>
+    <li>
+      <a href="../articles/examples/fcnresnet.html">fcnresnet</a>
+    </li>
+    <li>
+      <a href="../articles/examples/keypoints.html">keypoints</a>
     </li>
   </ul></li>
 <li>
@@ -151,7 +157,7 @@ but deviates in a few key aspects due to dataset availability and R API conventi
 The <code>10fold</code> split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.</p></li>
 <li><p>The <code>split</code> parameter in R controls which version of the dataset to use: <code>"original"</code> (unaligned) or <code>"funneled"</code> (aligned using funneling).
 The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.</p></li>
-<li><p>The dataset is downloaded from <a href="https://figshare.com/authors/_/3118605" class="external-link">Figshare</a>,
+<li><p>The dataset is downloaded from Figshare,
 which hosts the same files referenced in <code>scikit-learn</code>'s dataset utilities.</p></li>
 <li><p><code>lfw_people_dataset</code>: 13,233 images across multiple identities (using either <code>"original"</code> or <code>"funneled"</code> splits)</p></li>
 <li><p><code>lfw_pairs_dataset</code>:</p><ul><li><p>Training split (<code>train = TRUE</code>): 2,200 image pairs</p></li>
@@ -162,18 +168,19 @@ which hosts the same files referenced in <code>scikit-learn</code>'s dataset uti
     <h2>See also</h2>
     <div class="dont-index"><p>Other classification_dataset:
 <code><a href="caltech_dataset.html">caltech_dataset</a></code>,
-<code><a href="cifar_datasets.html">cifar10_dataset</a>()</code>,
-<code><a href="eurosat_dataset.html">eurosat_dataset</a>()</code>,
-<code><a href="fer_dataset.html">fer_dataset</a>()</code>,
-<code><a href="fgvc_aircraft_dataset.html">fgvc_aircraft_dataset</a>()</code>,
-<code><a href="flowers102_dataset.html">flowers102_dataset</a>()</code>,
-<code><a href="image_folder_dataset.html">image_folder_dataset</a>()</code>,
-<code><a href="mnist_dataset.html">mnist_dataset</a>()</code>,
-<code><a href="oxfordiiitpet_dataset.html">oxfordiiitpet_dataset</a>()</code>,
-<code><a href="places365_dataset.html">places365_dataset</a>()</code>,
-<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset</a>()</code>,
-<code><a href="whoi_plankton_dataset.html">whoi_plankton_dataset</a>()</code>,
-<code><a href="whoi_small_coralnet_dataset.html">whoi_small_coralnet_dataset</a>()</code></p></div>
+<code><a href="cifar_datasets.html">cifar10_dataset()</a></code>,
+<code><a href="eurosat_dataset.html">eurosat_dataset()</a></code>,
+<code><a href="fer_dataset.html">fer_dataset()</a></code>,
+<code><a href="fgvc_aircraft_dataset.html">fgvc_aircraft_dataset()</a></code>,
+<code><a href="flowers102_dataset.html">flowers102_dataset()</a></code>,
+<code><a href="image_folder_dataset.html">image_folder_dataset()</a></code>,
+<code><a href="mnist_dataset.html">mnist_dataset()</a></code>,
+<code><a href="oxfordiiitpet_dataset.html">oxfordiiitpet_dataset()</a></code>,
+<code><a href="places365_dataset.html">places365_dataset()</a></code>,
+<code><a href="tiny_imagenet_dataset.html">tiny_imagenet_dataset()</a></code>,
+<code><a href="vggface2_dataset.html">vggface2_dataset()</a></code>,
+<code><a href="whoi_plankton_dataset.html">whoi_plankton_dataset()</a></code>,
+<code><a href="whoi_small_coralnet_dataset.html">whoi_small_coralnet_dataset()</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -215,11 +222,11 @@ which hosts the same files referenced in <code>scikit-learn</code>'s dataset uti
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Tomasz Kalinowski, Daniel Falbel, Posit Software, PBC.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>
