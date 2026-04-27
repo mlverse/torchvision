@@ -59,4 +59,3 @@
   info <- magick::image_info(img)
   c(info$width, info$height)
 }
-
