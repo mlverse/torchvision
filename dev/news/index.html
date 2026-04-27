@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.8.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.9.0.9000</span>
       </span>
     </div>
 
@@ -86,15 +86,18 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.9.0" id="torchvision-090">torchvision 0.9.0<small>2026-04-22</small><a class="anchor" aria-label="anchor" href="#torchvision-090"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-0-9-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-9-0"></a></h3>
 <ul><li>Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation) reducing memory usage by ~50% (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>).</li>
 <li>
 <code><a href="../reference/coco_classes.html">coco_classes()</a></code> is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (<a href="https://github.com/318" class="external-link">@318</a>).</li>
 <li>Renamed <code>$categories</code> to <code>$classes</code> for consistency (character vector of class names; old attribute is deprecated with a warning) (<a href="https://github.com/mlverse/torchvision/issues/300" class="external-link">#300</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-9-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-9-0"></a></h3>
 <ul><li>Added resolution function for COCO Imagenet_21k and Pascal_VOC classes and labels (<a href="https://github.com/mlverse/torchvision/issues/284" class="external-link">#284</a>).</li>
 <li>Added article showcasing <code><a href="../reference/model_fcn_resnet.html">model_fcn_resnet50()</a></code> with visualization utilities <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/vision_make_grid.html">vision_make_grid()</a></code> (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/281" class="external-link">#281</a>).</li>
 <li>Added collection dataset catalog with <code><a href="../reference/search_collection.html">search_collection()</a></code>, <code><a href="../reference/get_collection_catalog.html">get_collection_catalog()</a></code>, and <code><a href="../reference/list_collection_datasets.html">list_collection_datasets()</a></code> functions for discovering and exploring collections (<a href="https://github.com/mlverse/torchvision/issues/271" class="external-link">#271</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
@@ -102,18 +105,18 @@
 <li>Added support for <code>connectivity</code> argument for drawing lines between keypoints in <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/303" class="external-link">#303</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-models-development-version">New models<a class="anchor" aria-label="anchor" href="#new-models-development-version"></a></h3>
+<h3 id="new-models-0-9-0">New models<a class="anchor" aria-label="anchor" href="#new-models-0-9-0"></a></h3>
 <ul><li>Added <code><a href="../reference/model_maskrcnn.html">model_maskrcnn_resnet50_fpn()</a></code> and <code><a href="../reference/model_maskrcnn.html">model_maskrcnn_resnet50_fpn_v2()</a></code> for instance segmentation (<a href="https://github.com/mlverse/torchvision/issues/278" class="external-link">#278</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
 <li>Added <code>model_convnext_*_detection()</code> for object detection, with * within tiny/small/base (<a href="https://github.com/mlverse/torchvision/issues/262" class="external-link">#262</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
 <li>Added <code>model_convnext_*_fcn()</code> and <code>model_convnext_*_upernet()</code> for semantic segmentation, with * within tiny/small/base (<a href="https://github.com/mlverse/torchvision/issues/265" class="external-link">#265</a>, <a href="https://github.com/ANAMASGARD" class="external-link">@ANAMASGARD</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-datasets-development-version">New datasets<a class="anchor" aria-label="anchor" href="#new-datasets-development-version"></a></h3>
+<h3 id="new-datasets-0-9-0">New datasets<a class="anchor" aria-label="anchor" href="#new-datasets-0-9-0"></a></h3>
 <ul><li>Added <code><a href="../reference/vggface2_dataset.html">vggface2_dataset()</a></code> for loading the VGGFace2 dataset (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/238" class="external-link">#238</a>).</li>
 <li>Added <code>moth</code> dataset to <code><a href="../reference/rf100_biology_collection.html">rf100_biology_collection()</a></code> and <code>currency</code> and <code>wine_label</code> to <code><a href="../reference/rf100_document_collection.html">rf100_document_collection()</a></code> (<a href="https://github.com/mlverse/torchvision/issues/274" class="external-link">#274</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-improvements-0-9-0">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-0-9-0"></a></h3>
 <ul><li>
 <code>model_maskrcnn_*()</code> and <code>model_fasterrcnn_*()</code> now match the pytorch implementation (<a href="https://github.com/mlverse/torchvision/issues/318" class="external-link">#318</a>).</li>
 <li>
@@ -269,7 +272,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Daniel Falbel.</p>
+  <p></p><p>Developed by Tomasz Kalinowski, Daniel Falbel, Posit Software, PBC.</p>
 </div>
 
 <div class="pkgdown">
