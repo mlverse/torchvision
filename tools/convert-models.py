@@ -4,7 +4,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from ultralytics import settings
-from safetensors import save_file
+from safetensors.torch import save_file
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
