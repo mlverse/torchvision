@@ -149,8 +149,8 @@ models = {
   'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
   }
 safetensormodels = {
-  'tabicl2_classifier': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt?download=true',
-  'tabicl2_regressor': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt?download=true',
+  'tabicl2_classifier': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt',
+  'tabicl2_regressor': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt',
   }
 
 os.makedirs("models", exist_ok=True)
