@@ -205,7 +205,7 @@ for name, url in safetensormodels.items():
     m = load_state_dict_from_url(url, progress=False)
     converted = {}
     
-    for nm, par in m.items():
+    for nm, par in m["state_dict"].items():
       converted.update([(nm, par.clone())])
     save_file(converted, fpath)
     upload_blob(
