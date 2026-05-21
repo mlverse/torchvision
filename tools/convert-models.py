@@ -4,6 +4,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from ultralytics import settings
+from safetensors import save_file
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -147,6 +148,10 @@ models = {
   'yolo_v12_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12s.pt',
   'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
   }
+safetensormodels = {
+  'tabicl2_classifier': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt?download=true',
+  'tabicl2_regressor': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt?download=true',
+  }
 
 os.makedirs("models", exist_ok=True)
 # yolo specifics 
@@ -179,6 +184,30 @@ for name, url in models.items():
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)
+    upload_blob(
+      "torch-pretrained-models",
+      fpath,
+      "models/vision/v2/" + fpath
+    )
+    # free disk space
+    os.remove(fpath)
+
+
+
+for name, url in safetensormodels.items():
+  fpath = "models/" + name + ".safetensors"
+
+  if blob_exist("torch-pretrained-models", f"models/vision/v2/{fpath}"):
+    print(f"--- file {fpath} is already in the bucket. Bypassing conversion")
+
+  else:
+    # download from url, convert and upload the converted weights
+    m = load_state_dict_from_url(url, progress=False)
+    converted = {}
+    
+    for nm, par in m.items():
+      converted.update([(nm, par.clone())])
+    save_file(converted, fpath)
     upload_blob(
       "torch-pretrained-models",
       fpath,
