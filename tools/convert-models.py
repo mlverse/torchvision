@@ -4,7 +4,6 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from ultralytics import settings
-from safetensors.torch import save_file
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -147,10 +146,8 @@ models = {
   'yolo_v12_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12n.pt',
   'yolo_v12_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12s.pt',
   'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
-  }
-safetensormodels = {
-  'tabicl2_classifier': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt',
-  'tabicl2_regressor': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt',
+  'tabicl_classifier_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt',
+  'tabicl_regressor_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt',
   }
 
 os.makedirs("models", exist_ok=True)
@@ -177,37 +174,13 @@ for name, url in models.items():
     if name.startswith("convnext_") and name.endswith("k"):
       m = m["model"]
     
-    # openmmlab models weights are embedded in a named object
-    if name.startswith("convnext_") and "_upernet_" in name:
+    # openmmlab and jingang models weights are embedded in a named object
+    if name.startswith("convnext_") and "_upernet_" in name) or name.startswith("tabicl_"):
       m = m["state_dict"]
     
     for nm, par in m.items():
       converted.update([(nm, par.clone())])
     torch.save(converted, fpath, _use_new_zipfile_serialization=True)
-    upload_blob(
-      "torch-pretrained-models",
-      fpath,
-      "models/vision/v2/" + fpath
-    )
-    # free disk space
-    os.remove(fpath)
-
-
-
-for name, url in safetensormodels.items():
-  fpath = "models/" + name + ".safetensors"
-
-  if blob_exist("torch-pretrained-models", f"models/vision/v2/{fpath}"):
-    print(f"--- file {fpath} is already in the bucket. Bypassing conversion")
-
-  else:
-    # download from url, convert and upload the converted weights
-    m = load_state_dict_from_url(url, progress=False)
-    converted = {}
-    
-    for nm, par in m["state_dict"].items():
-      converted.update([(nm, par.clone())])
-    save_file(converted, fpath)
     upload_blob(
       "torch-pretrained-models",
       fpath,
