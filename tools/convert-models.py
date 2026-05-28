@@ -175,7 +175,7 @@ for name, url in models.items():
       m = m["model"]
     
     # openmmlab and jingang models weights are embedded in a named object
-    if name.startswith("convnext_") and "_upernet_" in name) or name.startswith("tabicl_"):
+    if (name.startswith("convnext_") and "_upernet_" in name) or name.startswith("tabicl_"):
       m = m["state_dict"]
     
     for nm, par in m.items():
