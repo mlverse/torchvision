@@ -18,20 +18,26 @@
 #'    not guaranteed to be the same between CPU and GPU. This is similar
 #'    to the behavior of argsort in torch when repeated values are present.
 #'
-#'    When the optional `torchvisionlib` package is installed, `nms()` uses
-#'    `torchvisionlib::ops_nms()` for faster inference. Otherwise, it falls
-#'    back to the pure R algorithm below.
+#'    When the optional `torchvisionlib` package and its native library are
+#'    installed, `nms()` uses `torchvisionlib::ops_nms()` for faster inference.
+#'    Otherwise, it falls back to the pure R algorithm below.
 #'
 #' @return keep (Tensor): int64 tensor with the indices of the elements that
 #'  have been kept by NMS, sorted in decreasing order of scores.
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
-  if (rlang::is_installed("torchvisionlib")) {
+  if (.torchvisionlib_nms_available()) {
     return(torchvisionlib::ops_nms(boxes, scores, iou_threshold))
   }
 
   .nms_r(boxes, scores, iou_threshold)
+}
+
+#' @noRd
+.torchvisionlib_nms_available <- function() {
+  rlang::is_installed("torchvisionlib") &&
+    isTRUE(torchvisionlib::torchvisionlib_is_installed())
 }
 
 #' @noRd

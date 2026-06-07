@@ -86,7 +86,7 @@ test_that("nms matches the pure R implementation", {
 })
 
 test_that("nms uses torchvisionlib when installed", {
-  skip_if_not(rlang::is_installed("torchvisionlib"))
+  skip_if_not(.torchvisionlib_nms_available())
 
   boxes_nms <- torch::torch_tensor(
     matrix(
