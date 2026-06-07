@@ -18,15 +18,24 @@
 #'    not guaranteed to be the same between CPU and GPU. This is similar
 #'    to the behavior of argsort in torch when repeated values are present.
 #'
-#'    Current algorithm has a time complexity of O(n^2) and runs in native R.
-#'    It may be improve in the future by a Rcpp implementation or through alternative algorithm
+#'    When the optional `torchvisionlib` package is installed, `nms()` uses
+#'    `torchvisionlib::ops_nms()` for faster inference. Otherwise, it falls
+#'    back to the pure R algorithm below.
 #'
 #' @return keep (Tensor): int64 tensor with the indices of the elements that
 #'  have been kept by NMS, sorted in decreasing order of scores.
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
+  if (rlang::is_installed("torchvisionlib")) {
+    return(torchvisionlib::ops_nms(boxes, scores, iou_threshold))
+  }
 
+  .nms_r(boxes, scores, iou_threshold)
+}
+
+#' @noRd
+.nms_r <- function(boxes, scores, iou_threshold) {
   # Handle empty inputs gracefully
 
   n_boxes <- boxes$shape[1]

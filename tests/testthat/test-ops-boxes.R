@@ -67,3 +67,42 @@ test_that("box_iou", {
   expect_equal_to_r(x, matrix(1, nrow = 5, ncol = 5))
 })
 
+test_that("nms matches the pure R implementation", {
+  boxes_nms <- torch::torch_tensor(
+    matrix(
+      c(
+        0, 0, 2, 2,
+        0.1, 0.1, 2.1, 2.1,
+        5, 5, 6, 6
+      ),
+      ncol = 4,
+      byrow = TRUE
+    )
+  )
+  scores_nms <- torch::torch_tensor(c(0.9, 0.8, 0.7))
+
+  expected <- .nms_r(boxes_nms, scores_nms, 0.5)
+  expect_equal_to_r(nms(boxes_nms, scores_nms, 0.5), as.integer(expected$cpu()))
+})
+
+test_that("nms uses torchvisionlib when installed", {
+  skip_if_not(rlang::is_installed("torchvisionlib"))
+
+  boxes_nms <- torch::torch_tensor(
+    matrix(
+      c(
+        0, 0, 2, 2,
+        0.1, 0.1, 2.1, 2.1,
+        5, 5, 6, 6
+      ),
+      ncol = 4,
+      byrow = TRUE
+    )
+  )
+  scores_nms <- torch::torch_tensor(c(0.9, 0.8, 0.7))
+
+  expect_equal_to_r(
+    nms(boxes_nms, scores_nms, 0.5),
+    as.integer(torchvisionlib::ops_nms(boxes_nms, scores_nms, 0.5)$cpu())
+  )
+})
