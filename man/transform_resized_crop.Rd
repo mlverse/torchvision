@@ -32,11 +32,11 @@ i.e, if height > width, then image will be rescaled to
 Crop an image and resize it to a desired size
 }
 \seealso{
-Other combining_transforms: 
-\code{\link{transform_five_crop}()},
-\code{\link{transform_random_apply}()},
-\code{\link{transform_random_choice}()},
-\code{\link{transform_random_order}()},
-\code{\link{transform_ten_crop}()}
+Other combining_transforms:
+\code{\link[=transform_five_crop]{transform_five_crop()}},
+\code{\link[=transform_random_apply]{transform_random_apply()}},
+\code{\link[=transform_random_choice]{transform_random_choice()}},
+\code{\link[=transform_random_order]{transform_random_order()}},
+\code{\link[=transform_ten_crop]{transform_ten_crop()}}
 }
 \concept{combining_transforms}
