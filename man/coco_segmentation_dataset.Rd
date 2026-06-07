@@ -72,9 +72,9 @@ tensor_image_browse(masked)
 \seealso{
 \code{\link{coco_detection_dataset}} for object detection tasks
 
-Other segmentation_dataset: 
-\code{\link{oxfordiiitpet_segmentation_dataset}()},
+Other segmentation_dataset:
+\code{\link[=oxfordiiitpet_segmentation_dataset]{oxfordiiitpet_segmentation_dataset()}},
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_peixos_segmentation_dataset}()}
+\code{\link[=rf100_peixos_segmentation_dataset]{rf100_peixos_segmentation_dataset()}}
 }
 \concept{segmentation_dataset}

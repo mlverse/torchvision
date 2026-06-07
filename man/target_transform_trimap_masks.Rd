@@ -38,7 +38,7 @@ draw_segmentation_masks(item)
 
 }
 \seealso{
-Other target_transforms: 
-\code{\link{target_transform_coco_masks}()}
+Other target_transforms:
+\code{\link[=target_transform_coco_masks]{target_transform_coco_masks()}}
 }
 \concept{target_transforms}
