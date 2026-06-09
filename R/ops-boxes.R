@@ -27,7 +27,7 @@
 #'
 #' @export
 nms <- function(boxes, scores, iou_threshold) {
-  if (.torchvisionlib_nms_available()) {
+  if (.torchvisionlib_is_available()) {
     return(torchvisionlib::ops_nms(boxes, scores, iou_threshold))
   }
 
@@ -35,7 +35,7 @@ nms <- function(boxes, scores, iou_threshold) {
 }
 
 #' @noRd
-.torchvisionlib_nms_available <- function() {
+.torchvisionlib_is_available <- function() {
   rlang::is_installed("torchvisionlib") &&
     isTRUE(torchvisionlib::torchvisionlib_is_installed())
 }
