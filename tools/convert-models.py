@@ -146,6 +146,8 @@ models = {
   'yolo_v12_n': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12n.pt',
   'yolo_v12_s': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12s.pt',
   'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
+  'tabicl_classifier_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt',
+  'tabicl_regressor_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt',
   }
 
 os.makedirs("models", exist_ok=True)
@@ -172,8 +174,8 @@ for name, url in models.items():
     if name.startswith("convnext_") and name.endswith("k"):
       m = m["model"]
     
-    # openmmlab models weights are embedded in a named object
-    if name.startswith("convnext_") and "_upernet_" in name:
+    # openmmlab and jingang models weights are embedded in a named object
+    if (name.startswith("convnext_") and "_upernet_" in name) or name.startswith("tabicl_"):
       m = m["state_dict"]
     
     for nm, par in m.items():
