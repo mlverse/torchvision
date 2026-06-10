@@ -31,7 +31,8 @@ draw_segmentation_masks(item)
 
 }
 \seealso{
-Other target_transforms: 
-\code{\link{target_transform_trimap_masks}()}
+Other target_transforms:
+\code{\link[=target_transform_sahi_crop]{target_transform_sahi_crop()}},
+\code{\link[=target_transform_trimap_masks]{target_transform_trimap_masks()}}
 }
 \concept{target_transforms}
