@@ -34,7 +34,7 @@ criterion with respect to a reference box, the selected box is
 not guaranteed to be the same between CPU and GPU. This is similar
 to the behavior of argsort in torch when repeated values are present.
 
-When the optional \pkg{torchvisionlib} package and its native library are
+When the optional \code{torchvisionlib} package and its native library are
 installed, \code{nms()} uses \code{torchvisionlib::ops_nms()} for faster inference.
-Otherwise, it falls back to the pure R algorithm.
+Otherwise, it falls back to the pure R algorithm below.
 }
