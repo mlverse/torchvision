@@ -7,29 +7,58 @@
 target_transform_sahi_crop(y, crop_windows, min_area = 0)
 }
 \arguments{
-\item{y}{List target containing \code{boxes} and \code{labels}.}
+\item{y}{list containing object detection target annotations with at least
+\code{boxes} and \code{labels} fields. Optional fields such as \code{area}, \code{iscrowd},
+\code{image_height}, and \code{image_width} are preserved and updated when present.}
 
-\item{crop_windows}{List of SAHI crop windows. Each crop window may be:
-\itemize{
-\item a numeric vector of length 4 in \code{c(top, left, height, width)} order,
-\item a named numeric vector with names \code{top}, \code{left}, \code{height}, \code{width},
-\item a list with named elements \code{top}, \code{left}, \code{height}, \code{width},
-\item a one-row matrix or data frame with columns in the same order.
-}}
+\item{crop_windows}{list of crop windows. Each crop window must define
+\code{top}, \code{left}, \code{height}, and \code{width}.}
 
-\item{min_area}{Numeric. Minimum box area after clipping, in crop coordinates.
-Boxes with smaller area are removed. Default is \code{0}.}
+\item{min_area}{numeric. Minimum bounding box area to retain after clipping.
+Objects with clipped area smaller than \code{min_area} are removed.}
 }
 \value{
-A list of transformed targets, one per crop window.
-Each target retains the original fields except for updated \code{boxes},
-\code{labels}, \code{area} (when present), \code{iscrowd} (when present),
-and optional image size metadata.
+List of transformed targets, one per crop window, with bounding boxes
+expressed in crop coordinates and associated annotations filtered to the
+objects visible within each crop.
 }
 \description{
-Clips and translates detection targets for a collection of SAHI crop windows.
-This transform is dataset-agnostic and operates on standard detection targets
-containing at least \code{boxes} and \code{labels}.
+Adjusts object detection targets for SAHI (Slicing Aided Hyper Inference)
+crop windows by clipping bounding boxes to crop boundaries, translating box
+coordinates into the crop reference frame, and removing objects that do not
+intersect the crop region.
+Use as \code{target_transform} in object detection datasets together with SAHI
+image slicing transforms.
+}
+\examples{
+\dontrun{
+target <- list(
+  boxes = torch_tensor(
+    matrix(
+      c(
+        10, 10, 30, 30,
+        40, 40, 60, 60
+      ),
+      nrow = 2,
+      byrow = TRUE
+    )
+  ),
+  labels = torch_tensor(c(1L, 2L)),
+  image_height = 100L,
+  image_width = 100L
+)
+
+crops <- list(
+  list(top = 0, left = 0, height = 25, width = 25),
+  list(top = 30, left = 30, height = 40, width = 40)
+)
+
+cropped_targets <- target_transform_sahi_crop(
+  target,
+  crops
+)
+}
+
 }
 \seealso{
 Other target_transforms:

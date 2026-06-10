@@ -150,23 +150,54 @@ select_object_field <- function(field, mask, mask_logical) {
 
 #' Target Transform: SAHI Crop Target Adjustment
 #'
-#' Clips and translates detection targets for a collection of SAHI crop windows.
-#' This transform is dataset-agnostic and operates on standard detection targets
-#' containing at least `boxes` and `labels`.
+#' Adjusts object detection targets for SAHI (Slicing Aided Hyper Inference)
+#' crop windows by clipping bounding boxes to crop boundaries, translating box
+#' coordinates into the crop reference frame, and removing objects that do not
+#' intersect the crop region.
+#' Use as `target_transform` in object detection datasets together with SAHI
+#' image slicing transforms.
 #'
-#' @param y List target containing `boxes` and `labels`.
-#' @param crop_windows List of SAHI crop windows. Each crop window may be:
-#'   * a numeric vector of length 4 in `c(top, left, height, width)` order,
-#'   * a named numeric vector with names `top`, `left`, `height`, `width`,
-#'   * a list with named elements `top`, `left`, `height`, `width`,
-#'   * a one-row matrix or data frame with columns in the same order.
-#' @param min_area Numeric. Minimum box area after clipping, in crop coordinates.
-#'   Boxes with smaller area are removed. Default is `0`.
+#' @param y list containing object detection target annotations with at least
+#'   `boxes` and `labels` fields. Optional fields such as `area`, `iscrowd`,
+#'   `image_height`, and `image_width` are preserved and updated when present.
+#' @param crop_windows list of crop windows. Each crop window must define
+#'   `top`, `left`, `height`, and `width`.
+#' @param min_area numeric. Minimum bounding box area to retain after clipping.
+#'   Objects with clipped area smaller than `min_area` are removed.
 #'
-#' @return A list of transformed targets, one per crop window.
-#'   Each target retains the original fields except for updated `boxes`,
-#'   `labels`, `area` (when present), `iscrowd` (when present),
-#'   and optional image size metadata.
+#' @return List of transformed targets, one per crop window, with bounding boxes
+#'   expressed in crop coordinates and associated annotations filtered to the
+#'   objects visible within each crop.
+#'
+#' @examples
+#' \dontrun{
+#' target <- list(
+#'   boxes = torch_tensor(
+#'     matrix(
+#'       c(
+#'         10, 10, 30, 30,
+#'         40, 40, 60, 60
+#'       ),
+#'       nrow = 2,
+#'       byrow = TRUE
+#'     )
+#'   ),
+#'   labels = torch_tensor(c(1L, 2L)),
+#'   image_height = 100L,
+#'   image_width = 100L
+#' )
+#'
+#' crops <- list(
+#'   list(top = 0, left = 0, height = 25, width = 25),
+#'   list(top = 30, left = 30, height = 40, width = 40)
+#' )
+#'
+#' cropped_targets <- target_transform_sahi_crop(
+#'   target,
+#'   crops
+#' )
+#' }
+#'
 #' @family target_transforms
 #' @export
 target_transform_sahi_crop <- function(y, crop_windows, min_area = 0) {
