@@ -50,6 +50,366 @@ target_transform_coco_masks <- function(y) {
   y
 }
 
+parse_sahi_crop_window <- function(crop_window) {
+  if (inherits(crop_window, "torch_tensor")) {
+    crop_window <- as.array(crop_window)
+  }
+
+  if (is.matrix(crop_window) || is.data.frame(crop_window)) {
+    crop_window <- as.numeric(crop_window)
+  }
+
+  if (is.numeric(crop_window) && length(crop_window) == 4L) {
+    if (!is.null(names(crop_window))) {
+      top <- crop_window[["top"]]
+      left <- crop_window[["left"]]
+      height <- crop_window[["height"]]
+      width <- crop_window[["width"]]
+    } else {
+      top <- crop_window[[1]]
+      left <- crop_window[[2]]
+      height <- crop_window[[3]]
+      width <- crop_window[[4]]
+    }
+  } else if (is.list(crop_window) && all(c("top", "left", "height", "width") %in% names(crop_window))) {
+    top <- as.numeric(crop_window[["top"]])
+    left <- as.numeric(crop_window[["left"]])
+    height <- as.numeric(crop_window[["height"]])
+    width <- as.numeric(crop_window[["width"]])
+  } else {
+    value_error(
+      "Each crop window must be a numeric vector or list with elements ",
+      "`top`, `left`, `height` and `width`."
+    )
+  }
+
+  if (any(is.na(c(top, left, height, width)))) {
+    value_error("Crop window must contain non-missing top, left, height and width values.")
+  }
+  if (top < 0 || left < 0) {
+    value_error("Crop window top and left must be non-negative.")
+  }
+  if (height <= 0 || width <= 0) {
+    value_error("Crop window height and width must be positive.")
+  }
+
+  list(
+    top = as.numeric(top),
+    left = as.numeric(left),
+    height = as.numeric(height),
+    width = as.numeric(width)
+  )
+}
+
+normalize_sahi_crop_windows <- function(crop_windows) {
+  if (inherits(crop_windows, "torch_tensor")) {
+    crop_windows <- as.array(crop_windows)
+  }
+
+  if (is.numeric(crop_windows) && length(crop_windows) == 4L && !is.list(crop_windows)) {
+    crop_windows <- list(crop_windows)
+  }
+
+  if (is.matrix(crop_windows)) {
+    crop_windows <- lapply(seq_len(nrow(crop_windows)), function(i) crop_windows[i, ])
+  } else if (is.data.frame(crop_windows)) {
+    crop_windows <- lapply(seq_len(nrow(crop_windows)), function(i) as.numeric(crop_windows[i, ]))
+  }
+
+  if (is.list(crop_windows) && !is.null(names(crop_windows)) &&
+      all(c("top", "left", "height", "width") %in% names(crop_windows))) {
+    crop_windows <- list(crop_windows)
+  }
+
+  if (!is.list(crop_windows) || length(crop_windows) == 0L) {
+    value_error("crop_windows must be a non-empty list of crop windows.")
+  }
+
+  lapply(crop_windows, parse_sahi_crop_window)
+}
+
+empty_like <- function(x) {
+  if (inherits(x, "torch_tensor")) {
+    return(torch::torch_zeros(c(0), dtype = x$dtype, device = x$device))
+  }
+  x[integer(0)]
+}
+
+select_object_field <- function(field, mask, mask_logical) {
+  if (inherits(field, "torch_tensor")) {
+    if (length(mask_logical) == 0L) {
+      return(empty_like(field))
+    }
+    return(field[mask])
+  }
+  if (is.atomic(field) || is.list(field)) {
+    return(field[mask_logical])
+  }
+  field
+}
+
+#' Target Transform: SAHI Crop Target Adjustment
+#'
+#' Clips and translates detection targets for a collection of SAHI crop windows.
+#' This transform is dataset-agnostic and operates on standard detection targets
+#' containing at least `boxes` and `labels`.
+#'
+#' @param y List target containing `boxes` and `labels`.
+#' @param crop_windows List of SAHI crop windows. Each crop window may be:
+#'   * a numeric vector of length 4 in `c(top, left, height, width)` order,
+#'   * a named numeric vector with names `top`, `left`, `height`, `width`,
+#'   * a list with named elements `top`, `left`, `height`, `width`,
+#'   * a one-row matrix or data frame with columns in the same order.
+#' @param min_area Numeric. Minimum box area after clipping, in crop coordinates.
+#'   Boxes with smaller area are removed. Default is `0`.
+#'
+#' @return A list of transformed targets, one per crop window.
+#'   Each target retains the original fields except for updated `boxes`,
+#'   `labels`, `area` (when present), `iscrowd` (when present),
+#'   and optional image size metadata.
+#' @family target_transforms
+#' @export
+target_transform_sahi_crop <- function(y, crop_windows, min_area = 0) {
+  if (!"boxes" %in% names(y)) {
+    cli_abort("Target must contain 'boxes' field")
+  }
+
+  if (!"labels" %in% names(y)) {
+    cli_abort("Target must contain 'labels' field")
+  }
+
+  if (!is.numeric(min_area) || length(min_area) != 1L || min_area < 0) {
+    value_error("min_area must be a non-negative number.")
+  }
+
+  crop_windows <- normalize_sahi_crop_windows(crop_windows)
+
+  boxes <- y$boxes
+
+  if (!inherits(boxes, "torch_tensor")) {
+    boxes <- torch::torch_tensor(
+      boxes,
+      dtype = torch::torch_float()
+    )
+  }
+
+  if (boxes$ndim != 2L || boxes$shape[[2]] != 4L) {
+    value_error("Target 'boxes' must be a tensor of shape (N, 4).")
+  }
+
+  labels <- y$labels
+
+  if (inherits(labels, "torch_tensor") && labels$ndim == 0L) {
+    labels <- labels$unsqueeze(1)
+  }
+
+  if ("area" %in% names(y) &&
+      inherits(y$area, "torch_tensor") &&
+      y$area$ndim == 0L) {
+    y$area <- y$area$unsqueeze(1)
+  }
+
+  if ("iscrowd" %in% names(y) &&
+      inherits(y$iscrowd, "torch_tensor") &&
+      y$iscrowd$ndim == 0L) {
+    y$iscrowd <- y$iscrowd$unsqueeze(1)
+  }
+
+  lapply(crop_windows, function(crop_window) {
+
+    crop_top <- crop_window$top
+    crop_left <- crop_window$left
+    crop_bottom <- crop_top + crop_window$height
+    crop_right <- crop_left + crop_window$width
+
+    crop_top_t <- torch::torch_tensor(
+      crop_top,
+      dtype = boxes$dtype,
+      device = boxes$device
+    )
+
+    crop_left_t <- torch::torch_tensor(
+      crop_left,
+      dtype = boxes$dtype,
+      device = boxes$device
+    )
+
+    crop_bottom_t <- torch::torch_tensor(
+      crop_bottom,
+      dtype = boxes$dtype,
+      device = boxes$device
+    )
+
+    crop_right_t <- torch::torch_tensor(
+      crop_right,
+      dtype = boxes$dtype,
+      device = boxes$device
+    )
+
+    clipped_boxes <- torch::torch_stack(
+      list(
+        torch::torch_max(boxes[, 1], other = crop_left_t),
+        torch::torch_max(boxes[, 2], other = crop_top_t),
+        torch::torch_min(boxes[, 3], other = crop_right_t),
+        torch::torch_min(boxes[, 4], other = crop_bottom_t)
+      ),
+      dim = 2
+    )
+
+    keep <- (
+      clipped_boxes[, 3] > clipped_boxes[, 1]
+    ) & (
+      clipped_boxes[, 4] > clipped_boxes[, 2]
+    )
+
+    keep_mask <- as.logical(as.array(keep))
+
+    if (any(keep_mask)) {
+      new_boxes <- clipped_boxes[keep_mask, ]
+    } else {
+      new_boxes <- torch::torch_zeros(
+        c(0, 4),
+        dtype = boxes$dtype,
+        device = boxes$device
+      )
+    }
+
+    filtered_labels <- select_object_field(
+      labels,
+      keep,
+      keep_mask
+    )
+
+    filtered_iscrowd <- NULL
+
+    if ("iscrowd" %in% names(y)) {
+      filtered_iscrowd <- select_object_field(
+        y$iscrowd,
+        keep,
+        keep_mask
+      )
+    }
+
+    if (as.integer(new_boxes$size(1)) > 0L) {
+
+      offset <- torch::torch_tensor(
+        c(
+          crop_left,
+          crop_top,
+          crop_left,
+          crop_top
+        ),
+        dtype = boxes$dtype,
+        device = boxes$device
+      )
+
+      new_boxes <- new_boxes - offset
+    }
+
+    if (
+      as.integer(new_boxes$size(1)) > 0L &&
+      min_area > 0
+    ) {
+
+      area_mask <- as.logical(
+        as.array(
+          box_area(new_boxes) >= min_area
+        )
+      )
+
+      if (any(area_mask)) {
+
+        area_mask_t <- torch::torch_tensor(
+          area_mask,
+          dtype = torch::torch_bool(),
+          device = boxes$device
+        )
+
+        new_boxes <- new_boxes[area_mask, ]
+
+        filtered_labels <- select_object_field(
+          filtered_labels,
+          area_mask_t,
+          area_mask
+        )
+
+        if (!is.null(filtered_iscrowd)) {
+          filtered_iscrowd <- select_object_field(
+            filtered_iscrowd,
+            area_mask_t,
+            area_mask
+          )
+        }
+
+      } else {
+
+        new_boxes <- torch::torch_zeros(
+          c(0, 4),
+          dtype = boxes$dtype,
+          device = boxes$device
+        )
+
+        filtered_labels <- empty_like(labels)
+
+        if (!is.null(filtered_iscrowd)) {
+          filtered_iscrowd <- empty_like(y$iscrowd)
+        }
+      }
+    }
+
+    transformed <- y
+
+    transformed$boxes <- new_boxes
+    transformed$labels <- filtered_labels
+
+    if ("area" %in% names(y)) {
+
+      if (as.integer(new_boxes$size(1)) > 0L) {
+
+        area <- box_area(new_boxes)
+
+        if (inherits(y$area, "torch_tensor")) {
+          area <- area$to(
+            dtype = y$area$dtype,
+            device = boxes$device
+          )
+        }
+
+        transformed$area <- area
+
+      } else {
+
+        if (inherits(y$area, "torch_tensor")) {
+          transformed$area <- torch::torch_zeros(
+            c(0),
+            dtype = y$area$dtype,
+            device = boxes$device
+          )
+        } else {
+          transformed$area <- numeric(0)
+        }
+      }
+    }
+
+    if (!is.null(filtered_iscrowd)) {
+      transformed$iscrowd <- filtered_iscrowd
+    }
+
+    if ("image_height" %in% names(y)) {
+      transformed$image_height <- as.integer(
+        crop_window$height
+      )
+    }
+
+    if ("image_width" %in% names(y)) {
+      transformed$image_width <- as.integer(
+        crop_window$width
+      )
+    }
+
+    transformed
+  })
+}
 
 #' Target Transform: Trimap to Boolean Masks
 #'
