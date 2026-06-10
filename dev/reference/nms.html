@@ -129,8 +129,9 @@ have been kept by NMS, sorted in decreasing order of scores.</p>
 criterion with respect to a reference box, the selected box is
 not guaranteed to be the same between CPU and GPU. This is similar
 to the behavior of argsort in torch when repeated values are present.</p>
-<p>Current algorithm has a time complexity of O(n^2) and runs in native R.
-It may be improve in the future by a Rcpp implementation or through alternative algorithm</p>
+<p>When the optional <span class="pkg">torchvisionlib</span> package and its native library are
+installed, <code>nms()</code> uses <code><a href="https://rdrr.io/pkg/torchvisionlib/man/ops_nms.html" class="external-link">torchvisionlib::ops_nms()</a></code> for faster inference.
+Otherwise, it falls back to the pure R algorithm.</p>
     </div>
 
   </div>
