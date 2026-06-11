@@ -3,10 +3,10 @@ context("segmentation-transforms")
 # Helper to create mock COCO target
 mock_coco_target <- function(h = 100, w = 100) {
   list(
-    boxes = torch::torch_tensor(matrix(c(10, 20, 50, 60), nrow = 1)),
+    boxes = torch_tensor(matrix(c(10, 20, 50, 60), nrow = 1)),
     labels = "cat",
-    area = torch::torch_tensor(c(800)),
-    iscrowd = torch::torch_tensor(FALSE),
+    area = torch_tensor(c(800)),
+    iscrowd = torch_tensor(FALSE),
     segmentation = list(list(c(10, 20, 50, 20, 50, 60, 10, 60))),
     image_height = h,
     image_width = w
@@ -15,9 +15,9 @@ mock_coco_target <- function(h = 100, w = 100) {
 
 # Helper to create mock trimap
 mock_trimap <- function(h = 3, w = 3) {
-  torch::torch_tensor(
+  torch_tensor(
     array(rep(c(1, 2, 3), length.out = h * w), dim = c(h, w)),
-    dtype = torch::torch_int32()
+    dtype = torch_int32()
   )
 }
 
@@ -30,7 +30,7 @@ test_that("target_transform_coco_masks() converts polygons to masks", {
   result <- target_transform_coco_masks(y)
   expect_true("masks" %in% names(result))
   expect_tensor(result$masks)
-  expect_tensor_dtype(result$masks, torch::torch_bool())
+  expect_tensor_dtype(result$masks, torch_bool())
   expect_equal(result$masks$ndim, 3)
   expect_true("segmentation" %in% names(result))
 })
@@ -38,7 +38,7 @@ test_that("target_transform_coco_masks() converts polygons to masks", {
 test_that("target_transform_coco_masks() handles empty segmentation", {
   skip_if_not_installed("torch")
   y <- list(
-    boxes = torch::torch_zeros(c(0, 4)),
+    boxes = torch_zeros(c(0, 4)),
     labels = character(),
     segmentation = list(),
     image_height = 100,
@@ -53,7 +53,7 @@ test_that("target_transform_coco_masks() handles multiple objects", {
   skip_if_not_installed("torch")
   skip_if_not_installed("magick")
   y <- list(
-    boxes = torch::torch_tensor(matrix(c(10,20,50,60, 60,10,90,40), nrow = 2, byrow = TRUE)),
+    boxes = torch_tensor(matrix(c(10,20,50,60, 60,10,90,40), nrow = 2, byrow = TRUE)),
     labels = c("cat", "dog"),
     segmentation = list(
       list(c(10, 20, 50, 20, 50, 60, 10, 60)),
@@ -74,7 +74,7 @@ test_that("target_transform_trimap_masks() converts trimap to masks", {
   result <- target_transform_trimap_masks(y)
   expect_true("masks" %in% names(result))
   expect_tensor(result$masks)
-  expect_tensor_dtype(result$masks, torch::torch_bool())
+  expect_tensor_dtype(result$masks, torch_bool())
   expect_equal(result$masks$shape[1], 3)
   expect_equal(result$label, 1L)
 })
@@ -100,7 +100,7 @@ test_that("coco_segmentation_dataset with target_transform produces masks", {
   expect_true("masks" %in% names(y))
   expect_tensor(y$masks)
   expect_equal(y$masks$ndim, 3)
-  expect_tensor_dtype(y$masks, torch::torch_bool())
+  expect_tensor_dtype(y$masks, torch_bool())
 })
 
 # Integration with draw_segmentation_masks()
@@ -108,7 +108,7 @@ test_that("coco_segmentation_dataset with target_transform produces masks", {
 test_that("transformed masks work with draw_segmentation_masks()", {
   skip_if_not_installed("torch")
   skip_if_not_installed("magick")
-  image <- torch::torch_randint(100, 200, c(3, 50, 50), dtype = torch::torch_uint8())
+  image <- torch_randint(100, 200, c(3, 50, 50), dtype = torch_uint8())
   y <- list(trimap = mock_trimap(50, 50), label = 1L)
   transformed_y <- target_transform_trimap_masks(y)
   item <- list(x = image, y = transformed_y)
@@ -126,7 +126,7 @@ test_that("coco_polygon_to_mask handles single polygon", {
   polygon <- list(c(10, 10, 50, 10, 50, 50, 10, 50))
   mask <- coco_polygon_to_mask(polygon, 100, 100)
   expect_tensor(mask)
-  expect_tensor_dtype(mask, torch::torch_bool())
+  expect_tensor_dtype(mask, torch_bool())
   expect_tensor_shape(mask, c(100, 100))
   expect_true(as.array(mask[30, 30]))
 })
@@ -137,4 +137,48 @@ test_that("coco_polygon_to_mask handles empty polygon", {
   mask <- coco_polygon_to_mask(list(), 100, 100)
   expect_tensor(mask)
   expect_equal_to_r(mask$sum(), 0)
+})
+
+
+test_that("transform_sahi_crop works with torch tensor input", {
+
+  image <- torch_randint(0, 255, c(3, 100, 100), dtype = torch_uint8())
+
+  res <- transform_sahi_crop(image, size = c(50, 50), overlap_size_ratio = c(0, 0))
+
+  expect_true("images" %in% names(res))
+  expect_true("crop_windows" %in% names(res))
+  expect_equal(length(res$images), 4)
+
+  first <- res$images[[1]]
+  expect_tensor(first)
+  expect_equal(first$shape, c(3, 50, 50))
+  expect_equal(length(res$crop_windows), 4)
+  expect_true(is.numeric(res$crop_windows[[1]]$top))
+})
+
+test_that("transform_sahi_crop converts array inputs via transform_to_tensor", {
+
+  # array in H x W x C layout
+  arr <- array(sample(0:255, 3 * 80 * 60, replace = TRUE), dim = c(80, 60, 3))
+
+  res <- transform_sahi_crop(arr, size = c(40, 30), overlap_size_ratio = c(0.5, 0.5))
+
+  expect_true("images" %in% names(res))
+  expect_true("crop_windows" %in% names(res))
+  expect_true(length(res$images) > 0)
+  expect_tensor(res$images[[1]])
+  expect_equal(res$images[[1]]$shape[[1]], 3)
+})
+
+test_that("transform_sahi_crop returns single crop when size >= image dims", {
+
+  img <- torch_randint(0, 255, c(3, 30, 40), dtype = torch_uint8())
+
+  res <- transform_sahi_crop(img, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
+
+  expect_equal(length(res$images), 1)
+  expect_equal(res$images[[1]]$shape, c(3, 30, 40))
+  expect_equal(res$crop_windows[[1]]$height, 30)
+  expect_equal(res$crop_windows[[1]]$width, 40)
 })
