@@ -4,6 +4,10 @@
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 
+## New Features
+
+* Added SAHI (Slicing Aided Hyper Inference) support via `transform_sahi_crop()` and `target_transform_sahi_crop()` for slicing large images into overlapping crops and adjusting detection targets accordingly. (@DerrickUnleashed, #324)
+
 # torchvision 0.9.0
 
 ## Breaking changes
