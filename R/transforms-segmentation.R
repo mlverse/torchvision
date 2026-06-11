@@ -314,6 +314,15 @@ target_transform_sahi_crop <- function(
         keep_mask
       ]
 
+      labels_kept <- select_object_field(
+        labels,
+        torch::torch_tensor(
+          keep_mask,
+          dtype = torch::torch_bool()
+        ),
+        keep_mask
+      )
+
       cropped_area <- box_area(
         clipped_boxes
       )
@@ -334,7 +343,7 @@ target_transform_sahi_crop <- function(
       ]
 
       labels_out <- select_object_field(
-        labels,
+        labels_kept,
         torch::torch_tensor(
           ratio_mask,
           dtype = torch::torch_bool()
@@ -418,4 +427,132 @@ target_transform_sahi_crop <- function(
 
     transformed
   })
+}
+
+empty_like <- function(x) {
+
+  if (inherits(x, "torch_tensor")) {
+
+    return(
+      torch::torch_zeros(
+        c(0),
+        dtype = x$dtype,
+        device = x$device
+      )
+    )
+  }
+
+  x[integer(0)]
+}
+
+
+select_object_field <- function(
+    field,
+    mask,
+    mask_logical
+) {
+
+  if (inherits(field, "torch_tensor")) {
+
+    if (length(mask_logical) == 0L) {
+      return(empty_like(field))
+    }
+
+    return(field[mask])
+  }
+
+  if (is.atomic(field)) {
+    return(field[mask_logical])
+  }
+
+  if (is.list(field)) {
+    return(field[mask_logical])
+  }
+
+  field
+}
+
+
+parse_sahi_crop_window <- function(window) {
+
+  if (
+    !is.list(window) ||
+    !all(
+      c(
+        "top",
+        "left",
+        "height",
+        "width"
+      ) %in% names(window)
+    )
+  ) {
+
+    stop(
+      "Each crop window must contain top, left, height and width."
+    )
+  }
+
+  top <- as.numeric(window$top)
+  left <- as.numeric(window$left)
+  height <- as.numeric(window$height)
+  width <- as.numeric(window$width)
+
+  if (
+    any(is.na(c(top, left, height, width)))
+  ) {
+    stop("Crop window contains NA values.")
+  }
+
+  if (top < 0 || left < 0) {
+    stop(
+      "Crop window top and left must be non-negative."
+    )
+  }
+
+  if (height <= 0 || width <= 0) {
+    stop(
+      "Crop window height and width must be positive."
+    )
+  }
+
+  list(
+    top = top,
+    left = left,
+    height = height,
+    width = width
+  )
+}
+
+
+normalize_sahi_crop_windows <- function(
+    crop_windows
+) {
+
+  if (!is.list(crop_windows)) {
+    stop(
+      "crop_windows must be a list."
+    )
+  }
+
+  if (length(crop_windows) == 0L) {
+    stop(
+      "crop_windows must not be empty."
+    )
+  }
+
+  lapply(
+    crop_windows,
+    parse_sahi_crop_window
+  )
+}
+
+
+box_area <- function(boxes) {
+
+  (
+    boxes[, 3] - boxes[, 1]
+  ) *
+  (
+    boxes[, 4] - boxes[, 2]
+  )
 }

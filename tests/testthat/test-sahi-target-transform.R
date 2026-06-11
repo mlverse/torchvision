@@ -96,6 +96,39 @@ test_that("target_transform_sahi_crop removes boxes outside crop", {
   expect_equal(as.integer(result[[1]]$labels$size(1)), 0L)
 })
 
+test_that("target_transform_sahi_crop preserves labels when boxes are filtered by crop and area", {
+
+  y <- list(
+    boxes = torch_tensor(
+      matrix(
+        c(
+          10, 10, 30, 30,
+          30, 30, 40, 40
+        ),
+        nrow = 2,
+        byrow = TRUE
+      )
+    ),
+    labels = torch_tensor(c(1L, 2L))
+  )
+
+  result <- target_transform_sahi_crop(
+    y,
+    list(
+      list(
+        top = 0,
+        left = 0,
+        height = 25,
+        width = 25
+      )
+    ),
+    min_area_ratio = 0.1
+  )
+
+  expect_equal(as.integer(result[[1]]$boxes$size(1)), 1L)
+  expect_equal(as.vector(as.array(result[[1]]$labels)), 1L)
+})
+
 test_that("target_transform_sahi_crop supports multiple crop windows", {
 
   y <- list(
