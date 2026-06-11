@@ -135,14 +135,24 @@ target_transform_trimap_masks <- function(y) {
 #'
 #' @examples
 #' \dontrun{
-#' result <- transform_sahi_crop(
-#'   image,
-#'   size = c(512, 512),
-#'   overlap_size_ratio = c(0.2, 0.2)
+#' ds <- mnist_dataset(
+#'   transform = transform_sahi_crop,
+#'   download = TRUE
 #' )
 #'
-#' length(result$images)
-#' result$crop_windows[[1]]
+#' item <- ds[1]
+#'
+#' item$x$crop_windows[[1]]$top  # Top coordinate of the first crop in the original image
+#'
+#' item$x$crop_windows[[1]]$left  # Left coordinate of the first crop in the original image
+#'
+#' item$x$crop_windows[[1]]$height  # Height of the first crop
+#'
+#' item$x$crop_windows[[1]]$width  # Width of the first crop
+#'
+#' item$x$images[[1]] # First cropped image tensor
+#'
+#' item$y  # Dataset target (digit label)
 #' }
 #'
 #' @references
@@ -156,6 +166,10 @@ transform_sahi_crop <- function(
   size = c(512L, 512L),
   overlap_size_ratio = c(0.2, 0.2)
 ){
+
+  if (!inherits(x, "torch_tensor")) {
+    x <- transform_to_tensor(x)
+  }
 
   if (length(size) != 2L) {
     cli_abort("size must contain height and width.")
