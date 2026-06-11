@@ -119,7 +119,10 @@ target_transform_trimap_masks <- function(y) {
 #'
 #' Use as `transform` in image datasets.
 #'
-#' @param x Image tensor of shape `(C, H, W)`.
+#' @param x Image input. Can be a `torch_tensor` of shape `(C, H, W)` or a
+#'   supported image type (e.g., `magick-image`, `array`). Non-tensor inputs
+#'   are converted using `transform_to_tensor()` before slicing.
+#' @note If `x` is not a `torch_tensor`, `transform_to_tensor()` is applied.
 #' @param size Integer vector of length 2 containing crop height and width
 #'   in the form `c(height, width)`.
 #' @param overlap_size_ratio Numeric vector of length 2 containing vertical

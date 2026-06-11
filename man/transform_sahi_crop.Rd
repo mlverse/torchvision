@@ -7,7 +7,9 @@
 transform_sahi_crop(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2))
 }
 \arguments{
-\item{x}{Image tensor of shape \verb{(C, H, W)}.}
+\item{x}{Image input. Can be a \code{torch_tensor} of shape \verb{(C, H, W)} or a
+supported image type (e.g., \code{magick-image}, \code{array}). Non-tensor inputs
+are converted using \code{transform_to_tensor()} before slicing.}
 
 \item{size}{Integer vector of length 2 containing crop height and width
 in the form \code{c(height, width)}.}
@@ -36,6 +38,9 @@ metadata required to later transform detection targets using
 \code{target_transform_sahi_crop()}.
 
 Use as \code{transform} in image datasets.
+}
+\note{
+If \code{x} is not a \code{torch_tensor}, \code{transform_to_tensor()} is applied.
 }
 \examples{
 \dontrun{
