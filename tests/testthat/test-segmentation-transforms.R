@@ -148,13 +148,13 @@ test_that("transform_sahi_crop works with torch tensor input", {
 
   expect_true("images" %in% names(res))
   expect_true("crop_windows" %in% names(res))
-  expect_equal(length(res$images), 4)
+  expect_length(res$images, 4)
 
   first <- res$images[[1]]
   expect_tensor(first)
-  expect_equal(first$shape, c(3, 50, 50))
-  expect_equal(length(res$crop_windows), 4)
-  expect_true(is.numeric(res$crop_windows[[1]]$top))
+  expect_tensor_shape(first, c(3, 50, 50))
+  expect_length(res$crop_windows, 4)
+  expect_type(res$crop_windows[[1]]$top,"double")
 })
 
 test_that("transform_sahi_crop converts array inputs via transform_to_tensor", {
@@ -166,7 +166,7 @@ test_that("transform_sahi_crop converts array inputs via transform_to_tensor", {
 
   expect_true("images" %in% names(res))
   expect_true("crop_windows" %in% names(res))
-  expect_true(length(res$images) > 0)
+  expect_gt(length(res$images), 0)
   expect_tensor(res$images[[1]])
   expect_equal(res$images[[1]]$shape[[1]], 3)
 })
@@ -177,7 +177,7 @@ test_that("transform_sahi_crop returns single crop when size >= image dims", {
 
   res <- transform_sahi_crop(img, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
 
-  expect_equal(length(res$images), 1)
+  expect_length(res$images, 1)
   expect_equal(res$images[[1]]$shape, c(3, 30, 40))
   expect_equal(res$crop_windows[[1]]$height, 30)
   expect_equal(res$crop_windows[[1]]$width, 40)
@@ -198,9 +198,9 @@ test_that("target_transform_sahi_crop clips and translates boxes correctly", {
   out <- target_transform_sahi_crop(y, crop_windows, min_area_ratio = 0)
 
   expect_equal(as.integer(out[[1]]$boxes$size(1)), 1)
-  expect_true(as.character(out[[1]]$labels[[1]]) == "a")
+  expect_equal(as.character(out[[1]]$labels[[1]]), "a")
 
-  expect_true(as.integer(out[[2]]$boxes$size(1)) >= 1)
+  expect_gte(as.integer(out[[2]]$boxes$size(1)), 1)
 })
 
 test_that("target_transform_sahi_crop preserves label types and empty outputs", {
@@ -214,8 +214,8 @@ test_that("target_transform_sahi_crop preserves label types and empty outputs", 
 
   out <- target_transform_sahi_crop(y, crop_windows)
 
-  expect_true(is.character(out[[1]]$labels))
-  expect_equal(length(out[[1]]$labels), 0)
+  expect_type(out[[1]]$labels,"character")
+  expect_length(out[[1]]$labels, 0)
 })
 
 test_that("target_transform_sahi_crop filters by min_area_ratio", {
