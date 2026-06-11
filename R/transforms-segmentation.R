@@ -109,19 +109,17 @@ target_transform_trimap_masks <- function(y) {
 
 #' @export 
 transform_sahi_crop <- function(
-    x,
-    size = c(512L, 512L),
-    overlap_size_ratio = c(0.2, 0.2)
-) {
+  x,
+  size = c(512L, 512L),
+  overlap_size_ratio = c(0.2, 0.2)
+){
 
   if (length(size) != 2L) {
-    value_error("size must contain height and width.")
+    cli_abort("size must contain height and width.")
   }
 
   if (length(overlap_size_ratio) != 2L) {
-    value_error(
-      "overlap_size_ratio must contain height and width ratios."
-    )
+    cli_abort("overlap_size_ratio must contain height and width ratios.")
   }
 
   slice_height <- as.integer(size[[1]])
@@ -208,9 +206,9 @@ transform_sahi_crop <- function(
 
 #' @export
 target_transform_sahi_crop <- function(
-    y,
-    crop_windows,
-    min_area_ratio = 0.1
+  y,
+  crop_windows,
+  min_area_ratio = 0.1
 ) {
 
   if (!"boxes" %in% names(y)) {
@@ -227,14 +225,10 @@ target_transform_sahi_crop <- function(
     min_area_ratio < 0 ||
     min_area_ratio > 1
   ) {
-    value_error(
-      "min_area_ratio must be between 0 and 1."
-    )
+    cli_abort("min_area_ratio must be between 0 and 1.")
   }
 
-  crop_windows <- normalize_sahi_crop_windows(
-    crop_windows
-  )
+  crop_windows <- normalize_sahi_crop_windows(crop_windows)
 
   boxes <- y$boxes
 
@@ -249,9 +243,7 @@ target_transform_sahi_crop <- function(
     boxes$ndim != 2L ||
     boxes$shape[[2]] != 4L
   ) {
-    value_error(
-      "Target 'boxes' must have shape (N, 4)."
-    )
+    cli_abort("Target 'boxes' must have shape (N, 4).")
   }
 
   labels <- y$labels
@@ -300,19 +292,13 @@ target_transform_sahi_crop <- function(
       clipped_boxes[, 2]
     )
 
-    keep_mask <- as.logical(
-      as.array(keep)
-    )
+    keep_mask <- as.logical(as.array(keep))
 
     if (any(keep_mask)) {
 
-      clipped_boxes <- clipped_boxes[
-        keep_mask,
-      ]
+      clipped_boxes <- clipped_boxes[keep_mask,]
 
-      original_area_kept <- original_area[
-        keep_mask
-      ]
+      original_area_kept <- original_area[keep_mask]
 
       labels_kept <- select_object_field(
         labels,
@@ -323,14 +309,9 @@ target_transform_sahi_crop <- function(
         keep_mask
       )
 
-      cropped_area <- box_area(
-        clipped_boxes
-      )
+      cropped_area <- box_area(clipped_boxes)
 
-      area_ratio <- (
-        cropped_area /
-        original_area_kept
-      )
+      area_ratio <- (cropped_area / original_area_kept)
 
       ratio_mask <- as.logical(
         as.array(
@@ -338,9 +319,7 @@ target_transform_sahi_crop <- function(
         )
       )
 
-      clipped_boxes <- clipped_boxes[
-        ratio_mask,
-      ]
+      clipped_boxes <- clipped_boxes[ratio_mask,]
 
       labels_out <- select_object_field(
         labels_kept,
@@ -359,9 +338,7 @@ target_transform_sahi_crop <- function(
         device = boxes$device
       )
 
-      labels_out <- empty_like(
-        labels
-      )
+      labels_out <- empty_like(labels)
     }
 
     if (
@@ -381,9 +358,7 @@ target_transform_sahi_crop <- function(
         device = boxes$device
       )
 
-      clipped_boxes <- (
-        clipped_boxes - offset
-      )
+      clipped_boxes <- (clipped_boxes - offset)
     }
 
     transformed <- y
@@ -399,9 +374,7 @@ target_transform_sahi_crop <- function(
         ) > 0L
       ) {
 
-        transformed$area <- box_area(
-          clipped_boxes
-        )
+        transformed$area <- box_area(clipped_boxes)
 
       } else {
 
@@ -414,15 +387,11 @@ target_transform_sahi_crop <- function(
     }
 
     if ("image_height" %in% names(y)) {
-      transformed$image_height <- as.integer(
-        window$height
-      )
+      transformed$image_height <- as.integer(window$height)
     }
 
     if ("image_width" %in% names(y)) {
-      transformed$image_width <- as.integer(
-        window$width
-      )
+      transformed$image_width <- as.integer(window$width)
     }
 
     transformed
@@ -486,10 +455,7 @@ parse_sahi_crop_window <- function(window) {
       ) %in% names(window)
     )
   ) {
-
-    stop(
-      "Each crop window must contain top, left, height and width."
-    )
+    cli_abort("Each crop window must contain top, left, height and width.")
   }
 
   top <- as.numeric(window$top)
@@ -500,19 +466,15 @@ parse_sahi_crop_window <- function(window) {
   if (
     any(is.na(c(top, left, height, width)))
   ) {
-    stop("Crop window contains NA values.")
+    cli_abort("Crop window contains NA values.")
   }
 
   if (top < 0 || left < 0) {
-    stop(
-      "Crop window top and left must be non-negative."
-    )
+    cli_abort("Crop window top and left must be non-negative.")
   }
 
   if (height <= 0 || width <= 0) {
-    stop(
-      "Crop window height and width must be positive."
-    )
+    cli_abort("Crop window height and width must be positive.")
   }
 
   list(
@@ -529,15 +491,11 @@ normalize_sahi_crop_windows <- function(
 ) {
 
   if (!is.list(crop_windows)) {
-    stop(
-      "crop_windows must be a list."
-    )
+    cli_abort("crop_windows must be a list.")
   }
 
   if (length(crop_windows) == 0L) {
-    stop(
-      "crop_windows must not be empty."
-    )
+    cli_abort("crop_windows must not be empty.")
   }
 
   lapply(
