@@ -42,9 +42,9 @@ target_transform_coco_masks <- function(y) {
   valid_masks <- Filter(function(m) !is.null(m), masks_list)
 
   if (length(valid_masks) > 0) {
-    y$masks <- torch::torch_stack(valid_masks)
+    y$masks <- torch_stack(valid_masks)
   } else {
-    y$masks <- torch::torch_zeros(c(0, y$image_height, y$image_width), dtype = torch::torch_bool())
+    y$masks <- torch_zeros(c(0, y$image_height, y$image_width), dtype = torch_bool())
   }
 
   y
@@ -90,7 +90,7 @@ target_transform_trimap_masks <- function(y) {
   trimap <- y$trimap
 
   if (!inherits(trimap, "torch_tensor")) {
-    trimap <- torch::torch_tensor(trimap, dtype = torch::torch_int32())
+    trimap <- torch_tensor(trimap, dtype = torch_int32())
   }
 
   if (trimap$ndim != 2) {
@@ -101,7 +101,7 @@ target_transform_trimap_masks <- function(y) {
   mask2 <- (trimap == 2)
   mask3 <- (trimap == 3)
 
-  y$masks <- torch::torch_stack(list(mask1, mask2, mask3))$to(dtype = torch::torch_bool())
+  y$masks <- torch_stack(list(mask1, mask2, mask3))$to(dtype = torch_bool())
 
   y
 }
@@ -239,9 +239,9 @@ target_transform_sahi_crop <- function(
   boxes <- y$boxes
 
   if (!inherits(boxes, "torch_tensor")) {
-    boxes <- torch::torch_tensor(
+    boxes <- torch_tensor(
       boxes,
-      dtype = torch::torch_float()
+      dtype = torch_float()
     )
   }
 
@@ -265,24 +265,24 @@ target_transform_sahi_crop <- function(
     crop_bottom <- crop_top + window$height
     crop_right <- crop_left + window$width
 
-    clipped_boxes <- torch::torch_stack(
+    clipped_boxes <- torch_stack(
       list(
-        torch::torch_clamp(
+        torch_clamp(
           boxes[, 1],
           min = crop_left,
           max = crop_right
         ),
-        torch::torch_clamp(
+        torch_clamp(
           boxes[, 2],
           min = crop_top,
           max = crop_bottom
         ),
-        torch::torch_clamp(
+        torch_clamp(
           boxes[, 3],
           min = crop_left,
           max = crop_right
         ),
-        torch::torch_clamp(
+        torch_clamp(
           boxes[, 4],
           min = crop_top,
           max = crop_bottom
@@ -316,9 +316,9 @@ target_transform_sahi_crop <- function(
 
       labels_kept <- select_object_field(
         labels,
-        torch::torch_tensor(
+        torch_tensor(
           keep_mask,
-          dtype = torch::torch_bool()
+          dtype = torch_bool()
         ),
         keep_mask
       )
@@ -344,16 +344,16 @@ target_transform_sahi_crop <- function(
 
       labels_out <- select_object_field(
         labels_kept,
-        torch::torch_tensor(
+        torch_tensor(
           ratio_mask,
-          dtype = torch::torch_bool()
+          dtype = torch_bool()
         ),
         ratio_mask
       )
 
     } else {
 
-      clipped_boxes <- torch::torch_zeros(
+      clipped_boxes <- torch_zeros(
         c(0, 4),
         dtype = boxes$dtype,
         device = boxes$device
@@ -370,7 +370,7 @@ target_transform_sahi_crop <- function(
       ) > 0L
     ) {
 
-      offset <- torch::torch_tensor(
+      offset <- torch_tensor(
         c(
           crop_left,
           crop_top,
@@ -405,7 +405,7 @@ target_transform_sahi_crop <- function(
 
       } else {
 
-        transformed$area <- torch::torch_zeros(
+        transformed$area <- torch_zeros(
           c(0),
           dtype = boxes$dtype,
           device = boxes$device
@@ -434,7 +434,7 @@ empty_like <- function(x) {
   if (inherits(x, "torch_tensor")) {
 
     return(
-      torch::torch_zeros(
+      torch_zeros(
         c(0),
         dtype = x$dtype,
         device = x$device
