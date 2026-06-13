@@ -162,7 +162,6 @@ target_transform_trimap_masks <- function(y) {
 #' SAHI Documentation:
 #' https://obss.github.io/sahi/slicing/
 #'
-#' @family transforms
 #' @export
 transform_sahi_crop <- function(
   x,
