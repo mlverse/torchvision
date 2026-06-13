@@ -138,24 +138,33 @@ target_transform_trimap_masks <- function(y) {
 #'
 #' @examples
 #' \dontrun{
-#' ds <- mnist_dataset(
-#'   transform = transform_sahi_crop,
-#'   download = TRUE
+#' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
+#'
+#' img <- base_loader(img_url) %>%
+#'   transform_to_tensor()
+#'
+#' item <- transform_sahi_crop(img)
+#'
+#' item$crop_windows[[1]]$top      # Top coordinate of the first crop in the original image
+#' item$crop_windows[[1]]$left     # Left coordinate of the first crop in the original image
+#' item$crop_windows[[1]]$height   # Height of the first crop
+#' item$crop_windows[[1]]$width    # Width of the first crop
+#'
+#' item$images[[1]]                # First cropped image tensor
+#'
+#' length(item$images)             # Number of generated image crops
+#'
+#' crops <- torch_stack(
+#'   item$images[1:length(item$images)]
 #' )
 #'
-#' item <- ds[1]
+#' grid <- vision_make_grid(
+#'   crops,
+#'   scale = TRUE,
+#'   num_rows = 3
+#' )
 #'
-#' item$x$crop_windows[[1]]$top  # Top coordinate of the first crop in the original image
-#'
-#' item$x$crop_windows[[1]]$left  # Left coordinate of the first crop in the original image
-#'
-#' item$x$crop_windows[[1]]$height  # Height of the first crop
-#'
-#' item$x$crop_windows[[1]]$width  # Width of the first crop
-#'
-#' item$x$images[[1]] # First cropped image tensor
-#'
-#' item$y  # Dataset target (digit label)
+#' tensor_image_browse(grid)       # Displays a grid of the generated crops
 #' }
 #'
 #' @references
