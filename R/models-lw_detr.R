@@ -1,8 +1,8 @@
-#' @importFrom torch nn_module nn_linear nn_embedding nn_layer_norm nn_multihead_attention
-#' @importFrom torch nn_conv2d nn_conv_transpose2d nn_batch_norm2d nn_sequential nn_module_list
+#' @importFrom torch nn_module nn_linear nn_embedding nn_layer_norm
+#' @importFrom torch nn_conv2d nn_conv_transpose2d nn_batch_norm2d nn_module_list
 #' @importFrom torch torch_tensor torch_zeros torch_ones torch_cat torch_stack torch_arange
-#' @importFrom torch torch_log torch_exp torch_sigmoid torch_topk torch_gather torch_linspace
-#' @importFrom torch nnf_relu nnf_gelu nnf_silu nnf_grid_sample nnf_interpolate nnf_softmax nnf_linear
+#' @importFrom torch torch_exp torch_sigmoid torch_topk torch_gather torch_linspace
+#' @importFrom torch nnf_relu nnf_gelu nnf_silu nnf_grid_sample nnf_interpolate nnf_softmax
 #' @importFrom torch nn_parameter with_no_grad
 NULL
 
@@ -596,9 +596,8 @@ lw_detr_ms_deform_attn <- torch::nn_module(
 
     self$d_model    <- d_model
     self$num_queries <- num_queries
-    self$n_levels   <- n_levels
   },
-  forward = function(images, class_embed_fn, bbox_embed_fn, num_select) {
+  forward = function(images, class_embed_fn, bbox_embed_fn) {
     bs     <- images$size(1L)
     device <- images$device
 
@@ -721,8 +720,7 @@ lw_detr_model <- torch::nn_module(
 
     out <- self$model(images,
                       class_embed_fn = function(h) self$class_embed(h),
-                      bbox_embed_fn  = function(h) self$bbox_embed(h),
-                      num_select     = self$num_select)
+                      bbox_embed_fn  = function(h) self$bbox_embed(h))
 
     pred_logits <- out$logits   # (B, Lq, num_classes)
     pred_boxes  <- out$boxes    # (B, Lq, 4) cxcywh in [0,1]
