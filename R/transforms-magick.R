@@ -70,7 +70,12 @@
   if (crop_height >= image_height && crop_width >= image_width) {
     return(list(
       images = list(x),
-      crop_windows = list(list(top = 0, left = 0, height = image_height, width = image_width))
+      crop_windows = list(list(
+        top = 0,
+        left = 0,
+        height = as.double(image_height),
+        width = as.double(image_width)
+      ))
     ))
   }
 
@@ -92,10 +97,10 @@
       crop <- transform_crop(x, top, left, crop_height, crop_width)
       images <- c(images, list(crop))
       crop_windows <- c(crop_windows, list(list(
-        top = as.integer(top),
-        left = as.integer(left),
-        height = as.integer(crop_height),
-        width = as.integer(crop_width)
+        top = as.double(top),
+        left = as.double(left),
+        height = as.double(crop_height),
+        width = as.double(crop_width)
       )))
     }
   }
