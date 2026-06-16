@@ -18,9 +18,9 @@ Utilities for resolving Caltech class identifiers to their corresponding
 human readable labels.
 }
 \seealso{
-Other class_resolution:
-\code{\link[=coco_classes]{coco_classes()}},
-\code{\link[=imagenet_classes]{imagenet_classes()}},
-\code{\link[=pascal_voc_classes]{pascal_voc_classes()}}
+Other class_resolution: 
+\code{\link{coco_classes}()},
+\code{\link{imagenet_classes}()},
+\code{\link{pascal_voc_classes}()}
 }
 \concept{class_resolution}

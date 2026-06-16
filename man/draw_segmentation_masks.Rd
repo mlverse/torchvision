@@ -45,11 +45,11 @@ tensor_image_browse(masked_image)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other image display:
-\code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}},
-\code{\link[=draw_keypoints]{draw_keypoints()}},
-\code{\link[=tensor_image_browse]{tensor_image_browse()}},
-\code{\link[=tensor_image_display]{tensor_image_display()}},
-\code{\link[=vision_make_grid]{vision_make_grid()}}
+Other image display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{tensor_image_display}()},
+\code{\link{vision_make_grid}()}
 }
 \concept{image display}
