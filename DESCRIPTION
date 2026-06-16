@@ -99,6 +99,7 @@ Collate:
     'models-mobilenetv3.R'
     'models-mobilenetv3_large.R'
     'models-resnet.R'
+    'models-rfdetr.R'
     'models-vgg.R'
     'models-vit.R'
     'ops-box_convert.R'
@@ -115,4 +116,4 @@ Depends:
     R (>= 3.5)
 LazyData: true
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+RoxygenNote: 8.0.0
