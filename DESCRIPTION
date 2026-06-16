@@ -107,7 +107,7 @@ Collate:
     'transforms-defaults.R'
     'transforms-generics.R'
     'transforms-magick.R'
-    'transforms-segmentation.R'
+    'target-transforms-segmentation.R'
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
@@ -115,4 +115,4 @@ Depends:
     R (>= 3.5)
 LazyData: true
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+RoxygenNote: 8.0.0
