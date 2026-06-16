@@ -414,8 +414,8 @@ convx <- nn_module(
   }
 )
 
-bottleneck <- nn_module(
-  "bottleneck",
+rfdetr_bottleneck <- nn_module(
+  "rfdetr_bottleneck",
   initialize = function(c1, c2, shortcut = TRUE, g = 1, k = c(3, 3), e = 0.5, act = "silu", layer_norm = FALSE) {
     c_ <- as.integer(c2 * e)
     self$cv1 <- convx(c1, c_, kernel = k[1], stride = 1, act = act, layer_norm = layer_norm)
@@ -436,7 +436,7 @@ c2f <- nn_module(
     self$cv1 <- convx(c1, 2 * c, kernel = 1, stride = 1, act = act, layer_norm = layer_norm)
     self$cv2 <- convx((2 + n) * c, c2, kernel = 1, act = act, layer_norm = layer_norm)
     self$m <- nn_module_list(lapply(seq_len(n), function(i) {
-      bottleneck(c, c, shortcut, g, k = c(3, 3), e = 1.0, act = act, layer_norm = layer_norm)
+      rfdetr_bottleneck(c, c, shortcut, g, k = c(3, 3), e = 1.0, act = act, layer_norm = layer_norm)
     }))
   },
   forward = function(x) {
