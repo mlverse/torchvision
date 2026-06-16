@@ -277,6 +277,45 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   UseMethod("transform_ten_crop", img)
 }
 
+#' Transform: SAHI Image Slicing
+#'
+#' Splits a large image into overlapping crops following the
+#' SAHI (Slicing Aided Hyper Inference) approach. This transform is useful
+#' for object detection workflows where downscaling large images would
+#' otherwise remove small object details.
+#'
+#' The transform returns both the cropped image tiles and the crop window
+#' metadata required to later transform detection targets using
+#' \code{target_transform_sahi_crop()}.
+#'
+#' Use as \code{transform} in image datasets.
+#'
+#' @param x Image input. Can be a \code{torch_tensor} of shape \verb{(C, H, W)} or a
+#'   supported image type (e.g., \code{magick-image}, \code{array}). Non-tensor inputs
+#'   are converted using \code{transform_to_tensor()} before slicing.
+#' @param size Integer vector of length 2 containing crop height and width
+#'   in the form \code{c(height, width)}.
+#' @param overlap_size_ratio Numeric vector of length 2 containing vertical
+#'   and horizontal overlap ratios in the form
+#'   \code{c(overlap_height_ratio, overlap_width_ratio)}.
+#'
+#' @return
+#' A list with:
+#' \describe{
+#'   \item{images}{List of cropped image tensors.}
+#'   \item{crop_windows}{List of crop windows. Each crop window contains
+#'     \code{top}, \code{left}, \code{height} and \code{width} fields.}
+#' }
+#'
+#' @note
+#' If \code{x} is not a \code{torch_tensor}, \code{transform_to_tensor()} is applied.
+#'
+#' @family combining_transforms
+#' @export
+transform_sahi_crop <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+  UseMethod("transform_sahi_crop", x)
+}
+
 #' Transform a tensor image with a square transformation matrix and a
 #'   mean_vector computed offline
 #'
