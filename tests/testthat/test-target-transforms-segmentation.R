@@ -1,4 +1,4 @@
-context("segmentation-transforms")
+context("target-transforms-segmentation")
 
 # Helper to create mock COCO target
 mock_coco_target <- function(h = 100, w = 100) {
@@ -139,49 +139,7 @@ test_that("coco_polygon_to_mask handles empty polygon", {
   expect_equal_to_r(mask$sum(), 0)
 })
 
-
-test_that("transform_sahi_crop works with torch tensor input", {
-
-  image <- torch_randint(0, 255, c(3, 100, 100), dtype = torch_uint8())
-
-  res <- transform_sahi_crop(image, size = c(50, 50), overlap_size_ratio = c(0, 0))
-
-  expect_true("images" %in% names(res))
-  expect_true("crop_windows" %in% names(res))
-  expect_length(res$images, 4)
-
-  first <- res$images[[1]]
-  expect_tensor(first)
-  expect_tensor_shape(first, c(3, 50, 50))
-  expect_length(res$crop_windows, 4)
-  expect_type(res$crop_windows[[1]]$top,"double")
-})
-
-test_that("transform_sahi_crop converts array inputs via transform_to_tensor", {
-
-  # array in H x W x C layout
-  arr <- array(sample(0:255, 3 * 80 * 60, replace = TRUE), dim = c(80, 60, 3))
-
-  res <- transform_sahi_crop(arr, size = c(40, 30), overlap_size_ratio = c(0.5, 0.5))
-
-  expect_true("images" %in% names(res))
-  expect_true("crop_windows" %in% names(res))
-  expect_gt(length(res$images), 0)
-  expect_tensor(res$images[[1]])
-  expect_equal(res$images[[1]]$shape[[1]], 3)
-})
-
-test_that("transform_sahi_crop returns single crop when size >= image dims", {
-
-  img <- torch_randint(0, 255, c(3, 30, 40), dtype = torch_uint8())
-
-  res <- transform_sahi_crop(img, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
-
-  expect_length(res$images, 1)
-  expect_equal(res$images[[1]]$shape, c(3, 30, 40))
-  expect_equal(res$crop_windows[[1]]$height, 30)
-  expect_equal(res$crop_windows[[1]]$width, 40)
-})
+# SAHI target transform tests
 
 test_that("target_transform_sahi_crop clips and translates boxes correctly", {
 

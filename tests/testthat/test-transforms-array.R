@@ -55,3 +55,17 @@ test_that("transform_to_tensor works for list of arrays", {
                "3D arrays")
 
 })
+
+test_that("transform_sahi_crop converts array inputs via default dispatch", {
+
+  arr <- array(sample(0:255, 3 * 80 * 60, replace = TRUE), dim = c(80, 60, 3))
+
+  res <- transform_sahi_crop(arr, size = c(40, 30), overlap_size_ratio = c(0.5, 0.5))
+
+  expect_true("images" %in% names(res))
+  expect_true("crop_windows" %in% names(res))
+  expect_gt(length(res$images), 0)
+  expect_tensor(res$images[[1]])
+  expect_equal(res$images[[1]]$shape[[1]], 3)
+
+})

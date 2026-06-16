@@ -187,6 +187,34 @@ test_that("ten_crop", {
   expect_tensor_shape(ob[[1]], c(1,3,3,3))
 })
 
+test_that("sahi_crop", {
+
+  x <- torch_randn(3, 10, 12)
+  o <- transform_sahi_crop(x, size = c(4, 4), overlap_size_ratio = c(0, 0))
+
+  expect_true("images" %in% names(o))
+  expect_true("crop_windows" %in% names(o))
+
+  n_rows <- ceiling((10 - 4) / 4) + 1
+  n_cols <- ceiling((12 - 4) / 4) + 1
+  expect_length(o$images, n_rows * n_cols)
+  expect_tensor_shape(o$images[[1]], c(3, 4, 4))
+  expect_type(o$crop_windows[[1]]$top, "double")
+
+})
+
+test_that("sahi_crop returns single crop when size >= image dims", {
+
+  x <- torch_randn(3, 30, 40)
+  o <- transform_sahi_crop(x, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
+
+  expect_length(o$images, 1)
+  expect_equal(o$images[[1]]$shape, c(3, 30, 40))
+  expect_equal(o$crop_windows[[1]]$height, 30)
+  expect_equal(o$crop_windows[[1]]$width, 40)
+
+})
+
 test_that("rotate", {
 
   img <- torch::torch_tensor(matrix(1:16))$view(c(1, 4, 4))
