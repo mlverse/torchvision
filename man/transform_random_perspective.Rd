@@ -22,7 +22,7 @@ and ranges from 0 to 1. Default is 0.5.}
 
 \item{interpolation}{(int, optional) Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:filter_types]{magick::filter_types()}}.}
+\code{\link[magick:options]{magick::filter_types()}}.}
 
 \item{fill}{(int or str or tuple): Pixel fill value for constant fill.
 Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
@@ -34,15 +34,15 @@ Performs a random perspective transformation of the given image with a given
 probability
 }
 \seealso{
-Other random_transforms:
-\code{\link[=transform_color_jitter]{transform_color_jitter()}},
-\code{\link[=transform_random_affine]{transform_random_affine()}},
-\code{\link[=transform_random_crop]{transform_random_crop()}},
-\code{\link[=transform_random_erasing]{transform_random_erasing()}},
-\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
-\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
-\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
-\code{\link[=transform_random_rotation]{transform_random_rotation()}},
-\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
+Other random_transforms: 
+\code{\link{transform_color_jitter}()},
+\code{\link{transform_random_affine}()},
+\code{\link{transform_random_crop}()},
+\code{\link{transform_random_erasing}()},
+\code{\link{transform_random_grayscale}()},
+\code{\link{transform_random_horizontal_flip}()},
+\code{\link{transform_random_resized_crop}()},
+\code{\link{transform_random_rotation}()},
+\code{\link{transform_random_vertical_flip}()}
 }
 \concept{random_transforms}

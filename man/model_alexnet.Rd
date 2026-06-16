@@ -20,14 +20,14 @@ AlexNet model architecture from the
 \href{https://arxiv.org/abs/1404.5997}{One weird trick...} paper.
 }
 \seealso{
-Other classification_model:
+Other classification_model: 
 \code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_facenet}},
-\code{\link[=model_inception_v3]{model_inception_v3()}},
-\code{\link[=model_maxvit]{model_maxvit()}},
-\code{\link[=model_mobilenet_v2]{model_mobilenet_v2()}},
+\code{\link{model_inception_v3}()},
+\code{\link{model_maxvit}()},
+\code{\link{model_mobilenet_v2}()},
 \code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},

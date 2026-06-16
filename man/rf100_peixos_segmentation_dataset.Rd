@@ -58,9 +58,9 @@ tensor_image_browse(overlay)
 
 }
 \seealso{
-Other segmentation_dataset:
-\code{\link[=coco_segmentation_dataset]{coco_segmentation_dataset()}},
-\code{\link[=oxfordiiitpet_segmentation_dataset]{oxfordiiitpet_segmentation_dataset()}},
+Other segmentation_dataset: 
+\code{\link{coco_segmentation_dataset}()},
+\code{\link{oxfordiiitpet_segmentation_dataset}()},
 \code{\link{pascal_voc_datasets}}
 }
 \concept{segmentation_dataset}

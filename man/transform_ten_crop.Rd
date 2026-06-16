@@ -24,11 +24,12 @@ returns a tuple of images and there may be a mismatch in the number of
 inputs and targets your Dataset returns.
 }
 \seealso{
-Other combining_transforms:
-\code{\link[=transform_five_crop]{transform_five_crop()}},
-\code{\link[=transform_random_apply]{transform_random_apply()}},
-\code{\link[=transform_random_choice]{transform_random_choice()}},
-\code{\link[=transform_random_order]{transform_random_order()}},
-\code{\link[=transform_resized_crop]{transform_resized_crop()}}
+Other combining_transforms: 
+\code{\link{transform_five_crop}()},
+\code{\link{transform_random_apply}()},
+\code{\link{transform_random_choice}()},
+\code{\link{transform_random_order}()},
+\code{\link{transform_resized_crop}()},
+\code{\link{transform_sahi_crop}()}
 }
 \concept{combining_transforms}

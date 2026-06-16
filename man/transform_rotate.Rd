@@ -43,25 +43,25 @@ value for the area outside the transform in the output image is always 0.}
 Angular rotation of an image
 }
 \seealso{
-Other unitary_transforms:
-\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
-\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
-\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
-\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
-\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
-\code{\link[=transform_affine]{transform_affine()}},
-\code{\link[=transform_center_crop]{transform_center_crop()}},
-\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
-\code{\link[=transform_crop]{transform_crop()}},
-\code{\link[=transform_grayscale]{transform_grayscale()}},
-\code{\link[=transform_hflip]{transform_hflip()}},
-\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
-\code{\link[=transform_normalize]{transform_normalize()}},
-\code{\link[=transform_pad]{transform_pad()}},
-\code{\link[=transform_perspective]{transform_perspective()}},
-\code{\link[=transform_resize]{transform_resize()}},
-\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
-\code{\link[=transform_to_tensor]{transform_to_tensor()}},
-\code{\link[=transform_vflip]{transform_vflip()}}
+Other unitary_transforms: 
+\code{\link{transform_adjust_brightness}()},
+\code{\link{transform_adjust_contrast}()},
+\code{\link{transform_adjust_gamma}()},
+\code{\link{transform_adjust_hue}()},
+\code{\link{transform_adjust_saturation}()},
+\code{\link{transform_affine}()},
+\code{\link{transform_center_crop}()},
+\code{\link{transform_convert_image_dtype}()},
+\code{\link{transform_crop}()},
+\code{\link{transform_grayscale}()},
+\code{\link{transform_hflip}()},
+\code{\link{transform_linear_transformation}()},
+\code{\link{transform_normalize}()},
+\code{\link{transform_pad}()},
+\code{\link{transform_perspective}()},
+\code{\link{transform_resize}()},
+\code{\link{transform_rgb_to_grayscale}()},
+\code{\link{transform_to_tensor}()},
+\code{\link{transform_vflip}()}
 }
 \concept{unitary_transforms}

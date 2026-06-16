@@ -31,11 +31,11 @@ Arranges a batch B of (image) tensors in a grid, with optional padding between
 images. Expects a 4d mini-batch tensor of shape (B x C x H x W).
 }
 \seealso{
-Other image display:
-\code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}},
-\code{\link[=draw_keypoints]{draw_keypoints()}},
-\code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}},
-\code{\link[=tensor_image_browse]{tensor_image_browse()}},
-\code{\link[=tensor_image_display]{tensor_image_display()}}
+Other image display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_browse}()},
+\code{\link{tensor_image_display}()}
 }
 \concept{image display}

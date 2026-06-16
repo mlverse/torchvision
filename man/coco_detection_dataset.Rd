@@ -70,13 +70,13 @@ tensor_image_browse(boxed)
 \seealso{
 \code{\link{coco_segmentation_dataset}} for instance segmentation tasks
 
-Other detection_dataset:
+Other detection_dataset: 
 \code{\link{pascal_voc_datasets}},
-\code{\link[=rf100_biology_collection]{rf100_biology_collection()}},
-\code{\link[=rf100_damage_collection]{rf100_damage_collection()}},
-\code{\link[=rf100_document_collection]{rf100_document_collection()}},
-\code{\link[=rf100_infrared_collection]{rf100_infrared_collection()}},
-\code{\link[=rf100_medical_collection]{rf100_medical_collection()}},
-\code{\link[=rf100_underwater_collection]{rf100_underwater_collection()}}
+\code{\link{rf100_biology_collection}()},
+\code{\link{rf100_damage_collection}()},
+\code{\link{rf100_document_collection}()},
+\code{\link{rf100_infrared_collection}()},
+\code{\link{rf100_medical_collection}()},
+\code{\link{rf100_underwater_collection}()}
 }
 \concept{detection_dataset}

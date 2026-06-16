@@ -91,7 +91,7 @@ tensor_image_display(segmented)
 }
 }
 \seealso{
-Other semantic_segmentation_model:
+Other semantic_segmentation_model: 
 \code{\link{model_convnext_segmentation}},
 \code{\link{model_deeplabv3}}
 }

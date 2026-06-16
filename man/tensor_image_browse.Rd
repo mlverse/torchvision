@@ -16,11 +16,11 @@ color image to display}
 Display image tensor into browser
 }
 \seealso{
-Other image display:
-\code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}},
-\code{\link[=draw_keypoints]{draw_keypoints()}},
-\code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}},
-\code{\link[=tensor_image_display]{tensor_image_display()}},
-\code{\link[=vision_make_grid]{vision_make_grid()}}
+Other image display: 
+\code{\link{draw_bounding_boxes}()},
+\code{\link{draw_keypoints}()},
+\code{\link{draw_segmentation_masks}()},
+\code{\link{tensor_image_display}()},
+\code{\link{vision_make_grid}()}
 }
 \concept{image display}
