@@ -125,6 +125,30 @@ target_transform_trimap_masks <- function(y) {
 #'
 #' @return A list of transformed targets, one per crop window.
 #'
+#' @examples
+#' \dontrun{
+#'
+#' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
+#' img <- base_loader(img_url) %>% transform_to_tensor()
+#'
+#' item <- transform_sahi_crop(img, size = c(512, 512))
+#'
+#' # Synthetic target with a box straddling the first two crops
+#' y <- list(
+#'   boxes = torch_tensor(matrix(c(400, 100, 600, 300), nrow = 1, byrow = TRUE),
+#'                        dtype = torch_float()),
+#'   labels = torch_tensor(1L)
+#' )
+#'
+#' targets <- target_transform_sahi_crop(y, item$crop_windows, min_area_ratio = 0.1)
+#'
+#' targets[[1]]$boxes  # Box clipped and translated to first crop coordinates
+#'
+#' targets[[2]]$boxes  # Box in second crop (the portion that spilled over)
+#'
+#' targets[[2]]$labels  # Label of the box in second crop
+#' }
+#'
 #' @family target_transforms
 #' @export
 target_transform_sahi_crop <- function(y, crop_windows, min_area_ratio = 0.1) {

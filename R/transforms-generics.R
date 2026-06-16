@@ -310,6 +310,40 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #' @note
 #' If \code{x} is not a \code{torch_tensor}, \code{transform_to_tensor()} is applied.
 #'
+#' @examples
+#' \dontrun{
+#'
+#' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
+#'
+#' img <- base_loader(img_url) %>%
+#'   transform_to_tensor()
+#'
+#' item <- transform_sahi_crop(img)
+#'
+#' # Crop metadata
+#' item$crop_windows[[1]]$top        # top coordinate of the first crop
+#' item$crop_windows[[1]]$left       # left coordinate of the first crop
+#' item$crop_windows[[1]]$height     # height of the first crop
+#' item$crop_windows[[1]]$width      # width of the first crop
+#'
+#' item$images[[1]]  # First cropped image tensor
+#'
+#' length(item$images)  # Number of generated crops
+#'
+#' # Visualize the first 9 crops
+#' crops <- torch_stack(
+#'   item$images[1:length(item$images)]
+#' )
+#'
+#' grid <- vision_make_grid(
+#'   crops,
+#'   scale = TRUE,
+#'   num_rows = 3
+#' )
+#'
+#' tensor_image_browse(grid)
+#' }
+#'
 #' @family combining_transforms
 #' @export
 transform_sahi_crop <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
