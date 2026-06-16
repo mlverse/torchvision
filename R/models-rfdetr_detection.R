@@ -1,11 +1,29 @@
 #' RF-DETR Implementation
 #'
 #' RF-DETR: Neural Architecture Search for Real-Time Detection Transformers
-#' (https://arxiv.org/abs/2511.09554)
+#' ([https://arxiv.org/abs/2511.09554](https://arxiv.org/abs/2511.09554))
 #'
-#' Object detection transformer models with a DinoV2 backbone and
-#' deformable-attention decoder. Supports Nano, Small, Medium, Base,
-#' Base with O365 pretraining, and Large variants.
+#' Object detection transformer models combining a DINOv2 backbone
+#' (windowed attention, register tokens) with a deformable-attention
+#' decoder and two-stage query proposal. Supports Nano, Small, Medium,
+#' Base, Base with O365 pretraining, and Large variants.
+#'
+#' ## Model Variants
+#' ```
+#' | Variant   | Backbone           | Decoder Layers | Resolution | # Queries | Group DETR | Weights                     |
+#' |-----------|--------------------|----------------|------------|-----------|------------|-----------------------------|
+#' | nano      | DINOv2 Small (win) | 2              | 384        | 300       | 13         | COCO (91 classes)           |
+#' | small     | DINOv2 Small (win) | 2              | 512        | 300       | 13         | COCO (91 classes)           |
+#' | medium    | DINOv2 Small (win) | 2              | 640        | 300       | 13         | COCO (91 classes)           |
+#' | base      | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes)           |
+#' | base_2    | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes, alt run)  |
+#' | base_o365 | DINOv2 Small (win) | 3              | 640        | 300       | 13         | Objects365 (366 classes)    |
+#' | large     | DINOv2 Base (win)  | 3              | 560        | 300       | 13         | COCO (91 classes)           |
+#' ```
+#' - All models use group DETR (group_detr=13) with two-stage query proposal,
+#'   Lite Refpoint Refine, and BBox reparameterisation.
+#' - The `large` variant corresponds to the deprecated RF-DETR-Large config
+#'   (DINOv2 Base encoder, hidden_dim=384).
 #'
 #' @inheritParams model_mobilenet_v2
 #'
@@ -1542,7 +1560,7 @@ build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) 
   model
 }
 
-#' @describeIn model_rfdetr RF-DETR Nano (fastest, 30.5M params)
+#' @describeIn model_rfdetr RF-DETR Nano (fastest, COCO, 384px)
 #' @export
 model_rfdetr_nano <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$nano
@@ -1550,7 +1568,7 @@ model_rfdetr_nano <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_nano")
 }
 
-#' @describeIn model_rfdetr RF-DETR Small
+#' @describeIn model_rfdetr RF-DETR Small (lightweight, COCO, 512px)
 #' @export
 model_rfdetr_small <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$small
@@ -1558,7 +1576,7 @@ model_rfdetr_small <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_small")
 }
 
-#' @describeIn model_rfdetr RF-DETR Medium
+#' @describeIn model_rfdetr RF-DETR Medium (balanced speed/accuracy, COCO, 640px)
 #' @export
 model_rfdetr_medium <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$medium
@@ -1566,7 +1584,7 @@ model_rfdetr_medium <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_medium")
 }
 
-#' @describeIn model_rfdetr RF-DETR Base (COCO pretrained)
+#' @describeIn model_rfdetr RF-DETR Base (COCO pretrained, 640px)
 #' @export
 model_rfdetr_base <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$base
@@ -1574,7 +1592,7 @@ model_rfdetr_base <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_base")
 }
 
-#' @describeIn model_rfdetr RF-DETR Base variant 2 (alternative COCO training)
+#' @describeIn model_rfdetr RF-DETR Base variant 2 (alternative COCO training run)
 #' @export
 model_rfdetr_base_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$base_2
@@ -1582,7 +1600,7 @@ model_rfdetr_base_2 <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_base_2")
 }
 
-#' @describeIn model_rfdetr RF-DETR Base pretrained on Objects365 (366 classes)
+#' @describeIn model_rfdetr RF-DETR Base O365 (Objects365, 366 classes)
 #' @export
 model_rfdetr_base_o365 <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$base_o365
@@ -1590,7 +1608,7 @@ model_rfdetr_base_o365 <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_base_o365")
 }
 
-#' @describeIn model_rfdetr RF-DETR Large (most accurate)
+#' @describeIn model_rfdetr RF-DETR Large (DINOv2 Base backbone, COCO, 560px)
 #' @export
 model_rfdetr_large <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$large
