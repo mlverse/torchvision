@@ -155,7 +155,7 @@ tensor_image_display(segmented)
 
 }
 \seealso{
-Other semantic_segmentation_model: 
+Other semantic_segmentation_model:
 \code{\link{model_deeplabv3}},
 \code{\link{model_fcn_resnet}}
 }

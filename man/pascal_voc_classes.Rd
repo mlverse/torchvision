@@ -24,9 +24,9 @@ The dataset defines 21 semantic classes: \code{"background"}, \code{"aeroplane"}
 They are available through the \code{classes} variable of the dataset object.
 }
 \seealso{
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{imagenet_classes}()}
+Other class_resolution:
+\code{\link[=caltech_classes]{caltech_classes()}},
+\code{\link[=coco_classes]{coco_classes()}},
+\code{\link[=imagenet_classes]{imagenet_classes()}}
 }
 \concept{class_resolution}

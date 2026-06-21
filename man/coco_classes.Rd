@@ -18,9 +18,9 @@ human readable labels. The labels are retrieved from pytorch/vision source to be
 with torchvision pretrained models.
 }
 \seealso{
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{imagenet_classes}()},
-\code{\link{pascal_voc_classes}()}
+Other class_resolution:
+\code{\link[=caltech_classes]{caltech_classes()}},
+\code{\link[=imagenet_classes]{imagenet_classes()}},
+\code{\link[=pascal_voc_classes]{pascal_voc_classes()}}
 }
 \concept{class_resolution}

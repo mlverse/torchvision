@@ -54,8 +54,8 @@ targets[[2]]$labels  # Label of the box in second crop
 
 }
 \seealso{
-Other target_transforms: 
-\code{\link{target_transform_coco_masks}()},
-\code{\link{target_transform_trimap_masks}()}
+Other target_transforms:
+\code{\link[=target_transform_coco_masks]{target_transform_coco_masks()}},
+\code{\link[=target_transform_trimap_masks]{target_transform_trimap_masks()}}
 }
 \concept{target_transforms}

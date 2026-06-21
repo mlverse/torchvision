@@ -174,24 +174,19 @@ output
 
 }
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}},
 \code{\link{model_maskrcnn}}
 
-Other object_detection_model: 
-\code{\link{model_convnext_detection}},
-\code{\link{model_fasterrcnn}},
-\code{\link{model_maskrcnn}}
-
-Other classification_model: 
-\code{\link{model_alexnet}()},
+Other classification_model:
+\code{\link[=model_alexnet]{model_alexnet()}},
 \code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
+\code{\link[=model_inception_v3]{model_inception_v3()}},
+\code{\link[=model_maxvit]{model_maxvit()}},
+\code{\link[=model_mobilenet_v2]{model_mobilenet_v2()}},
 \code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
