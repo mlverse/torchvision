@@ -145,7 +145,7 @@ tensor_image_browse(boxed)
 
 }
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
 \code{\link{model_maskrcnn}},

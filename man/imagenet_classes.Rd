@@ -33,24 +33,9 @@ human readable labels. The labels are retrieved from the same source used by
 PyTorch's reference implementation.
 }
 \seealso{
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
+Other class_resolution:
+\code{\link[=caltech_classes]{caltech_classes()}},
+\code{\link[=coco_classes]{coco_classes()}},
+\code{\link[=pascal_voc_classes]{pascal_voc_classes()}}
 }
 \concept{class_resolution}

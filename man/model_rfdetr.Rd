@@ -80,7 +80,7 @@ Lite Refpoint Refine, and BBox reparameterisation.
 
 }}
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
 \code{\link{model_fasterrcnn}},

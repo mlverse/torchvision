@@ -153,7 +153,7 @@ cli::cli_inform("Majority class {.pkg ResNet-50}: {.emph {pascal_voc_classes(top
 
 }
 \seealso{
-Other semantic_segmentation_model: 
+Other semantic_segmentation_model:
 \code{\link{model_convnext_segmentation}},
 \code{\link{model_fcn_resnet}}
 }
