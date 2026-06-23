@@ -108,20 +108,17 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
   } else {
     n_h <- max(ceiling((image_height - crop_height) / step_h) + 1L, 1L)
     n_w <- max(ceiling((image_width - crop_width) / step_w) + 1L, 1L)
-    n_total <- n_h * n_w
 
-    crop_windows <- vector("list", n_total)
+    tops <- seq(0L, by = step_h, length.out = n_h)
+    tops <- pmin(tops, image_height - crop_height)
+    lefts <- seq(0L, by = step_w, length.out = n_w)
+    lefts <- pmin(lefts, image_width - crop_width)
+
+    crop_windows <- vector("list", n_h * n_w)
     idx <- 1L
 
-    for (i in seq_len(n_h)) {
-      top <- (i - 1L) * step_h
-      if (top + crop_height > image_height)
-        top <- image_height - crop_height
-      for (j in seq_len(n_w)) {
-        left <- (j - 1L) * step_w
-        if (left + crop_width > image_width)
-          left <- image_width - crop_width
-
+    for (top in tops)
+      for (left in lefts) {
         crop_windows[[idx]] <- list(
           top = as.double(top + 1L),
           left = as.double(left + 1L),
@@ -130,7 +127,6 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
         )
         idx <- idx + 1L
       }
-    }
   }
 
   structure(
