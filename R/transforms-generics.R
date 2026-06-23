@@ -279,36 +279,25 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 
 #' Slicing Aid for Hyper Inference (SAHI) for image
 #'
-#' Splits a large image into overlapping crops following the
-#' SAHI (Slicing Aided Hyper Inference) approach. This transform is useful
-#' for object detection workflows where downscaling large images would
-#' otherwise remove small object details.
-#'
-#' The transform returns both the cropped image tiles and the crop window
-#' metadata required to later transform detection targets using
-#' \code{target_transform_sahi_crop()}.
+#' Splits an image into overlapping crops using a precomputed
+#' \code{sahi_split} object (created by \code{prepare_sahi_split()}).
+#' Unlike other transforms, the split parameters are prepared once and
+#' reused, keeping the transform type-invariant: the output has the same
+#' type as the input (stacked tensor for tensor input, multi-frame magick
+#' image for magick input).
 #'
 #' Use as \code{transform} in image datasets.
 #'
-#' @param x Image input. Can be a \code{torch_tensor} of shape \verb{(C, H, W)} or a
-#'   supported image type (e.g., \code{magick-image}, \code{array}). Non-tensor inputs
-#'   are converted using \code{transform_to_tensor()} before slicing.
-#' @param size Integer vector of length 2 containing crop height and width
-#'   in the form \code{c(height, width)}.
-#' @param overlap_size_ratio Numeric vector of length 2 containing vertical
-#'   and horizontal overlap ratios in the form
-#'   \code{c(overlap_height_ratio, overlap_width_ratio)}.
+#' @param x Image input. Can be a \code{torch_tensor} of shape \verb{(C, H, W)}
+#'   or a \code{magick-image}.
+#' @param sahi_split An object of class \code{sahi_split} created by
+#'   \code{prepare_sahi_split()}.
 #'
-#' @return
-#' A list with:
-#' \describe{
-#'   \item{images}{List of cropped image tensors.}
-#'   \item{crop_windows}{List of crop windows. Each crop window contains
-#'     \code{top}, \code{left}, \code{height} and \code{width} fields.}
-#' }
-#'
-#' @note
-#' If \code{x} is not a \code{torch_tensor}, \code{transform_to_tensor()} is applied.
+#' @return An object of the same type as \code{x}:
+#'   \describe{
+#'     \item{torch_tensor in}{Stacked tensor of shape \verb{(N, C, H, W)}.}
+#'     \item{magick-image in}{Multi-frame magick image.}
+#'   }
 #'
 #' @examples
 #' \dontrun{
@@ -318,35 +307,25 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #' img <- base_loader(img_url) %>%
 #'   transform_to_tensor()
 #'
-#' item <- transform_sahi_crop(img)
+#' sp <- prepare_sahi_split(img, size = c(512, 512), overlap_size_ratio = c(0.2, 0.2))
 #'
-#' # Crop metadata
-#' item$crop_windows[[1]]$top        # top coordinate of the first crop
-#' item$crop_windows[[1]]$left       # left coordinate of the first crop
-#' item$crop_windows[[1]]$height     # height of the first crop
-#' item$crop_windows[[1]]$width      # width of the first crop
+#' crops <- transform_sahi_crop(img, sp)
 #'
-#' item$images[[1]]  # First cropped image tensor
+#' # crops is a stacked tensor of shape (N, C, H, W)
+#' crops$shape
 #'
-#' length(item$images)  # Number of generated crops
-#'
-#' # Visualize the first 9 crops
-#' crops <- torch_stack(
-#'   item$images[1:length(item$images)]
-#' )
-#'
+#' # Visualize the first 9 crops in a 3x3 grid
 #' grid <- vision_make_grid(
 #'   crops,
 #'   scale = TRUE,
 #'   num_rows = 3
 #' )
-#'
 #' tensor_image_browse(grid)
 #' }
 #'
 #' @family combining_transforms
 #' @export
-transform_sahi_crop <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+transform_sahi_crop <- function(x, sahi_split) {
   UseMethod("transform_sahi_crop", x)
 }
 

@@ -52,60 +52,14 @@
 }
 
 #' @export
-`transform_sahi_crop.magick-image` <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+`transform_sahi_crop.magick-image` <- function(x, sahi_split) {
 
-  img_info <- magick::image_info(x)
-  image_height <- img_info$height
-  image_width <- img_info$width
+  crops <- lapply(sahi_split$crop_windows, function(cw) {
+    # Convert 1-based coords to 0-based for magick
+    transform_crop(x, cw$top - 1, cw$left - 1, cw$height, cw$width)
+  })
 
-  crop_height <- as.integer(size[1])
-  crop_width <- as.integer(size[2])
-
-  overlap_h <- round(crop_height * overlap_size_ratio[1])
-  overlap_w <- round(crop_width * overlap_size_ratio[2])
-
-  step_h <- max(crop_height - overlap_h, 1L)
-  step_w <- max(crop_width - overlap_w, 1L)
-
-  if (crop_height >= image_height && crop_width >= image_width) {
-    return(list(
-      images = list(x),
-      crop_windows = list(list(
-        top = 0,
-        left = 0,
-        height = as.double(image_height),
-        width = as.double(image_width)
-      ))
-    ))
-  }
-
-  n_h <- max(ceiling((image_height - crop_height) / step_h) + 1, 1L)
-  n_w <- max(ceiling((image_width - crop_width) / step_w) + 1, 1L)
-
-  images <- list()
-  crop_windows <- list()
-
-  for (i in seq_len(n_h)) {
-    top <- (i - 1L) * step_h
-    if (top + crop_height > image_height)
-      top <- image_height - crop_height
-    for (j in seq_len(n_w)) {
-      left <- (j - 1L) * step_w
-      if (left + crop_width > image_width)
-        left <- image_width - crop_width
-
-      crop <- transform_crop(x, top, left, crop_height, crop_width)
-      images <- c(images, list(crop))
-      crop_windows <- c(crop_windows, list(list(
-        top = as.double(top),
-        left = as.double(left),
-        height = as.double(crop_height),
-        width = as.double(crop_width)
-      )))
-    }
-  }
-
-  list(images = images, crop_windows = crop_windows)
+  magick::image_join(crops)
 }
 
 # Utils -------------------------------------------------------------------
