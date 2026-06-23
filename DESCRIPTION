@@ -103,6 +103,7 @@ Collate:
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
+    'sahi-split.R'
     'target-transforms-segmentation.R'
     'transforms-array.R'
     'transforms-defaults.R'
