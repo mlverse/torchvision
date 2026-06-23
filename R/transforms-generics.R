@@ -314,7 +314,7 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #' # crops is a stacked tensor of shape (N, C, H, W)
 #' crops$shape
 #'
-#' # Visualize the first 9 crops in a 3x3 grid
+#' # Visualize the crops in a grid
 #' grid <- vision_make_grid(
 #'   crops,
 #'   scale = TRUE,
