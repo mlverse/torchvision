@@ -277,7 +277,7 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   UseMethod("transform_ten_crop", img)
 }
 
-#' Transform: SAHI Image Slicing
+#' Slicing Aid for Hyper Inference (SAHI) for image
 #'
 #' Splits a large image into overlapping crops following the
 #' SAHI (Slicing Aided Hyper Inference) approach. This transform is useful
