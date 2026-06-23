@@ -15,11 +15,9 @@ test_that("transform_to_tensor works with magick image lists", {
 test_that("transform_sahi_crop works with magick images", {
   im <- magick::image_read("assets/class/horse/horse-2.tif")
 
-  res <- transform_sahi_crop(im, size = c(50, 60), overlap_size_ratio = c(0, 0))
+  sp <- prepare_sahi_split(im, size = c(50, 60), overlap_size_ratio = c(0, 0))
+  res <- transform_sahi_crop(im, sp)
 
-  expect_true("images" %in% names(res))
-  expect_true("crop_windows" %in% names(res))
-  expect_gt(length(res$images), 0)
-  expect_s3_class(res$images[[1]], "magick-image")
-  expect_type(res$crop_windows[[1]]$top, "double")
+  expect_s3_class(res, "magick-image")
+  expect_length(res, 9)
 })

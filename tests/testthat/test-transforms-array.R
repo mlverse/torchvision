@@ -56,16 +56,18 @@ test_that("transform_to_tensor works for list of arrays", {
 
 })
 
-test_that("transform_sahi_crop converts array inputs via default dispatch", {
+test_that("transform_sahi_crop works with arrays via convert-then-split", {
 
   arr <- array(sample(0:255, 3 * 80 * 60, replace = TRUE), dim = c(80, 60, 3))
 
-  res <- transform_sahi_crop(arr, size = c(40, 30), overlap_size_ratio = c(0.5, 0.5))
+  x <- transform_to_tensor(arr)
+  sp <- prepare_sahi_split(x, size = c(40, 30), overlap_size_ratio = c(0.5, 0.5))
+  res <- transform_sahi_crop(x, sp)
 
-  expect_true("images" %in% names(res))
-  expect_true("crop_windows" %in% names(res))
-  expect_gt(length(res$images), 0)
-  expect_tensor(res$images[[1]])
-  expect_equal(res$images[[1]]$shape[[1]], 3)
+  expect_tensor(res)
+  expect_equal(res$ndim, 4)
+  expect_gt(res$size(1), 0)
+  expect_tensor(res)
+  expect_equal(res$size(2), 3)
 
 })

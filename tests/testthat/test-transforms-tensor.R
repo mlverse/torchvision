@@ -190,28 +190,27 @@ test_that("ten_crop", {
 test_that("sahi_crop", {
 
   x <- torch_randn(3, 10, 12)
-  o <- transform_sahi_crop(x, size = c(4, 4), overlap_size_ratio = c(0, 0))
+  sp <- prepare_sahi_split(x, size = c(4, 4), overlap_size_ratio = c(0, 0))
+  o <- transform_sahi_crop(x, sp)
 
-  expect_true("images" %in% names(o))
-  expect_true("crop_windows" %in% names(o))
+  expect_tensor(o)
+  expect_tensor_shape(o, c(9,3,4,4))
 
   n_rows <- ceiling((10 - 4) / 4) + 1
   n_cols <- ceiling((12 - 4) / 4) + 1
-  expect_length(o$images, n_rows * n_cols)
-  expect_tensor_shape(o$images[[1]], c(3, 4, 4))
-  expect_type(o$crop_windows[[1]]$top, "double")
+  expect_equal(o$size(1), n_rows * n_cols)
+  expect_tensor_shape(o[1, ..], c(3, 4, 4))
 
 })
 
-test_that("sahi_crop returns single crop when size >= image dims", {
+test_that("sahi_crop returns single stacked crop when size >= image dims", {
 
   x <- torch_randn(3, 30, 40)
-  o <- transform_sahi_crop(x, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
+  sp <- prepare_sahi_split(x, size = c(100, 100), overlap_size_ratio = c(0.2, 0.2))
+  o <- transform_sahi_crop(x, sp)
 
-  expect_length(o$images, 1)
-  expect_equal(o$images[[1]]$shape, c(3, 30, 40))
-  expect_equal(o$crop_windows[[1]]$height, 30)
-  expect_equal(o$crop_windows[[1]]$width, 40)
+  expect_tensor(o)
+  expect_tensor_shape(o, c(1,3,30,40))
 
 })
 

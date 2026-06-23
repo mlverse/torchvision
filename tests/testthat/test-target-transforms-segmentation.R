@@ -148,12 +148,15 @@ test_that("target_transform_sahi_crop clips and translates boxes correctly", {
     labels = c("a", "b")
   )
 
-  crop_windows <- list(
-    list(top = 0, left = 0, height = 50, width = 50),
-    list(top = 50, left = 50, height = 100, width = 100)
-  )
+  # 1-based crop windows (top/left = 1 means first pixel)
+  sp <- structure(list(
+    crop_windows = list(
+      list(top = 1, left = 1, height = 50, width = 50),
+      list(top = 51, left = 51, height = 100, width = 100)
+    )
+  ), class = "sahi_split")
 
-  out <- target_transform_sahi_crop(y, crop_windows, min_area_ratio = 0)
+  out <- target_transform_sahi_crop(y, sp, min_area_ratio = 0)
 
   expect_equal(as.integer(out[[1]]$boxes$size(1)), 1)
   expect_equal(as.character(out[[1]]$labels[[1]]), "a")
@@ -168,9 +171,11 @@ test_that("target_transform_sahi_crop preserves label types and empty outputs", 
     labels = character()
   )
 
-  crop_windows <- list(list(top = 0, left = 0, height = 10, width = 10))
+  sp <- structure(list(
+    crop_windows = list(list(top = 1, left = 1, height = 10, width = 10))
+  ), class = "sahi_split")
 
-  out <- target_transform_sahi_crop(y, crop_windows)
+  out <- target_transform_sahi_crop(y, sp)
 
   expect_type(out[[1]]$labels,"character")
   expect_length(out[[1]]$labels, 0)
@@ -183,11 +188,13 @@ test_that("target_transform_sahi_crop filters by min_area_ratio", {
     labels = torch_tensor(1L)
   )
 
-  crop_windows <- list(list(top = 0, left = 0, height = 10, width = 10))
+  sp <- structure(list(
+    crop_windows = list(list(top = 1, left = 1, height = 10, width = 10))
+  ), class = "sahi_split")
 
-  out_keep_none <- target_transform_sahi_crop(y, crop_windows, min_area_ratio = 0.5)
+  out_keep_none <- target_transform_sahi_crop(y, sp, min_area_ratio = 0.5)
   expect_equal(as.integer(out_keep_none[[1]]$boxes$size(1)), 0)
 
-  out_keep_some <- target_transform_sahi_crop(y, crop_windows, min_area_ratio = 0)
+  out_keep_some <- target_transform_sahi_crop(y, sp, min_area_ratio = 0)
   expect_equal(as.integer(out_keep_some[[1]]$boxes$size(1)), 1)
 })
