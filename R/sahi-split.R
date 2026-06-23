@@ -9,6 +9,8 @@
 #'   * A numeric vector of length 2: `c(height, width)`
 #'   * A `torch_tensor`: dimensions extracted from the tensor shape
 #'   * A `magick-image`: dimensions extracted from image metadata
+#'   * A dataset (e.g. `coco_detection_dataset`): dimensions extracted from
+#'     the first sample's metadata or loaded image
 #' @param size Integer vector of length 2 containing crop height and width
 #'   in the form `c(height, width)`.
 #' @param overlap_size_ratio Numeric vector of length 2 containing vertical
@@ -30,19 +32,25 @@
 #'
 #' @examples
 #' \dontrun{
-#' # From image dimensions
-#' sp <- prepare_sahi_split(c(400, 600), size = c(200, 200))
-#'
 #' # From a torch tensor
 #' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
 #' img <- base_loader(img_url) %>% transform_to_tensor()
 #' sp <- prepare_sahi_split(img, size = c(512, 512), overlap_size_ratio = c(0.2, 0.2))
 #'
-#' # Use with transform_sahi_crop
 #' crops <- transform_sahi_crop(img, sp)
-#'
-#' # Visualize the crops in a grid
 #' grid <- vision_make_grid(crops, scale = TRUE, num_rows = 3)
+#' tensor_image_browse(grid)
+#'
+#' # From a dataset (SAHI as part of the transform pipeline)
+#' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+#' sp_ds <- prepare_sahi_split(ds, size = c(200, 200), overlap_size_ratio = c(0.2, 0.2))
+#'
+#' ds <- coco_detection_dataset(train = FALSE, year = "2017",
+#'   transform = . %>% transform_to_tensor() %>%
+#'     transform_sahi_crop(sp_ds))
+#'
+#' item <- ds[1]
+#' grid <- vision_make_grid(item$x, scale = TRUE, num_rows = 3)
 #' tensor_image_browse(grid)
 #' }
 #'
@@ -78,6 +86,36 @@ prepare_sahi_split.torch_tensor <- function(x, size = c(512L, 512L), overlap_siz
 `prepare_sahi_split.magick-image` <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
   info <- magick::image_info(x)
   compute_sahi_split(info$height, info$width, size, overlap_size_ratio)
+}
+
+#' @export
+prepare_sahi_split.dataset <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+  if (inherits(x, "R6")) {
+    # Attempt to read image_metadata (used by COCO-style datasets)
+    meta <- x$image_metadata
+    if (!is.null(meta) && is.list(meta)) {
+      first <- meta[[1]]
+      image_height <- first$height
+      image_width <- first$width
+      if (!is.null(image_height) && !is.null(image_width))
+        return(compute_sahi_split(image_height, image_width, size, overlap_size_ratio))
+    }
+    # Fall back: load the first sample to determine dimensions
+    item <- x$.getitem(1)
+    im <- item$x
+    if (inherits(im, "torch_tensor")) {
+      image_height <- im$size(-2)
+      image_width <- im$size(-1)
+    } else if (inherits(im, "array")) {
+      image_height <- dim(im)[1]
+      image_width <- dim(im)[2]
+    } else {
+      value_error("Cannot determine image dimensions from dataset.")
+    }
+    compute_sahi_split(image_height, image_width, size, overlap_size_ratio)
+  } else {
+    not_implemented_for_class(x)
+  }
 }
 
 # Internal: compute crop windows and return a sahi_split object

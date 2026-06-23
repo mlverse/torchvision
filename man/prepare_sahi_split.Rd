@@ -12,6 +12,8 @@ prepare_sahi_split(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2))
 \item A numeric vector of length 2: \code{c(height, width)}
 \item A \code{torch_tensor}: dimensions extracted from the tensor shape
 \item A \code{magick-image}: dimensions extracted from image metadata
+\item A dataset (e.g. \code{coco_detection_dataset}): dimensions extracted from
+the first sample's metadata or loaded image
 }}
 
 \item{size}{Integer vector of length 2 containing crop height and width
@@ -43,19 +45,25 @@ transforms remain type-invariant (returning the same type as their input).
 }
 \examples{
 \dontrun{
-# From image dimensions
-sp <- prepare_sahi_split(c(400, 600), size = c(200, 200))
-
 # From a torch tensor
 img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
 img <- base_loader(img_url) \%>\% transform_to_tensor()
 sp <- prepare_sahi_split(img, size = c(512, 512), overlap_size_ratio = c(0.2, 0.2))
 
-# Use with transform_sahi_crop
 crops <- transform_sahi_crop(img, sp)
-
-# Visualize the crops in a grid
 grid <- vision_make_grid(crops, scale = TRUE, num_rows = 3)
+tensor_image_browse(grid)
+
+# From a dataset (SAHI as part of the transform pipeline)
+ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+sp_ds <- prepare_sahi_split(ds, size = c(200, 200), overlap_size_ratio = c(0.2, 0.2))
+
+ds <- coco_detection_dataset(train = FALSE, year = "2017",
+  transform = . \%>\% transform_to_tensor() \%>\%
+    transform_sahi_crop(sp_ds))
+
+item <- ds[1]
+grid <- vision_make_grid(item$x, scale = TRUE, num_rows = 3)
 tensor_image_browse(grid)
 }
 
