@@ -237,8 +237,7 @@ transform_ten_crop.default <- function(img, size, vertical_flip = FALSE) {
 
 #' @export
 transform_sahi_crop.default <- function(x, size, overlap_size_ratio) {
-  x <- transform_to_tensor(x)
-  transform_sahi_crop(x, size = size, overlap_size_ratio = overlap_size_ratio)
+  not_implemented_for_class(x)
 }
 
 #' @export
