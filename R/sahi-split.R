@@ -108,8 +108,10 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
   } else {
     n_h <- max(ceiling((image_height - crop_height) / step_h) + 1L, 1L)
     n_w <- max(ceiling((image_width - crop_width) / step_w) + 1L, 1L)
+    n_total <- n_h * n_w
 
-    crop_windows <- list()
+    crop_windows <- vector("list", n_total)
+    idx <- 1L
 
     for (i in seq_len(n_h)) {
       top <- (i - 1L) * step_h
@@ -120,12 +122,13 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
         if (left + crop_width > image_width)
           left <- image_width - crop_width
 
-        crop_windows <- c(crop_windows, list(list(
+        crop_windows[[idx]] <- list(
           top = as.double(top + 1L),
           left = as.double(left + 1L),
           height = as.double(crop_height),
           width = as.double(crop_width)
-        )))
+        )
+        idx <- idx + 1L
       }
     }
   }
