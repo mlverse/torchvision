@@ -149,7 +149,7 @@ target_transform_trimap_masks <- function(y) {
 #' targets[[2]]$boxes  # Box in second crop (the portion that spilled over)
 #'
 #' # Visualize the crops with bounding boxes overlaid
-#' preview <- lapply(1:min(9, dim(crops)[1]), function(i) {
+#' preview <- lapply(1:dim(crops)[1], function(i) {
 #'   item <- list(x = crops[i, ..], y = targets[[i]])
 #'   class(item) <- "image_with_bounding_box"
 #'   draw_bounding_boxes(item, colors = "red")
