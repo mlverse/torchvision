@@ -236,7 +236,7 @@ transform_ten_crop.default <- function(img, size, vertical_flip = FALSE) {
 }
 
 #' @export
-transform_sahi_crop.default <- function(x, size, overlap_size_ratio) {
+transform_sahi_crop.default <- function(x, sahi_split) {
   not_implemented_for_class(x)
 }
 
