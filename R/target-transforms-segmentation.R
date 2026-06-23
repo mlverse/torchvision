@@ -106,7 +106,7 @@ target_transform_trimap_masks <- function(y) {
   y
 }
 
-#' Target Transform: SAHI Crop Target Adjustment
+#' Target Transform: Slicing Aid for Hyper Inference (SAHI) for COCO bounding boxes.
 #'
 #' Adjusts object detection targets for SAHI image crops by clipping bounding
 #' boxes to crop boundaries, translating coordinates into crop-relative
