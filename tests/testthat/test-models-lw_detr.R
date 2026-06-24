@@ -46,6 +46,41 @@ test_that("model_lw_detr_tiny respects num_classes and num_select", {
   expect_true(all(labels_vec >= 0 & labels_vec < 10))
 })
 
+test_that("model_lw_detr_tiny supports pixel_mask", {
+  skip_on_cran()
+  skip_if_not(torch::torch_is_installed())
+
+  model <- model_lw_detr_tiny(num_classes = 91, num_select = 50)
+  model$eval()
+  input <- base_loader("assets/class/dog/dog.0.jpg") %>%
+    transform_to_tensor() %>% transform_resize(c(256, 256)) %>% torch_unsqueeze(1)
+
+  # Mark only the top 160 rows valid, as if the image were letterbox-padded.
+  mask <- torch_zeros(c(1, 256, 256), dtype = torch::torch_bool())
+  mask[, 1:160, ] <- TRUE
+  full <- torch_ones(c(1, 256, 256), dtype = torch::torch_bool())
+
+  torch::with_no_grad({
+    out_mask <- model(input, pixel_mask = mask)
+    out_full <- model(input, pixel_mask = full)
+    out_none <- model(input)
+  })
+
+  d <- out_mask$detections[[1]]
+  expect_named(d, c("boxes", "labels", "scores"))
+  expect_equal(d$boxes$shape[1], 50L)
+  expect_equal(d$boxes$shape[2], 4L)
+  expect_equal(d$scores$shape[1], 50L)
+
+  expect_equal(as.numeric(out_full$detections[[1]]$scores$cpu()),
+               as.numeric(out_none$detections[[1]]$scores$cpu()))
+
+  expect_false(isTRUE(all.equal(
+    as.numeric(d$scores$cpu()),
+    as.numeric(out_none$detections[[1]]$scores$cpu())
+  )))
+})
+
 test_that("model_lw_detr pretrained weights require COCO num_classes", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
