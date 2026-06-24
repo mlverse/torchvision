@@ -136,6 +136,7 @@ if (num_boxes > 0) {
 Other object_detection_model:
 \code{\link{model_facenet}},
 \code{\link{model_fasterrcnn}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}}
 }
 \concept{object_detection_model}
