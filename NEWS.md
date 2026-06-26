@@ -1,5 +1,9 @@
 # torchvision (development version)
 
+## New models
+
+* Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28, #328).
+
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
@@ -25,7 +29,6 @@
 * Added `model_maskrcnn_resnet50_fpn()` and `model_maskrcnn_resnet50_fpn_v2()` for instance segmentation (#278, @ANAMASGARD).
 * Added `model_convnext_*_detection()` for object detection, with * within tiny/small/base (#262, @ANAMASGARD).
 * Added `model_convnext_*_fcn()` and `model_convnext_*_upernet()` for semantic segmentation, with * within tiny/small/base (#265, @ANAMASGARD).
-* Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28 #328).
 
 ## New datasets
 
