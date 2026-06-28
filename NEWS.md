@@ -1,9 +1,12 @@
 # torchvision (development version)
 
+## New models
+
+* Added RF-DETR (Nano, Small, Medium, Base, Base-v2, Base-O365, Large) object detection models with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
+
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
-* Added RF-DETR (Nano, Small, Medium, Base, Base-v2, Base-O365, Large) object detection models with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
 
 # torchvision 0.9.0
 
