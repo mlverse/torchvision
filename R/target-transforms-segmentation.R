@@ -170,6 +170,22 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 
   crop_windows <- sahi_split$crop_windows
 
+  shape_y <- function(n_boxes, boxes_dtype, labels_val, labels_dtype, crop_h, crop_w) {
+    out <- y
+    out$boxes <- torch_zeros(c(n_boxes, 4), dtype = boxes_dtype)
+    if (labels_is_tensor)
+      out$labels <- torch_tensor(labels_val, dtype = labels_dtype)
+    else
+      out$labels <- labels_val
+    if (!is.null(y$area))
+      out$area <- torch_zeros(n_boxes, dtype = y$area$dtype)
+    if (!is.null(y$image_height))
+      out$image_height <- crop_h
+    if (!is.null(y$image_width))
+      out$image_width <- crop_w
+    out
+  }
+
   results <- lapply(crop_windows, function(cw) {
 
     # Convert 1-based crop window coordinates to 0-based for box clipping
@@ -178,26 +194,10 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
     crop_h <- cw$height
     crop_w <- cw$width
 
-    shape_y <- function(n_boxes, boxes_dtype, labels_val, labels_dtype) {
-      out <- y
-      out$boxes <- torch_zeros(c(n_boxes, 4), dtype = boxes_dtype)
-      if (labels_is_tensor)
-        out$labels <- torch_tensor(labels_val, dtype = labels_dtype)
-      else
-        out$labels <- labels_val
-      if (!is.null(y$area))
-        out$area <- torch_zeros(n_boxes, dtype = y$area$dtype)
-      if (!is.null(y$image_height))
-        out$image_height <- crop_h
-      if (!is.null(y$image_width))
-        out$image_width <- crop_w
-      out
-    }
-
     if (n == 0) {
       labels_val <- if (labels_is_tensor) integer(0) else vector(typeof(labels), 0)
       labels_dtype <- if (labels_is_tensor) labels$dtype else NULL
-      return(shape_y(0, boxes$dtype, labels_val, labels_dtype))
+      return(shape_y(0, boxes$dtype, labels_val, labels_dtype, crop_h, crop_w))
     }
 
     x1 <- boxes[, 1]
@@ -223,7 +223,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
     if (length(mask_idx) == 0) {
       labels_val <- if (labels_is_tensor) integer(0) else vector(typeof(labels), 0)
       labels_dtype <- if (labels_is_tensor) labels$dtype else NULL
-      return(shape_y(0, boxes$dtype, labels_val, labels_dtype))
+      return(shape_y(0, boxes$dtype, labels_val, labels_dtype, crop_h, crop_w))
     }
 
     n_keep <- length(mask_idx)
