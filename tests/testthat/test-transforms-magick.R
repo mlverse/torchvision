@@ -21,3 +21,14 @@ test_that("transform_sahi_crop works with magick images", {
   expect_s3_class(res, "magick-image")
   expect_length(res, 9)
 })
+
+test_that("transform_sahi_crop works with batched multi-frame magick images", {
+  im <- magick::image_read("assets/class/horse/horse-2.tif")
+  im_batch <- magick::image_join(c(im, im))
+
+  sp <- prepare_sahi_split(im, size = c(50, 60), overlap_size_ratio = c(0, 0))
+  res <- transform_sahi_crop(im_batch, sp)
+
+  expect_s3_class(res, "magick-image")
+  expect_length(res, 9 * 2)
+})

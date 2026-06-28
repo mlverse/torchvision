@@ -214,6 +214,19 @@ test_that("sahi_crop returns single stacked crop when size >= image dims", {
 
 })
 
+test_that("sahi_crop works with batched 4D tensor input", {
+
+  x <- torch_randn(2, 3, 10, 12)
+  sp <- prepare_sahi_split(x, size = c(4, 4), overlap_size_ratio = c(0, 0))
+  o <- transform_sahi_crop(x, sp)
+
+  expect_tensor(o)
+  n_rows <- ceiling((10 - 4) / 4) + 1
+  n_cols <- ceiling((12 - 4) / 4) + 1
+  expect_tensor_shape(o, c(n_rows * n_cols, 2, 3, 4, 4))
+
+})
+
 test_that("rotate", {
 
   img <- torch::torch_tensor(matrix(1:16))$view(c(1, 4, 4))
