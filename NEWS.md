@@ -6,7 +6,7 @@
 
 ## New Features
 
-* Added SAHI (Slicing Aided Hyper Inference) support via `transform_sahi_crop()` and `target_transform_sahi_crop()` for slicing large images into overlapping crops and adjusting detection targets accordingly. (@DerrickUnleashed, #324)
+* Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
 
 # torchvision 0.9.0
 
