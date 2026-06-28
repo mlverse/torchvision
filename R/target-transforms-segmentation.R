@@ -140,7 +140,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
       out$image_height <- crop_h
     if (!is.null(y$image_width))
       out$image_width <- crop_w
-    out$is_crowd <- NULL
+    out$iscrowd <- NULL
     out
   }
 
@@ -207,7 +207,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
     if (!is.null(y$image_width))
       out_y$image_width <- crop_w
 
-    out_y$is_crowd <- NULL
+    out_y$iscrowd <- NULL
 
     out_y
   })
