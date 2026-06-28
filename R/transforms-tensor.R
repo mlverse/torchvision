@@ -284,6 +284,9 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
 #' @export
 transform_sahi_crop.torch_tensor <- function(x, sahi_split) {
 
+  if (!inherits(sahi_split, "sahi_split")) {
+    cli_abort("{.arg sahi_split} must be a {.cls sahi_split} object created by {.fn prepare_sahi_split}.")
+  }
   check_img(x)
 
   crops <- lapply(sahi_split$crop_windows, function(cw) {

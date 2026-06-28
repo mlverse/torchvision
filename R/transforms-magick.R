@@ -54,6 +54,9 @@
 #' @export
 `transform_sahi_crop.magick-image` <- function(x, sahi_split) {
 
+  if (!inherits(sahi_split, "sahi_split")) {
+    cli_abort("{.arg sahi_split} must be a {.cls sahi_split} object created by {.fn prepare_sahi_split}.")
+  }
   crops <- lapply(sahi_split$crop_windows, function(cw) {
     # Convert 1-based coords to 0-based for magick
     transform_crop(x, cw$top - 1, cw$left - 1, cw$height, cw$width)
