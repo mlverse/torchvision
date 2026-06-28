@@ -90,32 +90,26 @@ prepare_sahi_split.torch_tensor <- function(x, size = c(512L, 512L), overlap_siz
 
 #' @export
 prepare_sahi_split.dataset <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
-  if (inherits(x, "R6")) {
-    # Attempt to read image_metadata (used by COCO-style datasets)
-    meta <- x$image_metadata
-    if (!is.null(meta) && is.list(meta)) {
-      first <- meta[[1]]
-      image_height <- first$height
-      image_width <- first$width
-      if (!is.null(image_height) && !is.null(image_width))
-        return(compute_sahi_split(image_height, image_width, size, overlap_size_ratio))
-    }
-    # Fall back: load the first sample to determine dimensions
-    item <- x$.getitem(1)
-    im <- item$x
-    if (inherits(im, "torch_tensor")) {
-      image_height <- im$size(-2)
-      image_width <- im$size(-1)
-    } else if (inherits(im, "array")) {
-      image_height <- dim(im)[1]
-      image_width <- dim(im)[2]
-    } else {
-      value_error("Cannot determine image dimensions from dataset.")
-    }
-    compute_sahi_split(image_height, image_width, size, overlap_size_ratio)
-  } else {
-    not_implemented_for_class(x)
+  meta <- x$image_metadata
+  if (!is.null(meta) && is.list(meta)) {
+    first <- meta[[1]]
+    image_height <- first$height
+    image_width <- first$width
+    if (!is.null(image_height) && !is.null(image_width))
+      return(compute_sahi_split(image_height, image_width, size, overlap_size_ratio))
   }
+  item <- x$.getitem(1)
+  im <- item$x
+  if (inherits(im, "torch_tensor")) {
+    image_height <- im$size(-2)
+    image_width <- im$size(-1)
+  } else if (inherits(im, "array")) {
+    image_height <- dim(im)[1]
+    image_width <- dim(im)[2]
+  } else {
+    value_error("Cannot determine image dimensions from dataset.")
+  }
+  compute_sahi_split(image_height, image_width, size, overlap_size_ratio)
 }
 
 # Internal: compute crop windows and return a sahi_split object
