@@ -158,10 +158,11 @@ test_that("target_transform_sahi_crop clips and translates boxes correctly", {
 
   out <- target_transform_sahi_crop(y, sp, min_area_ratio = 0)
 
-  expect_equal(as.integer(out[[1]]$boxes$size(1)), 1)
+  expect_length(out, length(sp$crop_windows))
+  expect_tensor_shape(out[[1]]$boxes, c(1, 4))
   expect_equal(as.character(out[[1]]$labels[[1]]), "a")
 
-  expect_gte(as.integer(out[[2]]$boxes$size(1)), 1)
+  expect_gt(out[[2]]$boxes$size(1), 0)
 })
 
 test_that("target_transform_sahi_crop preserves label types and empty outputs", {
@@ -177,6 +178,8 @@ test_that("target_transform_sahi_crop preserves label types and empty outputs", 
 
   out <- target_transform_sahi_crop(y, sp)
 
+  expect_length(out, length(sp$crop_windows))
+  expect_tensor_shape(out[[1]]$boxes, c(0, 4))
   expect_type(out[[1]]$labels,"character")
   expect_length(out[[1]]$labels, 0)
 })
@@ -193,8 +196,10 @@ test_that("target_transform_sahi_crop filters by min_area_ratio", {
   ), class = "sahi_split")
 
   out_keep_none <- target_transform_sahi_crop(y, sp, min_area_ratio = 0.5)
-  expect_equal(as.integer(out_keep_none[[1]]$boxes$size(1)), 0)
+  expect_length(out_keep_none, length(sp$crop_windows))
+  expect_tensor_shape(out_keep_none[[1]]$boxes, c(0, 4))
 
   out_keep_some <- target_transform_sahi_crop(y, sp, min_area_ratio = 0)
-  expect_equal(as.integer(out_keep_some[[1]]$boxes$size(1)), 1)
+  expect_length(out_keep_some, length(sp$crop_windows))
+  expect_tensor_shape(out_keep_some[[1]]$boxes, c(1, 4))
 })

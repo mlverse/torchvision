@@ -67,7 +67,6 @@ test_that("transform_sahi_crop works with arrays via convert-then-split", {
   expect_tensor(res)
   expect_equal(res$ndim, 4)
   expect_gt(res$size(1), 0)
-  expect_tensor(res)
   expect_equal(res$size(2), 3)
 
 })
