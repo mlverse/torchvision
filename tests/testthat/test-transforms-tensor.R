@@ -196,10 +196,10 @@ test_that("sahi_crop", {
   expect_tensor(o)
   expect_tensor_shape(o, c(9,3,4,4))
 
-  n_rows <- ceiling((10 - 4) / 4) + 1
-  n_cols <- ceiling((12 - 4) / 4) + 1
-  expect_equal(o$size(1), n_rows * n_cols)
-  expect_tensor_shape(o[1, ..], c(3, 4, 4))
+  h_crops <- ceiling((10 - 4) / 4) + 1
+  v_crops <- ceiling((12 - 4) / 4) + 1
+  batch_size <- h_crops * v_crops
+  expect_tensor_shape(o, c(batch_size, 3, 4, 4))
 
 })
 
