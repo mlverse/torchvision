@@ -106,61 +106,7 @@ target_transform_trimap_masks <- function(y) {
   y
 }
 
-#' Target Transform: Slicing Aid for Hyper Inference (SAHI) for COCO bounding boxes.
-#'
-#' Adjusts object detection targets for SAHI image crops by clipping bounding
-#' boxes to crop boundaries, translating coordinates into crop-relative
-#' coordinates and filtering annotations according to the retained area ratio.
-#'
-#' @param y Detection target list containing at least `boxes` and `labels`.
-#'   Bounding boxes are expected in `(x1, y1, x2, y2)` format.
-#'   `labels` may be a `torch_tensor`, an atomic vector, or a list; empty
-#'   outputs preserve the original type.
-#' @param sahi_split An object of class `sahi_split` created by
-#'   `prepare_sahi_split()` containing the precomputed crop windows.
-#' @param min_area_ratio Numeric value between 0 and 1 specifying the minimum
-#'   fraction of original bounding box area that must remain after clipping
-#'   for an annotation to be retained.
-#'
-#' @return A list of transformed targets, one per crop window. Each element
-#'   has the same type and structure as the input `y`, except that the field
-#'   `is_crowd` (if present) is removed, since its length would be
-#'   inconsistent with the per-crop number of annotations.
-#'
-#' @examples
-#' \dontrun{
-#'
-#' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
-#' img <- base_loader(img_url) %>% transform_to_tensor()
-#'
-#' sp <- prepare_sahi_split(img, size = c(512, 512))
-#'
-#' crops <- transform_sahi_crop(img, sp)
-#'
-#' # Synthetic target with a box straddling the first two crops
-#' y <- list(
-#'   boxes = torch_tensor(matrix(c(400, 100, 600, 300), nrow = 1, byrow = TRUE),
-#'                        dtype = torch_float()),
-#'   labels = "car"
-#' )
-#'
-#' targets <- target_transform_sahi_crop(y, sp, min_area_ratio = 0.1)
-#'
-#' targets[[1]]$boxes  # Box clipped and translated to first crop coordinates
-#'
-#' targets[[2]]$boxes  # Box in second crop (the portion that spilled over)
-#'
-#' # Visualize the crops with bounding boxes overlaid
-#' preview <- lapply(1:dim(crops)[1], function(i) {
-#'   item <- list(x = crops[i, ..], y = targets[[i]])
-#'   class(item) <- "image_with_bounding_box"
-#'   draw_bounding_boxes(item, colors = "red")
-#' })
-#' grid <- vision_make_grid(torch_stack(preview), scale = FALSE, num_rows = 3)
-#' tensor_image_browse(grid)
-#' }
-#'
-#' @family target_transforms
+#' @rdname transform_sahi_crop
 #' @export
 target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 

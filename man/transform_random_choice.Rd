@@ -16,11 +16,11 @@ Apply single transformation randomly picked from a list
 }
 \seealso{
 Other combining_transforms:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
 \code{\link[=transform_five_crop]{transform_five_crop()}},
 \code{\link[=transform_random_apply]{transform_random_apply()}},
 \code{\link[=transform_random_order]{transform_random_order()}},
 \code{\link[=transform_resized_crop]{transform_resized_crop()}},
-\code{\link[=transform_sahi_crop]{transform_sahi_crop()}},
 \code{\link[=transform_ten_crop]{transform_ten_crop()}}
 }
 \concept{combining_transforms}
