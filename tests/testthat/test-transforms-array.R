@@ -65,9 +65,7 @@ test_that("transform_sahi_crop works with batched 4D array input", {
   res <- transform_sahi_crop(x, sp)
 
   expect_tensor(res)
-  expect_equal(res$ndim, 5)
-  expect_true(res$size(1) > 0)
-  expect_equal(res$size(2), 2)
-  expect_equal(res$size(3), 3)
+  expect_tensor_shape(res, c(9, 2, 3, 40, 30))
+  expect_tensor_dtype(res, torch_float())
 
 })
