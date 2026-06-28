@@ -203,3 +203,33 @@ test_that("target_transform_sahi_crop filters by min_area_ratio", {
   expect_length(out_keep_some, length(sp$crop_windows))
   expect_tensor_shape(out_keep_some[[1]]$boxes, c(1, 4))
 })
+
+test_that("target_transform_sahi_crop handles batch of targets", {
+
+  y1 <- list(
+    boxes = torch_tensor(matrix(c(10, 10, 60, 60), nrow = 1, byrow = TRUE)),
+    labels = "a"
+  )
+  y2 <- list(
+    boxes = torch_tensor(matrix(c(5, 5, 20, 20), nrow = 1, byrow = TRUE)),
+    labels = "b"
+  )
+  y_batch <- list(y1, y2)
+
+  sp <- structure(list(
+    crop_windows = list(
+      list(top = 1, left = 1, height = 50, width = 50),
+      list(top = 51, left = 51, height = 100, width = 100)
+    )
+  ), class = "sahi_split")
+
+  out <- target_transform_sahi_crop(y_batch, sp, min_area_ratio = 0)
+
+  expect_length(out, 2)
+  expect_length(out[[1]], length(sp$crop_windows))
+  expect_length(out[[2]], length(sp$crop_windows))
+  expect_tensor_shape(out[[1]][[1]]$boxes, c(1, 4))
+  expect_tensor_shape(out[[2]][[1]]$boxes, c(1, 4))
+  expect_equal(out[[1]][[1]]$labels[[1]], "a")
+  expect_equal(out[[2]][[1]]$labels[[1]], "b")
+})

@@ -203,6 +203,18 @@ test_that("sahi_crop", {
 
 })
 
+test_that("sahi_crop with non-zero overlap produces correct number of crops", {
+
+  x <- torch_randn(3, 10, 12)
+  sp <- prepare_sahi_split(x, size = c(4, 4), overlap_size_ratio = c(0.5, 0.5))
+  o <- transform_sahi_crop(x, sp)
+
+  expect_tensor(o)
+  expect_equal(length(sp$crop_windows), 20)
+  expect_tensor_shape(o, c(20, 3, 4, 4))
+
+})
+
 test_that("sahi_crop returns single stacked crop when size >= image dims", {
 
   x <- torch_randn(3, 30, 40)

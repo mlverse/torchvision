@@ -110,6 +110,15 @@ target_transform_trimap_masks <- function(y) {
 #' @export
 target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 
+  # Detect batch input: list of target lists
+  if (is.list(y) && !"boxes" %in% names(y)) {
+    if (is.list(sahi_split) && !inherits(sahi_split, "sahi_split")) {
+      return(Map(function(yi, sp) target_transform_sahi_crop(yi, sp, min_area_ratio),
+                 y, sahi_split))
+    }
+    return(lapply(y, function(yi) target_transform_sahi_crop(yi, sahi_split, min_area_ratio)))
+  }
+
   boxes <- y$boxes
   labels <- y$labels
   labels_is_tensor <- inherits(labels, "torch_tensor")
