@@ -54,7 +54,7 @@
 #' tensor_image_browse(grid)
 #' }
 #'
-#' @family sahi
+#' @family combining_transforms
 #' @export
 prepare_sahi_split <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
   UseMethod("prepare_sahi_split", x)
