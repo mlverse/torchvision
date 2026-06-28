@@ -123,7 +123,9 @@ target_transform_trimap_masks <- function(y) {
 #'   for an annotation to be retained.
 #'
 #' @return A list of transformed targets, one per crop window. Each element
-#'   has the same type and structure as the input `y`.
+#'   has the same type and structure as the input `y`, except that the field
+#'   `is_crowd` (if present) is removed, since its length would be
+#'   inconsistent with the per-crop number of annotations.
 #'
 #' @examples
 #' \dontrun{
@@ -183,6 +185,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
       out$image_height <- crop_h
     if (!is.null(y$image_width))
       out$image_width <- crop_w
+    out$is_crowd <- NULL
     out
   }
 
@@ -248,6 +251,8 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
       out_y$image_height <- crop_h
     if (!is.null(y$image_width))
       out_y$image_width <- crop_w
+
+    out_y$is_crowd <- NULL
 
     out_y
   })
