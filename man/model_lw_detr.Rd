@@ -104,23 +104,36 @@ pass to \code{\link[=coco_classes]{coco_classes()}} for names
 norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 
-# Letterbox a non-square image to 640x640 and build the matching pixel mask
-img <- magick_loader("path/to/image.jpg") |> transform_to_tensor()
-h <- img$shape[2]; w <- img$shape[3]
-s <- 640 / max(h, w)
-nh <- round(h * s); nw <- round(w * s)
-img <- img |> transform_resize(c(nh, nw)) |> transform_normalize(norm_mean, norm_std)
-canvas <- torch::torch_zeros(c(3, 640, 640))
-canvas[, 1:nh, 1:nw] <- img
+# A non-square demo image from the LW-DETR repository
+url <- "https://raw.githubusercontent.com/Atten4Vis/LW-DETR/main/demo/000000496954.jpg"
+img <- base_loader(url) |> transform_to_tensor()
+h <- img$shape[2]
+w <- img$shape[3]
+
+# Letterbox the longest side to 640 and build the matching pixel mask
+s  <- 640 / max(h, w)
+nh <- round(h * s)
+nw <- round(w * s)
+resized <- img |> transform_resize(c(nh, nw))
+canvas  <- torch::torch_zeros(c(3, 640, 640))
+canvas[, 1:nh, 1:nw] <- resized
 mask <- torch::torch_zeros(c(640, 640), dtype = torch::torch_bool())
 mask[1:nh, 1:nw] <- TRUE
+
+input <- canvas |> transform_normalize(norm_mean, norm_std)
 
 model <- model_lw_detr_tiny(pretrained = TRUE)
 model$eval()
 pred <- torch::with_no_grad(
-  model(canvas$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
+  model(input$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
 )$detections[[1]]
-labels <- coco_classes(as.integer(pred$labels))
+
+# Draw the most confident detections on the letterboxed image
+topk   <- pred$scores$topk(k = 5L)[[2]]
+boxes  <- pred$boxes[topk, ]
+labels <- coco_classes(as.integer(pred$labels[topk]))
+boxed  <- draw_bounding_boxes(canvas, boxes, labels = labels)
+tensor_image_browse(boxed)
 }
 
 }
