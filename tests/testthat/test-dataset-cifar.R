@@ -3,7 +3,8 @@ context("dataset-cifar")
 t <- withr::local_tempdir()
 
 test_that("cifar10", {
-
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
   expect_error(
     ds <- cifar10_dataset(root = tempfile(), train = TRUE),
     class = "runtime_error"
@@ -27,7 +28,8 @@ test_that("cifar10", {
 })
 
 test_that("cifar100", {
-
+  skip_if(Sys.getenv("TEST_LARGE_DATASETS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
   expect_error(
     ds <- cifar100_dataset(root = tempfile(), train = TRUE),
     class = "runtime_error"
