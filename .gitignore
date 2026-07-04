@@ -1,10 +1,8 @@
 .Rproj.user
 models/
 env/
-test.pth
-testing.pth
-x.pth
-docs
+docs/
 .Rhistory
-s.pth
 inst/doc
+tools/
+.vscode/
