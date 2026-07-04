@@ -99,32 +99,10 @@ test_that("model_lw_detr pretrained weights require COCO num_classes", {
   expect_error(model_lw_detr_tiny(pretrained = TRUE, num_classes = 10), "num_classes = 91")
 })
 
-# The top detection on this cat image should be the cat class (COCO id 17).
-expect_lw_detr_detects_cat <- function(model) {
-  input <- base_loader("assets/class/cat/cat.2.jpg") %>%
-    transform_to_tensor() %>%
-    transform_resize(c(640, 640)) %>%
-    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
-    torch_unsqueeze(1)
-  model$eval()
-  torch::with_no_grad({
-    out <- model(input)
-  })
-  expect_named(out, "detections")
-  expect_named(out$detections[[1]], c("boxes", "labels", "scores"))
-  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
-  labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
-  scores_vec <- as.numeric(out$detections[[1]]$scores$cpu())
-  expect_true(all(labels_vec >= 0 & labels_vec <= 90))
-  top <- which.max(scores_vec)
-  expect_equal(labels_vec[top], 17L)
-  expect_gt(scores_vec[top], 0.25)
-}
-
 test_that("tests for pretrained model_lw_detr_tiny", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  expect_lw_detr_detects_cat(model_lw_detr_tiny(pretrained = TRUE))
+  expect_coco_model_detects_cat(model_lw_detr_tiny(pretrained = TRUE))
 })
 
 test_that("tests for pretrained model_lw_detr_small", {
@@ -134,7 +112,7 @@ test_that("tests for pretrained model_lw_detr_small", {
   )
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  expect_lw_detr_detects_cat(model_lw_detr_small(pretrained = TRUE))
+  expect_coco_model_detects_cat(model_lw_detr_small(pretrained = TRUE))
 })
 
 test_that("tests for pretrained model_lw_detr_medium", {
@@ -144,7 +122,7 @@ test_that("tests for pretrained model_lw_detr_medium", {
   )
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  expect_lw_detr_detects_cat(model_lw_detr_medium(pretrained = TRUE))
+  expect_coco_model_detects_cat(model_lw_detr_medium(pretrained = TRUE))
 })
 
 test_that("tests for pretrained model_lw_detr_large", {
@@ -154,5 +132,5 @@ test_that("tests for pretrained model_lw_detr_large", {
   )
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
-  expect_lw_detr_detects_cat(model_lw_detr_large(pretrained = TRUE))
+  expect_coco_model_detects_cat(model_lw_detr_large(pretrained = TRUE))
 })
