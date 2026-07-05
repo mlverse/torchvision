@@ -782,25 +782,6 @@ gen_encoder_output_proposals <- function(memory, memory_padding_mask, spatial_sh
   list(output_memory, output_proposals)
 }
 
-mlp_module <- nn_module(
-  "mlp_module",
-  initialize = function(input_dim, hidden_dim, output_dim, num_layers) {
-    self$num_layers <- num_layers
-    h <- rep(hidden_dim, num_layers - 1)
-    dims <- c(input_dim, h, output_dim)
-    self$layers <- nn_module_list(lapply(seq_len(num_layers), function(i) {
-      nn_linear(dims[i], dims[i + 1])
-    }))
-  },
-  forward = function(x) {
-    for (i in seq_len(self$num_layers)) {
-      x <- self$layers[[i]](x)
-      if (i < self$num_layers) x <- nnf_relu(x)
-    }
-    x
-  }
-)
-
 rfdetr_decoder_layer <- nn_module(
   "rfdetr_decoder_layer",
   initialize = function(d_model = 256, sa_nhead = 8, ca_nhead = 16,
@@ -871,7 +852,7 @@ rfdetr_decoder <- nn_module(
     self$return_intermediate <- return_intermediate
     self$lite_refpoint_refine <- lite_refpoint_refine
     self$bbox_reparam <- bbox_reparam
-    self$ref_point_head <- mlp_module(2 * d_model, d_model, d_model, 2)
+    self$ref_point_head <- .lw_detr_mlp_layers(2 * d_model, d_model, d_model, 2)
   },
   refpoints_refine = function(refpoints_unsigmoid, new_refpoints_delta) {
     if (self$bbox_reparam) {
@@ -1104,7 +1085,7 @@ rfdetr_model <- nn_module(
     self$transformer <- transformer
     hidden_dim <- transformer$d_model
     self$class_embed <- nn_linear(hidden_dim, num_classes)
-    self$bbox_embed <- mlp_module(hidden_dim, hidden_dim, 4, 3)
+    self$bbox_embed <- .lw_detr_mlp_layers(hidden_dim, hidden_dim, 4, 3)
     query_dim <- 4
     self$refpoint_embed <- nn_embedding(num_queries * group_detr, query_dim)
     self$query_feat <- nn_embedding(num_queries * group_detr, hidden_dim)
