@@ -49,7 +49,10 @@
 #'
 #' @export
 target_transform_resize <- function(target, size) {
-  # Extract original dimensions once
+  if (!"orig_size" %in% names(target)) {
+    cli::cli_abort("Target must contain 'orig_size' field")
+  }
+  # Extract original dimensions
   c(orig_h, orig_w) %<-% target$orig_size
 
   # Compute new dimensions
@@ -68,15 +71,15 @@ target_transform_resize <- function(target, size) {
   scale_w <- new_w / orig_w
 
   # Resize bounding boxes (xyxy format)
-  boxes <- target$boxes
+  boxes <- target$boxes$clone()
   boxes_resized <- boxes
-  boxes_resized[, 1L] <- boxes[, 1L] * scale_w  # xmin
-  boxes_resized[, 2L] <- boxes[, 2L] * scale_h  # ymin
-  boxes_resized[, 3L] <- boxes[, 3L] * scale_w  # xmax
-  boxes_resized[, 4L] <- boxes[, 4L] * scale_h  # ymax
+  boxes_resized[, 1L] <- boxes[, 1L] * scale_w # xmin
+  boxes_resized[, 2L] <- boxes[, 2L] * scale_h # ymin
+  boxes_resized[, 3L] <- boxes[, 3L] * scale_w # xmax
+  boxes_resized[, 4L] <- boxes[, 4L] * scale_h # ymax
 
   # Update target
-  target$boxes     <- boxes_resized
+  target$boxes <- boxes_resized
   target$orig_size <- c(new_h, new_w)
 
   target
