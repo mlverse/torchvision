@@ -83,14 +83,16 @@ Lite Refpoint Refine, and BBox reparameterisation.
 \dontrun{
 url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 img_tensor <- transform_to_tensor(magick::image_read(url))
+img_dims <- dim(img_tensor)[-1]
 
 x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
+target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
 
 model_fn <- get("model_rfdetr_large")
 model <- model_fn(pretrained = TRUE)
 model$eval()
 
-results <- model(x)$detections[[1]]
+results <- model(x, target_sizes = target_sizes)$detections[[1]]
 
 scores <- as.numeric(results$scores)
 labels <- as.numeric(results$labels)

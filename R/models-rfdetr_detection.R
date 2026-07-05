@@ -35,14 +35,16 @@
 #' \dontrun{
 #' url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 #' img_tensor <- transform_to_tensor(magick::image_read(url))
+#' img_dims <- dim(img_tensor)[-1]
 #'
 #' x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
+#' target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
 #'
 #' model_fn <- get("model_rfdetr_large")
 #' model <- model_fn(pretrained = TRUE)
 #' model$eval()
 #'
-#' results <- model(x)$detections[[1]]
+#' results <- model(x, target_sizes = target_sizes)$detections[[1]]
 #'
 #' scores <- as.numeric(results$scores)
 #' labels <- as.numeric(results$labels)
@@ -1115,7 +1117,7 @@ rfdetr_model <- nn_module(
     }
     self$two_stage <- two_stage
   },
-  forward = function(x, mask = NULL) {
+  forward = function(x, mask = NULL, target_sizes = NULL) {
     if (is.list(x) && !is.null(x$tensors)) {
       mask <- x$mask
       x <- x$tensors
@@ -1204,11 +1206,17 @@ rfdetr_model <- nn_module(
       boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)
       gather_idx <- (topk_boxes + 1L)$unsqueeze(3)$'repeat'(c(1, 1, 4))
       boxes_xyxy <- torch_gather(boxes_xyxy, 2, gather_idx)
-      h <- x$size(3)
-      w <- x$size(4)
-      scale_fct <- torch_tensor(c(w, h, w, h), device = boxes_xyxy$device, dtype = boxes_xyxy$dtype)
+      if (!is.null(target_sizes)) {
+        h <- target_sizes[, 1]
+        w <- target_sizes[, 2]
+        scale_fct <- torch_stack(list(w, h, w, h), dim = 2)$unsqueeze(2)
+      } else {
+        h <- x$size(3)
+        w <- x$size(4)
+        scale_fct <- torch_tensor(c(w, h, w, h), device = boxes_xyxy$device, dtype = boxes_xyxy$dtype)
+      }
       boxes_xyxy <- boxes_xyxy * scale_fct
-      clamp_max <- max(h, w)
+      clamp_max <- if (is.null(target_sizes)) max(h, w) else as.integer(torch_max(w))
       x1 <- boxes_xyxy[, , 1]$clamp(min = 0)
       y1 <- boxes_xyxy[, , 2]$clamp(min = 0)
       x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
