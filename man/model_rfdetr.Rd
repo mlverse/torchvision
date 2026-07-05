@@ -79,11 +79,47 @@ Lite Refpoint Refine, and BBox reparameterisation.
 \item \code{model_rfdetr_large()}: RF-DETR Large (DINOv2 Base backbone, COCO, 560px)
 
 }}
+\examples{
+\dontrun{
+url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
+img_tensor <- transform_to_tensor(magick::image_read(url))
+img_dims <- dim(img_tensor)[-1]
+
+x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
+target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
+
+model_fn <- get("model_rfdetr_large")
+model <- model_fn(pretrained = TRUE)
+model$eval()
+
+out <- model(x)
+results <- rfdetr_postprocess()(out, target_sizes)
+
+scores <- as.numeric(results[[1]]$scores)
+labels <- as.numeric(results[[1]]$labels)
+boxes <- as.matrix(results[[1]]$boxes)
+
+keep <- which(scores > 0.3)
+
+if (length(keep) > 0) {
+  boxed <- draw_bounding_boxes(
+    (img_tensor * 255)$to(dtype = torch_uint8()),
+    torch_tensor(boxes[keep, , drop = FALSE], dtype = torch_int64()),
+    labels = sprintf("\%d:\%.2f", labels[keep], scores[keep]),
+    colors = "black",
+    width = 6,
+    font_size = 12
+  )
+  tensor_image_browse(boxed)
+}
+}
+}
 \seealso{
 Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
 \code{\link{model_fasterrcnn}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}}
 }
 \concept{object_detection_model}

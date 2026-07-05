@@ -30,8 +30,44 @@
 #' @family object_detection_model
 #' @rdname model_rfdetr
 #' @name model_rfdetr
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
+#' img_tensor <- transform_to_tensor(magick::image_read(url))
+#' img_dims <- dim(img_tensor)[-1]
+#'
+#' x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
+#' target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
+#'
+#' model_fn <- get("model_rfdetr_large")
+#' model <- model_fn(pretrained = TRUE)
+#' model$eval()
+#'
+#' out <- model(x)
+#' results <- rfdetr_postprocess()(out, target_sizes)
+#'
+#' scores <- as.numeric(results[[1]]$scores)
+#' labels <- as.numeric(results[[1]]$labels)
+#' boxes <- as.matrix(results[[1]]$boxes)
+#'
+#' keep <- which(scores > 0.3)
+#'
+#' if (length(keep) > 0) {
+#'   boxed <- draw_bounding_boxes(
+#'     (img_tensor * 255)$to(dtype = torch_uint8()),
+#'     torch_tensor(boxes[keep, , drop = FALSE], dtype = torch_int64()),
+#'     labels = sprintf("%d:%.2f", labels[keep], scores[keep]),
+#'     colors = "black",
+#'     width = 3,
+#'     font_size = 12
+#'   )
+#'   tensor_image_browse(boxed)
+#' }
+#' }
 NULL
 
+# This code is modified from https://github.com/roboflow/rf-detr/
 rfdetr_torchscript_urls <- list(
   rfdetr_nano = c("https://torch-cdn.mlverse.org/models/vision/v2/models/rf_detr_nano.pth", "f995ded00af2036196c9d4148da1532d", "116 MB"),
   rfdetr_small = c("https://torch-cdn.mlverse.org/models/vision/v2/models/rf_detr_small.pth", "b9ea5f60a04f07efb51097db3815e397", "116 MB"),
