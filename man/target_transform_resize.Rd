@@ -43,7 +43,8 @@ remain aligned with the resized image.
 target <- list(
   boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
   labels = torch_tensor(1L, dtype = torch_long()),
-  orig_size = c(100L, 100L)
+  image_height  = 100L,
+  image_width = 100L)
 )
 
 # Resize to fixed size

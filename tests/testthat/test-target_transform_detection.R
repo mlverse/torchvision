@@ -15,7 +15,8 @@ make_target <- function(boxes, labels = NULL, orig_size = c(100L, 200L), image_i
   list(
     boxes = boxes,
     labels = labels,
-    orig_size = orig_size,
+    image_height = orig_size[1],
+    image_width = orig_size[2],
     image_id = torch_tensor(image_id, dtype = torch_long()),
     area = area,
     iscrowd = iscrowd
@@ -51,10 +52,11 @@ test_that("target_transform_resize with integer rescales proportionally", {
   # scale_h = 25/100 = 0.25, scale_w = 50/200 = 0.25
   expected_boxes <- matrix(c(10, 5, 20, 15), ncol = 4)
   expect_equal_to_r(out$boxes, expected_boxes, tolerance = 1e-5)
-  expect_equal(out$orig_size, c(25L, 50L))
+  expect_equal(out$image_height, 25L)
+  expect_equal(out$image_width, 50L)
 })
 
-test_that("target_transform_resize updates orig_size", {
+test_that("target_transform_resize updates original size", {
   target <- make_target(
     boxes = matrix(c(0, 0, 10, 10), ncol = 4),
     orig_size = c(100L, 100L)
@@ -62,7 +64,8 @@ test_that("target_transform_resize updates orig_size", {
 
   out <- target_transform_resize(target, c(300L, 400L))
 
-  expect_equal(out$orig_size, c(300L, 400L))
+  expect_equal(out$image_height, 300L)
+  expect_equal(out$image_width, 400L)
 })
 
 test_that("target_transform_resize preserves other target fields", {
@@ -112,7 +115,8 @@ test_that("target_transform_resize handles empty boxes", {
 
   expect_equal(out$boxes$shape, c(0L, 4L))
   expect_tensor(out$boxes)
-  expect_equal(out$orig_size, c(200L, 400L))
+  expect_equal(out$image_height, 200L)
+  expect_equal(out$image_width, 400L)
 })
 
 test_that("target_transform_resize handles multiple boxes", {
@@ -187,7 +191,8 @@ test_that("target_transform_resize with integer handles square image", {
 
   expected_boxes <- matrix(c(5, 10, 25, 30), ncol = 4)
   expect_equal_to_r(out$boxes, expected_boxes, tolerance = 1e-5)
-  expect_equal(out$orig_size, c(50L, 50L))
+  expect_equal(out$image_height, 50L)
+  expect_equal(out$image_width, 50L)
 })
 
 test_that("target_transform_resize with integer handles portrait image", {
@@ -204,7 +209,8 @@ test_that("target_transform_resize with integer handles portrait image", {
   # scale_h = 50/200 = 0.25, scale_w = 25/100 = 0.25
   expected_boxes <- matrix(c(2.5, 10, 12.5, 30), ncol = 4)
   expect_equal_to_r(out$boxes, expected_boxes, tolerance = 1e-5)
-  expect_equal(out$orig_size, c(50L, 25L))
+  expect_equal(out$image_height, 50L)
+  expect_equal(out$image_width, 25L)
 })
 
 test_that("target_transform_resize with integer handles landscape image", {
@@ -221,7 +227,8 @@ test_that("target_transform_resize with integer handles landscape image", {
   # scale_h = 25/100 = 0.25, scale_w = 50/200 = 0.25
   expected_boxes <- matrix(c(5, 2.5, 30, 12.5), ncol = 4)
   expect_equal_to_r(out$boxes, expected_boxes, tolerance = 1e-5)
-  expect_equal(out$orig_size, c(25L, 50L))
+  expect_equal(out$image_height, 25L)
+  expect_equal(out$image_width, 50L)
 })
 
 test_that("target_transform_resize is composable in a pipeline", {
@@ -235,10 +242,11 @@ test_that("target_transform_resize is composable in a pipeline", {
   out2 <- target_transform_resize(out1, c(100L, 200L))
 
   expect_equal_to_r(out2$boxes, as.matrix(target$boxes$cpu()), tolerance = 1e-4)
-  expect_equal(out2$orig_size, target$orig_size)
+  expect_equal(out2$image_height, target$image_height)
+  expect_equal(out2$image_width, target$image_width)
 })
 
-test_that("target_transform_resize works with magrittr pipe", {
+test_that("target_transform_resize works with pipe", {
   skip_if_not_installed("magrittr")
 
   target <- make_target(
@@ -252,10 +260,19 @@ test_that("target_transform_resize works with magrittr pipe", {
     target_transform_resize(size = c(100L, 200L))
 
   expect_equal_to_r(out$boxes, as.matrix(target$boxes$cpu()), tolerance = 1e-4)
-  expect_equal(out$orig_size, target$orig_size)
+  expect_equal(out$image_height, target$image_height)
+  expect_equal(out$image_width, target$image_width)
+
+  out <- target %>%
+    target_transform_resize(size = c(200L, 400L)) %>%
+    target_transform_resize(size = c(100L, 200L))
+
+  expect_equal_to_r(out$boxes, as.matrix(target$boxes$cpu()), tolerance = 1e-4)
+  expect_equal(out$image_height, target$image_height)
+  expect_equal(out$image_width, target$image_width)
 })
 
-test_that("target_transform_resize errors when orig_size is missing", {
+test_that("target_transform_resize errors when one of image size is missing", {
   target <- list(
     boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
     labels = torch_ones(1L, dtype = torch_long())
@@ -263,7 +280,7 @@ test_that("target_transform_resize errors when orig_size is missing", {
 
   expect_error(
     target_transform_resize(target, c(200L, 400L)),
-    "orig_size"
+    "image_width"
   )
 })
 
@@ -274,13 +291,15 @@ test_that("target_transform_resize does not mutate the input target", {
   )
 
   original_boxes <- as.matrix(target$boxes$cpu())
-  original_size <- target$orig_size
+  original_height <- target$image_height
+  original_width <- target$image_width
 
   out <- target_transform_resize(target, c(200L, 400L))
 
   # Original target must not be modified
   expect_equal_to_r(target$boxes, original_boxes)
-  expect_equal(target$orig_size, original_size)
+  expect_equal(target$image_height, original_height)
+  expect_equal(target$image_width, original_width)
 
   # Result must be different
   expect_false(identical(as.matrix(out$boxes$cpu()), original_boxes))

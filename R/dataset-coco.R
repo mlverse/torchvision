@@ -147,7 +147,9 @@ coco_detection_dataset <- torch::dataset(
       boxes = boxes,
       labels = labels,
       area = area,
-      iscrowd = iscrowd
+      iscrowd = iscrowd,
+      image_height = height,
+      image_width = width
     )
 
     if (!is.null(self$transform)) {
@@ -155,8 +157,6 @@ coco_detection_dataset <- torch::dataset(
     }
 
     if (!is.null(self$target_transform)) {
-      y$image_height <- height
-      y$image_width <- width
       y <- self$target_transform(y)
     }
 
@@ -298,7 +298,9 @@ coco_segmentation_dataset <- torch::dataset(
     y <- list(
       labels = labels,
       iscrowd = iscrowd,
-      segmentation = anns$segmentation
+      segmentation = anns$segmentation,
+      image_height = height,
+      image_width = width
     )
 
     if (!is.null(self$transform)) {
@@ -306,8 +308,6 @@ coco_segmentation_dataset <- torch::dataset(
     }
 
     if (!is.null(self$target_transform)) {
-      y$image_height <- height
-      y$image_width <- width
       y <- self$target_transform(y)
     }
 

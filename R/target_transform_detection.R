@@ -33,7 +33,8 @@
 #' target <- list(
 #'   boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
 #'   labels = torch_tensor(1L, dtype = torch_long()),
-#'   orig_size = c(100L, 100L)
+#'   image_height  = 100L,
+#'   image_width = 100L)
 #' )
 #'
 #' # Resize to fixed size
@@ -49,11 +50,12 @@
 #'
 #' @export
 target_transform_resize <- function(target, size) {
-  if (!"orig_size" %in% names(target)) {
-    cli::cli_abort("Target must contain 'orig_size' field")
+  if (!"image_height" %in% names(target) || !"image_width" %in% names(target)) {
+    cli::cli_abort("Target must contain both 'image_height' and 'image_width' field")
   }
   # Extract original dimensions
-  c(orig_h, orig_w) %<-% target$orig_size
+  orig_h <- target$image_height
+  orig_w <- target$image_width
 
   # Compute new dimensions
   if (length(size) == 1L) {
@@ -80,7 +82,8 @@ target_transform_resize <- function(target, size) {
 
   # Update target
   target$boxes <- boxes_resized
-  target$orig_size <- c(new_h, new_w)
+  target$image_height <- new_h
+  target$image_width <- new_w
 
   target
 }
