@@ -9,11 +9,11 @@ transform_adjust_hue(img, hue_factor)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{hue_factor}{(float):  How much to shift the hue channel. Should be in
-\verb{[-0.5, 0.5]}. 0.5 and -0.5 give complete reversal of hue channel in
-HSV space in positive and negative direction respectively.
-0 means no shift. Therefore, both -0.5 and 0.5 will give an image
-with complementary colors while 0 gives the original image.}
+\item{hue_factor}{(numeric): How much to shift the hue channel. Should be
+in \verb{[-0.5, 0.5]}. \code{0.5} and \code{-0.5} give complete reversal of hue channel
+in HSV space in positive and negative direction respectively. \code{0} means
+no shift. Therefore, both \code{-0.5} and \code{0.5} will give an image with
+complementary colors while \code{0} gives the original image.}
 }
 \description{
 The image hue is adjusted by converting the image to HSV and

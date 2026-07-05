@@ -1,11 +1,11 @@
 #' Convert an image to a tensor
 #'
 #' Converts a Magick Image or array (H x W x C) in the range `[0, 255]` to a
-#'   `torch_tensor` of shape (C x H x W) in the range `[0.0, 1.0]`. In the
+#'   `torch_tensor` of shape (C x H x W) in the range `[0, 1]`. In the
 #'   other cases, tensors are returned without scaling.
 #'
 #' @note
-#' Because the input image is scaled to `[0.0, 1.0]`, this transformation
+#' Because the input image is scaled to `[0, 1]`, this transformation
 #'   should not be used when transforming target image masks.
 #'
 #' @param img A `magick-image`, `array` or `torch_tensor`.
@@ -45,9 +45,9 @@ transform_convert_image_dtype <- function(img, dtype = torch::torch_float()) {
 #' This transform acts out of place, i.e., it does not mutate the input tensor.
 #'
 #' @inheritParams transform_to_tensor
-#' @param mean (sequence): Sequence of means for each channel.
-#' @param std (sequence): Sequence of standard deviations for each channel.
-#' @param inplace (bool,optional): Bool to make this operation in-place.
+#' @param mean (numeric vector): Means for each channel.
+#' @param std (numeric vector): Standard deviations for each channel.
+#' @param inplace (logical, optional): Whether to make this operation in-place.
 #'
 #' @family unitary_transforms
 #'
@@ -63,12 +63,12 @@ transform_normalize <- function(img, mean, std, inplace = FALSE) {
 #'   of leading dimensions
 #'
 #' @inheritParams transform_to_tensor
-#' @param size (sequence or int): Desired output size. If size is a sequence
-#'   like c(h, w), output size will be matched to this. If size is an int,
-#'   smaller edge of the image will be matched to this number.
-#'   i.e, if height > width, then image will be rescaled to
-#'   (size * height / width, size).
-#' @param interpolation (int, optional) Desired interpolation. An integer
+#' @param size (integer vector or integer): Desired output size. If `size` is
+#'   an integer vector of length 2 like `c(h, w)`, output size will be matched
+#'   to this. If `size` is a bare integer, smaller edge of the image will be
+#'   matched to this number, i.e., if height > width, then image will be
+#'   rescaled to `(size * height / width, size)`.
+#' @param interpolation (integer, optional): Desired interpolation. An integer
 #'   `0 = nearest`, `2 = bilinear`, and `3 = bicubic` or a name from
 #'   [magick::filter_types()].
 #'
@@ -86,10 +86,10 @@ transform_resize <- function(img, size, interpolation = 2) {
 #'   of leading dimensions.
 #'
 #' @inheritParams transform_to_tensor
-#' @param size (sequence or int): Desired output size of the crop. If size is
-#'   an int instead of sequence like c(h, w), a square crop (size, size) is
-#'   made. If provided a tuple or list of length 1, it will be interpreted as
-#'   `c(size, size)`.
+#' @param size (integer vector or integer): Desired output size.
+#'   If `size` is either a integer vector of length 2 like `c(h, w)` or a bare integer,
+#'   in which case a square crop `c(size, size)` is made. If provided a list of
+#'   length 1, it will be interpreted as `c(size, size)`.
 #'
 #' @family unitary_transforms
 #'
@@ -105,18 +105,19 @@ transform_center_crop <- function(img, size) {
 #'   of leading dimensions.
 #'
 #' @inheritParams transform_to_tensor
-#' @param padding (int or tuple or list): Padding on each border. If a single
-#'   int is provided this is used to pad all borders. If tuple of length 2 is
-#'   provided this is the padding on left/right and top/bottom respectively.
-#'   If a tuple of length 4 is provided this is the padding for the left, right,
-#'   top and bottom borders respectively.
-#' @param fill (int or str or tuple): Pixel fill value for constant fill.
-#'   Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-#'   respectively. This value is only used when the padding_mode is constant.
-#'   Only int value is supported for Tensors.
-#' @param padding_mode Type of padding. Should be: constant, edge, reflect or
-#'   symmetric. Default is constant. Mode symmetric is not yet supported for
-#'   Tensor inputs.
+#' @param padding (integer vector or integer): Padding on each border. If a
+#'   single integer is provided, this value is used to pad all borders. If an
+#'   integer vector of length 2 is provided, it gives the padding on
+#'   left/right and top/bottom respectively. If an integer vector of length 4
+#'   is provided, it gives the padding for the left, right, top and bottom
+#'   borders respectively.
+#' @param fill (numeric vector or numeric): Pixel fill value for constant fill.
+#'   Default is `0`. If a numeric vector of length 3, it is used to fill R, G,
+#'   B channels respectively. This value is only used when the `padding_mode`
+#'   is constant. Only integer values are supported for Tensors.
+#' @param padding_mode (character): Type of padding. Should be: `constant`,
+#'   `edge`, `reflect` or `symmetric`. Default is `constant`. Mode `symmetric`
+#'   is not yet supported for Tensor inputs.
 #'
 #'  - constant: pads with a constant value, this value is specified with fill
 #'
@@ -140,8 +141,8 @@ transform_pad <- function(img, padding, fill = 0, padding_mode = "constant") {
 #' Apply a list of transformations randomly with a given probability
 #'
 #' @inheritParams transform_to_tensor
-#' @param transforms (list or tuple): list of transformations.
-#' @param p (float): probability.
+#' @param transforms (list): List of transformations.
+#' @param p (numeric): Probability.
 #'
 #' @family combining_transforms
 #'
@@ -178,7 +179,7 @@ transform_random_order <- function(img, transforms) {
 #'
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
-#' @param pad_if_needed (boolean): It will pad the image if smaller than the
+#' @param pad_if_needed (logical): It will pad the image if smaller than the
 #'   desired size to avoid raising an exception. Since cropping is done
 #'   after padding, the padding seems to be done at a random offset.
 #'
@@ -198,7 +199,7 @@ transform_random_crop <- function(img, size, padding=NULL, pad_if_needed=FALSE,
 #'   dimensions
 #'
 #' @inheritParams transform_to_tensor
-#' @param p (float): probability of the image being flipped.
+#' @param p (numeric): Probability of the image being flipped.
 #'   Default value is 0.5
 #'
 #' @family random_transforms
@@ -209,7 +210,7 @@ transform_random_horizontal_flip <- function(img, p = 0.5) {
 
 #' Vertically flip an image randomly with a given probability
 #'
-#' The image can be a PIL Image or a torch Tensor, in which case it is expected
+#' The image can be a Magick Image or a torch Tensor, in which case it is expected
 #'   to have `[..., H, W]` shape, where `...` means an arbitrary number of
 #'   leading dimensions
 #'
@@ -235,8 +236,10 @@ transform_random_vertical_flip <- function(img, p = 0.5) {
 #'
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
-#' @param scale (tuple of float): range of size of the origin size cropped
-#' @param ratio (tuple of float): range of aspect ratio of the origin aspect
+#' @param scale (numeric vector of length 2): Range of size of the origin size
+#'   cropped.
+#' @param ratio (numeric vector of length 2): Range of aspect ratio of the
+#'   origin aspect ratio cropped.
 #'   ratio cropped.
 #'
 #' @family random_transforms
@@ -269,7 +272,7 @@ transform_five_crop <- function(img, size) {
 #'   inputs and targets your Dataset returns.
 #'
 #' @inheritParams transform_five_crop
-#' @param vertical_flip (bool): Use vertical flipping instead of horizontal
+#' @param vertical_flip (logical): Use vertical flipping instead of horizontal.
 #'
 #' @family combining_transforms
 #' @export
@@ -382,21 +385,21 @@ transform_linear_transformation <- function(img, transformation_matrix, mean_vec
 
 #' Randomly change the brightness, contrast and saturation of an image
 #'
-#' @param brightness (float or tuple of float (min, max)): How much to jitter
-#'   brightness. `brightness_factor` is chosen uniformly from
+#' @param brightness (numeric or numeric vector of length 2): How much to
+#'   jitter brightness. `brightness_factor` is chosen uniformly from
 #'   `[max(0, 1 - brightness), 1 + brightness]` or the given `[min, max]`.
 #'   Should be non negative numbers.
-#' @param contrast (float or tuple of float (min, max)): How much to jitter
+#' @param contrast (numeric or numeric vector of length 2): How much to jitter
 #'   contrast. `contrast_factor` is chosen uniformly from
 #'   `[max(0, 1 - contrast), 1 + contrast]` or the given `[min, max]`. Should
 #'   be non negative numbers.
-#' @param saturation (float or tuple of float (min, max)): How much to jitter
-#'   saturation. `saturation_factor` is chosen uniformly from
+#' @param saturation (numeric or numeric vector of length 2): How much to
+#'   jitter saturation. `saturation_factor` is chosen uniformly from
 #'   `[max(0, 1 - saturation), 1 + saturation]` or the given `[min, max]`.
 #'   Should be non negative numbers.
-#' @param hue (float or tuple of float (min, max)): How much to jitter hue.
+#' @param hue (numeric or numeric vector of length 2): How much to jitter hue.
 #'   `hue_factor` is chosen uniformly from `[-hue, hue]` or the given
-#'   `[min, max]`. Should have 0<= hue <= 0.5 or -0.5 <= min <= max <= 0.5.
+#'   `[min, max]`. Should have `0 <= hue <= 0.5` or `-0.5 <= min <= max <= 0.5`.
 #' @inheritParams transform_to_tensor
 #'
 #' @family random_transforms
@@ -407,22 +410,24 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 
 #' Rotate the image by angle
 #'
-#' @param degrees (sequence or float or int): Range of degrees to select from.
-#'   If degrees is a number instead of sequence like c(min, max), the range of
-#'   degrees will be (-degrees, +degrees).
-#' @param interpolation (int, optional): Interpolation mode. 0 for nearest, 2 for bilinear.
-#'   Default is 0 (nearest).
-#' @param resample Deprecated. Use interpolation instead.
-#' @param expand (bool, optional): Optional expansion flag. If true, expands the
-#'   output to make it large enough to hold the entire rotated image. If false
-#'   or omitted, make the output image the same size as the input image. Note
-#'   that the expand flag assumes rotation around the center and no translation.
-#' @param center (list or tuple, optional): Optional center of rotation, c(x, y).
-#'   Origin is the upper left corner. Default is the center of the image.
-#' @param fill (n-tuple or int or float): Pixel fill value for area outside the
-#'   rotated image. If int or float, the value is used for all bands
-#'   respectively. Defaults to 0 for all bands. This option is only available
-#'   for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+#' @param degrees (numeric vector of length 2 or numeric): Range of degrees to
+#'   select from. If `degrees` is a bare number instead of a numeric vector of
+#'   length 2 like `c(min, max)`, the range of degrees will be
+#'   `(-degrees, +degrees)`.
+#' @param interpolation (integer, optional): Interpolation mode. `0` for
+#'   nearest, `2` for bilinear. Default is `0` (nearest).
+#' @param resample Deprecated. Use `interpolation` instead.
+#' @param expand (logical, optional): Optional expansion flag. If `TRUE`,
+#'   expands the output to make it large enough to hold the entire rotated
+#'   image. If `FALSE` or omitted, make the output image the same size as the
+#'   input image. Note that the expand flag assumes rotation around the center
+#'   and no translation.
+#' @param center (numeric vector of length 2, optional): Optional center of
+#'   rotation, `c(x, y)`. Origin is the upper left corner. Default is the
+#'   center of the image.
+#' @param fill (numeric vector or numeric): Pixel fill value for area outside
+#'   the rotated image. If a single numeric value, the value is used for all
+#'   channels. Defaults to `0` for all channels. This option is not supported for Tensor input. Fill
 #'   value for the area outside the transform in the output image is always 0.
 #' @inheritParams transform_to_tensor
 #'
@@ -440,26 +445,28 @@ transform_random_rotation <- function(img, degrees, interpolation = 0, expand=FA
 #' Random affine transformation of the image keeping center invariant
 #'
 #' @inheritParams transform_random_rotation
-#' @param translate (tuple, optional): tuple of maximum absolute fraction for
-#'   horizontal and vertical translations. For example `translate=c(a, b)`, then
-#'   horizontal shift is randomly sampled in the range
-#'   -img_width * a < dx < img_width * a and vertical shift is randomly sampled
-#'   in the range -img_height * b < dy < img_height * b. Will not translate by
+#' @param translate (numeric vector of length 2, optional): Numeric vector of
+#'   maximum absolute fraction for horizontal and vertical translations. For
+#'   example `translate = c(a, b)`, then horizontal shift is randomly sampled
+#'   in the range `-img_width * a < dx < img_width * a` and vertical shift is
+#'   randomly sampled in the range
+#'   `-img_height * b < dy < img_height * b`. Will not translate by default.
+#' @param scale (numeric vector of length 2, optional): Scaling factor
+#'   interval, e.g. `c(a, b)`, then scale is randomly sampled from the range
+#'   `a <= scale <= b`. Will keep original scale by default.
+#' @param shear (numeric vector or numeric, optional): Range of degrees to
+#'   select from. If `shear` is a bare number, a shear parallel to the x axis
+#'   in the range `(-shear, +shear)` will be applied. Else if `shear` is a
+#'   numeric vector of length 2, a shear parallel to the x axis in the range
+#'   `(shear[1], shear[2])` will be applied. Else if `shear` is a numeric
+#'   vector of length 4, a x-axis shear in `(shear[1], shear[2])` and y-axis
+#'   shear in `(shear[3], shear[4])` will be applied. Will not apply shear by
 #'   default.
-#' @param scale (tuple, optional): scaling factor interval, e.g c(a, b), then
-#'   scale is randomly sampled from the range a <= scale <= b. Will keep
-#'   original scale by default.
-#' @param shear (sequence or float or int, optional): Range of degrees to select
-#'   from. If shear is a number, a shear parallel to the x axis in the range
-#'   (-shear, +shear) will be applied. Else if shear is a tuple or list of 2
-#'   values a shear parallel to the x axis in the range `(shear[1], shear[2])`
-#'   will be applied. Else if shear is a tuple or list of 4 values, a x-axis
-#'   shear in `(shear[1], shear[2])` and y-axis shear in `(shear[3], shear[4])`
-#'   will be applied. Will not apply shear by default.
-#' @param fill (tuple or int): Fill color for the area outside the transform.
-#'   Default is 0. This option is not supported for Tensor input.
-#' @param interpolation (int or character, optional): Interpolation mode.
-#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
+#' @param fill (numeric vector or numeric): Fill color for the area outside the
+#'   transform. Default is `0`. This option is not supported for Tensor input.
+#' @param interpolation (integer or character, optional): Interpolation mode.
+#'   Supported values are `0` / `"nearest"` and `2` / `"bilinear"`. Default
+#'   is `0`.
 #' @param fillcolor Deprecated. Use fill instead.
 #' @param resample Deprecated. Use interpolation instead.
 #'
@@ -482,8 +489,8 @@ transform_random_affine <- function(img, degrees, translate=NULL, scale=NULL,
 #' Convert image to grayscale
 #'
 #' @inheritParams transform_to_tensor
-#' @param num_output_channels (int): (1 or 3) number of channels desired for
-#'   output image
+#' @param num_output_channels (integer): (`1` or `3`) number of channels
+#'   desired for output image.
 #'
 #' @family unitary_transforms
 #' @export
@@ -496,8 +503,8 @@ transform_grayscale <- function(img, num_output_channels) {
 #' Convert image to grayscale with a probability of `p`.
 #'
 #' @inheritParams transform_to_tensor
-#' @param p (float): probability that image should be converted to grayscale
-#'   (default 0.1).
+#' @param p (numeric): Probability that image should be converted to grayscale
+#'   (default `0.1`).
 #'
 #' @family random_transforms
 #' @export
@@ -511,9 +518,10 @@ transform_random_grayscale <- function(img, p = 0.1) {
 #' Performs a random perspective transformation of the given image with a given
 #'   probability
 #'
-#' @param distortion_scale (float): argument to control the degree of distortion
-#'   and ranges from 0 to 1. Default is 0.5.
-#' @param p (float): probability of the image being transformed. Default is 0.5.
+#' @param distortion_scale (numeric): Argument to control the degree of
+#'   distortion and ranges from 0 to 1. Default is `0.5`.
+#' @param p (numeric): Probability of the image being transformed. Default
+#'   is `0.5`.
 #' @inheritParams transform_resize
 #' @inheritParams transform_pad
 #'
@@ -530,14 +538,19 @@ transform_random_perspective <- function(img, distortion_scale=0.5, p=0.5,
 #'   See <https://arxiv.org/pdf/1708.04896>
 #'
 #' @inheritParams transform_to_tensor
-#' @param p probability that the random erasing operation will be performed.
-#' @param scale range of proportion of erased area against input image.
-#' @param ratio range of aspect ratio of erased area.
-#' @param value erasing value. Default is 0. If a single int, it is used to
-#'   erase all pixels. If a tuple of length 3, it is used to erase
-#'   R, G, B channels respectively.
-#'   If a str of 'random', erasing each pixel with random values.
-#' @param inplace boolean to make this transform inplace. Default set to FALSE.
+#' @param p (numeric): Probability that the random erasing operation will be
+#'   performed.
+#' @param scale (numeric vector of length 2): Range of proportion of erased
+#'   area against input image.
+#' @param ratio (numeric vector of length 2): Range of aspect ratio of erased
+#'   area.
+#' @param value (numeric vector or numeric or character): Erasing value.
+#'   Default is `0`. If a single numeric value, it is used to erase all
+#'   pixels. If a numeric vector of length 3, it is used to erase R, G, B
+#'   channels respectively. If the string `"random"`, erasing each pixel with
+#'   random values.
+#' @param inplace (logical): Boolean to make this transform inplace. Default
+#'   set to `FALSE`.
 #'
 #' @family random_transforms
 #' @export
@@ -551,11 +564,12 @@ transform_random_erasing <- function(img, p=0.5, scale=c(0.02, 0.33), ratio=c(0.
 #' Crop the given image at specified location and output size
 #'
 #' @inheritParams transform_to_tensor
-#' @param top (int): Vertical component of the top left corner of the crop box.
-#' @param left (int): Horizontal component of the top left corner of the crop
-#'   box.
-#' @param height (int): Height of the crop box.
-#' @param width (int): Width of the crop box.
+#' @param top (integer): Vertical component of the top left corner of the
+#'   crop box.
+#' @param left (integer): Horizontal component of the top left corner of the
+#'   crop box.
+#' @param height (integer): Height of the crop box.
+#' @param width (integer): Width of the crop box.
 #'
 #' @family unitary_transforms
 #' @export
@@ -563,7 +577,7 @@ transform_crop <- function(img, top, left, height, width) {
   UseMethod("transform_crop", img)
 }
 
-#' Horizontally flip a PIL Image or Tensor
+#' Horizontally flip a Magick Image or Tensor
 #'
 #' @inheritParams transform_to_tensor
 #'
@@ -573,7 +587,7 @@ transform_hflip <- function(img) {
   UseMethod("transform_hflip", img)
 }
 
-#' Vertically flip a PIL Image or Tensor
+#' Vertically flip a Magick Image or Tensor
 #'
 #' @inheritParams transform_to_tensor
 #'
@@ -585,11 +599,7 @@ transform_vflip <- function(img) {
 
 #' Crop an image and resize it to a desired size
 #'
-#' @param top (int): Vertical component of the top left corner of the crop box.
-#' @param left (int): Horizontal component of the top left corner of the crop
-#'   box.
-#' @param height (int): Height of the crop box.
-#' @param width (int): Width of the crop box.
+#' @inheritParams transform_crop
 #' @inheritParams transform_resize
 #'
 #' @family combining_transforms
@@ -602,9 +612,9 @@ transform_resized_crop <- function(img, top, left, height, width, size,
 
 #' Adjust the brightness of an image
 #'
-#' @param brightness_factor (float):  How much to adjust the brightness. Can be
-#'   any non negative number. 0 gives a black image, 1 gives the
-#'   original image while 2 increases the brightness by a factor of 2.
+#' @param brightness_factor (numeric): How much to adjust the brightness. Can
+#'   be any non negative number. `0` gives a black image, `1` gives the
+#'   original image while `2` increases the brightness by a factor of 2.
 #' @inheritParams transform_resize
 #'
 #' @family unitary_transforms
@@ -615,9 +625,9 @@ transform_adjust_brightness <- function(img, brightness_factor) {
 
 #' Adjust the contrast of an image
 #'
-#' @param contrast_factor (float): How much to adjust the contrast. Can be any
-#'   non negative number. 0 gives a solid gray image, 1 gives the
-#'   original image while 2 increases the contrast by a factor of 2.
+#' @param contrast_factor (numeric): How much to adjust the contrast. Can be
+#'   any non negative number. `0` gives a solid gray image, `1` gives the
+#'   original image while `2` increases the contrast by a factor of 2.
 #'
 #' @inheritParams transform_resize
 #'
@@ -629,9 +639,9 @@ transform_adjust_contrast <- function(img, contrast_factor) {
 
 #' Adjust the color saturation of an image
 #'
-#' @param saturation_factor (float):  How much to adjust the saturation. 0 will
-#'   give a black and white image, 1 will give the original image while
-#'   2 will enhance the saturation by a factor of 2.
+#' @param saturation_factor (numeric): How much to adjust the saturation. `0`
+#'   will give a black and white image, `1` will give the original image while
+#'   `2` will enhance the saturation by a factor of 2.
 #'
 #' @inheritParams transform_resize
 #'
@@ -652,11 +662,11 @@ transform_adjust_saturation <- function(img, saturation_factor) {
 #'
 #' Search for Hue for more details.
 #'
-#' @param hue_factor (float):  How much to shift the hue channel. Should be in
-#'   `[-0.5, 0.5]`. 0.5 and -0.5 give complete reversal of hue channel in
-#'   HSV space in positive and negative direction respectively.
-#'   0 means no shift. Therefore, both -0.5 and 0.5 will give an image
-#'   with complementary colors while 0 gives the original image.
+#' @param hue_factor (numeric): How much to shift the hue channel. Should be
+#'   in `[-0.5, 0.5]`. `0.5` and `-0.5` give complete reversal of hue channel
+#'   in HSV space in positive and negative direction respectively. `0` means
+#'   no shift. Therefore, both `-0.5` and `0.5` will give an image with
+#'   complementary colors while `0` gives the original image.
 #'
 #' @inheritParams transform_resize
 #'
@@ -670,8 +680,7 @@ transform_adjust_hue <- function(img, hue_factor) {
 #'
 #' @inheritParams transform_to_tensor
 #' @inheritParams transform_random_rotation
-#' @param angle (float or int): rotation angle value in degrees,
-#'   counter-clockwise.
+#' @param angle (numeric): Rotation angle value in degrees, counter-clockwise.
 #'
 #' @family unitary_transforms
 #' @export
@@ -688,19 +697,21 @@ transform_rotate <- function(img, angle, interpolation = 0, expand = FALSE,
 #'
 #' @inheritParams transform_rotate
 #' @inheritParams transform_random_affine
-#' @param translate (sequence of int) – horizontal and vertical translations
-#'  (post-rotation translation)
-#' @param scale (float) – overall scale
-#' @param shear (float or sequence) – shear angle value in degrees between -180 to 180,
-#'  clockwise direction. If a sequence is specified, the first value corresponds
-#'  to a shear parallel to the x-axis, while the second value corresponds to a
-#'  shear parallel to the y-axis.
-#' @param interpolation (int or character): Interpolation mode.
-#'   Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.
-#' @param fill Fill color for area outside the transform. Default is NULL.
-#' @param resample Deprecated. Use interpolation instead.
-#' @param fillcolor Deprecated. Use fill instead.
-#' @param center Optional center of rotation, c(x, y). Default is image center.
+#' @param translate (integer vector of length 2): Horizontal and vertical
+#'   translations (post-rotation translation).
+#' @param scale (numeric): Overall scale.
+#' @param shear (numeric vector or numeric): Shear angle value in degrees
+#'   between `-180` to `180`, clockwise direction. If a numeric vector is
+#'   specified, the first value corresponds to a shear parallel to the x-axis,
+#'   while the second value corresponds to a shear parallel to the y-axis.
+#' @param interpolation (integer or character): Interpolation mode.
+#'   Supported values are `0` / `"nearest"` and `2` / `"bilinear"`. Default
+#'   is `0`.
+#' @param fill Fill color for area outside the transform. Default is `NULL`.
+#' @param center (numeric vector of length 2, optional): Optional center of
+#'   rotation, `c(x, y)`. Default is image center.
+#' @param resample Deprecated. Use `interpolation` instead.
+#' @param fillcolor Deprecated. Use `fill` instead.
 #'
 #' @family unitary_transforms
 #' @export
@@ -720,11 +731,11 @@ transform_affine <- function(img, angle, translate, scale, shear,
 
 #' Perspective transformation of an image
 #'
-#' @param startpoints (list of list of ints): List containing four lists of two
-#'   integers corresponding to four corners
+#' @param startpoints (list of integer vectors of length 2): List containing
+#'   four integer vectors of length 2 corresponding to four corners
 #'   `[top-left, top-right, bottom-right, bottom-left]` of the original image.
-#' @param endpoints (list of list of ints): List containing four lists of two
-#'   integers corresponding to four corners
+#' @param endpoints (list of integer vectors of length 2): List containing
+#'   four integer vectors of length 2 corresponding to four corners
 #'   `[top-left, top-right, bottom-right, bottom-left]` of the transformed
 #'   image.
 #' @inheritParams transform_resize
@@ -748,10 +759,10 @@ transform_perspective <- function(img, startpoints, endpoints, interpolation = 2
 #'
 #' @details Search for Gamma Correction for more details.
 #'
-#' @param gamma (float): Non negative real number, same as \eqn{\gamma} in the
-#'   equation. gamma larger than 1 make the shadows darker, while gamma smaller
-#'   than 1 make dark regions lighter.
-#' @param gain (float): The constant multiplier.
+#' @param gamma (numeric): Non negative real number, same as \eqn{\gamma} in
+#'   the equation. `gamma` larger than 1 make the shadows darker, while
+#'   `gamma` smaller than 1 make dark regions lighter.
+#' @param gain (numeric): The constant multiplier.
 #' @inheritParams transform_to_tensor
 #'
 #' @family unitary_transforms

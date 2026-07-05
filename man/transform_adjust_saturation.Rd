@@ -9,9 +9,9 @@ transform_adjust_saturation(img, saturation_factor)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{saturation_factor}{(float):  How much to adjust the saturation. 0 will
-give a black and white image, 1 will give the original image while
-2 will enhance the saturation by a factor of 2.}
+\item{saturation_factor}{(numeric): How much to adjust the saturation. \code{0}
+will give a black and white image, \code{1} will give the original image while
+\code{2} will enhance the saturation by a factor of 2.}
 }
 \description{
 Adjust the color saturation of an image

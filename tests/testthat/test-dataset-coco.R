@@ -32,7 +32,7 @@ test_that("coco_detection_dataset loads a single example correctly", {
   expect_length(dim(item$x), 3)
 
   expect_type(y, "list")
-  expect_named(y, c("boxes", "labels", "area", "iscrowd"))
+  expect_named(y, c("boxes", "labels", "area", "iscrowd", "image_height", "image_width"))
 
   expect_tensor(y$boxes)
   expect_equal(y$boxes$ndim, 2)
@@ -85,7 +85,7 @@ test_that("coco_detection_dataset batches correctly using dataloader", {
   expect_true(all(vapply(batch$x, is_torch_tensor, logical(1))))
 
   expect_type(batch$y, "list")
-  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd"))
+  expect_named(batch$y[[1]], c("boxes", "labels", "area", "iscrowd", "image_height", "image_width"))
   expect_tensor(batch$y[[1]]$boxes)
   expect_equal(batch$y[[1]]$boxes$ndim, 2)
   expect_equal(batch$y[[1]]$boxes$size(2), 4)

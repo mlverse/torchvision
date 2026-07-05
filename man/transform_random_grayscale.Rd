@@ -9,8 +9,8 @@ transform_random_grayscale(img, p = 0.1)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{(float): probability that image should be converted to grayscale
-(default 0.1).}
+\item{p}{(numeric): Probability that image should be converted to grayscale
+(default \code{0.1}).}
 }
 \description{
 Convert image to grayscale with a probability of \code{p}.

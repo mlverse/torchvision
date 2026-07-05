@@ -9,14 +9,15 @@ transform_crop(img, top, left, height, width)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{top}{(int): Vertical component of the top left corner of the crop box.}
+\item{top}{(integer): Vertical component of the top left corner of the
+crop box.}
 
-\item{left}{(int): Horizontal component of the top left corner of the crop
-box.}
+\item{left}{(integer): Horizontal component of the top left corner of the
+crop box.}
 
-\item{height}{(int): Height of the crop box.}
+\item{height}{(integer): Height of the crop box.}
 
-\item{width}{(int): Width of the crop box.}
+\item{width}{(integer): Width of the crop box.}
 }
 \description{
 Crop the given image at specified location and output size

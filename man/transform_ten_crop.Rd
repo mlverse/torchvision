@@ -9,13 +9,13 @@ transform_ten_crop(img, size, vertical_flip = FALSE)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{vertical_flip}{(bool): Use vertical flipping instead of horizontal}
+\item{vertical_flip}{(logical): Use vertical flipping instead of horizontal.}
 }
 \description{
 Crop the given image into four corners and the central crop, plus the flipped
