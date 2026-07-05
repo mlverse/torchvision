@@ -217,11 +217,8 @@ export(rf100_peixos_segmentation_dataset)
 export(rf100_underwater_collection)
 export(search_collection)
 export(target_transform_coco_masks)
-<<<<<<< HEAD
 export(target_transform_sahi_crop)
-=======
 export(target_transform_resize)
->>>>>>> main
 export(target_transform_trimap_masks)
 export(tensor_image_browse)
 export(tensor_image_display)
