@@ -1208,6 +1208,12 @@ rfdetr_model <- nn_module(
       w <- x$size(4)
       scale_fct <- torch_tensor(c(w, h, w, h), device = boxes_xyxy$device, dtype = boxes_xyxy$dtype)
       boxes_xyxy <- boxes_xyxy * scale_fct
+      clamp_max <- max(h, w)
+      x1 <- boxes_xyxy[, , 1]$clamp(min = 0)
+      y1 <- boxes_xyxy[, , 2]$clamp(min = 0)
+      x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
+      y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
+      boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(max = clamp_max)
       detections <- list()
       for (i in seq_len(boxes_xyxy$size(1))) {
         detections[[i]] <- list(
@@ -1250,6 +1256,11 @@ rfdetr_postprocess <- nn_module(
     img_w <- target_sizes[, 2]
     scale_fct <- torch_stack(list(img_w, img_h, img_w, img_h), dim = 2)
     boxes_xyxy <- boxes_xyxy * scale_fct$unsqueeze(2)
+    x1 <- boxes_xyxy[, , 1]$clamp(min = 0)
+    y1 <- boxes_xyxy[, , 2]$clamp(min = 0)
+    x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
+    y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
+    boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(min = 0)
     results <- list()
     for (i in seq_len(boxes_xyxy$size(1))) {
       results[[i]] <- list(
