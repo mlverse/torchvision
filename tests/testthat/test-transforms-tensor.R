@@ -235,7 +235,7 @@ test_that("sahi_crop works with batched 4D tensor input", {
   expect_tensor(o)
   n_rows <- ceiling((10 - 4) / 4) + 1
   n_cols <- ceiling((12 - 4) / 4) + 1
-  expect_tensor_shape(o, c(n_rows * n_cols, 2, 3, 4, 4))
+  expect_tensor_shape(o, c(n_rows * n_cols * 2, 3, 4, 4))
 
 })
 
