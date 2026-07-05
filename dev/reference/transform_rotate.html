@@ -110,37 +110,37 @@
 
 
 <dt id="arg-angle">angle<a class="anchor" aria-label="anchor" href="#arg-angle"></a></dt>
-<dd><p>(float or int): rotation angle value in degrees,
-counter-clockwise.</p></dd>
+<dd><p>(numeric): Rotation angle value in degrees, counter-clockwise.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int, optional): Interpolation mode. 0 for nearest, 2 for bilinear.
-Default is 0 (nearest).</p></dd>
+<dd><p>(integer, optional): Interpolation mode. <code>0</code> for
+nearest, <code>2</code> for bilinear. Default is <code>0</code> (nearest).</p></dd>
 
 
 <dt id="arg-expand">expand<a class="anchor" aria-label="anchor" href="#arg-expand"></a></dt>
-<dd><p>(bool, optional): Optional expansion flag. If true, expands the
-output to make it large enough to hold the entire rotated image. If false
-or omitted, make the output image the same size as the input image. Note
-that the expand flag assumes rotation around the center and no translation.</p></dd>
+<dd><p>(logical, optional): Optional expansion flag. If <code>TRUE</code>,
+expands the output to make it large enough to hold the entire rotated
+image. If <code>FALSE</code> or omitted, make the output image the same size as the
+input image. Note that the expand flag assumes rotation around the center
+and no translation.</p></dd>
 
 
 <dt id="arg-center">center<a class="anchor" aria-label="anchor" href="#arg-center"></a></dt>
-<dd><p>(list or tuple, optional): Optional center of rotation, c(x, y).
-Origin is the upper left corner. Default is the center of the image.</p></dd>
+<dd><p>(numeric vector of length 2, optional): Optional center of
+rotation, <code>c(x, y)</code>. Origin is the upper left corner. Default is the
+center of the image.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>(n-tuple or int or float): Pixel fill value for area outside the
-rotated image. If int or float, the value is used for all bands
-respectively. Defaults to 0 for all bands. This option is only available
-for Pillow&gt;=5.2.0. This option is not supported for Tensor input. Fill
+<dd><p>(numeric vector or numeric): Pixel fill value for area outside
+the rotated image. If a single numeric value, the value is used for all
+channels. Defaults to <code>0</code> for all channels. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.</p></dd>
 
 
 <dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
-<dd><p>Deprecated. Use interpolation instead.</p></dd>
+<dd><p>Deprecated. Use <code>interpolation</code> instead.</p></dd>
 
 </dl></div>
     <div id="see-also">

@@ -106,10 +106,10 @@ of leading dimensions.</p>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>(sequence or int): Desired output size of the crop. If size is
-an int instead of sequence like c(h, w), a square crop (size, size) is
-made. If provided a tuple or list of length 1, it will be interpreted as
-<code>c(size, size)</code>.</p></dd>
+<dd><p>(integer vector or integer): Desired output size.
+If <code>size</code> is either a integer vector of length 2 like <code>c(h, w)</code> or a bare integer,
+in which case a square crop <code>c(size, size)</code> is made. If provided a list of
+length 1, it will be interpreted as <code>c(size, size)</code>.</p></dd>
 
 </dl></div>
     <div id="see-also">

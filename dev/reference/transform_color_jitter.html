@@ -108,30 +108,30 @@
 
 
 <dt id="arg-brightness">brightness<a class="anchor" aria-label="anchor" href="#arg-brightness"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
-brightness. <code>brightness_factor</code> is chosen uniformly from
+<dd><p>(numeric or numeric vector of length 2): How much to
+jitter brightness. <code>brightness_factor</code> is chosen uniformly from
 <code>[max(0, 1 - brightness), 1 + brightness]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
 
 
 <dt id="arg-contrast">contrast<a class="anchor" aria-label="anchor" href="#arg-contrast"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
+<dd><p>(numeric or numeric vector of length 2): How much to jitter
 contrast. <code>contrast_factor</code> is chosen uniformly from
 <code>[max(0, 1 - contrast), 1 + contrast]</code> or the given <code>[min, max]</code>. Should
 be non negative numbers.</p></dd>
 
 
 <dt id="arg-saturation">saturation<a class="anchor" aria-label="anchor" href="#arg-saturation"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
-saturation. <code>saturation_factor</code> is chosen uniformly from
+<dd><p>(numeric or numeric vector of length 2): How much to
+jitter saturation. <code>saturation_factor</code> is chosen uniformly from
 <code>[max(0, 1 - saturation), 1 + saturation]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
 
 
 <dt id="arg-hue">hue<a class="anchor" aria-label="anchor" href="#arg-hue"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter hue.
+<dd><p>(numeric or numeric vector of length 2): How much to jitter hue.
 <code>hue_factor</code> is chosen uniformly from <code>[-hue, hue]</code> or the given
-<code>[min, max]</code>. Should have 0&lt;= hue &lt;= 0.5 or -0.5 &lt;= min &lt;= max &lt;= 0.5.</p></dd>
+<code>[min, max]</code>. Should have <code>0 &lt;= hue &lt;= 0.5</code> or <code>-0.5 &lt;= min &lt;= max &lt;= 0.5</code>.</p></dd>
 
 </dl></div>
     <div id="see-also">

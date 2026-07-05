@@ -106,11 +106,11 @@ inputs and targets your Dataset returns.</p>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height &gt; width, then image will be rescaled to
-(size * height / width, size).</p></dd>
+<dd><p>(integer vector or integer): Desired output size. If <code>size</code> is
+an integer vector of length 2 like <code>c(h, w)</code>, output size will be matched
+to this. If <code>size</code> is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height &gt; width, then image will be
+rescaled to <code>(size * height / width, size)</code>.</p></dd>
 
 </dl></div>
     <div id="see-also">

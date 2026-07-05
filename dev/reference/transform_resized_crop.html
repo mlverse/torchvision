@@ -102,32 +102,33 @@
 
 
 <dt id="arg-top">top<a class="anchor" aria-label="anchor" href="#arg-top"></a></dt>
-<dd><p>(int): Vertical component of the top left corner of the crop box.</p></dd>
+<dd><p>(integer): Vertical component of the top left corner of the
+crop box.</p></dd>
 
 
 <dt id="arg-left">left<a class="anchor" aria-label="anchor" href="#arg-left"></a></dt>
-<dd><p>(int): Horizontal component of the top left corner of the crop
-box.</p></dd>
+<dd><p>(integer): Horizontal component of the top left corner of the
+crop box.</p></dd>
 
 
 <dt id="arg-height">height<a class="anchor" aria-label="anchor" href="#arg-height"></a></dt>
-<dd><p>(int): Height of the crop box.</p></dd>
+<dd><p>(integer): Height of the crop box.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>(int): Width of the crop box.</p></dd>
+<dd><p>(integer): Width of the crop box.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height &gt; width, then image will be rescaled to
-(size * height / width, size).</p></dd>
+<dd><p>(integer vector or integer): Desired output size. If <code>size</code> is
+an integer vector of length 2 like <code>c(h, w)</code>, output size will be matched
+to this. If <code>size</code> is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height &gt; width, then image will be
+rescaled to <code>(size * height / width, size)</code>.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int, optional) Desired interpolation. An integer
+<dd><p>(integer, optional): Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 

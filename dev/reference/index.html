@@ -134,7 +134,7 @@
       </tr><tr><td>
           <p><code><a href="transform_hflip.html">transform_hflip()</a></code> </p>
         </td>
-        <td><p>Horizontally flip a PIL Image or Tensor</p></td>
+        <td><p>Horizontally flip a Magick Image or Tensor</p></td>
       </tr><tr><td>
           <p><code><a href="transform_linear_transformation.html">transform_linear_transformation()</a></code> </p>
         </td>
@@ -170,7 +170,7 @@
       </tr><tr><td>
           <p><code><a href="transform_vflip.html">transform_vflip()</a></code> </p>
         </td>
-        <td><p>Vertically flip a PIL Image or Tensor</p></td>
+        <td><p>Vertically flip a Magick Image or Tensor</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="random-transformation">Random transformation <a href="#random-transformation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
@@ -243,6 +243,14 @@
           <p><code><a href="transform_ten_crop.html">transform_ten_crop()</a></code> </p>
         </td>
         <td><p>Crop an image and the flipped image each into four corners and a central crop</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="target-transformations-for-object-detection">Target transformations for object detection <a href="#target-transformations-for-object-detection" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into object-detection compatible with draw_bounding_boxes() and object-detection models.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="target_transform_resize.html">target_transform_resize()</a></code> </p>
+        </td>
+        <td><p>Resize the bounding boxes of a detection target</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="target-transformations-for-segmentation">Target transformations for segmentation <a href="#target-transformations-for-segmentation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into segmentation masks compatible with draw_segmentation_masks() and segmentation models.</p>

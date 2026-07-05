@@ -108,29 +108,29 @@
 
 
 <dt id="arg-startpoints">startpoints<a class="anchor" aria-label="anchor" href="#arg-startpoints"></a></dt>
-<dd><p>(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+<dd><p>(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the original image.</p></dd>
 
 
 <dt id="arg-endpoints">endpoints<a class="anchor" aria-label="anchor" href="#arg-endpoints"></a></dt>
-<dd><p>(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+<dd><p>(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 <code>[top-left, top-right, bottom-right, bottom-left]</code> of the transformed
 image.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int, optional) Desired interpolation. An integer
+<dd><p>(integer, optional): Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.</p></dd>
+<dd><p>(numeric vector or numeric): Pixel fill value for constant fill.
+Default is <code>0</code>. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the <code>padding_mode</code>
+is constant. Only integer values are supported for Tensors.</p></dd>
 
 </dl></div>
     <div id="see-also">

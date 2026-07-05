@@ -113,45 +113,46 @@
 
 
 <dt id="arg-angle">angle<a class="anchor" aria-label="anchor" href="#arg-angle"></a></dt>
-<dd><p>(float or int): rotation angle value in degrees,
-counter-clockwise.</p></dd>
+<dd><p>(numeric): Rotation angle value in degrees, counter-clockwise.</p></dd>
 
 
 <dt id="arg-translate">translate<a class="anchor" aria-label="anchor" href="#arg-translate"></a></dt>
-<dd><p>(sequence of int) – horizontal and vertical translations
-(post-rotation translation)</p></dd>
+<dd><p>(integer vector of length 2): Horizontal and vertical
+translations (post-rotation translation).</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>(float) – overall scale</p></dd>
+<dd><p>(numeric): Overall scale.</p></dd>
 
 
 <dt id="arg-shear">shear<a class="anchor" aria-label="anchor" href="#arg-shear"></a></dt>
-<dd><p>(float or sequence) – shear angle value in degrees between -180 to 180,
-clockwise direction. If a sequence is specified, the first value corresponds
-to a shear parallel to the x-axis, while the second value corresponds to a
-shear parallel to the y-axis.</p></dd>
+<dd><p>(numeric vector or numeric): Shear angle value in degrees
+between <code>-180</code> to <code>180</code>, clockwise direction. If a numeric vector is
+specified, the first value corresponds to a shear parallel to the x-axis,
+while the second value corresponds to a shear parallel to the y-axis.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int or character): Interpolation mode.
-Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.</p></dd>
+<dd><p>(integer or character): Interpolation mode.
+Supported values are <code>0</code> / <code>"nearest"</code> and <code>2</code> / <code>"bilinear"</code>. Default
+is <code>0</code>.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>Fill color for area outside the transform. Default is NULL.</p></dd>
+<dd><p>Fill color for area outside the transform. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-resample">resample<a class="anchor" aria-label="anchor" href="#arg-resample"></a></dt>
-<dd><p>Deprecated. Use interpolation instead.</p></dd>
+<dd><p>Deprecated. Use <code>interpolation</code> instead.</p></dd>
 
 
 <dt id="arg-fillcolor">fillcolor<a class="anchor" aria-label="anchor" href="#arg-fillcolor"></a></dt>
-<dd><p>Deprecated. Use fill instead.</p></dd>
+<dd><p>Deprecated. Use <code>fill</code> instead.</p></dd>
 
 
 <dt id="arg-center">center<a class="anchor" aria-label="anchor" href="#arg-center"></a></dt>
-<dd><p>Optional center of rotation, c(x, y). Default is image center.</p></dd>
+<dd><p>(numeric vector of length 2, optional): Optional center of
+rotation, <code>c(x, y)</code>. Default is image center.</p></dd>
 
 </dl></div>
     <div id="see-also">

@@ -110,25 +110,26 @@ probability</p>
 
 
 <dt id="arg-distortion-scale">distortion_scale<a class="anchor" aria-label="anchor" href="#arg-distortion-scale"></a></dt>
-<dd><p>(float): argument to control the degree of distortion
-and ranges from 0 to 1. Default is 0.5.</p></dd>
+<dd><p>(numeric): Argument to control the degree of
+distortion and ranges from 0 to 1. Default is <code>0.5</code>.</p></dd>
 
 
 <dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
-<dd><p>(float): probability of the image being transformed. Default is 0.5.</p></dd>
+<dd><p>(numeric): Probability of the image being transformed. Default
+is <code>0.5</code>.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int, optional) Desired interpolation. An integer
+<dd><p>(integer, optional): Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.</p></dd>
+<dd><p>(numeric vector or numeric): Pixel fill value for constant fill.
+Default is <code>0</code>. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the <code>padding_mode</code>
+is constant. Only integer values are supported for Tensors.</p></dd>
 
 </dl></div>
     <div id="see-also">

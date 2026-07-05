@@ -87,6 +87,7 @@
 <url><loc>/reference/rf100_underwater_collection.html</loc></url>
 <url><loc>/reference/search_collection.html</loc></url>
 <url><loc>/reference/target_transform_coco_masks.html</loc></url>
+<url><loc>/reference/target_transform_resize.html</loc></url>
 <url><loc>/reference/target_transform_trimap_masks.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>

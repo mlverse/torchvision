@@ -106,24 +106,25 @@ of leading dimensions.</p>
 
 
 <dt id="arg-padding">padding<a class="anchor" aria-label="anchor" href="#arg-padding"></a></dt>
-<dd><p>(int or tuple or list): Padding on each border. If a single
-int is provided this is used to pad all borders. If tuple of length 2 is
-provided this is the padding on left/right and top/bottom respectively.
-If a tuple of length 4 is provided this is the padding for the left, right,
-top and bottom borders respectively.</p></dd>
+<dd><p>(integer vector or integer): Padding on each border. If a
+single integer is provided, this value is used to pad all borders. If an
+integer vector of length 2 is provided, it gives the padding on
+left/right and top/bottom respectively. If an integer vector of length 4
+is provided, it gives the padding for the left, right, top and bottom
+borders respectively.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
-<dd><p>(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.</p></dd>
+<dd><p>(numeric vector or numeric): Pixel fill value for constant fill.
+Default is <code>0</code>. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the <code>padding_mode</code>
+is constant. Only integer values are supported for Tensors.</p></dd>
 
 
 <dt id="arg-padding-mode">padding_mode<a class="anchor" aria-label="anchor" href="#arg-padding-mode"></a></dt>
-<dd><p>Type of padding. Should be: constant, edge, reflect or
-symmetric. Default is constant. Mode symmetric is not yet supported for
-Tensor inputs.</p><ul><li><p>constant: pads with a constant value, this value is specified with fill</p></li>
+<dd><p>(character): Type of padding. Should be: <code>constant</code>,
+<code>edge</code>, <code>reflect</code> or <code>symmetric</code>. Default is <code>constant</code>. Mode <code>symmetric</code>
+is not yet supported for Tensor inputs.</p><ul><li><p>constant: pads with a constant value, this value is specified with fill</p></li>
 <li><p>edge: pads with the last value on the edge of the image</p></li>
 <li><p>reflect: pads with reflection of image (without repeating the last
 value on the edge) padding <code>[1, 2, 3, 4]</code> with 2 elements on both sides
