@@ -35,23 +35,20 @@
 #' \dontrun{
 #' url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 #' img_tensor <- transform_to_tensor(magick::image_read(url))
-#' img_dims <- dim(img_tensor)[-1]
 #'
 #' x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
-#' target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
 #'
 #' model_fn <- get("model_rfdetr_large")
 #' model <- model_fn(pretrained = TRUE)
 #' model$eval()
 #'
-#' out <- model(x)
-#' results <- rfdetr_postprocess()(out, target_sizes)
+#' results <- model(x)$detections[[1]]
 #'
-#' scores <- as.numeric(results[[1]]$scores)
-#' labels <- as.numeric(results[[1]]$labels)
-#' boxes <- as.matrix(results[[1]]$boxes)
+#' scores <- as.numeric(results$scores)
+#' labels <- as.numeric(results$labels)
+#' boxes <- as.matrix(results$boxes)
 #'
-#' keep <- which(scores > 0.3)
+#' keep <- which(scores > 0.75)
 #'
 #' if (length(keep) > 0) {
 #'   boxed <- draw_bounding_boxes(
@@ -1206,6 +1203,39 @@ rfdetr_model <- nn_module(
         out$pred_logits <- cls_enc
         out$pred_boxes <- ref_enc
       }
+    }
+    if (!self$training) {
+      out_logits <- out$pred_logits
+      out_bbox <- out$pred_boxes
+      prob <- out_logits$sigmoid()
+      num_select <- min(self$num_queries, out_logits$size(2))
+      topk_values <- prob$view(c(out_logits$size(1), -1))$topk(num_select, dim = 2)
+      scores <- topk_values[[1]]
+      topk_indexes <- topk_values[[2]]
+      flat_idx_0 <- topk_indexes - 1L
+      topk_boxes <- flat_idx_0 %/% out_logits$size(3)
+      labels <- flat_idx_0 %% out_logits$size(3)
+      boxes_cxcywh <- out_bbox
+      x1 <- boxes_cxcywh[, , 1] - boxes_cxcywh[, , 3] / 2
+      y1 <- boxes_cxcywh[, , 2] - boxes_cxcywh[, , 4] / 2
+      x2 <- boxes_cxcywh[, , 1] + boxes_cxcywh[, , 3] / 2
+      y2 <- boxes_cxcywh[, , 2] + boxes_cxcywh[, , 4] / 2
+      boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)
+      gather_idx <- (topk_boxes + 1L)$unsqueeze(3)$'repeat'(c(1, 1, 4))
+      boxes_xyxy <- torch_gather(boxes_xyxy, 2, gather_idx)
+      h <- x$size(3)
+      w <- x$size(4)
+      scale_fct <- torch_tensor(c(w, h, w, h), device = boxes_xyxy$device, dtype = boxes_xyxy$dtype)
+      boxes_xyxy <- boxes_xyxy * scale_fct
+      detections <- list()
+      for (i in seq_len(boxes_xyxy$size(1))) {
+        detections[[i]] <- list(
+          scores = scores[i, ],
+          labels = labels[i, ],
+          boxes = boxes_xyxy[i, , ]
+        )
+      }
+      return(list(detections = detections))
     }
     out
   }

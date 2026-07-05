@@ -83,23 +83,20 @@ Lite Refpoint Refine, and BBox reparameterisation.
 \dontrun{
 url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 img_tensor <- transform_to_tensor(magick::image_read(url))
-img_dims <- dim(img_tensor)[-1]
 
 x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
-target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
 
 model_fn <- get("model_rfdetr_large")
 model <- model_fn(pretrained = TRUE)
 model$eval()
 
-out <- model(x)
-results <- rfdetr_postprocess()(out, target_sizes)
+results <- model(x)$detections[[1]]
 
-scores <- as.numeric(results[[1]]$scores)
-labels <- as.numeric(results[[1]]$labels)
-boxes <- as.matrix(results[[1]]$boxes)
+scores <- as.numeric(results$scores)
+labels <- as.numeric(results$labels)
+boxes <- as.matrix(results$boxes)
 
-keep <- which(scores > 0.3)
+keep <- which(scores > 0.75)
 
 if (length(keep) > 0) {
   boxed <- draw_bounding_boxes(
@@ -107,7 +104,7 @@ if (length(keep) > 0) {
     torch_tensor(boxes[keep, , drop = FALSE], dtype = torch_int64()),
     labels = sprintf("\%d:\%.2f", labels[keep], scores[keep]),
     colors = "black",
-    width = 6,
+    width = 3,
     font_size = 12
   )
   tensor_image_browse(boxed)
