@@ -9,11 +9,11 @@ transform_normalize(img, mean, std, inplace = FALSE)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{mean}{(sequence): Sequence of means for each channel.}
+\item{mean}{(numeric vector): Means for each channel.}
 
-\item{std}{(sequence): Sequence of standard deviations for each channel.}
+\item{std}{(numeric vector): Standard deviations for each channel.}
 
-\item{inplace}{(bool,optional): Bool to make this operation in-place.}
+\item{inplace}{(logical, optional): Whether to make this operation in-place.}
 }
 \description{
 Given mean: \verb{(mean[1],...,mean[n])} and std: \verb{(std[1],..,std[n])} for \code{n}
