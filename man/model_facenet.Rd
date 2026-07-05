@@ -177,6 +177,7 @@ output
 Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_fasterrcnn}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}},
 \code{\link{model_rfdetr}}
 

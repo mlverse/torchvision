@@ -148,6 +148,7 @@ tensor_image_browse(boxed)
 Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}},
 \code{\link{model_rfdetr}}
 }
