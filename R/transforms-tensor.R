@@ -293,7 +293,10 @@ transform_sahi_crop.torch_tensor <- function(x, sahi_split) {
     transform_crop(x, cw$top, cw$left, cw$height, cw$width)
   })
 
-  torch_stack(crops)
+  result <- torch_stack(crops)
+  if (x$ndim == 4)
+    result <- result$flatten(start_dim = 1, end_dim = 2)
+  result
 }
 
 #' @export
