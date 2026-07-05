@@ -477,6 +477,7 @@ check_img <- function(x) {
 }
 
 #' @importFrom utils tail
+#' @export
 get_image_size.torch_tensor <- function(img) {
   check_img(img)
 

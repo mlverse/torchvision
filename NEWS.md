@@ -4,6 +4,10 @@
 
 * Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28, #328).
 
+## New features
+
+* Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
+
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).

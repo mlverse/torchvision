@@ -20,29 +20,30 @@ transform_affine(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{angle}{(float or int): rotation angle value in degrees,
-counter-clockwise.}
+\item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 
-\item{translate}{(sequence of int) – horizontal and vertical translations
-(post-rotation translation)}
+\item{translate}{(integer vector of length 2): Horizontal and vertical
+translations (post-rotation translation).}
 
-\item{scale}{(float) – overall scale}
+\item{scale}{(numeric): Overall scale.}
 
-\item{shear}{(float or sequence) – shear angle value in degrees between -180 to 180,
-clockwise direction. If a sequence is specified, the first value corresponds
-to a shear parallel to the x-axis, while the second value corresponds to a
-shear parallel to the y-axis.}
+\item{shear}{(numeric vector or numeric): Shear angle value in degrees
+between \code{-180} to \code{180}, clockwise direction. If a numeric vector is
+specified, the first value corresponds to a shear parallel to the x-axis,
+while the second value corresponds to a shear parallel to the y-axis.}
 
-\item{interpolation}{(int or character): Interpolation mode.
-Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.}
+\item{interpolation}{(integer or character): Interpolation mode.
+Supported values are \code{0} / \code{"nearest"} and \code{2} / \code{"bilinear"}. Default
+is \code{0}.}
 
-\item{fill}{Fill color for area outside the transform. Default is NULL.}
+\item{fill}{Fill color for area outside the transform. Default is \code{NULL}.}
 
-\item{resample}{Deprecated. Use interpolation instead.}
+\item{resample}{Deprecated. Use \code{interpolation} instead.}
 
-\item{fillcolor}{Deprecated. Use fill instead.}
+\item{fillcolor}{Deprecated. Use \code{fill} instead.}
 
-\item{center}{Optional center of rotation, c(x, y). Default is image center.}
+\item{center}{(numeric vector of length 2, optional): Optional center of
+rotation, \code{c(x, y)}. Default is image center.}
 }
 \description{
 Apply affine transformation on an image keeping image center invariant
