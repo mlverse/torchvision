@@ -81,10 +81,9 @@ Lite Refpoint Refine, and BBox reparameterisation.
 }}
 \examples{
 \dontrun{
-if (!torch::torch_is_installed()) return()
-
 url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
-img <- transform_to_tensor(magick::image_read(url))
+img <- base_loader(url) \%>\%
+  transform_to_tensor()
 
 model <- model_rfdetr_large(pretrained = TRUE)
 model$eval()
@@ -97,7 +96,8 @@ topk <- pred$scores$topk(k = 5L)[[2]]
 boxes <- pred$boxes[topk, ]
 labels <- coco_classes(as.integer(pred$labels[topk]))
 canvas <- (img * 255)$to(dtype = torch_uint8())
-boxed <- draw_bounding_boxes(canvas, boxes, labels = labels)
+boxed <- draw_bounding_boxes(canvas, boxes, labels = labels,
+ colors = "black", width = 6)
 tensor_image_browse(boxed)
 }
 }
