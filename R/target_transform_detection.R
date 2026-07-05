@@ -48,38 +48,36 @@
 #' @family target_transforms_detection
 #'
 #' @export
-target_transform_resize <- function(size) {
-  function(target) {
-    # Extract original dimensions once
-    c(orig_h, orig_w) %<-% target$orig_size
+target_transform_resize <- function(target, size) {
+  # Extract original dimensions once
+  c(orig_h, orig_w) %<-% target$orig_size
 
-    # Compute new dimensions
-    if (length(size) == 1L) {
-      # Proportional resize: match smaller edge to size
-      scale <- size / max(orig_h, orig_w)
-      new_h <- round(orig_h * scale)
-      new_w <- round(orig_w * scale)
-    } else {
-      # Fixed size resize
-      c(new_h, new_w) %<-% size
-    }
-
-    # Compute scale factors (reuse orig_h / orig_w)
-    scale_h <- new_h / orig_h
-    scale_w <- new_w / orig_w
-
-    # Resize bounding boxes (xyxy format)
-    boxes <- target$boxes
-    boxes_resized <- boxes
-    boxes_resized[, 1L] <- boxes[, 1L] * scale_w  # xmin
-    boxes_resized[, 2L] <- boxes[, 2L] * scale_h  # ymin
-    boxes_resized[, 3L] <- boxes[, 3L] * scale_w  # xmax
-    boxes_resized[, 4L] <- boxes[, 4L] * scale_h  # ymax
-
-    # Update target
-    target$boxes     <- boxes_resized
-    target$orig_size <- c(new_h, new_w)
-
-    target
+  # Compute new dimensions
+  if (length(size) == 1L) {
+    # Proportional resize: match smaller edge to size
+    scale <- size / max(orig_h, orig_w)
+    new_h <- round(orig_h * scale)
+    new_w <- round(orig_w * scale)
+  } else {
+    # Fixed size resize
+    c(new_h, new_w) %<-% size
   }
+
+  # Compute scale factors (reuse orig_h / orig_w)
+  scale_h <- new_h / orig_h
+  scale_w <- new_w / orig_w
+
+  # Resize bounding boxes (xyxy format)
+  boxes <- target$boxes
+  boxes_resized <- boxes
+  boxes_resized[, 1L] <- boxes[, 1L] * scale_w  # xmin
+  boxes_resized[, 2L] <- boxes[, 2L] * scale_h  # ymin
+  boxes_resized[, 3L] <- boxes[, 3L] * scale_w  # xmax
+  boxes_resized[, 4L] <- boxes[, 4L] * scale_h  # ymax
+
+  # Update target
+  target$boxes     <- boxes_resized
+  target$orig_size <- c(new_h, new_w)
+
+  target
 }

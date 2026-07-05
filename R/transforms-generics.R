@@ -210,7 +210,7 @@ transform_random_horizontal_flip <- function(img, p = 0.5) {
 
 #' Vertically flip an image randomly with a given probability
 #'
-#' The image can be a PIL Image or a torch Tensor, in which case it is expected
+#' The image can be a Magick Image or a torch Tensor, in which case it is expected
 #'   to have `[..., H, W]` shape, where `...` means an arbitrary number of
 #'   leading dimensions
 #'
@@ -347,8 +347,7 @@ transform_color_jitter <- function(img, brightness=0, contrast=0, saturation=0, 
 #'   center of the image.
 #' @param fill (numeric vector or numeric): Pixel fill value for area outside
 #'   the rotated image. If a single numeric value, the value is used for all
-#'   channels. Defaults to `0` for all channels. This option is only available
-#'   for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+#'   channels. Defaults to `0` for all channels. This option is not supported for Tensor input. Fill
 #'   value for the area outside the transform in the output image is always 0.
 #' @inheritParams transform_to_tensor
 #'
@@ -498,7 +497,7 @@ transform_crop <- function(img, top, left, height, width) {
   UseMethod("transform_crop", img)
 }
 
-#' Horizontally flip a PIL Image or Tensor
+#' Horizontally flip a Magick Image or Tensor
 #'
 #' @inheritParams transform_to_tensor
 #'
@@ -508,7 +507,7 @@ transform_hflip <- function(img) {
   UseMethod("transform_hflip", img)
 }
 
-#' Vertically flip a PIL Image or Tensor
+#' Vertically flip a Magick Image or Tensor
 #'
 #' @inheritParams transform_to_tensor
 #'

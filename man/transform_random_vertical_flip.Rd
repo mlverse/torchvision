@@ -13,7 +13,7 @@ transform_random_vertical_flip(img, p = 0.5)
 Default value is 0.5}
 }
 \description{
-The image can be a PIL Image or a torch Tensor, in which case it is expected
+The image can be a Magick Image or a torch Tensor, in which case it is expected
 to have \verb{[..., H, W]} shape, where \code{...} means an arbitrary number of
 leading dimensions
 }

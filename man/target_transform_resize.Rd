@@ -4,21 +4,21 @@
 \alias{target_transform_resize}
 \title{Resize the bounding boxes of a detection target}
 \usage{
-target_transform_resize(size)
+target_transform_resize(target, size)
 }
 \arguments{
-\item{size}{Desired output size. If \code{size} is a integer vector of length 2
-like \code{c(h, w)}, output size will be matched to this. If \code{size} is a bare integer,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-\verb{(size * height / width, size)}.}
-
 \item{target}{A list containing at least:
 \itemize{
 \item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format
 \item \code{orig_size} — integer vector or tensor of length 2 with \verb{(height, width)}
 \item Other fields (labels, image_id, etc.) are preserved unchanged
 }}
+
+\item{size}{Desired output size. If \code{size} is a integer vector of length 2
+like \code{c(h, w)}, output size will be matched to this. If \code{size} is a bare integer,
+smaller edge of the image will be matched to this number.
+i.e, if height > width, then image will be rescaled to
+\verb{(size * height / width, size)}.}
 }
 \value{
 A list with the same structure as the input target, where:

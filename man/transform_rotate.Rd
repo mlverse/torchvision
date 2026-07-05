@@ -34,8 +34,7 @@ center of the image.}
 
 \item{fill}{(numeric vector or numeric): Pixel fill value for area outside
 the rotated image. If a single numeric value, the value is used for all
-channels. Defaults to \code{0} for all channels. This option is only available
-for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+channels. Defaults to \code{0} for all channels. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.}
 
 \item{resample}{Deprecated. Use \code{interpolation} instead.}
