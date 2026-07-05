@@ -718,12 +718,8 @@ rfdetr_joiner <- nn_module(
 
 ms_deform_attn_core_pytorch <- function(value, spatial_shapes, sampling_locations, attention_weights,
                                          spatial_shapes_hw = NULL) {
-  batch_size <- value$size(1)
-  n_heads <- value$size(2)
-  head_dim <- value$size(3)
-  len_query <- sampling_locations$size(2)
-  n_levels <- sampling_locations$size(4)
-  n_points <- sampling_locations$size(5)
+  c(batch_size, n_heads, head_dim) %<-% as.list(value$size())[1:3]
+  c(len_query, n_levels, n_points) %<-% as.list(sampling_locations$size())[c(2, 4, 5)]
   shapes <- if (!is.null(spatial_shapes_hw)) spatial_shapes_hw else spatial_shapes
   n_shapes <- if (is.list(shapes)) length(shapes) else shapes$size(1)
   sizes <- lapply(seq_len(n_shapes), function(i) {
