@@ -716,107 +716,6 @@ rfdetr_joiner <- nn_module(
   }
 )
 
-ms_deform_attn_core_pytorch <- function(value, spatial_shapes, sampling_locations, attention_weights,
-                                         spatial_shapes_hw = NULL) {
-  c(batch_size, n_heads, head_dim) %<-% as.list(value$size())[1:3]
-  c(len_query, n_levels, n_points) %<-% as.list(sampling_locations$size())[c(2, 4, 5)]
-  shapes <- if (!is.null(spatial_shapes_hw)) spatial_shapes_hw else spatial_shapes
-  n_shapes <- if (is.list(shapes)) length(shapes) else shapes$size(1)
-  sizes <- lapply(seq_len(n_shapes), function(i) {
-    if (is.list(shapes)) as.integer(shapes[[i]][1] * shapes[[i]][2])
-    else as.integer(shapes[i, 1]$item() * shapes[i, 2]$item())
-  })
-  value_list <- value$split(sizes, dim = 4)
-  sampling_grids <- 2 * sampling_locations - 1
-  sampling_value_list <- list()
-  for (lvl in seq_len(n_levels)) {
-    h <- if (is.list(shapes)) shapes[[lvl]][1] else as.integer(shapes[lvl, 1]$item())
-    w <- if (is.list(shapes)) shapes[[lvl]][2] else as.integer(shapes[lvl, 2]$item())
-    value_l <- value_list[[lvl]]$view(c(batch_size * n_heads, head_dim, h, w))
-    sampling_grid_l <- sampling_grids[, , , lvl, , , drop = FALSE]
-    sampling_grid_l <- sampling_grid_l$squeeze(4)
-    sampling_grid_l <- sampling_grid_l$transpose(2, 3)
-    sampling_grid_l <- sampling_grid_l$flatten(start_dim = 1, end_dim = 2)
-    sampling_value_l <- nnf_grid_sample(
-      value_l, sampling_grid_l, mode = "bilinear",
-      padding_mode = "zeros", align_corners = FALSE
-    )
-    sampling_value_list[[lvl]] <- sampling_value_l
-  }
-  attention_weights <- attention_weights$transpose(2, 3)
-  attention_weights <- attention_weights$reshape(c(batch_size * n_heads, 1, len_query, n_levels * n_points))
-  sampling_values <- torch_stack(sampling_value_list, dim = -2)$flatten(start_dim = -2)
-  output <- (sampling_values * attention_weights)$sum(dim = -1)
-  output <- output$view(c(batch_size, n_heads * head_dim, len_query))
-  output$transpose(2, 3)$contiguous()
-}
-
-ms_deform_attn <- nn_module(
-  "ms_deform_attn",
-  initialize = function(d_model = 256, n_levels = 4, n_heads = 8, n_points = 4) {
-    self$d_model <- d_model
-    self$n_levels <- n_levels
-    self$n_heads <- n_heads
-    self$n_points <- n_points
-    self$sampling_offsets <- nn_linear(d_model, n_heads * n_levels * n_points * 2)
-    self$attention_weights <- nn_linear(d_model, n_heads * n_levels * n_points)
-    self$value_proj <- nn_linear(d_model, d_model)
-    self$output_proj <- nn_linear(d_model, d_model)
-    self$reset_parameters()
-  },
-  reset_parameters = function() {
-    nn_init_constant_(self$sampling_offsets$weight, 0)
-    thetas <- torch_arange(0, self$n_heads - 1, dtype = torch_float32()) * (2 * pi / self$n_heads)
-    grid_init <- torch_stack(list(thetas$cos(), thetas$sin()), dim = -1)
-    grid_init <- grid_init / grid_init$abs()$max(dim = -1, keepdim = TRUE)[[1]]
-    grid_init <- grid_init$view(c(self$n_heads, 1, 1, 2))$'repeat'(c(1, self$n_levels, self$n_points, 1))
-    for (i in seq_len(self$n_points)) {
-      grid_init[, , i, ] <- grid_init[, , i, ] * i
-    }
-    self$sampling_offsets$bias <- nn_parameter(grid_init$view(-1))
-    nn_init_constant_(self$attention_weights$weight, 0)
-    nn_init_constant_(self$attention_weights$bias, 0)
-    nn_init_xavier_uniform_(self$value_proj$weight)
-    nn_init_constant_(self$value_proj$bias, 0)
-    nn_init_xavier_uniform_(self$output_proj$weight)
-    nn_init_constant_(self$output_proj$bias, 0)
-  },
-  forward = function(query, reference_points, input_flatten, input_spatial_shapes,
-                     input_level_start_index, input_padding_mask = NULL,
-                     input_spatial_shapes_hw = NULL) {
-    batch_size <- query$size(1)
-    len_query <- query$size(2)
-    value <- self$value_proj(input_flatten)
-    if (!is.null(input_padding_mask)) {
-      value <- value$masked_fill(input_padding_mask$unsqueeze(3), 0)
-    }
-    sampling_offsets <- self$sampling_offsets(query)$view(c(
-      batch_size, len_query, self$n_heads, self$n_levels, self$n_points, 2
-    ))
-    attention_weights <- self$attention_weights(query)$view(c(
-      batch_size, len_query, self$n_heads, self$n_levels * self$n_points
-    ))
-    if (reference_points$size(-1) == 2) {
-      offset_normalizer <- torch_stack(list(
-        input_spatial_shapes[, 2], input_spatial_shapes[, 1]
-      ), dim = -1)
-      sampling_locations <- reference_points$unsqueeze(3)$unsqueeze(5) +
-        sampling_offsets / offset_normalizer$unsqueeze(1)$unsqueeze(1)$unsqueeze(4)
-    } else {
-      sampling_locations <- reference_points[, , NULL, , NULL, 1:2] +
-        sampling_offsets / self$n_points * reference_points[, , NULL, , NULL, 3:4] * 0.5
-    }
-    attention_weights <- nnf_softmax(attention_weights, dim = -1)
-    value <- value$transpose(2, 3)$contiguous()$view(c(
-      batch_size, self$n_heads, self$d_model %/% self$n_heads, -1
-    ))
-    output <- ms_deform_attn_core_pytorch(
-      value, input_spatial_shapes, sampling_locations, attention_weights,
-      input_spatial_shapes_hw
-    )
-    self$output_proj(output)
-  }
-)
 
 gen_sineembed_for_position <- function(pos_tensor, dim = 128) {
   scale <- 2 * pi
@@ -914,7 +813,7 @@ rfdetr_decoder_layer <- nn_module(
     self$self_attn <- nn_multihead_attention(d_model, sa_nhead, dropout = dropout, batch_first = TRUE)
     self$dropout1 <- nn_dropout(dropout)
     self$norm1 <- nn_layer_norm(d_model)
-    self$cross_attn <- ms_deform_attn(d_model, n_levels = num_feature_levels, n_heads = ca_nhead, n_points = dec_n_points)
+    self$cross_attn <- detr_ms_deform_attn(d_model, n_levels = num_feature_levels, n_heads = ca_nhead, n_points = dec_n_points)
     self$linear1 <- nn_linear(d_model, dim_feedforward)
     self$dropout <- nn_dropout(dropout)
     self$linear2 <- nn_linear(dim_feedforward, d_model)
@@ -931,8 +830,7 @@ rfdetr_decoder_layer <- nn_module(
   forward = function(tgt, memory, tgt_mask = NULL, memory_key_padding_mask = NULL,
                      pos = NULL, query_pos = NULL, query_sine_embed = NULL,
                      is_first = FALSE, reference_points = NULL,
-                     spatial_shapes = NULL, level_start_index = NULL,
-                     spatial_shapes_hw = NULL) {
+                     spatial_shapes = NULL, level_start_index = NULL) {
     bs <- tgt$size(1)
     num_queries <- tgt$size(2)
     q <- k <- tgt + query_pos
@@ -954,8 +852,7 @@ rfdetr_decoder_layer <- nn_module(
       memory,
       spatial_shapes,
       level_start_index,
-      memory_key_padding_mask,
-      spatial_shapes_hw
+      mask = if (!is.null(memory_key_padding_mask)) memory_key_padding_mask$unsqueeze(3) else NULL
     )
     tgt <- tgt + self$dropout2(tgt2)
     tgt <- self$norm2(tgt)
@@ -997,8 +894,7 @@ rfdetr_decoder <- nn_module(
   },
   forward = function(tgt, memory, memory_key_padding_mask = NULL, pos = NULL,
                      refpoints_unsigmoid = NULL, level_start_index = NULL,
-                     spatial_shapes = NULL, valid_ratios = NULL,
-                     spatial_shapes_hw = NULL) {
+                     spatial_shapes = NULL, valid_ratios = NULL) {
     output <- tgt
     intermediate <- list()
     hs_refpoints <- list(refpoints_unsigmoid)
@@ -1029,8 +925,7 @@ rfdetr_decoder <- nn_module(
         is_first = (layer_id == 1),
         reference_points = ref_info[[2]],
         spatial_shapes = spatial_shapes,
-        level_start_index = level_start_index,
-        spatial_shapes_hw = spatial_shapes_hw
+        level_start_index = level_start_index
       )
       if (self$return_intermediate) {
         intermediate[[layer_id]] <- if (!is.null(self$norm)) self$norm(output) else output
@@ -1188,8 +1083,7 @@ rfdetr_transformer <- nn_module(
         refpoints_unsigmoid = refpoint_embed_exp,
         level_start_index = level_start_index,
         spatial_shapes = spatial_shapes_t,
-        valid_ratios = valid_ratios,
-        spatial_shapes_hw = spatial_shapes
+        valid_ratios = valid_ratios
       )
       hs <- dec_out[[1]]
       references <- dec_out[[2]]

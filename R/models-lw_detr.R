@@ -312,8 +312,9 @@ lw_detr_gen_proposals <- function(spatial_shapes, masks, bs, device) {
 
 # Multi-scale deformable attention
 
-lw_detr_ms_deform_attn <- torch::nn_module(
-  initialize = function(d_model = 256L, n_levels = 1L, n_heads = 8L, n_points = 4L) {
+# Adapted from atten4vis/lw-detr
+detr_ms_deform_attn <- torch::nn_module(
+  initialize = function(d_model = 256L, n_levels = 4L, n_heads = 8L, n_points = 4L) {
     self$n_levels <- n_levels
     self$n_heads <- n_heads
     self$n_points <- n_points
@@ -353,7 +354,7 @@ lw_detr_ms_deform_attn <- torch::nn_module(
 
     value <- self$value_proj(input_flatten)
     if (!is.null(mask)) {
-      value <- value$masked_fill(mask$logical_not()$unsqueeze(-1L), 0)
+      value <- value$masked_fill(mask, 0)
     }
     offsets <- self$sampling_offsets(query)$reshape(c(bs, lenq, nh, nl, np, 2L))
     attn_w <- torch::nnf_softmax(
@@ -361,17 +362,24 @@ lw_detr_ms_deform_attn <- torch::nn_module(
       dim = -1L
     )
 
-    ref_xy <- reference_points[,,, 1:2]
-    ref_wh <- reference_points[,,, 3:4]
-    ref_xy_exp <- ref_xy$unsqueeze(3L)$unsqueeze(5L)
-    ref_wh_exp <- ref_wh$unsqueeze(3L)$unsqueeze(5L)
-    sampling_locs <- ref_xy_exp + offsets / np * ref_wh_exp * 0.5
+    if (reference_points$size(-1L) == 2L) {
+      offset_normalizer <- torch::torch_stack(list(
+        spatial_shapes[, 2L], spatial_shapes[, 1L]
+      ), dim = -1L)
+      sampling_locs <- reference_points$unsqueeze(3L)$unsqueeze(5L) +
+        offsets / offset_normalizer$unsqueeze(1L)$unsqueeze(1L)$unsqueeze(4L)
+    } else {
+      ref_xy <- reference_points[,,, 1:2]
+      ref_wh <- reference_points[,,, 3:4]
+      sampling_locs <- ref_xy$unsqueeze(3L)$unsqueeze(5L) +
+        offsets / np * ref_wh$unsqueeze(3L)$unsqueeze(5L) * 0.5
+    }
 
     val_split <- list()
     for (lvl in seq_len(nl)) {
       h_l <- as.integer(spatial_shapes[lvl, 1])
       w_l <- as.integer(spatial_shapes[lvl, 2])
-      s <- level_start_index[lvl] + 1L
+      s <- as.integer(level_start_index[lvl]) + 1L
       e <- s + h_l * w_l - 1L
       val_l <- value[, s:e, ]$reshape(c(bs, h_l, w_l, nh, hd))
       val_l <- val_l$permute(c(1L, 4L, 5L, 2L, 3L))$reshape(c(bs * nh, hd, h_l, w_l))
@@ -474,7 +482,7 @@ lw_detr_ms_deform_attn <- torch::nn_module(
   initialize = function(d_model, sa_nhead, ca_nhead, dim_feedforward = 2048L, n_levels = 1L, n_points = 4L) {
     self$self_attn <- .lw_detr_dec_self_attn(d_model, sa_nhead)
     self$self_attn_layer_norm <- torch::nn_layer_norm(d_model)
-    self$cross_attn <- lw_detr_ms_deform_attn(d_model, n_levels, ca_nhead, n_points)
+    self$cross_attn <- detr_ms_deform_attn(d_model, n_levels, ca_nhead, n_points)
     self$cross_attn_layer_norm <- torch::nn_layer_norm(d_model)
     self$mlp <- .lw_detr_dec_ffn(d_model, dim_feedforward)
     self$layer_norm <- torch::nn_layer_norm(d_model)
@@ -483,7 +491,10 @@ lw_detr_ms_deform_attn <- torch::nn_module(
     sa_qk <- tgt + query_pos
     tgt <- self$self_attn_layer_norm(tgt + self$self_attn(sa_qk, tgt))
 
-    ca_out <- self$cross_attn(tgt + query_pos, reference_points, memory, spatial_shapes, level_start_index, mask)
+    ca_out <- self$cross_attn(
+      tgt + query_pos, reference_points, memory, spatial_shapes, level_start_index,
+      mask = if (!is.null(mask)) mask$logical_not()$unsqueeze(-1L) else NULL
+    )
     tgt <- self$cross_attn_layer_norm(tgt + ca_out)
     tgt <- self$layer_norm(tgt + self$mlp(tgt))
     tgt
