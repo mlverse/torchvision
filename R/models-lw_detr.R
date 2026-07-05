@@ -415,7 +415,7 @@ detr_ms_deform_attn <- torch::nn_module(
 # Decoder
 
 # MLP with $layers nn_module_list
-.lw_detr_mlp_layers <- torch::nn_module(
+detr_mlp_layer <- torch::nn_module(
   initialize = function(input_dim, hidden_dim, output_dim, num_layers) {
     dims_in <- c(input_dim, rep(hidden_dim, num_layers - 1L))
     dims_out <- c(rep(hidden_dim, num_layers - 1L), output_dim)
@@ -517,7 +517,7 @@ detr_ms_deform_attn <- torch::nn_module(
     }))
     self$layernorm <- torch::nn_layer_norm(d_model)
 
-    self$ref_point_head <- .lw_detr_mlp_layers(2L * d_model, d_model, d_model, 2L)
+    self$ref_point_head <- detr_mlp_layer(2L * d_model, d_model, d_model, 2L)
 
     self$num_layers <- num_layers
     self$d_model <- d_model
@@ -588,7 +588,7 @@ detr_ms_deform_attn <- torch::nn_module(
       torch::nn_linear(d_model, num_classes)
     }))
     self$enc_out_bbox_embed <- torch::nn_module_list(lapply(seq_len(group_detr), function(g) {
-      .lw_detr_mlp_layers(d_model, d_model, 4L, 3L)
+      detr_mlp_layer(d_model, d_model, 4L, 3L)
     }))
     self$enc_output <- torch::nn_module_list(lapply(seq_len(group_detr), function(g) {
       torch::nn_linear(d_model, d_model)
@@ -711,7 +711,7 @@ lw_detr_model <- torch::nn_module(
     group_detr = 13L
   ) {
     self$class_embed <- torch::nn_linear(d_model, num_classes)
-    self$bbox_embed <- .lw_detr_mlp_layers(d_model, d_model, 4L, 3L)
+    self$bbox_embed <- detr_mlp_layer(d_model, d_model, 4L, 3L)
 
     self$model <- .lw_detr_inner_model(
       embed_dim,

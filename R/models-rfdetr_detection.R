@@ -852,7 +852,7 @@ rfdetr_decoder <- nn_module(
     self$return_intermediate <- return_intermediate
     self$lite_refpoint_refine <- lite_refpoint_refine
     self$bbox_reparam <- bbox_reparam
-    self$ref_point_head <- .lw_detr_mlp_layers(2 * d_model, d_model, d_model, 2)
+    self$ref_point_head <- detr_mlp_layer(2 * d_model, d_model, d_model, 2)
   },
   refpoints_refine = function(refpoints_unsigmoid, new_refpoints_delta) {
     if (self$bbox_reparam) {
@@ -1085,7 +1085,7 @@ rfdetr_model <- nn_module(
     self$transformer <- transformer
     hidden_dim <- transformer$d_model
     self$class_embed <- nn_linear(hidden_dim, num_classes)
-    self$bbox_embed <- .lw_detr_mlp_layers(hidden_dim, hidden_dim, 4, 3)
+    self$bbox_embed <- detr_mlp_layer(hidden_dim, hidden_dim, 4, 3)
     query_dim <- 4
     self$refpoint_embed <- nn_embedding(num_queries * group_detr, query_dim)
     self$query_feat <- nn_embedding(num_queries * group_detr, hidden_dim)
