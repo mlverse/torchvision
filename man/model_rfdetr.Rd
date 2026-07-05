@@ -81,36 +81,24 @@ Lite Refpoint Refine, and BBox reparameterisation.
 }}
 \examples{
 \dontrun{
+if (!torch::torch_is_installed()) return()
+
 url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
-img_tensor <- transform_to_tensor(magick::image_read(url))
-img_dims <- dim(img_tensor)[-1]
+img <- transform_to_tensor(magick::image_read(url))
 
-x <- nnf_interpolate(img_tensor$unsqueeze(1), size = c(640, 640))
-target_sizes <- torch_tensor(matrix(img_dims, nrow = 1))
-
-model_fn <- get("model_rfdetr_large")
-model <- model_fn(pretrained = TRUE)
+model <- model_rfdetr_large(pretrained = TRUE)
 model$eval()
 
-results <- model(x, target_sizes = target_sizes)$detections[[1]]
+pred <- torch::with_no_grad(
+  model(img$unsqueeze(1))
+)$detections[[1]]
 
-scores <- as.numeric(results$scores)
-labels <- as.numeric(results$labels)
-boxes <- as.matrix(results$boxes)
-
-keep <- which(scores > 0.75)
-
-if (length(keep) > 0) {
-  boxed <- draw_bounding_boxes(
-    (img_tensor * 255)$to(dtype = torch_uint8()),
-    torch_tensor(boxes[keep, , drop = FALSE], dtype = torch_int64()),
-    labels = sprintf("\%d:\%.2f", labels[keep], scores[keep]),
-    colors = "black",
-    width = 3,
-    font_size = 12
-  )
-  tensor_image_browse(boxed)
-}
+topk <- pred$scores$topk(k = 5L)[[2]]
+boxes <- pred$boxes[topk, ]
+labels <- coco_classes(as.integer(pred$labels[topk]))
+canvas <- (img * 255)$to(dtype = torch_uint8())
+boxed <- draw_bounding_boxes(canvas, boxes, labels = labels)
+tensor_image_browse(boxed)
 }
 }
 \seealso{
