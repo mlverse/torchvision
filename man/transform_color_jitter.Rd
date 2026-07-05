@@ -15,24 +15,24 @@ transform_color_jitter(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{brightness}{(float or tuple of float (min, max)): How much to jitter
-brightness. \code{brightness_factor} is chosen uniformly from
+\item{brightness}{(numeric or numeric vector of length 2): How much to
+jitter brightness. \code{brightness_factor} is chosen uniformly from
 \verb{[max(0, 1 - brightness), 1 + brightness]} or the given \verb{[min, max]}.
 Should be non negative numbers.}
 
-\item{contrast}{(float or tuple of float (min, max)): How much to jitter
+\item{contrast}{(numeric or numeric vector of length 2): How much to jitter
 contrast. \code{contrast_factor} is chosen uniformly from
 \verb{[max(0, 1 - contrast), 1 + contrast]} or the given \verb{[min, max]}. Should
 be non negative numbers.}
 
-\item{saturation}{(float or tuple of float (min, max)): How much to jitter
-saturation. \code{saturation_factor} is chosen uniformly from
+\item{saturation}{(numeric or numeric vector of length 2): How much to
+jitter saturation. \code{saturation_factor} is chosen uniformly from
 \verb{[max(0, 1 - saturation), 1 + saturation]} or the given \verb{[min, max]}.
 Should be non negative numbers.}
 
-\item{hue}{(float or tuple of float (min, max)): How much to jitter hue.
+\item{hue}{(numeric or numeric vector of length 2): How much to jitter hue.
 \code{hue_factor} is chosen uniformly from \verb{[-hue, hue]} or the given
-\verb{[min, max]}. Should have 0<= hue <= 0.5 or -0.5 <= min <= max <= 0.5.}
+\verb{[min, max]}. Should have \verb{0 <= hue <= 0.5} or \verb{-0.5 <= min <= max <= 0.5}.}
 }
 \description{
 Randomly change the brightness, contrast and saturation of an image

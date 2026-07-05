@@ -9,11 +9,11 @@ transform_adjust_gamma(img, gamma, gain = 1)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{gamma}{(float): Non negative real number, same as \eqn{\gamma} in the
-equation. gamma larger than 1 make the shadows darker, while gamma smaller
-than 1 make dark regions lighter.}
+\item{gamma}{(numeric): Non negative real number, same as \eqn{\gamma} in
+the equation. \code{gamma} larger than 1 make the shadows darker, while
+\code{gamma} smaller than 1 make dark regions lighter.}
 
-\item{gain}{(float): The constant multiplier.}
+\item{gain}{(numeric): The constant multiplier.}
 }
 \description{
 Also known as Power Law Transform. Intensities in RGB mode are adjusted

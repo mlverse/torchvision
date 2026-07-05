@@ -15,23 +15,23 @@ transform_perspective(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{startpoints}{(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+\item{startpoints}{(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 \verb{[top-left, top-right, bottom-right, bottom-left]} of the original image.}
 
-\item{endpoints}{(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+\item{endpoints}{(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 \verb{[top-left, top-right, bottom-right, bottom-left]} of the transformed
 image.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
 \code{\link[magick:filter_types]{magick::filter_types()}}.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 }
 \description{
 Perspective transformation of an image

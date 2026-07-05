@@ -9,8 +9,8 @@ transform_grayscale(img, num_output_channels)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{num_output_channels}{(int): (1 or 3) number of channels desired for
-output image}
+\item{num_output_channels}{(integer): (\code{1} or \code{3}) number of channels
+desired for output image.}
 }
 \description{
 Convert image to grayscale

@@ -9,9 +9,9 @@ transform_adjust_contrast(img, contrast_factor)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{contrast_factor}{(float): How much to adjust the contrast. Can be any
-non negative number. 0 gives a solid gray image, 1 gives the
-original image while 2 increases the contrast by a factor of 2.}
+\item{contrast_factor}{(numeric): How much to adjust the contrast. Can be
+any non negative number. \code{0} gives a solid gray image, \code{1} gives the
+original image while \code{2} increases the contrast by a factor of 2.}
 }
 \description{
 Adjust the contrast of an image

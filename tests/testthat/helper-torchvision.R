@@ -63,3 +63,26 @@ expect_bbox_is_xyxy <- function(object, width, height) {
               info = "Each y_min must be smaller than its y_max.")
 
 }
+
+
+# The top detection on this cat image should be the cat class (COCO id 17).
+expect_coco_model_detects_cat <- function(model, min_score = 0.25) {
+  input <- base_loader("assets/class/cat/cat.2.jpg") %>%
+    transform_to_tensor() %>%
+    transform_resize(c(640, 640)) %>%
+    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
+    torch::torch_unsqueeze(1)
+  model$eval()
+  torch::with_no_grad({
+    out <- model(input)
+  })
+  expect_named(out, "detections")
+  expect_named(out$detections[[1]], c("boxes", "labels", "scores"), ignore.order = TRUE)
+  expect_equal(out$detections[[1]]$boxes$shape[2], 4L)
+  labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
+  scores_vec <- as.numeric(out$detections[[1]]$scores$cpu())
+  expect_true(all(labels_vec >= 0 & labels_vec <= 90))
+  top <- which.max(scores_vec)
+  expect_equal(labels_vec[top], 17L)
+  expect_gt(scores_vec[top], min_score)
+}

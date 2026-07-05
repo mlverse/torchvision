@@ -9,20 +9,21 @@ transform_pad(img, padding, fill = 0, padding_mode = "constant")
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{padding}{(int or tuple or list): Padding on each border. If a single
-int is provided this is used to pad all borders. If tuple of length 2 is
-provided this is the padding on left/right and top/bottom respectively.
-If a tuple of length 4 is provided this is the padding for the left, right,
-top and bottom borders respectively.}
+\item{padding}{(integer vector or integer): Padding on each border. If a
+single integer is provided, this value is used to pad all borders. If an
+integer vector of length 2 is provided, it gives the padding on
+left/right and top/bottom respectively. If an integer vector of length 4
+is provided, it gives the padding for the left, right, top and bottom
+borders respectively.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 
-\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or
-symmetric. Default is constant. Mode symmetric is not yet supported for
-Tensor inputs.
+\item{padding_mode}{(character): Type of padding. Should be: \code{constant},
+\code{edge}, \code{reflect} or \code{symmetric}. Default is \code{constant}. Mode \code{symmetric}
+is not yet supported for Tensor inputs.
 \itemize{
 \item constant: pads with a constant value, this value is specified with fill
 \item edge: pads with the last value on the edge of the image

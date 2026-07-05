@@ -9,9 +9,9 @@ transform_random_apply(img, transforms, p = 0.5)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transforms}{(list or tuple): list of transformations.}
+\item{transforms}{(list): List of transformations.}
 
-\item{p}{(float): probability.}
+\item{p}{(numeric): Probability.}
 }
 \description{
 Apply a list of transformations randomly with a given probability

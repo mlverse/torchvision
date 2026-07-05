@@ -9,7 +9,7 @@ transform_random_horizontal_flip(img, p = 0.5)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{(float): probability of the image being flipped.
+\item{p}{(numeric): Probability of the image being flipped.
 Default value is 0.5}
 }
 \description{
