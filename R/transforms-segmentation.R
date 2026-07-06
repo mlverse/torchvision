@@ -20,7 +20,7 @@
 #' draw_segmentation_masks(item)
 #' }
 #'
-#' @family target_transforms
+#' @family target_transforms_segmentation
 #' @export
 target_transform_coco_masks <- function(y) {
 
@@ -80,7 +80,7 @@ target_transform_coco_masks <- function(y) {
 #' draw_segmentation_masks(item)
 #' }
 #'
-#' @family target_transforms
+#' @family target_transforms_segmentation
 #' @export
 target_transform_trimap_masks <- function(y) {
   if (!"trimap" %in% names(y)) {

@@ -244,7 +244,7 @@ subset(catalog, has_train & has_test & has_valid)
 
 ## Additional Resources
 
-- **RoboFlow Universe**: Browse datasets at [https://universe.roboflow.com/browse/](https://universe.roboflow.com/browse/)
+- **RoboFlow Universe**: Browse datasets at https://universe.roboflow.com/browse/
 - **Collection Functions**: See `?rf100_biology_collection`, `?rf100_medical_collection`, etc.
 - **Visualization**: See `?draw_bounding_boxes` for visualizing detections
 

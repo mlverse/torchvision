@@ -11,7 +11,7 @@
 model_fasterrcnn_resnet50_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -21,7 +21,7 @@ model_fasterrcnn_resnet50_fpn(
 model_fasterrcnn_resnet50_fpn_v2(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -31,7 +31,7 @@ model_fasterrcnn_resnet50_fpn_v2(
 model_fasterrcnn_mobilenet_v3_large_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -41,7 +41,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn(
 model_fasterrcnn_mobilenet_v3_large_320_fpn(
   pretrained = FALSE,
   progress = TRUE,
-  num_classes = 91,
+  num_classes = 90,
   score_thresh = 0.05,
   nms_thresh = 0.5,
   detections_per_img = 100,
@@ -53,7 +53,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn(
 
 \item{progress}{Logical. Show progress bar during download (unused).}
 
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
 
@@ -104,17 +104,17 @@ Input images should be \code{torch_tensor}s of shape
 \examples{
 \dontrun{
 library(magrittr)
-norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
-# https://pytorch.org/vision/stable/models.html
+# ImageNet normalization constants, see https://pytorch.org/vision/stable/models.html
+norm_mean <- c(0.485, 0.456, 0.406)
 norm_std  <- c(0.229, 0.224, 0.225)
 # Use a publicly available image of an animal
 url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
        "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
-img <- magick_loader(url) \%>\%
+image <- magick_loader(url) \%>\%
   transform_to_tensor() \%>\%
   transform_resize(c(520, 520))
-
-input <- img  \%>\%
+# ResNet backbone requires image normalization
+input <- image  \%>\%
   transform_normalize(norm_mean, norm_std)
 batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 
@@ -133,7 +133,7 @@ if (num_boxes > 0) {
 }
 
 # ResNet-50 FPN V2
-model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, , detections_per_img = 5 )
 model$eval()
 pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
@@ -159,7 +159,10 @@ if (num_boxes > 0) {
 }
 
 # MobileNet V3 Large 320 FPN
-model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
+batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(
+  pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
+)
 model$eval()
 pred <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
@@ -174,9 +177,10 @@ if (num_boxes > 0) {
 
 }
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}}
 }
 \concept{object_detection_model}

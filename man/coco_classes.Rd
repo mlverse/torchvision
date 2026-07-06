@@ -4,7 +4,7 @@
 \alias{coco_classes}
 \title{MS COCO Class Labels}
 \usage{
-coco_classes(class_id = 1:80)
+coco_classes(class_id = 1:90)
 }
 \arguments{
 \item{class_id}{Integer vector of 1-based class identifiers.}
@@ -13,13 +13,14 @@ coco_classes(class_id = 1:80)
 A character vector with the COCO class names
 }
 \description{
-Utilities for resolving COCO 80 class identifiers to their corresponding
-human readable labels. The labels are retrieved from ultralytics source
+Utilities for resolving COCO 90 class identifiers to their corresponding
+human readable labels. The labels are retrieved from pytorch/vision source to be compliant
+with torchvision pretrained models.
 }
 \seealso{
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{imagenet_classes}()},
-\code{\link{pascal_voc_classes}()}
+Other class_resolution:
+\code{\link[=caltech_classes]{caltech_classes()}},
+\code{\link[=imagenet_classes]{imagenet_classes()}},
+\code{\link[=pascal_voc_classes]{pascal_voc_classes()}}
 }
 \concept{class_resolution}

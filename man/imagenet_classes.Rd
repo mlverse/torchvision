@@ -22,8 +22,8 @@ imagenet_21k_classes(class_id)
 A character vector with 1000 entries representing the ImageNet-1k
 class labels.
 
-A data.frame with 21.8k rows representing the ImageNet-21k
-class labels.
+A data.frame containing columns \code{id} and \code{label} representing
+the ImageNet-21k class identifiers and labels. By default, returns all 21.8K rows.
 
 A character vector with the labels associated with \code{class_id}.
 }
@@ -33,24 +33,9 @@ human readable labels. The labels are retrieved from the same source used by
 PyTorch's reference implementation.
 }
 \seealso{
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
-
-Other class_resolution: 
-\code{\link{caltech_classes}()},
-\code{\link{coco_classes}()},
-\code{\link{pascal_voc_classes}()}
+Other class_resolution:
+\code{\link[=caltech_classes]{caltech_classes()}},
+\code{\link[=coco_classes]{coco_classes()}},
+\code{\link[=pascal_voc_classes]{pascal_voc_classes()}}
 }
 \concept{class_resolution}

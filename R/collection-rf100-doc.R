@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Document dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with
+#' Loads one of the RoboFlow 100 Document datasets with
 #' bounding box annotations for object-detection task.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",

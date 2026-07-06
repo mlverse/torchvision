@@ -9,34 +9,35 @@ transform_resized_crop(img, top, left, height, width, size, interpolation = 2)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{top}{(int): Vertical component of the top left corner of the crop box.}
+\item{top}{(integer): Vertical component of the top left corner of the
+crop box.}
 
-\item{left}{(int): Horizontal component of the top left corner of the crop
-box.}
+\item{left}{(integer): Horizontal component of the top left corner of the
+crop box.}
 
-\item{height}{(int): Height of the crop box.}
+\item{height}{(integer): Height of the crop box.}
 
-\item{width}{(int): Width of the crop box.}
+\item{width}{(integer): Width of the crop box.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 }
 \description{
 Crop an image and resize it to a desired size
 }
 \seealso{
-Other combining_transforms: 
-\code{\link{transform_five_crop}()},
-\code{\link{transform_random_apply}()},
-\code{\link{transform_random_choice}()},
-\code{\link{transform_random_order}()},
-\code{\link{transform_ten_crop}()}
+Other combining_transforms:
+\code{\link[=transform_five_crop]{transform_five_crop()}},
+\code{\link[=transform_random_apply]{transform_random_apply()}},
+\code{\link[=transform_random_choice]{transform_random_choice()}},
+\code{\link[=transform_random_order]{transform_random_order()}},
+\code{\link[=transform_ten_crop]{transform_ten_crop()}}
 }
 \concept{combining_transforms}

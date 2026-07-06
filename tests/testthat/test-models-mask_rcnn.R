@@ -9,7 +9,7 @@ test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 90)
   expect_s3_class(model, "nn_module")
   expect_true(!is.null(model$backbone))
   expect_true(!is.null(model$rpn))
@@ -34,11 +34,11 @@ test_that("maskrcnn_resnet50_fpn inference works", {
   skip_if_not(torch::torch_is_installed())
 
   # We expect 0 detection here, we keep the compute budget for pretrained model
-  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.1, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.1, detections_per_img = 10)
   model$eval()
 
   # Test forward pass
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
@@ -70,11 +70,11 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
 
 
   # We expect 0 detection here, we keep the compute budget for pretrained model
-  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = FALSE, num_classes = 91, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 10)
   model$eval()
 
   # Test forward pass
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
@@ -98,11 +98,11 @@ test_that("maskrcnn handles empty detections correctly", {
   model <- model_maskrcnn_resnet50_fpn(
     pretrained = FALSE,
     num_classes = 91,
-    score_thresh = 0.99, nms_thresh = 0.9, detections_per_img = 100
+    score_thresh = 0.99, nms_thresh = 0.9, detections_per_img = 10
   )
   model$eval()
 
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
 
   # Should return empty tensors with correct shapes
   expect_tensor_shape(output$detections[[1]]$boxes, c(0,4))
@@ -144,20 +144,20 @@ test_that("maskrcnn with different num_classes works", {
   model$eval()
 
   input <- torch::torch_randn(1, 3, 800, 800)
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
 
   # Should work without errors
   expect_tensor(output$detections[[1]]$masks)
 })
 
-test_that("maskrcnn pretrained requires num_classes = 91", {
+test_that("maskrcnn pretrained requires num_classes = 90", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
   # Should error when pretrained=TRUE with num_classes != 91
   expect_error(
     model_maskrcnn_resnet50_fpn(pretrained = TRUE, num_classes = 10, score_thresh = 0.6, nms_thresh = 0.9, detections_per_img = 100),
-    "Pretrained weights require num_classes = 91"
+    "Pretrained weights require num_classes = 90"
   )
 })
 
@@ -165,13 +165,20 @@ test_that("mask_rcnn pretrained infer correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.01, nms_thresh = 0.7, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
+    labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")
+    # Verify masks match number of detections
+    expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),
+                 info = "Number of masks should match number of detections")
   }
 
 })
@@ -180,13 +187,20 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.01, nms_thresh = 0.7, detections_per_img = 100)
+  model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  output <- model(input)
+  torch::with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    # Verify background class is removed, labels should be COCO IDs [1, 90]
+    labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
+    expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
+    expect_true(any(labels_vec == 17), info = "model found a cat")
+    # Verify masks match number of detections
+    expect_equal(output$detections[[1]]$masks$shape[1], length(labels_vec),
+                 info = "Number of masks should match number of detections")
   }
 
 })
@@ -196,14 +210,14 @@ test_that("mask_head_module initializes correctly", {
   skip_if_not(torch::torch_is_installed())
 
   mask_head <- mask_head_module()
-  mask_rcnn_pred <- mask_rcnn_predictor(num_classes = 91)
+  mask_rcnn_pred <- mask_rcnn_predictor(num_classes = 90)
   expect_is(mask_head, "nn_module")
 
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- input %>% mask_head() %>% mask_rcnn_pred()
 
-  # Output should be (2, 91, 28, 28)
+  # Output should be (2, 91, 28, 28) - 90 classes + 1 background
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
@@ -211,14 +225,14 @@ test_that("mask_head_module_v2 initializes correctly", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  mask_head <- mask_head_module_v2(num_classes = 91)
+  mask_head <- mask_head_module_v2(num_classes = 90)
   expect_s3_class(mask_head, "nn_module")
 
   # Test forward pass
   input <- torch::torch_randn(2, 256, 14, 14)
   output <- mask_head(input)
 
-  # Output should be (2, 91, 28, 28)
+  # Output should be (2, 91, 28, 28) - 90 classes + 1 background
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 

@@ -9,17 +9,17 @@ transform_random_order(img, transforms)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transforms}{(list or tuple): list of transformations.}
+\item{transforms}{(list): List of transformations.}
 }
 \description{
 Apply a list of transformations in a random order
 }
 \seealso{
-Other combining_transforms: 
-\code{\link{transform_five_crop}()},
-\code{\link{transform_random_apply}()},
-\code{\link{transform_random_choice}()},
-\code{\link{transform_resized_crop}()},
-\code{\link{transform_ten_crop}()}
+Other combining_transforms:
+\code{\link[=transform_five_crop]{transform_five_crop()}},
+\code{\link[=transform_random_apply]{transform_random_apply()}},
+\code{\link[=transform_random_choice]{transform_random_choice()}},
+\code{\link[=transform_resized_crop]{transform_resized_crop()}},
+\code{\link[=transform_ten_crop]{transform_ten_crop()}}
 }
 \concept{combining_transforms}

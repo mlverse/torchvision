@@ -31,7 +31,7 @@ draw_segmentation_masks(item)
 
 }
 \seealso{
-Other target_transforms: 
-\code{\link{target_transform_trimap_masks}()}
+Other target_transforms_segmentation:
+\code{\link[=target_transform_trimap_masks]{target_transform_trimap_masks()}}
 }
-\concept{target_transforms}
+\concept{target_transforms_segmentation}

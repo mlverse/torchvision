@@ -10,57 +10,64 @@ transform_affine(
   translate,
   scale,
   shear,
-  resample = 0,
-  fillcolor = NULL
+  interpolation = 0,
+  fill = NULL,
+  resample,
+  fillcolor,
+  center = NULL
 )
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{angle}{(float or int): rotation angle value in degrees,
-counter-clockwise.}
+\item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 
-\item{translate}{(sequence of int) – horizontal and vertical translations
-(post-rotation translation)}
+\item{translate}{(integer vector of length 2): Horizontal and vertical
+translations (post-rotation translation).}
 
-\item{scale}{(float) – overall scale}
+\item{scale}{(numeric): Overall scale.}
 
-\item{shear}{(float or sequence) – shear angle value in degrees between -180 to 180,
-clockwise direction. If a sequence is specified, the first value corresponds
-to a shear parallel to the x-axis, while the second value corresponds to a
-shear parallel to the y-axis.}
+\item{shear}{(numeric vector or numeric): Shear angle value in degrees
+between \code{-180} to \code{180}, clockwise direction. If a numeric vector is
+specified, the first value corresponds to a shear parallel to the x-axis,
+while the second value corresponds to a shear parallel to the y-axis.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(integer or character): Interpolation mode.
+Supported values are \code{0} / \code{"nearest"} and \code{2} / \code{"bilinear"}. Default
+is \code{0}.}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.}
+\item{fill}{Fill color for area outside the transform. Default is \code{NULL}.}
+
+\item{resample}{Deprecated. Use \code{interpolation} instead.}
+
+\item{fillcolor}{Deprecated. Use \code{fill} instead.}
+
+\item{center}{(numeric vector of length 2, optional): Optional center of
+rotation, \code{c(x, y)}. Default is image center.}
 }
 \description{
 Apply affine transformation on an image keeping image center invariant
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

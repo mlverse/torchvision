@@ -15,47 +15,47 @@ transform_perspective(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{startpoints}{(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+\item{startpoints}{(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 \verb{[top-left, top-right, bottom-right, bottom-left]} of the original image.}
 
-\item{endpoints}{(list of list of ints): List containing four lists of two
-integers corresponding to four corners
+\item{endpoints}{(list of integer vectors of length 2): List containing
+four integer vectors of length 2 corresponding to four corners
 \verb{[top-left, top-right, bottom-right, bottom-left]} of the transformed
 image.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 }
 \description{
 Perspective transformation of an image
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

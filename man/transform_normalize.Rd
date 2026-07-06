@@ -9,11 +9,11 @@ transform_normalize(img, mean, std, inplace = FALSE)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{mean}{(sequence): Sequence of means for each channel.}
+\item{mean}{(numeric vector): Means for each channel.}
 
-\item{std}{(sequence): Sequence of standard deviations for each channel.}
+\item{std}{(numeric vector): Standard deviations for each channel.}
 
-\item{inplace}{(bool,optional): Bool to make this operation in-place.}
+\item{inplace}{(logical, optional): Whether to make this operation in-place.}
 }
 \description{
 Given mean: \verb{(mean[1],...,mean[n])} and std: \verb{(std[1],..,std[n])} for \code{n}
@@ -25,25 +25,25 @@ channels, this transform will normalize each channel of the input
 This transform acts out of place, i.e., it does not mutate the input tensor.
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

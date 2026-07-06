@@ -7,49 +7,54 @@
 transform_random_rotation(
   img,
   degrees,
-  resample = 0,
+  interpolation = 0,
   expand = FALSE,
   center = NULL,
-  fill = NULL
+  fill = NULL,
+  resample
 )
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{degrees}{(sequence or float or int): Range of degrees to select from.
-If degrees is a number instead of sequence like c(min, max), the range of
-degrees will be (-degrees, +degrees).}
+\item{degrees}{(numeric vector of length 2 or numeric): Range of degrees to
+select from. If \code{degrees} is a bare number instead of a numeric vector of
+length 2 like \code{c(min, max)}, the range of degrees will be
+\verb{(-degrees, +degrees)}.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(integer, optional): Interpolation mode. \code{0} for
+nearest, \code{2} for bilinear. Default is \code{0} (nearest).}
 
-\item{expand}{(bool, optional): Optional expansion flag. If true, expands the
-output to make it large enough to hold the entire rotated image. If false
-or omitted, make the output image the same size as the input image. Note
-that the expand flag assumes rotation around the center and no translation.}
+\item{expand}{(logical, optional): Optional expansion flag. If \code{TRUE},
+expands the output to make it large enough to hold the entire rotated
+image. If \code{FALSE} or omitted, make the output image the same size as the
+input image. Note that the expand flag assumes rotation around the center
+and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, c(x, y).
-Origin is the upper left corner. Default is the center of the image.}
+\item{center}{(numeric vector of length 2, optional): Optional center of
+rotation, \code{c(x, y)}. Origin is the upper left corner. Default is the
+center of the image.}
 
-\item{fill}{(n-tuple or int or float): Pixel fill value for area outside the
-rotated image. If int or float, the value is used for all bands
-respectively. Defaults to 0 for all bands. This option is only available
-for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+\item{fill}{(numeric vector or numeric): Pixel fill value for area outside
+the rotated image. If a single numeric value, the value is used for all
+channels. Defaults to \code{0} for all channels. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.}
+
+\item{resample}{Deprecated. Use \code{interpolation} instead.}
 }
 \description{
 Rotate the image by angle
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100  Biology dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Biology](https://universe.roboflow.com/browse/biology) datasets with
+#' Loads one of the RoboFlow 100 Biology datasets with
 #' bounding box annotations for object-detection task.
 #'
 #' @inheritParams rf100_document_collection

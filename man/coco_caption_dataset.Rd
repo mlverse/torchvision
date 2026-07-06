@@ -57,7 +57,7 @@ title(main = y, col.main = "black")
 }
 }
 \seealso{
-Other caption_dataset: 
+Other caption_dataset:
 \code{\link{flickr_caption_dataset}}
 }
 \concept{caption_dataset}

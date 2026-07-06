@@ -1,3 +1,4 @@
+# each test runs on single tensor image (dim = 3) and with the `b` suffix on batch tensor images (dim = 4)
 test_that("convert_image_dtype", {
 
   x <- torch::torch_rand(1, 2, 2, dtype = torch_float32())
@@ -5,6 +6,11 @@ test_that("convert_image_dtype", {
   y <- transform_convert_image_dtype(o, torch_float32())
 
   expect_equal(round(as_array(x),1), round(as_array(y),1))
+
+  ob <- transform_convert_image_dtype(x$unsqueeze(1), torch_int16())
+  yb <- transform_convert_image_dtype(ob, torch_float32())
+
+  expect_equal(round(as_array(x$unsqueeze(1)),1), round(as_array(yb),1))
 
 })
 
@@ -15,6 +21,10 @@ test_that("normalize", {
 
   expect_equal_to_r(o, as_array((x - 1)/2))
 
+  ob <- transform_normalize(x$unsqueeze(1), 1, 2)
+
+  expect_equal_to_r(ob, as_array((x$unsqueeze(1) - 1)/2))
+
 })
 
 test_that("normalize error is glued", {
@@ -22,6 +32,7 @@ test_that("normalize error is glued", {
   x <- torch_randn(3, 10, 10)
 
   expect_error(transform_normalize(x, 1, 0), "evaluated to zero after conversion to Float")
+  expect_error(transform_normalize(x$unsqueeze(1), 1, 0), "evaluated to zero after conversion to Float")
 
 })
 
@@ -29,30 +40,42 @@ test_that("resize", {
   x <- torch_randn(3, 10, 10)
   o <- transform_resize(x, c(20, 20))
   expect_tensor_shape(o, c(3, 20, 20))
+  ob <- transform_resize(x$unsqueeze(1), c(20, 20))
+  expect_tensor_shape(ob, c(1, 3, 20, 20))
 
   x <- torch_randn(3, 10, 20)
   o <- transform_resize(x, c(10, 10))
   expect_tensor_shape(o, c(3, 10, 10))
+  ob <- transform_resize(x$unsqueeze(1), c(10, 10))
+  expect_tensor_shape(ob, c(1, 3, 10, 10))
 
   x <- torch_randn(3, 10, 20)
   o <- transform_resize(x, c(10))
   expect_tensor_shape(o, c(3, 10, 20))
+  ob <- transform_resize(x$unsqueeze(1), c(10))
+  expect_tensor_shape(ob, c(1, 3, 10, 20))
 
   x <- torch_randn(3, 20, 10)
   o <- transform_resize(x, c(10))
   expect_tensor_shape(o, c(3, 20, 10))
+  ob <- transform_resize(x$unsqueeze(1), c(10))
+  expect_tensor_shape(ob, c(1, 3, 20, 10))
 
   x <- torch_randn(3, 10, 5)
   o <- transform_resize(x, 10)
   expect_tensor_shape(o, c(3, 20, 10))
+  ob <- transform_resize(x$unsqueeze(1), 10)
+  expect_tensor_shape(ob, c(1, 3, 20, 10))
 })
 
 test_that("pad", {
 
   x <- torch_randn(3, 10, 10)
   o <- transform_pad(x, c(1,2))
-
   expect_tensor_shape(o, c(3, 14, 12))
+
+  ob <- transform_pad(x$unsqueeze(1), c(1,2))
+  expect_tensor_shape(ob, c(1, 3, 14, 12))
 })
 
 test_that("crop", {
@@ -63,6 +86,11 @@ test_that("crop", {
   expect_tensor_shape(o, c(3,2,2))
   expect_equal(as_array(x[,1,1]), as_array(o[,1,1]))
 
+  ob <- transform_crop(x$unsqueeze(1), 1, 1, 2, 2)
+
+  expect_tensor_shape(ob, c(1,3,2,2))
+  expect_equal(as_array(x$unsqueeze(1)[,,1,1]), as_array(ob[,,1,1]))
+
 })
 
 test_that("center_crop", {
@@ -71,6 +99,10 @@ test_that("center_crop", {
   o <- transform_center_crop(x, c(2,2))
 
   expect_tensor_shape(o, c(3,2,2))
+
+  ob <- transform_center_crop(x$unsqueeze(1), c(2,2))
+
+  expect_tensor_shape(ob, c(1,3,2,2))
 
 })
 
@@ -81,6 +113,10 @@ test_that("resized_crop", {
 
   expect_tensor_shape(o, c(3,6,6))
 
+  ob <- transform_resized_crop(x$unsqueeze(1), 1, 1, 2, 2, size = c(6, 6))
+
+  expect_tensor_shape(ob, c(1,3,6,6))
+
 })
 
 test_that("hflip", {
@@ -89,6 +125,10 @@ test_that("hflip", {
   o <- transform_hflip(x)
 
   expect_equal_to_r(o[,,1], as_array(x[,,10]))
+
+  ob <- transform_hflip(x$unsqueeze(1))
+
+  expect_equal_to_r(ob[..,1], as_array(x$unsqueeze(1)[..,10]))
 
 })
 
@@ -100,6 +140,9 @@ test_that("perspective", {
   o <- transform_perspective(x, startpoints = list(c(2,2), c(2,3), c(3,2), c(3,3)),
                              endpoints = list(c(4,4), c(4,5), c(5,4), c(5,5)))
 
+  ob <- transform_perspective(x$unsqueeze(1), startpoints = list(c(2,2), c(2,3), c(3,2), c(3,3)),
+                             endpoints = list(c(4,4), c(4,5), c(5,4), c(5,5)))
+
 })
 
 test_that("vflip", {
@@ -109,14 +152,24 @@ test_that("vflip", {
 
   expect_equal_to_r(o[,1,], as_array(x[,10,]))
 
+  ob <- transform_vflip(x$unsqueeze(1))
+
+  expect_equal_to_r(ob[,,1,], as_array(x$unsqueeze(1)[,,10,]))
+
 })
 
 test_that("five_crop", {
 
-  x <- torch_randn(3, 10, 10)
+  x <- torch_randn(3, 10, 12)
   o <- transform_five_crop(x, c(3, 3))
 
   expect_length(o, 5)
+  expect_tensor_shape(o[[1]], c(3,3,3))
+
+  ob <- transform_five_crop(x$unsqueeze(1), c(3, 3))
+
+  expect_length(ob, 5)
+  expect_tensor_shape(ob[[1]], c(1,3,3,3))
 
 })
 
@@ -126,7 +179,12 @@ test_that("ten_crop", {
   o <- transform_ten_crop(x, c(3, 3))
 
   expect_length(o, 10)
+  expect_tensor_shape(o[[1]], c(3,3,3))
 
+  ob <- transform_ten_crop(x$unsqueeze(1), c(3, 3))
+
+  expect_length(ob, 10)
+  expect_tensor_shape(ob[[1]], c(1,3,3,3))
 })
 
 test_that("rotate", {
@@ -141,6 +199,15 @@ test_that("rotate", {
   expect_equal_to_r(output[1,,2], c(0,0, 2, 5, 0, 0))
   expect_equal_to_r(output[1,,3], c(0,3, 7, 10, 9, 0))
 
+  outputb <- transform_rotate(img$unsqueeze(1), 90)
+
+  expect_tensor_shape(outputb, c(1,1,4,4))
+  expect_equal_to_r(outputb[,1,,1]$squeeze(1), c(4,3,2,1))
+
+  outputb <- transform_rotate(img$unsqueeze(1), 45, expand = TRUE)
+  expect_equal_to_r(outputb[,1,,2]$squeeze(1), c(0,0, 2, 5, 0, 0))
+  expect_equal_to_r(outputb[,1,,3]$squeeze(1), c(0,3, 7, 10, 9, 0))
+
 })
 
 test_that("rotate a rectangle image", {
@@ -152,15 +219,24 @@ test_that("rotate a rectangle image", {
   expect_equal_to_r(output[1,,1], c(5,4,3,2,1))
   expect_equal_to_r(output[1,,4], c(20,19,18,17,16))
 
+  outputb <- transform_rotate(img$unsqueeze(1), 90)
+
+  expect_tensor_shape(outputb, c(1,1,5,4))
+  expect_equal_to_r(outputb[,1,,1]$squeeze(1), c(5,4,3,2,1))
+  expect_equal_to_r(outputb[,1,,4]$squeeze(1), c(20,19,18,17,16))
+
 })
 
 test_that("random_affine", {
 
-  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  x <- torch_eye(8)$view(c(1, 8, 8))
 
   # no translation
   o <- transform_random_affine(x, 0, c(0, 0))
   expect_equal(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
+
+  ob <- transform_random_affine(x$unsqueeze(1), 0, c(0, 0))
+  expect_equal(as.numeric(torch_sum(x)), as.numeric(torch_sum(ob)))
 
   # probabilistic transformation with p = 0.1 should not result in sum deviating by > 1
   o <- transform_random_affine(x, 0, c(0.1, 0))
@@ -171,21 +247,65 @@ test_that("random_affine", {
   expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
   expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(o)))
 
+  ob <- transform_random_affine(x$unsqueeze(1), 0, c(0.1, 0))
+  expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(ob)))
+  expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(ob)))
+
+  ob <- transform_random_affine(x$unsqueeze(1), 0, c(0, 0.1))
+  expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(ob)))
+  expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(ob)))
+
 })
 
 test_that("affine", {
 
-  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  x <- torch_eye(8)$view(c(1, 8, 8))
 
   # translate by 1 pixel horizontally
   # should result in sum smaller by 1
   o <- transform_affine(x, 0, c(0, 1), 1, 0)
   expect_equal(as.numeric(torch_sum(x)) - 1, as.numeric(torch_sum(o)))
 
+  ob <- transform_affine(x$unsqueeze(1), 0, c(0, 1), 1, 0)
+  expect_equal(as.numeric(torch_sum(x)) - 1, as.numeric(torch_sum(ob)))
+
   # translate by 1 pixel vertically
   # should result in sum smaller by 1
   o <- transform_affine(x, 0, c(1, 0), 1, 0)
   expect_equal(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(o)))
+
+  # interpolation accepts enum-style string values
+  o_int <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0)
+  o_chr <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = "nearest")
+  expect_equal_to_r(o_chr, as_array(o_int))
+})
+
+test_that("affine deprecated arguments still work", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+
+  old_resample <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, resample = 0, fill = 0),
+    "resample"
+  )
+
+  old_fillcolor <- expect_warning(
+    transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fillcolor = 0),
+    "fillcolor"
+  )
+
+  new <- transform_affine(x, 0, c(0, 1), 1, 0, interpolation = 0, fill = 0)
+
+  expect_equal_to_r(old_resample, as_array(new))
+  expect_equal_to_r(old_fillcolor, as_array(new))
+
+})
+
+test_that("affine validates positive scale", {
+
+  x <- torch_eye(8)$view(c(1, 1, 8, 8))
+  expect_error(transform_affine(x, 0, c(0, 0), 0, 0), "positive")
+  expect_error(transform_affine(x, 0, c(0, 0), 1, 0, interpolation = "bicubic"), "Unsupported interpolation mode")
 
 })
 
@@ -202,6 +322,10 @@ test_that("linear transformation", {
   out <- transform_linear_transformation(tensor, matrix, mean_vector)
 
   expect_equal(dim(out), c(3, 24, 32))
+
+  outb <- transform_linear_transformation(tensor$unsqueeze(1), matrix, mean_vector)
+
+  expect_equal(dim(outb), c(1, 3, 24, 32))
 })
 
 test_that("adjust hue", {
@@ -212,6 +336,11 @@ test_that("adjust hue", {
   for (f in hue_factor) {
     out <- transform_adjust_hue(x, f)
     expect_equal(dim(out), dim(x))
+  }
+
+  for (f in hue_factor) {
+    out <- transform_adjust_hue(x$unsqueeze(1), f)
+    expect_equal(dim(out), dim(x$unsqueeze(1)))
   }
 
 })
@@ -227,6 +356,14 @@ test_that("grayscale", {
   expect_equal(dim(out)[2:3], dim(x)[2:3])
   expect_equal(dim(out)[1], 1)
 
+  outb <- transform_grayscale(x$unsqueeze(1), 3)
+  expect_equal(dim(outb), dim(x$unsqueeze(1)))
+  expect_equal(dim(outb)[2], 3)
+
+  outb <- transform_grayscale(x$unsqueeze(1), 1)
+  expect_equal(dim(outb)[3:4], dim(x)[2:3])
+  expect_equal(dim(outb)[2], 1)
+
 })
 
 test_that("random grayscale", {
@@ -235,6 +372,11 @@ test_that("random grayscale", {
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_grayscale(tensor, p)
     expect_equal(dim(out), dim(tensor))
+  }
+
+  for (p in seq(0, 1, length.out = 10)) {
+    outb <- transform_random_grayscale(tensor$unsqueeze(1), p)
+    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
   }
 
 })
@@ -252,6 +394,15 @@ test_that("random vertical flip", {
     out <- transform_random_vertical_flip(tensor, p)
     expect_equal(dim(out), dim(tensor))
   }
+
+  for (i in 1:10) {
+    outb <- transform_random_vertical_flip(tensor$unsqueeze(1))
+    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+  }
+  for (p in seq(0, 1, length.out = 10)) {
+    outb <- transform_random_vertical_flip(tensor$unsqueeze(1), p)
+    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+  }
 })
 
 
@@ -263,6 +414,7 @@ test_that("random rotation works", {
   rotate <- function(img) transform_random_rotation(img, 20)
 
   expect_error(rotate(x), regexp = NA)
+  expect_error(rotate(x$unsqueeze(1)), regexp = NA)
 
 
 })
@@ -270,7 +422,7 @@ test_that("random rotation works", {
 test_that("random choice transform works", {
 
   # Example Image
-  x <- array(1, dim = c(3, 200, 200))
+  x <- torch_ones(c(3, 200, 200))
 
   # Transforms
   color_transform <- function(img) transform_color_jitter(
@@ -285,7 +437,21 @@ test_that("random choice transform works", {
   # Select a Random Transform to Apply
   expect_error(regexp = NA, {
     transform_random_choice(
-      torch_tensor(x),
+      x,
+      list(
+        color_transform,
+        resize_crop,
+        hflip,
+        vflip,
+        rotate,
+        identity
+      )
+    )
+  })
+
+  expect_error(regexp = NA, {
+    transform_random_choice(
+      x$unsqueeze(1),
       list(
         color_transform,
         resize_crop,

@@ -9,10 +9,10 @@ transform_center_crop(img, size)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size of the crop. If size is
-an int instead of sequence like c(h, w), a square crop (size, size) is
-made. If provided a tuple or list of length 1, it will be interpreted as
-\code{c(size, size)}.}
+\item{size}{(integer vector or integer): Desired output size.
+If \code{size} is either a integer vector of length 2 like \code{c(h, w)} or a bare integer,
+in which case a square crop \code{c(size, size)} is made. If provided a list of
+length 1, it will be interpreted as \code{c(size, size)}.}
 }
 \description{
 The image can be a Magick Image or a torch Tensor, in which case it is
@@ -20,25 +20,25 @@ expected to have \verb{[..., H, W]} shape, where ... means an arbitrary number
 of leading dimensions.
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

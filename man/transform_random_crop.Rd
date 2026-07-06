@@ -16,30 +16,31 @@ transform_random_crop(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{padding}{(int or tuple or list): Padding on each border. If a single
-int is provided this is used to pad all borders. If tuple of length 2 is
-provided this is the padding on left/right and top/bottom respectively.
-If a tuple of length 4 is provided this is the padding for the left, right,
-top and bottom borders respectively.}
+\item{padding}{(integer vector or integer): Padding on each border. If a
+single integer is provided, this value is used to pad all borders. If an
+integer vector of length 2 is provided, it gives the padding on
+left/right and top/bottom respectively. If an integer vector of length 4
+is provided, it gives the padding for the left, right, top and bottom
+borders respectively.}
 
-\item{pad_if_needed}{(boolean): It will pad the image if smaller than the
+\item{pad_if_needed}{(logical): It will pad the image if smaller than the
 desired size to avoid raising an exception. Since cropping is done
 after padding, the padding seems to be done at a random offset.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 
-\item{padding_mode}{Type of padding. Should be: constant, edge, reflect or
-symmetric. Default is constant. Mode symmetric is not yet supported for
-Tensor inputs.
+\item{padding_mode}{(character): Type of padding. Should be: \code{constant},
+\code{edge}, \code{reflect} or \code{symmetric}. Default is \code{constant}. Mode \code{symmetric}
+is not yet supported for Tensor inputs.
 \itemize{
 \item constant: pads with a constant value, this value is specified with fill
 \item edge: pads with the last value on the edge of the image
@@ -57,15 +58,15 @@ to have \verb{[..., H, W]} shape, where ... means an arbitrary number of leading
 dimensions.
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

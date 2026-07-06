@@ -163,6 +163,24 @@ mnist_dataset <- dataset(
     list(x = x, y = y)
   },
 
+
+  # .getbatch = function(index) {
+  #   x <- self$data[index, , , drop = FALSE]
+  #   # unsqueeze(2) on array
+  #   dim(x) = c(length(index), 1, dim(x)[2:3])
+  #   y <- self$targets[index]
+  #
+  #   if (!is.null(self$transform)) {
+  #     x <- self$transform(x)
+  #   }
+  #
+  #   if (!is.null(self$target_transform)) {
+  #     y <- self$target_transform(y)
+  #   }
+  #
+  #   list(x = x, y = y)
+  # },
+
   .length = function() {
     dim(self$data)[1]
   },

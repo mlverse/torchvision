@@ -16,33 +16,38 @@ transform_random_erasing(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{probability that the random erasing operation will be performed.}
+\item{p}{(numeric): Probability that the random erasing operation will be
+performed.}
 
-\item{scale}{range of proportion of erased area against input image.}
+\item{scale}{(numeric vector of length 2): Range of proportion of erased
+area against input image.}
 
-\item{ratio}{range of aspect ratio of erased area.}
+\item{ratio}{(numeric vector of length 2): Range of aspect ratio of erased
+area.}
 
-\item{value}{erasing value. Default is 0. If a single int, it is used to
-erase all pixels. If a tuple of length 3, it is used to erase
-R, G, B channels respectively.
-If a str of 'random', erasing each pixel with random values.}
+\item{value}{(numeric vector or numeric or character): Erasing value.
+Default is \code{0}. If a single numeric value, it is used to erase all
+pixels. If a numeric vector of length 3, it is used to erase R, G, B
+channels respectively. If the string \code{"random"}, erasing each pixel with
+random values.}
 
-\item{inplace}{boolean to make this transform inplace. Default set to FALSE.}
+\item{inplace}{(logical): Boolean to make this transform inplace. Default
+set to \code{FALSE}.}
 }
 \description{
 'Random Erasing Data Augmentation' by Zhong \emph{et al.}
 See \url{https://arxiv.org/pdf/1708.04896}
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

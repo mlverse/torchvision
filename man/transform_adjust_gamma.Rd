@@ -9,11 +9,11 @@ transform_adjust_gamma(img, gamma, gain = 1)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{gamma}{(float): Non negative real number, same as \eqn{\gamma} in the
-equation. gamma larger than 1 make the shadows darker, while gamma smaller
-than 1 make dark regions lighter.}
+\item{gamma}{(numeric): Non negative real number, same as \eqn{\gamma} in
+the equation. \code{gamma} larger than 1 make the shadows darker, while
+\code{gamma} smaller than 1 make dark regions lighter.}
 
-\item{gain}{(float): The constant multiplier.}
+\item{gain}{(numeric): The constant multiplier.}
 }
 \description{
 Also known as Power Law Transform. Intensities in RGB mode are adjusted
@@ -27,25 +27,25 @@ based on the following equation:
 Search for Gamma Correction for more details.
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

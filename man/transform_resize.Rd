@@ -9,15 +9,15 @@ transform_resize(img, size, interpolation = 2)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 }
 \description{
 The image can be a Magic Image or a torch Tensor, in which case it is
@@ -25,25 +25,25 @@ expected to have \verb{[..., H, W]} shape, where ... means an arbitrary number
 of leading dimensions
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_rotate}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_rotate]{transform_rotate()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

@@ -7,58 +7,61 @@
 transform_rotate(
   img,
   angle,
-  resample = 0,
+  interpolation = 0,
   expand = FALSE,
   center = NULL,
-  fill = NULL
+  fill = NULL,
+  resample
 )
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{angle}{(float or int): rotation angle value in degrees,
-counter-clockwise.}
+\item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(integer, optional): Interpolation mode. \code{0} for
+nearest, \code{2} for bilinear. Default is \code{0} (nearest).}
 
-\item{expand}{(bool, optional): Optional expansion flag. If true, expands the
-output to make it large enough to hold the entire rotated image. If false
-or omitted, make the output image the same size as the input image. Note
-that the expand flag assumes rotation around the center and no translation.}
+\item{expand}{(logical, optional): Optional expansion flag. If \code{TRUE},
+expands the output to make it large enough to hold the entire rotated
+image. If \code{FALSE} or omitted, make the output image the same size as the
+input image. Note that the expand flag assumes rotation around the center
+and no translation.}
 
-\item{center}{(list or tuple, optional): Optional center of rotation, c(x, y).
-Origin is the upper left corner. Default is the center of the image.}
+\item{center}{(numeric vector of length 2, optional): Optional center of
+rotation, \code{c(x, y)}. Origin is the upper left corner. Default is the
+center of the image.}
 
-\item{fill}{(n-tuple or int or float): Pixel fill value for area outside the
-rotated image. If int or float, the value is used for all bands
-respectively. Defaults to 0 for all bands. This option is only available
-for Pillow>=5.2.0. This option is not supported for Tensor input. Fill
+\item{fill}{(numeric vector or numeric): Pixel fill value for area outside
+the rotated image. If a single numeric value, the value is used for all
+channels. Defaults to \code{0} for all channels. This option is not supported for Tensor input. Fill
 value for the area outside the transform in the output image is always 0.}
+
+\item{resample}{Deprecated. Use \code{interpolation} instead.}
 }
 \description{
 Angular rotation of an image
 }
 \seealso{
-Other unitary_transforms: 
-\code{\link{transform_adjust_brightness}()},
-\code{\link{transform_adjust_contrast}()},
-\code{\link{transform_adjust_gamma}()},
-\code{\link{transform_adjust_hue}()},
-\code{\link{transform_adjust_saturation}()},
-\code{\link{transform_affine}()},
-\code{\link{transform_center_crop}()},
-\code{\link{transform_convert_image_dtype}()},
-\code{\link{transform_crop}()},
-\code{\link{transform_grayscale}()},
-\code{\link{transform_hflip}()},
-\code{\link{transform_linear_transformation}()},
-\code{\link{transform_normalize}()},
-\code{\link{transform_pad}()},
-\code{\link{transform_perspective}()},
-\code{\link{transform_resize}()},
-\code{\link{transform_rgb_to_grayscale}()},
-\code{\link{transform_to_tensor}()},
-\code{\link{transform_vflip}()}
+Other unitary_transforms:
+\code{\link[=transform_adjust_brightness]{transform_adjust_brightness()}},
+\code{\link[=transform_adjust_contrast]{transform_adjust_contrast()}},
+\code{\link[=transform_adjust_gamma]{transform_adjust_gamma()}},
+\code{\link[=transform_adjust_hue]{transform_adjust_hue()}},
+\code{\link[=transform_adjust_saturation]{transform_adjust_saturation()}},
+\code{\link[=transform_affine]{transform_affine()}},
+\code{\link[=transform_center_crop]{transform_center_crop()}},
+\code{\link[=transform_convert_image_dtype]{transform_convert_image_dtype()}},
+\code{\link[=transform_crop]{transform_crop()}},
+\code{\link[=transform_grayscale]{transform_grayscale()}},
+\code{\link[=transform_hflip]{transform_hflip()}},
+\code{\link[=transform_linear_transformation]{transform_linear_transformation()}},
+\code{\link[=transform_normalize]{transform_normalize()}},
+\code{\link[=transform_pad]{transform_pad()}},
+\code{\link[=transform_perspective]{transform_perspective()}},
+\code{\link[=transform_resize]{transform_resize()}},
+\code{\link[=transform_rgb_to_grayscale]{transform_rgb_to_grayscale()}},
+\code{\link[=transform_to_tensor]{transform_to_tensor()}},
+\code{\link[=transform_vflip]{transform_vflip()}}
 }
 \concept{unitary_transforms}

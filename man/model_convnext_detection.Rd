@@ -26,7 +26,7 @@ model_convnext_base_detection(
 )
 }
 \arguments{
-\item{num_classes}{Number of output classes (default: 91 for COCO).}
+\item{num_classes}{Number of output classes excluding background (default: 90 for COCO).}
 
 \item{pretrained_backbone}{Logical. If \code{TRUE}, loads ImageNet-pretrained
 ConvNeXt backbone weights. Default: \code{FALSE}.}
@@ -133,9 +133,10 @@ if (num_boxes > 0) {
 
 }
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_facenet}},
 \code{\link{model_fasterrcnn}},
+\code{\link{model_lw_detr}},
 \code{\link{model_maskrcnn}}
 }
 \concept{object_detection_model}

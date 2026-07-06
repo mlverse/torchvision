@@ -15,34 +15,35 @@ transform_random_perspective(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{distortion_scale}{(float): argument to control the degree of distortion
-and ranges from 0 to 1. Default is 0.5.}
+\item{distortion_scale}{(numeric): Argument to control the degree of
+distortion and ranges from 0 to 1. Default is \code{0.5}.}
 
-\item{p}{(float): probability of the image being transformed. Default is 0.5.}
+\item{p}{(numeric): Probability of the image being transformed. Default
+is \code{0.5}.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 
-\item{fill}{(int or str or tuple): Pixel fill value for constant fill.
-Default is 0. If a tuple of length 3, it is used to fill R, G, B channels
-respectively. This value is only used when the padding_mode is constant.
-Only int value is supported for Tensors.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 }
 \description{
 Performs a random perspective transformation of the given image with a given
 probability
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

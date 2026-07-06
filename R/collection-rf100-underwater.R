@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Underwater dataset Collection
 #'
-#' Loads one of the underwater related [RoboFlow 100 Environmental](https://universe.roboflow.com/browse/environmental)
+#' Loads one of the underwater related RoboFlow 100 Environmental
 #' datasets: "pipes", "aquarium", "objects", or "coral". Images are provided with
 #' bounding box annotations for object-detection task.
 #'

@@ -256,7 +256,7 @@ collection_catalog$total_size_mb <- sum(c(collection_catalog$train_size_mb,  col
 collection_catalog$function_name <- paste0(collection_catalog$collection, "_collection")
 
 collection_catalog$roboflow_url <- ifelse(is.na(collection_catalog$roboflow_url),
-                                     paste0("https://universe.roboflow.com/browse/", collection_catalog$collection),
+                                     paste0("https://universe.roboflow.com/", collection_catalog$collection),
                                      collection_catalog$roboflow_url)
 
 

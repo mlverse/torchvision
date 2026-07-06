@@ -1,4 +1,4 @@
-test_that("random_resised_crop", {
+test_that("random_resized_crop", {
 
   img <- torch::torch_randn(3, 224, 224)
   o <- transform_random_resized_crop(img, size = c(32, 32))

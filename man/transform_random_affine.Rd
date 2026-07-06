@@ -10,57 +10,64 @@ transform_random_affine(
   translate = NULL,
   scale = NULL,
   shear = NULL,
-  resample = 0,
-  fillcolor = 0
+  interpolation = 0,
+  fill = 0,
+  resample,
+  fillcolor
 )
 }
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{degrees}{(sequence or float or int): Range of degrees to select from.
-If degrees is a number instead of sequence like c(min, max), the range of
-degrees will be (-degrees, +degrees).}
+\item{degrees}{(numeric vector of length 2 or numeric): Range of degrees to
+select from. If \code{degrees} is a bare number instead of a numeric vector of
+length 2 like \code{c(min, max)}, the range of degrees will be
+\verb{(-degrees, +degrees)}.}
 
-\item{translate}{(tuple, optional): tuple of maximum absolute fraction for
-horizontal and vertical translations. For example \code{translate=c(a, b)}, then
-horizontal shift is randomly sampled in the range
--img_width * a < dx < img_width * a and vertical shift is randomly sampled
-in the range -img_height * b < dy < img_height * b. Will not translate by
+\item{translate}{(numeric vector of length 2, optional): Numeric vector of
+maximum absolute fraction for horizontal and vertical translations. For
+example \code{translate = c(a, b)}, then horizontal shift is randomly sampled
+in the range \verb{-img_width * a < dx < img_width * a} and vertical shift is
+randomly sampled in the range
+\verb{-img_height * b < dy < img_height * b}. Will not translate by default.}
+
+\item{scale}{(numeric vector of length 2, optional): Scaling factor
+interval, e.g. \code{c(a, b)}, then scale is randomly sampled from the range
+\verb{a <= scale <= b}. Will keep original scale by default.}
+
+\item{shear}{(numeric vector or numeric, optional): Range of degrees to
+select from. If \code{shear} is a bare number, a shear parallel to the x axis
+in the range \verb{(-shear, +shear)} will be applied. Else if \code{shear} is a
+numeric vector of length 2, a shear parallel to the x axis in the range
+\verb{(shear[1], shear[2])} will be applied. Else if \code{shear} is a numeric
+vector of length 4, a x-axis shear in \verb{(shear[1], shear[2])} and y-axis
+shear in \verb{(shear[3], shear[4])} will be applied. Will not apply shear by
 default.}
 
-\item{scale}{(tuple, optional): scaling factor interval, e.g c(a, b), then
-scale is randomly sampled from the range a <= scale <= b. Will keep
-original scale by default.}
+\item{interpolation}{(integer or character, optional): Interpolation mode.
+Supported values are \code{0} / \code{"nearest"} and \code{2} / \code{"bilinear"}. Default
+is \code{0}.}
 
-\item{shear}{(sequence or float or int, optional): Range of degrees to select
-from. If shear is a number, a shear parallel to the x axis in the range
-(-shear, +shear) will be applied. Else if shear is a tuple or list of 2
-values a shear parallel to the x axis in the range \verb{(shear[1], shear[2])}
-will be applied. Else if shear is a tuple or list of 4 values, a x-axis
-shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
-will be applied. Will not apply shear by default.}
+\item{fill}{(numeric vector or numeric): Fill color for the area outside the
+transform. Default is \code{0}. This option is not supported for Tensor input.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{resample}{Deprecated. Use interpolation instead.}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.}
+\item{fillcolor}{Deprecated. Use fill instead.}
 }
 \description{
 Random affine transformation of the image keeping center invariant
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

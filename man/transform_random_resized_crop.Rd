@@ -15,20 +15,22 @@ transform_random_resized_crop(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{scale}{(tuple of float): range of size of the origin size cropped}
+\item{scale}{(numeric vector of length 2): Range of size of the origin size
+cropped.}
 
-\item{ratio}{(tuple of float): range of aspect ratio of the origin aspect
+\item{ratio}{(numeric vector of length 2): Range of aspect ratio of the
+origin aspect ratio cropped.
 ratio cropped.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
-\code{\link[magick:options]{magick::filter_types()}}.}
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 }
 \description{
 Crop the given image to a random size and aspect ratio. The image can be a
@@ -43,15 +45,15 @@ ratio is made. This crop is finally resized to given size. This is
 popularly used to train the Inception networks.
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

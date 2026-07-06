@@ -1,27 +1,36 @@
 # torchvision (development version)
 
-## Bug fixes and improvements
+## New models
 
-* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter
-  type from `Vector` to `List`, removed stale "(currently unavailable)" note,
-  fixed `colors` description to say "rainbow" instead of "viridis", and fixed
-  a grammatical typo in the error message ("but is current shape is" ->
-  "but current shape is") (#).
-
-## Breaking changes
-
-* **COCO datasets**: Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation).
-  This reduces memory usage by ~50%. Migration: use `coco_segmentation_dataset()` for segmentation tasks (@Chandraveersingh1717, #280, developed with LLM assistance).
-* **COCO datasets**: Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
+* Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28, #328).
 
 ## New features
 
-* Added resolution function for coco imagenet_21k and and pascal_voc classes and labels (#284).
+* Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
+* Added article showcasing `model_fasterrcnn_resnet50_fpn()` with visualization utilities `draw_bounding_boxes()` and `vision_make_grid()` (@DerrickUnleashed, #301).
+
+
+## Bug fixes and improvements
+
+* `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
+
+# torchvision 0.9.0
+
+## Breaking changes
+
+* Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50% (@Chandraveersingh1717, #280).
+* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (@318).
+* Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
+
+## New features
+
+* Added resolution function for COCO Imagenet_21k and Pascal_VOC classes and labels (#284).
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
+
 * Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
-* Added article showcasing `model_fasterrcnn_resnet50_fpn()` with visualization utilities `draw_bounding_boxes()` and `vision_make_grid()` (@DerrickUnleashed, #301).
+
 
 ## New models
 
@@ -36,27 +45,30 @@
 
 ## Bug fixes and improvements
 
+* `model_maskrcnn_*()` and `model_fasterrcnn_*()` now match the pytorch implementation (#318).
+* `transform_` now correctly manage batched 4D torch tensors and 4D arrays (#313).
 * `mnist_datataset()` and derivatives now correctly return item x() values with a 1-channel dimension (@Chandraveersingh1717, #307).
+* `transform_affine()`, `transform_rotate()` and random derivatives now use `interpolation` and `fill` parameter in favor of `resample`and `fillcolor` (@Chandraveersingh1717, #299).
 * Fixed `draw_keypoints()` documentation and error message (@srishtiii28, #296).
 * Standardized dataset messages: download messages now include split information, success messages show image count and class count for consistency.
-* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284)
-* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272)
-* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due
-to non-vectorized `transform_` operations (#264)
-* Added article for `draw_keypoints()` (@DerrickUnleashed #303)
-* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency.(@DerrickUnleashed #302)
+* fix `model_fasterrcnn_*` did not provide boxes output normalized to image size, did not manage batches, fix performance of the `roi_align()` function (#284).
+* fix rf100 collection bounding-box now consider the correct native COCO format being 'xywh' (#272).
+* Remove `.getbatch` method from MNIST as it is providing inconsistent tensor dimensions with `.getitem` due to non-vectorized `transform_` operations (#264).
+* Added article for `draw_keypoints()` (@DerrickUnleashed, #303).
+* Fix typos and align model documentation for `model_deeplabv3_*` and `model_convnext_*_detection()` to ensure consistency (@DerrickUnleashed #302).
+* Fixed `draw_keypoints()` documentation: corrected `connectivity` parameter type, obsolete note,  `colors` description default (@srishtiii28 #296).
 
 # torchvision 0.8.0
 
 ## New datasets
 
 * Added `lfw_people_dataset()` and `lfw_pairs_dataset()` for loading Labelled Faces in the Wild (LFW) datasets (@DerrickUnleashed, #203).
-* Added `places365_dataset()`for loading the Places365 dataset (@koshtiakanksha, #196).
+* Added `places365_dataset()` for loading the Places365 dataset (@koshtiakanksha, #196).
 * Added `pascal_segmentation_dataset()`, and `pascal_detection_dataset()` for loading the Pascal Visual Object Classes datasets (@DerrickUnleashed, #209).
 * Added `whoi_plankton_dataset()`, `whoi_small_plankton_dataset()`, and  `whoi_small_coral_dataset()` (@cregouby, #236).
 * Added `rf100_document_collection()`, `rf100_medical_collection()`, `rf100_biology_collection()`, `rf100_damage_collection()`, `rf100_infrared_collection()`, 
-  and `rf100_underwater_collection()` . Those are collection of datasets from RoboFlow 100 under the same 
-  thematic, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
+  and `rf100_underwater_collection()`. These are collections of datasets from Roboflow 100 under the same 
+  theme, for a total of 35 datasets (@koshtiakanksha, @cregouby, #239).
 * Added `rf100_peixos_segmentation_dataset()`.  (@koshtiakanksha, @cregouby, #250).
 
 ## New models

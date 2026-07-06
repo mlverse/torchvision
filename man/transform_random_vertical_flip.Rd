@@ -9,24 +9,24 @@ transform_random_vertical_flip(img, p = 0.5)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{p}{(float): probability of the image being flipped.
+\item{p}{(numeric): Probability of the image being flipped.
 Default value is 0.5}
 }
 \description{
-The image can be a PIL Image or a torch Tensor, in which case it is expected
+The image can be a Magick Image or a torch Tensor, in which case it is expected
 to have \verb{[..., H, W]} shape, where \code{...} means an arbitrary number of
 leading dimensions
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_affine}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_affine]{transform_random_affine()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}}
 }
 \concept{random_transforms}
