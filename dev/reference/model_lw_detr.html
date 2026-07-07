@@ -202,7 +202,8 @@ Real-Time Detection. <a href="https://arxiv.org/abs/2406.03459" class="external-
 <code><a href="model_convnext_detection.html">model_convnext_detection</a></code>,
 <code><a href="model_facenet.html">model_facenet</a></code>,
 <code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code>,
-<code><a href="model_maskrcnn.html">model_maskrcnn</a></code></p></div>
+<code><a href="model_maskrcnn.html">model_maskrcnn</a></code>,
+<code><a href="model_rfdetr.html">model_rfdetr</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -231,7 +232,7 @@ Real-Time Detection. <a href="https://arxiv.org/abs/2406.03459" class="external-
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_lw_detr_tiny</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">with_no_grad</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu">model</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, pixel_mask <span class="op">=</span> <span class="va">mask</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
