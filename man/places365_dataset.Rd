@@ -80,7 +80,8 @@ tensor_image_browse(item$x)
 # Show class index and label
 label_idx <- item$y
 label_name <- ds$classes[label_idx]
-cat("Label index:", label_idx, "Class name:", label_name, "\n")
+label_idx  # Class Index
+label_name  # Name of the Label
 
 dl <- dataloader(ds, batch_size = 2)
 batch <- dataloader_next(dataloader_make_iter(dl))
@@ -98,19 +99,20 @@ batch$x
 
 }
 \seealso{
-Other classification_dataset: 
+Other classification_dataset:
 \code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
-\code{\link{eurosat_dataset}()},
-\code{\link{fer_dataset}()},
-\code{\link{fgvc_aircraft_dataset}()},
-\code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
+\code{\link[=cifar10_dataset]{cifar10_dataset()}},
+\code{\link[=eurosat_dataset]{eurosat_dataset()}},
+\code{\link[=fer_dataset]{fer_dataset()}},
+\code{\link[=fgvc_aircraft_dataset]{fgvc_aircraft_dataset()}},
+\code{\link[=flowers102_dataset]{flowers102_dataset()}},
+\code{\link[=image_folder_dataset]{image_folder_dataset()}},
 \code{\link{lfw_dataset}},
-\code{\link{mnist_dataset}()},
-\code{\link{oxfordiiitpet_dataset}()},
-\code{\link{tiny_imagenet_dataset}()},
-\code{\link{whoi_plankton_dataset}()},
-\code{\link{whoi_small_coralnet_dataset}()}
+\code{\link[=mnist_dataset]{mnist_dataset()}},
+\code{\link[=oxfordiiitpet_dataset]{oxfordiiitpet_dataset()}},
+\code{\link[=tiny_imagenet_dataset]{tiny_imagenet_dataset()}},
+\code{\link[=vggface2_dataset]{vggface2_dataset()}},
+\code{\link[=whoi_plankton_dataset]{whoi_plankton_dataset()}},
+\code{\link[=whoi_small_coralnet_dataset]{whoi_small_coralnet_dataset()}}
 }
 \concept{classification_dataset}

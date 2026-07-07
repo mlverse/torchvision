@@ -37,19 +37,19 @@ torch_tensor of shape (3, H, W) and dtype uint8 of the image with segmentation m
 Draw segmentation masks with their respective colors on top of a given RGB tensor image
 }
 \examples{
-if (torch::torch_is_installed()) {
+\dontshow{if (torch::torch_is_installed() && rlang::is_installed("magick")) withAutoprint(\{ # examplesIf}
 image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
 mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
 masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
 tensor_image_browse(masked_image)
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
-Other image display: 
-\code{\link{draw_bounding_boxes}()},
-\code{\link{draw_keypoints}()},
-\code{\link{tensor_image_browse}()},
-\code{\link{tensor_image_display}()},
-\code{\link{vision_make_grid}()}
+Other image display:
+\code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}},
+\code{\link[=draw_keypoints]{draw_keypoints()}},
+\code{\link[=tensor_image_browse]{tensor_image_browse()}},
+\code{\link[=tensor_image_display]{tensor_image_display()}},
+\code{\link[=vision_make_grid]{vision_make_grid()}}
 }
 \concept{image display}

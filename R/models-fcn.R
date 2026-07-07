@@ -59,16 +59,6 @@
 #' tensor_image_display(segmented)
 #' }
 NULL
-
-
-voc_segmentation_classes <- c(
-  "background", "aeroplane", "bicycle", "bird", "boat",
-  "bottle", "bus", "car", "cat", "chair",
-  "cow", "dining table", "dog", "horse", "motorbike",
-  "person", "potted plant", "sheep", "sofa", "train",
-  "tv/monitor"
-)
-
 fcn_model_urls <- list(
   fcn_resnet50_coco = c(
     "https://torch-cdn.mlverse.org/models/vision/v2/models/fcn_resnet50_coco.pth",

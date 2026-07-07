@@ -12,7 +12,7 @@ download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
 
   if (!file.exists(path) || redownload) {
     # we should first download to a temporary file because
-    # download probalems could cause hard to debug errors.
+    # download problems could cause hard to debug errors.
     tmp <- tempfile(fileext = fs::path_ext(path))
     on.exit({try({fs::file_delete(tmp)}, silent = TRUE)}, add = TRUE)
 

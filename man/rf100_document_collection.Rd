@@ -43,7 +43,7 @@ visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_
 RoboFlow 100 Document dataset Collection
 }
 \details{
-Loads one of the \href{https://universe.roboflow.com/browse/documents}{RoboFlow 100 Document} datasets with
+Loads one of the RoboFlow 100 Document datasets with
 bounding box annotations for object-detection task.
 }
 \examples{
@@ -67,13 +67,13 @@ tensor_image_browse(boxed_img)
 
 }
 \seealso{
-Other detection_dataset: 
-\code{\link{coco_detection_dataset}()},
+Other detection_dataset:
+\code{\link[=coco_detection_dataset]{coco_detection_dataset()}},
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_biology_collection}()},
-\code{\link{rf100_damage_collection}()},
-\code{\link{rf100_infrared_collection}()},
-\code{\link{rf100_medical_collection}()},
-\code{\link{rf100_underwater_collection}()}
+\code{\link[=rf100_biology_collection]{rf100_biology_collection()}},
+\code{\link[=rf100_damage_collection]{rf100_damage_collection()}},
+\code{\link[=rf100_infrared_collection]{rf100_infrared_collection()}},
+\code{\link[=rf100_medical_collection]{rf100_medical_collection()}},
+\code{\link[=rf100_underwater_collection]{rf100_underwater_collection()}}
 }
 \concept{detection_dataset}

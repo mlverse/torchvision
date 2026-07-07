@@ -46,10 +46,11 @@ cifar10_dataset <- torch::dataset(
     self$root <- root
     self$transform <- transform
     self$target_transform <- target_transform
-
+    self$train <- train
+    self$split <- ifelse(train, "train", "test")
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -76,7 +77,7 @@ cifar10_dataset <- torch::dataset(
     self$x <- data$imgs
     self$y <- data$labels + 1L
 
-    cli_inform("Dataset {.cls {class(self)[[1]]}} loaded with {length(self$y)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
   .load_meta = function() {
     cl <- readLines(fs::path(self$root, self$fname, self$label_fname))

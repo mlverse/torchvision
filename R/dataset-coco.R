@@ -1,6 +1,6 @@
 #' COCO Detection Dataset
 #'
-#' Loads the MS COCO dataset for object detection and segmentation.
+#' Loads the MS COCO dataset for object detection tasks only.
 #'
 #' @rdname coco_detection_dataset
 #' @param root Root directory where the dataset is stored or will be downloaded to.
@@ -16,19 +16,22 @@
 #' - `y$labels`: an integer `torch_tensor` with the class label for each object.
 #' - `y$area`: a float `torch_tensor` indicating the area of each object.
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
-#' - `y$segmentation`: a list of segmentation polygons for each object.
-#' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks.
 #'
-#' The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
-#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
+#' The returned object has S3 class \code{"image_with_bounding_box"}
+#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+#'
+#' For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 #'
 #' @details
-#' The returned image is in CHW format (channels, height, width), matching the torch convention.
+#' The returned image `x` is in CHW format (channels, height, width), matching the torch convention.
 #' The dataset `y` offers object detection annotations such as bounding boxes, labels,
-#' areas, crowd indicators, and segmentation masks from the official COCO annotations.
+#' areas, and crowd indicators from the official COCO annotations.
+#'
+#' Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
 #'
 #' @examples
 #' \dontrun{
+#' # Load dataset for object detection
 #' ds <- coco_detection_dataset(
 #'   train = FALSE,
 #'   year = "2017",
@@ -40,12 +43,9 @@
 #' # Visualize bounding boxes
 #' boxed <- draw_bounding_boxes(item)
 #' tensor_image_browse(boxed)
-#'
-#' # Visualize segmentation masks (if present)
-#' masked <- draw_segmentation_masks(item)
-#' tensor_image_browse(masked)
 #' }
 #' @family detection_dataset
+#' @seealso \code{\link{coco_segmentation_dataset}} for instance segmentation tasks
 #' @importFrom jsonlite fromJSON
 #' @export
 coco_detection_dataset <- torch::dataset(
@@ -58,7 +58,7 @@ coco_detection_dataset <- torch::dataset(
             rep("http://images.cocodataset.org/annotations/annotations_trainval2017.zip", time = 2),
             "http://images.cocodataset.org/zips/train2014.zip", "http://images.cocodataset.org/zips/val2014.zip",
             rep("http://images.cocodataset.org/annotations/annotations_trainval2014.zip", time = 2)),
-    size = c("800 MB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
+    size = c("18.4 GB", "800 MB", rep("770 MB", time = 2), "6.33 GB", "6.33 GB", rep("242 MB", time = 2)),
     md5 = c(c("cced6f7f71b7629ddf16f17bbcfab6b2", "442b8da7639aecaf257c1dceb8ba8c80"),
             rep("f4bbac642086de4f52a3fdda2de5fa2c", time = 2),
             c("0da8cfa0e090c266b78f30e2d2874f1a", "a3d79f5ed8d289b7a7554ce06a5782b3"),
@@ -94,7 +94,7 @@ coco_detection_dataset <- torch::dataset(
                                      glue::glue("instances_{split}{year}.json"))
 
     if (download) {
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -104,7 +104,7 @@ coco_detection_dataset <- torch::dataset(
 
     self$load_annotations()
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {
@@ -119,8 +119,8 @@ coco_detection_dataset <- torch::dataset(
 
     x <- base_loader(img_path)
 
-    H <- dim(x)[1]
-    W <- dim(x)[2]
+    height <- dim(x)[1]
+    width <- dim(x)[2]
 
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
@@ -129,27 +129,10 @@ coco_detection_dataset <- torch::dataset(
       boxes <- box_xywh_to_xyxy(boxes_wh)
 
       label_ids <- anns$category_id
-      labels <- as.character(self$categories$name[match(label_ids, self$categories$id)])
+      labels <- self$category_names[as.character(label_ids)]
 
       area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
       iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
-
-      masks <- lapply(seq_len(nrow(anns)), function(i) {
-        seg <- anns$segmentation[[i]]
-        if (is.list(seg) && length(seg) > 0) {
-          mask <- coco_polygon_to_mask(seg, height = H, width = W)
-          if (inherits(mask, "torch_tensor") && mask$ndim == 2) return(mask)
-        }
-        NULL
-      })
-
-      masks <- Filter(function(m) inherits(m, "torch_tensor") && m$ndim == 2, masks)
-
-      if (length(masks) > 0) {
-        masks_tensor <- torch::torch_stack(masks)
-      } else {
-        masks_tensor <- torch::torch_zeros(c(0, H, W), dtype = torch::torch_bool())
-      }
 
     } else {
       # empty annotation
@@ -157,7 +140,6 @@ coco_detection_dataset <- torch::dataset(
       labels <- character()
       area <- torch::torch_empty(0, dtype = torch::torch_float())
       iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
-      masks_tensor <- torch::torch_empty(c(0, H, W), dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 
@@ -165,19 +147,22 @@ coco_detection_dataset <- torch::dataset(
       boxes = boxes,
       labels = labels,
       area = area,
-      iscrowd = iscrowd,
-      segmentation = anns$segmentation,
-      masks = masks_tensor
+      iscrowd = iscrowd
     )
 
-    if (!is.null(self$transform))
+    if (!is.null(self$transform)) {
       x <- self$transform(x)
+    }
 
-    if (!is.null(self$target_transform))
+    if (!is.null(self$target_transform)) {
+      y$image_height <- height
+      y$image_width <- width
       y <- self$target_transform(y)
+    }
 
     result <- list(x = x, y = y)
-    class(result) <- c("image_with_bounding_box", "image_with_segmentation_mask", class(result))
+    class(result) <- c("image_with_bounding_box", class(result))
+
     result
   },
 
@@ -191,8 +176,8 @@ coco_detection_dataset <- torch::dataset(
 
     cli_inform("Downloading {.cls {class(self)[[1]]}}...")
 
-    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco_dataset")
-    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco_dataset")
+    ann_zip <- download_and_cache(self$resources[annotation_filter, ]$url, prefix = "coco")
+    archive <- download_and_cache(self$resources[image_filter, ]$url, prefix = "coco")
 
     if (tools::md5sum(archive) != self$resources[image_filter, ]$md5) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
@@ -213,14 +198,126 @@ coco_detection_dataset <- torch::dataset(
     )
 
     self$annotations <- data$annotations
-    self$categories <- data$categories
-    self$category_names <- setNames(self$categories$name, self$categories$id)
+    self$classes <- data$categories$name
+    self$category_ids <- data$categories$id
+    self$category_names <- setNames(self$classes, self$category_ids)
 
     ids <- as.numeric(names(self$image_metadata))
     image_paths <- fs::path(self$image_dir,
                             sapply(ids, function(id) self$image_metadata[[as.character(id)]]$file_name))
     exist <- fs::file_exists(image_paths)
     self$image_ids <- ids[exist]
+  },
+
+  active = list(
+    categories = function() {
+      .Deprecated(
+        msg = "The `$categories` attribute is deprecated. Please use `$classes` instead for class names."
+      )
+      data.frame(id = self$category_ids, name = self$classes)
+    }
+  )
+)
+
+
+#' COCO Segmentation Dataset
+#'
+#' Loads the MS COCO dataset for instance segmentation tasks.
+#'
+#' @rdname coco_segmentation_dataset
+#' @inheritParams coco_detection_dataset
+#' @param target_transform Optional transform function applied to the target.
+#'   Use \code{target_transform_coco_masks} to convert polygon annotations to binary masks.
+#'
+#' @return An object of class `coco_segmentation_dataset`. Each item is a list:
+#' - `x`: a `(C, H, W)` array representing the image.
+#' - `y$labels`: an integer `torch_tensor` with the class label for each object.
+#' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
+#' - `y$segmentation`: a list of segmentation polygons for each object.
+#' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks (when using target_transform_coco_masks).
+#'
+#' The returned object has S3 class \code{"image_with_segmentation_mask"}
+#' to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()}.
+#'
+#' For object detection tasks without segmentation, use \code{\link{coco_detection_dataset}} instead.
+#'
+#' @details
+#' The returned image `x` is in CHW format (channels, height, width), matching the torch convention.
+#' The dataset `y` offers instance segmentation annotations including labels,
+#' crowd indicators, and segmentation masks from the official COCO annotations.
+#'
+#' Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
+#'
+#' @examples
+#' \dontrun{
+#' # Load dataset for instance segmentation
+#' ds <- coco_segmentation_dataset(
+#'   train = FALSE,
+#'   year = "2017",
+#'   download = TRUE,
+#'   target_transform = target_transform_coco_masks
+#' )
+#'
+#' item <- ds[1]
+#'
+#' # Visualize segmentation masks
+#' masked <- draw_segmentation_masks(item)
+#' tensor_image_browse(masked)
+#' }
+#' @family segmentation_dataset
+#' @seealso \code{\link{coco_detection_dataset}} for object detection tasks
+#' @export
+coco_segmentation_dataset <- torch::dataset(
+  name = "coco_segmentation_dataset",
+  inherit = coco_detection_dataset,
+
+  .getitem = function(index) {
+    image_id <- self$image_ids[index]
+    image_info <- self$image_metadata[[as.character(image_id)]]
+
+    img_path <- fs::path(self$image_dir, image_info$file_name)
+
+    x <- base_loader(img_path)
+
+    height <- dim(x)[1]
+    width <- dim(x)[2]
+
+    anns <- self$annotations[self$annotations$image_id == image_id, ]
+
+    if (nrow(anns) > 0) {
+      label_ids <- anns$category_id
+      labels <- self$category_names[as.character(label_ids)]
+      iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
+    } else {
+      # empty annotation
+      labels <- character()
+      iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
+      anns$segmentation <- list()
+    }
+
+    y <- list(
+      labels = labels,
+      iscrowd = iscrowd,
+      segmentation = anns$segmentation
+    )
+
+    if (!is.null(self$transform)) {
+      x <- self$transform(x)
+    }
+
+    if (!is.null(self$target_transform)) {
+      y$image_height <- height
+      y$image_width <- width
+      y <- self$target_transform(y)
+    }
+
+    result <- list(x = x, y = y)
+    class(result) <- c("image_with_bounding_box", class(result))
+
+    if (!is.null(y$masks)) {
+      class(result) <- c("image_with_segmentation_mask", class(result))
+    }
+    result
   }
 )
 
@@ -286,7 +383,7 @@ coco_caption_dataset <- torch::dataset(
     self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -296,7 +393,7 @@ coco_caption_dataset <- torch::dataset(
 
     self$load_annotations()
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$image_ids)} images.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images.")
   },
 
   load_annotations = function() {
@@ -328,3 +425,114 @@ coco_caption_dataset <- torch::dataset(
     list(x = x, y = y)
   }
 )
+
+#' MS COCO Class Labels
+#'
+#' Utilities for resolving COCO 90 class identifiers to their corresponding
+#' human readable labels. The labels are retrieved from pytorch/vision source to be compliant
+#' with torchvision pretrained models.
+#'
+#' @param class_id Integer vector of 1-based class identifiers.
+#' @return A character vector with the COCO class names
+#' @family class_resolution
+#' @importFrom utils read.delim
+#' @export
+coco_classes <- function(class_id = 1:90) {
+  if (any(class_id > 90)) {
+    cli_warn("MS COCO {.var class_id} cannot be > 90")
+  }
+
+  labels <- c("person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush"
+  )
+  labels[nzchar(labels)][class_id]
+}
+

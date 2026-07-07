@@ -1,7 +1,6 @@
-rpn_head <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+rpn_head <- torch::nn_module(
     "rpn_head",
-    initialize = function() {
+    initialize = function(in_channels, num_anchors = 3) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -20,19 +19,17 @@ rpn_head <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_v2 <- function(in_channels, num_anchors = 3) {
-  torch::nn_module(
+
+rpn_head_v2 <- torch::nn_module(
     "rpn_head_v2",
-    initialize = function() {
-      # The pretrained checkpoint stacks two Conv2d → BatchNorm2d → ReLU
-      # blocks with bias disabled on the convolutions. Mirror that layout so
-      # the parameter names and shapes line up with the weight file.
+    initialize = function(in_channels, num_anchors = 3) {
+      # PyTorch V2 uses Conv2dNormActivation with norm_layer=None, which creates
+      # Conv2d with bias=True, NO batch norm, and ReLU activation.
+      # This matches torchvision.ops.misc.Conv2dNormActivation behavior when norm_layer=None.
       block <- function() {
         nn_sequential(
-          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = FALSE),
-          nn_batch_norm2d(in_channels),
+          nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1, bias = TRUE),
           nn_relu()
         )
       }
@@ -54,11 +51,10 @@ rpn_head_v2 <- function(in_channels, num_anchors = 3) {
       list(objectness = objectness_list, bbox_deltas = bbox_reg_list)
     }
   )
-}
 
-rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
-  torch::nn_module(
-    initialize = function() {
+
+rpn_head_mobilenet <- torch::nn_module(
+    initialize = function(in_channels, num_anchors = 15) {
       self$conv <- nn_sequential(nn_sequential(nn_conv2d(in_channels, in_channels, kernel_size = 3, padding = 1)))
       self$cls_logits <- nn_conv2d(in_channels, num_anchors, kernel_size = 1)
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
@@ -76,45 +72,65 @@ rpn_head_mobilenet <- function(in_channels, num_anchors = 15) {
       list(objectness = objectness, bbox_deltas = bbox_deltas)
     }
   )
-}
+
 
 #' @importFrom torch torch_meshgrid torch_stack torch_tensor torch_stack torch_zeros_like torch_max torch_float32
-generate_level_anchors <- function(h, w, stride, scales) {
+generate_level_anchors <- function(h, w, stride, base_sizes = c(32, 64, 128, 256, 512), aspect_ratios = c(0.5, 1.0, 2.0), device = "cpu") {
   # Grid centers
-  shift_x <- torch_arange(0.5, w - 0.5, 1.0) * stride
-  shift_y <- torch_arange(0.5, h - 0.5, 1.0) * stride
+  shift_x <- torch_arange(0.5, w - 0.5, 1.0, device = device) * stride
+  shift_y <- torch_arange(0.5, h - 0.5, 1.0, device = device) * stride
   shifts <- torch_meshgrid(list(shift_x, shift_y), indexing = "xy")
-  shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], shifts[[1]], shifts[[2]]), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
+  shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], torch_zeros_like(shifts[[1]]), torch_zeros_like(shifts[[2]])), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
 
-  # Anchor sizes (width/height)
-  # Example: square anchors per scale
-  anchor_sizes <- torch_tensor(scales) * stride  # [A]
-  anchor_widths <- anchor_sizes
-  anchor_heights <- anchor_sizes
+  # Create anchors for each combination of base_size and aspect_ratio
+  anchor_list <- list()
 
-  # Create base anchors [A, 4] (xc, yc, w, h)
+  for (base_size in base_sizes) {
+    for (ratio in aspect_ratios) {
+      w_anchor <- base_size * sqrt(ratio)
+      h_anchor <- base_size / sqrt(ratio)
+      anchor_list[[length(anchor_list) + 1]] <- c(w_anchor, h_anchor)
+    }
+  }
+
+  # Stack anchors [A, 2]
+  anchors_wh <- do.call(rbind, anchor_list)
+  anchor_widths <- torch_tensor(anchors_wh[, 1], device = device)
+  anchor_heights <- torch_tensor(anchors_wh[, 2], device = device)
+
+  # Create base anchors [4, A] then transpose to [A, 4] (xc, yc, w, h)
   anchors <- torch_stack(list(
-    torch_zeros_like(anchor_sizes),
-    torch_zeros_like(anchor_sizes),
+    torch_zeros_like(anchor_widths),
+    torch_zeros_like(anchor_heights),
     anchor_widths,
     anchor_heights
-  ), dim = 1)  # [A, 4]
+  ), dim = 1)$permute(c(2, 1))
 
   # Expand to [H, W, A, 4]
   anchors <- anchors$reshape(c(1, 1, -1, 4)) + shift_grid  # Broadcasting
-  anchors
+
+  # Convert from (xc, yc, w, h) to (x1, y1, x2, y2)
+  orig_shape <- anchors$shape
+  anchors <- anchors$reshape(c(-1, 4))
+  anchors <- box_cxcywh_to_xyxy(anchors)
+  anchors$reshape(orig_shape)
 }
 
-decode_boxes <- function(anchors, deltas) {
+decode_boxes <- function(anchors, deltas, weights = c(10, 10, 5, 5)) {
   widths <- anchors[, 3] - anchors[, 1]
   heights <- anchors[, 4] - anchors[, 2]
   ctr_x <- anchors[, 1] + widths / 2
   ctr_y <- anchors[, 2] + heights / 2
 
-  dx <- deltas[, 1]
-  dy <- deltas[, 2]
-  dw <- deltas[, 3]
-  dh <- deltas[, 4]
+  # Apply bbox regression weights (default: 10, 10, 5, 5)
+  dx <- deltas[, 1] / weights[1]
+  dy <- deltas[, 2] / weights[2]
+  dw <- deltas[, 3] / weights[3]
+  dh <- deltas[, 4] / weights[4]
+
+  # Clamp dw and dh to prevent numerical instability in exp() to log(1000 / 16)  # ~4.135
+  dw <- torch::torch_clamp(dw, max = 4.135)
+  dh <- torch::torch_clamp(dh, max = 4.135)
 
   pred_ctr_x <- ctr_x + dx * widths
   pred_ctr_y <- ctr_y + dy * heights
@@ -129,19 +145,138 @@ decode_boxes <- function(anchors, deltas) {
   torch::torch_stack(list(x1, y1, x2, y2), dim = 2)
 }
 
-generate_proposals <- function(features, rpn_out, image_size, strides,
+#' Postprocess Detections
+#'
+#' Processes class logits and box regression to produce final detections.
+#' Keeps all class predictions before filtering, rather than taking max across
+#' classes first, allowing proper per-class NMS.
+#'
+#' @param class_logits Tensor of shape \[N, num_classes_with_bg\] - raw classification scores including background
+#' @param box_regression Tensor of shape \[N, num_classes_with_bg * 4\] - box deltas for each class
+#' @param proposals Tensor of shape \[N, 4\] - proposal boxes in (x1, y1, x2, y2) format
+#' @param image_size Integer vector of length 2: \[height, width\]
+#' @param num_classes Integer - number of classes excluding background (e.g., 90 for COCO)
+#' @param score_thresh Numeric - minimum score threshold for detections
+#' @param nms_thresh Numeric - NMS IoU threshold
+#' @param detections_per_img Integer - maximum detections to return
+#'
+#' @details
+#' Box regression uses standard Faster R-CNN decoding with weights (10, 10, 5, 5).
+#' Background class (index 1 in class_logits) is removed, returning labels
+#' in range \[1, num_classes\] which correspond to COCO classes \[1=person, 2=bicycle, ..., 90=toothbrush\].
+#'
+#' @return List with boxes, labels, scores tensors
+#' @noRd
+postprocess_detections <- function(class_logits, box_regression, proposals,
+                                   image_size, num_classes, score_thresh,
+                                   nms_thresh, detections_per_img) {
+  device <- class_logits$device
+  num_proposals <- proposals$shape[1]
+
+  # class_logits and box_regression include background class
+  # num_classes excludes background, so total classes = num_classes + 1
+  num_classes_with_bg <- num_classes + 1L
+
+  # Decode boxes for all classes: [N, num_classes_with_bg, 4]
+  pred_boxes <- box_regression$view(c(num_proposals, num_classes_with_bg, 4))
+
+  # Decode boxes using proposals as anchors (expand proposals for all classes)
+  proposals_expanded <- proposals$unsqueeze(2)$expand(c(num_proposals, num_classes_with_bg, 4))
+
+  # Decode for each class
+  decoded_boxes <- torch_zeros_like(pred_boxes)
+  for (cls_idx in seq_len(num_classes_with_bg)) {
+    decoded_boxes[, cls_idx, ] <- decode_boxes(proposals, pred_boxes[, cls_idx, ])
+  }
+
+  # Clip to image boundaries
+  decoded_boxes <- clip_boxes_to_image(decoded_boxes$view(c(-1, 4)), image_size)
+  decoded_boxes <- decoded_boxes$view(c(num_proposals, num_classes_with_bg, 4))
+
+  # Apply softmax to get class probabilities: [N, num_classes_with_bg]
+  pred_scores <- torch::nnf_softmax(class_logits, dim = 2)
+
+  # Remove background class (class 1 in 1-based indexing)
+  # Keep classes 2 through num_classes_with_bg
+  pred_boxes <- decoded_boxes[, 2:num_classes_with_bg, ]   # [N, num_classes, 4]
+  pred_scores <- pred_scores[, 2:num_classes_with_bg]       # [N, num_classes]
+
+  # Create labels for each prediction: [num_classes]
+  # These are the actual class indices (1, 2, 3, ... num_classes)
+  # torch_arange in R is inclusive on both ends
+  labels <- torch_arange(1L, num_classes, device = device, dtype = torch_long())
+  # Expand to match scores: [N, num_classes]
+  labels <- labels$view(c(1, -1))$expand_as(pred_scores)
+
+  # Flatten everything: treat each (proposal, class) pair as a separate detection
+  boxes <- pred_boxes$reshape(c(-1, 4))           # [N * num_classes, 4]
+  scores <- pred_scores$reshape(c(-1))            # [N * num_classes]
+  labels <- labels$reshape(c(-1))                 # [N * num_classes]
+
+  # Remove low scoring boxes
+  keep <- scores > score_thresh
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  if (boxes$shape[1] == 0) {
+    return(list(
+      boxes = torch_empty(c(0, 4), device = device),
+      labels = torch_empty(c(0), dtype = torch_long(), device = device),
+      scores = torch_empty(c(0), device = device)
+    ))
+  }
+
+  # Remove small boxes
+  keep <- remove_small_boxes(boxes, min_size = 1e-2)
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  if (boxes$shape[1] == 0) {
+    return(list(
+      boxes = torch_empty(c(0, 4), device = device),
+      labels = torch_empty(c(0), dtype = torch_long(), device = device),
+      scores = torch_empty(c(0), device = device)
+    ))
+  }
+
+  # Apply per-class NMS
+  keep <- batched_nms(boxes, scores, labels, nms_thresh)
+
+  # Keep only top k detections
+  if (keep$shape[1] > detections_per_img) {
+    keep <- keep[1:detections_per_img]
+  }
+
+  boxes <- boxes[keep, ]
+  scores <- scores[keep]
+  labels <- labels[keep]
+
+  list(boxes = boxes, labels = labels, scores = scores)
+}
+
+#' @importFrom torch nnf_grid_sample torch_empty
+generate_proposals <- function(features, rpn_out, image_size, strides, batch_idx,
                                score_thresh = 0.05, nms_thresh = 0.7) {
   device <- rpn_out$objectness[[1]]$device
-  all_proposals <- torch::torch_empty(0L, 4L, device = device)
-  all_scores <- torch::torch_empty(0L, device = device)
+  all_proposals <- torch_empty(0L, 4L, device = device)
+  all_scores <- torch_empty(0L, device = device)
 
   for (i in seq_along(features)) {
-    objectness <- rpn_out$objectness[[i]][1, , , ]
-    deltas <- rpn_out$bbox_deltas[[i]][1, , , ]
+    objectness <- rpn_out$objectness[[i]][batch_idx, , , ]
+    deltas <- rpn_out$bbox_deltas[[i]][batch_idx, , , ]
 
     c(a, h, w) %<-% objectness$shape
 
-    anchors <- generate_level_anchors(h, w, strides[[i]], scales = seq_len(a))
+    if (a == 15) {
+      base_sizes <- c(32, 64, 128, 256, 512)
+    } else if (a == 3) {
+      base_sizes <- c(4 * strides[[i]])
+    } else {
+      value_error("Unexpected number of anchors: {a}. Expected 3 or 15.")
+    }
+    anchors <- generate_level_anchors(h, w, strides[[i]], base_sizes = base_sizes, aspect_ratios = c(0.5, 1, 2), device = device)
     anchors <- anchors$reshape(c(-1, 4))  # [H*W*A, 4]
 
     objectness <- objectness$sigmoid()$flatten() ## [H*W*A]
@@ -163,43 +298,72 @@ generate_proposals <- function(features, rpn_out, image_size, strides,
     keep_idx <- nms(proposals, scores, nms_thresh)
     proposals <- proposals[keep_idx, ]
   } else {
-    proposals <- torch::torch_empty(c(0, 4), device = device, dtype = torch_float32())
+    proposals <- torch_empty(c(0, 4), device = device, dtype = torch_float32())
   }
 
   list(proposals = proposals)
 }
 
-roi_align_stub <- function(feature_map, proposals, output_size = c(7L, 7L)) {
-  h <- as.integer(feature_map$shape[[3]])
-  w <- as.integer(feature_map$shape[[4]])
+roi_align <- function(feature_map, proposals, batch_idx, output_size = c(7L, 7L)) {
+  # A vectorized version of roi_align_stub for feature_map: [B, C, H, W] and proposals: [N, 4] (x1, y1, x2, y2)
 
-  n <- proposals$size(1)
-  pooled <- vector("list", n)
-
-  for (i in seq_len(n)) {
-    x1 <- max(1, min(as.numeric(proposals[i, 1]), w))
-    y1 <- max(1, min(as.numeric(proposals[i, 2]), h))
-    x2 <- max(x1 + 1, min(as.numeric(proposals[i, 3]), w))
-    y2 <- max(y1 + 1, min(as.numeric(proposals[i, 4]), h))
-
-    region <- feature_map[1, , y1:y2, x1:x2]
-    pooled_feat <- torch::nnf_interpolate(
-      region$unsqueeze(1),
-      size = output_size,
-      mode = "bilinear",
-      align_corners = FALSE
-    )[1, , , ]
-
-    pooled[[i]] <- pooled_feat$reshape(-1)
+  num_rois <- proposals$size(1)
+  if (num_rois == 0) {
+    return(torch_empty(c(0, feature_map$size(2), output_size[1], output_size[2]), device = feature_map$device))
   }
 
-  torch::torch_stack(pooled)
+  channels <- feature_map$size(2)
+  h_feat <- feature_map$size(3)
+  w_feat <- feature_map$size(4)
+
+  # Normalize coordinnates to match grid_sample [-1 et 1]
+  x1 <- (proposals[, 1] / (w_feat - 1) * 2) - 1
+  y1 <- (proposals[, 2] / (h_feat - 1) * 2) - 1
+  x2 <- (proposals[, 3] / (w_feat - 1) * 2) - 1
+  y2 <- (proposals[, 4] / (h_feat - 1) * 2) - 1
+
+  # Create a grid of output_size
+  grid_y <- torch_linspace(0, 1, output_size[1], device = feature_map$device)
+  grid_x <- torch_linspace(0, 1, output_size[2], device = feature_map$device)
+
+  # Meshgrid to get relative coordiantes in [7, 7]
+  grids <- torch_meshgrid(list(grid_y, grid_x), indexing = "ij")
+  rel_y <- grids[[1]]
+  rel_x <- grids[[2]]
+
+  # Linear interpolation for each ROI [N, 7, 7]
+  # x <- x1 + rel_x * (x2 - x1)
+  sampling_x <- x1$view(c(-1, 1, 1)) + rel_x$view(c(1, output_size[1], output_size[2])) * (x2 - x1)$view(c(-1, 1, 1))
+  sampling_y <- y1$view(c(-1, 1, 1)) + rel_y$view(c(1, output_size[1], output_size[2])) * (y2 - y1)$view(c(-1, 1, 1))
+
+  # Clamp grid to [-1, 1] to avoid needing padding (especially for MPS compatibility)
+  sampling_x <- sampling_x$clamp(-1, 1)
+  sampling_y <- sampling_y$clamp(-1, 1)
+
+  # Concat to get a grid of [N, 7, 7, 2]
+  grid <- torch_stack(list(sampling_x, sampling_y), dim = -1)
+
+  # bilinear sampling
+  input_selected <- feature_map[batch_idx, , , ]$unsqueeze(1)$expand(c(num_rois, channels, h_feat, w_feat))
+
+  pooled_features <- nnf_grid_sample(
+    input_selected,
+    grid,
+    mode = "bilinear",
+    padding_mode = "zeros",
+    align_corners = FALSE
+  )
+
+  # Return [N, C, 7, 7]
+  pooled_features
 }
 
+roi_heads_module <-  torch::nn_module(
+    "region-of-interest head",
+    initialize = function(num_classes = 90) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
 
-roi_heads_module <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
       # Define box_head with named layers to match expected state dict structure
       self$box_head <- torch::nn_module(
         initialize = function() {
@@ -215,8 +379,8 @@ roi_heads_module <- function(num_classes = 91) {
 
       self$box_predictor <- torch::nn_module(
         initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+          self$cls_score <- torch::nn_linear(1024, num_classes_with_bg, bias = TRUE)
+          self$bbox_pred <- torch::nn_linear(1024, num_classes_with_bg * 4, bias = TRUE)
         },
         forward = function(x) {
           list(
@@ -226,44 +390,56 @@ roi_heads_module <- function(num_classes = 91) {
         }
       )()
     },
-    forward = function(features, proposals) {
+    forward = function(features, proposals, batch_idx) {
       feature_maps <- features[c("p2", "p3", "p4", "p5")]
-      pooled <- roi_align_stub(feature_maps[[1]], proposals)
-      x <- self$box_head(pooled)
+      pooled <- roi_align(feature_maps[[1]], proposals, batch_idx)
+      x <- self$box_head(pooled$flatten(start_dim = 2))
       self$box_predictor(x)
     }
   )
-}
 
-roi_heads_module_v2 <- function(num_classes = 91) {
-  torch::nn_module(
-    initialize = function() {
-      # The pretrained weights expect four (Linear -> BN -> ReLU) blocks
-      # followed by a final linear layer at index "4".
-      block <- function() {
-        nn_sequential(
-          nn_linear(1024, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        )
-      }
+roi_heads_module_v2 <-  torch::nn_module(
+    "region-of-interest head v2",
+    initialize = function(num_classes = 90, in_channels = 256) {
+      # num_classes excludes background, but predictor needs background + all classes
+      num_classes_with_bg <- num_classes + 1L
 
-      layers <- list(
-        nn_sequential(
-          nn_linear(256 * 7 * 7, 1024, bias = FALSE),
-          nn_batch_norm1d(1024),
-          nn_relu()
-        ),
-        block(),
-        block(),
-        block(),
-        nn_linear(1024, 1024, bias = TRUE)
-      )
-      self$box_head <- do.call(nn_sequential, layers)
+      # V2 uses FastRCNNConvFCHead: 4 conv layers + 1 FC layer
+      # PyTorch: FastRCNNConvFCHead((256, 7, 7), [256, 256, 256, 256], [1024], norm_layer=BatchNorm2d)
+      self$box_head <- torch::nn_module(
+        initialize = function() {
+          conv_block <- function(in_ch, out_ch) {
+            nn_sequential(
+              nn_conv2d(in_ch, out_ch, kernel_size = 3, padding = 1, bias = TRUE),
+              nn_batch_norm2d(out_ch),
+              nn_relu()
+            )
+          }
+          # State dict expects numeric indices: 0, 1, 2, 3, 4
+          # Use character names that will be accessed as self[["0"]], etc.
+          self[["0"]] <- conv_block(in_channels, 256)
+          self[["1"]] <- conv_block(256, 256)
+          self[["2"]] <- conv_block(256, 256)
+          self[["3"]] <- conv_block(256, 256)
+          self[["4"]] <- nn_linear(256 * 7 * 7, 1024, bias = TRUE)
+        },
+        forward = function(x) {
+          # x is [N, 256, 7, 7]
+          x <- self[["0"]](x)
+          x <- self[["1"]](x)
+          x <- self[["2"]](x)
+          x <- self[["3"]](x)
+          x <- x$flatten(start_dim = 2)  # [N, 256*7*7]
+          x <- self[["4"]](x)            # [N, 1024]
+          x <- nnf_relu(x)
+          x
+        }
+      )()
+
       self$box_predictor <- torch::nn_module(
         initialize = function() {
-          self$cls_score <- torch::nn_linear(1024, num_classes, bias = TRUE)
-          self$bbox_pred <- torch::nn_linear(1024, num_classes * 4, bias = TRUE)
+          self$cls_score <- torch::nn_linear(1024, num_classes_with_bg, bias = TRUE)
+          self$bbox_pred <- torch::nn_linear(1024, num_classes_with_bg * 4, bias = TRUE)
         },
         forward = function(x) {
           list(
@@ -273,17 +449,18 @@ roi_heads_module_v2 <- function(num_classes = 91) {
         }
       )()
     },
-    forward = function(features, proposals) {
-      pooled <- roi_align_stub(features[[1]], proposals)
+    forward = function(features, proposals, batch_idx) {
+      feature_maps <- features[c("p2", "p3", "p4", "p5")]
+      pooled <- roi_align(feature_maps[[1]], proposals, batch_idx)
       x <- self$box_head(pooled)
       self$box_predictor(x)
     }
   )
-}
 
-fpn_module <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module <- torch::nn_module(
+    "feature pyramid network",
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(torch::nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -310,7 +487,6 @@ fpn_module <- function(in_channels, out_channels) {
       results
     }
   )
-}
 
 
 resnet_fpn_backbone <- function(pretrained = TRUE) {
@@ -349,7 +525,7 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -363,13 +539,13 @@ resnet_fpn_backbone <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model <- function(backbone, num_classes,
-                             score_thresh = 0.05,
-                             nms_thresh = 0.5,
-                             detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_model <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -378,7 +554,7 @@ fasterrcnn_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head(in_channels = backbone$out_channels)()
+          self$head <- rpn_head(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
@@ -386,86 +562,58 @@ fasterrcnn_model <- function(backbone, num_classes,
       )()
 
       # Use the roi_heads_module instead of inline definition
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
 
     forward = function(images) {
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                  score_thresh = self$score_thresh,
-                                  nms_thresh = self$nms_thresh)
+      batch_size <- images$shape[1]
+      image_size <- images$shape[3:4]
+      final_results <- list()
 
-      if (props$proposals$shape[1] == 0) {
-        empty <- list(
-          boxes = torch::torch_empty(c(0, 4)),
-          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-          scores = torch::torch_empty(c(0))
-        )
-        return(list(features = features, detections = empty))
-      }
+      for (b in seq_len(batch_size)) {
+        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                    batch_idx = b, score_thresh = 0,
+                                    nms_thresh = self$nms_thresh)
 
-      detections <- self$roi_heads(features, props$proposals)
-
-      scores <- torch::nnf_softmax(detections$scores, dim = 2)
-      max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores[[1]]
-      final_labels <- max_scores[[2]]
-
-      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
-      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-      # Filter by score threshold
-      keep <- final_scores > self$score_thresh
-      num_detections <- torch::torch_sum(keep)$item()
-
-      if (num_detections > 0) {
-        final_boxes <- final_boxes[keep, ]
-        final_labels <- final_labels[keep]
-        final_scores <- final_scores[keep]
-
-        # Apply NMS to remove overlapping detections
-        if (final_boxes$shape[1] > 1) {
-          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-          final_boxes <- final_boxes[nms_keep, ]
-          final_labels <- final_labels[nms_keep]
-          final_scores <- final_scores[nms_keep]
+        if (props$proposals$shape[1] == 0) {
+          empty <- list(
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
+          )
+          final_results[[b]] <- empty
+          next
         }
 
-        # Limit detections per image
-        n_det <- final_scores$shape[1]
-        if (n_det > self$detections_per_img) {
-          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-          top_idx <- top_k[[2]]
-          final_boxes <- final_boxes[top_idx, ]
-          final_labels <- final_labels[top_idx]
-          final_scores <- final_scores[top_idx]
-        }
-      } else {
-        final_boxes <- torch::torch_empty(c(0, 4))
-        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-        final_scores <- torch::torch_empty(c(0))
-      }
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-      list(
-        features = features,
-        detections = list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
-      )
+
+        final_results[[b]] <- result
+      }
+      list(features = features, detections = final_results)
     }
   )
-}
 
 
-fpn_module_v2 <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module_v2 <- torch::nn_module(
+    "feature pyramid network v2",
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(
           nn_conv2d(c, out_channels, kernel_size = 1, bias = FALSE),
@@ -500,7 +648,7 @@ fpn_module_v2 <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
   resnet <- model_resnet50(pretrained = pretrained)
@@ -538,7 +686,7 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_v2(
         in_channels = c(256, 512, 1024, 2048),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       c2_to_c5 <- self$body(x)
@@ -552,13 +700,13 @@ resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
 }
 
 
-fasterrcnn_model_v2 <- function(backbone, num_classes,
-                                score_thresh = 0.05,
-                                nms_thresh = 0.5,
-                                detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_model_v2 <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -567,91 +715,62 @@ fasterrcnn_model_v2 <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_v2(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_v2(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module_v2(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                  score_thresh = self$score_thresh,
-                                  nms_thresh = self$nms_thresh)
+      batch_size <- images$shape[1]
+      image_size <- images$shape[3:4]
+      final_results <- list()
 
-      if (props$proposals$shape[1] == 0) {
-        empty <- list(
-          boxes = torch::torch_empty(c(0, 4)),
-          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-          scores = torch::torch_empty(c(0))
-        )
-        return(list(features = features, detections = empty))
-      }
+      for (b in seq_len(batch_size)) {
+        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
+                                    batch_idx = b, score_thresh = 0,
+                                    nms_thresh = self$nms_thresh)
 
-      detections <- self$roi_heads(features, props$proposals)
-
-      scores <- torch::nnf_softmax(detections$scores, dim = 2)
-      max_scores <- torch::torch_max(scores, dim = 2)
-      final_scores <- max_scores[[1]]
-      final_labels <- max_scores[[2]]
-
-      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
-      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-      # Filter by score threshold
-      keep <- final_scores > self$score_thresh
-      num_detections <- torch::torch_sum(keep)$item()
-
-      if (num_detections > 0) {
-        final_boxes <- final_boxes[keep, ]
-        final_labels <- final_labels[keep]
-        final_scores <- final_scores[keep]
-
-        # Apply NMS to remove overlapping detections
-        if (final_boxes$shape[1] > 1) {
-          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-          final_boxes <- final_boxes[nms_keep, ]
-          final_labels <- final_labels[nms_keep]
-          final_scores <- final_scores[nms_keep]
+        if (props$proposals$shape[1] == 0) {
+          empty <- list(
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
+          )
+          final_results[[b]] <- empty
+          next
         }
 
-        # Limit detections per image
-        n_det <- final_scores$shape[1]
-        if (n_det > self$detections_per_img) {
-          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-          top_idx <- top_k[[2]]
-          final_boxes <- final_boxes[top_idx, ]
-          final_labels <- final_labels[top_idx]
-          final_scores <- final_scores[top_idx]
-        }
-      } else {
-        final_boxes <- torch::torch_empty(c(0, 4))
-        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-        final_scores <- torch::torch_empty(c(0))
-      }
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
 
-      list(
-        features = features,
-        detections = list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
-      )
+
+        final_results[[b]] <- result
+      }
+      list(features = features, detections = final_results)
     }
-  )()
-}
+  )
 
 
-fpn_module_2level <- function(in_channels, out_channels) {
-  torch::nn_module(
-    initialize = function() {
+
+fpn_module_2level <- torch::nn_module(
+    initialize = function(in_channels, out_channels) {
       self$inner_blocks <- nn_module_list(lapply(in_channels, function(c) {
         nn_sequential(nn_conv2d(c, out_channels, kernel_size = 1))
       }))
@@ -673,7 +792,7 @@ fpn_module_2level <- function(in_channels, out_channels) {
       results
     }
   )
-}
+
 
 
 mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
@@ -685,7 +804,7 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
@@ -709,13 +828,13 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
   backbone
 }
 
-fasterrcnn_mobilenet_model <- function(backbone, num_classes,
-                                       score_thresh = 0.05,
-                                       nms_thresh = 0.5,
-                                       detections_per_img = 100) {
-  torch::nn_module(
-    initialize = function() {
+fasterrcnn_mobilenet_model <- torch::nn_module(
+    initialize = function(backbone, num_classes,
+                          score_thresh = 0.05,
+                          nms_thresh = 0.5,
+                          detections_per_img = 100) {
       self$backbone <- backbone
+      self$num_classes <- num_classes
 
       # Store configurable detection parameters
       self$score_thresh <- score_thresh
@@ -724,78 +843,58 @@ fasterrcnn_mobilenet_model <- function(backbone, num_classes,
 
       self$rpn <- torch::nn_module(
         initialize = function() {
-          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)()
+          self$head <- rpn_head_mobilenet(in_channels = backbone$out_channels)
         },
         forward = function(features) {
           self$head(features)
         }
       )()
-      self$roi_heads <- roi_heads_module(num_classes = num_classes)()
+      self$roi_heads <- roi_heads_module(num_classes = num_classes)
     },
     forward = function(images) {
       features <- self$backbone(images)
       rpn_out <- self$rpn(features)
 
-      image_size <- as.integer(images$shape[3:4])
-      props <- generate_proposals(features, rpn_out, image_size, c(8, 16),
-                                  score_thresh = self$score_thresh,
-                                  nms_thresh = self$nms_thresh)
+      batch_size <- images$shape[1]
+      image_size <- images$shape[3:4]
+      final_results <- list()
 
-      if (props$proposals$shape[1] == 0) {
-        empty <- list(
-          boxes = torch::torch_empty(c(0, 4)),
-          labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-          scores = torch::torch_empty(c(0))
+      for (b in seq_len(batch_size)) {
+        props <- generate_proposals(features, rpn_out, image_size, c(8, 16),
+                                    batch_idx = b, score_thresh = 0,
+                                    nms_thresh = self$nms_thresh)
+
+        if (props$proposals$shape[1] == 0) {
+          empty <- list(
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0))
+          )
+          final_results[[b]] <- empty
+          next
+        }
+
+        # Get ROI head predictions
+        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
+
+        # Postprocess detections
+        result <- postprocess_detections(
+          class_logits = roi_out$scores,
+          box_regression = roi_out$boxes,
+          proposals = props$proposals,
+          image_size = image_size,
+          num_classes = self$num_classes,
+          score_thresh = self$score_thresh,
+          nms_thresh = self$nms_thresh,
+          detections_per_img = self$detections_per_img
         )
-        return(list(features = features, detections = empty))
+
+        final_results[[b]] <- result
       }
-
-      detections <- self$roi_heads(features, props$proposals)
-
-      scores <- nnf_softmax(detections$scores, dim = 2)
-      max_scores <- torch_max(scores, dim = 2)
-      final_scores <- max_scores[[1]]
-      final_labels <- max_scores[[2]]
-
-      box_reg <- detections$boxes$view(c(-1, num_classes, 4))
-      gather_idx <- final_labels$unsqueeze(2)$unsqueeze(3)$expand(c(-1, 1, 4))
-      final_boxes <- box_reg$gather(2, gather_idx)$squeeze(2)
-
-      # Filter by score threshold
-      keep <- final_scores > self$score_thresh
-      if (torch::torch_sum(keep)$item() > 0) {
-        final_boxes <- final_boxes[keep, ]
-        final_labels <- final_labels[keep]
-        final_scores <- final_scores[keep]
-
-        # Apply NMS to remove overlapping detections
-        if (final_boxes$shape[1] > 1) {
-          nms_keep <- nms(final_boxes, final_scores, self$nms_thresh)
-          final_boxes <- final_boxes[nms_keep, ]
-          final_labels <- final_labels[nms_keep]
-          final_scores <- final_scores[nms_keep]
-        }
-
-        # Limit detections per image
-        n_det <- final_scores$shape[1]
-        if (n_det > self$detections_per_img) {
-          top_k <- torch::torch_topk(final_scores, self$detections_per_img)
-          top_idx <- top_k[[2]]
-          final_boxes <- final_boxes[top_idx, ]
-          final_labels <- final_labels[top_idx]
-          final_scores <- final_scores[top_idx]
-        }
-      } else {
-        final_boxes <- torch::torch_empty(c(0, 4))
-        final_labels <- torch::torch_empty(c(0), dtype = torch::torch_long())
-        final_scores <- torch::torch_empty(c(0))
-      }
-
-      final <- list(boxes = final_boxes, labels = final_labels, scores = final_scores)
-      list(features = features, detections = final)
+      list(features = features, detections = final_results)
     }
-  )()
-}
+  )
+
 
 
 
@@ -808,7 +907,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
       self$fpn <- fpn_module_2level(
         in_channels = c(160, 960),  # output channels of layer 13 and 16
         out_channels = 256
-      )()
+      )
     },
     forward = function(x) {
       all_feats <- list()
@@ -839,7 +938,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'
 #' @param pretrained Logical. If TRUE, loads pretrained weights from local file.
 #' @param progress Logical. Show progress bar during download (unused).
-#' @param num_classes Number of output classes (default: 91 for COCO).
+#' @param num_classes Number of output classes excluding background (default: 90 for COCO).
 #' @param score_thresh Numeric. Minimum score threshold for detections (default: 0.05).
 #' @param nms_thresh Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).
 #' @param detections_per_img Integer. Maximum number of detections per image (default: 100).
@@ -864,71 +963,43 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' @examples
 #' \dontrun{
 #' library(magrittr)
-#' norm_mean <- c(0.485, 0.456, 0.406) # ImageNet normalization constants, see
-#' # https://pytorch.org/vision/stable/models.html
+#' # ImageNet normalization constants, see https://pytorch.org/vision/stable/models.html
+#' norm_mean <- c(0.485, 0.456, 0.406)
 #' norm_std  <- c(0.229, 0.224, 0.225)
 #' # Use a publicly available image of an animal
-#' wmc <- "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-#' url <- "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg"
-#' img <- base_loader(paste0(wmc,url))
-#'
-#' input <- img %>%
+#' url <- paste0("https://upload.wikimedia.org/wikipedia/commons/thumb/",
+#'        "e/ea/Morsan_Normande_vache.jpg/120px-Morsan_Normande_vache.jpg")
+#' image <- magick_loader(url) %>%
 #'   transform_to_tensor() %>%
-#'   transform_resize(c(520, 520)) %>%
+#'   transform_resize(c(520, 520))
+#' # ResNet backbone requires image normalization
+#' input <- image  %>%
 #'   transform_normalize(norm_mean, norm_std)
-#' batch <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
-#'
-#' # ResNet-50 FPN
-#' model <- model_fasterrcnn_resnet50_fpn(pretrained = TRUE)
-#' model$eval()
-#' pred <- model(batch)$detections
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
+#' batch_normalized <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 #'
 #' # ResNet-50 FPN V2
-#' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE)
+#' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, , detections_per_img = 5 )
 #' model$eval()
-#' pred <- model(batch)$detections
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
+#' torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
+#' labels <- coco_classes(as.integer(pred$labels))
 #'
-#' # MobileNet V3 Large FPN
-#' model <- model_fasterrcnn_mobilenet_v3_large_fpn(pretrained = TRUE)
-#' model$eval()
-#' pred <- model(batch)$detections
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
+#' # Visualize boxes
+#' labels <- coco_classes(as.integer(pred$labels))
+#' boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+#' tensor_image_browse(boxed)
 #'
 #' # MobileNet V3 Large 320 FPN
-#' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(pretrained = TRUE)
+#' batch <- image$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
+#' model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(
+#'   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
+#' )
 #' model$eval()
-#' pred <- model(batch)$detections
-#' num_boxes <- as.integer(pred$boxes$size()[1])
-#' keep <- seq_len(min(5, num_boxes))
-#' boxes <- pred$boxes[keep, ]$view(c(-1, 4))
-#' labels <- ds$category_names[as.character(as.integer(pred$labels[keep]))]
-#' if (num_boxes > 0) {
-#'   boxed <- draw_bounding_boxes(image, boxes, labels = labels)
-#'   tensor_image_browse(boxed)
-#' }
+#' torch::with_no_grad({pred <- model(batch)$detections[[1]]})
+#'
+#' # Visualize boxes
+#' labels <- coco_classes(as.integer(pred$labels))
+#' boxed <- draw_bounding_boxes(image, pred$boxes, labels = labels)
+#' tensor_image_browse(boxed)
 #' }
 #'
 #' @family object_detection_model
@@ -955,7 +1026,7 @@ rpn_model_urls <- list(
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN
 #' @export
 model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
-                                          num_classes = 91,
+                                          num_classes = 90,
                                           score_thresh = 0.05,
                                           nms_thresh = 0.5,
                                           detections_per_img = 100,
@@ -964,9 +1035,9 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
   model <- fasterrcnn_model(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
-                            detections_per_img = detections_per_img)()
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+                            detections_per_img = detections_per_img)
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_resnet50
@@ -988,7 +1059,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
 #' @describeIn model_fasterrcnn Faster R-CNN with ResNet-50 FPN V2
 #' @export
 model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
-                                             num_classes = 91,
+                                             num_classes = 90,
                                              score_thresh = 0.05,
                                              nms_thresh = 0.5,
                                              detections_per_img = 100,
@@ -999,8 +1070,8 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
                                nms_thresh = nms_thresh,
                                detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_resnet50_v2
@@ -1039,7 +1110,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
 #' @export
 model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                                     progress = TRUE,
-                                                    num_classes = 91,
+                                                    num_classes = 90,
                                                     score_thresh = 0.05,
                                                     nms_thresh = 0.5,
                                                     detections_per_img = 100,
@@ -1050,8 +1121,8 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                       nms_thresh = nms_thresh,
                                       detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
@@ -1074,7 +1145,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
 #' @export
 model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         progress = TRUE,
-                                                        num_classes = 91,
+                                                        num_classes = 90,
                                                         score_thresh = 0.05,
                                                         nms_thresh = 0.5,
                                                         detections_per_img = 100,
@@ -1085,8 +1156,8 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                       nms_thresh = nms_thresh,
                                       detections_per_img = detections_per_img)
 
-  if (pretrained && num_classes != 91)
-    cli_abort("Pretrained weights require num_classes = 91.")
+  if (pretrained && num_classes != 90)
+    cli_abort("Pretrained weights require num_classes = 90 (excluding background).")
 
   if (pretrained) {
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320

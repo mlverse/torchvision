@@ -10,8 +10,10 @@ transform_random_affine(
   translate = NULL,
   scale = NULL,
   shear = NULL,
-  resample = 0,
-  fillcolor = 0
+  interpolation = 0,
+  fill = 0,
+  resample,
+  fillcolor
 )
 }
 \arguments{
@@ -40,27 +42,29 @@ will be applied. Else if shear is a tuple or list of 4 values, a x-axis
 shear in \verb{(shear[1], shear[2])} and y-axis shear in \verb{(shear[3], shear[4])}
 will be applied. Will not apply shear by default.}
 
-\item{resample}{(int, optional): An optional resampling filter. See interpolation
-modes.}
+\item{interpolation}{(int or character, optional): Interpolation mode.
+Supported values are 0 / "nearest" and 2 / "bilinear". Default is 0.}
 
-\item{fillcolor}{(tuple or int): Optional fill color (Tuple for RGB Image and
-int for grayscale) for the area outside the transform in the output image
-(Pillow>=5.0.0). This option is not supported for Tensor input. Fill value
-for the area outside the transform in the output image is always 0.}
+\item{fill}{(tuple or int): Fill color for the area outside the transform.
+Default is 0. This option is not supported for Tensor input.}
+
+\item{resample}{Deprecated. Use interpolation instead.}
+
+\item{fillcolor}{Deprecated. Use fill instead.}
 }
 \description{
 Random affine transformation of the image keeping center invariant
 }
 \seealso{
-Other random_transforms: 
-\code{\link{transform_color_jitter}()},
-\code{\link{transform_random_crop}()},
-\code{\link{transform_random_erasing}()},
-\code{\link{transform_random_grayscale}()},
-\code{\link{transform_random_horizontal_flip}()},
-\code{\link{transform_random_perspective}()},
-\code{\link{transform_random_resized_crop}()},
-\code{\link{transform_random_rotation}()},
-\code{\link{transform_random_vertical_flip}()}
+Other random_transforms:
+\code{\link[=transform_color_jitter]{transform_color_jitter()}},
+\code{\link[=transform_random_crop]{transform_random_crop()}},
+\code{\link[=transform_random_erasing]{transform_random_erasing()}},
+\code{\link[=transform_random_grayscale]{transform_random_grayscale()}},
+\code{\link[=transform_random_horizontal_flip]{transform_random_horizontal_flip()}},
+\code{\link[=transform_random_perspective]{transform_random_perspective()}},
+\code{\link[=transform_random_resized_crop]{transform_random_resized_crop()}},
+\code{\link[=transform_random_rotation]{transform_random_rotation()}},
+\code{\link[=transform_random_vertical_flip]{transform_random_vertical_flip()}}
 }
 \concept{random_transforms}

@@ -1,0 +1,14 @@
+---
+title: "Image Segmentation with fcn_resnet50"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(torchvision)
+```

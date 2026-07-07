@@ -98,7 +98,7 @@ indices <- as.integer(topk[[2]][1, ])
 scores <- as.numeric(topk[[1]][1, ])
 
 # 6. Show Top-5 predictions
-glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\%)")
+glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}\%)")
 
 # 7. Same with large model
 model_large <- model_mobilenet_v3_large(pretrained = TRUE)
@@ -107,33 +107,20 @@ output_l <- model_large(input)
 topk <- output_l$topk(k = 5, dim = 2)
 indices <- as.integer(topk[[2]][1, ])
 scores <- as.numeric(topk[[1]][1, ])
-glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}\%)")
+glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}\%)")
 }
 
 }
 \seealso{
-Other classification_model: 
-\code{\link{model_alexnet}()},
+Other classification_model:
+\code{\link[=model_alexnet]{model_alexnet()}},
 \code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
 \code{\link{model_facenet}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
-\code{\link{model_resnet}},
-\code{\link{model_vgg}},
-\code{\link{model_vit}}
-
-Other classification_model: 
-\code{\link{model_alexnet}()},
-\code{\link{model_convnext}},
-\code{\link{model_efficientnet}},
-\code{\link{model_efficientnet_v2}},
-\code{\link{model_facenet}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
+\code{\link[=model_inception_v3]{model_inception_v3()}},
+\code{\link[=model_maxvit]{model_maxvit()}},
+\code{\link[=model_mobilenet_v2]{model_mobilenet_v2()}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},
 \code{\link{model_vit}}

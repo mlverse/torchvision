@@ -45,7 +45,7 @@ test_that("model_fcn_resnet50 loads pretrained weights with 21 classes", {
 })
 
 test_that("model_fcn_resnet50 can segment a cat", {
-  voc_idx <- setNames(seq_along(torchvision:::voc_segmentation_classes), torchvision:::voc_segmentation_classes)
+  voc_idx <- setNames(seq_along(pascal_voc_classes()), pascal_voc_classes())
 
   model <- model_fcn_resnet50(pretrained = TRUE)
   img <- torch::torch_tensor(jpeg::readJPEG("assets/class/cat/cat.1.jpg"))$permute(c(3,1,2))

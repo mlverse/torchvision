@@ -1,39 +1,30 @@
 Package: torchvision
 Title: Models, Datasets and Transformations for Images
-Version: 0.8.0.9000
+Version: 0.9.0.9000
 Authors@R: c(
-    person(given = "Daniel",
-           family = "Falbel",
-           role = c("aut", "cre"),
-           email = "daniel@posit.co"
-           ),
-    person(given = "Christophe",
-           family = "Regouby",
-           role = c("ctb"),
-           email = "christophe.regouby@free.fr"
-           ),
-    person(given = "Akanksha", 
-           family = "Koshti", 
-           role = c("ctb")),
-    person(given = "Derrick",
-           family = "Richard",
-           role = c("ctb"),
-           email = "derrickrds@gmail.com"
-           ),
-    person(given = "ANAMASGARD",
-           role = c("ctb")
-           ),
-    person(family = "RStudio", role = c("cph"))
+    person("Tomasz", "Kalinowski", role = c("ctb", "cre"),
+           email = "tomasz@posit.co"),
+    person("Daniel", "Falbel", role = c("aut", "cph"),
+           email = "dfalbel@gmail.com"),
+    person("Christophe", "Regouby", role = c("ctb"),
+           email = "christophe.regouby@free.fr"),
+    person("Akanksha", "Koshti", role = c("ctb")),
+    person("Derrick", "Richard", role = c("ctb"),
+           email = "derrickrds@gmail.com"),
+    person("ANAMASGARD", role = c("ctb")),
+    person("Chandraveer", "Singh", role = c("ctb"),
+           email = "chandraveersingh1717@gmail.com"),
+    person("Posit Software, PBC", role = c("cph", "fnd"),
+           comment = c(ROR = "03wc8by49"))
     )
 Description: Provides access to datasets, models and preprocessing
     facilities for deep learning with images. Integrates seamlessly
-    with the 'torch' package and it's 'API' borrows heavily from
-    'PyTorch' vision package.
+    with the 'torch' package and its API borrows heavily from
+    the 'PyTorch' vision package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, roclets = c("namespace", "rd"))
 URL: https://torchvision.mlverse.org, https://github.com/mlverse/torchvision
-RoxygenNote: 7.3.3
 Imports:
     torch (>= 0.5.0),
     fs,
@@ -59,7 +50,8 @@ Suggests:
     R.matlab,
     xml2,
     knitr,
-    rmarkdown
+    rmarkdown,
+    torchvisionlib
 BugReports: https://github.com/mlverse/torchvision/issues
 Collate: 
     'collection-catalog.R'
@@ -80,6 +72,7 @@ Collate:
     'dataset-fgvc.R'
     'dataset-flickr.R'
     'dataset-flowers.R'
+    'dataset-imagenet.R'
     'dataset-lfw.R'
     'dataset-mnist.R'
     'dataset-oxfordiiitpet.R'
@@ -87,9 +80,9 @@ Collate:
     'dataset-places365.R'
     'dataset-plankton.R'
     'dataset-rf100-peixos.R'
+    'dataset-vggface2.R'
     'extension.R'
     'globals.R'
-    'imagenet.R'
     'models-alexnet.R'
     'models-convnext.R'
     'models-convnext_detection.R'
@@ -101,6 +94,7 @@ Collate:
     'models-faster_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
+    'models-mask_rcnn.R'
     'models-maxvit.R'
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'
@@ -110,11 +104,11 @@ Collate:
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
-    'tiny-imagenet-dataset.R'
     'transforms-array.R'
     'transforms-defaults.R'
     'transforms-generics.R'
     'transforms-magick.R'
+    'transforms-segmentation.R'
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
@@ -122,3 +116,4 @@ Depends:
     R (>= 3.5)
 LazyData: true
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

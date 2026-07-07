@@ -48,7 +48,7 @@
 #' scores <- as.numeric(topk[[1]][1, ])
 #'
 #' # 6. Show Top-5 predictions
-#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
+#' glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}%)")
 #'
 #' # 7. Same with large model
 #' model_large <- model_mobilenet_v3_large(pretrained = TRUE)
@@ -57,7 +57,7 @@
 #' topk <- output_l$topk(k = 5, dim = 2)
 #' indices <- as.integer(topk[[2]][1, ])
 #' scores <- as.numeric(topk[[1]][1, ])
-#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
+#' glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}%)")
 #' }
 #'
 #' @importFrom torch nn_module nn_conv2d nn_batch_norm2d nn_relu nn_hardswish nn_hardsigmoid nn_identity nn_sequential

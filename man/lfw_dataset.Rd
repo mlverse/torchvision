@@ -71,7 +71,7 @@ but deviates in a few key aspects due to dataset availability and R API conventi
 The \verb{10fold} split is not supported, as the original protocol files are unavailable or incompatible with clean separation of image-label pairs.
 \item The \code{split} parameter in R controls which version of the dataset to use: \code{"original"} (unaligned) or \code{"funneled"} (aligned using funneling).
 The funneled version contains geometrically normalized face images, offering better alignment and typically improved performance for face recognition models.
-\item The dataset is downloaded from \href{https://figshare.com/authors/_/3118605}{Figshare},
+\item The dataset is downloaded from Figshare,
 which hosts the same files referenced in \code{scikit-learn}'s dataset utilities.
 \item \code{lfw_people_dataset}: 13,233 images across multiple identities (using either \code{"original"} or \code{"funneled"} splits)
 \item \code{lfw_pairs_dataset}:
@@ -111,19 +111,20 @@ lfw$classes[first_item$y]  # Class Name (e.g., "Same" or "Different")
 
 }
 \seealso{
-Other classification_dataset: 
+Other classification_dataset:
 \code{\link{caltech_dataset}},
-\code{\link{cifar10_dataset}()},
-\code{\link{eurosat_dataset}()},
-\code{\link{fer_dataset}()},
-\code{\link{fgvc_aircraft_dataset}()},
-\code{\link{flowers102_dataset}()},
-\code{\link{image_folder_dataset}()},
-\code{\link{mnist_dataset}()},
-\code{\link{oxfordiiitpet_dataset}()},
-\code{\link{places365_dataset}()},
-\code{\link{tiny_imagenet_dataset}()},
-\code{\link{whoi_plankton_dataset}()},
-\code{\link{whoi_small_coralnet_dataset}()}
+\code{\link[=cifar10_dataset]{cifar10_dataset()}},
+\code{\link[=eurosat_dataset]{eurosat_dataset()}},
+\code{\link[=fer_dataset]{fer_dataset()}},
+\code{\link[=fgvc_aircraft_dataset]{fgvc_aircraft_dataset()}},
+\code{\link[=flowers102_dataset]{flowers102_dataset()}},
+\code{\link[=image_folder_dataset]{image_folder_dataset()}},
+\code{\link[=mnist_dataset]{mnist_dataset()}},
+\code{\link[=oxfordiiitpet_dataset]{oxfordiiitpet_dataset()}},
+\code{\link[=places365_dataset]{places365_dataset()}},
+\code{\link[=tiny_imagenet_dataset]{tiny_imagenet_dataset()}},
+\code{\link[=vggface2_dataset]{vggface2_dataset()}},
+\code{\link[=whoi_plankton_dataset]{whoi_plankton_dataset()}},
+\code{\link[=whoi_small_coralnet_dataset]{whoi_small_coralnet_dataset()}}
 }
 \concept{classification_dataset}

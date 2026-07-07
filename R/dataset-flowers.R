@@ -89,7 +89,7 @@ flowers102_dataset <- dataset(
     self$classes <- self$classes
 
     if (download){
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
     }
 
@@ -99,7 +99,7 @@ flowers102_dataset <- dataset(
     meta <- readRDS(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
     self$img_path <- meta$img_path
     self$labels <- meta$labels
-    cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} loaded with {self$.length()} samples.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   .getitem = function(index) {
@@ -163,7 +163,7 @@ flowers102_dataset <- dataset(
   },
 
   active = list(
-    raw_folder = function() file.path(self$root_path, "flowers102", "raw"),
-    processed_folder = function() file.path(self$root_path, "flowers102", "processed")
+    raw_folder = function() file.path(self$root_path, class(self)[1], "raw"),
+    processed_folder = function() file.path(self$root_path, class(self)[1], "processed")
   )
 )

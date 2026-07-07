@@ -48,7 +48,7 @@
 #' topk <- output_s$topk(k = 5, dim = 2)
 #' indices <- as.integer(topk[[2]][1, ])
 #' scores <- as.numeric(topk[[1]][1, ])
-#' glue::glue("{seq_along(indices)}. {imagenet_label(indices)} ({round(scores, 2)}%)")
+#' glue::glue("{seq_along(indices)}. {imagenet_classes(indices)} ({round(scores, 2)}%)")
 #' }
 #'
 #' @family classification_model

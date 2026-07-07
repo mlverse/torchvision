@@ -65,9 +65,10 @@ flickr8k_caption_dataset <- torch::dataset(
     self$train <- train
     self$split <- ifelse(train, "train", "test")
 
-    if (download)
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+    if (download) {
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. Use `download = TRUE` to download it.")
@@ -125,7 +126,7 @@ flickr8k_caption_dataset <- torch::dataset(
     self$captions <- data$captions
     self$classes <- readRDS(file.path(self$processed_folder, self$class_index_file))
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {
@@ -227,9 +228,10 @@ flickr30k_caption_dataset <- torch::dataset(
     self$train <- train
     self$split <- ifelse(train, "train", "test")
 
-    if (download)
-      cli_inform("Dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
+    if (download) {
+      cli_inform("Split {.val {self$split}} of dataset {.cls {class(self)[[1]]}} (~{.emph {self$archive_size}}) will be downloaded and processed if not already available.")
       self$download()
+    }
 
     if (!self$check_exists())
       cli_abort("Dataset not found. Use `download = TRUE` to download it.")
@@ -253,7 +255,7 @@ flickr30k_caption_dataset <- torch::dataset(
     self$captions <- vapply(self$filenames, function(f) caption_to_index[[f]], integer(1))
     self$classes <- captions_map
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {length(self$images)} images across {length(self$classes)} classes.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   check_exists = function() {

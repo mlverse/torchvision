@@ -34,23 +34,26 @@ An object of class \code{coco_detection_dataset}. Each item is a list:
 \item \code{y$labels}: an integer \code{torch_tensor} with the class label for each object.
 \item \code{y$area}: a float \code{torch_tensor} indicating the area of each object.
 \item \code{y$iscrowd}: a boolean \code{torch_tensor}, where \code{TRUE} marks the object as part of a crowd.
-\item \code{y$segmentation}: a list of segmentation polygons for each object.
-\item \code{y$masks}: a \verb{(N, H, W)} boolean \code{torch_tensor} containing binary segmentation masks.
 }
 
-The returned object has S3 classes \code{"image_with_bounding_box"} and \code{"image_with_segmentation_mask"}
-to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()} and \code{draw_segmentation_masks()}.
+The returned object has S3 class \code{"image_with_bounding_box"}
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+
+For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 }
 \description{
-Loads the MS COCO dataset for object detection and segmentation.
+Loads the MS COCO dataset for object detection tasks only.
 }
 \details{
-The returned image is in CHW format (channels, height, width), matching the torch convention.
+The returned image \code{x} is in CHW format (channels, height, width), matching the torch convention.
 The dataset \code{y} offers object detection annotations such as bounding boxes, labels,
-areas, crowd indicators, and segmentation masks from the official COCO annotations.
+areas, and crowd indicators from the official COCO annotations.
+
+Files are downloaded to a \code{coco} subdirectory in the torch cache directory for better organization.
 }
 \examples{
 \dontrun{
+# Load dataset for object detection
 ds <- coco_detection_dataset(
   train = FALSE,
   year = "2017",
@@ -62,20 +65,18 @@ item <- ds[1]
 # Visualize bounding boxes
 boxed <- draw_bounding_boxes(item)
 tensor_image_browse(boxed)
-
-# Visualize segmentation masks (if present)
-masked <- draw_segmentation_masks(item)
-tensor_image_browse(masked)
 }
 }
 \seealso{
-Other detection_dataset: 
+\code{\link{coco_segmentation_dataset}} for instance segmentation tasks
+
+Other detection_dataset:
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_biology_collection}()},
-\code{\link{rf100_damage_collection}()},
-\code{\link{rf100_document_collection}()},
-\code{\link{rf100_infrared_collection}()},
-\code{\link{rf100_medical_collection}()},
-\code{\link{rf100_underwater_collection}()}
+\code{\link[=rf100_biology_collection]{rf100_biology_collection()}},
+\code{\link[=rf100_damage_collection]{rf100_damage_collection()}},
+\code{\link[=rf100_document_collection]{rf100_document_collection()}},
+\code{\link[=rf100_infrared_collection]{rf100_infrared_collection()}},
+\code{\link[=rf100_medical_collection]{rf100_medical_collection()}},
+\code{\link[=rf100_underwater_collection]{rf100_underwater_collection()}}
 }
 \concept{detection_dataset}

@@ -16,6 +16,7 @@ draw_bounding_boxes(x, ...)
   boxes,
   labels = NULL,
   colors = NULL,
+  color = NULL,
   fill = FALSE,
   width = 1,
   font = c("serif", "plain"),
@@ -44,6 +45,8 @@ to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
 
+\item{color}{Deprecated alias for \code{colors}.}
+
 \item{fill}{If \code{TRUE} fills the bounding box with specified color.}
 
 \item{width}{Width of text shift to the bounding box.}
@@ -71,11 +74,11 @@ tensor_image_browse(bboxed)
 }
 }
 \seealso{
-Other image display: 
-\code{\link{draw_keypoints}()},
-\code{\link{draw_segmentation_masks}()},
-\code{\link{tensor_image_browse}()},
-\code{\link{tensor_image_display}()},
-\code{\link{vision_make_grid}()}
+Other image display:
+\code{\link[=draw_keypoints]{draw_keypoints()}},
+\code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}},
+\code{\link[=tensor_image_browse]{tensor_image_browse()}},
+\code{\link[=tensor_image_display]{tensor_image_display()}},
+\code{\link[=vision_make_grid]{vision_make_grid()}}
 }
 \concept{image display}

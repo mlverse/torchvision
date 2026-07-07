@@ -697,7 +697,7 @@ msgstr "Il faut passer une image individuelle en `x`, et non un batch."
 #: vision_utils.R:132 vision_utils.R:329 vision_utils.R:445 vision_utils.R:507
 #: vision_utils.R:537
 msgid "Only grayscale and RGB images are supported"
-msgstr "Seules les images en niveau de gris et RGB son prise en compte."
+msgstr "Seules les images en niveaux de gris et RVB sont prises en charge"
 
 #: vision_utils.R:139
 msgid "`x` should be of dtype `torch_uint8` or `torch_float`"

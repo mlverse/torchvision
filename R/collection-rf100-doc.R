@@ -3,7 +3,7 @@ NULL
 
 #' RoboFlow 100 Document dataset Collection
 #'
-#' Loads one of the [RoboFlow 100 Document](https://universe.roboflow.com/browse/documents) datasets with
+#' Loads one of the RoboFlow 100 Document datasets with
 #' bounding box annotations for object-detection task.
 #'
 #' @param dataset Dataset to select within \code{c("tweeter_post", "tweeter_profile", "document_part",
@@ -171,7 +171,7 @@ rf100_document_collection <- torch::dataset(
       self$.data <- ads$to_data_frame() %>% subset(lengths(objects$bbox) > 0)
     }
 
-    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images for split {.val {self$split}}.")
+    cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
   download = function() {

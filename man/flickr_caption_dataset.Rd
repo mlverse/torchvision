@@ -79,7 +79,7 @@ first_item$y  # character vector containing five captions.
 
 }
 \seealso{
-Other caption_dataset: 
-\code{\link{coco_caption_dataset}()}
+Other caption_dataset:
+\code{\link[=coco_caption_dataset]{coco_caption_dataset()}}
 }
 \concept{caption_dataset}

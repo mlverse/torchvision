@@ -149,9 +149,11 @@ out <- mtcnn(image_tensor)
 out
 
 # Load an image from the web
-wmc <- "https://upload.wikimedia.org/wikipedia/commons/"
-url <- "b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg"
-img <- base_loader(paste0(wmc,url))
+url <- paste0("https://upload.wikimedia.org/wikipedia/commons",
+              "/b/b4/Catherine_Bell_200101233d_hr_\%28cropped\%29.jpg")
+tmp_file <- tempfile(fileext = ".jpg")
+download.file(url, tmp_file, mode = "wb")
+img <- jpeg::readJPEG(tmp_file)
 
 # Convert to torch tensor [C, H, W] normalized
 input <- transform_to_tensor(img)  # [C, H, W]
@@ -172,22 +174,19 @@ output
 
 }
 \seealso{
-Other object_detection_model: 
+Other object_detection_model:
 \code{\link{model_convnext_detection}},
-\code{\link{model_fasterrcnn}}
+\code{\link{model_fasterrcnn}},
+\code{\link{model_maskrcnn}}
 
-Other object_detection_model: 
-\code{\link{model_convnext_detection}},
-\code{\link{model_fasterrcnn}}
-
-Other classification_model: 
-\code{\link{model_alexnet}()},
+Other classification_model:
+\code{\link[=model_alexnet]{model_alexnet()}},
 \code{\link{model_convnext}},
 \code{\link{model_efficientnet}},
 \code{\link{model_efficientnet_v2}},
-\code{\link{model_inception_v3}()},
-\code{\link{model_maxvit}()},
-\code{\link{model_mobilenet_v2}()},
+\code{\link[=model_inception_v3]{model_inception_v3()}},
+\code{\link[=model_maxvit]{model_maxvit()}},
+\code{\link[=model_mobilenet_v2]{model_mobilenet_v2()}},
 \code{\link{model_mobilenet_v3}},
 \code{\link{model_resnet}},
 \code{\link{model_vgg}},

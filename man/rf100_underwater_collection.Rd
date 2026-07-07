@@ -39,7 +39,7 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the underwater related \href{https://universe.roboflow.com/browse/environmental}{RoboFlow 100 Environmental}
+Loads one of the underwater related RoboFlow 100 Environmental
 datasets: "pipes", "aquarium", "objects", or "coral". Images are provided with
 bounding box annotations for object-detection task.
 }
@@ -61,13 +61,13 @@ tensor_image_browse(boxed)
 
 }
 \seealso{
-Other detection_dataset: 
-\code{\link{coco_detection_dataset}()},
+Other detection_dataset:
+\code{\link[=coco_detection_dataset]{coco_detection_dataset()}},
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_biology_collection}()},
-\code{\link{rf100_damage_collection}()},
-\code{\link{rf100_document_collection}()},
-\code{\link{rf100_infrared_collection}()},
-\code{\link{rf100_medical_collection}()}
+\code{\link[=rf100_biology_collection]{rf100_biology_collection()}},
+\code{\link[=rf100_damage_collection]{rf100_damage_collection()}},
+\code{\link[=rf100_document_collection]{rf100_document_collection()}},
+\code{\link[=rf100_infrared_collection]{rf100_infrared_collection()}},
+\code{\link[=rf100_medical_collection]{rf100_medical_collection()}}
 }
 \concept{detection_dataset}

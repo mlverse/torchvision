@@ -34,6 +34,7 @@ criterion with respect to a reference box, the selected box is
 not guaranteed to be the same between CPU and GPU. This is similar
 to the behavior of argsort in torch when repeated values are present.
 
-Current algorithm has a time complexity of O(n^2) and runs in native R.
-It may be improve in the future by a Rcpp implementation or through alternative algorithm
+When the optional \code{torchvisionlib} package and its native library are
+installed, \code{nms()} uses \code{torchvisionlib::ops_nms()} for faster inference.
+Otherwise, it falls back to the pure R algorithm below.
 }

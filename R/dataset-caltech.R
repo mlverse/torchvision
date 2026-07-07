@@ -212,3 +212,23 @@ caltech256_dataset <- torch::dataset(
     fs::dir_exists(fs::path(self$root, self$subname))
   }
 )
+
+#' Caltech Class Labels
+#'
+#' Utilities for resolving Caltech class identifiers to their corresponding
+#' human readable labels.
+#'
+#' @param class_id Integer vector of 1-based class identifiers.
+#' @return A character vector with 257 entries representing the Caltech 257
+#'   class labels.
+#' @family class_resolution
+#' @importFrom utils read.csv
+#' @export
+caltech_classes <- function(class_id = 1:257) {
+  if (any(class_id > 257)) {
+    cli_warn("Caltech {.var class_id} cannot be > 257")
+  }
+  url <- download_and_cache("https://raw.githubusercontent.com/vkinakh/stable-diffusion-imagenet/refs/heads/main/caltech256_classes.txt")
+  labels_df <- read.csv(url, sep = ".", header = FALSE, col.names = c("id", "label"))
+  labels_df[class_id,]$label
+}

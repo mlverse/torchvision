@@ -41,7 +41,7 @@ The returned item inherits the class \code{image_with_bounding_box} so it can be
 visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
 }
 \description{
-Loads one of the \href{https://universe.roboflow.com/browse/medical}{RoboFlow 100 Medical} datasets
+Loads one of the RoboFlow 100 Medical datasets
 with per-dataset folders and train/valid/test splits.
 }
 \examples{
@@ -59,13 +59,13 @@ tensor_image_browse(boxed)
 
 }
 \seealso{
-Other detection_dataset: 
-\code{\link{coco_detection_dataset}()},
+Other detection_dataset:
+\code{\link[=coco_detection_dataset]{coco_detection_dataset()}},
 \code{\link{pascal_voc_datasets}},
-\code{\link{rf100_biology_collection}()},
-\code{\link{rf100_damage_collection}()},
-\code{\link{rf100_document_collection}()},
-\code{\link{rf100_infrared_collection}()},
-\code{\link{rf100_underwater_collection}()}
+\code{\link[=rf100_biology_collection]{rf100_biology_collection()}},
+\code{\link[=rf100_damage_collection]{rf100_damage_collection()}},
+\code{\link[=rf100_document_collection]{rf100_document_collection()}},
+\code{\link[=rf100_infrared_collection]{rf100_infrared_collection()}},
+\code{\link[=rf100_underwater_collection]{rf100_underwater_collection()}}
 }
 \concept{detection_dataset}
