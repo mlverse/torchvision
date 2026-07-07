@@ -297,10 +297,10 @@ maskrcnn_model <- torch::nn_module(
 
         if (props$proposals$shape[1] == 0) {
           empty <- list(
-            boxes = torch::torch_empty(c(0, 4)),
-            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch::torch_empty(c(0)),
-            masks = torch::torch_empty(c(0, 28, 28))
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0)),
+            masks = torch_empty(c(0, 28, 28))
           )
           final_results[[b]] <- empty
           next
@@ -363,7 +363,7 @@ maskrcnn_model <- torch::nn_module(
           final_masks <- torch::torch_sigmoid(final_masks)
 
         } else {
-          final_masks <- torch::torch_empty(c(0, 28, 28))
+          final_masks <- torch_empty(c(0, 28, 28))
         }
 
         final_results[[b]] <- list(
@@ -426,10 +426,10 @@ maskrcnn_model_v2 <- torch::nn_module(
 
         if (props$proposals$shape[1] == 0L) {
           empty <- list(
-            boxes = torch::torch_empty(c(0, 4)),
-            labels = torch::torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch::torch_empty(c(0)),
-            masks = torch::torch_empty(c(0, 28, 28))
+            boxes = torch_empty(c(0, 4)),
+            labels = torch_empty(c(0), dtype = torch::torch_long()),
+            scores = torch_empty(c(0)),
+            masks = torch_empty(c(0, 28, 28))
           )
           final_results[[b]] <- empty
           next
@@ -487,7 +487,7 @@ maskrcnn_model_v2 <- torch::nn_module(
           final_masks <- torch::torch_sigmoid(final_masks)
 
         } else {
-          final_masks <- torch::torch_empty(c(0, 28, 28))
+          final_masks <- torch_empty(c(0, 28, 28))
         }
 
         final_results[[b]] <- list(

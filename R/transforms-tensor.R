@@ -660,7 +660,7 @@ apply_grid_transform <- function(img, grid, mode) {
 gen_affine_grid <- function(theta, w, h, ow, oh) {
 
   d <- 0.5
-  base_grid <- torch::torch_empty(1, oh, ow, 3)
+  base_grid <- torch_empty(1, oh, ow, 3)
   base_grid[.., 1]$copy_(torch::torch_linspace(start = -ow * 0.5 + d, end = ow * 0.5 + d - 1,
                                                steps=ow))
 
