@@ -132,7 +132,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
 
     H <- dim(x)[1]
     W <- dim(x)[2]
-    mask <- torch::torch_zeros(c(H, W), dtype = torch::torch_bool())
+    mask <- torch::torch_zeros(c(H, W), dtype = torch_bool())
 
     mask_lst <- lapply(index_annotation$segmentation, function(seg) {
         if (is.list(seg) && length(seg) > 0) {

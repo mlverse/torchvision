@@ -238,7 +238,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
   # Handle empty polygon list early to avoid graphics device issues
   if (length(segmentation) == 0) {
     mask_logical <- matrix(FALSE, nrow = height, ncol = width)
-    mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
+    mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch_bool())
     return(mask_tensor)
   }
 
@@ -279,7 +279,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
   }
 
   mask_logical <- mask_matrix > 0
-  mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch::torch_bool())
+  mask_tensor <- torch::torch_tensor(mask_logical, dtype = torch_bool())
 
   return(mask_tensor)
 }
@@ -308,7 +308,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
 #'
 #' @examplesIf torch::torch_is_installed() && rlang::is_installed("magick")
 #' image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-#' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+#' mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch_bool())
 #' masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
 #' tensor_image_browse(masked_image)
 #' @family image display
@@ -353,7 +353,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
     value_error("`masks` must be of shape (H, W) or (num_masks, H, W)")
   }
   # datasets item include boolean masks, and models inference produce logits floats for masks
-  if (masks$dtype != torch::torch_bool() && masks$dtype != torch::torch_float() ) {
+  if (masks$dtype != torch_bool() && masks$dtype != torch::torch_float() ) {
     type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
   if (any(masks$shape[-2:-1] != img_to_draw$shape[-2:-1])) {

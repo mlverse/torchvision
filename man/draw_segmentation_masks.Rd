@@ -39,7 +39,7 @@ Draw segmentation masks with their respective colors on top of a given RGB tenso
 \examples{
 \dontshow{if (torch::torch_is_installed() && rlang::is_installed("magick")) withAutoprint(\{ # examplesIf}
 image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::torch_uint8())
-mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch::torch_bool())
+mask <- torch::torch_tril(torch::torch_ones(c(360, 360)))$to(torch_bool())
 masked_image <- draw_segmentation_masks(image_tensor, mask, alpha = 0.2)
 tensor_image_browse(masked_image)
 \dontshow{\}) # examplesIf}

@@ -287,11 +287,11 @@ coco_segmentation_dataset <- torch::dataset(
     if (nrow(anns) > 0) {
       label_ids <- anns$category_id
       labels <- self$category_names[as.character(label_ids)]
-      iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
+      iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch_bool())
     } else {
       # empty annotation
       labels <- character()
-      iscrowd <- torch_empty(0, dtype = torch::torch_bool())
+      iscrowd <- torch_empty(0, dtype = torch_bool())
       anns$segmentation <- list()
     }
 

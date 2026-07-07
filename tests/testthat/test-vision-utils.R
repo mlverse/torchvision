@@ -63,8 +63,8 @@ test_that("draw_segmentation_masks works with boolean mask", {
 
   image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
   image_uint <- torch::torch_randint(low = 190, high = 255, size = c(3, 360, 360))$to(torch::torch_uint8())
-  lower_mask <- torch::torch_tril(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch::torch_bool())
-  upper_mask <- torch::torch_triu(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch::torch_bool())
+  lower_mask <- torch::torch_tril(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch_bool())
+  upper_mask <- torch::torch_triu(torch::torch_ones(c(360, 360)), diagonal = FALSE)$to(torch_bool())
   masks <- torch::torch_stack(c(lower_mask, upper_mask), dim = 1)
 
   expect_no_error(masked_image <- draw_segmentation_masks(image_float, masks))

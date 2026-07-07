@@ -5,7 +5,7 @@
 # Utility helpers
 
 # Channel-wise LayerNorm for (B, C, H, W)
-#' @importFrom torch torch_ones_like with_no_grad torch_topk torch_gather torch_div
+#' @importFrom torch torch_ones_like with_no_grad torch_topk torch_gather torch_div torch_bool
 lw_detr_channel_layer_norm <- nn_module(
   initialize = function(channels, eps = 1e-6) {
     self$weight <- nn_parameter(torch_ones(channels))
@@ -976,7 +976,7 @@ lw_detr_model <- nn_module(
 #' resized <- img |> transform_resize(c(nh, nw))
 #' canvas  <- torch::torch_zeros(c(3, 640, 640))
 #' canvas[, 1:nh, 1:nw] <- resized
-#' mask <- torch::torch_zeros(c(640, 640), dtype = torch::torch_bool())
+#' mask <- torch::torch_zeros(c(640, 640), dtype = torch_bool())
 #' mask[1:nh, 1:nw] <- TRUE
 #'
 #' input <- canvas |> transform_normalize(norm_mean, norm_std)
