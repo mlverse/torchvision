@@ -281,6 +281,23 @@ transform_ten_crop.torch_tensor <- function(img, size, vertical_flip = FALSE) {
 
   c(first_five, second_five)
 }
+#' @export
+transform_sahi_crop.torch_tensor <- function(x, sahi_split) {
+
+  if (!inherits(sahi_split, "sahi_split")) {
+    cli_abort("{.arg sahi_split} must be a {.cls sahi_split} object created by {.fn prepare_sahi_split}.")
+  }
+  check_img(x)
+
+  crops <- lapply(sahi_split$crop_windows, function(cw) {
+    transform_crop(x, cw$top, cw$left, cw$height, cw$width)
+  })
+
+  result <- torch_stack(crops)
+  if (x$ndim == 4)
+    result <- result$flatten(start_dim = 1, end_dim = 2)
+  result
+}
 
 #' @export
 transform_linear_transformation.torch_tensor <- function(img, transformation_matrix,
@@ -477,6 +494,7 @@ check_img <- function(x) {
 }
 
 #' @importFrom utils tail
+#' @export
 get_image_size.torch_tensor <- function(img) {
   check_img(img)
 
@@ -659,7 +677,7 @@ apply_grid_transform <- function(img, grid, mode) {
 gen_affine_grid <- function(theta, w, h, ow, oh) {
 
   d <- 0.5
-  base_grid <- torch::torch_empty(1, oh, ow, 3)
+  base_grid <- torch_empty(1, oh, ow, 3)
   base_grid[.., 1]$copy_(torch::torch_linspace(start = -ow * 0.5 + d, end = ow * 0.5 + d - 1,
                                                steps=ow))
 

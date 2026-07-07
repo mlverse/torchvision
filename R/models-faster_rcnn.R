@@ -980,7 +980,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #' # ResNet-50 FPN V2
 #' model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, , detections_per_img = 5 )
 #' model$eval()
-#' torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
+#' with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
 #' labels <- coco_classes(as.integer(pred$labels))
 #'
 #' # Visualize boxes
@@ -994,7 +994,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
 #'   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
 #' )
 #' model$eval()
-#' torch::with_no_grad({pred <- model(batch)$detections[[1]]})
+#' with_no_grad({pred <- model(batch)$detections[[1]]})
 #'
 #' # Visualize boxes
 #' labels <- coco_classes(as.integer(pred$labels))

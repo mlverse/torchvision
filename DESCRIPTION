@@ -94,21 +94,25 @@ Collate:
     'models-faster_rcnn.R'
     'models-fcn.R'
     'models-inception.R'
+    'models-lw_detr.R'
     'models-mask_rcnn.R'
     'models-maxvit.R'
     'models-mobilenetv2.R'
     'models-mobilenetv3.R'
     'models-mobilenetv3_large.R'
     'models-resnet.R'
+    'models-rfdetr_detection.R'
     'models-vgg.R'
     'models-vit.R'
     'ops-box_convert.R'
     'ops-boxes.R'
+    'sahi-split.R'
+    'target-transforms-segmentation.R'
+    'target_transform_detection.R'
     'transforms-array.R'
     'transforms-defaults.R'
     'transforms-generics.R'
     'transforms-magick.R'
-    'transforms-segmentation.R'
     'transforms-tensor.R'
     'utils.R'
     'vision_utils.R'
@@ -116,4 +120,4 @@ Depends:
     R (>= 3.5)
 LazyData: true
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+RoxygenNote: 8.0.0

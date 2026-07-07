@@ -9,11 +9,11 @@ transform_five_crop(img, size)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 }
 \description{
 Crop the given image into four corners and the central crop. This transform
@@ -22,6 +22,7 @@ inputs and targets your Dataset returns.
 }
 \seealso{
 Other combining_transforms:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
 \code{\link[=transform_random_apply]{transform_random_apply()}},
 \code{\link[=transform_random_choice]{transform_random_choice()}},
 \code{\link[=transform_random_order]{transform_random_order()}},

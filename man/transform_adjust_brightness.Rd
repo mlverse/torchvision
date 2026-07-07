@@ -9,9 +9,9 @@ transform_adjust_brightness(img, brightness_factor)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{brightness_factor}{(float):  How much to adjust the brightness. Can be
-any non negative number. 0 gives a black image, 1 gives the
-original image while 2 increases the brightness by a factor of 2.}
+\item{brightness_factor}{(numeric): How much to adjust the brightness. Can
+be any non negative number. \code{0} gives a black image, \code{1} gives the
+original image while \code{2} increases the brightness by a factor of 2.}
 }
 \description{
 Adjust the brightness of an image

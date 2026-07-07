@@ -168,8 +168,8 @@ resnet <- torch::nn_module(
         torch::nn_init_kaiming_normal_(m$weight, mode=  "fan_out",
                                        nonlinearity = "relu")
       } else if (inherits(m, "nn_batch_norm2d") || inherits(m, "nn_group_norm")) {
-        torch::nn_init_constant_(m$weight, 1)
-        torch::nn_init_constant_(m$bias, 0)
+        nn_init_constant_(m$weight, 1)
+        nn_init_constant_(m$bias, 0)
       }
     }
 
@@ -180,9 +180,9 @@ resnet <- torch::nn_module(
       for (m in private$modules_) {
 
         if (inherits(m, "bottleneck"))
-          torch::nn_init_constant_(m$bn3$weight, 0)
+          nn_init_constant_(m$bn3$weight, 0)
         else if (inherits(m, "basic_block"))
-          torch::nn_init_constant_(m$bn2$weight, 0)
+          nn_init_constant_(m$bn2$weight, 0)
 
       }
     }

@@ -68,8 +68,8 @@ Inception3 <- torch::nn_module(
           stddev <- if (!is.null(m$stddev)) m$stddev else 0.1
           torch::nn_init_trunc_normal_(m$weight, mean = 0, std = stddev, a = -2, b = -2)
         } else if (inherits(m, "nn_batch_norm2d")) {
-          torch::nn_init_constant_(m$weight, 1)
-          torch::nn_init_constant_(m$bias, 0)
+          nn_init_constant_(m$weight, 1)
+          nn_init_constant_(m$bias, 0)
         }
       }
     }
