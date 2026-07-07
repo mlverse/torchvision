@@ -324,34 +324,29 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #'
 #' @examples
 #' \dontrun{
-#' # Full SAHI pipeline: prepare split, crop image, adjust targets
-#' img_url <- "https://raw.githubusercontent.com/obss/sahi/main/demo/demo_data/small-vehicles1.jpeg"
-#' img <- base_loader(img_url) %>% transform_to_tensor()
-#'
-#' sp <- prepare_sahi_split(img, size = c(512, 512), overlap_size_ratio = c(0.2, 0.2))
-#'
-#' crops <- transform_sahi_crop(img, sp)
-#' crops$shape
-#'
-#' # Synthetic target with a box straddling the first two crops
-#' y <- list(
-#'   boxes = torch_tensor(matrix(c(400, 100, 600, 300), nrow = 1, byrow = TRUE),
-#'                        dtype = torch_float()),
-#'   labels = "car"
+#' # Dataset workflow: prepare SAHI split from a resized COCO dataset
+#' ds <- coco_detection_dataset(
+#'   train = FALSE, year = "2017", download = TRUE,
+#'   transform = . \%>\%
+#'     transform_to_tensor() \%>\%
+#'     transform_resize(c(500, 400)),
+#'   target_transform = . \%>\%
+#'     target_transform_resize(c(500, 400))
 #' )
-#' targets <- target_transform_sahi_crop(y, sp, min_area_ratio = 0.1)
-#'
-#' targets[[1]]$boxes  # Box clipped and translated to first crop
-#' targets[[2]]$boxes  # Box in second crop (the portion that spilled over)
-#'
-#' # Visualize crops with bounding boxes overlaid
-#' preview <- lapply(1:dim(crops)[1], function(i) {
-#'   item <- list(x = crops[i, ..], y = targets[[i]])
-#'   class(item) <- "image_with_bounding_box"
-#'   draw_bounding_boxes(item, colors = "red")
-#' })
-#' grid <- vision_make_grid(torch_stack(preview), scale = FALSE, num_rows = 3)
-#' tensor_image_browse(grid)
+#' 
+#' # Computes crop windows matching the resized (500x400) image dimensions
+#' sp <- prepare_sahi_split(ds, size = c(200L, 200L), overlap_size_ratio = c(0.2, 0.2))
+#' 
+#' ds_sahi <- coco_detection_dataset(
+#'   train = FALSE, year = "2017", download = FALSE,
+#'   transform = . \%>\%
+#'     transform_to_tensor() \%>\%
+#'     transform_resize(c(500, 400)) \%>\%
+#'     transform_sahi_crop(sp),
+#'   target_transform = . \%>\%
+#'     target_transform_resize(c(500, 400)) \%>\%
+#'     target_transform_sahi_crop(sp, min_area_ratio = 0.2)
+#' )
 #' }
 #'
 #' @family combining_transforms
