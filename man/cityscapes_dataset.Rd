@@ -37,12 +37,12 @@ Multiple types can be specified (default: "instance").}
 \value{
 A torch dataset object. Each item is a named list:
 \itemize{
-\item \code{x}: RGB image array of shape (H, W, 3) or transformed tensor
+\item \code{x}: a RGB magick image.
 \item \code{y}: Named list containing requested target types:
 \itemize{
-\item \code{instance}: Instance segmentation mask (H, W) with unique IDs per object
-\item \code{semantic}: Semantic segmentation mask (H, W) with class IDs
-\item \code{color}: Color-coded visualization (H, W, 3)
+\item \code{instance}: Instance segmentation mask (1, H, W) with unique IDs per object
+\item \code{semantic}: Semantic segmentation mask (1, H, W) with class IDs
+\item \code{color}: Color-coded visualization (3, H, W)
 \item \code{polygon}: Polygon annotations (nested list structure)
 }
 }
