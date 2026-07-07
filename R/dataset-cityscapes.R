@@ -21,12 +21,12 @@
 #'
 #' @return A torch dataset object. Each item is a named list:
 #' \itemize{
-#'   \item `x`: RGB image array of shape (H, W, 3) or transformed tensor
+#'   \item `x`: a RGB magick image.
 #'   \item `y`: Named list containing requested target types:
 #'     \itemize{
-#'       \item `instance`: Instance segmentation mask (H, W) with unique IDs per object
-#'       \item `semantic`: Semantic segmentation mask (H, W) with class IDs
-#'       \item `color`: Color-coded visualization (H, W, 3)
+#'       \item `instance`: Instance segmentation mask (1, H, W) with unique IDs per object
+#'       \item `semantic`: Semantic segmentation mask (1, H, W) with class IDs
+#'       \item `color`: Color-coded visualization (3, H, W)
 #'       \item `polygon`: Polygon annotations (nested list structure)
 #'     }
 #' }
@@ -133,7 +133,7 @@
 #' @export
 cityscapes_dataset <- torch::dataset(
   name = "cityscapes",
-  
+
   # Cityscapes evaluation classes (19 classes used for benchmarks)
   classes = c(
     "road", "sidewalk", "building", "wall", "fence", "pole",
@@ -141,14 +141,11 @@ cityscapes_dataset <- torch::dataset(
     "person", "rider", "car", "truck", "bus", "train",
     "motorcycle", "bicycle"
   ),
-  
+
   # Class ID mapping (trainId -> name)
   # IDs 0-18 are evaluation classes, 255 is ignore/void
-  class_ids = c(
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14, 15, 16, 17, 18
-  ),
-  
+  class_ids = 0:18,
+
   initialize = function(
     root = tempdir(),
     split = "train",
@@ -157,38 +154,38 @@ cityscapes_dataset <- torch::dataset(
     transform = NULL,
     target_transform = NULL
   ) {
-    
+
     self$root_path <- root
     self$split <- split
     self$mode <- mode
     self$target_type <- target_type
     self$transform <- transform
     self$target_transform <- target_transform
-    
+
     # Validate parameters
     if (!split %in% c("train", "val", "test")) {
-      cli::cli_abort(
+      cli_abort(
         "split must be one of 'train', 'val', or 'test', got {.val {split}}"
       )
     }
-    
+
     if (!mode %in% c("fine", "coarse")) {
-      cli::cli_abort(
+      cli_abort(
         "mode must be either 'fine' or 'coarse', got {.val {mode}}"
       )
     }
-    
+
     valid_types <- c("instance", "semantic", "polygon", "color")
     invalid_types <- setdiff(target_type, valid_types)
     if (length(invalid_types) > 0) {
-      cli::cli_abort(
+      cli_abort(
         "target_type must be one or more of: {.val {valid_types}}. Got invalid types: {.val {invalid_types}}"
       )
     }
-    
+
     # Check dataset exists
     if (!self$check_exists()) {
-      cli::cli_abort(
+      cli_abort(
         c(
           "Cityscapes dataset not found at {.path {self$root_path}}",
           "i" = "Download manually from {.url https://www.cityscapes-dataset.com/downloads/}",
@@ -197,17 +194,17 @@ cityscapes_dataset <- torch::dataset(
         )
       )
     }
-    
+
     # Build file lists
     self$images <- self$get_image_list()
-    
+
     if (length(self$images) == 0) {
-      cli::cli_abort(
+      cli_abort(
         "No images found for split {.val {split}} in {.path {self$images_dir}}"
       )
     }
-    
-    cli::cli_inform(
+
+    cli_inform(
       c(
         "v" = "Loaded {.cls {class(self)[[1]]}} dataset",
         "i" = "Split: {.val {split}}, Mode: {.val {mode}}",
@@ -216,21 +213,21 @@ cityscapes_dataset <- torch::dataset(
       )
     )
   },
-  
+
   get_image_list = function() {
     img_dir <- file.path(self$images_dir, self$split)
-    
+
     if (!dir.exists(img_dir)) {
-      cli::cli_abort("Image directory not found: {.path {img_dir}}")
+      cli_abort("Image directory not found: {.path {img_dir}}")
     }
-    
+
     # Find all city subdirectories
     cities <- list.dirs(img_dir, recursive = FALSE, full.names = FALSE)
-    
+
     if (length(cities) == 0) {
       return(character(0))
     }
-    
+
     # Collect all images from all cities
     images <- character(0)
     for (city in cities) {
@@ -242,22 +239,22 @@ cityscapes_dataset <- torch::dataset(
       )
       images <- c(images, city_imgs)
     }
-    
+
     sort(images)
   },
-  
+
   get_target_path = function(img_path, target_type) {
     # Convert image path to target annotation path
     base_name <- basename(img_path)
     base_name <- sub("_leftImg8bit\\.png$", "", base_name)
     city <- basename(dirname(img_path))
-    
+
     target_dir <- file.path(
       self$targets_dir,
       self$split,
       city
     )
-    
+
     # Different suffixes for different annotation types
     suffix <- switch(
       target_type,
@@ -266,86 +263,76 @@ cityscapes_dataset <- torch::dataset(
       "color" = if (self$mode == "fine") "_gtFine_color.png" else "_gtCoarse_color.png",
       "polygon" = "_gtFine_polygons.json"  # Only available for fine mode
     )
-    
+
     file.path(target_dir, paste0(base_name, suffix))
   },
-  
+
   check_exists = function() {
     img_exists <- dir.exists(self$images_dir)
     target_exists <- dir.exists(self$targets_dir)
     img_exists && target_exists
   },
-  
+
   .getitem = function(index) {
     img_path <- self$images[[index]]
-    
+
     # Load image using magick (supports various formats)
-    img <- magick::image_read(img_path)
-    img_array <- magick::image_data(img, channels = "rgb")
-    
-    # Convert from (C, H, W) to (H, W, C) format
-    x <- aperm(as.numeric(img_array), c(2, 3, 1))
-    
+    x <- magick_loader(img_path)
+
     # Load targets based on target_type
     y <- list()
-    
+
     for (ttype in self$target_type) {
       target_path <- self$get_target_path(img_path, ttype)
-      
+
       if (!file.exists(target_path)) {
-        cli::cli_warn(
+        cli_warn(
           "Target file not found: {.path {basename(target_path)}}",
           "Returning NULL for {.val {ttype}}"
         )
         y[[ttype]] <- NULL
         next
       }
-      
+
       if (ttype == "polygon") {
         # Load JSON polygon data
         y[[ttype]] <- jsonlite::fromJSON(target_path, simplifyVector = FALSE)
       } else if (ttype == "color") {
         # Load color visualization
         color_img <- magick::image_read(target_path)
-        color_array <- magick::image_data(color_img, channels = "rgb")
-        y[[ttype]] <- aperm(as.numeric(color_array), c(2, 3, 1))
+        y[[ttype]] <- magick::image_data(color_img, channels = "rgb") %>% aperm(c(1,3,2))
       } else {
         # Load segmentation masks (instance or semantic)
         # These are 16-bit PNG files
         mask_img <- magick::image_read(target_path)
-        mask_array <- magick::image_data(mask_img, channels = "gray")
-        
-        # Convert from 8-bit representation to actual IDs
-        # Cityscapes stores IDs in 16-bit format
-        mask_matrix <- as.integer(mask_array[1, , ])
-        
-        y[[ttype]] <- mask_matrix
+
+        y[[ttype]] <- magick::image_data(mask_img, channels = "gray") %>% aperm(c(1,3,2))
       }
     }
-    
+
     # Apply transforms
     if (!is.null(self$transform)) {
       x <- self$transform(x)
     }
-    
+
     if (!is.null(self$target_transform)) {
       y <- self$target_transform(y)
     }
-    
+
     result <- list(x = x, y = y)
     class(result) <- c("image_with_segmentation_mask", class(result))
     result
   },
-  
+
   .length = function() {
     length(self$images)
   },
-  
+
   active = list(
     images_dir = function() {
       file.path(self$root_path, "leftImg8bit")
     },
-    
+
     targets_dir = function() {
       if (self$mode == "fine") {
         file.path(self$root_path, "gtFine")
