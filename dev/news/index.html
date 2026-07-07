@@ -100,6 +100,10 @@
 <ul><li>
 <code><a href="../reference/nms.html">nms()</a></code> now uses <code><a href="https://rdrr.io/pkg/torchvisionlib/man/ops_nms.html" class="external-link">torchvisionlib::ops_nms()</a></code> when torchvisionlib is installed, speeding up inference for <code>model_fasterrcnn_*()</code> and <code>model_maskrcnn_*()</code> (<a href="https://github.com/mlverse/torchvision/issues/321" class="external-link">#321</a>, <a href="https://github.com/mlverse/torchvision/issues/322" class="external-link">#322</a>).</li>
 </ul></div>
+<div class="section level3">
+<h3 id="new-features-development-version-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-development-version-1"></a></h3>
+<ul><li>Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: <code><a href="../reference/transform_sahi_crop.html">prepare_sahi_split()</a></code> precomputes overlapping crop windows, then <code><a href="../reference/transform_sahi_crop.html">transform_sahi_crop()</a></code> slices images and <code><a href="../reference/transform_sahi_crop.html">target_transform_sahi_crop()</a></code> adjusts detection targets per crop. (<a href="https://github.com/DerrickUnleashed" class="external-link">@DerrickUnleashed</a>, <a href="https://github.com/mlverse/torchvision/issues/324" class="external-link">#324</a>)</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.9.0" id="torchvision-090">torchvision 0.9.0<small>2026-04-22</small><a class="anchor" aria-label="anchor" href="#torchvision-090"></a></h2>

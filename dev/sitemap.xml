@@ -126,6 +126,7 @@
 <url><loc>/reference/transform_resized_crop.html</loc></url>
 <url><loc>/reference/transform_rgb_to_grayscale.html</loc></url>
 <url><loc>/reference/transform_rotate.html</loc></url>
+<url><loc>/reference/transform_sahi_crop.html</loc></url>
 <url><loc>/reference/transform_ten_crop.html</loc></url>
 <url><loc>/reference/transform_to_tensor.html</loc></url>
 <url><loc>/reference/transform_vflip.html</loc></url>
