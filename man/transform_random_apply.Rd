@@ -9,15 +9,16 @@ transform_random_apply(img, transforms, p = 0.5)
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{transforms}{(list or tuple): list of transformations.}
+\item{transforms}{(list): List of transformations.}
 
-\item{p}{(float): probability.}
+\item{p}{(numeric): Probability.}
 }
 \description{
 Apply a list of transformations randomly with a given probability
 }
 \seealso{
 Other combining_transforms:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
 \code{\link[=transform_five_crop]{transform_five_crop()}},
 \code{\link[=transform_random_choice]{transform_random_choice()}},
 \code{\link[=transform_random_order]{transform_random_order()}},

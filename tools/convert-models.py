@@ -1,9 +1,11 @@
+import os
 import torch
 from torch.hub import load_state_dict_from_url # used to be in torchvision
-import os
+import safetensors.torch
+from ultralytics import settings
+import urllib.request
 import boto3
 from botocore.exceptions import ClientError
-from ultralytics import settings
 
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -25,6 +27,15 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
             source_file_name, destination_blob_name
         )
     )
+
+def load_weights(url):
+    """Download and load model weights, handling .safetensors and .pth/.pt formats."""
+    if url.endswith('.safetensors'):
+        with urllib.request.urlopen(url) as response:
+            data = response.read()
+        return safetensors.torch.load(data)
+    else:
+        return load_state_dict_from_url(url, progress=False, map_location=torch.device("cpu"))
 
 def blob_exist(bucket_name, blob_name):
     """Check if file already exists in s3 bucket"""
@@ -148,6 +159,21 @@ models = {
   'yolo_v12_x': 'https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12x.pt',
   'tabicl_classifier_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-classifier-v2-20260212.ckpt',
   'tabicl_regressor_v2': 'https://huggingface.co/jingang/TabICL/resolve/main/tabicl-regressor-v2-20260212.ckpt',
+  'rf_detr_nano': 'https://storage.googleapis.com/rfdetr/nano_coco/checkpoint_best_regular.pth',
+  'rf_detr_small': 'https://storage.googleapis.com/rfdetr/small_coco/checkpoint_best_regular.pth',
+  'rf_detr_medium': 'https://storage.googleapis.com/rfdetr/medium_coco/checkpoint_best_regular.pth',
+  'rf_detr_base': 'https://storage.googleapis.com/rfdetr/rf-detr-base-coco.pth',
+  'rf_detr_base_2': 'https://storage.googleapis.com/rfdetr/rf-detr-base-2.pth',
+  'rf_detr_base_o365': 'https://storage.googleapis.com/rfdetr/top-secret-1234/lwdetr_dinov2_small_o365_checkpoint.pth',
+  'rf_detr_large': 'https://storage.googleapis.com/rfdetr/rf-detr-large.pth',
+  'rf_detr_seg_nano': 'https://storage.googleapis.com/rfdetr/rf-detr-seg-n-ft.pth',
+  'rf_detr_seg_small': 'https://storage.googleapis.com/rfdetr/rf-detr-seg-s-ft.pth',
+  'rf_detr_seg_medium': 'https://storage.googleapis.com/rfdetr/rf-detr-seg-m-ft.pth',
+  'rf_detr_seg_large': 'https://storage.googleapis.com/rfdetr/rf-detr-seg-l-ft.pth',
+  'lw_detr_coco_tiny': 'https://huggingface.co/AnnaZhang/lwdetr_tiny_60e_coco/resolve/main/model.safetensors',
+  'lw_detr_coco_small': 'https://huggingface.co/AnnaZhang/lwdetr_small_60e_coco/resolve/main/model.safetensors',
+  'lw_detr_coco_medium': 'https://huggingface.co/AnnaZhang/lwdetr_medium_60e_coco/resolve/main/model.safetensors',
+  'lw_detr_coco_large': 'https://huggingface.co/AnnaZhang/lwdetr_large_60e_coco/resolve/main/model.safetensors',
   }
 
 os.makedirs("models", exist_ok=True)
@@ -162,8 +188,8 @@ for name, url in models.items():
     print(f"--- file {fpath} is already in the bucket. Bypassing conversion")
 
   else:
-    # download from url, convert and upload the converted weights
-    m = load_state_dict_from_url(url, progress=False)
+    # download from url, convert and upload the converted weights to "cpu"
+    m = load_weights(url)
     converted = {}
     
     # yolo models weights are embedded in a BaseModel per https://github.com/ultralytics/ultralytics/blob/main/ultralytics/nn/tasks.py#L309
@@ -172,6 +198,10 @@ for name, url in models.items():
     
     # fb models weights are embedded in a named object
     if name.startswith("convnext_") and name.endswith("k"):
+      m = m["model"]
+    
+    # roboflow models weights are embedded in a named object
+    if name.startswith("rf_detr"):
       m = m["model"]
     
     # openmmlab and jingang models weights are embedded in a named object

@@ -15,18 +15,20 @@ transform_random_resized_crop(
 \arguments{
 \item{img}{A \code{magick-image}, \code{array} or \code{torch_tensor}.}
 
-\item{size}{(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height > width, then image will be rescaled to
-(size * height / width, size).}
+\item{size}{(integer vector or integer): Desired output size. If \code{size} is
+an integer vector of length 2 like \code{c(h, w)}, output size will be matched
+to this. If \code{size} is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height > width, then image will be
+rescaled to \verb{(size * height / width, size)}.}
 
-\item{scale}{(tuple of float): range of size of the origin size cropped}
+\item{scale}{(numeric vector of length 2): Range of size of the origin size
+cropped.}
 
-\item{ratio}{(tuple of float): range of aspect ratio of the origin aspect
+\item{ratio}{(numeric vector of length 2): Range of aspect ratio of the
+origin aspect ratio cropped.
 ratio cropped.}
 
-\item{interpolation}{(int, optional) Desired interpolation. An integer
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
 \code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
 \code{\link[magick:filter_types]{magick::filter_types()}}.}
 }

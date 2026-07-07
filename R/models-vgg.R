@@ -31,13 +31,13 @@ VGG <- torch::nn_module(
       if (inherits(m, "nn_conv2d")) {
         torch::nn_init_kaiming_normal_(m$weight, mode = "fan_out", nonlinearity="relu")
         if (!is.null(m$bias))
-          torch::nn_init_constant_(m$bias, 0)
+          nn_init_constant_(m$bias, 0)
       } else if (inherits(m, "nn_batch_norm2d")) {
-        torch::nn_init_constant_(m$weight, 1)
-        torch::nn_init_constant_(m$bias, 0)
+        nn_init_constant_(m$weight, 1)
+        nn_init_constant_(m$bias, 0)
       } else if (inherits(m, "nn_linear")) {
         torch::nn_init_normal_(m$weight, 0, 0.01)
-        torch::nn_init_constant_(m$bias, 0)
+        nn_init_constant_(m$bias, 0)
       }
 
     }

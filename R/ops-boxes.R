@@ -46,7 +46,7 @@ nms <- function(boxes, scores, iou_threshold) {
 
   n_boxes <- boxes$shape[1]
   if (n_boxes == 0) {
-    return(torch::torch_empty(0L, dtype = torch::torch_long(), device = boxes$device))
+    return(torch_empty(0L, dtype = torch::torch_long(), device = boxes$device))
   }
 
   # Sort scores in descending order
@@ -124,7 +124,7 @@ batched_nms <- function(
   # from different classes do not overlap
 
     if(boxes$numel() == 0) {
-      return(torch::torch_empty(0, dtype=torch::torch_int64(), device = boxes_device))
+      return(torch_empty(0, dtype=torch::torch_int64(), device = boxes_device))
     } else {
       max_coordinate <- boxes$max()
       offsets <- idxs$to(device = boxes_device, dtype = boxes_dtype) * (max_coordinate + torch::torch_tensor(1)$to(device = boxes_device, dtype = boxes_dtype))
