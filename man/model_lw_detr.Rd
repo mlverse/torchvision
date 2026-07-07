@@ -117,7 +117,7 @@ nw <- round(w * s)
 resized <- img |> transform_resize(c(nh, nw))
 canvas  <- torch::torch_zeros(c(3, 640, 640))
 canvas[, 1:nh, 1:nw] <- resized
-mask <- torch::torch_zeros(c(640, 640), dtype = torch::torch_bool())
+mask <- torch::torch_zeros(c(640, 640), dtype = torch_bool())
 mask[1:nh, 1:nw] <- TRUE
 
 input <- canvas |> transform_normalize(norm_mean, norm_std)

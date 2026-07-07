@@ -113,6 +113,7 @@ tensor_image_browse(boxed_img)
 }
 \seealso{
 Other segmentation_dataset:
+\code{\link[=cityscapes_dataset]{cityscapes_dataset()}},
 \code{\link[=coco_segmentation_dataset]{coco_segmentation_dataset()}},
 \code{\link[=oxfordiiitpet_segmentation_dataset]{oxfordiiitpet_segmentation_dataset()}},
 \code{\link[=rf100_peixos_segmentation_dataset]{rf100_peixos_segmentation_dataset()}}

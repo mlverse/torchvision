@@ -68,9 +68,9 @@ test_that("model_lw_detr_tiny supports pixel_mask", {
     torch_unsqueeze(1)
 
   # Mark only the top 160 rows valid, as if the image were letterbox-padded.
-  mask <- torch_zeros(c(1, 256, 256), dtype = torch::torch_bool())
+  mask <- torch_zeros(c(1, 256, 256), dtype = torch_bool())
   mask[, 1:160, ] <- TRUE
-  full <- torch_ones(c(1, 256, 256), dtype = torch::torch_bool())
+  full <- torch_ones(c(1, 256, 256), dtype = torch_bool())
 
   with_no_grad({
     out_mask <- model(input, pixel_mask = mask)

@@ -5,6 +5,10 @@
 * Added RF-DETR (Nano, Small, Medium, Base, Base-v2, Base-O365, Large) object detection models with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
 * Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28, #328).
 
+## New datasets
+
+* Added `cityscapes_dataset()` relying on manual download due to usage license (#279, @ANAMASGARD).
+
 ## New features
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
