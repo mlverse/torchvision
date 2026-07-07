@@ -171,7 +171,7 @@ test_that("mask_rcnn pretrained infer correctly", {
   torch::with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
@@ -193,7 +193,7 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   torch::with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, 200, 200)
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
