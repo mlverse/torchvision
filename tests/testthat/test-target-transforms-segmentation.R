@@ -161,8 +161,10 @@ test_that("target_transform_sahi_crop clips and translates boxes correctly", {
   expect_length(out, length(sp$crop_windows))
   expect_tensor_shape(out[[1]]$boxes, c(1, 4))
   expect_equal(as.character(out[[1]]$labels[[1]]), "a")
+  expect_bbox_is_xyxy(out[[1]]$boxes, 50, 50)
 
   expect_gt(out[[2]]$boxes$size(1), 0)
+  expect_bbox_is_xyxy(out[[2]]$boxes, 100, 100)
 })
 
 test_that("target_transform_sahi_crop preserves label types and empty outputs", {
@@ -180,6 +182,7 @@ test_that("target_transform_sahi_crop preserves label types and empty outputs", 
 
   expect_length(out, length(sp$crop_windows))
   expect_tensor_shape(out[[1]]$boxes, c(0, 4))
+  expect_bbox_is_xyxy(out[[1]]$boxes, 10, 10)
   expect_type(out[[1]]$labels,"character")
   expect_length(out[[1]]$labels, 0)
 })
@@ -198,10 +201,12 @@ test_that("target_transform_sahi_crop filters by min_area_ratio", {
   out_keep_none <- target_transform_sahi_crop(y, sp, min_area_ratio = 0.5)
   expect_length(out_keep_none, length(sp$crop_windows))
   expect_tensor_shape(out_keep_none[[1]]$boxes, c(0, 4))
+  expect_bbox_is_xyxy(out_keep_none[[1]]$boxes, 10, 10)
 
   out_keep_some <- target_transform_sahi_crop(y, sp, min_area_ratio = 0)
   expect_length(out_keep_some, length(sp$crop_windows))
   expect_tensor_shape(out_keep_some[[1]]$boxes, c(1, 4))
+  expect_bbox_is_xyxy(out_keep_some[[1]]$boxes, 10, 10)
 })
 
 test_that("target_transform_sahi_crop handles batch of targets", {
@@ -230,6 +235,10 @@ test_that("target_transform_sahi_crop handles batch of targets", {
   expect_length(out[[2]], length(sp$crop_windows))
   expect_tensor_shape(out[[1]][[1]]$boxes, c(1, 4))
   expect_tensor_shape(out[[2]][[1]]$boxes, c(1, 4))
+  expect_bbox_is_xyxy(out[[1]][[1]]$boxes, 50, 50)
+  expect_bbox_is_xyxy(out[[2]][[1]]$boxes, 50, 50)
+  expect_bbox_is_xyxy(out[[1]][[2]]$boxes, 100, 100)
+  expect_bbox_is_xyxy(out[[2]][[2]]$boxes, 100, 100)
   expect_equal(out[[1]][[1]]$labels[[1]], "a")
   expect_equal(out[[2]][[1]]$labels[[1]], "b")
 })
