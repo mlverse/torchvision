@@ -66,10 +66,10 @@ Use as \code{transform} / \code{target_transform} in image datasets.
 # Dataset workflow: prepare SAHI split from a resized COCO dataset
 ds <- coco_detection_dataset(
   train = FALSE, year = "2017", download = TRUE,
-  transform = . \\%>\\%
-    transform_to_tensor() \\%>\\%
+  transform = . \%>\%
+    transform_to_tensor() \%>\%
     transform_resize(c(500, 400)),
-  target_transform = . \\%>\\%
+  target_transform = . \%>\%
     target_transform_resize(c(500, 400))
 )
 
@@ -78,14 +78,26 @@ sp <- prepare_sahi_split(ds, size = c(200L, 200L), overlap_size_ratio = c(0.2, 0
 
 ds_sahi <- coco_detection_dataset(
   train = FALSE, year = "2017", download = FALSE,
-  transform = . \\%>\\%
-    transform_to_tensor() \\%>\\%
-    transform_resize(c(500, 400)) \\%>\\%
+  transform = . \%>\%
+    transform_to_tensor() \%>\%
+    transform_resize(c(500, 400)) \%>\%
     transform_sahi_crop(sp),
-  target_transform = . \\%>\\%
-    target_transform_resize(c(500, 400)) \\%>\\%
+  target_transform = . \%>\%
+    target_transform_resize(c(500, 400)) \%>\%
     target_transform_sahi_crop(sp, min_area_ratio = 0.2)
 )
+
+# Visualize the SAHI crops for the first image
+item <- ds_sahi[1]
+crops <- item$x
+targets <- item$y
+preview <- lapply(1:dim(crops)[1], function(i) {
+  item <- list(x = crops[i, ..], y = targets[[i]])
+  class(item) <- "image_with_bounding_box"
+  draw_bounding_boxes(item, colors = "red")
+})
+grid <- vision_make_grid(torch_stack(preview), scale = FALSE, num_rows = 3)
+tensor_image_browse(grid)
 }
 
 }
