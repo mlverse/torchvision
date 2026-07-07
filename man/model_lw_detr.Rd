@@ -124,7 +124,7 @@ input <- canvas |> transform_normalize(norm_mean, norm_std)
 
 model <- model_lw_detr_tiny(pretrained = TRUE)
 model$eval()
-pred <- torch::with_no_grad(
+pred <- with_no_grad(
   model(input$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
 )$detections[[1]]
 

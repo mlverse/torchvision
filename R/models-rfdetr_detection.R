@@ -40,7 +40,7 @@
 #' model <- model_rfdetr_large(pretrained = TRUE)
 #' model$eval()
 #'
-#' pred <- torch::with_no_grad(
+#' pred <- with_no_grad(
 #'   model(img$unsqueeze(1))
 #' )$detections[[1]]
 #'
@@ -737,8 +737,8 @@ gen_encoder_output_proposals <- function(memory, memory_padding_mask, spatial_sh
     if (!is.null(memory_padding_mask)) {
       mask_flatten <- memory_padding_mask[, cur:(cur + h * w - 1)]
       mask_flatten <- mask_flatten$view(c(-1, h, w, 1))
-      valid_height <- torch_sum((!mask_flatten[, , 1, 1])$to(dtype = torch_int()), dim = 2)
-      valid_width <- torch_sum((!mask_flatten[, 1, , 1])$to(dtype = torch_int()), dim = 2)
+      valid_height <- torch_sum((!mask_flatten[, , 1, 1])$to(dtype = torch_int32()), dim = 2)
+      valid_width <- torch_sum((!mask_flatten[, 1, , 1])$to(dtype = torch_int32()), dim = 2)
     }
     grid_y <- torch_linspace(0, h - 1, h, dtype = torch_float32(), device = memory$device)
     grid_x <- torch_linspace(0, w - 1, w, dtype = torch_float32(), device = memory$device)

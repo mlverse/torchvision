@@ -5,6 +5,7 @@
 # Utility helpers
 
 # Channel-wise LayerNorm for (B, C, H, W)
+#' @importFrom torch torch_ones_like with_no_grad
 lw_detr_channel_layer_norm <- torch::nn_module(
   initialize = function(channels, eps = 1e-6) {
     self$weight <- torch::nn_parameter(torch::torch_ones(channels))
@@ -325,7 +326,7 @@ detr_ms_deform_attn <- torch::nn_module(
     self$value_proj <- torch::nn_linear(d_model, d_model)
     self$output_proj <- torch::nn_linear(d_model, d_model)
 
-    torch::with_no_grad({
+    with_no_grad({
       torch::nn_init_constant_(self$sampling_offsets$weight, 0)
       thetas <- torch::torch_arange(n_heads, dtype = torch::torch_float32()) * (2 * pi / n_heads)
       grid_init <- torch::torch_stack(list(thetas$cos(), thetas$sin()), dim = -1L)
@@ -733,7 +734,7 @@ lw_detr_model <- torch::nn_module(
     )
 
     bias_value <- -log((1 - 0.01) / 0.01)
-    torch::with_no_grad({
+    with_no_grad({
       self$class_embed$bias$fill_(bias_value)
       for (g in seq_len(group_detr)) {
         self$model$enc_out_class_embed[[g]]$bias$fill_(bias_value)
@@ -982,7 +983,7 @@ lw_detr_model <- torch::nn_module(
 #'
 #' model <- model_lw_detr_tiny(pretrained = TRUE)
 #' model$eval()
-#' pred <- torch::with_no_grad(
+#' pred <- with_no_grad(
 #'   model(input$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
 #' )$detections[[1]]
 #'

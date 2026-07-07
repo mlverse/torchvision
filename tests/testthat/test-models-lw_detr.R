@@ -10,7 +10,7 @@ test_that("non-pretrained model_lw_detr_tiny works with single image and batch",
     transform_resize(c(256, 256)) %>%
     torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")
@@ -29,7 +29,7 @@ test_that("non-pretrained model_lw_detr_tiny works with single image and batch",
     ),
     dim = 1
   )
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(batch)
   })
   expect_length(out$detections, 2)
@@ -47,7 +47,7 @@ test_that("model_lw_detr_tiny respects num_classes and num_select", {
     transform_resize(c(256, 256)) %>%
     torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_equal(out$detections[[1]]$boxes$shape[1], 25L)
@@ -72,7 +72,7 @@ test_that("model_lw_detr_tiny supports pixel_mask", {
   mask[, 1:160, ] <- TRUE
   full <- torch_ones(c(1, 256, 256), dtype = torch::torch_bool())
 
-  torch::with_no_grad({
+  with_no_grad({
     out_mask <- model(input, pixel_mask = mask)
     out_full <- model(input, pixel_mask = full)
     out_none <- model(input)
@@ -121,7 +121,7 @@ test_that("tests for pretrained model_lw_detr_small", {
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")
@@ -149,7 +149,7 @@ test_that("tests for pretrained model_lw_detr_medium", {
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")

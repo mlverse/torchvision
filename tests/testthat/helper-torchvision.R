@@ -73,7 +73,7 @@ expect_coco_model_detects_cat <- function(model, min_score = 0.25, size = c(640,
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")

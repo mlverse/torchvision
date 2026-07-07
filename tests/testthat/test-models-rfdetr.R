@@ -53,7 +53,7 @@ test_that("test for pretrained model_rfdetr_small", {
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")
@@ -94,7 +94,7 @@ test_that("test for pretrained model_rfdetr_medium", {
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")
@@ -181,7 +181,7 @@ test_that("test for pretrained model_rfdetr_base_o365", {
     transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225)) %>%
     torch::torch_unsqueeze(1)
   model$eval()
-  torch::with_no_grad({
+  with_no_grad({
     out <- model(input)
   })
   expect_named(out, "detections")

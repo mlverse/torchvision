@@ -88,7 +88,7 @@ img <- base_loader(url) \%>\%
 model <- model_rfdetr_large(pretrained = TRUE)
 model$eval()
 
-pred <- torch::with_no_grad(
+pred <- with_no_grad(
   model(img$unsqueeze(1))
 )$detections[[1]]
 

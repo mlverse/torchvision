@@ -38,7 +38,7 @@ test_that("maskrcnn_resnet50_fpn inference works", {
   model$eval()
 
   # Test forward pass
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
@@ -74,7 +74,7 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
   model$eval()
 
   # Test forward pass
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
@@ -102,7 +102,7 @@ test_that("maskrcnn handles empty detections correctly", {
   )
   model$eval()
 
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
 
   # Should return empty tensors with correct shapes
   expect_tensor_shape(output$detections[[1]]$boxes, c(0,4))
@@ -144,7 +144,7 @@ test_that("maskrcnn with different num_classes works", {
   model$eval()
 
   input <- torch::torch_randn(1, 3, 800, 800)
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
 
   # Should work without errors
   expect_tensor(output$detections[[1]]$masks)
@@ -168,7 +168,7 @@ test_that("mask_rcnn pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
@@ -190,7 +190,7 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  torch::with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input)})
   # Masks should be expanded back to image size
   if (output$detections[[1]]$boxes$shape[1] > 0) {
     expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
