@@ -191,7 +191,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
     if (!is.null(y$image_width))
       out_y$image_width <- crop_w
 
-    out_y$iscrowd <- NULL
+    out_y$iscrowd <- y$iscrowd[mask_idx]
 
     out_y
   })
