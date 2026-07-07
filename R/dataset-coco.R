@@ -125,21 +125,21 @@ coco_detection_dataset <- torch::dataset(
     anns <- self$annotations[self$annotations$image_id == image_id, ]
 
     if (nrow(anns) > 0) {
-      boxes_wh <- torch::torch_tensor(do.call(rbind, anns$bbox), dtype = torch::torch_float())
+      boxes_wh <- torch_tensor(do.call(rbind, anns$bbox), dtype = torch_float())
       boxes <- box_xywh_to_xyxy(boxes_wh)
 
       label_ids <- anns$category_id
       labels <- self$category_names[as.character(label_ids)]
 
-      area <- torch::torch_tensor(anns$area, dtype = torch::torch_float())
-      iscrowd <- torch::torch_tensor(as.logical(anns$iscrowd), dtype = torch::torch_bool())
+      area <- torch_tensor(anns$area, dtype = torch_float())
+      iscrowd <- torch_tensor(as.logical(anns$iscrowd), dtype = torch_bool())
 
     } else {
       # empty annotation
-      boxes <- torch::torch_zeros(c(0, 4), dtype = torch::torch_float())
+      boxes <- torch_zeros(c(0, 4), dtype = torch_float())
       labels <- character()
-      area <- torch::torch_empty(0, dtype = torch::torch_float())
-      iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
+      area <- torch_empty(0, dtype = torch_float())
+      iscrowd <- torch_empty(0, dtype = torch_bool())
       anns$segmentation <- list()
     }
 
@@ -291,7 +291,7 @@ coco_segmentation_dataset <- torch::dataset(
     } else {
       # empty annotation
       labels <- character()
-      iscrowd <- torch::torch_empty(0, dtype = torch::torch_bool())
+      iscrowd <- torch_empty(0, dtype = torch::torch_bool())
       anns$segmentation <- list()
     }
 

@@ -176,10 +176,10 @@ get_random_resized_crop_params <- function(img, scale, ratio) {
   area <- height * width
 
   for (i in 1:10) {
-    target_area <- as.numeric(area * torch::torch_empty(1)$uniform_(scale[1], scale[2]))
+    target_area <- as.numeric(area * torch_empty(1)$uniform_(scale[1], scale[2]))
     log_ratio <- torch::torch_log(torch::torch_tensor(ratio))
     aspect_ratio <-  as.numeric(torch::torch_exp(
-      torch::torch_empty(1)$uniform_(as.numeric(log_ratio[1]), as.numeric(log_ratio[2]))
+      torch_empty(1)$uniform_(as.numeric(log_ratio[1]), as.numeric(log_ratio[2]))
     ))
 
     w <- as.integer(round(sqrt(target_area * aspect_ratio)))
@@ -333,7 +333,7 @@ transform_color_jitter.default <- function(img, brightness=0, contrast=0,
 }
 
 get_random_rotation_params <- function(degrees) {
-  as.numeric(torch::torch_empty(1)$uniform_(degrees[1], degrees[2]))
+  as.numeric(torch_empty(1)$uniform_(degrees[1], degrees[2]))
 }
 
 #' @export
@@ -366,19 +366,19 @@ get_random_affine_params <- function(degrees,
                                      shears,
                                      img_size) {
 
-  angle <- as.numeric(torch::torch_empty(1)$uniform_(degrees[1], degrees[2]))
+  angle <- as.numeric(torch_empty(1)$uniform_(degrees[1], degrees[2]))
   if (!is.null(translate)) {
     max_dx <- as.numeric(translate[1] * img_size[1])
     max_dy <- as.numeric(translate[2] * img_size[2])
-    tx <- as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dx, max_dx))))
-    ty <- as.integer(round(as.numeric(torch::torch_empty(1)$uniform_(-max_dy, max_dy))))
+    tx <- as.integer(round(as.numeric(torch_empty(1)$uniform_(-max_dx, max_dx))))
+    ty <- as.integer(round(as.numeric(torch_empty(1)$uniform_(-max_dy, max_dy))))
     translations <- c(tx, ty)
   } else {
     translations <- c(0,0)
   }
 
   if (!is.null(scale_ranges)) {
-    scale <- as.numeric(torch::torch_empty(1)$uniform_(scale_ranges[1], scale_ranges[2]))
+    scale <- as.numeric(torch_empty(1)$uniform_(scale_ranges[1], scale_ranges[2]))
   } else {
     scale <- 1
   }
@@ -386,9 +386,9 @@ get_random_affine_params <- function(degrees,
   shear_x <- shear_y <- 0.0
 
   if (!is.null(shears))  {
-    shear_x <- as.numeric(torch::torch_empty(1)$uniform_(shears[1], shears[2]))
+    shear_x <- as.numeric(torch_empty(1)$uniform_(shears[1], shears[2]))
     if (length(shears) == 4)
-      shear_y <- as.numeric(torch::torch_empty(1)$uniform_(shears[3], shears[4]))
+      shear_y <- as.numeric(torch_empty(1)$uniform_(shears[3], shears[4]))
   }
 
   shear <- c(shear_x, shear_y)

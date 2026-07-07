@@ -124,7 +124,7 @@ input <- canvas |> transform_normalize(norm_mean, norm_std)
 
 model <- model_lw_detr_tiny(pretrained = TRUE)
 model$eval()
-pred <- torch::with_no_grad(
+pred <- with_no_grad(
   model(input$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
 )$detections[[1]]
 
@@ -146,6 +146,7 @@ Other object_detection_model:
 \code{\link{model_convnext_detection}},
 \code{\link{model_facenet}},
 \code{\link{model_fasterrcnn}},
-\code{\link{model_maskrcnn}}
+\code{\link{model_maskrcnn}},
+\code{\link{model_rfdetr}}
 }
 \concept{object_detection_model}
