@@ -25,6 +25,7 @@ inputs and targets your Dataset returns.
 }
 \seealso{
 Other combining_transforms:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
 \code{\link[=transform_five_crop]{transform_five_crop()}},
 \code{\link[=transform_random_apply]{transform_random_apply()}},
 \code{\link[=transform_random_choice]{transform_random_choice()}},

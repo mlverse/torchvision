@@ -236,6 +236,11 @@ transform_ten_crop.default <- function(img, size, vertical_flip = FALSE) {
 }
 
 #' @export
+transform_sahi_crop.default <- function(x, sahi_split) {
+  not_implemented_for_class(x)
+}
+
+#' @export
 transform_linear_transformation.default <- function(img, transformation_matrix,
                                                     mean_vector) {
   not_implemented_for_class(img)

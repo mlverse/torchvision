@@ -280,6 +280,93 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
   UseMethod("transform_ten_crop", img)
 }
 
+#' Slicing Aid for Hyper Inference (SAHI)
+#'
+#' The SAHI transform pipeline consists of three functions:
+#' \itemize{
+#'   \item \code{prepare_sahi_split()} precomputes overlapping crop windows
+#'     from an image, tensor, numeric dimensions, or dataset.
+#'   \item \code{transform_sahi_crop()} applies the crop windows to an image,
+#'     returning the same type as the input (stacked tensor or multi-frame
+#'     magick image).
+#'   \item \code{target_transform_sahi_crop()} adjusts detection targets
+#'     (bounding boxes and labels) to match the cropped images.
+#' }
+#' Use as \code{transform} / \code{target_transform} in image datasets.
+#'
+#' @param x Image input (\code{torch_tensor} or \code{magick-image}) for
+#'   \code{transform_sahi_crop}. For \code{prepare_sahi_split} it can also be
+#'   a numeric vector \code{c(height, width)} or a dataset.
+#' @param y Detection target list containing \code{boxes} and \code{labels}.
+#'   Bounding boxes in \code{(x1, y1, x2, y2)} format.
+#' @param sahi_split An object of class \code{sahi_split} created by
+#'   \code{prepare_sahi_split()}.
+#' @param size Integer vector of length 2: crop \code{c(height, width)}.
+#' @param overlap_size_ratio Numeric vector of length 2: vertical and horizontal
+#'   overlap ratios \code{c(overlap_h, overlap_w)}.
+#' @param min_area_ratio Numeric between 0 and 1. Minimum fraction of original
+#'   bounding box area that must remain after clipping for the annotation to
+#'   be retained.
+#'
+#' @return \describe{
+#'   \item{prepare_sahi_split}{An object of class \code{sahi_split} with
+#'     \code{crop_windows}, \code{size}, \code{overlap_size_ratio},
+#'     \code{image_height}, and \code{image_width}. Crop window coordinates
+#'     are 1-based.}
+#'   \item{transform_sahi_crop}{Same type as \code{x}:
+#'     \code{torch_tensor} in \eqn{\rightarrow} stacked \eqn{(N, C, H, W)}
+#'     tensor; \code{magick-image} in \eqn{\rightarrow} multi-frame magick
+#'     image.}
+#'   \item{target_transform_sahi_crop}{List of transformed targets, one per
+#'     crop window, each with the same structure as the input \code{y} except
+#'     \code{is_crowd} (if present) is removed.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Dataset workflow: prepare SAHI split from a resized COCO dataset
+#' ds <- coco_detection_dataset(
+#'   train = FALSE, year = "2017", download = TRUE,
+#'   transform = . %>%
+#'     transform_to_tensor() %>%
+#'     transform_resize(c(500, 400)),
+#'   target_transform = . %>%
+#'     target_transform_resize(c(500, 400))
+#' )
+#' 
+#' # Computes crop windows matching the resized (500x400) image dimensions
+#' sp <- prepare_sahi_split(ds, size = c(200L, 200L), overlap_size_ratio = c(0.2, 0.2))
+#' 
+#' ds_sahi <- coco_detection_dataset(
+#'   train = FALSE, year = "2017", download = FALSE,
+#'   transform = . %>%
+#'     transform_to_tensor() %>%
+#'     transform_resize(c(500, 400)) %>%
+#'     transform_sahi_crop(sp),
+#'   target_transform = . %>%
+#'     target_transform_resize(c(500, 400)) %>%
+#'     target_transform_sahi_crop(sp, min_area_ratio = 0.2)
+#' )
+#'
+#' # Visualize the SAHI crops for the first image
+#' item <- ds_sahi[1]
+#' crops <- item$x
+#' targets <- item$y
+#' preview <- lapply(1:dim(crops)[1], function(i) {
+#'   item <- list(x = crops[i, ..], y = targets[[i]])
+#'   class(item) <- "image_with_bounding_box"
+#'   draw_bounding_boxes(item, colors = "red")
+#' })
+#' grid <- vision_make_grid(torch_stack(preview), scale = FALSE, num_rows = 3)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family combining_transforms
+#' @export
+transform_sahi_crop <- function(x, sahi_split) {
+  UseMethod("transform_sahi_crop", x)
+}
+
 #' Transform a tensor image with a square transformation matrix and a
 #'   mean_vector computed offline
 #'

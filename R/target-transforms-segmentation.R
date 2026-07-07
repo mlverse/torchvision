@@ -42,9 +42,9 @@ target_transform_coco_masks <- function(y) {
   valid_masks <- Filter(function(m) !is.null(m), masks_list)
 
   if (length(valid_masks) > 0) {
-    y$masks <- torch::torch_stack(valid_masks)
+    y$masks <- torch_stack(valid_masks)
   } else {
-    y$masks <- torch::torch_zeros(c(0, y$image_height, y$image_width), dtype = torch::torch_bool())
+    y$masks <- torch_zeros(c(0, y$image_height, y$image_width), dtype = torch_bool())
   }
 
   y
@@ -90,7 +90,7 @@ target_transform_trimap_masks <- function(y) {
   trimap <- y$trimap
 
   if (!inherits(trimap, "torch_tensor")) {
-    trimap <- torch::torch_tensor(trimap, dtype = torch::torch_int32())
+    trimap <- torch_tensor(trimap, dtype = torch_int32())
   }
 
   if (trimap$ndim != 2) {
@@ -101,7 +101,7 @@ target_transform_trimap_masks <- function(y) {
   mask2 <- (trimap == 2)
   mask3 <- (trimap == 3)
 
-  y$masks <- torch::torch_stack(list(mask1, mask2, mask3))$to(dtype = torch::torch_bool())
+  y$masks <- torch_stack(list(mask1, mask2, mask3))$to(dtype = torch_bool())
 
   y
 }

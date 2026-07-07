@@ -18,6 +18,7 @@ Apply a list of transformations randomly with a given probability
 }
 \seealso{
 Other combining_transforms:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
 \code{\link[=transform_five_crop]{transform_five_crop()}},
 \code{\link[=transform_random_choice]{transform_random_choice()}},
 \code{\link[=transform_random_order]{transform_random_order()}},
