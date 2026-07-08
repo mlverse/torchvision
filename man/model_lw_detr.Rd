@@ -117,14 +117,14 @@ nw <- round(w * s)
 resized <- img |> transform_resize(c(nh, nw))
 canvas  <- torch::torch_zeros(c(3, 640, 640))
 canvas[, 1:nh, 1:nw] <- resized
-mask <- torch::torch_zeros(c(640, 640), dtype = torch_bool())
+mask <- torch::torch_zeros(c(640, 640), dtype = torch::torch_bool())
 mask[1:nh, 1:nw] <- TRUE
 
 input <- canvas |> transform_normalize(norm_mean, norm_std)
 
 model <- model_lw_detr_tiny(pretrained = TRUE)
 model$eval()
-pred <- with_no_grad(
+pred <- torch::with_no_grad(
   model(input$unsqueeze(1), pixel_mask = mask$unsqueeze(1))
 )$detections[[1]]
 
