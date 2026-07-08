@@ -121,7 +121,7 @@ batch_normalized <- input$unsqueeze(1)    # Add batch dimension (1, 3, H, W)
 # ResNet-50 FPN V2
 model <- model_fasterrcnn_resnet50_fpn_v2(pretrained = TRUE, , detections_per_img = 5 )
 model$eval()
-with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
+torch::with_no_grad({pred <- model(batch_normalized)$detections[[1]]})
 labels <- coco_classes(as.integer(pred$labels))
 
 # Visualize boxes
@@ -135,7 +135,7 @@ model <- model_fasterrcnn_mobilenet_v3_large_320_fpn(
   pretrained = TRUE, score_thresh = 0.02, nms_thresh = 0.8, detections_per_img = 5
 )
 model$eval()
-with_no_grad({pred <- model(batch)$detections[[1]]})
+torch::with_no_grad({pred <- model(batch)$detections[[1]]})
 
 # Visualize boxes
 labels <- coco_classes(as.integer(pred$labels))
