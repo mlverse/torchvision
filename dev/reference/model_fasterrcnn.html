@@ -228,7 +228,7 @@
 <span class="r-in"><span><span class="co"># ResNet-50 FPN V2</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_fasterrcnn_resnet50_fpn_v2</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span>, , detections_per_img <span class="op">=</span> <span class="fl">5</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">with_no_grad</span><span class="op">(</span><span class="op">{</span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch_normalized</span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="op">{</span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch_normalized</span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="coco_classes.html">coco_classes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">labels</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Visualize boxes</span></span></span>
@@ -242,7 +242,7 @@
 <span class="r-in"><span>  pretrained <span class="op">=</span> <span class="cn">TRUE</span>, score_thresh <span class="op">=</span> <span class="fl">0.02</span>, nms_thresh <span class="op">=</span> <span class="fl">0.8</span>, detections_per_img <span class="op">=</span> <span class="fl">5</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">with_no_grad</span><span class="op">(</span><span class="op">{</span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="op">{</span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Visualize boxes</span></span></span>
 <span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="coco_classes.html">coco_classes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">labels</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -264,7 +264,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

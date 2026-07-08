@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   examples/fcnresnet: examples/fcnresnet.html
@@ -12,4 +12,4 @@ articles:
   examples/style-transfer: examples/style-transfer.html
   examples/texture-nca: examples/texture-nca.html
   examples/tinyimagenet-alexnet: examples/tinyimagenet-alexnet.html
-last_built: 2026-07-07T22:38Z
+last_built: 2026-07-08T06:27Z
