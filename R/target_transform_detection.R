@@ -199,3 +199,59 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
   results
 }
 
+#' Transform an image with bounding boxes to an image with rotated boxes
+#'
+#' Converts an \code{image_with_bounding_box} item (or a detection dataset that
+#' returns such items) to an \code{image_with_rotated_box} item. The bounding
+#' boxes are converted from \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} (xyxy)
+#' format to \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} (xyxyr) format,
+#' where \eqn{r} is the rotation angle in radians (anti-clockwise). For
+#' axis-aligned boxes, \eqn{r = 0}.
+#'
+#' @param x An object of class \code{image_with_bounding_box} or a dataset that
+#'   returns \code{image_with_bounding_box} items via \code{.getitem()}.
+#'
+#' @return An object of class \code{image_with_rotated_box} with the same
+#'   structure as the input \code{image_with_bounding_box}, except that
+#'   \code{$boxes} is a tensor of shape \code{(N, 5)} in xyxyr format.
+#'   When applied to a dataset, returns the same dataset with its
+#'   \code{.getitem} method modified to return \code{image_with_rotated_box}
+#'   items.
+#'
+#' @examples
+#' \dontrun{
+#' # Convert a single item
+#' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
+#' item <- ds[1]
+#' rotated_item <- transform_to_rotated_box(item)
+#' rotated_item$y$boxes  # (N, 5) tensor in xyxyr format
+#'
+#' # Wrap a dataset
+#' ds_rotated <- transform_to_rotated_box(ds)
+#' rotated_item <- ds_rotated[1]
+#' }
+#'
+#' @family target_transforms_detection
+#'
+#' @export
+transform_to_rotated_box <- function(x) {
+  UseMethod("transform_to_rotated_box", x)
+}
+
+#' @export
+transform_to_rotated_box.image_with_bounding_box <- function(x) {
+  x$y$boxes <- box_xyxy_to_xyxyr(x$y$boxes)
+  class(x) <- c("image_with_rotated_box", class(x))
+  x
+}
+
+#' @export
+transform_to_rotated_box.dataset <- function(x) {
+  original_getitem <- x$.getitem
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    transform_to_rotated_box(item)
+  }
+  x
+}
+

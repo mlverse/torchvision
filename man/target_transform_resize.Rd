@@ -59,6 +59,7 @@ new_target <- transform_fn(target)
 }
 \seealso{
 Other target_transforms_detection:
-\code{\link[=prepare_sahi_split]{prepare_sahi_split()}}
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
+\code{\link[=transform_to_rotated_box]{transform_to_rotated_box()}}
 }
 \concept{target_transforms_detection}

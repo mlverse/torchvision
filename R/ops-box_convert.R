@@ -76,3 +76,21 @@ box_xyxy_to_xywh <- function(boxes) {
   return(boxes)
 }
 
+#' box_xyxy_to_xyxyr
+#'
+#' Converts bounding boxes from \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format to
+#'   \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format, where \eqn{r} is the rotation
+#'   angle in radians (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
+#'
+#' @param boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
+#'   which will be converted.
+#'
+#' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
+#'   with rotation angle \eqn{r = 0}.
+#'
+#' @export
+box_xyxy_to_xyxyr <- function(boxes) {
+  rotation <- torch_zeros(boxes$size(1), 1, dtype = boxes$dtype)
+  torch_cat(list(boxes, rotation), dim = -1)
+}
+
