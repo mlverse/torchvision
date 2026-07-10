@@ -219,7 +219,97 @@ draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
   )
 }
 
+#' @rdname draw_bounding_boxes
+#' @export
+draw_bounding_boxes.image_with_rotated_box <- function(x, ...) {
+  rlang::check_installed("magick")
+  boxes <- x$y$boxes
 
+  img_to_draw <- if (x$x$dtype == torch::torch_uint8()) {
+    x$x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+  } else if (x$x$dtype == torch::torch_float()) {
+    x$x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+  } else type_error("`x$x` should be torch_uint8 or torch_float")
+
+  num_boxes <- boxes$shape[1]
+  if (num_boxes == 0) {
+    cli_warn("boxes doesn't contain any box. No box was drawn")
+    return(x$x)
+  }
+
+  colors <- list(...)$colors
+  if (is.null(colors)) {
+    colors <- grDevices::hcl.colors(n = num_boxes)
+  }
+
+  labels <- x$y$labels
+  width <- list(...)$width
+  if (is.null(width)) width <- 1
+
+  font <- list(...)$font
+  if (is.null(font)) font <- c("serif", "plain")
+
+  font_size <- list(...)$font_size
+  if (is.null(font_size)) font_size <- 10
+
+  boxes_r <- as.matrix(boxes$to(device = "cpu"))
+
+  draw <- png::writePNG(img_to_draw) %>%
+    magick::image_read() %>%
+    magick::image_draw()
+
+  for (i in seq_len(num_boxes)) {
+    xmin <- boxes_r[i, 1]
+    ymin <- boxes_r[i, 2]
+    xmax <- boxes_r[i, 3]
+    ymax <- boxes_r[i, 4]
+    theta <- boxes_r[i, 5]
+
+    cx <- (xmin + xmax) / 2
+    cy <- (ymin + ymax) / 2
+    hw <- (xmax - xmin) / 2
+    hh <- (ymax - ymin) / 2
+
+    ct <- cos(theta)
+    st <- sin(theta)
+
+    corners_x <- c(
+      cx - hw * ct + hh * st,
+      cx + hw * ct + hh * st,
+      cx + hw * ct - hh * st,
+      cx - hw * ct - hh * st
+    )
+    corners_y <- c(
+      cy - hw * st - hh * ct,
+      cy + hw * st - hh * ct,
+      cy + hw * st + hh * ct,
+      cy - hw * st + hh * ct
+    )
+
+    graphics::polygon(corners_x, corners_y,
+                      border = colors[(i - 1) %% length(colors) + 1],
+                      lwd = width)
+
+    if (!is.null(labels)) {
+      lbl <- labels[(i - 1) %% length(labels) + 1]
+      graphics::text(corners_x[1] + 2 * width + font_size,
+                     corners_y[1] + 2 * width,
+                     labels = lbl,
+                     col = colors[(i - 1) %% length(colors) + 1],
+                     vfont = font,
+                     cex = font_size / 10)
+    }
+  }
+
+  grDevices::dev.off()
+
+  draw_tt <- draw %>%
+    magick::image_data(channels = "rgb") %>%
+    as.integer() %>%
+    torch::torch_tensor(dtype = torch::torch_uint8())
+
+  draw_tt$permute(c(3, 1, 2))
+}
 
 #' Convert COCO polygon to mask tensor (Robust Version)
 #'

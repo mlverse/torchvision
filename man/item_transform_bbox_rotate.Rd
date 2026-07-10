@@ -4,11 +4,14 @@
 \alias{item_transform_bbox_rotate}
 \title{Transform an image with bounding boxes to an image with rotated boxes}
 \usage{
-item_transform_bbox_rotate(x)
+item_transform_bbox_rotate(x, angle = 0)
 }
 \arguments{
 \item{x}{An object of class \code{image_with_bounding_box} or a dataset that
 returns \code{image_with_bounding_box} items via \code{.getitem()}.}
+
+\item{angle}{(numeric): Rotation angle in radians (anti-clockwise). A
+single numeric value applied to all boxes. Default is \code{0}.}
 }
 \value{
 An object of class \code{image_with_rotated_box} with the same
@@ -28,14 +31,14 @@ axis-aligned boxes, \eqn{r = 0}.
 }
 \examples{
 \dontrun{
-# Convert a single item
+# Convert a single item with a rotation angle
 ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
 item <- ds[1]
-rotated_item <- item_transform_bbox_rotate(item)
+rotated_item <- item_transform_bbox_rotate(item, angle = 0.5)
 rotated_item$y$boxes  # (N, 5) tensor in xyxyr format
 
-# Wrap a dataset
-ds_rotated <- item_transform_bbox_rotate(ds)
+# Wrap a dataset with a rotation angle
+ds_rotated <- item_transform_bbox_rotate(ds, angle = 0.5)
 rotated_item <- ds_rotated[1]
 }
 

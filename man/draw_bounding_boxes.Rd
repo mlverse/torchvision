@@ -5,6 +5,7 @@
 \alias{draw_bounding_boxes.default}
 \alias{draw_bounding_boxes.torch_tensor}
 \alias{draw_bounding_boxes.image_with_bounding_box}
+\alias{draw_bounding_boxes.image_with_rotated_box}
 \title{Draws bounding boxes on image.}
 \usage{
 draw_bounding_boxes(x, ...)
@@ -25,6 +26,8 @@ draw_bounding_boxes(x, ...)
 )
 
 \method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
+
+\method{draw_bounding_boxes}{image_with_rotated_box}(x, ...)
 }
 \arguments{
 \item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
