@@ -15,3 +15,37 @@ test_that("box_cxcywh_to_xyxy box_xyxy_to_cxcywh box_xywh_to_xyxy box_xyxy_to_xy
   expect_equal(torch::as_array(xywh), torch::as_array(xyxy))
 })
 
+test_that("box_xyxy_to_xyxyr adds zero rotation column", {
+  result <- box_xyxy_to_xyxyr(xyxy)
+
+  expect_tensor(result)
+  expect_equal(result$size(2), 5L)
+  expect_equal(result$size(1), 5L)
+  expect_equal(torch::as_array(result[, 1:4]), torch::as_array(xyxy))
+  expect_equal(torch::as_array(result[, 5]), rep(0, 5))
+})
+
+test_that("box_xyxy_to_xyxyr handles single box", {
+  single <- torch::torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- box_xyxy_to_xyxyr(single)
+
+  expect_equal(result$size(1), 1L)
+  expect_equal(result$size(2), 5L)
+  expect_equal(torch::as_array(result[, 5]), 0)
+})
+
+test_that("box_xyxy_to_xyxyr handles empty boxes", {
+  empty <- torch::torch_zeros(c(0, 4))
+  result <- box_xyxy_to_xyxyr(empty)
+
+  expect_equal(result$size(1), 0L)
+  expect_equal(result$size(2), 5L)
+})
+
+test_that("box_xyxy_to_xyxyr preserves dtype", {
+  boxes <- torch::torch_tensor(matrix(c(1, 2, 3, 4), ncol = 4), dtype = torch::torch_int())
+  result <- box_xyxy_to_xyxyr(boxes)
+
+  expect_equal(result$dtype, torch::torch_int())
+})
+
