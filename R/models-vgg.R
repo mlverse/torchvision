@@ -46,13 +46,20 @@ VGG <- torch::nn_module(
 )
 
 vgg_make_layers <- function(cfg, batch_norm) {
-  layers <- list()
+  n_layers <- sum(vapply(
+    cfg,
+    function(v) if (v == "M") 1L else if (batch_norm) 3L else 2L,
+    integer(1)
+  ))
+  layers <- vector("list", n_layers)
+  k <- 0L
   in_channels <- 3
   for (v in cfg) {
 
     if (v == "M") {
 
-      layers[[length(layers) + 1]] <- torch::nn_max_pool2d(
+      k <- k + 1L
+      layers[[k]] <- torch::nn_max_pool2d(
         kernel_size = 2,
         stride = 2
       )
@@ -60,15 +67,19 @@ vgg_make_layers <- function(cfg, batch_norm) {
     } else {
 
       v <- as.integer(v)
-      layers[[length(layers) + 1]] <- torch::nn_conv2d(
+      k <- k + 1L
+      layers[[k]] <- torch::nn_conv2d(
         in_channels = in_channels, out_channels = v,
         kernel_size = 3, padding = 1
       )
 
-      if (batch_norm)
-        layers[[length(layers) + 1]] <- torch::nn_batch_norm2d(num_features = v)
+      if (batch_norm) {
+        k <- k + 1L
+        layers[[k]] <- torch::nn_batch_norm2d(num_features = v)
+      }
 
-      layers[[length(layers) + 1]] <- torch::nn_relu(inplace = TRUE)
+      k <- k + 1L
+      layers[[k]] <- torch::nn_relu(inplace = TRUE)
       in_channels <- v
 
     }

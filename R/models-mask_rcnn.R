@@ -287,7 +287,7 @@ maskrcnn_model <- torch::nn_module(
 
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
-      final_results <- list()
+      final_results <- vector("list", batch_size)
 
       for (b in seq_len(batch_size)) {
 
@@ -417,7 +417,7 @@ maskrcnn_model_v2 <- torch::nn_module(
 
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
-      final_results <- list()
+      final_results <- vector("list", batch_size)
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),

@@ -206,7 +206,7 @@ resnet <- torch::nn_module(
       )
     }
 
-    layers <- list()
+    layers <- vector("list", blocks)
     layers[[1]] <- block(self$inplanes, planes, stride, downsample, self$groups,
             self$base_width, previous_dilation, norm_layer)
     self$inplanes <- planes * block$public_fields$expansion

@@ -177,13 +177,15 @@ efficientnet <- torch::nn_module(
       as.integer(ceiling(depth_coefficient * repeats))
     }
     out_channels <- round_filters(32)
-    features <- list(conv_norm_act(3, out_channels, stride = 2, norm_layer = norm_layer, activation_layer = torch::nn_silu))
+    features <- vector("list", length(b0_cfg) + 1)
+    features[[1]] <- conv_norm_act(3, out_channels, stride = 2, norm_layer = norm_layer, activation_layer = torch::nn_silu)
     in_channels <- out_channels
 
-    for (cfg in b0_cfg) {
+    for (cfg_idx in seq_along(b0_cfg)) {
+      cfg <- b0_cfg[[cfg_idx]]
       oc <- round_filters(cfg$channels)
       r <- round_repeats(cfg$repeats)
-      stage_blocks <- list()
+      stage_blocks <- vector("list", r)
       for (i in 1:r) {
         s <- ifelse(i == 1, cfg$stride, 1)
         stage_blocks[[i]] <- mbconv_block(in_channels, oc,
@@ -191,7 +193,7 @@ efficientnet <- torch::nn_module(
                                           se_ratio = 0.25, norm_layer = norm_layer)
         in_channels <- oc
       }
-      features[[length(features) + 1]] <- torch::nn_sequential(!!!stage_blocks)
+      features[[cfg_idx + 1]] <- torch::nn_sequential(!!!stage_blocks)
     }
 
     final_channels <- round_filters(1280)

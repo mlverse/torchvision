@@ -6,8 +6,8 @@ rpn_head <- torch::nn_module(
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
     },
     forward = function(features) {
-      objectness_list <- list()
-      bbox_reg_list <- list()
+      objectness_list <- vector("list", length(features))
+      bbox_reg_list <- vector("list", length(features))
 
       for (i in seq_along(features)) {
         x <- features[[i]]
@@ -38,8 +38,8 @@ rpn_head_v2 <- torch::nn_module(
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1, bias = TRUE)
     },
     forward = function(features) {
-      objectness_list <- list()
-      bbox_reg_list <- list()
+      objectness_list <- vector("list", length(features))
+      bbox_reg_list <- vector("list", length(features))
 
       for (i in seq_along(features)) {
         x <- features[[i]]
@@ -60,13 +60,13 @@ rpn_head_mobilenet <- torch::nn_module(
       self$bbox_pred <- nn_conv2d(in_channels, num_anchors * 4, kernel_size = 1)
     },
     forward = function(features) {
-      objectness <- list()
-      bbox_deltas <- list()
+      objectness <- vector("list", length(features))
+      bbox_deltas <- vector("list", length(features))
 
-      for (x in features) {
-        t <- nnf_relu(self$conv(x))
-        objectness[[length(objectness) + 1]] <- self$cls_logits(t)
-        bbox_deltas[[length(bbox_deltas) + 1]] <- self$bbox_pred(t)
+      for (i in seq_along(features)) {
+        t <- nnf_relu(self$conv(features[[i]]))
+        objectness[[i]] <- self$cls_logits(t)
+        bbox_deltas[[i]] <- self$bbox_pred(t)
       }
 
       list(objectness = objectness, bbox_deltas = bbox_deltas)
@@ -83,13 +83,15 @@ generate_level_anchors <- function(h, w, stride, base_sizes = c(32, 64, 128, 256
   shift_grid <- torch_stack(list(shifts[[1]], shifts[[2]], torch_zeros_like(shifts[[1]]), torch_zeros_like(shifts[[2]])), dim = 3)$unsqueeze(3)  # [H, W, 1, 4]
 
   # Create anchors for each combination of base_size and aspect_ratio
-  anchor_list <- list()
+  anchor_list <- vector("list", length(base_sizes) * length(aspect_ratios))
 
+  k <- 0L
   for (base_size in base_sizes) {
     for (ratio in aspect_ratios) {
       w_anchor <- base_size * sqrt(ratio)
       h_anchor <- base_size / sqrt(ratio)
-      anchor_list[[length(anchor_list) + 1]] <- c(w_anchor, h_anchor)
+      k <- k + 1L
+      anchor_list[[k]] <- c(w_anchor, h_anchor)
     }
   }
 
@@ -472,7 +474,7 @@ fpn_module <- torch::nn_module(
       names(inputs) <- c("c2", "c3", "c4", "c5")
 
       last_inner <- self$inner_blocks[[4]](inputs$c5)
-      results <- list()
+      results <- vector("list", 4)
       results[[4]] <- self$layer_blocks[[4]](last_inner)
 
       for (i in 3:1) {
@@ -571,7 +573,7 @@ fasterrcnn_model <- torch::nn_module(
 
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
-      final_results <- list()
+      final_results <- vector("list", batch_size)
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
@@ -633,7 +635,7 @@ fpn_module_v2 <- torch::nn_module(
       names(inputs) <- c("c2", "c3", "c4", "c5")
 
       last_inner <- self$inner_blocks[[4]](inputs$c5)
-      results <- list()
+      results <- vector("list", 4)
       results[[4]] <- self$layer_blocks[[4]](last_inner)
 
       for (i in 3:1) {
@@ -729,7 +731,7 @@ fasterrcnn_model_v2 <- torch::nn_module(
 
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
-      final_results <- list()
+      final_results <- vector("list", batch_size)
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
@@ -780,7 +782,7 @@ fpn_module_2level <- torch::nn_module(
     },
     forward = function(inputs) {
       last_inner <- self$inner_blocks[[2]](inputs[[2]])
-      results <- list()
+      results <- vector("list", 2)
       results[[2]] <- self$layer_blocks[[2]](last_inner)
 
       lateral <- self$inner_blocks[[1]](inputs[[1]])
@@ -807,7 +809,7 @@ mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
       )
     },
     forward = function(x) {
-      all_feats <- list()
+      all_feats <- vector("list", length(self$body))
 
       for (i in seq_len(length(self$body))) {
         x <- self$body[[i]](x)
@@ -857,7 +859,7 @@ fasterrcnn_mobilenet_model <- torch::nn_module(
 
       batch_size <- images$shape[1]
       image_size <- images$shape[3:4]
-      final_results <- list()
+      final_results <- vector("list", batch_size)
 
       for (b in seq_len(batch_size)) {
         props <- generate_proposals(features, rpn_out, image_size, c(8, 16),
@@ -910,7 +912,7 @@ mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
       )
     },
     forward = function(x) {
-      all_feats <- list()
+      all_feats <- vector("list", length(self$body))
 
       for (i in seq_len(length(self$body))) {
         x <- self$body[[i]](x)

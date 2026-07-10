@@ -161,7 +161,7 @@ ppm_module <- torch::nn_module(
   },
   forward = function(x) {
     target_size <- x$shape[3:4]
-    ppm_outs <- list()
+    ppm_outs <- vector("list", length(self$stages))
 
     for (i in seq_along(self$stages)) {
       ppm_out <- self$stages[[i]](x)
@@ -241,7 +241,7 @@ upernet_head <- torch::nn_module(
     inputs <- list(features$c2, features$c3, features$c4, features$c5)
 
     # Build laterals
-    laterals <- list()
+    laterals <- vector("list", 4)
     for (i in 1:3) {
       laterals[[i]] <- self$lateral_convs[[i]](inputs[[i]])
     }
@@ -260,7 +260,7 @@ upernet_head <- torch::nn_module(
     }
 
     # Build FPN outputs
-    fpn_outs <- list()
+    fpn_outs <- vector("list", 4)
     for (i in 1:3) {
       fpn_outs[[i]] <- self$fpn_convs[[i]](laterals[[i]])
     }

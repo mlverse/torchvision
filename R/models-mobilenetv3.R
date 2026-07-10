@@ -216,40 +216,36 @@ MobileNetV3 <- nn_module(
   initialize = function(inverted_residual_setting, last_channel, num_classes = 1000,
                         dropout = 0.2, norm_layer = nn_batch_norm2d) {
 
-    layers <- list()
+    n_conf <- length(inverted_residual_setting)
+    layers <- vector("list", n_conf + 2)
 
     firstconv_out <- inverted_residual_setting[[1]]$input_channels
-    layers <- c(layers, list(
-      Conv2dNormActivation(
-        3, firstconv_out, kernel_size = 3, stride = 2,
-        norm_layer = norm_layer, activation_layer = nn_hardswish
-      )
-    ))
+    layers[[1]] <- Conv2dNormActivation(
+      3, firstconv_out, kernel_size = 3, stride = 2,
+      norm_layer = norm_layer, activation_layer = nn_hardswish
+    )
 
-    for (conf in inverted_residual_setting) {
-      layers <- c(layers, list(
-        InvertedResidual(
-          input_channels = conf$input_channels,
-          expanded_channels = conf$expanded_channels,
-          out_channels = conf$out_channels,
-          kernel = conf$kernel,
-          stride = conf$stride,
-          use_se = conf$use_se,
-          use_hs = conf$use_hs,
-          dilation = conf$dilation,
-          norm_layer = norm_layer
-        )
-      ))
+    for (i in seq_len(n_conf)) {
+      conf <- inverted_residual_setting[[i]]
+      layers[[i + 1]] <- InvertedResidual(
+        input_channels = conf$input_channels,
+        expanded_channels = conf$expanded_channels,
+        out_channels = conf$out_channels,
+        kernel = conf$kernel,
+        stride = conf$stride,
+        use_se = conf$use_se,
+        use_hs = conf$use_hs,
+        dilation = conf$dilation,
+        norm_layer = norm_layer
+      )
     }
 
-    lastconv_in <- inverted_residual_setting[[length(inverted_residual_setting)]]$out_channels
+    lastconv_in <- inverted_residual_setting[[n_conf]]$out_channels
     lastconv_out <- 6 * lastconv_in
-    layers <- c(layers, list(
-      Conv2dNormActivation(
-        lastconv_in, lastconv_out, kernel_size = 1,
-        norm_layer = norm_layer, activation_layer = nn_hardswish
-      )
-    ))
+    layers[[n_conf + 2]] <- Conv2dNormActivation(
+      lastconv_in, lastconv_out, kernel_size = 1,
+      norm_layer = norm_layer, activation_layer = nn_hardswish
+    )
 
     self$features <- nn_sequential(!!!layers)
     self$avgpool <- nn_adaptive_avg_pool2d(1)

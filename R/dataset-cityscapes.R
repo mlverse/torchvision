@@ -229,18 +229,17 @@ cityscapes_dataset <- torch::dataset(
     }
 
     # Collect all images from all cities
-    images <- character(0)
-    for (city in cities) {
-      city_path <- file.path(img_dir, city)
-      city_imgs <- list.files(
+    images <- vector("list", length(cities))
+    for (i in seq_along(cities)) {
+      city_path <- file.path(img_dir, cities[i])
+      images[[i]] <- list.files(
         city_path,
         pattern = "_leftImg8bit\\.png$",
         full.names = TRUE
       )
-      images <- c(images, city_imgs)
     }
 
-    sort(images)
+    sort(unlist(images))
   },
 
   get_target_path = function(img_path, target_type) {

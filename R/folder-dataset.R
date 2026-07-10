@@ -28,11 +28,13 @@ folder_make_dataset <- function(directory, class_to_idx, extensions = NULL, is_v
     }
   }
 
-  paths <- c()
-  indexes <- c()
+  target_classes <- sort(names(class_to_idx))
+  paths <- vector("list", length(target_classes))
+  indexes <- vector("list", length(target_classes))
 
-  for (target_class in sort(names(class_to_idx))) {
+  for (i in seq_along(target_classes)) {
 
+    target_class <- target_classes[i]
     class_index <- class_to_idx[target_class]
     target_dir <- fs::path_join(c(directory, target_class))
 
@@ -42,13 +44,13 @@ folder_make_dataset <- function(directory, class_to_idx, extensions = NULL, is_v
     fnames <- fs::dir_ls(target_dir, recurse = TRUE)
     fnames <- fnames[is_valid_file(fnames)]
 
-    paths <- c(paths, fnames)
-    indexes <- c(indexes, rep(class_index, length(fnames)))
+    paths[[i]] <- fnames
+    indexes[[i]] <- rep(class_index, length(fnames))
   }
 
   list(
-    paths,
-    indexes
+    unlist(paths),
+    unlist(indexes)
   )
 }
 
