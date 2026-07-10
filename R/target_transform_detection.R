@@ -210,6 +210,8 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #'
 #' @param x An object of class \code{image_with_bounding_box} or a dataset that
 #'   returns \code{image_with_bounding_box} items via \code{.getitem()}.
+#' @param angle (numeric): Rotation angle in radians (anti-clockwise). A
+#'   single numeric value applied to all boxes. Default is \code{0}.
 #'
 #' @return An object of class \code{image_with_rotated_box} with the same
 #'   structure as the input \code{image_with_bounding_box}, except that
@@ -220,37 +222,37 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #'
 #' @examples
 #' \dontrun{
-#' # Convert a single item
+#' # Convert a single item with a rotation angle
 #' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
 #' item <- ds[1]
-#' rotated_item <- item_transform_bbox_rotate(item)
+#' rotated_item <- item_transform_bbox_rotate(item, angle = 0.5)
 #' rotated_item$y$boxes  # (N, 5) tensor in xyxyr format
 #'
-#' # Wrap a dataset
-#' ds_rotated <- item_transform_bbox_rotate(ds)
+#' # Wrap a dataset with a rotation angle
+#' ds_rotated <- item_transform_bbox_rotate(ds, angle = 0.5)
 #' rotated_item <- ds_rotated[1]
 #' }
 #'
 #' @family target_transforms_detection
 #'
 #' @export
-item_transform_bbox_rotate <- function(x) {
+item_transform_bbox_rotate <- function(x, angle = 0) {
   UseMethod("item_transform_bbox_rotate", x)
 }
 
 #' @export
-item_transform_bbox_rotate.image_with_bounding_box <- function(x) {
-  x$y$boxes <- box_xyxy_to_xyxyr(x$y$boxes)
+item_transform_bbox_rotate.image_with_bounding_box <- function(x, angle = 0) {
+  x$y$boxes <- box_xyxy_to_xyxyr(x$y$boxes, angle = angle)
   class(x) <- c("image_with_rotated_box", class(x))
   x
 }
 
 #' @export
-item_transform_bbox_rotate.dataset <- function(x) {
+item_transform_bbox_rotate.dataset <- function(x, angle = 0) {
   original_getitem <- x$.getitem
   x$.getitem <- function(index) {
     item <- original_getitem(index)
-    item_transform_bbox_rotate(item)
+    item_transform_bbox_rotate(item, angle = angle)
   }
   x
 }

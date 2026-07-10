@@ -328,7 +328,7 @@ make_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {
 
 test_that("item_transform_bbox_rotate converts image_with_bounding_box to image_with_rotated_box", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4))
-  result <- item_transform_bbox_rotate(item)
+  result <- item_transform_bbox_rotate(item, angle = 0)
 
   expect_true(inherits(result, "image_with_rotated_box"))
   expect_equal(result$y$boxes$size(2), 5L)
@@ -344,7 +344,7 @@ test_that("item_transform_bbox_rotate preserves image and other target fields", 
   original_x <- item$x$clone()
   original_labels <- item$y$labels$clone()
 
-  result <- item_transform_bbox_rotate(item)
+  result <- item_transform_bbox_rotate(item, angle = 0)
 
   expect_true(result$x$eq(original_x)$all()$item())
   expect_true(result$y$labels$eq(original_labels)$all()$item())
@@ -357,21 +357,21 @@ test_that("item_transform_bbox_rotate handles empty boxes", {
     boxes = matrix(numeric(0), ncol = 4),
     labels = torch_zeros(0L, dtype = torch_long())
   )
-  result <- item_transform_bbox_rotate(item)
+  result <- item_transform_bbox_rotate(item, angle = 0)
 
   expect_true(inherits(result, "image_with_rotated_box"))
   expect_equal(result$y$boxes$size(1), 0L)
   expect_equal(result$y$boxes$size(2), 5L)
 })
 
-test_that("item_transform_bbox_rotate handles multiple boxes", {
+test_that("item_transform_bbox_rotate handles multiple boxes with angle=0", {
   boxes <- matrix(c(
     10, 20, 50, 60,
     100, 200, 150, 250,
     0, 0, 300, 400
   ), ncol = 4, byrow = TRUE)
   item <- make_item(boxes)
-  result <- item_transform_bbox_rotate(item)
+  result <- item_transform_bbox_rotate(item, angle = 0)
 
   expect_equal(result$y$boxes$size(1), 3L)
   expect_equal(result$y$boxes$size(2), 5L)
@@ -383,9 +383,24 @@ test_that("item_transform_bbox_rotate does not mutate input", {
   item <- make_item(boxes)
   original_boxes <- boxes$clone()
 
-  result <- item_transform_bbox_rotate(item)
+  result <- item_transform_bbox_rotate(item, angle = 0)
 
   expect_equal_to_r(item$y$boxes, as.matrix(original_boxes$cpu()))
   expect_equal(item$y$boxes$size(2), 4L)
   expect_false(inherits(item, "image_with_rotated_box"))
+})
+
+test_that("item_transform_bbox_rotate applies non-zero rotation angle", {
+  # A 2x2 square centered at the origin in image coords would be
+  # (-1,-1,1,1). Shift it to a real image: (100,100,102,102)
+  # Rotating by pi/4 should expand the enclosing box
+  item <- make_item(boxes = matrix(c(100, 100, 102, 102), ncol = 4))
+  result <- item_transform_bbox_rotate(item, angle = pi / 4)
+
+  # The enclosing box expands because corners rotate
+  cx <- 101; cy <- 101
+  half_diag <- sqrt(2)  # half diagonal of the 2x2 square after 45deg rotation
+  expect_equal(as.numeric(result$y$boxes[1, 1]$cpu()), cx - half_diag, tolerance = 1e-5)
+  expect_equal(as.numeric(result$y$boxes[1, 3]$cpu()), cx + half_diag, tolerance = 1e-5)
+  expect_equal(as.numeric(result$y$boxes[1, 5]$cpu()), pi / 4, tolerance = 1e-5)
 })

@@ -84,13 +84,64 @@ box_xyxy_to_xywh <- function(boxes) {
 #'
 #' @param boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
 #'   which will be converted.
+#' @param angle (numeric, optional): Rotation angle in radians (anti-clockwise).
+#'   A single numeric value applied to all boxes, or a tensor of shape \code{(N,)}
+#'   with one angle per box. Default is \code{0}.
 #'
 #' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
-#'   with rotation angle \eqn{r = 0}.
+#'   where \eqn{r} is the provided rotation angle. The bounding box coordinates
+#'   are computed by rotating the original axis-aligned box around its center
+#'   by \eqn{r} radians anti-clockwise, then taking the axis-aligned bounding
+#'   box of the rotated corners.
 #'
 #' @export
-box_xyxy_to_xyxyr <- function(boxes) {
-  rotation <- torch_zeros(boxes$size(1), 1, dtype = boxes$dtype)
-  torch_cat(list(boxes, rotation), dim = -1)
+box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
+
+  n <- boxes$size(1)
+
+  if (n == 0) {
+    angle_t <- torch_zeros(0, 1, dtype = boxes$dtype)
+    return(torch_cat(list(boxes, angle_t), dim = -1))
+  }
+
+  c(x1, y1, x2, y2) %<-% boxes$unbind(-1)
+  cx <- ((x1 + x2) / 2)$reshape(c(-1, 1))
+  cy <- ((y1 + y2) / 2)$reshape(c(-1, 1))
+  hw <- ((x2 - x1) / 2)$reshape(c(-1, 1))
+  hh <- ((y2 - y1) / 2)$reshape(c(-1, 1))
+
+  if (inherits(angle, "torch_tensor")) {
+    angle <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
+  } else {
+    angle <- torch_tensor(angle, dtype = boxes$dtype)$reshape(c(-1, 1))
+  }
+
+  if (angle$size(1) == 1 && n > 1) {
+    angle <- angle$expand(c(n, 1))
+  }
+
+  ct <- torch_cos(angle)
+  st <- torch_sin(angle)
+
+  corners_x <- torch_cat(list(
+    cx - hw * ct + hh * st,
+    cx + hw * ct + hh * st,
+    cx + hw * ct - hh * st,
+    cx - hw * ct - hh * st
+  ), dim = -1)
+
+  corners_y <- torch_cat(list(
+    cy - hw * st - hh * ct,
+    cy + hw * st - hh * ct,
+    cy + hw * st + hh * ct,
+    cy - hw * st + hh * ct
+  ), dim = -1)
+
+  xmin <- torch_min(corners_x, dim = -1)[[1]]$reshape(c(-1, 1))
+  xmax <- torch_max(corners_x, dim = -1)[[1]]$reshape(c(-1, 1))
+  ymin <- torch_min(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
+  ymax <- torch_max(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
+
+  torch_cat(list(xmin, ymin, xmax, ymax, angle), dim = -1L)
 }
 
