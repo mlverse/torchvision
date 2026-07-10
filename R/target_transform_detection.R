@@ -223,34 +223,34 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' # Convert a single item
 #' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
 #' item <- ds[1]
-#' rotated_item <- transform_to_rotated_box(item)
+#' rotated_item <- item_transform_bbox_rotate(item)
 #' rotated_item$y$boxes  # (N, 5) tensor in xyxyr format
 #'
 #' # Wrap a dataset
-#' ds_rotated <- transform_to_rotated_box(ds)
+#' ds_rotated <- item_transform_bbox_rotate(ds)
 #' rotated_item <- ds_rotated[1]
 #' }
 #'
 #' @family target_transforms_detection
 #'
 #' @export
-transform_to_rotated_box <- function(x) {
-  UseMethod("transform_to_rotated_box", x)
+item_transform_bbox_rotate <- function(x) {
+  UseMethod("item_transform_bbox_rotate", x)
 }
 
 #' @export
-transform_to_rotated_box.image_with_bounding_box <- function(x) {
+item_transform_bbox_rotate.image_with_bounding_box <- function(x) {
   x$y$boxes <- box_xyxy_to_xyxyr(x$y$boxes)
   class(x) <- c("image_with_rotated_box", class(x))
   x
 }
 
 #' @export
-transform_to_rotated_box.dataset <- function(x) {
+item_transform_bbox_rotate.dataset <- function(x) {
   original_getitem <- x$.getitem
   x$.getitem <- function(index) {
     item <- original_getitem(index)
-    transform_to_rotated_box(item)
+    item_transform_bbox_rotate(item)
   }
   x
 }
