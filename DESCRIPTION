@@ -83,6 +83,7 @@ Collate:
     'dataset-vggface2.R'
     'extension.R'
     'globals.R'
+    'item_transform_geometry.R'
     'models-alexnet.R'
     'models-convnext.R'
     'models-convnext_detection.R'
