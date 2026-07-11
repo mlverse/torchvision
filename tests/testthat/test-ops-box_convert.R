@@ -56,7 +56,7 @@ test_that("box_xyxy_to_xyxyr rotates box by 90 degrees around center", {
   result <- box_xyxy_to_xyxyr(box, angle = 90)
 
   expect_equal(torch::as_array(result[, 1:4]), torch::as_array(box), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 5]$cpu()), 90, tolerance = 1e-5)
+  expect_equal_to_r(result[1, 5], 90, tolerance = 1e-5)
 })
 
 test_that("box_xyxy_to_xyxyr rotates by 45 degrees and produces larger enclosing box", {
@@ -65,11 +65,11 @@ test_that("box_xyxy_to_xyxyr rotates by 45 degrees and produces larger enclosing
   box <- torch::torch_tensor(matrix(c(-1, -1, 1, 1), ncol = 4))
   result <- box_xyxy_to_xyxyr(box, angle = 45)
 
-  expect_equal(as.numeric(result[1, 1]$cpu()), -sqrt(2), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 2]$cpu()), -sqrt(2), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 3]$cpu()), sqrt(2), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 4]$cpu()), sqrt(2), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 5]$cpu()), 45, tolerance = 1e-5)
+  expect_equal_to_r(result[1, 1], -sqrt(2), tolerance = 1e-5)
+  expect_equal_to_r(result[1, 2], -sqrt(2), tolerance = 1e-5)
+  expect_equal_to_r(result[1, 3], sqrt(2), tolerance = 1e-5)
+  expect_equal_to_r(result[1, 4], sqrt(2), tolerance = 1e-5)
+  expect_equal_to_r(result[1, 5], 45, tolerance = 1e-5)
 })
 
 test_that("box_xyxy_to_xyxyr accepts per-box angles", {
@@ -78,6 +78,6 @@ test_that("box_xyxy_to_xyxyr accepts per-box angles", {
   result <- box_xyxy_to_xyxyr(box, angle = angles)
 
   expect_equal(result$size(1), 2L)
-  expect_equal(as.numeric(result[1, 5]$cpu()), 0, tolerance = 1e-5)
-  expect_equal(as.numeric(result[2, 5]$cpu()), 45, tolerance = 1e-5)
+  expect_equal_to_r(result[1, 5], 0, tolerance = 1e-5)
+  expect_equal_to_r(result[2, 5], 45, tolerance = 1e-5)
 })

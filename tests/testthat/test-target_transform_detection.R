@@ -332,8 +332,8 @@ test_that("item_transform_rotate converts image_with_bounding_box to image_with_
 
   expect_true(inherits(result, "image_with_rotated_box"))
   expect_equal(result$y$boxes$size(2), 5L)
-  expect_equal(torch::as_array(result$y$boxes[1, 1:4]), c(10, 20, 50, 60))
-  expect_equal(as.numeric(result$y$boxes[1, 5]$cpu()), 0)
+  expect_equal_to_r(result$y$boxes[1, 1:4], c(10, 20, 50, 60))
+  expect_equal_to_r(result$y$boxes[1, 5], 0)
 })
 
 test_that("item_transform_rotate rotates both image and bounding boxes", {
@@ -348,7 +348,7 @@ test_that("item_transform_rotate rotates both image and bounding boxes", {
   expect_equal(result$x$size(-1), 200L)
   # Boxes should be in xyxyr format
   expect_equal(result$y$boxes$size(2), 5L)
-  expect_equal(as.numeric(result$y$boxes[1, 5]$cpu()), 90)
+  expect_equal_to_r(result$y$boxes[1, 5], 90)
 })
 
 test_that("item_transform_rotate preserves labels and other target fields", {
@@ -414,9 +414,9 @@ test_that("item_transform_rotate applies non-zero rotation angle to boxes", {
   # The enclosing box expands because corners rotate
   cx <- 101; cy <- 101
   half_diag <- sqrt(2)
-  expect_equal(as.numeric(result$y$boxes[1, 1]$cpu()), cx - half_diag, tolerance = 1e-5)
-  expect_equal(as.numeric(result$y$boxes[1, 3]$cpu()), cx + half_diag, tolerance = 1e-5)
-  expect_equal(as.numeric(result$y$boxes[1, 5]$cpu()), 45, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 1], cx - half_diag, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 3], cx + half_diag, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 5], 45, tolerance = 1e-5)
 })
 
 test_that("item_transform_rotate with expand=TRUE enlarges canvas", {
