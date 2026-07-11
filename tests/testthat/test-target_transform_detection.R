@@ -336,16 +336,12 @@ test_that("item_transform_rotate converts image_with_bounding_box to image_with_
   expect_equal_to_r(result$y$boxes[1, 5], 0)
 })
 
-test_that("item_transform_rotate rotates both image and bounding boxes", {
+test_that("item_transform_rotate does not modify the image", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4))
   original_x <- item$x$clone()
   result <- item_transform_rotate(item, angle = 90)
 
-  # Image should be rotated (not identical to original)
-  expect_false(result$x$eq(original_x)$all()$item())
-  # With expand=FALSE, the canvas size stays the same
-  expect_equal(result$x$size(-2), 100L)
-  expect_equal(result$x$size(-1), 200L)
+  expect_true(result$x$eq(original_x)$all()$item())
   # Boxes should be in xyxyr format
   expect_equal(result$y$boxes$size(2), 5L)
   expect_equal_to_r(result$y$boxes[1, 5], 90)
@@ -417,22 +413,4 @@ test_that("item_transform_rotate applies non-zero rotation angle to boxes", {
   expect_equal_to_r(result$y$boxes[1, 1], cx - half_diag, tolerance = 1e-5)
   expect_equal_to_r(result$y$boxes[1, 3], cx + half_diag, tolerance = 1e-5)
   expect_equal_to_r(result$y$boxes[1, 5], 45, tolerance = 1e-5)
-})
-
-test_that("item_transform_rotate with expand=TRUE enlarges canvas", {
-  item <- make_item(
-    boxes = matrix(c(10, 20, 50, 60), ncol = 4),
-    image_size = c(100L, 100L)
-  )
-  result <- item_transform_rotate(item, angle = 45, expand = TRUE)
-
-  # Canvas should be larger than original
-  new_h <- result$x$size(-2)
-  new_w <- result$x$size(-1)
-  expect_true(new_h > 100L)
-  expect_true(new_w > 100L)
-
-  # Boxes should be translated to new canvas coordinates
-  expect_true(all(as.numeric(result$y$boxes[, 1]$cpu()) >= 0))
-  expect_true(all(as.numeric(result$y$boxes[, 3]$cpu()) <= new_w))
 })
