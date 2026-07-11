@@ -80,19 +80,19 @@ box_xyxy_to_xywh <- function(boxes) {
 #'
 #' Converts bounding boxes from \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format to
 #'   \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format, where \eqn{r} is the rotation
-#'   angle in radians (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
+#'   angle in degrees (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
 #'
 #' @param boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
 #'   which will be converted.
-#' @param angle (numeric, optional): Rotation angle in radians (anti-clockwise).
+#' @param angle (numeric, optional): Rotation angle in degrees (anti-clockwise).
 #'   A single numeric value applied to all boxes, or a tensor of shape \code{(N,)}
 #'   with one angle per box. Default is \code{0}.
 #'
 #' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
-#'   where \eqn{r} is the provided rotation angle. The bounding box coordinates
-#'   are computed by rotating the original axis-aligned box around its center
-#'   by \eqn{r} radians anti-clockwise, then taking the axis-aligned bounding
-#'   box of the rotated corners.
+#'   where \eqn{r} is the provided rotation angle in degrees. The bounding box
+#'   coordinates are computed by rotating the original axis-aligned box around
+#'   its center by \eqn{r} degrees anti-clockwise, then taking the axis-aligned
+#'   bounding box of the rotated corners.
 #'
 #' @export
 box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
@@ -111,17 +111,18 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
   hh <- ((y2 - y1) / 2)$reshape(c(-1, 1))
 
   if (inherits(angle, "torch_tensor")) {
-    angle <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
+    angle_deg <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
   } else {
-    angle <- torch_tensor(angle, dtype = boxes$dtype)$reshape(c(-1, 1))
+    angle_deg <- torch_tensor(angle, dtype = boxes$dtype)$reshape(c(-1, 1))
   }
 
-  if (angle$size(1) == 1 && n > 1) {
-    angle <- angle$expand(c(n, 1))
+  if (angle_deg$size(1) == 1 && n > 1) {
+    angle_deg <- angle_deg$expand(c(n, 1))
   }
 
-  ct <- torch_cos(angle)
-  st <- torch_sin(angle)
+  angle_rad <- angle_deg * pi / 180
+  ct <- torch_cos(angle_rad)
+  st <- torch_sin(angle_rad)
 
   corners_x <- torch_cat(list(
     cx - hw * ct + hh * st,
@@ -142,6 +143,6 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
   ymin <- torch_min(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
   ymax <- torch_max(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
 
-  torch_cat(list(xmin, ymin, xmax, ymax, angle), dim = -1L)
+  torch_cat(list(xmin, ymin, xmax, ymax, angle_deg), dim = -1L)
 }
 

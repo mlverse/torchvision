@@ -49,36 +49,35 @@ test_that("box_xyxy_to_xyxyr preserves dtype", {
   expect_equal(result$dtype, torch::torch_int())
 })
 
-test_that("box_xyxy_to_xyxyr rotates box by angle around center", {
+test_that("box_xyxy_to_xyxyr rotates box by 90 degrees around center", {
   # A 2x2 square centered at (0,0): xyxy = (-1, -1, 1, 1)
-  # Rotating by pi/2 should give the same axis-aligned box
+  # Rotating by 90 degrees should give the same axis-aligned box
   box <- torch::torch_tensor(matrix(c(-1, -1, 1, 1), ncol = 4))
-  result <- box_xyxy_to_xyxyr(box, angle = pi / 2)
+  result <- box_xyxy_to_xyxyr(box, angle = 90)
 
   expect_equal(torch::as_array(result[, 1:4]), torch::as_array(box), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 5]$cpu()), pi / 2, tolerance = 1e-5)
+  expect_equal(as.numeric(result[1, 5]$cpu()), 90, tolerance = 1e-5)
 })
 
-test_that("box_xyxy_to_xyxyr rotates by pi/4 and produces larger enclosing box", {
+test_that("box_xyxy_to_xyxyr rotates by 45 degrees and produces larger enclosing box", {
   # A 2x2 square centered at origin: xyxy = (-1, -1, 1, 1)
-  # Rotated by pi/4, the enclosing box expands to [-sqrt(2), -sqrt(2), sqrt(2), sqrt(2)]
+  # Rotated by 45 degrees, the enclosing box expands to [-sqrt(2), -sqrt(2), sqrt(2), sqrt(2)]
   box <- torch::torch_tensor(matrix(c(-1, -1, 1, 1), ncol = 4))
-  result <- box_xyxy_to_xyxyr(box, angle = pi / 4)
+  result <- box_xyxy_to_xyxyr(box, angle = 45)
 
   expect_equal(as.numeric(result[1, 1]$cpu()), -sqrt(2), tolerance = 1e-5)
   expect_equal(as.numeric(result[1, 2]$cpu()), -sqrt(2), tolerance = 1e-5)
   expect_equal(as.numeric(result[1, 3]$cpu()), sqrt(2), tolerance = 1e-5)
   expect_equal(as.numeric(result[1, 4]$cpu()), sqrt(2), tolerance = 1e-5)
-  expect_equal(as.numeric(result[1, 5]$cpu()), pi / 4, tolerance = 1e-5)
+  expect_equal(as.numeric(result[1, 5]$cpu()), 45, tolerance = 1e-5)
 })
 
 test_that("box_xyxy_to_xyxyr accepts per-box angles", {
   box <- torch::torch_tensor(rbind(c(0, 0, 2, 2), c(0, 0, 2, 2)))
-  angles <- torch::torch_tensor(c(0, pi / 4))
+  angles <- torch::torch_tensor(c(0, 45))
   result <- box_xyxy_to_xyxyr(box, angle = angles)
 
   expect_equal(result$size(1), 2L)
   expect_equal(as.numeric(result[1, 5]$cpu()), 0, tolerance = 1e-5)
-  expect_equal(as.numeric(result[2, 5]$cpu()), pi / 4, tolerance = 1e-5)
+  expect_equal(as.numeric(result[2, 5]$cpu()), 45, tolerance = 1e-5)
 })
-
