@@ -270,8 +270,9 @@ draw_bounding_boxes.image_with_rotated_box <- function(x, ...) {
     hw <- (xmax - xmin) / 2
     hh <- (ymax - ymin) / 2
 
-    ct <- cos(theta)
-    st <- sin(theta)
+    theta_rad <- theta * pi / 180
+    ct <- cos(theta_rad)
+    st <- sin(theta_rad)
 
     corners_x <- c(
       cx - hw * ct + hh * st,
