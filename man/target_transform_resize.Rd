@@ -59,7 +59,6 @@ new_target <- transform_fn(target)
 }
 \seealso{
 Other target_transforms_detection:
-\code{\link[=item_transform_bbox_rotate]{item_transform_bbox_rotate()}},
 \code{\link[=prepare_sahi_split]{prepare_sahi_split()}}
 }
 \concept{target_transforms_detection}
