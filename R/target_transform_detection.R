@@ -233,7 +233,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' rotated_item <- ds_rotated[1]
 #' }
 #'
-#' @family target_transforms_detection
+#' @family item_unitary_transforms
 #'
 #' @export
 item_transform_bbox_rotate <- function(x, angle = 0) {
