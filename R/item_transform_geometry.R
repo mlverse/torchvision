@@ -20,15 +20,29 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Convert a single item with a rotation angle
-#' ds <- coco_detection_dataset(train = FALSE, year = "2017", download = TRUE)
-#' item <- ds[1]
-#' rotated_item <- item_transform_rotate(item, angle = 30)
-#' rotated_item$y$boxes  # (N, 5) tensor in xyxyr format
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/9/9a/Aeroflot_Airbus_A330_Kustov.jpg"
 #'
-#' # Wrap a dataset
-#' ds_rotated <- item_transform_rotate(ds, angle = 30)
-#' rotated_item <- ds_rotated[1]
+#' img <- base_loader(url) |>
+#'   transform_to_tensor() |>
+#'   transform_resize(c(300, 500))
+#'
+#' item <- list(
+#'   x = img,
+#'   y = list(
+#'     boxes = torch_tensor(matrix(c(40, 95, 475, 180), ncol = 4), dtype = torch_float32()),
+#'     labels = "airplane",
+#'     image_height = 300L,
+#'     image_width = 500L
+#'   )
+#' )
+#' class(item) <- c("image_with_bounding_box", "list")
+#'
+#' item_rot <- item_transform_rotate(item, angle = 355)
+#' item_rot$y$boxes  # (N, 5) tensor in xyxyr format
+#'
+#' before <- draw_bounding_boxes(item, colors = "blue", width = 4)
+#' after <- draw_bounding_boxes(item_rot, colors = "red", width = 4)
+#' tensor_image_browse(after)
 #' }
 #'
 #' @family item_unitary_transforms
