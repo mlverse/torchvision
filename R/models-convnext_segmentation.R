@@ -161,20 +161,14 @@ ppm_module <- torch::nn_module(
   },
   forward = function(x) {
     target_size <- x$shape[3:4]
-    ppm_outs <- vector("list", length(self$stages))
-
-    for (i in seq_along(self$stages)) {
-      ppm_out <- self$stages[[i]](x)
-      ppm_out <- torch::nnf_interpolate(
-        ppm_out,
+    lapply(as.list(self$stages), function(stage) {
+      torch::nnf_interpolate(
+        stage(x),
         size = as.integer(target_size),
         mode = "bilinear",
         align_corners = FALSE
       )
-      ppm_outs[[i]] <- ppm_out
-    }
-
-    ppm_outs
+    })
   }
 )
 

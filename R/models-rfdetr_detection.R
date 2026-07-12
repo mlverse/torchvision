@@ -1212,14 +1212,9 @@ rfdetr_model <- nn_module(
       x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
       y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
       boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(max = clamp_max)
-      detections <- vector("list", boxes_xyxy$size(1))
-      for (i in seq_len(boxes_xyxy$size(1))) {
-        detections[[i]] <- list(
-          scores = scores[i, ],
-          labels = labels[i, ],
-          boxes = boxes_xyxy[i, , ]
-        )
-      }
+      detections <- lapply(seq_len(boxes_xyxy$size(1)), function(i) {
+        list(scores = scores[i, ], labels = labels[i, ], boxes = boxes_xyxy[i, , ])
+      })
       return(list(detections = detections))
     }
     out
@@ -1259,15 +1254,9 @@ rfdetr_postprocess <- nn_module(
     x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
     y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
     boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(min = 0)
-    results <- vector("list", boxes_xyxy$size(1))
-    for (i in seq_len(boxes_xyxy$size(1))) {
-      results[[i]] <- list(
-        scores = scores[i, ],
-        labels = labels[i, ],
-        boxes = boxes_xyxy[i, , ]
-      )
-    }
-    results
+    lapply(seq_len(boxes_xyxy$size(1)), function(i) {
+      list(scores = scores[i, ], labels = labels[i, ], boxes = boxes_xyxy[i, , ])
+    })
   }
 )
 
