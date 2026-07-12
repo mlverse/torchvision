@@ -513,10 +513,7 @@ multiscale_projector <- nn_module(
   forward = function(x) {
     results <- vector("list", length(self$stages))
     for (i in seq_along(self$stages)) {
-      feat_fuse <- vector("list", length(x))
-      for (j in seq_along(x)) {
-        feat_fuse[[j]] <- self$stages_sampling[[i]][[j]](x[[j]])
-      }
+      feat_fuse <- Map(function(f, y) f(y), as.list(self$stages_sampling[[i]]), x)
       if (length(feat_fuse) > 1) {
         feat_fuse <- torch_cat(feat_fuse, dim = 2)
       } else {
@@ -663,13 +660,10 @@ rfdetr_backbone <- nn_module(
     feats <- self$encoder(x)
     feats <- self$projector(feats)
     if (!is.null(mask)) {
-      out <- vector("list", length(feats))
-      for (i in seq_along(feats)) {
-        feat <- feats[[i]]
+      lapply(feats, function(feat) {
         m <- nnf_interpolate(mask$unsqueeze(1)$float(), size = feat$shape[3:4])$to(dtype = torch_bool())[1, , ]
-        out[[i]] <- list(tensors = feat, mask = m)
-      }
-      out
+        list(tensors = feat, mask = m)
+      })
     } else {
       feats
     }
@@ -689,16 +683,10 @@ rfdetr_joiner <- nn_module(
     }
     feats <- self[["0"]](x, mask)
     if (length(feats) > 0 && is.list(feats[[1]]) && !is.null(feats[[1]]$tensors)) {
-      pos <- vector("list", length(feats))
-      for (i in seq_along(feats)) {
-        pos[[i]] <- self[["1"]](feats[[i]]$tensors, align_dim_orders = FALSE)
-      }
+      pos <- lapply(feats, function(f) self[["1"]](f$tensors, align_dim_orders = FALSE))
       list(feats, pos)
     } else {
-      pos <- vector("list", length(feats))
-      for (i in seq_along(feats)) {
-        pos[[i]] <- self[["1"]](feats[[i]], align_dim_orders = FALSE)
-      }
+      pos <- lapply(feats, function(f) self[["1"]](f, align_dim_orders = FALSE))
       list(feats, pos)
     }
   }

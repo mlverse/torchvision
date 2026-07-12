@@ -29,28 +29,25 @@ folder_make_dataset <- function(directory, class_to_idx, extensions = NULL, is_v
   }
 
   target_classes <- sort(names(class_to_idx))
-  paths <- vector("list", length(target_classes))
-  indexes <- vector("list", length(target_classes))
 
-  for (i in seq_along(target_classes)) {
+  # List the whole tree once rather than calling fs::dir_ls() per class, then
+  # assign each entry to the top-level class directory it lives under.
+  entries <- fs::dir_ls(directory, recurse = TRUE)
+  entries <- entries[is_valid_file(entries)]
 
-    target_class <- target_classes[i]
-    class_index <- class_to_idx[target_class]
-    target_dir <- fs::path_join(c(directory, target_class))
+  parts <- fs::path_split(fs::path_rel(entries, directory))
+  first <- vapply(parts, `[[`, character(1), 1L)
+  keep <- lengths(parts) >= 2L & first %in% target_classes
 
-    if (!fs::is_dir(target_dir))
-      next
+  entries <- entries[keep]
+  first <- first[keep]
 
-    fnames <- fs::dir_ls(target_dir, recurse = TRUE)
-    fnames <- fnames[is_valid_file(fnames)]
-
-    paths[[i]] <- fnames
-    indexes[[i]] <- rep(class_index, length(fnames))
-  }
+  # group by class in sorted-class order (stable within a class)
+  ord <- order(match(first, target_classes), method = "radix")
 
   list(
-    unlist(paths),
-    unlist(indexes)
+    as.character(entries[ord]),
+    unname(class_to_idx[first[ord]])
   )
 }
 
