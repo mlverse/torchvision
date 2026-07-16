@@ -96,14 +96,21 @@ test_that("item_transform_rotate does not mutate input", {
 })
 
 test_that("item_transform_rotate applies non-zero rotation angle to boxes", {
-  item <- make_item(boxes = matrix(c(100, 100, 102, 102), ncol = 4))
+  item <- make_item(boxes = matrix(c(100, 100, 102, 102), ncol = 4), image_size = c(200L, 200L))
   result <- item_transform_rotate(item, angle = 45)
 
   cx <- 101; cy <- 101
-  half_diag <- sqrt(2)
+  hw <- 1; hh <- 1
   expect_tensor_shape(result$y$boxes, c(1, 5))
   expect_tensor_dtype(result$y$boxes, torch_float())
-  expect_equal_to_r(result$y$boxes[1, 1], cx - half_diag, tolerance = 1e-5)
-  expect_equal_to_r(result$y$boxes[1, 3], cx + half_diag, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 1], cx - hw, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 3], cx + hw, tolerance = 1e-5)
   expect_equal_to_r(result$y$boxes[1, 5], 45, tolerance = 1e-5)
+
+  angle_rad <- 45 * pi / 180
+  ct <- cos(angle_rad); st <- sin(angle_rad)
+  corners_x <- c(cx - hw*ct + hh*st, cx + hw*ct + hh*st, cx + hw*ct - hh*st, cx - hw*ct - hh*st)
+  corners_y <- c(cy - hw*st - hh*ct, cy + hw*st - hh*ct, cy + hw*st + hh*ct, cy - hw*st + hh*ct)
+  expect_true(all(corners_x >= 0 & corners_x <= 200))
+  expect_true(all(corners_y >= 0 & corners_y <= 200))
 })

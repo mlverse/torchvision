@@ -97,7 +97,7 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
       cy / torch_clamp(dist_down, min = eps),
       (img_h - cy) / torch_clamp(dist_up, min = eps)
     ), dim = -1), dim = -1)[[1]]$reshape(c(-1, 1))
-    scale <- torch_clamp(scale, max = 1.0)
+    scale <- torch_clamp(scale, min = 0, max = 1.0)
 
     hw <- hw * scale
     hh <- hh * scale
