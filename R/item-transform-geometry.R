@@ -42,7 +42,8 @@
 #'
 #' before <- draw_bounding_boxes(item, colors = "blue", width = 4)
 #' after <- draw_bounding_boxes(item_rot, colors = "red", width = 4)
-#' tensor_image_browse(after)
+#' grid <- vision_make_grid(torch_stack(list(before, after)), num_rows = 1)
+#' tensor_image_browse(grid)
 #' }
 #'
 #' @family item_unitary_transforms
@@ -54,7 +55,63 @@ item_transform_rotate <- function(x, angle = 0) {
 
 #' @export
 item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
-  x$y$boxes <- box_xyxy_to_xyxyr(x$y$boxes, angle = angle)
+  img_h <- x$y$image_height
+  img_w <- x$y$image_width
+
+  orig_boxes <- x$y$boxes
+  c(x1, y1, x2, y2) %<-% orig_boxes$unbind(-1)
+  cx <- ((x1 + x2) / 2)$reshape(c(-1, 1))
+  cy <- ((y1 + y2) / 2)$reshape(c(-1, 1))
+
+  boxes <- box_xyxy_to_xyxyr(orig_boxes, angle = angle)
+
+  if (!is.null(img_h) && !is.null(img_w)) {
+    img_h <- as.numeric(img_h)
+    img_w <- as.numeric(img_w)
+
+    angle_col <- boxes[, 5]
+    angle_rad <- angle_col$reshape(c(-1, 1)) * pi / 180
+    ct <- torch_cos(angle_rad)
+    st <- torch_sin(angle_rad)
+
+    hw <- ((x2 - x1) / 2)$reshape(c(-1, 1))
+    hh <- ((y2 - y1) / 2)$reshape(c(-1, 1))
+
+    dx <- torch_cat(list(
+      -hw * ct + hh * st,
+       hw * ct + hh * st,
+       hw * ct - hh * st,
+      -hw * ct - hh * st
+    ), dim = -1)
+
+    dy <- torch_cat(list(
+      -hw * st - hh * ct,
+       hw * st - hh * ct,
+       hw * st + hh * ct,
+      -hw * st + hh * ct
+    ), dim = -1)
+
+    dist_left  <- torch_max(torch_clamp(-dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_right <- torch_max(torch_clamp(dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_down  <- torch_max(torch_clamp(-dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_up    <- torch_max(torch_clamp(dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+
+    eps <- 1e-8
+    scale <- torch_min(torch_cat(list(
+      cx / torch_clamp(dist_left, min = eps),
+      (img_w - cx) / torch_clamp(dist_right, min = eps),
+      cy / torch_clamp(dist_down, min = eps),
+      (img_h - cy) / torch_clamp(dist_up, min = eps)
+    ), dim = -1), dim = -1)[[1]]$reshape(c(-1, 1))
+    scale <- torch_clamp(scale, max = 1.0)
+
+    hw <- hw * scale
+    hh <- hh * scale
+
+    boxes <- torch_cat(list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))), dim = -1L)
+  }
+
+  x$y$boxes <- boxes
   class(x) <- c("image_with_rotated_box", setdiff(class(x), "image_with_bounding_box"))
   x
 }

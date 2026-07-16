@@ -150,6 +150,9 @@ draw_bounding_boxes.torch_tensor <- function(x,
     cli_warn("boxes doesn't contain any box. No box was drawn")
     return(x)
   }
+  if (!is.null(labels) && inherits(labels, "torch_tensor")) {
+    labels <- as.character(as.array(labels$to(device = "cpu")))
+  }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     cli_abort(
       "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
@@ -221,8 +224,24 @@ draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
 
 #' @rdname draw_bounding_boxes
 #' @export
-draw_bounding_boxes.image_with_rotated_box <- function(x, ...) {
+draw_bounding_boxes.image_with_rotated_box <- function(x,
+                                                       labels = NULL,
+                                                       colors = NULL,
+                                                       color = NULL,
+                                                       fill = FALSE,
+                                                       width = 1,
+                                                       font = c("serif", "plain"),
+                                                       font_size = 10, ...) {
   rlang::check_installed("magick")
+
+  if (!is.null(color)) {
+    if (!is.null(colors)) {
+      cli_abort("Use either {.arg colors} or {.arg color}, not both.")
+    }
+    cli_warn("{.arg color} is deprecated; use {.arg colors} instead.")
+    colors <- color
+  }
+
   boxes <- x$y$boxes
 
   img_to_draw <- if (x$x$dtype == torch::torch_uint8()) {
@@ -237,26 +256,48 @@ draw_bounding_boxes.image_with_rotated_box <- function(x, ...) {
     return(x$x)
   }
 
-  colors <- list(...)$colors
+  if (is.null(labels)) labels <- x$y$labels
+  if (!is.null(labels) && inherits(labels, "torch_tensor")) {
+    labels <- as.character(as.array(labels$to(device = "cpu")))
+  }
+  if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
+    cli_abort(
+      "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
+    )
+  }
+
   if (is.null(colors)) {
     colors <- grDevices::hcl.colors(n = num_boxes)
   }
+  if (num_boxes %% length(colors) != 0) {
+    value_error("colors vector cannot be broadcasted on boxes")
+  }
 
-  labels <- x$y$labels
-  width <- list(...)$width
-  if (is.null(width)) width <- 1
+  if (!fill) {
+    fill_col <- NA
+  } else {
+    fill_col <- colors
+  }
 
-  font <- list(...)$font
-  if (is.null(font)) font <- c("serif", "plain")
+  if (is.null(font)) {
+    vfont <- c("serif", "plain")
+  } else {
+    if (is.null(font_size)) font_size <- 10
+  }
 
-  font_size <- list(...)$font_size
-  if (is.null(font_size)) font_size <- 10
+  if (x$x$size(1) == 1) {
+    img_to_draw <- x$x$tile(c(4, 2, 2))$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+  }
 
   boxes_r <- as.matrix(boxes$to(device = "cpu"))
 
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
+
+  img_h <- dim(img_to_draw)[1]
+  img_w <- dim(img_to_draw)[2]
+  graphics::clip(0, img_w, 0, img_h)
 
   for (i in seq_len(num_boxes)) {
     xmin <- boxes_r[i, 1]
@@ -288,6 +329,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x, ...) {
     )
 
     graphics::polygon(corners_x, corners_y,
+                      col = fill_col[(i - 1) %% length(fill_col) + 1],
                       border = colors[(i - 1) %% length(colors) + 1],
                       lwd = width)
 
