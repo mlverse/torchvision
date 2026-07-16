@@ -19,9 +19,9 @@ make_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {
   item
 }
 
-test_that("item_transform_rotate converts image_with_bounding_box to image_with_rotated_box", {
+test_that("target_transform_rotate_box converts image_with_bounding_box to image_with_rotated_box", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4))
-  result <- item_transform_rotate(item, angle = 0)
+  result <- target_transform_rotate_box(item, angle = 0)
 
   expect_s3_class(result, "image_with_rotated_box")
   expect_tensor_shape(result$y$boxes, c(1, 5))
@@ -30,10 +30,10 @@ test_that("item_transform_rotate converts image_with_bounding_box to image_with_
   expect_equal_to_r(result$y$boxes[1, 5], 0)
 })
 
-test_that("item_transform_rotate does not modify the image", {
+test_that("target_transform_rotate_box does not modify the image", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4))
   original_x <- item$x$clone()
-  result <- item_transform_rotate(item, angle = 90)
+  result <- target_transform_rotate_box(item, angle = 90)
 
   expect_true(result$x$eq(original_x)$all()$item())
   expect_tensor_shape(result$y$boxes, c(1, 5))
@@ -41,53 +41,53 @@ test_that("item_transform_rotate does not modify the image", {
   expect_equal_to_r(result$y$boxes[1, 5], 90)
 })
 
-test_that("item_transform_rotate preserves labels and other target fields", {
+test_that("target_transform_rotate_box preserves labels and other target fields", {
   item <- make_item(
     boxes = matrix(c(10, 20, 50, 60, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
     labels = torch_tensor(c(1L, 2L), dtype = torch_long())
   )
   original_labels <- item$y$labels$clone()
 
-  result <- item_transform_rotate(item, angle = 0)
+  result <- target_transform_rotate_box(item, angle = 0)
 
   expect_true(result$y$labels$eq(original_labels)$all()$item())
   expect_equal(result$y$image_height, 100L)
   expect_equal(result$y$image_width, 200L)
 })
 
-test_that("item_transform_rotate handles empty boxes", {
+test_that("target_transform_rotate_box handles empty boxes", {
   item <- make_item(
     boxes = matrix(numeric(0), ncol = 4),
     labels = torch_zeros(0L, dtype = torch_long())
   )
-  result <- item_transform_rotate(item, angle = 0)
+  result <- target_transform_rotate_box(item, angle = 0)
 
   expect_s3_class(result, "image_with_rotated_box")
   expect_tensor_shape(result$y$boxes, c(0, 5))
   expect_tensor_dtype(result$y$boxes, torch_float())
 })
 
-test_that("item_transform_rotate handles multiple boxes with angle=0", {
+test_that("target_transform_rotate_box handles multiple boxes with angle=0", {
   boxes <- matrix(c(
     10, 20, 50, 60,
     100, 200, 150, 250,
     0, 0, 300, 400
   ), ncol = 4, byrow = TRUE)
   item <- make_item(boxes)
-  result <- item_transform_rotate(item, angle = 0)
+  result <- target_transform_rotate_box(item, angle = 0)
 
   expect_tensor_shape(result$y$boxes, c(3, 5))
   expect_tensor_dtype(result$y$boxes, torch_float())
   expect_equal_to_r(result$y$boxes[, 5], c(0, 0, 0))
 })
 
-test_that("item_transform_rotate does not mutate input", {
+test_that("target_transform_rotate_box does not mutate input", {
   boxes <- torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4))
   item <- make_item(boxes)
   original_boxes <- boxes$clone()
   original_x <- item$x$clone()
 
-  result <- item_transform_rotate(item, angle = 0)
+  result <- target_transform_rotate_box(item, angle = 0)
 
   expect_equal_to_r(item$y$boxes, as.array(original_boxes$cpu()))
   expect_tensor_shape(item$y$boxes, c(1, 4))
@@ -95,9 +95,9 @@ test_that("item_transform_rotate does not mutate input", {
   expect_true(item$x$eq(original_x)$all()$item())
 })
 
-test_that("item_transform_rotate applies non-zero rotation angle to boxes", {
+test_that("target_transform_rotate_box applies non-zero rotation angle to boxes", {
   item <- make_item(boxes = matrix(c(100, 100, 102, 102), ncol = 4), image_size = c(200L, 200L))
-  result <- item_transform_rotate(item, angle = 45)
+  result <- target_transform_rotate_box(item, angle = 45)
 
   cx <- 101; cy <- 101
   hw <- 1; hh <- 1

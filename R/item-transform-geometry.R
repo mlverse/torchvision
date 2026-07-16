@@ -31,7 +31,7 @@
 #' before <- list(x = img, y = list(boxes = boxes, labels = {"dog"}, image_height = 300L, image_width = 500L))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
-#' after <- item_transform_rotate(before, angle = 30)
+#' after <- target_transform_rotate_box(before, angle = 30)
 #'
 #' before_plot <- draw_bounding_boxes(before, color = "blue", width = 4)
 #' after_plot <- draw_bounding_boxes(after, color = "red", width = 4)
@@ -43,12 +43,12 @@
 #' @family item_unitary_transforms
 #'
 #' @export
-item_transform_rotate <- function(x, angle = 0) {
-  UseMethod("item_transform_rotate", x)
+target_transform_rotate_box <- function(x, angle = 0) {
+  UseMethod("target_transform_rotate_box", x)
 }
 
 #' @export
-item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
+target_transform_rotate_box.image_with_bounding_box <- function(x, angle = 0) {
   img_h <- x$y$image_height
   img_w <- x$y$image_width
 
@@ -111,11 +111,11 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
 }
 
 #' @export
-item_transform_rotate.dataset <- function(x, angle = 0) {
+target_transform_rotate_box.dataset <- function(x, angle = 0) {
   original_getitem <- x$.getitem
   x$.getitem <- function(index) {
     item <- original_getitem(index)
-    item_transform_rotate(item, angle = angle)
+    target_transform_rotate_box(item, angle = angle)
   }
   x
 }

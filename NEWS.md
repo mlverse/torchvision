@@ -12,7 +12,7 @@
 ## New features
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
-* Added `item_transform_rotate()` for rotating both images and bounding boxes by an arbitrary angle (in degrees), returning boxes in `xyxyr` format. Includes a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons. (@DerrickUnleashed, #338)
+* Added `target_transform_rotate_box()` for rotating both images and bounding boxes by an arbitrary angle (in degrees), returning boxes in `xyxyr` format. Includes a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons. (@DerrickUnleashed, #338)
 
 ## Bug fixes and improvements
 
