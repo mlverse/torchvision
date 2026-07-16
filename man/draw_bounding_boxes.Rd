@@ -27,7 +27,17 @@ draw_bounding_boxes(x, ...)
 
 \method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
 
-\method{draw_bounding_boxes}{image_with_rotated_box}(x, ...)
+\method{draw_bounding_boxes}{image_with_rotated_box}(
+  x,
+  labels = NULL,
+  colors = NULL,
+  color = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
 }
 \arguments{
 \item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.

@@ -30,29 +30,24 @@ is left unchanged. For axis-aligned boxes, \eqn{r = 0}.
 }
 \examples{
 \dontrun{
-url <- "https://upload.wikimedia.org/wikipedia/commons/9/9a/Aeroflot_Airbus_A330_Kustov.jpg"
+url <- "https://upload.wikimedia.org/wikipedia/commons/c/c6/Jumping_dog.JPG"
 
 img <- base_loader(url) |>
   transform_to_tensor() |>
   transform_resize(c(300, 500))
 
-item <- list(
-  x = img,
-  y = list(
-    boxes = torch_tensor(matrix(c(40, 95, 475, 180), ncol = 4), dtype = torch_float32()),
-    labels = "airplane",
-    image_height = 300L,
-    image_width = 500L
-  )
-)
-class(item) <- c("image_with_bounding_box", "list")
+boxes <- torch_tensor(matrix(c(90, 25, 450, 290), ncol = 4), dtype = torch_float32())
 
-item_rot <- item_transform_rotate(item, angle = 355)
-item_rot$y$boxes  # (N, 5) tensor in xyxyr format
+before <- list(x = img, y = list(boxes = boxes, labels = {"dog"}, image_height = 300L, image_width = 500L))
+class(before) <- c("image_with_bounding_box", "list")
 
-before <- draw_bounding_boxes(item, colors = "blue", width = 4)
-after <- draw_bounding_boxes(item_rot, colors = "red", width = 4)
-tensor_image_browse(after)
+after <- item_transform_rotate(before, angle = 30)
+
+before_plot <- draw_bounding_boxes(before, color = "blue", width = 4)
+after_plot <- draw_bounding_boxes(after, color = "red", width = 4)
+
+grid <- vision_make_grid(torch_stack(list(before_plot, after_plot))$to(torch_float32()), scale = TRUE)
+tensor_image_browse(grid)
 }
 
 }
