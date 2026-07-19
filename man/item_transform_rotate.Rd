@@ -7,18 +7,25 @@
 item_transform_rotate(x, angle = 0)
 }
 \arguments{
-\item{x}{A torch tensor of shape \code{(C, H, W)}.}
+\item{x}{A torch tensor of shape \code{(C, H, W)}, or an
+\code{image_with_bounding_box} object.}
 
 \item{angle}{(numeric): Rotation angle in degrees (counter-clockwise).
 Default is \code{0}.}
 }
 \value{
-The rotated image tensor with expanded resolution.
+The rotated image tensor with expanded resolution, or an
+\code{image_with_rotated_box} object when the input is
+\code{image_with_bounding_box}.
 }
 \description{
 Rotates an image by a given angle around its center. The canvas is expanded
 so that the entire rotated image is visible with no cropping. Empty regions
 are filled with black.
+}
+\details{
+When passed an \code{image_with_bounding_box} object, the bounding boxes are
+also rotated via an internal call to \code{\link{target_transform_rotate_box}}.
 }
 \examples{
 \dontrun{

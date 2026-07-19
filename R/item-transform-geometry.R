@@ -4,11 +4,17 @@
 #' so that the entire rotated image is visible with no cropping. Empty regions
 #' are filled with black.
 #'
-#' @param x A torch tensor of shape \code{(C, H, W)}.
+#' When passed an \code{image_with_bounding_box} object, the bounding boxes are
+#' also rotated via an internal call to \code{\link{target_transform_rotate_box}}.
+#'
+#' @param x A torch tensor of shape \code{(C, H, W)}, or an
+#'   \code{image_with_bounding_box} object.
 #' @param angle (numeric): Rotation angle in degrees (counter-clockwise).
 #'   Default is \code{0}.
 #'
-#' @return The rotated image tensor with expanded resolution.
+#' @return The rotated image tensor with expanded resolution, or an
+#'   \code{image_with_rotated_box} object when the input is
+#'   \code{image_with_bounding_box}.
 #'
 #' @examples
 #' \dontrun{
@@ -30,7 +36,43 @@
 #' @importFrom torch nnf_affine_grid nnf_grid_sample
 #' @export
 item_transform_rotate <- function(x, angle = 0) {
-  img <- x
+  UseMethod("item_transform_rotate", x)
+}
+
+#' @export
+item_transform_rotate.torch_tensor <- function(x, angle = 0) {
+  rotate_image_tensor(x, angle)
+}
+
+#' @export
+item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
+  orig_h <- as.numeric(x$y$image_height)
+  orig_w <- as.numeric(x$y$image_width)
+
+  rotated_img <- rotate_image_tensor(x$x, angle)
+  new_h <- as.integer(rotated_img$shape[2])
+  new_w <- as.integer(rotated_img$shape[3])
+
+  dx <- (new_w - orig_w) / 2
+  dy <- (new_h - orig_h) / 2
+
+  shifted_boxes <- x$y$boxes$clone()
+  if (shifted_boxes$size(1) > 0) {
+    shifted_boxes[, 1] <- shifted_boxes[, 1] + dx
+    shifted_boxes[, 3] <- shifted_boxes[, 3] + dx
+    shifted_boxes[, 2] <- shifted_boxes[, 2] + dy
+    shifted_boxes[, 4] <- shifted_boxes[, 4] + dy
+  }
+
+  x$x <- rotated_img
+  x$y$boxes <- shifted_boxes
+  x$y$image_height <- new_h
+  x$y$image_width <- new_w
+
+  target_transform_rotate_box(x, angle = angle)
+}
+
+rotate_image_tensor <- function(img, angle) {
   if (img$ndim == 3) img <- img$unsqueeze(1)
 
   img_shape <- img$shape
