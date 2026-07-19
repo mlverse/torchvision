@@ -30,21 +30,20 @@ is left unchanged. For axis-aligned boxes, \eqn{r = 0}.
 }
 \examples{
 \dontrun{
-url <- "https://upload.wikimedia.org/wikipedia/commons/c/c6/Jumping_dog.JPG"
+url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
 
 img <- base_loader(url) |>
-  transform_to_tensor() |>
-  transform_resize(c(300, 500))
+  transform_to_tensor()
 
-boxes <- torch_tensor(matrix(c(90, 25, 450, 290), ncol = 4), dtype = torch_float32())
+boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"dog"}, image_height = 300L, image_width = 500L))
+before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
 class(before) <- c("image_with_bounding_box", "list")
 
-after <- target_transform_rotate_box(before, angle = 30)
+after <- target_transform_rotate_box(before, angle = 4)
 
-before_plot <- draw_bounding_boxes(before, color = "blue", width = 4)
-after_plot <- draw_bounding_boxes(after, color = "red", width = 4)
+before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 40)
+after_plot <- draw_bounding_boxes(after, colors = {"red"}, width = 40)
 
 grid <- vision_make_grid(torch_stack(list(before_plot, after_plot))$to(torch_float32()), scale = TRUE)
 tensor_image_browse(grid)
