@@ -51,4 +51,8 @@ tensor_image_browse(grid)
 }
 
 }
+\seealso{
+Other item_unitary_transforms:
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}
+}
 \concept{item_unitary_transforms}
