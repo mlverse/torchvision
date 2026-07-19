@@ -46,8 +46,8 @@ item_transform_rotate.torch_tensor <- function(x, angle = 0) {
 
 #' @export
 item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
-  orig_h <- as.numeric(x$y$image_height)
-  orig_w <- as.numeric(x$y$image_width)
+  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
+  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
 
   rotated_img <- rotate_image_tensor(x$x, angle)
   new_h <- as.integer(rotated_img$shape[2])
