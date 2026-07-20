@@ -253,7 +253,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
   if (num_boxes %% length(colors) != 0) {
     cli_abort(
       "Number of colors {.val {length(colors)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
-    )```
+    )
   }
 
   if (!fill) {
