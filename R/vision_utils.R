@@ -258,7 +258,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
 
   if (is.null(labels)) labels <- x$y$labels
   if (!is.null(labels) && inherits(labels, "torch_tensor")) {
-    labels <- as.character(as.array(labels$to(device = "cpu")))
+    labels <- as.character(as_array(labels$to(device = "cpu")))
   }
   if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
     cli_abort(
