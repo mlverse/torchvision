@@ -103,6 +103,7 @@
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/nms.html">nms()</a></code> now uses <code><a href="https://rdrr.io/pkg/torchvisionlib/man/ops_nms.html" class="external-link">torchvisionlib::ops_nms()</a></code> when torchvisionlib is installed, speeding up inference for <code>model_fasterrcnn_*()</code> and <code>model_maskrcnn_*()</code> (<a href="https://github.com/mlverse/torchvision/issues/321" class="external-link">#321</a>, <a href="https://github.com/mlverse/torchvision/issues/322" class="external-link">#322</a>).</li>
+<li>Lists and vectors that are filled in a loop are now preallocated to their target size instead of being grown one element at a time (<a href="https://github.com/srishtiii28" class="external-link">@srishtiii28</a>, <a href="https://github.com/mlverse/torchvision/issues/335" class="external-link">#335</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-development-version-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-development-version-1"></a></h3>
