@@ -2,7 +2,7 @@
 % Please edit documentation in R/item-transform-geometry.R
 \name{item_transform_rotate}
 \alias{item_transform_rotate}
-\title{Rotate image}
+\title{Rotate dataset item}
 \usage{
 item_transform_rotate(x, angle = 0)
 }

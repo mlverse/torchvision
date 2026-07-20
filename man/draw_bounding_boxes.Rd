@@ -17,7 +17,6 @@ draw_bounding_boxes(x, ...)
   boxes,
   labels = NULL,
   colors = NULL,
-  color = NULL,
   fill = FALSE,
   width = 1,
   font = c("serif", "plain"),
@@ -31,7 +30,6 @@ draw_bounding_boxes(x, ...)
   x,
   labels = NULL,
   colors = NULL,
-  color = NULL,
   fill = FALSE,
   width = 1,
   font = c("serif", "plain"),
@@ -57,8 +55,6 @@ to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
 \item{colors}{character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
-
-\item{color}{Deprecated alias for \code{colors}.}
 
 \item{fill}{If \code{TRUE} fills the bounding box with specified color.}
 
