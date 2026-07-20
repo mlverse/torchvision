@@ -247,7 +247,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
   img_to_draw <- if (x$x$dtype == torch::torch_uint8()) {
     x$x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else if (x$x$dtype == torch::torch_float()) {
-    x$x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
+    x$x$permute(c(2, 3, 1))$to(device = "cpu") %>% as_array()
   } else type_error("`x$x` should be torch_uint8 or torch_float")
 
   num_boxes <- boxes$shape[1]
