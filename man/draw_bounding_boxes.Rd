@@ -38,8 +38,9 @@ draw_bounding_boxes(x, ...)
 )
 }
 \arguments{
-\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+\item{x}{A torch_tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float},
+an \code{image_with_bounding_box}, or an \code{image_with_rotated_box} object.
+In case of a tensor with dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
 
 \item{...}{Additional arguments passed to methods.}

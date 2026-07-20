@@ -66,8 +66,9 @@ vision_make_grid <- function(tensor,
 #'
 #' Draws bounding boxes on top of one image tensor
 #'
-#' @param x Tensor of shape (C x H x W) and dtype `uint8` or dtype `float`.
-#'              In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+#' @param x A torch_tensor of shape (C x H x W) and dtype `uint8` or dtype `float`,
+#'              an `image_with_bounding_box`, or an `image_with_rotated_box` object.
+#'              In case of a tensor with dtype float, values are assumed to be in range \eqn{[0, 1]}.
 #'              C value for channel can only be 1 (grayscale) or 3 (RGB).
 #' @param boxes Tensor of size (N, 4) containing N bounding boxes in
 #'            c(\eqn{x_{min}}, \eqn{y_{min}}, \eqn{x_{max}}, \eqn{y_{max}}).
