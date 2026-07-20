@@ -1,4 +1,4 @@
-#' Rotate image
+#' Rotate dataset item
 #'
 #' Rotates an image by a given angle around its center. The canvas is expanded
 #' so that the entire rotated image is visible with no cropping. Empty regions
