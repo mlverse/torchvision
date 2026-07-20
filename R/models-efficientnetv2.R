@@ -88,17 +88,17 @@ efficientnet_v2 <- torch::nn_module(
     if (is.null(norm_layer))
       norm_layer <- torch::nn_batch_norm2d
 
-    features <- list(
-      conv_norm_act(3, firstconv_out, stride = 2,
-                    norm_layer = norm_layer, activation_layer = torch::nn_silu)
-    )
+    features <- vector("list", length(cfgs) + 1)
+    features[[1]] <- conv_norm_act(3, firstconv_out, stride = 2,
+                                   norm_layer = norm_layer, activation_layer = torch::nn_silu)
     in_channels <- firstconv_out
 
-    for (cfg in cfgs) {
+    for (cfg_idx in seq_along(cfgs)) {
+      cfg <- cfgs[[cfg_idx]]
       oc <- cfg$channels
       r <- cfg$repeats
       block_fn <- if (identical(cfg$block, "fused")) fused_mbconv_block else mbconv_block
-      stage_blocks <- list()
+      stage_blocks <- vector("list", r)
       for (i in seq_len(r)) {
         s <- ifelse(i == 1, cfg$stride, 1)
         if (identical(cfg$block, "fused")) {
@@ -115,7 +115,7 @@ efficientnet_v2 <- torch::nn_module(
         }
         in_channels <- oc
       }
-      features[[length(features) + 1]] <- torch::nn_sequential(!!!stage_blocks)
+      features[[cfg_idx + 1]] <- torch::nn_sequential(!!!stage_blocks)
     }
 
     final_channels <- 1280

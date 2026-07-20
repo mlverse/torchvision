@@ -16,6 +16,7 @@
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
+* Lists and vectors that are filled in a loop are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 
 ## New Features
 

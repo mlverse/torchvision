@@ -142,12 +142,6 @@ mobilenet_v3_large_impl <- torch::nn_module(
 
     activation <- nn_hardswish
 
-    layers <- list()
-    layers[[length(layers) + 1]] <- conv_norm_act_v3(3, 16, stride = 2,
-                                                     norm_layer = norm_layer,
-                                                     activation_layer = activation)
-    input_channel <- 16
-
     cfgs <- list(
       list(3, 16, 16, FALSE, torch::nn_relu, 1),
       list(3, 64, 24, FALSE, torch::nn_relu, 2),
@@ -166,17 +160,24 @@ mobilenet_v3_large_impl <- torch::nn_module(
       list(5, 960, 160, TRUE, activation, 1)
     )
 
-    for (cfg in cfgs) {
+    layers <- vector("list", length(cfgs) + 2)
+    layers[[1]] <- conv_norm_act_v3(3, 16, stride = 2,
+                                    norm_layer = norm_layer,
+                                    activation_layer = activation)
+    input_channel <- 16
+
+    for (i in seq_along(cfgs)) {
+      cfg <- cfgs[[i]]
       k <- cfg[[1]]; exp <- cfg[[2]]; c <- cfg[[3]]; se <- cfg[[4]];
       nl <- cfg[[5]]; s <- cfg[[6]]
-      layers[[length(layers) + 1]] <- inverted_residual_v3(
+      layers[[i + 1]] <- inverted_residual_v3(
         input_channel, exp, c, kernel_size = k, stride = s, use_se = se,
         activation_layer = nl, norm_layer = norm_layer
       )
       input_channel <- c
     }
 
-    layers[[length(layers) + 1]] <- conv_norm_act_v3(
+    layers[[length(cfgs) + 2]] <- conv_norm_act_v3(
       input_channel, 960, kernel_size = 1,
       norm_layer = norm_layer, activation_layer = activation
     )

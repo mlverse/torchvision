@@ -477,10 +477,10 @@ multiscale_projector <- nn_module(
   initialize = function(in_channels, out_channels, scale_factors, num_blocks = 3,
                         layer_norm = FALSE) {
     self$scale_factors <- scale_factors
-    stages_sampling <- list()
+    stages_sampling <- vector("list", length(scale_factors))
     for (i in seq_along(scale_factors)) {
       scale <- scale_factors[i]
-      level_modules <- list()
+      level_modules <- vector("list", length(in_channels))
       for (j in seq_along(in_channels)) {
         in_dim <- in_channels[j]
         if (scale == 1.0) {
@@ -511,18 +511,15 @@ multiscale_projector <- nn_module(
     }
   },
   forward = function(x) {
-    results <- list()
+    results <- vector("list", length(self$stages))
     for (i in seq_along(self$stages)) {
-      feat_fuse <- list()
-      for (j in seq_along(x)) {
-        feat_fuse[[length(feat_fuse) + 1]] <- self$stages_sampling[[i]][[j]](x[[j]])
-      }
+      feat_fuse <- Map(function(f, y) f(y), as.list(self$stages_sampling[[i]]), x)
       if (length(feat_fuse) > 1) {
         feat_fuse <- torch_cat(feat_fuse, dim = 2)
       } else {
         feat_fuse <- feat_fuse[[1]]
       }
-      results[[length(results) + 1]] <- self$stages[[i]](feat_fuse)
+      results[[i]] <- self$stages[[i]](feat_fuse)
     }
     results
   }
@@ -663,12 +660,10 @@ rfdetr_backbone <- nn_module(
     feats <- self$encoder(x)
     feats <- self$projector(feats)
     if (!is.null(mask)) {
-      out <- list()
-      for (feat in feats) {
+      lapply(feats, function(feat) {
         m <- nnf_interpolate(mask$unsqueeze(1)$float(), size = feat$shape[3:4])$to(dtype = torch_bool())[1, , ]
-        out[[length(out) + 1]] <- list(tensors = feat, mask = m)
-      }
-      out
+        list(tensors = feat, mask = m)
+      })
     } else {
       feats
     }
@@ -688,16 +683,10 @@ rfdetr_joiner <- nn_module(
     }
     feats <- self[["0"]](x, mask)
     if (length(feats) > 0 && is.list(feats[[1]]) && !is.null(feats[[1]]$tensors)) {
-      pos <- list()
-      for (i in seq_along(feats)) {
-        pos[[i]] <- self[["1"]](feats[[i]]$tensors, align_dim_orders = FALSE)
-      }
+      pos <- lapply(feats, function(f) self[["1"]](f$tensors, align_dim_orders = FALSE))
       list(feats, pos)
     } else {
-      pos <- list()
-      for (feat in feats) {
-        pos[[length(pos) + 1]] <- self[["1"]](feat, align_dim_orders = FALSE)
-      }
+      pos <- lapply(feats, function(f) self[["1"]](f, align_dim_orders = FALSE))
       list(feats, pos)
     }
   }
@@ -729,7 +718,7 @@ gen_sineembed_for_position <- function(pos_tensor, dim = 128) {
 }
 
 gen_encoder_output_proposals <- function(memory, memory_padding_mask, spatial_shapes, unsigmoid = TRUE) {
-  proposals <- list()
+  proposals <- vector("list", nrow(spatial_shapes))
   cur <- 1
   for (lvl in seq_len(nrow(spatial_shapes))) {
     h <- as.integer(spatial_shapes[lvl, 1])
@@ -864,7 +853,7 @@ rfdetr_decoder <- nn_module(
                      refpoints_unsigmoid = NULL, level_start_index = NULL,
                      spatial_shapes = NULL, valid_ratios = NULL) {
     output <- tgt
-    intermediate <- list()
+    intermediate <- vector("list", self$num_layers)
     hs_refpoints <- list(refpoints_unsigmoid)
     d_model_half <- as.integer(memory$size(3) / 2)
     if (self$lite_refpoint_refine) {
@@ -955,10 +944,10 @@ rfdetr_transformer <- nn_module(
     torch_stack(list(valid_ratio_w, valid_ratio_h), dim = -1)
   },
   forward = function(srcs, masks, pos_embeds, refpoint_embed, query_feat) {
-    src_flatten <- list()
-    mask_flatten <- list()
-    lvl_pos_embed_flatten <- list()
-    spatial_shapes <- list()
+    src_flatten <- vector("list", length(srcs))
+    mask_flatten <- vector("list", length(srcs))
+    lvl_pos_embed_flatten <- vector("list", length(srcs))
+    spatial_shapes <- vector("list", length(srcs))
     for (lvl in seq_along(srcs)) {
       src <- srcs[[lvl]]
       c <- src$size(2)
@@ -1005,10 +994,10 @@ rfdetr_transformer <- nn_module(
       )
       output_memory <- proposals[[1]]
       output_proposals <- proposals[[2]]
-      refpoint_embed_ts <- list()
-      memory_ts <- list()
-      boxes_ts <- list()
       gd <- if (self$training) self$group_detr else 1
+      refpoint_embed_ts <- vector("list", gd)
+      memory_ts <- vector("list", gd)
+      boxes_ts <- vector("list", gd)
       for (g_idx in seq_len(gd)) {
         om <- self$enc_output_norm[[g_idx]](self$enc_output[[g_idx]](output_memory))
         cls_enc_g <- self$enc_out_class_embed[[g_idx]](om)
@@ -1125,13 +1114,14 @@ rfdetr_model <- nn_module(
     backbone_out <- self$backbone(x, mask)
     features <- backbone_out[[1]]
     poss <- backbone_out[[2]]
-    srcs <- list()
-    masks <- list()
-    for (feat in features) {
-      srcs[[length(srcs) + 1]] <- feat
+    srcs <- vector("list", length(features))
+    masks <- if (is.null(mask)) list() else vector("list", length(features))
+    for (i in seq_along(features)) {
+      feat <- features[[i]]
+      srcs[[i]] <- feat
       if (!is.null(mask)) {
         m <- nnf_interpolate(mask$unsqueeze(1)$float(), size = feat$shape[3:4])$squeeze(1)$to(dtype = torch_bool())
-        masks[[length(masks) + 1]] <- m
+        masks[[i]] <- m
       }
     }
     refpoint_embed_weight <- self$refpoint_embed$weight
@@ -1162,7 +1152,7 @@ rfdetr_model <- nn_module(
       out$pred_logits <- outputs_class[hs$size(1), , , ]
       out$pred_boxes <- outputs_coord[hs$size(1), , , ]
       if (self$aux_loss) {
-        aux <- list()
+        aux <- vector("list", hs$size(1) - 1)
         for (i in seq_len(hs$size(1) - 1)) {
           aux[[i]] <- list(
             pred_logits = outputs_class[i, , , ],
@@ -1175,7 +1165,7 @@ rfdetr_model <- nn_module(
     if (self$two_stage) {
       gd <- if (self$training) self$group_detr else 1
       hs_enc_list <- hs_enc$split(hs_enc$size(2) %/% gd, dim = 2)
-      cls_enc_list <- list()
+      cls_enc_list <- vector("list", gd)
       for (g_idx in seq_len(gd)) {
         cls_enc_list[[g_idx]] <- self$transformer$enc_out_class_embed[[g_idx]](hs_enc_list[[g_idx]])
       }
@@ -1222,14 +1212,9 @@ rfdetr_model <- nn_module(
       x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
       y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
       boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(max = clamp_max)
-      detections <- list()
-      for (i in seq_len(boxes_xyxy$size(1))) {
-        detections[[i]] <- list(
-          scores = scores[i, ],
-          labels = labels[i, ],
-          boxes = boxes_xyxy[i, , ]
-        )
-      }
+      detections <- lapply(seq_len(boxes_xyxy$size(1)), function(i) {
+        list(scores = scores[i, ], labels = labels[i, ], boxes = boxes_xyxy[i, , ])
+      })
       return(list(detections = detections))
     }
     out
@@ -1269,15 +1254,9 @@ rfdetr_postprocess <- nn_module(
     x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
     y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
     boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(min = 0)
-    results <- list()
-    for (i in seq_len(boxes_xyxy$size(1))) {
-      results[[i]] <- list(
-        scores = scores[i, ],
-        labels = labels[i, ],
-        boxes = boxes_xyxy[i, , ]
-      )
-    }
-    results
+    lapply(seq_len(boxes_xyxy$size(1)), function(i) {
+      list(scores = scores[i, ], labels = labels[i, ], boxes = boxes_xyxy[i, , ])
+    })
   }
 )
 

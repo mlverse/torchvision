@@ -26,7 +26,7 @@ lw_detr_gen_sineembed <- function(pos, dim = 128L) {
   dim_t <- torch_arange(dim, dtype = torch_float32(), device = pos$device)
   dim_t <- 10000^(2 * torch_div(dim_t, 2L, rounding_mode = "floor") / dim)
 
-  coords <- list()
+  coords <- vector("list", pos$size(-1))
   for (c_idx in seq_len(pos$size(-1))) {
     v <- pos[,, c_idx] * scale
     pe <- v$unsqueeze(3) / dim_t
@@ -46,7 +46,7 @@ lw_detr_gen_sineembed <- function(pos, dim = 128L) {
 # `masks` is a list of (B, H_l, W_l) logical tensors (TRUE = valid pixel); the
 # proposal centres are normalised by the valid extent so padding is ignored.
 lw_detr_gen_proposals <- function(spatial_shapes, masks, bs, device) {
-  proposals <- list()
+  proposals <- vector("list", nrow(spatial_shapes))
   for (lvl in seq_len(nrow(spatial_shapes))) {
     h_l <- as.integer(spatial_shapes[lvl, 1])
     w_l <- as.integer(spatial_shapes[lvl, 2])
@@ -376,7 +376,7 @@ detr_ms_deform_attn <- nn_module(
         offsets / np * ref_wh$unsqueeze(3L)$unsqueeze(5L) * 0.5
     }
 
-    val_split <- list()
+    val_split <- vector("list", nl)
     for (lvl in seq_len(nl)) {
       h_l <- as.integer(spatial_shapes[lvl, 1])
       w_l <- as.integer(spatial_shapes[lvl, 2])
@@ -389,7 +389,7 @@ detr_ms_deform_attn <- nn_module(
 
     sampling_grids <- 2 * sampling_locs - 1
 
-    out_list <- list()
+    out_list <- vector("list", nl)
     for (lvl in seq_len(nl)) {
       grid_l <- sampling_grids[,,, lvl, , ]
       grid_l <- grid_l$permute(c(1L, 3L, 2L, 4L, 5L))

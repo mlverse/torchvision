@@ -161,7 +161,7 @@ aspp_module <- torch::nn_module(
   },
   forward = function(x) {
     input_size <- x$shape[3:4]  # Get height and width dimensions
-    res <- list()
+    res <- vector("list", length(self$convs))
 
     for (i in 1:(length(self$convs) - 1)) {
       res[[i]] <- self$convs[[i]](x)
@@ -170,7 +170,7 @@ aspp_module <- torch::nn_module(
     global_feat <- self$convs[[length(self$convs)]](x)
     target_size <- as.integer(input_size)
     global_feat <- nnf_interpolate(global_feat, size = target_size, mode = "bilinear", align_corners = FALSE)
-    res[[length(res) + 1]] <- global_feat
+    res[[length(res)]] <- global_feat
 
     x <- torch_cat(res, dim = 2)
     self$project(x)
