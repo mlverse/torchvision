@@ -252,7 +252,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
 
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
-    cli_warn("boxes doesn't contain any box. No box was drawn")
+    cli_warn("{.var x$y$boxes} doesn't contain any box. No box was drawn")
     return(x$x)
   }
 
