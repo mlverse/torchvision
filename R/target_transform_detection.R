@@ -236,7 +236,10 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 40)
 #' after_plot <- draw_bounding_boxes(after, colors = {"red"}, width = 40)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot))$to(torch_float32()), scale = TRUE)
+#' grid <- vision_make_grid(
+#'   torch_stack(list(before_plot, after_plot))$to(torch_float32()),
+#'   scale = TRUE
+#' )
 #' tensor_image_browse(grid)
 #' }
 #'
