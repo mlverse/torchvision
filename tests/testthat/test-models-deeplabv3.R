@@ -71,10 +71,10 @@ test_that("pretrained requires num_classes to be \'21\'", {
   )
 })
 
-test_that("model_deeplabv3_resnet50 detects cat in Wikipedia image", {
+test_that("model_deeplabv3_resnet50 detects aeroplane in Wikipedia image", {
 
-  img_url <- "https://upload.wikimedia.org/wikipedia/commons/3/36/United_Airlines_Boeing_777-200_Meulemans.jpg"
-  img <- magick::image_read(img_url)
+  # attribution to https://upload.wikimedia.org/wikipedia/commons/f/fa/America%E2%80%99s_Airfield_serves_as_hub_for_the_2024_NATO_Summit_%288526396%29.jpg
+  img <- magick::image_read("assets/class/aircraft/2024_nato_summit.jpeg")
 
   norm_mean <- c(0.485, 0.456, 0.406)
   norm_std <- c(0.229, 0.224, 0.225)
