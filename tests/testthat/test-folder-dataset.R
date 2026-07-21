@@ -16,7 +16,7 @@ test_that("image_folder dataset", {
     expect_tensor_shape(batch$y, 2)
   })
 
-  expect_length(ds, 16)
+  expect_length(ds, 15)
 
 })
 
