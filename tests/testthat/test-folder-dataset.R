@@ -2,6 +2,7 @@ test_that("image_folder dataset", {
 
   ds <- image_folder_dataset(
     root = "assets/class",
+    is_valid_file = \(x) has_file_allowed_extension(x, c('jpg', 'jpeg', 'png', 'tif')),
     transform = . %>% transform_to_tensor %>%
       transform_resize(c(32,32))
   )

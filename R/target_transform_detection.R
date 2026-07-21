@@ -51,7 +51,7 @@
 #' @export
 target_transform_resize <- function(target, size) {
   if (!"image_height" %in% names(target) || !"image_width" %in% names(target)) {
-    cli::cli_abort("Target must contain both 'image_height' and 'image_width' field")
+    cli::cli_abort("Target must contain both 'image_height' and 'image_width' fields")
   }
   # Extract original dimensions
   orig_h <- target$image_height
