@@ -28,7 +28,7 @@ target_transform_coco_masks <- function(y) {
     cli::cli_abort("Target must contain 'segmentation' field")
   }
   if (!all(c("image_height", "image_width") %in% names(y))) {
-    cli::cli_abort("Target must contain 'image_height' and 'image_width' fields")
+    cli::cli_abort("Target must contain both 'image_height' and 'image_width' fields")
   }
 
   masks_list <- lapply(y$segmentation, function(seg) {

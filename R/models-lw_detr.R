@@ -825,7 +825,7 @@ lw_detr_model <- nn_module(
       })
       .lw_detr_scale_layer(total_in, out_channels, n_blocks, sampling_ops = ops)
     } else {
-      stop(paste("Unsupported projector scale:", scale))
+      cli_abort("Unsupported projector scale: {scale}")
     }
   })
 }
