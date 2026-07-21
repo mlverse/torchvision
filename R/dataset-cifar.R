@@ -2,7 +2,7 @@
 #'
 #' The CIFAR datasets are benchmark **classification** datasets composed of
 #' 60,000 RGB thumbnail images of size 32x32 pixels. The
-#' [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) variant contains
+#' [CIFAR10](https://cave.cs.toronto.edu/kriz/cifar.html) variant contains
 #' 10 classes while CIFAR100 provides 100 classes. Images are split into
 #' 50,000 training samples and 10,000 test samples.
 #'
@@ -29,12 +29,12 @@
 #' @export
 cifar10_dataset <- torch::dataset(
   name = "cifar10_dataset",
-  url = "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
+  url = "https://cave.cs.toronto.edu/kriz/cifar-10-binary.tar.gz",
   md5 = "c32a1d4ab5d03f1284b67883e8d87530",
   fname = "cifar-10-batches-bin",
   type = 10,
   label_fname = "batches.meta.txt",
-  archive_size = "160 MB",
+  archive_size = "162 MB",
   initialize = function(
     root = tempdir(),
     train = TRUE,
@@ -157,19 +157,19 @@ cifar10_dataset <- torch::dataset(
 #' CIFAR100 dataset
 #'
 #' Downloads and prepares the
-#' [CIFAR100](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.
+#' [CIFAR100](https://cave.cs.toronto.edu/kriz/cifar.html) dataset.
 #'
 #' @rdname cifar_datasets
 #' @export
 cifar100_dataset <- torch::dataset(
   name = "cifar100_dataset",
   inherit = cifar10_dataset,
-  url = "https://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz",
+  url = "https://cave.cs.toronto.edu/kriz/cifar-100-binary.tar.gz",
   md5 = "03b5dce01913d631647c71ecec9e9cb8",
   fname = "cifar-100-binary",
   type = 100,
   label_fname = "fine_label_names.txt",
-  archive_size = "160 MB"
+  archive_size = "162 MB"
 )
 
 read_batch <- function(path, type = 10) {
