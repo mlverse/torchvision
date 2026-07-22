@@ -35,17 +35,30 @@ For axis-aligned boxes, \eqn{r = 0}.
 }
 \examples{
 \dontrun{
+url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
+img <- base_loader(url) |> transform_to_tensor()
+
 boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
 
+# Original boxes (blue, axis-aligned)
+before_plot <- draw_bounding_boxes(img, boxes = boxes, colors = "blue", width = 10)
+
+# Transform boxes to xyxyr with 4 degree rotation
 target <- list(
   boxes = boxes,
-  labels = torch_tensor(1L),
-  image_height = 4000L,
-  image_width = 3000L
+  image_height = img$shape[2],
+  image_width = img$shape[3]
 )
-
 rotated_target <- target_transform_rotate_box(target, angle = 4)
-rotated_target$boxes
+
+# Rotated boxes (red, drawn as polygons)
+after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
+
+grid <- vision_make_grid(
+  torch_stack(list(before_plot, after_plot))$to(torch_float32()),
+  scale = TRUE
+)
+tensor_image_browse(grid)
 }
 
 }
