@@ -2,29 +2,37 @@
 % Please edit documentation in R/target_transform_detection.R
 \name{target_transform_rotate_box}
 \alias{target_transform_rotate_box}
+\alias{target_transform_rotate_box.dataset}
 \title{Convert bounding boxes to rotated format}
 \usage{
 target_transform_rotate_box(target, angle = 0)
+
+\method{target_transform_rotate_box}{dataset}(target, angle = 0)
 }
 \arguments{
 \item{target}{A list representing the detection target, containing at least:
 \itemize{
-\item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format
-\item \code{image_height} (optional) — original image height, used for
-clamping boxes to remain within image bounds
-\item \code{image_width} (optional) — original image width, used for
-clamping boxes to remain within image bounds
-\item Other fields (labels, etc.) are preserved unchanged
-}}
+  \item \code{boxes} — tensor of shape \code{(N, 4)} with bounding boxes in xyxy format
+  \item \code{image_height} (optional) — original image height, used for
+    clamping boxes to remain within image bounds
+  \item \code{image_width} (optional) — original image width, used for
+    clamping boxes to remain within image bounds
+  \item Other fields (labels, etc.) are preserved unchanged
+}
+
+For the \code{dataset} method, a dataset object whose \code{.getitem} returns
+items with a \code{$y} target list.}
 
 \item{angle}{(numeric): Rotation angle in degrees (counter-clockwise).
 Default is \code{0}.}
 }
 \value{
 A list with the same structure as the input target, where
-\code{boxes} is a tensor of shape \verb{(N, 5)} in xyxyr format.
-When applied to a dataset, returns the same dataset with its
-\code{.getitem} method modified to return rotated-box targets.
+\code{boxes} is a tensor of shape \code{(N, 5)} in xyxyr format.
+
+For the \code{dataset} method, returns the same dataset with its
+\code{.getitem} method modified to apply the box rotation on the
+\code{$y} target of each item.
 }
 \description{
 Converts bounding boxes of a detection target from

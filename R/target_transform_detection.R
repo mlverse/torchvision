@@ -316,6 +316,7 @@ target_transform_rotate_box <- function(target, angle = 0) {
   target
 }
 
+#' @rdname target_transform_rotate_box
 #' @export
 target_transform_rotate_box.dataset <- function(target, angle = 0) {
   original_getitem <- target$.getitem
