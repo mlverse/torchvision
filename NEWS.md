@@ -2,8 +2,10 @@
 
 ## New models
 
-* Added RF-DETR (Nano, Small, Medium, Base, Base-v2, Base-O365, Large) object detection models with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
-* Added `model_lw_detr_tiny()`, `model_lw_detr_small()`, `model_lw_detr_medium()` and `model_lw_detr_large()` for real-time object detection (@srishtiii28, #328).
+* Added RF-DETR model family : `model_rfdetr_*`, with `*` being `nano()` `small()`, `medium()`, `base()`, `base_2()`, `base_o365()` and `large()`
+  for real-time object detection with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
+* Added LW-DETR model family : `model_lw_detr_*`, with `*` being `tiny()` `small()`, `medium()` and `large()` 
+  for real-time object detection with ViT backbone and deformable-attention decoder (@srishtiii28, #328).
 
 ## New datasets
 
@@ -16,7 +18,7 @@
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
-* Lists and vectors that are filled in a loop are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
+* Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 
 ## New Features
 

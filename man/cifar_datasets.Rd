@@ -43,12 +43,12 @@ A torch::dataset object. Each item is a list with:
 \description{
 The CIFAR datasets are benchmark \strong{classification} datasets composed of
 60,000 RGB thumbnail images of size 32x32 pixels. The
-\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10} variant contains
+\href{https://cave.cs.toronto.edu/kriz/cifar.html}{CIFAR10} variant contains
 10 classes while CIFAR100 provides 100 classes. Images are split into
 50,000 training samples and 10,000 test samples.
 
 Downloads and prepares the
-\href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR100} dataset.
+\href{https://cave.cs.toronto.edu/kriz/cifar.html}{CIFAR100} dataset.
 }
 \details{
 Downloads and prepares the CIFAR archives.
