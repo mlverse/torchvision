@@ -48,8 +48,4 @@ tensor_image_browse(after_plot)
 }
 
 }
-\seealso{
-Other item_unitary_transforms:
-\code{\link[=target_transform_rotate_box]{target_transform_rotate_box()}}
-}
 \concept{item_unitary_transforms}

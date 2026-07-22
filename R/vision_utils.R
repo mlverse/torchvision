@@ -132,8 +132,9 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else type_error("`x` should be torch_uint8 or torch_float")
 
-  if ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() ||
-      (boxes[, 2] >= boxes[, 4])$any() %>% as.logical()) {
+  if (boxes$shape[2] == 4 &&
+      ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() ||
+       (boxes[, 2] >= boxes[, 4])$any() %>% as.logical())) {
     value_error("Boxes must be in c(xmin, ymin, xmax, ymax) format")
   }
   num_boxes <- boxes$shape[1]
@@ -173,23 +174,71 @@ draw_bounding_boxes.torch_tensor <- function(x,
   }
 
   img_bb <- boxes$to(torch::torch_int64()) %>% as.array()
+  is_rotated <- ncol(img_bb) == 5
 
   draw <- png::writePNG(img_to_draw) %>%
     magick::image_read() %>%
     magick::image_draw()
 
-  graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4],
-                 col = fill_col, border = colors, lwd = width)
+  if (is_rotated) {
+    for (i in seq_len(num_boxes)) {
+      xmin <- img_bb[i, 1]
+      ymin <- img_bb[i, 2]
+      xmax <- img_bb[i, 3]
+      ymax <- img_bb[i, 4]
+      theta <- img_bb[i, 5]
 
-  if (!is.null(labels)) {
-    graphics::text(
-      img_bb[, 1] + 2 * width + font_size,
-      img_bb[, 2] + 2 * width,
-      labels = labels,
-      col = colors,
-      vfont = font,
-      cex = font_size / 10
-    )
+      cx <- (xmin + xmax) / 2
+      cy <- (ymin + ymax) / 2
+      hw <- (xmax - xmin) / 2
+      hh <- (ymax - ymin) / 2
+
+      theta_rad <- theta * pi / 180
+      ct <- cos(theta_rad)
+      st <- sin(theta_rad)
+
+      corners_x <- c(
+        cx - hw * ct + hh * st,
+        cx + hw * ct + hh * st,
+        cx + hw * ct - hh * st,
+        cx - hw * ct - hh * st
+      )
+      corners_y <- c(
+        cy - hw * st - hh * ct,
+        cy + hw * st - hh * ct,
+        cy + hw * st + hh * ct,
+        cy - hw * st + hh * ct
+      )
+
+      graphics::polygon(corners_x, corners_y,
+                        col = fill_col[(i - 1) %% length(fill_col) + 1],
+                        border = colors[(i - 1) %% length(colors) + 1],
+                        lwd = width)
+
+      if (!is.null(labels)) {
+        lbl <- labels[(i - 1) %% length(labels) + 1]
+        graphics::text(corners_x[1] + 2 * width + font_size,
+                       corners_y[1] + 2 * width,
+                       labels = lbl,
+                       col = colors[(i - 1) %% length(colors) + 1],
+                       vfont = font,
+                       cex = font_size / 10)
+      }
+    }
+  } else {
+    graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4],
+                   col = fill_col, border = colors, lwd = width)
+
+    if (!is.null(labels)) {
+      graphics::text(
+        img_bb[, 1] + 2 * width + font_size,
+        img_bb[, 2] + 2 * width,
+        labels = labels,
+        col = colors,
+        vfont = font,
+        cex = font_size / 10
+      )
+    }
   }
 
   grDevices::dev.off()

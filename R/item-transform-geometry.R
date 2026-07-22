@@ -74,7 +74,8 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
   x$y$image_height <- new_h
   x$y$image_width <- new_w
 
-  target_transform_rotate_box(x, angle = angle)
+  x$y <- target_transform_rotate_box(x$y, angle = angle)
+  x
 }
 
 rotate_image_tensor <- function(img, angle) {

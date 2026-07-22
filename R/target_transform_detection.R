@@ -201,71 +201,57 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 
 #' Convert bounding boxes to rotated format
 #'
-#' Converts bounding boxes of a detection item from
+#' Converts bounding boxes of a detection target from
 #' \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} (xyxy) format to
 #' \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} (xyxyr) format, where
-#' \eqn{r} is the rotation angle in degrees (counter-clockwise). The image
-#' is left unchanged. For axis-aligned boxes, \eqn{r = 0}.
+#' \eqn{r} is the rotation angle in degrees (counter-clockwise).
+#' For axis-aligned boxes, \eqn{r = 0}.
 #'
-#' @param x An object of class \code{image_with_bounding_box} or a dataset that
-#'   returns \code{image_with_bounding_box} items via \code{.getitem()}.
+#' @param target A list representing the detection target, containing at least:
+#'   \itemize{
+#'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
+#'     \item `image_height` (optional) — original image height, used for
+#'       clamping boxes to remain within image bounds
+#'     \item `image_width` (optional) — original image width, used for
+#'       clamping boxes to remain within image bounds
+#'     \item Other fields (labels, etc.) are preserved unchanged
+#'   }
 #' @param angle (numeric): Rotation angle in degrees (counter-clockwise).
 #'   Default is \code{0}.
 #'
-#' @return An object of class \code{image_with_rotated_box} with the same
-#'   structure as the input, except that
-#'   \code{$y$boxes} is a tensor of shape \code{(N, 5)} in xyxyr format.
+#' @return A list with the same structure as the input target, where
+#'   `boxes` is a tensor of shape `(N, 5)` in xyxyr format.
 #'   When applied to a dataset, returns the same dataset with its
-#'   \code{.getitem} method modified to return \code{image_with_rotated_box}
-#'   items.
+#'   `.getitem` method modified to return rotated-box targets.
 #'
 #' @examples
 #' \dontrun{
-#' url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
-#'
-#' img <- base_loader(url) |>
-#'   transform_to_tensor()
-#'
 #' boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
-#' class(before) <- c("image_with_bounding_box", "list")
-#'
-#' after <- target_transform_rotate_box(before, angle = 4)
-#'
-#' before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 40)
-#' after_plot <- draw_bounding_boxes(after, colors = {"red"}, width = 40)
-#'
-#' grid <- vision_make_grid(
-#'   torch_stack(list(before_plot, after_plot))$to(torch_float32()),
-#'   scale = TRUE
+#' target <- list(
+#'   boxes = boxes,
+#'   labels = torch_tensor(1L),
+#'   image_height = 4000L,
+#'   image_width = 3000L
 #' )
-#' tensor_image_browse(grid)
+#'
+#' rotated_target <- target_transform_rotate_box(target, angle = 4)
+#' rotated_target$boxes
 #' }
 #'
-#' @family item_unitary_transforms
+#' @family target_transforms_detection
 #'
 #' @export
-target_transform_rotate_box <- function(x, angle = 0) {
-  UseMethod("target_transform_rotate_box", x)
-}
-
-#' @export
-target_transform_rotate_box.image_with_bounding_box <- function(x, angle = 0) {
-  if (!is.null(x$x) && inherits(x$x, "torch_tensor") && x$x$ndim >= 3) {
-    img_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
-    img_w <- as.numeric(x$x$shape[length(x$x$shape)])
-  } else {
-    img_h <- x$y$image_height
-    img_w <- x$y$image_width
-  }
-
-  orig_boxes <- x$y$boxes
+target_transform_rotate_box <- function(target, angle = 0) {
+  orig_boxes <- target$boxes
   c(x1, y1, x2, y2) %<-% orig_boxes$unbind(-1)
   cx <- ((x1 + x2) / 2)$reshape(c(-1, 1))
   cy <- ((y1 + y2) / 2)$reshape(c(-1, 1))
 
   boxes <- box_xyxy_to_xyxyr(orig_boxes, angle = angle)
+
+  img_h <- target$image_height
+  img_w <- target$image_width
 
   if (!is.null(img_h) && !is.null(img_w)) {
     img_h <- as.numeric(img_h)
@@ -313,17 +299,17 @@ target_transform_rotate_box.image_with_bounding_box <- function(x, angle = 0) {
     boxes <- torch_cat(list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))), dim = -1L)
   }
 
-  x$y$boxes <- boxes
-  class(x) <- c("image_with_rotated_box", setdiff(class(x), "image_with_bounding_box"))
-  x
+  target$boxes <- boxes
+  target
 }
 
 #' @export
-target_transform_rotate_box.dataset <- function(x, angle = 0) {
-  original_getitem <- x$.getitem
-  x$.getitem <- function(index) {
+target_transform_rotate_box.dataset <- function(target, angle = 0) {
+  original_getitem <- target$.getitem
+  target$.getitem <- function(index) {
     item <- original_getitem(index)
-    target_transform_rotate_box(item, angle = angle)
+    item$y <- target_transform_rotate_box(item$y, angle = angle)
+    item
   }
-  x
+  target
 }

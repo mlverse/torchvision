@@ -4,57 +4,54 @@
 \alias{target_transform_rotate_box}
 \title{Convert bounding boxes to rotated format}
 \usage{
-target_transform_rotate_box(x, angle = 0)
+target_transform_rotate_box(target, angle = 0)
 }
 \arguments{
-\item{x}{An object of class \code{image_with_bounding_box} or a dataset that
-returns \code{image_with_bounding_box} items via \code{.getitem()}.}
+\item{target}{A list representing the detection target, containing at least:
+\itemize{
+\item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format
+\item \code{image_height} (optional) — original image height, used for
+clamping boxes to remain within image bounds
+\item \code{image_width} (optional) — original image width, used for
+clamping boxes to remain within image bounds
+\item Other fields (labels, etc.) are preserved unchanged
+}}
 
 \item{angle}{(numeric): Rotation angle in degrees (counter-clockwise).
 Default is \code{0}.}
 }
 \value{
-An object of class \code{image_with_rotated_box} with the same
-structure as the input, except that
-\code{$y$boxes} is a tensor of shape \code{(N, 5)} in xyxyr format.
+A list with the same structure as the input target, where
+\code{boxes} is a tensor of shape \verb{(N, 5)} in xyxyr format.
 When applied to a dataset, returns the same dataset with its
-\code{.getitem} method modified to return \code{image_with_rotated_box}
-items.
+\code{.getitem} method modified to return rotated-box targets.
 }
 \description{
-Converts bounding boxes of a detection item from
+Converts bounding boxes of a detection target from
 \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} (xyxy) format to
 \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} (xyxyr) format, where
-\eqn{r} is the rotation angle in degrees (counter-clockwise). The image
-is left unchanged. For axis-aligned boxes, \eqn{r = 0}.
+\eqn{r} is the rotation angle in degrees (counter-clockwise).
+For axis-aligned boxes, \eqn{r = 0}.
 }
 \examples{
 \dontrun{
-url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
-
-img <- base_loader(url) |>
-  transform_to_tensor()
-
 boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
-class(before) <- c("image_with_bounding_box", "list")
-
-after <- target_transform_rotate_box(before, angle = 4)
-
-before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 40)
-after_plot <- draw_bounding_boxes(after, colors = {"red"}, width = 40)
-
-grid <- vision_make_grid(
-  torch_stack(list(before_plot, after_plot))$to(torch_float32()),
-  scale = TRUE
+target <- list(
+  boxes = boxes,
+  labels = torch_tensor(1L),
+  image_height = 4000L,
+  image_width = 3000L
 )
-tensor_image_browse(grid)
+
+rotated_target <- target_transform_rotate_box(target, angle = 4)
+rotated_target$boxes
 }
 
 }
 \seealso{
-Other item_unitary_transforms:
-\code{\link[=item_transform_rotate]{item_transform_rotate()}}
+Other target_transforms_detection:
+\code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
+\code{\link[=target_transform_resize]{target_transform_resize()}}
 }
-\concept{item_unitary_transforms}
+\concept{target_transforms_detection}
