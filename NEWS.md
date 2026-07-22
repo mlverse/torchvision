@@ -14,6 +14,8 @@
 ## New features
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
+* Added article showcasing `model_fasterrcnn_resnet50_fpn()` with visualization utilities `draw_bounding_boxes()` and `vision_make_grid()` (@DerrickUnleashed, #301).
+
 
 ## Bug fixes and improvements
 
@@ -38,7 +40,9 @@
 * Added article showcasing `model_fcn_resnet50()` with visualization utilities `draw_segmentation_masks()` and `vision_make_grid()` (@DerrickUnleashed, #281).
 * Added collection dataset catalog with `search_collection()`, `get_collection_catalog()`, and `list_collection_datasets()` functions for discovering and exploring collections (#271, @ANAMASGARD).
 * Added `target_transform_coco_masks()` and `target_transform_trimap_masks()` transformation functions for explicit segmentation mask generation (@ANAMASGARD).
-* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed, #303).
+
+* Added support for `connectivity` argument for drawing lines between keypoints in `draw_keypoints()` (@DerrickUnleashed #303)
+
 
 ## New models
 
