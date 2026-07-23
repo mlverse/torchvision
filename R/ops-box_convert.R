@@ -122,27 +122,16 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
   }
 
   angle_rad <- torch_deg2rad(angle_deg)
-  ct <- torch_cos(angle_rad)
-  st <- torch_sin(angle_rad)
+  ct <- torch_abs(torch_cos(angle_rad))
+  st <- torch_abs(torch_sin(angle_rad))
 
-  corners_x <- torch_cat(list(
-    cx - hw * ct + hh * st,
-    cx + hw * ct + hh * st,
-    cx + hw * ct - hh * st,
-    cx - hw * ct - hh * st
-  ), dim = -1)
+  new_hw <- hw * ct + hh * st
+  new_hh <- hw * st + hh * ct
 
-  corners_y <- torch_cat(list(
-    cy - hw * st - hh * ct,
-    cy + hw * st - hh * ct,
-    cy + hw * st + hh * ct,
-    cy - hw * st + hh * ct
-  ), dim = -1)
-
-  xmin <- torch_min(corners_x, dim = -1)[[1]]$reshape(c(-1, 1))
-  xmax <- torch_max(corners_x, dim = -1)[[1]]$reshape(c(-1, 1))
-  ymin <- torch_min(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
-  ymax <- torch_max(corners_y, dim = -1)[[1]]$reshape(c(-1, 1))
+  xmin <- cx - new_hw
+  xmax <- cx + new_hw
+  ymin <- cy - new_hh
+  ymax <- cy + new_hh
 
   torch_cat(list(xmin, ymin, xmax, ymax, angle_deg), dim = -1L)
 }
