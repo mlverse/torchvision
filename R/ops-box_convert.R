@@ -121,7 +121,7 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
     angle_deg <- angle_deg$expand(c(n, 1))
   }
 
-  angle_rad <- angle_deg * pi / 180
+  angle_rad <- torch_deg2rad(angle_deg)
   ct <- torch_cos(angle_rad)
   st <- torch_sin(angle_rad)
 
