@@ -257,9 +257,9 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' @export
 target_transform_rotate_box <- function(target, angle = 0) {
   orig_boxes <- target$boxes
-  c(x1, y1, x2, y2) %<-% orig_boxes$unbind(-1)
-  cx <- ((x1 + x2) / 2)$reshape(c(-1, 1))
-  cy <- ((y1 + y2) / 2)$reshape(c(-1, 1))
+  cxcywh <- box_xyxy_to_cxcywh(orig_boxes)
+  cx <- cxcywh[, 1]$unsqueeze(-1)
+  cy <- cxcywh[, 2]$unsqueeze(-1)
 
   boxes <- box_xyxy_to_xyxyr(orig_boxes, angle = angle)
 
@@ -275,8 +275,8 @@ target_transform_rotate_box <- function(target, angle = 0) {
     ct <- torch_cos(angle_rad)
     st <- torch_sin(angle_rad)
 
-    hw <- ((x2 - x1) / 2)$reshape(c(-1, 1))
-    hh <- ((y2 - y1) / 2)$reshape(c(-1, 1))
+    hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
+    hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
 
     dx <- torch_cat(list(
       -hw * ct + hh * st,

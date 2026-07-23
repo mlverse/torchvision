@@ -2,17 +2,13 @@
 % Please edit documentation in R/item-transform-geometry.R
 \name{item_transform_rotate}
 \alias{item_transform_rotate}
-\alias{item_transform_rotate.default}
 \title{Rotate dataset item}
 \usage{
 item_transform_rotate(x, angle = 0)
-
-\method{item_transform_rotate}{default}(x, angle = 0)
 }
 \arguments{
 \item{x}{A dataset item, typically an \code{image_with_bounding_box} object
-containing an image tensor and associated target data (boxes, labels).
-Not a raw tensor; use \code{\link[=transform_rotate]{transform_rotate()}} for that.}
+containing an image tensor and associated target data (boxes, labels).}
 
 \item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 }
@@ -28,7 +24,7 @@ cropping. Empty regions are filled with black.
 \details{
 The bounding boxes (if present) are shifted to account for the expanded
 canvas and converted to rotated format via
-\code{\link[=target_transform_rotate_box]{target_transform_rotate_box()}}.
+\code{\link{target_transform_rotate_box}}.
 }
 \examples{
 \dontrun{
