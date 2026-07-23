@@ -45,8 +45,11 @@ item_transform_rotate <- function(x, angle = 0) {
 }
 
 #' @export
-item_transform_rotate.torch_tensor <- function(x, angle = 0) {
-  rotate_image_tensor(x, angle)
+item_transform_rotate.default <- function(x, angle = 0) {
+  cli_abort(
+    "{.fn item_transform_rotate} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To rotate a raw image tensor, use {.fn transform_rotate} instead."
+  )
 }
 
 #' @export
