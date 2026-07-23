@@ -37,6 +37,7 @@
 #'
 #' @family item_unitary_transforms
 #'
+#' @importFrom torch nnf_affine_grid nnf_grid_sample
 #' @export
 item_transform_rotate <- function(x, angle = 0) {
   UseMethod("item_transform_rotate", x)
@@ -55,7 +56,7 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
   orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
   orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
 
-  rotated_img <- transform_rotate(x$x, angle, expand = TRUE)
+  rotated_img <- rotate_image_tensor(x$x, angle)
   new_h <- as.integer(rotated_img$shape[2])
   new_w <- as.integer(rotated_img$shape[3])
 
@@ -77,4 +78,34 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
 
   x$y <- target_transform_rotate_box(x$y, angle = angle)
   x
+}
+
+rotate_image_tensor <- function(img, angle) {
+  if (img$ndim == 3) img <- img$unsqueeze(1)
+
+  img_shape <- img$shape
+  C <- img_shape[[2]]
+  H <- img_shape[[3]]
+  W <- img_shape[[4]]
+
+  theta_rad <- angle * pi / 180
+  ct <- cos(theta_rad)
+  st <- sin(theta_rad)
+  if (abs(ct) < 1e-10) ct <- 0
+  if (abs(st) < 1e-10) st <- 0
+
+  new_W <- as.integer(ceiling(W * abs(ct) + H * abs(st)))
+  new_H <- as.integer(ceiling(W * abs(st) + H * abs(ct)))
+
+  a <- ct * new_W / W
+  b <- st * new_H / W
+  c <- -st * new_W / H
+  d <- ct * new_H / H
+
+  theta_mat <- torch_tensor(matrix(c(a, b, 0, c, d, 0), nrow = 2, byrow = TRUE),
+                            dtype = torch_float32())$unsqueeze(1)
+
+  grid <- nnf_affine_grid(theta_mat, size = c(1L, C, new_H, new_W), align_corners = FALSE)
+  nnf_grid_sample(img, grid, mode = "bilinear", padding_mode = "zeros",
+                  align_corners = FALSE)$squeeze(1)
 }
