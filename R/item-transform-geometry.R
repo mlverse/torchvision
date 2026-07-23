@@ -10,8 +10,7 @@
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} object
 #'   containing an image tensor and associated target data (boxes, labels).
-#' @param angle (numeric): Rotation angle in degrees (counter-clockwise).
-#'   Default is \code{0}.
+#' @inheritParams transform_rotate
 #'
 #' @return An \code{image_with_rotated_box} object with the rotated image and
 #'   converted boxes in xyxyr format.

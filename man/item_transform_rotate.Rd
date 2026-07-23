@@ -14,8 +14,7 @@ item_transform_rotate(x, angle = 0)
 containing an image tensor and associated target data (boxes, labels).
 Not a raw tensor; use \code{\link[=transform_rotate]{transform_rotate()}} for that.}
 
-\item{angle}{(numeric): Rotation angle in degrees (counter-clockwise).
-Default is \code{0}.}
+\item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 }
 \value{
 An \code{image_with_rotated_box} object with the rotated image and
