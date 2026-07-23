@@ -43,7 +43,7 @@ test_that("box_xyxy_to_xyxyr handles empty boxes", {
 })
 
 test_that("box_xyxy_to_xyxyr preserves dtype", {
-  boxes <- torch_tensor(matrix(c(1, 2, 3, 4), ncol = 4), dtype = torch::torch_float())
+  boxes <- torch_tensor(matrix(c(1, 2, 3, 4), ncol = 4), dtype = torch_float())
   result <- box_xyxy_to_xyxyr(boxes, angle = 0)
 
   expect_tensor_dtype(result, torch_float())

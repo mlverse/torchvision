@@ -274,9 +274,9 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
 
   boxes <- x$y$boxes
 
-  img_to_draw <- if (x$x$dtype == torch::torch_uint8()) {
+  img_to_draw <- if (x$x$dtype == torch_uint8()) {
     x$x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
-  } else if (x$x$dtype == torch::torch_float()) {
+  } else if (x$x$dtype == torch_float()) {
     x$x$permute(c(2, 3, 1))$to(device = "cpu") %>% as_array()
   } else type_error("`x$x` should be torch_uint8 or torch_float")
 
@@ -380,7 +380,7 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
   draw_tt <- draw %>%
     magick::image_data(channels = "rgb") %>%
     as.integer() %>%
-    torch::torch_tensor(dtype = torch::torch_uint8())
+    torch_tensor(dtype = torch_uint8())
 
   draw_tt$permute(c(3, 1, 2))
 }
