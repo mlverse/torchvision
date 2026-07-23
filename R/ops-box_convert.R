@@ -105,11 +105,11 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
     return(torch_cat(list(boxes, angle_t), dim = -1))
   }
 
-  c(x1, y1, x2, y2) %<-% boxes$unbind(-1)
-  cx <- ((x1 + x2) / 2)$reshape(c(-1, 1))
-  cy <- ((y1 + y2) / 2)$reshape(c(-1, 1))
-  hw <- ((x2 - x1) / 2)$reshape(c(-1, 1))
-  hh <- ((y2 - y1) / 2)$reshape(c(-1, 1))
+  cxcywh <- box_xyxy_to_cxcywh(boxes)
+  cx <- cxcywh[, 1]$unsqueeze(-1)
+  cy <- cxcywh[, 2]$unsqueeze(-1)
+  hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
+  hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
 
   if (inherits(angle, "torch_tensor")) {
     angle_deg <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
