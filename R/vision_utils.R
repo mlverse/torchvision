@@ -209,14 +209,11 @@ draw_bounding_boxes.torch_tensor <- function(x,
       cy - hw * st + hh * ct
     )
 
-    poly_x <- c(t(cbind(all_x, NA)))
-    poly_y <- c(t(cbind(all_y, NA)))
-
-    fill_reps <- rep(fill_col, each = 4)
-    border_reps <- rep(colors, each = 4)
+    poly_x <- c(apply(all_x, 2, function(col) c(col, NA)))
+    poly_y <- c(apply(all_y, 2, function(col) c(col, NA)))
 
     graphics::polygon(poly_x, poly_y,
-                      col = fill_reps, border = border_reps, lwd = width)
+                      col = fill_col, border = colors, lwd = width)
 
     if (!is.null(labels)) {
       label_x <- all_x[1, ] + 2 * width + font_size
@@ -362,14 +359,11 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
     cy - hw * st + hh * ct
   )
 
-  poly_x <- c(t(cbind(all_x, NA)))
-  poly_y <- c(t(cbind(all_y, NA)))
-
-  fill_reps <- rep(fill_col, each = 4)
-  border_reps <- rep(colors, each = 4)
+  poly_x <- c(apply(all_x, 2, function(col) c(col, NA)))
+  poly_y <- c(apply(all_y, 2, function(col) c(col, NA)))
 
   graphics::polygon(poly_x, poly_y,
-                    col = fill_reps, border = border_reps, lwd = width)
+                    col = fill_col, border = colors, lwd = width)
 
   if (!is.null(labels)) {
     label_x <- all_x[1, ] + 2 * width + font_size
