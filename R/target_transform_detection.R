@@ -271,7 +271,7 @@ target_transform_rotate_box <- function(target, angle = 0) {
     img_w <- as.numeric(img_w)
 
     angle_col <- boxes[, 5]
-    angle_rad <- angle_col$reshape(c(-1, 1)) * pi / 180
+    angle_rad <- deg2rad(angle_col$reshape(c(-1, 1)))
     ct <- torch_cos(angle_rad)
     st <- torch_sin(angle_rad)
 
