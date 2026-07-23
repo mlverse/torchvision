@@ -181,49 +181,51 @@ draw_bounding_boxes.torch_tensor <- function(x,
     magick::image_draw()
 
   if (is_rotated) {
-    for (i in seq_len(num_boxes)) {
-      xmin <- img_bb[i, 1]
-      ymin <- img_bb[i, 2]
-      xmax <- img_bb[i, 3]
-      ymax <- img_bb[i, 4]
-      theta <- img_bb[i, 5]
+    xmin <- img_bb[, 1]
+    ymin <- img_bb[, 2]
+    xmax <- img_bb[, 3]
+    ymax <- img_bb[, 4]
+    theta <- img_bb[, 5]
 
-      cx <- (xmin + xmax) / 2
-      cy <- (ymin + ymax) / 2
-      hw <- (xmax - xmin) / 2
-      hh <- (ymax - ymin) / 2
+    cx <- (xmin + xmax) / 2
+    cy <- (ymin + ymax) / 2
+    hw <- (xmax - xmin) / 2
+    hh <- (ymax - ymin) / 2
 
-      theta_rad <- theta * pi / 180
-      ct <- cos(theta_rad)
-      st <- sin(theta_rad)
+    theta_rad <- theta * pi / 180
+    ct <- cos(theta_rad)
+    st <- sin(theta_rad)
 
-      corners_x <- c(
-        cx - hw * ct + hh * st,
-        cx + hw * ct + hh * st,
-        cx + hw * ct - hh * st,
-        cx - hw * ct - hh * st
-      )
-      corners_y <- c(
-        cy - hw * st - hh * ct,
-        cy + hw * st - hh * ct,
-        cy + hw * st + hh * ct,
-        cy - hw * st + hh * ct
-      )
+    all_x <- rbind(
+      cx - hw * ct + hh * st,
+      cx + hw * ct + hh * st,
+      cx + hw * ct - hh * st,
+      cx - hw * ct - hh * st
+    )
+    all_y <- rbind(
+      cy - hw * st - hh * ct,
+      cy + hw * st - hh * ct,
+      cy + hw * st + hh * ct,
+      cy - hw * st + hh * ct
+    )
 
-      graphics::polygon(corners_x, corners_y,
-                        col = fill_col[(i - 1) %% length(fill_col) + 1],
-                        border = colors[(i - 1) %% length(colors) + 1],
-                        lwd = width)
+    poly_x <- c(t(cbind(all_x, NA)))
+    poly_y <- c(t(cbind(all_y, NA)))
 
-      if (!is.null(labels)) {
-        lbl <- labels[(i - 1) %% length(labels) + 1]
-        graphics::text(corners_x[1] + 2 * width + font_size,
-                       corners_y[1] + 2 * width,
-                       labels = lbl,
-                       col = colors[(i - 1) %% length(colors) + 1],
-                       vfont = font,
-                       cex = font_size / 10)
-      }
+    fill_reps <- rep(fill_col, each = 4)
+    border_reps <- rep(colors, each = 4)
+
+    graphics::polygon(poly_x, poly_y,
+                      col = fill_reps, border = border_reps, lwd = width)
+
+    if (!is.null(labels)) {
+      label_x <- all_x[1, ] + 2 * width + font_size
+      label_y <- all_y[1, ] + 2 * width
+      graphics::text(label_x, label_y,
+                     labels = labels,
+                     col = colors,
+                     vfont = font,
+                     cex = font_size / 10)
     }
   } else {
     graphics::rect(img_bb[, 1], img_bb[, 2], img_bb[, 3], img_bb[, 4],
@@ -332,49 +334,51 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
   img_w <- dim(img_to_draw)[2]
   graphics::clip(0, img_w, 0, img_h)
 
-  for (i in seq_len(num_boxes)) {
-    xmin <- boxes_r[i, 1]
-    ymin <- boxes_r[i, 2]
-    xmax <- boxes_r[i, 3]
-    ymax <- boxes_r[i, 4]
-    theta <- boxes_r[i, 5]
+  xmin <- boxes_r[, 1]
+  ymin <- boxes_r[, 2]
+  xmax <- boxes_r[, 3]
+  ymax <- boxes_r[, 4]
+  theta <- boxes_r[, 5]
 
-    cx <- (xmin + xmax) / 2
-    cy <- (ymin + ymax) / 2
-    hw <- (xmax - xmin) / 2
-    hh <- (ymax - ymin) / 2
+  cx <- (xmin + xmax) / 2
+  cy <- (ymin + ymax) / 2
+  hw <- (xmax - xmin) / 2
+  hh <- (ymax - ymin) / 2
 
-    theta_rad <- theta * pi / 180
-    ct <- cos(theta_rad)
-    st <- sin(theta_rad)
+  theta_rad <- theta * pi / 180
+  ct <- cos(theta_rad)
+  st <- sin(theta_rad)
 
-    corners_x <- c(
-      cx - hw * ct + hh * st,
-      cx + hw * ct + hh * st,
-      cx + hw * ct - hh * st,
-      cx - hw * ct - hh * st
-    )
-    corners_y <- c(
-      cy - hw * st - hh * ct,
-      cy + hw * st - hh * ct,
-      cy + hw * st + hh * ct,
-      cy - hw * st + hh * ct
-    )
+  all_x <- rbind(
+    cx - hw * ct + hh * st,
+    cx + hw * ct + hh * st,
+    cx + hw * ct - hh * st,
+    cx - hw * ct - hh * st
+  )
+  all_y <- rbind(
+    cy - hw * st - hh * ct,
+    cy + hw * st - hh * ct,
+    cy + hw * st + hh * ct,
+    cy - hw * st + hh * ct
+  )
 
-    graphics::polygon(corners_x, corners_y,
-                      col = fill_col[(i - 1) %% length(fill_col) + 1],
-                      border = colors[(i - 1) %% length(colors) + 1],
-                      lwd = width)
+  poly_x <- c(t(cbind(all_x, NA)))
+  poly_y <- c(t(cbind(all_y, NA)))
 
-    if (!is.null(labels)) {
-      lbl <- labels[(i - 1) %% length(labels) + 1]
-      graphics::text(corners_x[1] + 2 * width + font_size,
-                     corners_y[1] + 2 * width,
-                     labels = lbl,
-                     col = colors[(i - 1) %% length(colors) + 1],
-                     vfont = font,
-                     cex = font_size / 10)
-    }
+  fill_reps <- rep(fill_col, each = 4)
+  border_reps <- rep(colors, each = 4)
+
+  graphics::polygon(poly_x, poly_y,
+                    col = fill_reps, border = border_reps, lwd = width)
+
+  if (!is.null(labels)) {
+    label_x <- all_x[1, ] + 2 * width + font_size
+    label_y <- all_y[1, ] + 2 * width
+    graphics::text(label_x, label_y,
+                   labels = labels,
+                   col = colors,
+                   vfont = font,
+                   cex = font_size / 10)
   }
 
   grDevices::dev.off()
