@@ -77,10 +77,15 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
   x$y$image_width <- new_w
 
   x$y <- target_transform_rotate_box(x$y, angle = angle)
+  class(x) <- c("image_with_rotated_box", "list")
   x
 }
 
 rotate_image_tensor <- function(img, angle) {
+  if (abs(angle) < 1e-6) {
+    if (img$ndim == 4) img <- img$squeeze(1)
+    return(img)
+  }
   if (img$ndim == 3) img <- img$unsqueeze(1)
 
   img_shape <- img$shape
