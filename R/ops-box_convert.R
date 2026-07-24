@@ -1,4 +1,5 @@
 #' @importFrom zeallot %<-%
+#' @importFrom torch torch_cos torch_sin torch_min
 NULL
 
 #' box_cxcywh_to_xyxy
@@ -74,5 +75,64 @@ box_xyxy_to_xywh <- function(boxes) {
   h <- y2 - y1 # y2 - y1
   boxes <- torch::torch_stack(list(x1, y1, w, h), dim=-1)
   return(boxes)
+}
+
+#' box_xyxy_to_xyxyr
+#'
+#' Converts bounding boxes from \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format to
+#'   \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format, where \eqn{r} is the rotation
+#'   angle in degrees (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
+#'
+#' @param boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
+#'   which will be converted.
+#' @param angle (numeric, optional): Rotation angle in degrees (anti-clockwise).
+#'   A single numeric value applied to all boxes, or a tensor of shape \code{(N,)}
+#'   with one angle per box. Default is \code{0}.
+#'
+#' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
+#'   where \eqn{r} is the provided rotation angle in degrees. The bounding box
+#'   coordinates are computed by rotating the original axis-aligned box around
+#'   its center by \eqn{r} degrees anti-clockwise, then taking the axis-aligned
+#'   bounding box of the rotated corners.
+#'
+#' @export
+box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
+
+  n <- boxes$size(1)
+
+  if (n == 0) {
+    angle_t <- torch_zeros(0, 1, dtype = boxes$dtype)
+    return(torch_cat(list(boxes, angle_t), dim = -1))
+  }
+
+  cxcywh <- box_xyxy_to_cxcywh(boxes)
+  cx <- cxcywh[, 1]$unsqueeze(-1)
+  cy <- cxcywh[, 2]$unsqueeze(-1)
+  hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
+  hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
+
+  if (inherits(angle, "torch_tensor")) {
+    angle_deg <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
+  } else {
+    angle_deg <- torch_tensor(angle, dtype = boxes$dtype)$reshape(c(-1, 1))
+  }
+
+  if (angle_deg$size(1) == 1 && n > 1) {
+    angle_deg <- angle_deg$expand(c(n, 1))
+  }
+
+  angle_rad <- torch_deg2rad(angle_deg)
+  ct <- torch_abs(torch_cos(angle_rad))
+  st <- torch_abs(torch_sin(angle_rad))
+
+  new_hw <- hw * ct + hh * st
+  new_hh <- hw * st + hh * ct
+
+  xmin <- cx - new_hw
+  xmax <- cx + new_hw
+  ymin <- cy - new_hh
+  ymax <- cy + new_hh
+
+  torch_cat(list(xmin, ymin, xmax, ymax, angle_deg), dim = -1L)
 }
 

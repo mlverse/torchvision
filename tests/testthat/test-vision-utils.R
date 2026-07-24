@@ -47,18 +47,6 @@ test_that("draw_bounding_boxes correctly mask a complete image", {
 
 })
 
-test_that("draw_bounding_boxes supports deprecated color alias", {
-  image_uint <- torch::torch_randint(low = 1, high = 240, size = c(3, 64, 64))$to(torch::torch_uint8())
-  boxes <- torch::torch_tensor(c(1, 1, 40, 40))$unsqueeze(1)
-
-  expect_warning(
-    bboxed_image <- draw_bounding_boxes(image_uint, boxes, color = "black", fill = TRUE),
-    "deprecated"
-  )
-  expect_tensor_dtype(bboxed_image, torch::torch_uint8())
-  expect_tensor_shape(bboxed_image, c(3, 64, 64))
-})
-
 test_that("draw_segmentation_masks works with boolean mask", {
 
   image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
