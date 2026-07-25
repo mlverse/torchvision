@@ -83,14 +83,14 @@ box_xyxy_to_xywh <- function(boxes) {
 #'   \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format, where \eqn{r} is the rotation
 #'   angle in degrees (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
 #'
-#' @param boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
-#'   which will be converted.
-#' @param angle (numeric, optional): Rotation angle in degrees (anti-clockwise).
+#' @param boxes (Tensor\[N, 4\] or \[N, 5]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}
+#'   or \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r_{deg})} format which will be converted.
+#' @param angle (numeric): Rotation angle in degrees (anti-clockwise).
 #'   A single numeric value applied to all boxes, or a tensor of shape \code{(N,)}
 #'   with one angle per box. Default is \code{0}.
 #'
-#' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
-#'   where \eqn{r} is the provided rotation angle in degrees. The bounding box
+#' @return boxes (Tensor\[N, 5\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r_{deg})} format,
+#'   where \eqn{r_{deg}} is the provided rotation angle in degrees. The bounding box
 #'   coordinates are computed by rotating the original axis-aligned box around
 #'   its center by \eqn{r} degrees anti-clockwise, then taking the axis-aligned
 #'   bounding box of the rotated corners.
@@ -100,16 +100,22 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
 
   n <- boxes$size(1)
 
+  origin_angle <- if (boxes$size(2)> 4) {
+    boxes[,5, drop=FALSE]
+  } else {
+    torch_zeros_like(boxes[ ,4, drop=FALSE])
+  }
+
   if (n == 0) {
     angle_t <- torch_zeros(0, 1, dtype = boxes$dtype)
     return(torch_cat(list(boxes, angle_t), dim = -1))
   }
 
   cxcywh <- box_xyxy_to_cxcywh(boxes)
-  cx <- cxcywh[, 1]$unsqueeze(-1)
-  cy <- cxcywh[, 2]$unsqueeze(-1)
-  hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
-  hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
+  cx <- cxcywh[, 1, drop = FALSE]
+  cy <- cxcywh[, 2, drop = FALSE]
+  hw <- cxcywh[, 3, drop = FALSE] / 2
+  hh <- cxcywh[, 4, drop = FALSE] / 2
 
   if (inherits(angle, "torch_tensor")) {
     angle_deg <- angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
@@ -133,6 +139,6 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
   ymin <- cy - new_hh
   ymax <- cy + new_hh
 
-  torch_cat(list(xmin, ymin, xmax, ymax, angle_deg), dim = -1L)
+  torch_cat(list(xmin, ymin, xmax, ymax, origin_angle + angle_deg), dim = -1L)
 }
 
