@@ -135,11 +135,12 @@ test_that("item_transform_rotate handles multiple boxes", {
     100, 200, 150, 250,
     0, 0, 300, 400
   ), ncol = 4, byrow = TRUE)
-  item <- make_detection_item(boxes)
+  item <- make_detection_item(boxes, image_size = c(400, 300))
   result <- item_transform_rotate(item, angle = 0)
 
   expect_equal(result$y$boxes$shape, c(3, 5))
-  expect_equal_to_r(result$y$boxes[, 5], c(0, 0, 0))
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes)
+  expect_equal_to_r(result$y$boxes[, 5], rep(0,3))
 })
 
 test_that("item_transform_rotate does not mutate input", {
@@ -177,16 +178,18 @@ test_that("item_transform_rotate can be composed", {
     100, 200, 150, 250,
     0, 0, 300, 400
   ), ncol = 4, byrow = TRUE)
-  item <- make_detection_item(boxes)
+  labels <- sample.int(2^16, 3)
+  item <- make_detection_item(boxes, labels = labels, image_size = c(410, 300))
   result <- item |>
-    item_transform_rotate(angle = 34) |>
-    item_transform_rotate(angle = 146)
+    item_transform_rotate(angle = 90) |>
+    item_transform_rotate(angle = 90)
 
-  expect_equal(result$x$shape, c(3, 100, 200))
-  expect_equal(result$y$image_height, 100L)
-  expect_equal(result$y$image_width, 200L)
+  expect_equal(result$x$shape, c(3, 410, 300))
+  expect_equal(result$y$image_width, 410L)
+  expect_equal(result$y$image_height, 300L)
   expect_equal(result$y$boxes$shape, c(3, 5))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes)
   expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))
+  expect_equal(result$y$labels, labels)
 })
 
