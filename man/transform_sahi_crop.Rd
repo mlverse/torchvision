@@ -103,7 +103,8 @@ tensor_image_browse(grid)
 }
 \seealso{
 Other target_transforms_detection:
-\code{\link[=target_transform_resize]{target_transform_resize()}}
+\code{\link[=target_transform_resize]{target_transform_resize()}},
+\code{\link[=target_transform_rotate_box]{target_transform_rotate_box()}}
 
 Other combining_transforms:
 \code{\link[=transform_five_crop]{transform_five_crop()}},

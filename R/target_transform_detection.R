@@ -199,3 +199,131 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
   results
 }
 
+#' Convert bounding boxes to rotated format
+#'
+#' Converts bounding boxes of a detection target from
+#' \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} (xyxy) format to
+#' \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} (xyxyr) format, where
+#' \eqn{r} is the rotation angle in degrees (counter-clockwise).
+#' For axis-aligned boxes, \eqn{r = 0}.
+#'
+#' @param target A list representing the detection target, containing at least:
+#'   \itemize{
+#'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
+#'     \item `image_height` (optional) — original image height, used for
+#'       clamping boxes to remain within image bounds
+#'     \item `image_width` (optional) — original image width, used for
+#'       clamping boxes to remain within image bounds
+#'     \item Other fields (labels, etc.) are preserved unchanged
+#'   }
+#' @param angle (numeric): Rotation angle in degrees (counter-clockwise).
+#'   Default is \code{0}.
+#'
+#' @return A list with the same structure as the input target, where
+#'   `boxes` is a tensor of shape `(N, 5)` in xyxyr format.
+#'   When applied to a dataset, returns the same dataset with its
+#'   `.getitem` method modified to return rotated-box targets.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
+#'
+#' # Original boxes (blue, axis-aligned)
+#' before_plot <- draw_bounding_boxes(img, boxes = boxes, colors = "blue", width = 10)
+#'
+#' # Transform boxes to xyxyr with 4 degree rotation
+#' target <- list(
+#'   boxes = boxes,
+#'   image_height = img$shape[2],
+#'   image_width = img$shape[3]
+#' )
+#' rotated_target <- target_transform_rotate_box(target, angle = 4)
+#'
+#' # Rotated boxes (red, drawn as polygons)
+#' after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
+#'
+#' grid <- vision_make_grid(
+#'   torch_stack(list(before_plot, after_plot))$to(torch_float32()),
+#'   scale = TRUE
+#' )
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family target_transforms_detection
+#'
+#' @export
+target_transform_rotate_box <- function(target, angle = 0) {
+  orig_boxes <- target$boxes
+  cxcywh <- box_xyxy_to_cxcywh(orig_boxes)
+  cx <- cxcywh[, 1]$unsqueeze(-1)
+  cy <- cxcywh[, 2]$unsqueeze(-1)
+
+  boxes <- box_xyxy_to_xyxyr(orig_boxes, angle = angle)
+
+  img_h <- target$image_height
+  img_w <- target$image_width
+
+  if (!is.null(img_h) && !is.null(img_w)) {
+    img_h <- as.numeric(img_h)
+    img_w <- as.numeric(img_w)
+
+    angle_col <- boxes[, 5]
+    angle_rad <- torch_deg2rad(angle_col$reshape(c(-1, 1)))
+    ct <- torch_cos(angle_rad)
+    st <- torch_sin(angle_rad)
+
+    hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
+    hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
+
+    dx <- torch_cat(list(
+      -hw * ct + hh * st,
+       hw * ct + hh * st,
+       hw * ct - hh * st,
+      -hw * ct - hh * st
+    ), dim = -1)
+
+    dy <- torch_cat(list(
+      -hw * st - hh * ct,
+       hw * st - hh * ct,
+       hw * st + hh * ct,
+      -hw * st + hh * ct
+    ), dim = -1)
+
+    dist_left  <- torch_max(torch_clamp(-dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_right <- torch_max(torch_clamp(dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_down  <- torch_max(torch_clamp(-dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_up    <- torch_max(torch_clamp(dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+
+    eps <- 1e-8
+    scale <- torch_min(torch_cat(list(
+      cx / torch_clamp(dist_left, min = eps),
+      (img_w - cx) / torch_clamp(dist_right, min = eps),
+      cy / torch_clamp(dist_down, min = eps),
+      (img_h - cy) / torch_clamp(dist_up, min = eps)
+    ), dim = -1), dim = -1)[[1]]$reshape(c(-1, 1))
+    scale <- torch_clamp(scale, min = 0, max = 1.0)
+
+    hw <- hw * scale
+    hh <- hh * scale
+
+    boxes <- torch_cat(list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))), dim = -1L)
+  }
+
+  target$boxes <- boxes
+  target
+}
+
+#' @rdname target_transform_rotate_box
+#' @export
+target_transform_rotate_box.dataset <- function(target, angle = 0) {
+  original_getitem <- target$.getitem
+  target$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item$y <- target_transform_rotate_box(item$y, angle = angle)
+    item
+  }
+  target
+}

@@ -304,3 +304,101 @@ test_that("target_transform_resize does not mutate the input target", {
   # Result must be different
   expect_false(identical(as.matrix(out$boxes$cpu()), original_boxes))
 })
+
+make_target <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {
+  if (is.matrix(boxes)) {
+    boxes <- torch_tensor(boxes, dtype = torch_float32())
+  }
+  if (is.null(labels)) {
+    labels <- torch_ones(boxes$size(1), dtype = torch_long())
+  }
+  list(
+    boxes = boxes,
+    labels = labels,
+    image_height = image_size[1],
+    image_width = image_size[2]
+  )
+}
+
+test_that("target_transform_rotate_box converts boxes to xyxyr format", {
+  target <- make_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- target_transform_rotate_box(target, angle = 0)
+
+  expect_tensor_shape(result$boxes, c(1, 5))
+  expect_tensor_dtype(result$boxes, torch_float())
+  expect_equal_to_r(result$boxes[1, 1:4], c(10, 20, 50, 60))
+  expect_equal_to_r(result$boxes[1, 5], 0)
+})
+
+test_that("target_transform_rotate_box applies non-zero rotation angle to boxes", {
+  target <- make_target(
+    boxes = matrix(c(100, 100, 102, 102), ncol = 4),
+    image_size = c(200L, 200L)
+  )
+  result <- target_transform_rotate_box(target, angle = 45)
+
+  cx <- 101; cy <- 101
+  hw <- 1; hh <- 1
+  expect_tensor_shape(result$boxes, c(1, 5))
+  expect_tensor_dtype(result$boxes, torch_float())
+  expect_equal_to_r(result$boxes[1, 1], cx - hw, tolerance = 1e-5)
+  expect_equal_to_r(result$boxes[1, 3], cx + hw, tolerance = 1e-5)
+  expect_equal_to_r(result$boxes[1, 5], 45, tolerance = 1e-5)
+
+  angle_rad <- 45 * pi / 180
+  ct <- cos(angle_rad); st <- sin(angle_rad)
+  corners_x <- c(cx - hw*ct + hh*st, cx + hw*ct + hh*st, cx + hw*ct - hh*st, cx - hw*ct - hh*st)
+  corners_y <- c(cy - hw*st - hh*ct, cy + hw*st - hh*ct, cy + hw*st + hh*ct, cy - hw*st + hh*ct)
+  expect_true(all(corners_x >= 0 & corners_x <= 200))
+  expect_true(all(corners_y >= 0 & corners_y <= 200))
+})
+
+test_that("target_transform_rotate_box preserves labels and other target fields", {
+  target <- make_target(
+    boxes = matrix(c(10, 20, 50, 60, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = torch_tensor(c(1L, 2L), dtype = torch_long())
+  )
+  original_labels <- target$labels$clone()
+
+  result <- target_transform_rotate_box(target, angle = 0)
+
+  expect_true(result$labels$eq(original_labels)$all()$item())
+  expect_equal(result$image_height, 100L)
+  expect_equal(result$image_width, 200L)
+})
+
+test_that("target_transform_rotate_box handles empty boxes", {
+  target <- make_target(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  result <- target_transform_rotate_box(target, angle = 0)
+
+  expect_tensor_shape(result$boxes, c(0, 5))
+  expect_tensor_dtype(result$boxes, torch_float())
+})
+
+test_that("target_transform_rotate_box handles multiple boxes with angle=0", {
+  boxes <- matrix(c(
+    10, 20, 50, 60,
+    100, 200, 150, 250,
+    0, 0, 300, 400
+  ), ncol = 4, byrow = TRUE)
+  target <- make_target(boxes)
+  result <- target_transform_rotate_box(target, angle = 0)
+
+  expect_tensor_shape(result$boxes, c(3, 5))
+  expect_tensor_dtype(result$boxes, torch_float())
+  expect_equal_to_r(result$boxes[, 5], c(0, 0, 0))
+})
+
+test_that("target_transform_rotate_box does not mutate input", {
+  boxes <- torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4))
+  target <- make_target(boxes)
+  original_boxes <- boxes$clone()
+
+  result <- target_transform_rotate_box(target, angle = 0)
+
+  expect_equal_to_r(target$boxes, as.array(original_boxes$cpu()))
+  expect_tensor_shape(target$boxes, c(1, 4))
+})

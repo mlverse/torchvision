@@ -33,29 +33,49 @@ navbar:
         href: articles/examples/keypoints.html
 
 reference:
-- title: Transforms
-  desc: Image transformation functions
-- subtitle: Unitary transformation
+- title: Image Transforms
+  desc: Transformation functions applied to Image (tensor images, magick images,...)
+- subtitle: Unitary image transformation
   contents:
     - has_concept("unitary_transforms")
-- subtitle: Random transformation
+- subtitle: Random image transformation
   contents:
     - has_concept("random_transforms")
-- subtitle: Combining / multiplying transformations
+- subtitle: Combining / multiplying image transformations
   contents:
     - has_concept("combining_transforms")
+
+- title: Target Transforms
+  desc: Transformation functions applied to targets (usualy the `$y` parameter)
 - subtitle: Target transformations for object detection
   desc: >
-    Functions to convert dataset native targets annotations into object-detection compatible
-    with draw_bounding_boxes() and object-detection models.
+    Functions to convert dataset native targets annotations into object-detection
+    targets compatible with draw_bounding_boxes() and object-detection models.
   contents:
     - has_concept("target_transforms_detection")
 - subtitle: Target transformations for segmentation
   desc: >
-    Functions to convert dataset native targets annotations into segmentation masks compatible
-    with draw_segmentation_masks() and segmentation models.
+    Functions to convert dataset native targets annotations into segmentation masks
+    targets compatible with draw_segmentation_masks() and segmentation models.
   contents:
     - has_concept("target_transforms_segmentation")
+
+- title: Item Transforms
+  desc: >
+    Transformation functions modifying both image (`$x` parameter ) and target
+    (`$y` parameter ) of a single dataset item. Result shall be compatible with
+    `draw_bounding_boxes()` for object-detection items and with `draw_segmentation_mask()`
+    for semantic-segmentation items.
+- subtitle: Unitary item transformations
+  desc: >
+    Functions to convert dataset **items** by an **unitary** transformation.
+  contents:
+    - has_concept("item_unitary_transforms")
+- subtitle: Random item transformations
+  desc: >
+    Functions to convert dataset **items** by a **random** transformation.
+  contents:
+    - has_concept("item_random_transforms")
 
 - title: Models
   desc: Computer Vision deep-learning Model architectures

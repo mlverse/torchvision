@@ -5,6 +5,7 @@
 \alias{draw_bounding_boxes.default}
 \alias{draw_bounding_boxes.torch_tensor}
 \alias{draw_bounding_boxes.image_with_bounding_box}
+\alias{draw_bounding_boxes.image_with_rotated_box}
 \title{Draws bounding boxes on image.}
 \usage{
 draw_bounding_boxes(x, ...)
@@ -16,7 +17,6 @@ draw_bounding_boxes(x, ...)
   boxes,
   labels = NULL,
   colors = NULL,
-  color = NULL,
   fill = FALSE,
   width = 1,
   font = c("serif", "plain"),
@@ -25,10 +25,22 @@ draw_bounding_boxes(x, ...)
 )
 
 \method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
+
+\method{draw_bounding_boxes}{image_with_rotated_box}(
+  x,
+  labels = NULL,
+  colors = NULL,
+  fill = FALSE,
+  width = 1,
+  font = c("serif", "plain"),
+  font_size = 10,
+  ...
+)
 }
 \arguments{
-\item{x}{Tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float}.
-In case of dtype float, values are assumed to be in range \eqn{[0, 1]}.
+\item{x}{A torch_tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float},
+an \code{image_with_bounding_box}, or an \code{image_with_rotated_box} object.
+In case of a tensor with dtype float, values are assumed to be in range \eqn{[0, 1]}.
 C value for channel can only be 1 (grayscale) or 3 (RGB).}
 
 \item{...}{Additional arguments passed to methods.}
@@ -44,8 +56,6 @@ to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
 \item{colors}{character vector containing the colors
 of the boxes or single color for all boxes. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
-
-\item{color}{Deprecated alias for \code{colors}.}
 
 \item{fill}{If \code{TRUE} fills the bounding box with specified color.}
 
