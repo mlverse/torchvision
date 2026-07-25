@@ -63,8 +63,8 @@ test_that("item_transform_rotate negative angles work", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
   result <- item_transform_rotate(item, angle = -45)
 
-  new_W <- as.integer(ceiling(200 * abs(cos(-45 * pi / 180)) + 100 * abs(sin(-45 * pi / 180))))
   new_H <- as.integer(ceiling(200 * abs(sin(-45 * pi / 180)) + 100 * abs(cos(-45 * pi / 180))))
+  new_W <- as.integer(ceiling(200 * abs(cos(-45 * pi / 180)) + 100 * abs(sin(-45 * pi / 180))))
 
   expect_equal(result$x$shape[1], 3)
   expect_equal(result$x$shape[2], new_H)
@@ -75,8 +75,8 @@ test_that("item_transform_rotate boxes are shifted for expanded canvas", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(300L, 500L))
   result <- item_transform_rotate(item, angle = 30)
 
-  new_W <- as.integer(ceiling(500 * abs(cos(30 * pi / 180)) + 300 * abs(sin(30 * pi / 180))))
   new_H <- as.integer(ceiling(500 * abs(sin(30 * pi / 180)) + 300 * abs(cos(30 * pi / 180))))
+  new_W <- as.integer(ceiling(500 * abs(cos(30 * pi / 180)) + 300 * abs(sin(30 * pi / 180))))
   dx <- (new_W - 500) / 2
   dy <- (new_H - 300) / 2
 
@@ -185,8 +185,8 @@ test_that("item_transform_rotate can be composed", {
     item_transform_rotate(angle = 90)
 
   expect_equal(result$x$shape, c(3, 410, 300))
-  expect_equal(result$y$image_width, 410L)
-  expect_equal(result$y$image_height, 300L)
+  expect_equal(result$y$image_height, 410)
+  expect_equal(result$y$image_width, 300)
   expect_equal(result$y$boxes$shape, c(3, 5))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes)
   expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))

@@ -39,12 +39,12 @@
 #'
 #' @importFrom torch nnf_affine_grid nnf_grid_sample
 #' @export
-item_transform_rotate <- function(x, angle = 0) {
+item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, center = NULL, fill = 0) {
   UseMethod("item_transform_rotate", x)
 }
 
 #' @export
-item_transform_rotate.default <- function(x, angle = 0) {
+item_transform_rotate.default <- function(x, angle, interpolation = 2, expand = TRUE, center = NULL, fill = 0) {
   cli_abort(
     "{.fn item_transform_rotate} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
     To rotate a raw image tensor, use {.fn transform_rotate} instead."
@@ -52,23 +52,40 @@ item_transform_rotate.default <- function(x, angle = 0) {
 }
 
 #' @export
-item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
+item_transform_rotate.image_with_bounding_box <- function(
+  x,
+  angle,
+  interpolation = 2,
+  expand = TRUE,
+  center = NULL,
+  fill = 0
+) {
   orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
   orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
 
-  rotated_img <- rotate_image_tensor(x$x, angle)
+  rotated_img <- rotated_img <- transform_rotate(
+    x$x,
+    angle = angle,
+    expand = expand,
+    interpolation = interpolation, # 2 = bilinear
+    fill = fill # 0 is padding with black
+  )
   new_h <- as.integer(rotated_img$shape[2])
   new_w <- as.integer(rotated_img$shape[3])
 
   dx <- (new_w - orig_w) / 2
   dy <- (new_h - orig_h) / 2
 
-  shifted_boxes <- x$y$boxes$clone()
-  if (shifted_boxes$size(1) > 0) {
-    shifted_boxes[, 1] <- shifted_boxes[, 1] + dx
-    shifted_boxes[, 3] <- shifted_boxes[, 3] + dx
-    shifted_boxes[, 2] <- shifted_boxes[, 2] + dy
-    shifted_boxes[, 4] <- shifted_boxes[, 4] + dy
+  x1 <- x$y$boxes[, 1]
+  y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]
+  y2 <- x$y$boxes[, 4]
+  has_angle <- x$y$boxes$size(2) == 5L
+  angle_col <- if (has_angle) x$y$boxes[, 5] else NULL
+
+  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
+  if (!is.null(angle_col)) {
+    shifted_boxes <- torch_cat(list(shifted_boxes, angle_col), dim = -1L)
   }
 
   x$x <- rotated_img
@@ -82,38 +99,4 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
 }
 
 #' @export
-item_transform_rotate.image_with_bounding_box <- item_transform_rotate.image_with_bounding_box
-
-rotate_image_tensor <- function(img, angle) {
-  if (abs(angle) < 1e-6) {
-    if (img$ndim == 4) img <- img$squeeze(1)
-    return(img)
-  }
-  if (img$ndim == 3) img <- img$unsqueeze(1)
-
-  img_shape <- img$shape
-  C <- img_shape[[2]]
-  H <- img_shape[[3]]
-  W <- img_shape[[4]]
-
-  theta_rad <- angle * pi / 180
-  ct <- cos(theta_rad)
-  st <- sin(theta_rad)
-  if (abs(ct) < 1e-10) ct <- 0
-  if (abs(st) < 1e-10) st <- 0
-
-  new_W <- as.integer(ceiling(W * abs(ct) + H * abs(st)))
-  new_H <- as.integer(ceiling(W * abs(st) + H * abs(ct)))
-
-  a <- ct * new_W / W
-  b <- st * new_H / W
-  c <- -st * new_W / H
-  d <- ct * new_H / H
-
-  theta_mat <- torch_tensor(matrix(c(a, b, 0, c, d, 0), nrow = 2, byrow = TRUE),
-                            dtype = torch_float32())$unsqueeze(1)
-
-  grid <- nnf_affine_grid(theta_mat, size = c(1L, C, new_H, new_W), align_corners = FALSE)
-  nnf_grid_sample(img, grid, mode = "bilinear", padding_mode = "zeros",
-                  align_corners = FALSE)$squeeze(1)
-}
+item_transform_rotate.image_with_rotated_box <- item_transform_rotate.image_with_bounding_box
