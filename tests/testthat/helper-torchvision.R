@@ -91,3 +91,33 @@ expect_coco_model_detects_cat <- function(model, min_score = 0.25, size = c(640,
   expect_equal(labels_vec[top], 17L)
   expect_gt(scores_vec[top], min_score)
 }
+
+# Helper to build a detection item target with boxes, labels, image metadata, area and is_crowd (as per coco dataset targets)
+make_detection_target <- function(boxes,
+                        labels = NULL,
+                        image_size = c(100L, 200L),
+                        image_id = sample.int(2^16, 1),
+                        area = NULL,
+                        iscrowd = NULL) {
+  if (is.matrix(boxes)) {
+    boxes <- torch_tensor(boxes, dtype = torch_float32())
+  }
+  if (is.null(labels)) {
+    labels <- torch_ones(boxes$size(1), dtype = torch_long())
+  }
+  if (is.null(area)) {
+    area <- (boxes[, 3] - boxes[, 1]) * (boxes[, 4] - boxes[, 2])
+  }
+  if (is.null(iscrowd)) {
+    iscrowd <- torch_zeros(boxes$size(1), dtype = torch::torch_uint8())
+  }
+  list(
+    boxes = boxes,
+    labels = labels,
+    image_height = image_size[1],
+    image_width = image_size[2],
+    image_id = torch_tensor(image_id, dtype = torch_long()),
+    area = area,
+    iscrowd = iscrowd
+  )
+}
