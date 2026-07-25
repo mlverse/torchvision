@@ -24,7 +24,7 @@ cropping. Empty regions are filled with black.
 \details{
 The bounding boxes (if present) are shifted to account for the expanded
 canvas and converted to rotated format via
-\code{\link{target_transform_rotate_box}}.
+\code{\link{target_transform_rotate}}.
 }
 \examples{
 \dontrun{

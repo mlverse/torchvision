@@ -153,7 +153,7 @@ test_that("target_transform_resize with integer handles landscape image", {
 })
 
 
-test_that("target_transform_resize works with pipe", {
+test_that("target_transform_resize can be composed with pipe", {
   skip_if_not_installed("magrittr")
 
   target <- make_detection_target(boxes = matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
@@ -204,9 +204,9 @@ test_that("target_transform_resize does not mutate the input target", {
   expect_false(identical(as.matrix(out$boxes$cpu()), original_boxes))
 })
 
-test_that("target_transform_rotate_box converts boxes to xyxyr format", {
+test_that("target_transform_rotate converts boxes to xyxyr format", {
   target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
-  result <- target_transform_rotate_box(target, angle = 0)
+  result <- target_transform_rotate(target, angle = 0)
 
   expect_tensor_shape(result$boxes, c(1, 5))
   expect_tensor_dtype(result$boxes, torch_float())
@@ -214,9 +214,9 @@ test_that("target_transform_rotate_box converts boxes to xyxyr format", {
   expect_equal_to_r(result$boxes[1, 5], 0)
 })
 
-test_that("target_transform_rotate_box applies non-zero rotation angle to boxes", {
+test_that("target_transform_rotate applies non-zero rotation angle to boxes", {
   target <- make_detection_target(boxes = matrix(c(70, 40, 130, 160), ncol = 4), image_size = c(200L, 200L))
-  result <- target_transform_rotate_box(target, angle = 73)
+  result <- target_transform_rotate(target, angle = 73)
 
   cx <- 100
   cy <- 100
@@ -239,7 +239,7 @@ test_that("target_transform_rotate_box applies non-zero rotation angle to boxes"
   expect_true(all(corners_y >= 0 & corners_y <= 200))
 })
 
-test_that("target_transform_rotate_box preserves labels and other target fields", {
+test_that("target_transform_rotate preserves labels and other target fields", {
   target <- make_detection_target(
     boxes = matrix(
       c(10, 20, 50, 60, 5, 5, 15, 25),
@@ -250,47 +250,75 @@ test_that("target_transform_rotate_box preserves labels and other target fields"
   )
   original_labels <- target$labels$clone()
 
-  result <- target_transform_rotate_box(target, angle = 0)
+  result <- target_transform_rotate(target, angle = 0)
 
   expect_true(result$labels$eq(original_labels)$all()$item())
   expect_equal(result$image_height, 100L)
   expect_equal(result$image_width, 200L)
 })
 
-test_that("target_transform_rotate_box handles empty boxes", {
+test_that("target_transform_rotate handles empty boxes", {
   target <- make_detection_target(boxes = matrix(numeric(0), ncol = 4), labels = torch_zeros(0L, dtype = torch_long()))
-  result <- target_transform_rotate_box(target, angle = 27)
+  result <- target_transform_rotate(target, angle = 27)
 
   expect_tensor_shape(result$boxes, c(0, 5))
   expect_tensor_dtype(result$boxes, torch_float())
 })
 
-test_that("target_transform_rotate_box handles multiple boxes", {
+test_that("target_transform_rotate handles multiple boxes", {
   boxes <- matrix(c(10, 20, 50, 60, 100, 200, 150, 250, 0, 0, 300, 400), ncol = 4, byrow = TRUE)
   target <- make_detection_target(boxes)
-  result <- target_transform_rotate_box(target, angle = 442)
+  result <- target_transform_rotate(target, angle = 442)
 
   expect_tensor_shape(result$boxes, c(3, 5))
   expect_tensor_dtype(result$boxes, torch_float())
   expect_equal_to_r(result$boxes[, 5], rep(442, 3L))
 })
 
-test_that("target_transform_rotate_box does not mutate input when (angle %% 180 == 0)", {
+test_that("target_transform_rotate does not mutate input when (angle %% 180 == 0)", {
   boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
   target <- make_detection_target(boxes)
 
-  result <- target_transform_rotate_box(target, angle = 180)
+  result <- target_transform_rotate(target, angle = 180)
 
   expect_equal_to_r(result$boxes, matrix(c(boxes, 180), ncol = 5))
   expect_tensor_shape(result$boxes, c(1, 5))
 
-  result <- target_transform_rotate_box(target, angle = 360)
+  result <- target_transform_rotate(target, angle = 360)
 
   expect_equal_to_r(result$boxes, matrix(c(boxes, 360), ncol = 5))
   expect_tensor_shape(result$boxes, c(1, 5))
 
-  result <- target_transform_rotate_box(target, angle = -180)
+  result <- target_transform_rotate(target, angle = -180)
 
   expect_equal_to_r(result$boxes, matrix(c(boxes, -180), ncol = 5))
   expect_tensor_shape(result$boxes, c(1, 5))
 })
+
+test_that("target_transform_rotate can be composed with pipe", {
+  skip_if_not_installed("magrittr")
+
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  target <- make_detection_target(boxes,
+                                  image_size = c(100L, 200L))
+
+  # Usage with the native pipe
+  out <- target |>
+    target_transform_rotate(angle = 15) |>
+    target_transform_rotate(angle = 165)
+
+  expect_equal_to_r(out$boxes, matrix(c(boxes, 180), ncol = 5))
+  expect_equal(out$image_height, target$image_height)
+  expect_equal(out$image_width, target$image_width)
+
+  # Usage with the magrittr pipe
+  out <- target %>%
+    target_transform_rotate(angle = -165) %>%
+    target_transform_rotate(angle = -15)
+
+  expect_equal_to_r(out$boxes, out$boxes, matrix(c(boxes, -180), ncol = 5))
+  expect_equal(out$image_height, target$image_height)
+  expect_equal(out$image_width, target$image_width)
+})
+
+

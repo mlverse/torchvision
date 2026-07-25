@@ -245,7 +245,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #'   image_height = img$shape[2],
 #'   image_width = img$shape[3]
 #' )
-#' rotated_target <- target_transform_rotate_box(target, angle = 4)
+#' rotated_target <- target_transform_rotate(target, angle = 4)
 #'
 #' # Rotated boxes (red, drawn as polygons)
 #' after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
@@ -260,8 +260,24 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' @family target_transforms_detection
 #'
 #' @export
-target_transform_rotate_box <- function(target, angle = 0) {
+target_transform_rotate <- function(target, angle = 0) {
+  UseMethod("target_transform_rotate")
+}
+
+#' @export
+target_transform_rotate.default <- function(target,...) {
+  not_implemented_for_class(img)
+}
+
+#' @rdname target_transform_rotate
+#' @export
+target_transform_rotate.list <- function(target, angle = 0) {
+  # check list target is an object_detection_target
+  if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
+    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fct target_transform_rotate}.")
+  }
   orig_boxes <- target$boxes
+
   cxcywh <- box_xyxy_to_cxcywh(orig_boxes)
   cx <- cxcywh[, 1]$unsqueeze(-1)
   cy <- cxcywh[, 2]$unsqueeze(-1)
@@ -326,21 +342,30 @@ target_transform_rotate_box <- function(target, angle = 0) {
     hw <- hw * scale
     hh <- hh * scale
 
-    boxes <- torch_cat(list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))), dim = -1L)
+    boxes <- torch_cat(
+      list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))),
+      dim = -1L
+    )
   }
 
   target$boxes <- boxes
   target
 }
 
-#' @rdname target_transform_rotate_box
+#' @rdname target_transform_rotate
 #' @export
-target_transform_rotate_box.dataset <- function(target, angle = 0) {
+target_transform_rotate.dataset <- function(target, angle = 0) {
+  # Capture original getitem in closure
   original_getitem <- target$.getitem
+
+  # Override getitem to apply rotation transform on-the-fly
   target$.getitem <- function(index) {
     item <- original_getitem(index)
-    item$y <- target_transform_rotate_box(item$y, angle = angle)
+    # Explicit dispatch to list method to avoid ambiguity
+    item$y <- target_transform_rotate.list(item$y, angle = angle)
     item
   }
+
+  # Return the modified dataset (copy-on-modify ensures original is preserved)
   target
 }

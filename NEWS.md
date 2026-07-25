@@ -14,7 +14,7 @@
 ## New features
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
-* Added `target_transform_rotate_box()` for converting bounding boxes from xyxy to xyxyr format with a rotation angle (@DerrickUnleashed, #338). 
+* Added `target_transform_rotate()` for converting bounding boxes from xyxy to xyxyr format with a rotation angle (@DerrickUnleashed, #338). 
   Both operates on detection item targets (the `y` part of a dataset item) for composable target transform pipelines. 
 * Added a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons (@DerrickUnleashed, #338). 
 * Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)

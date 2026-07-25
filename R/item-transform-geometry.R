@@ -6,7 +6,7 @@
 #'
 #' The bounding boxes (if present) are shifted to account for the expanded
 #' canvas and converted to rotated format via
-#' \code{\link{target_transform_rotate_box}}.
+#' \code{\link{target_transform_rotate}}.
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} object
 #'   containing an image tensor and associated target data (boxes, labels).
@@ -76,7 +76,7 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
   x$y$image_height <- new_h
   x$y$image_width <- new_w
 
-  x$y <- target_transform_rotate_box(x$y, angle = angle)
+  x$y <- target_transform_rotate(x$y, angle = angle)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }
