@@ -121,3 +121,16 @@ make_detection_target <- function(boxes,
     iscrowd = iscrowd
   )
 }
+
+make_detection_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {
+  x <- torch_randn(3, image_size[1], image_size[2])
+  y <- make_detection_target(
+    boxes = boxes,
+    labels = labels,
+    image_size = image_size
+  )
+  item <- list(x = x, y = y)
+  class(item) <- c("image_with_bounding_box", "list")
+  item
+}
+

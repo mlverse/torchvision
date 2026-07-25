@@ -274,7 +274,7 @@ target_transform_rotate.default <- function(target,...) {
 target_transform_rotate.list <- function(target, angle = 0) {
   # check list target is an object_detection_target
   if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
-    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fct target_transform_rotate}.")
+    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fn target_transform_rotate}.")
   }
   orig_boxes <- target$boxes
 
