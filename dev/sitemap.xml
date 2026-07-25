@@ -24,6 +24,7 @@
 <url><loc>/reference/box_xywh_to_xyxy.html</loc></url>
 <url><loc>/reference/box_xyxy_to_cxcywh.html</loc></url>
 <url><loc>/reference/box_xyxy_to_xywh.html</loc></url>
+<url><loc>/reference/box_xyxy_to_xyxyr.html</loc></url>
 <url><loc>/reference/caltech_classes.html</loc></url>
 <url><loc>/reference/caltech_dataset.html</loc></url>
 <url><loc>/reference/cifar_datasets.html</loc></url>
@@ -49,6 +50,7 @@
 <url><loc>/reference/image_folder_dataset.html</loc></url>
 <url><loc>/reference/imagenet_classes.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/item_transform_rotate.html</loc></url>
 <url><loc>/reference/lfw_dataset.html</loc></url>
 <url><loc>/reference/list_collection_datasets.html</loc></url>
 <url><loc>/reference/magick_loader.html</loc></url>
@@ -90,6 +92,7 @@
 <url><loc>/reference/search_collection.html</loc></url>
 <url><loc>/reference/target_transform_coco_masks.html</loc></url>
 <url><loc>/reference/target_transform_resize.html</loc></url>
+<url><loc>/reference/target_transform_rotate_box.html</loc></url>
 <url><loc>/reference/target_transform_trimap_masks.html</loc></url>
 <url><loc>/reference/tensor_image_browse.html</loc></url>
 <url><loc>/reference/tensor_image_display.html</loc></url>

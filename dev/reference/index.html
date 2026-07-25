@@ -84,11 +84,11 @@
     </div>
 
     <table class="ref-index"><colgroup><col class="alias"><col class="title"></colgroup><tbody><tr><th colspan="2">
-          <h2 id="transforms">Transforms <a href="#transforms" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Image transformation functions</p>
+          <h2 id="image-transforms">Image Transforms <a href="#image-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions applied to Image (tensor images, magick images,…)</p>
         </th>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="unitary-transformation">Unitary transformation <a href="#unitary-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="unitary-image-transformation">Unitary image transformation <a href="#unitary-image-transformation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -172,7 +172,7 @@
         </td>
         <td><p>Vertically flip a Magick Image or Tensor</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="random-transformation">Random transformation <a href="#random-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="random-image-transformation">Random image transformation <a href="#random-image-transformation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -216,7 +216,7 @@
         </td>
         <td><p>Vertically flip an image randomly with a given probability</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="combining-multiplying-transformations">Combining / multiplying transformations <a href="#combining-multiplying-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="combining-multiplying-image-transformations">Combining / multiplying image transformations <a href="#combining-multiplying-image-transformations" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -248,20 +248,28 @@
         </td>
         <td><p>Crop an image and the flipped image each into four corners and a central crop</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="target-transforms">Target Transforms <a href="#target-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions applied to targets (usualy the <code>$y</code> parameter)</p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="target-transformations-for-object-detection">Target transformations for object detection <a href="#target-transformations-for-object-detection" class="anchor" aria-hidden="true"></a></h3>
-          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into object-detection compatible with draw_bounding_boxes() and object-detection models.</p>
+          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into object-detection targets compatible with draw_bounding_boxes() and object-detection models.</p>
         </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="target_transform_resize.html">target_transform_resize()</a></code> </p>
         </td>
         <td><p>Resize the bounding boxes of a detection target</p></td>
       </tr><tr><td>
+          <p><code><a href="target_transform_rotate_box.html">target_transform_rotate_box()</a></code> <code><a href="target_transform_rotate_box.html">target_transform_rotate_box.dataset()</a></code> </p>
+        </td>
+        <td><p>Convert bounding boxes to rotated format</p></td>
+      </tr><tr><td>
           <p><code><a href="transform_sahi_crop.html">prepare_sahi_split()</a></code> <code><a href="transform_sahi_crop.html">target_transform_sahi_crop()</a></code> <code><a href="transform_sahi_crop.html">transform_sahi_crop()</a></code> </p>
         </td>
         <td><p>Slicing Aid for Hyper Inference (SAHI)</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="target-transformations-for-segmentation">Target transformations for segmentation <a href="#target-transformations-for-segmentation" class="anchor" aria-hidden="true"></a></h3>
-          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into segmentation masks compatible with draw_segmentation_masks() and segmentation models.</p>
+          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into segmentation masks targets compatible with draw_segmentation_masks() and segmentation models.</p>
         </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="target_transform_coco_masks.html">target_transform_coco_masks()</a></code> </p>
@@ -272,6 +280,22 @@
         </td>
         <td><p>Target Transform: Trimap to Boolean Masks</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="item-transforms">Item Transforms <a href="#item-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions modifying both image (<code>$x</code> parameter ) and target (<code>$y</code> parameter ) of a single dataset item. Result shall be compatible with <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> for object-detection items and with <code>draw_segmentation_mask()</code> for semantic-segmentation items.</p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="unitary-item-transformations">Unitary item transformations <a href="#unitary-item-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset <strong>items</strong> by an <strong>unitary</strong> transformation.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="item_transform_rotate.html">item_transform_rotate()</a></code> </p>
+        </td>
+        <td><p>Rotate dataset item</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="random-item-transformations">Random item transformations <a href="#random-item-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset <strong>items</strong> by a <strong>random</strong> transformation.</p>
+        </th>
+      </tr></tbody><tbody></tbody><tbody><tr><th colspan="2">
           <h2 id="models">Models <a href="#models" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Computer Vision deep-learning Model architectures</p>
         </th>
@@ -615,6 +639,10 @@
           <p><code><a href="box_xyxy_to_xywh.html">box_xyxy_to_xywh()</a></code> </p>
         </td>
         <td><p>box_xyxy_to_xywh</p></td>
+      </tr><tr><td>
+          <p><code><a href="box_xyxy_to_xyxyr.html">box_xyxy_to_xyxyr()</a></code> </p>
+        </td>
+        <td><p>box_xyxy_to_xyxyr</p></td>
       </tr><tr><td>
           <p><code><a href="clip_boxes_to_image.html">clip_boxes_to_image()</a></code> </p>
         </td>
