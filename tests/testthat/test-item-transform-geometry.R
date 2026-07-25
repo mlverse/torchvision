@@ -170,3 +170,23 @@ test_that("item_transform_rotate image dtype is preserved", {
 
   expect_equal(result$x$dtype, item$x$dtype)
 })
+
+test_that("item_transform_rotate can be composed", {
+  boxes <- matrix(c(
+    10, 20, 50, 60,
+    100, 200, 150, 250,
+    0, 0, 300, 400
+  ), ncol = 4, byrow = TRUE)
+  item <- make_detection_item(boxes)
+  result <- item |>
+    item_transform_rotate(angle = 34) |>
+    item_transform_rotate(angle = 146)
+
+  expect_equal(result$x$shape, c(3, 100, 200))
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+  expect_equal(result$y$boxes$shape, c(3, 5))
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes)
+  expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))
+})
+

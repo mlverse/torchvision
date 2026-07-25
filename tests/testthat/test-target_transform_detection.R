@@ -316,7 +316,7 @@ test_that("target_transform_rotate can be composed with pipe", {
     target_transform_rotate(angle = -165) %>%
     target_transform_rotate(angle = -15)
 
-  expect_equal_to_r(out$boxes, out$boxes, matrix(c(boxes, -180), ncol = 5))
+  expect_equal_to_r(out$boxes, matrix(c(boxes, -180), ncol = 5))
   expect_equal(out$image_height, target$image_height)
   expect_equal(out$image_width, target$image_width)
 })
