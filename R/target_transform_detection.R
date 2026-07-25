@@ -266,7 +266,7 @@ target_transform_rotate <- function(target, angle = 0) {
 
 #' @export
 target_transform_rotate.default <- function(target,...) {
-  not_implemented_for_class(img)
+  not_implemented_for_class(target)
 }
 
 #' @rdname target_transform_rotate
