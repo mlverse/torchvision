@@ -728,8 +728,9 @@ rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = N
 
   assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
   theta <- torch::torch_tensor(matrix)$reshape(c(1, 2, 3))
-  w <- tail(img$shape, 2)[1]
-  h <- tail(img$shape, 2)[2]
+  # w/h follow Pillow convention (w = first spatial dim = H in torch)
+  w <- tail(img$shape, 2)[1]  # This is H in (C, H, W)
+  h <- tail(img$shape, 2)[2]  # This is W in (C, H, W)
 
   if (expand) {
     o_shape <- rotate_compute_output_size(theta, w, h)

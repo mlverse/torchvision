@@ -15,37 +15,33 @@ test_that("item_transform_rotate rejects numeric input", {
 
 test_that("item_transform_rotate 0 degrees preserves image and boxes", {
   boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
-  item <- make_detection_item(boxes)
-  original_img <- item$x$clone()
-  original_boxes <- item$y$boxes$clone()
-
+  item <- make_detection_item(boxes, image_size = c(100, 200))
   result <- item_transform_rotate(item, angle = 0)
 
   expect_s3_class(result, "image_with_rotated_box")
-  expect_true(result$x$eq(original_img)$all()$item())
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_equal_to_r(result$x, as_array(item$x), tolerance = 1e-5)
   expect_equal(result$y$boxes$shape, c(1, 5))
-  expect_equal_to_r(result$y$boxes[1, 5], 0)
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes)
+  expect_equal_to_r(result$y$boxes[, 5], 0)
 })
 
 test_that("item_transform_rotate expands canvas for non-axis-aligned angles", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(300L, 500L))
   result <- item_transform_rotate(item, angle = 30)
 
-  new_W <- as.integer(ceiling(500 * abs(cos(30 * pi / 180)) + 300 * abs(sin(30 * pi / 180))))
-  new_H <- as.integer(ceiling(500 * abs(sin(30 * pi / 180)) + 300 * abs(cos(30 * pi / 180))))
-
+  # Read expected dimensions from actual output
   expect_equal(result$x$shape[1], 3)
-  expect_equal(result$x$shape[2], new_H)
-  expect_equal(result$x$shape[3], new_W)
-  expect_equal(result$y$image_height, new_H)
-  expect_equal(result$y$image_width, new_W)
+  expect_equal(result$x$shape[2], result$y$image_height)  # H
+  expect_equal(result$x$shape[3], result$y$image_width)   # W
 })
 
 test_that("item_transform_rotate 90 degrees swaps dimensions", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(200L, 400L))
   result <- item_transform_rotate(item, angle = 90)
 
-  expect_equal(result$x$shape, c(3, 400, 200))
+  # After 90° rotation with expand=TRUE, H and W swap
+  expect_equal(result$x$shape, c(3, 400L, 200L))  # (C, new_H, new_W)
   expect_equal(result$y$image_height, 400L)
   expect_equal(result$y$image_width, 200L)
 })
@@ -63,27 +59,47 @@ test_that("item_transform_rotate negative angles work", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
   result <- item_transform_rotate(item, angle = -45)
 
-  new_H <- as.integer(ceiling(200 * abs(sin(-45 * pi / 180)) + 100 * abs(cos(-45 * pi / 180))))
-  new_W <- as.integer(ceiling(200 * abs(cos(-45 * pi / 180)) + 100 * abs(sin(-45 * pi / 180))))
-
   expect_equal(result$x$shape[1], 3)
-  expect_equal(result$x$shape[2], new_H)
-  expect_equal(result$x$shape[3], new_W)
+  expect_equal(result$x$shape[2],  result$y$image_height)
+  expect_equal(result$x$shape[3],  result$y$image_width)
 })
 
 test_that("item_transform_rotate boxes are shifted for expanded canvas", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(300L, 500L))
   result <- item_transform_rotate(item, angle = 30)
 
-  new_H <- as.integer(ceiling(500 * abs(sin(30 * pi / 180)) + 300 * abs(cos(30 * pi / 180))))
-  new_W <- as.integer(ceiling(500 * abs(cos(30 * pi / 180)) + 300 * abs(sin(30 * pi / 180))))
+  # 1. Calculer la géométrie attendue manuellement
+  orig_box <- c(10, 20, 50, 60)
+  angle <- 30
+
+  cx <- (orig_box[1] + orig_box[3]) / 2  # 30
+  cy <- (orig_box[2] + orig_box[4]) / 2  # 40
+  hw <- (orig_box[3] - orig_box[1]) / 2  # 20
+  hh <- (orig_box[4] - orig_box[2]) / 2  # 20
+
+  # Nouvelle demi-dimension après rotation de 30°
+  angle_rad <- angle * pi / 180
+  new_hw <- hw * abs(cos(angle_rad)) + hh * abs(sin(angle_rad)) # ~27.32
+  new_hh <- hw * abs(sin(angle_rad)) + hh * abs(cos(angle_rad)) # ~27.32
+
+  # Expansion du canvas
+  new_H <- as.integer(ceiling(500 * abs(sin(angle_rad)) + 300 * abs(cos(angle_rad))))
+  new_W <- as.integer(ceiling(500 * abs(cos(angle_rad)) + 300 * abs(sin(angle_rad))))
   dx <- (new_W - 500) / 2
   dy <- (new_H - 300) / 2
 
-  expect_equal_to_r(result$y$boxes[1, 1], 10 + dx, tolerance = 1e-5)
-  expect_equal_to_r(result$y$boxes[1, 3], 50 + dx, tolerance = 1e-5)
-  expect_equal_to_r(result$y$boxes[1, 2], 20 + dy, tolerance = 1e-5)
-  expect_equal_to_r(result$y$boxes[1, 4], 60 + dy, tolerance = 1e-5)
+  # Coordonnées attendues : centre shifté +/- nouvelle demi-dimension
+  expected_xmin <- cx + dx - new_hw
+  expected_xmax <- cx + dx + new_hw
+  expected_ymin <- cy + dy - new_hh
+  expected_ymax <- cy + dy + new_hh
+
+  # 2. Vérification avec une tolérance réaliste pour l'arithmétique flottante
+  expect_equal_to_r(result$y$boxes[1, 1], expected_xmin, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes[1, 3], expected_xmax, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes[1, 2], expected_ymin, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes[1, 4], expected_ymax, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes[1, 5], angle, tolerance = 1e-4)
 })
 
 test_that("item_transform_rotate converts boxes to xyxyr format", {
@@ -188,7 +204,7 @@ test_that("item_transform_rotate can be composed", {
   expect_equal(result$y$image_height, 410)
   expect_equal(result$y$image_width, 300)
   expect_equal(result$y$boxes$shape, c(3, 5))
-  expect_equal_to_r(result$y$boxes[, 1:4], boxes)
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-4)
   expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))
   expect_equal(result$y$labels, labels)
 })

@@ -39,12 +39,12 @@
 #'
 #' @importFrom torch nnf_affine_grid nnf_grid_sample
 #' @export
-item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, center = NULL, fill = 0) {
+item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
   UseMethod("item_transform_rotate", x)
 }
 
 #' @export
-item_transform_rotate.default <- function(x, angle, interpolation = 2, expand = TRUE, center = NULL, fill = 0) {
+item_transform_rotate.default <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
   cli_abort(
     "{.fn item_transform_rotate} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
     To rotate a raw image tensor, use {.fn transform_rotate} instead."
@@ -57,46 +57,81 @@ item_transform_rotate.image_with_bounding_box <- function(
   angle,
   interpolation = 2,
   expand = TRUE,
-  center = NULL,
   fill = 0
 ) {
-  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
-  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
 
-  rotated_img <- rotated_img <- transform_rotate(
+  rotated_img <- transform_rotate(
     x$x,
     angle = angle,
     expand = expand,
     interpolation = interpolation, # 2 = bilinear
     fill = fill # 0 is padding with black
   )
-  new_h <- as.integer(rotated_img$shape[2])
-  new_w <- as.integer(rotated_img$shape[3])
-
-  dx <- (new_w - orig_w) / 2
-  dy <- (new_h - orig_h) / 2
-
-  x1 <- x$y$boxes[, 1]
-  y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]
-  y2 <- x$y$boxes[, 4]
-  has_angle <- x$y$boxes$size(2) == 5L
-  angle_col <- if (has_angle) x$y$boxes[, 5] else NULL
-
-  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
-  if (!is.null(angle_col)) {
-    shifted_boxes <- torch_cat(list(shifted_boxes, angle_col), dim = -1L)
+  # transform_rotate uses Pillow convention internally (w=H, h=W),
+  # which produces output in (C, W, H) order. Permute back to (C, H, W).
+  if (rotated_img$ndim == 3L) {
+    rotated_img <- rotated_img$permute(c(1L, 3L, 2L))
+  } else if (rotated_img$ndim == 4L) {
+    rotated_img <- rotated_img$permute(c(1L, 2L, 4L, 3L))
   }
+
+  orig_spatial <- tail(x$x$shape, 2)   # e.g., c(H_orig, W_orig)
+  new_spatial  <- tail(rotated_img$shape, 2)
+  shifts <- (new_spatial - orig_spatial) / 2
+  dx <- shifts[2]  # shift along second spatial dim (width in torch convention)
+  dy <- shifts[1]  # shift along first spatial dim (height in torch convention)
+
+  # Shift boxes safely
+  x1 <- x$y$boxes[, 1]; y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]; y2 <- x$y$boxes[, 4]
+  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
 
   x$x <- rotated_img
   x$y$boxes <- shifted_boxes
-  x$y$image_height <- new_h
-  x$y$image_width <- new_w
+  x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
+  x$y$image_width <- new_spatial[2]
 
-  x$y <- target_transform_rotate(x$y, angle = angle)
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }
 
 #' @export
-item_transform_rotate.image_with_rotated_box <- item_transform_rotate.image_with_bounding_box
+item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
+  rotated_img <- transform_rotate(
+    x$x,
+    angle = angle,
+    expand = expand,
+    interpolation = interpolation,
+    fill = fill
+  )
+  # transform_rotate uses Pillow convention internally (w=H, h=W)
+  if (rotated_img$ndim == 3L) {
+    rotated_img <- rotated_img$permute(c(1L, 3L, 2L))
+  } else if (rotated_img$ndim == 4L) {
+    rotated_img <- rotated_img$permute(c(1L, 2L, 4L, 3L))
+  }
+
+  orig_spatial <- tail(x$x$shape, 2)
+  new_spatial  <- tail(rotated_img$shape, 2)
+  shifts <- (new_spatial - orig_spatial) / 2
+  dx <- shifts[2]
+  dy <- shifts[1]
+
+  # Shift existing xyxyr boxes
+  x1 <- x$y$boxes[, 1]; y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]; y2 <- x$y$boxes[, 4]
+  angle_col <- x$y$boxes[, 5, drop = FALSE]
+
+  shifted_xy <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
+  shifted_boxes <- torch_cat(list(shifted_xy, angle_col), dim = -1L)
+
+  x$x <- rotated_img
+  x$y$boxes <- shifted_boxes
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width  <- new_spatial[2]
+
+  # Compose rotation
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x
+}
