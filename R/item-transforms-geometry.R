@@ -81,6 +81,9 @@ item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
   x
 }
 
+#' @export
+item_transform_rotate.image_with_bounding_box <- item_transform_rotate.image_with_bounding_box
+
 rotate_image_tensor <- function(img, angle) {
   if (abs(angle) < 1e-6) {
     if (img$ndim == 4) img <- img$squeeze(1)
