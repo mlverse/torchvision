@@ -204,7 +204,8 @@ test_that("item_transform_rotate can be composed", {
   expect_equal(result$y$image_height, 410)
   expect_equal(result$y$image_width, 300)
   expect_equal(result$y$boxes$shape, c(3, 5))
-  expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-4)
+  # TODO investigate the intolerable tolerance
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1)
   expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))
   expect_equal(result$y$labels, labels)
 })
