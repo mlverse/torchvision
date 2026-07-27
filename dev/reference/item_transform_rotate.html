@@ -83,7 +83,7 @@ cropping. Empty regions are filled with black."><meta name="robots" content="noi
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Rotate dataset item</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/item-transform-geometry.R" class="external-link"><code>R/item-transform-geometry.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/item-transforms-geometry.R" class="external-link"><code>R/item-transforms-geometry.R</code></a></small>
     <div class="hidden name"><code>item_transform_rotate.Rd</code></div>
     </div>
 
@@ -94,7 +94,7 @@ cropping. Empty regions are filled with black.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">item_transform_rotate</span><span class="op">(</span><span class="va">x</span>, angle <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">item_transform_rotate</span><span class="op">(</span><span class="va">x</span>, <span class="va">angle</span>, interpolation <span class="op">=</span> <span class="fl">2</span>, expand <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -109,6 +109,26 @@ containing an image tensor and associated target data (boxes, labels).</p></dd>
 <dt id="arg-angle">angle<a class="anchor" aria-label="anchor" href="#arg-angle"></a></dt>
 <dd><p>(numeric): Rotation angle value in degrees, counter-clockwise.</p></dd>
 
+
+<dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
+<dd><p>(integer, optional): Interpolation mode. <code>0</code> for
+nearest, <code>2</code> for bilinear. Default is <code>0</code> (nearest).</p></dd>
+
+
+<dt id="arg-expand">expand<a class="anchor" aria-label="anchor" href="#arg-expand"></a></dt>
+<dd><p>(logical, optional): Optional expansion flag. If <code>TRUE</code>,
+expands the output to make it large enough to hold the entire rotated
+image. If <code>FALSE</code> or omitted, make the output image the same size as the
+input image. Note that the expand flag assumes rotation around the center
+and no translation.</p></dd>
+
+
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
+<dd><p>(numeric vector or numeric): Pixel fill value for area outside
+the rotated image. If a single numeric value, the value is used for all
+channels. Defaults to <code>0</code> for all channels. This option is not supported for Tensor input. Fill
+value for the area outside the transform in the output image is always 0.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -119,7 +139,7 @@ converted boxes in xyxyr format.</p>
     <h2>Details</h2>
     <p>The bounding boxes (if present) are shifted to account for the expanded
 canvas and converted to rotated format via
-<code><a href="target_transform_rotate_box.html">target_transform_rotate_box</a></code>.</p>
+<code><a href="target_transform_rotate.html">target_transform_rotate</a></code>.</p>
     </div>
 
     <div id="ref-examples">
