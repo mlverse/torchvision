@@ -1,8 +1,8 @@
 #' Rotate dataset item
 #'
-#' Rotates the image inside a dataset item by a given angle around its center.
+#' Rotates a dataset item by a given angle around its center.
 #' The canvas is expanded so that the entire rotated image is visible with no
-#' cropping. Empty regions are filled with black.
+#' cropping. Empty regions are filled with given fill color.
 #'
 #' The bounding boxes (if present) are shifted to account for the expanded
 #' canvas and converted to rotated format via
@@ -29,7 +29,7 @@
 #'
 #' after <- item_transform_rotate(before, angle = 30)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 10)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #' tensor_image_browse(before_plot)
 #' tensor_image_browse(after_plot)
@@ -86,7 +86,6 @@ item_transform_rotate.image_with_bounding_box <- function(
   x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
   x$y$image_width <- new_spatial[2]
 
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }
