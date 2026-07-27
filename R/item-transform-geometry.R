@@ -131,12 +131,22 @@ rotate_image_tensor <- function(img, angle) {
 #'
 #' @examples
 #' \dontrun{
-#' boxes <- torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4), dtype = torch_float32())
-#' img <- torch_randn(3, 100, 200)
-#' item <- list(x = img, y = list(boxes = boxes, labels = torch_tensor(1L)))
-#' class(item) <- c("image_with_bounding_box", "list")
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
 #'
-#' flipped <- item_transform_hflip(item)
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_hflip(before)
+#'
+#' # Draw and visualize side by side
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
 #' }
 #'
 #' @family item_unitary_transforms
