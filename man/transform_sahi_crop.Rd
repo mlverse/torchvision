@@ -103,6 +103,7 @@ tensor_image_browse(grid)
 }
 \seealso{
 Other target_transforms_detection:
+\code{\link[=target_transform_affine]{target_transform_affine()}},
 \code{\link[=target_transform_resize]{target_transform_resize()}},
 \code{\link[=target_transform_rotate]{target_transform_rotate()}}
 
