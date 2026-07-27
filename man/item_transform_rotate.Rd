@@ -54,7 +54,7 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_rotate(before, angle = 30)
 
-before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 10)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
 after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 tensor_image_browse(before_plot)
 tensor_image_browse(after_plot)
