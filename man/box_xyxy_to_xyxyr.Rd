@@ -7,22 +7,17 @@
 box_xyxy_to_xyxyr(boxes, angle = 0)
 }
 \arguments{
-\item{boxes}{(Tensor[N, 4]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format
-which will be converted.}
+\item{boxes}{(Tensor[N, 4] or [N, 5]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})}
+or \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r_{deg})} format, where \eqn{r_{deg}} format.}
 
-\item{angle}{(numeric, optional): Rotation angle in degrees (anti-clockwise).
-A single numeric value applied to all boxes, or a tensor of shape \code{(N,)}
-with one angle per box. Default is \code{0}.}
+\item{angle}{(numeric): Rotation angle in degrees (anti-clockwise).
+A single numeric value or a tensor of shape (N,). Default is 0.}
 }
 \value{
-boxes (Tensor[N, 5]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format,
-where \eqn{r} is the provided rotation angle in degrees. The bounding box
-coordinates are computed by rotating the original axis-aligned box around
-its center by \eqn{r} degrees anti-clockwise, then taking the axis-aligned
-bounding box of the rotated corners.
+(Tensor[N, 5]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r_{deg})} format with accumulated angle.
 }
 \description{
 Converts bounding boxes from \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format to
-\eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r)} format, where \eqn{r} is the rotation
-angle in degrees (anti-clockwise). For axis-aligned boxes, \eqn{r = 0}.
+\eqn{(x_{min}, y_{min}, x_{max}, y_{max}, r_{deg})} format, where \eqn{r_{deg}} is the rotation
+angle in degrees (anti-clockwise). Handles composition natively.
 }

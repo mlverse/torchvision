@@ -1,7 +1,34 @@
 test_that("vgg models works", {
 
   vggs <- list(
-    model_vgg11,
+    model_vgg11
+  )
+
+  for (m in vggs) {
+
+    model <- m()
+    expect_tensor_shape(model(torch_ones(5, 3, 224, 224)), c(5, 1000))
+
+  }
+
+  skip_on_ci() # unfortunatelly we don't have enough RAM on CI for that.
+  #skip_on_os(os = "mac") # not downloading a bunch of files locally.
+  #skip_on_os(os = "windows") # not downloading a bunch of files locally.
+
+  for (m in vggs) {
+    model <- m(pretrained = TRUE)
+    expect_tensor_shape(model(torch_ones(1, 3, 224, 224)), c(1, 1000))
+    gc()
+  }
+  unlink_model_file()
+})
+
+test_that("large vgg models works", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
+
+  vggs <- list(
     model_vgg11_bn,
     model_vgg13,
     model_vgg13_bn,

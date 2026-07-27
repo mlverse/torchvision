@@ -93,12 +93,10 @@ target_transform_resize <- function(target, size) {
 #' @family target_transforms_detection
 #' @export
 target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
-
   # Detect batch input: list of target lists
   if (is.list(y) && !"boxes" %in% names(y)) {
     if (is.list(sahi_split) && !inherits(sahi_split, "sahi_split")) {
-      return(Map(function(yi, sp) target_transform_sahi_crop(yi, sp, min_area_ratio),
-                 y, sahi_split))
+      return(Map(function(yi, sp) target_transform_sahi_crop(yi, sp, min_area_ratio), y, sahi_split))
     }
     return(lapply(y, function(yi) target_transform_sahi_crop(yi, sahi_split, min_area_ratio)))
   }
@@ -114,22 +112,25 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
   shape_y <- function(n_boxes, boxes_dtype, labels_val, labels_dtype, crop_h, crop_w) {
     out <- y
     out$boxes <- torch_zeros(c(n_boxes, 4), dtype = boxes_dtype)
-    if (labels_is_tensor)
+    if (labels_is_tensor) {
       out$labels <- torch_tensor(labels_val, dtype = labels_dtype)
-    else
+    } else {
       out$labels <- labels_val
-    if (!is.null(y$area))
+    }
+    if (!is.null(y$area)) {
       out$area <- torch_zeros(n_boxes, dtype = y$area$dtype)
-    if (!is.null(y$image_height))
+    }
+    if (!is.null(y$image_height)) {
       out$image_height <- crop_h
-    if (!is.null(y$image_width))
+    }
+    if (!is.null(y$image_width)) {
       out$image_width <- crop_w
+    }
     out$iscrowd <- NULL
     out
   }
 
   results <- lapply(crop_windows, function(cw) {
-
     # Convert 1-based crop window coordinates to 0-based for box clipping
     top <- cw$top - 1
     left <- cw$left - 1
@@ -178,18 +179,22 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
     out_y <- y
     out_y$boxes <- new_boxes
 
-    if (labels_is_tensor)
+    if (labels_is_tensor) {
       out_y$labels <- labels[mask_idx]
-    else
+    } else {
       out_y$labels <- labels[mask_idx]
+    }
 
-    if (!is.null(y$area))
+    if (!is.null(y$area)) {
       out_y$area <- keep_area[mask_idx]
+    }
 
-    if (!is.null(y$image_height))
+    if (!is.null(y$image_height)) {
       out_y$image_height <- crop_h
-    if (!is.null(y$image_width))
+    }
+    if (!is.null(y$image_width)) {
       out_y$image_width <- crop_w
+    }
 
     out_y$iscrowd <- y$iscrowd[mask_idx]
 
@@ -240,7 +245,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #'   image_height = img$shape[2],
 #'   image_width = img$shape[3]
 #' )
-#' rotated_target <- target_transform_rotate_box(target, angle = 4)
+#' rotated_target <- target_transform_rotate(target, angle = 4)
 #'
 #' # Rotated boxes (red, drawn as polygons)
 #' after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
@@ -255,8 +260,24 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' @family target_transforms_detection
 #'
 #' @export
-target_transform_rotate_box <- function(target, angle = 0) {
+target_transform_rotate <- function(target, angle = 0) {
+  UseMethod("target_transform_rotate")
+}
+
+#' @export
+target_transform_rotate.default <- function(target,...) {
+  not_implemented_for_class(target)
+}
+
+#' @rdname target_transform_rotate
+#' @export
+target_transform_rotate.list <- function(target, angle = 0) {
+  # check list target is an object_detection_target
+  if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
+    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fn target_transform_rotate}.")
+  }
   orig_boxes <- target$boxes
+
   cxcywh <- box_xyxy_to_cxcywh(orig_boxes)
   cx <- cxcywh[, 1]$unsqueeze(-1)
   cy <- cxcywh[, 2]$unsqueeze(-1)
@@ -271,59 +292,80 @@ target_transform_rotate_box <- function(target, angle = 0) {
     img_w <- as.numeric(img_w)
 
     angle_col <- boxes[, 5]
-    angle_rad <- torch_deg2rad(angle_col$reshape(c(-1, 1)))
+    angle_rad <- deg2rad(angle_col$reshape(c(-1, 1)))
     ct <- torch_cos(angle_rad)
     st <- torch_sin(angle_rad)
 
     hw <- (cxcywh[, 3] / 2)$unsqueeze(-1)
     hh <- (cxcywh[, 4] / 2)$unsqueeze(-1)
 
-    dx <- torch_cat(list(
-      -hw * ct + hh * st,
-       hw * ct + hh * st,
-       hw * ct - hh * st,
-      -hw * ct - hh * st
-    ), dim = -1)
+    dx <- torch_cat(
+      list(
+        -hw * ct + hh * st,
+        hw * ct + hh * st,
+        hw * ct - hh * st,
+        -hw * ct - hh * st
+      ),
+      dim = -1
+    )
 
-    dy <- torch_cat(list(
-      -hw * st - hh * ct,
-       hw * st - hh * ct,
-       hw * st + hh * ct,
-      -hw * st + hh * ct
-    ), dim = -1)
+    dy <- torch_cat(
+      list(
+        -hw * st - hh * ct,
+        hw * st - hh * ct,
+        hw * st + hh * ct,
+        -hw * st + hh * ct
+      ),
+      dim = -1
+    )
 
-    dist_left  <- torch_max(torch_clamp(-dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_left <- torch_max(torch_clamp(-dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
     dist_right <- torch_max(torch_clamp(dx, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
-    dist_down  <- torch_max(torch_clamp(-dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
-    dist_up    <- torch_max(torch_clamp(dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_down <- torch_max(torch_clamp(-dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
+    dist_up <- torch_max(torch_clamp(dy, min = 0), dim = -1)[[1]]$reshape(c(-1, 1))
 
     eps <- 1e-8
-    scale <- torch_min(torch_cat(list(
-      cx / torch_clamp(dist_left, min = eps),
-      (img_w - cx) / torch_clamp(dist_right, min = eps),
-      cy / torch_clamp(dist_down, min = eps),
-      (img_h - cy) / torch_clamp(dist_up, min = eps)
-    ), dim = -1), dim = -1)[[1]]$reshape(c(-1, 1))
+    scale <- torch_min(
+      torch_cat(
+        list(
+          cx / torch_clamp(dist_left, min = eps),
+          (img_w - cx) / torch_clamp(dist_right, min = eps),
+          cy / torch_clamp(dist_down, min = eps),
+          (img_h - cy) / torch_clamp(dist_up, min = eps)
+        ),
+        dim = -1
+      ),
+      dim = -1
+    )[[1]]$reshape(c(-1, 1))
     scale <- torch_clamp(scale, min = 0, max = 1.0)
 
     hw <- hw * scale
     hh <- hh * scale
 
-    boxes <- torch_cat(list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))), dim = -1L)
+    boxes <- torch_cat(
+      list(cx - hw, cy - hh, cx + hw, cy + hh, angle_col$reshape(c(-1, 1))),
+      dim = -1L
+    )
   }
 
   target$boxes <- boxes
   target
 }
 
-#' @rdname target_transform_rotate_box
+#' @rdname target_transform_rotate
 #' @export
-target_transform_rotate_box.dataset <- function(target, angle = 0) {
+target_transform_rotate.dataset <- function(target, angle = 0) {
+  # Capture original getitem in closure
   original_getitem <- target$.getitem
+
+  # Override getitem to apply rotation transform on-the-fly
   target$.getitem <- function(index) {
     item <- original_getitem(index)
-    item$y <- target_transform_rotate_box(item$y, angle = angle)
+    # Explicit dispatch to list method to avoid ambiguity
+    item$y <- target_transform_rotate.list(item$y, angle = angle)
     item
   }
+
+  # Return the modified dataset (copy-on-modify ensures original is preserved)
   target
 }

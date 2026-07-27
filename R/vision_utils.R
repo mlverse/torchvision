@@ -1,4 +1,5 @@
 #' @importFrom magrittr %>%
+#' @importFrom torch torch_uint8
 NULL
 
 #' A simplified version of torchvision.utils.make_grid

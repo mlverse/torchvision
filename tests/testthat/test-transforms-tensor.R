@@ -266,13 +266,13 @@ test_that("rotate", {
 test_that("rotate a rectangle image", {
 
   img <- torch::torch_tensor(matrix(1:20))$view(c(1, 4, 5))
-  output <- transform_rotate(img, 90)
+  output <- transform_rotate(img, 90, expand=TRUE)
 
   expect_tensor_shape(output, c(1,5,4))
   expect_equal_to_r(output[1,,1], c(5,4,3,2,1))
   expect_equal_to_r(output[1,,4], c(20,19,18,17,16))
 
-  outputb <- transform_rotate(img$unsqueeze(1), 90)
+  outputb <- transform_rotate(img$unsqueeze(1), 90, expand=TRUE)
 
   expect_tensor_shape(outputb, c(1,1,5,4))
   expect_equal_to_r(outputb[,1,,1]$squeeze(1), c(5,4,3,2,1))
