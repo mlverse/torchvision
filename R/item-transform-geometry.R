@@ -114,3 +114,82 @@ rotate_image_tensor <- function(img, angle) {
   nnf_grid_sample(img, grid, mode = "bilinear", padding_mode = "zeros",
                   align_corners = FALSE)$squeeze(1)
 }
+
+
+#' Horizontally flip a dataset item
+#'
+#' Flips the image inside a dataset item horizontally. For detection items,
+#' bounding box x-coordinates are adjusted to remain correct after the flip.
+#' For segmentation items, both the image and the masks are flipped.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#'
+#' @return A dataset item of the same class with the image and target
+#'   horizontally flipped.
+#'
+#' @examples
+#' \dontrun{
+#' boxes <- torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4), dtype = torch_float32())
+#' img <- torch_randn(3, 100, 200)
+#' item <- list(x = img, y = list(boxes = boxes, labels = torch_tensor(1L)))
+#' class(item) <- c("image_with_bounding_box", "list")
+#'
+#' flipped <- item_transform_hflip(item)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_hflip <- function(x) {
+  UseMethod("item_transform_hflip", x)
+}
+
+#' @export
+item_transform_hflip.default <- function(x) {
+  cli_abort(
+    "{.fn item_transform_hflip} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To flip a raw image tensor, use {.fn transform_hflip} instead."
+  )
+}
+
+#' @export
+item_transform_hflip.image_with_bounding_box <- function(x) {
+  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
+
+  x$x <- transform_hflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    x1 <- boxes[, 1]$clone()
+    x3 <- boxes[, 3]$clone()
+    boxes[, 1] <- orig_w - x3
+    boxes[, 3] <- orig_w - x1
+  }
+  x$y$boxes <- boxes
+
+  x
+}
+
+#' @export
+item_transform_hflip.image_with_segmentation_mask <- function(x) {
+  x$x <- transform_hflip(x$x)
+
+  masks <- x$y$masks
+  if (!is.null(masks) && masks$ndim >= 3) {
+    x$y$masks <- masks$flip(-1)
+  }
+
+  x
+}
+
+#' @export
+item_transform_hflip.dataset <- function(x) {
+  original_getitem <- x$.getitem
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_hflip(item)
+  }
+  x
+}
