@@ -320,6 +320,7 @@ target_transform_rotate_box <- function(target, angle = 0) {
 #' @export
 target_transform_rotate_box.dataset <- function(target, angle = 0) {
   original_getitem <- target$.getitem
+  unlockBinding(".getitem", as.environment(target))
   target$.getitem <- function(index) {
     item <- original_getitem(index)
     item$y <- target_transform_rotate_box(item$y, angle = angle)
