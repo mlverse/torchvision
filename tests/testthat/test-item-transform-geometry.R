@@ -222,7 +222,7 @@ test_that("item_transform_hflip preserves image shape for detection", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
-  expect_equal(result$x$shape, c(3, 100, 200))
+  expect_tensor_shape(result$x, c(3, 100, 200))
 })
 
 test_that("item_transform_hflip flips box x-coordinates", {
@@ -267,8 +267,8 @@ test_that("item_transform_hflip handles empty boxes", {
   )
   result <- item_transform_hflip(item)
 
-  expect_equal(result$y$boxes$shape, c(0, 4))
-  expect_equal(result$y$boxes$dtype, torch_float())
+  expect_tensor_shape(result$y$boxes, c(0, 4))
+  expect_tensor_dtype(result$y$boxes, torch_float())
 })
 
 test_that("item_transform_hflip handles multiple boxes", {
@@ -280,7 +280,7 @@ test_that("item_transform_hflip handles multiple boxes", {
   item <- make_item(boxes, image_size = c(500L, 600L))
   result <- item_transform_hflip(item)
 
-  expect_equal(result$y$boxes$shape, c(3, 4))
+  expect_tensor_shape(result$y$boxes, c(3, 4))
   expect_equal_to_r(result$y$boxes[1, 1], 600 - 50)
   expect_equal_to_r(result$y$boxes[1, 3], 600 - 10)
   expect_equal_to_r(result$y$boxes[2, 1], 600 - 150)
@@ -310,18 +310,28 @@ test_that("item_transform_hflip preserves class for detection", {
   expect_s3_class(result, "image_with_bounding_box")
 })
 
+test_that("item_transform_hflip actually flips image pixels for detection", {
+  w <- 200L
+  item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, w))
+  original_img <- item$x$clone()
+  result <- item_transform_hflip(item)
+
+  expect_tensor_shape(result$x, c(3, 100L, w))
+  expect_true(torch_equal(result$x, transform_hflip(original_img)))
+})
+
 test_that("item_transform_hflip image dtype is preserved for detection", {
   item <- make_item(matrix(c(10, 20, 50, 60), ncol = 4))
   result <- item_transform_hflip(item)
 
-  expect_equal(result$x$dtype, item$x$dtype)
+  expect_tensor_dtype(result$x, item$x$dtype)
 })
 
 test_that("item_transform_hflip preserves image shape for segmentation", {
   item <- make_seg_item(image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
-  expect_equal(result$x$shape, c(3, 100, 200))
+  expect_tensor_shape(result$x, c(3, 100, 200))
 })
 
 test_that("item_transform_hflip flips masks for segmentation", {
@@ -330,7 +340,8 @@ test_that("item_transform_hflip flips masks for segmentation", {
 
   result <- item_transform_hflip(item)
 
-  expect_equal(result$y$masks$shape, original_masks$shape)
+  expect_tensor_shape(result$y$masks, original_masks$shape)
+  expect_tensor_dtype(result$y$masks, torch_bool())
   expect_true(result$y$masks$equal(original_masks$flip(-1)))
 })
 
@@ -356,4 +367,11 @@ test_that("item_transform_hflip preserves class for segmentation", {
   result <- item_transform_hflip(item)
 
   expect_s3_class(result, "image_with_segmentation_mask")
+})
+
+test_that("item_transform_hflip image dtype is preserved for segmentation", {
+  item <- make_seg_item(image_size = c(100L, 200L))
+  result <- item_transform_hflip(item)
+
+  expect_tensor_dtype(result$x, item$x$dtype)
 })
