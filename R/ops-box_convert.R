@@ -1,5 +1,5 @@
 #' @importFrom zeallot %<-%
-#' @importFrom torch torch_cos torch_sin torch_min torch_abs
+#' @importFrom torch torch_cos torch_sin torch_min torch_abs torch_sign
 NULL
 
 #' box_cxcywh_to_xyxy
