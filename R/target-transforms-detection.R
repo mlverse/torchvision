@@ -369,3 +369,104 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
   # Return the modified dataset (copy-on-modify ensures original is preserved)
   target
 }
+
+#' Apply an affine transformation to a detection target
+#'
+#' Applies an affine transformation (rotation, translation, scale and shear) to
+#' the bounding boxes of a detection target so that they follow an image
+#' transformed by [transform_affine()] with the same parameters. Each box centre
+#' is moved by the affine transformation around the given centre, the box is
+#' scaled by `scale` and rotated by `angle`, and the result is returned as a
+#' rotated box in xyxyr format. Passing an already rotated target accumulates the
+#' rotation, so transforms compose.
+#'
+#' @param target A list representing the detection target, containing at least:
+#'   \itemize{
+#'     \item `boxes` — tensor of shape `(N, 4)` in xyxy format, or `(N, 5)` in
+#'       xyxyr format for an already rotated target
+#'     \item `image_height` — original image height, defining the rotation centre
+#'     \item `image_width` — original image width, defining the rotation centre
+#'     \item Other fields (labels, etc.) are preserved unchanged
+#'   }
+#' @inheritParams transform_affine
+#'
+#' @return A list with the same structure as the input target, where `boxes` is a
+#'   tensor of shape `(N, 5)` in xyxyr format.
+#'
+#' @examples
+#' \dontrun{
+#' target <- list(
+#'   boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4), dtype = torch_float32()),
+#'   labels = torch_tensor(1L, dtype = torch_long()),
+#'   image_height = 100L,
+#'   image_width = 200L
+#' )
+#' target_transform_affine(target, angle = 20, translate = c(10, 5), scale = 1.1, shear = 8)
+#' }
+#'
+#' @family target_transforms_detection
+#'
+#' @export
+target_transform_affine <- function(target, angle = 0, translate = c(0, 0),
+                                    scale = 1, shear = 0, center = NULL) {
+  UseMethod("target_transform_affine")
+}
+
+#' @export
+target_transform_affine.default <- function(target, ...) {
+  not_implemented_for_class(target)
+}
+
+#' @rdname target_transform_affine
+#' @export
+target_transform_affine.list <- function(target, angle = 0, translate = c(0, 0),
+                                         scale = 1, shear = 0, center = NULL) {
+  if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
+    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fn target_transform_affine}.")
+  }
+
+  boxes <- target$boxes
+  if (boxes$size(1) > 0) {
+    if (length(shear) == 1)
+      shear <- c(shear, 0)
+
+    width <- as.numeric(target$image_width)
+    height <- as.numeric(target$image_height)
+
+    rot <- deg2rad(angle)
+    sx <- deg2rad(shear[1])
+    sy <- deg2rad(shear[2])
+
+    m11 <- scale * cos(rot - sy) / cos(sy)
+    m12 <- scale * (-cos(rot - sy) * tan(sx) / cos(sy) - sin(rot))
+    m21 <- scale * sin(rot - sy) / cos(sy)
+    m22 <- scale * (-sin(rot - sy) * tan(sx) / cos(sy) + cos(rot))
+
+    cx <- if (is.null(center)) width / 2 else center[1]
+    cy <- if (is.null(center)) height / 2 else center[2]
+
+    x1 <- boxes[, 1]
+    y1 <- boxes[, 2]
+    x2 <- boxes[, 3]
+    y2 <- boxes[, 4]
+
+    bcx <- (x1 + x2) / 2
+    bcy <- (y1 + y2) / 2
+    hw <- (x2 - x1) / 2 * scale
+    hh <- (y2 - y1) / 2 * scale
+
+    ncx <- m11 * (bcx - cx) + m12 * (bcy - cy) + cx + translate[1]
+    ncy <- m21 * (bcx - cx) + m22 * (bcy - cy) + cy + translate[2]
+
+    aabb <- torch_stack(list(ncx - hw, ncy - hh, ncx + hw, ncy + hh), dim = -1L)
+    if (boxes$size(2) == 5)
+      aabb <- torch_cat(list(aabb, boxes[, 5, drop = FALSE]), dim = -1L)
+
+    boxes <- aabb
+  } else {
+    boxes <- boxes[, 1:4]
+  }
+
+  target$boxes <- box_xyxy_to_xyxyr(boxes, angle = angle)
+  target
+}
