@@ -709,9 +709,7 @@ rotate_compute_output_size <- function(theta, w, h) {
 
   # Truncate precision to 1e-4 to avoid ceil of Xe-15 to 1.0
   tol <- 1e-4
-  cmax <- torch::torch_ceil((max_vals / tol)$trunc_() * tol)
-  cmin <- torch::torch_floor((min_vals / tol)$trunc_() * tol)
-  size <- cmax - cmin
+  size <- torch::torch_ceil(max_vals - min_vals - tol)
 
   as.integer(c(size[1]$item(), size[2]$item()))
 }
@@ -729,8 +727,8 @@ rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = N
   assert_grid_transform_inputs(img, matrix, interpolation, fill, interpolation_modes)
   theta <- torch::torch_tensor(matrix)$reshape(c(1, 2, 3))
   # w/h follow Pillow convention (w = first spatial dim = H in torch)
-  w <- tail(img$shape, 2)[1]  # This is H in (C, H, W)
-  h <- tail(img$shape, 2)[2]  # This is W in (C, H, W)
+  h <- tail(img$shape, 2)[1]  # This is H in (C, H, W)
+  w <- tail(img$shape, 2)[2]  # This is W in (C, H, W)
 
   if (expand) {
     o_shape <- rotate_compute_output_size(theta, w, h)

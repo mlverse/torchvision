@@ -67,13 +67,6 @@ item_transform_rotate.image_with_bounding_box <- function(
     interpolation = interpolation, # 2 = bilinear
     fill = fill # 0 is padding with black
   )
-  # transform_rotate uses Pillow convention internally (w=H, h=W),
-  # which produces output in (C, W, H) order. Permute back to (C, H, W).
-  if (rotated_img$ndim == 3L) {
-    rotated_img <- rotated_img$permute(c(1L, 3L, 2L))
-  } else if (rotated_img$ndim == 4L) {
-    rotated_img <- rotated_img$permute(c(1L, 2L, 4L, 3L))
-  }
 
   orig_spatial <- tail(x$x$shape, 2)   # e.g., c(H_orig, W_orig)
   new_spatial  <- tail(rotated_img$shape, 2)
@@ -82,12 +75,14 @@ item_transform_rotate.image_with_bounding_box <- function(
   dy <- shifts[1]  # shift along first spatial dim (height in torch convention)
 
   # Shift boxes safely
-  x1 <- x$y$boxes[, 1]; y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]; y2 <- x$y$boxes[, 4]
+  x1 <- x$y$boxes[, 1]
+  y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]
+  y2 <- x$y$boxes[, 4]
   shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- shifted_boxes
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
   x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
   x$y$image_width <- new_spatial[2]
 
@@ -105,12 +100,6 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
     interpolation = interpolation,
     fill = fill
   )
-  # transform_rotate uses Pillow convention internally (w=H, h=W)
-  if (rotated_img$ndim == 3L) {
-    rotated_img <- rotated_img$permute(c(1L, 3L, 2L))
-  } else if (rotated_img$ndim == 4L) {
-    rotated_img <- rotated_img$permute(c(1L, 2L, 4L, 3L))
-  }
 
   orig_spatial <- tail(x$x$shape, 2)
   new_spatial  <- tail(rotated_img$shape, 2)
@@ -119,19 +108,18 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
   dy <- shifts[1]
 
   # Shift existing xyxyr boxes
-  x1 <- x$y$boxes[, 1]; y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]; y2 <- x$y$boxes[, 4]
+  x1 <- x$y$boxes[, 1]
+  y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]
+  y2 <- x$y$boxes[, 4]
   angle_col <- x$y$boxes[, 5, drop = FALSE]
 
   shifted_xy <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
   shifted_boxes <- torch_cat(list(shifted_xy, angle_col), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- shifted_boxes
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
   x$y$image_height <- new_spatial[1]
   x$y$image_width  <- new_spatial[2]
-
-  # Compose rotation
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
   x
 }
