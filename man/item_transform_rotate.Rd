@@ -31,9 +31,9 @@ An \code{image_with_rotated_box} object with the rotated image and
 converted boxes in xyxyr format.
 }
 \description{
-Rotates the image inside a dataset item by a given angle around its center.
+Rotates a dataset item by a given angle around its center.
 The canvas is expanded so that the entire rotated image is visible with no
-cropping. Empty regions are filled with black.
+cropping. Empty regions are filled with given fill color.
 }
 \details{
 The bounding boxes (if present) are shifted to account for the expanded
