@@ -91,3 +91,13 @@ expect_coco_model_detects_cat <- function(model, min_score = 0.25, size = c(640,
   expect_equal(labels_vec[top], 17L)
   expect_gt(scores_vec[top], min_score)
 }
+
+make_segmentation_item <- function(image_size = c(100L, 200L), num_masks = 3L) {
+  x <- torch_randn(3, image_size[1], image_size[2])
+  masks <- torch_rand(num_masks, image_size[1], image_size[2]) > 0.5
+  labels <- torch_ones(num_masks, dtype = torch_long())
+  y <- list(masks = masks, labels = labels, image_height = image_size[1], image_width = image_size[2])
+  item <- list(x = x, y = y)
+  class(item) <- c("image_with_segmentation_mask", "list")
+  item
+}

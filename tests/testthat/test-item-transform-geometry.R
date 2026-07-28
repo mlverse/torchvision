@@ -193,16 +193,6 @@ test_that("item_transform_rotate image dtype is preserved", {
 
 # --- item_transform_hflip tests ---
 
-make_seg_item <- function(image_size = c(100L, 200L), num_masks = 3L) {
-  x <- torch_randn(3, image_size[1], image_size[2])
-  masks <- torch_rand(num_masks, image_size[1], image_size[2]) > 0.5
-  labels <- torch_ones(num_masks, dtype = torch_long())
-  y <- list(masks = masks, labels = labels, image_height = image_size[1], image_width = image_size[2])
-  item <- list(x = x, y = y)
-  class(item) <- c("image_with_segmentation_mask", "list")
-  item
-}
-
 test_that("item_transform_hflip rejects non-item inputs", {
   img <- torch_randn(3, 100, 200)
   expect_error(
@@ -328,14 +318,14 @@ test_that("item_transform_hflip image dtype is preserved for detection", {
 })
 
 test_that("item_transform_hflip preserves image shape for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L))
+  item <- make_segmentation_item(image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
   expect_tensor_shape(result$x, c(3, 100, 200))
 })
 
 test_that("item_transform_hflip flips masks for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L), num_masks = 2L)
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
   original_masks <- item$y$masks$clone()
 
   result <- item_transform_hflip(item)
@@ -346,7 +336,7 @@ test_that("item_transform_hflip flips masks for segmentation", {
 })
 
 test_that("item_transform_hflip preserves labels for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L), num_masks = 2L)
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
   original_labels <- item$y$labels$clone()
 
   result <- item_transform_hflip(item)
@@ -355,7 +345,7 @@ test_that("item_transform_hflip preserves labels for segmentation", {
 })
 
 test_that("item_transform_hflip preserves image_height and image_width for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L))
+  item <- make_segmentation_item(image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
   expect_equal(result$y$image_height, 100L)
@@ -363,14 +353,14 @@ test_that("item_transform_hflip preserves image_height and image_width for segme
 })
 
 test_that("item_transform_hflip preserves class for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L))
+  item <- make_segmentation_item(image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
   expect_s3_class(result, "image_with_segmentation_mask")
 })
 
 test_that("item_transform_hflip image dtype is preserved for segmentation", {
-  item <- make_seg_item(image_size = c(100L, 200L))
+  item <- make_segmentation_item(image_size = c(100L, 200L))
   result <- item_transform_hflip(item)
 
   expect_tensor_dtype(result$x, item$x$dtype)
