@@ -357,6 +357,7 @@ target_transform_rotate.list <- function(target, angle = 0) {
 target_transform_rotate.dataset <- function(target, angle = 0) {
   # Capture original getitem in closure
   original_getitem <- target$.getitem
+  unlockBinding(".getitem", as.environment(target))
   # Override getitem to apply rotation transform on-the-fly
   target$.getitem <- function(index) {
     item <- original_getitem(index)

@@ -267,6 +267,7 @@ item_transform_vflip <- function(x) {
 #' @export
 item_transform_vflip.dataset <- function(x) {
   original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
     item <- original_getitem(index)
     item_transform_vflip(item)
