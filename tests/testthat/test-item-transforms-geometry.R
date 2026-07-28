@@ -21,7 +21,7 @@ test_that("item_transform_rotate 0 degrees preserves image and boxes", {
   expect_s3_class(result, "image_with_rotated_box")
   expect_tensor_shape(result$x, c(3, 100, 200))
   expect_equal_to_r(result$x, as_array(item$x), tolerance = 1e-5)
-  expect_equal(result$y$boxes$shape, c(1, 5))
+  expect_tensor_shape(result$y$boxes, c(1, 5))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes)
   expect_equal_to_r(result$y$boxes[, 5], 0)
 })
@@ -41,7 +41,7 @@ test_that("item_transform_rotate 90 degrees swaps dimensions", {
   result <- item_transform_rotate(item, angle = 90)
 
   # After 90° rotation with expand=TRUE, H and W swap
-  expect_equal(result$x$shape, c(3, 400L, 200L))  # (C, new_H, new_W)
+  expect_tensor_shape(result$x, c(3, 400L, 200L))
   expect_equal(result$y$image_height, 400L)
   expect_equal(result$y$image_width, 200L)
 })
@@ -50,7 +50,7 @@ test_that("item_transform_rotate 180 degrees preserves dimensions", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(200L, 400L))
   result <- item_transform_rotate(item, angle = 180)
 
-  expect_equal(result$x$shape, c(3, 200, 400))
+  expect_tensor_shape(result$x, c(3, 200, 400))
   expect_equal(result$y$image_height, 200L)
   expect_equal(result$y$image_width, 400L)
 })
@@ -141,7 +141,7 @@ test_that("item_transform_rotate handles empty boxes", {
   result <- item_transform_rotate(item, angle = 45)
 
   expect_s3_class(result, "image_with_rotated_box")
-  expect_equal(result$y$boxes$shape, c(0, 5))
+  expect_tensor_shape(result$y$boxes, c(0, 5))
   expect_equal(result$y$boxes$dtype, torch_float())
 })
 
@@ -154,7 +154,7 @@ test_that("item_transform_rotate handles multiple boxes", {
   item <- make_detection_item(boxes, image_size = c(400, 300))
   result <- item_transform_rotate(item, angle = 0)
 
-  expect_equal(result$y$boxes$shape, c(3, 5))
+  expect_tensor_shape(result$y$boxes, c(3, 5))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes)
   expect_equal_to_r(result$y$boxes[, 5], rep(0,3))
 })
@@ -200,16 +200,14 @@ test_that("item_transform_rotate can be composed", {
     item_transform_rotate(angle = 90) |>
     item_transform_rotate(angle = 90)
 
-  expect_equal(result$x$shape, c(3, 410, 300))
+  expect_tensor_shape(result$x, c(3, 410, 300))
   expect_equal(result$y$image_height, 410)
   expect_equal(result$y$image_width, 300)
-  expect_equal(result$y$boxes$shape, c(3, 5))
+  expect_tensor_shape(result$y$boxes, c(3, 5))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-5)
   expect_equal_to_r(result$y$boxes[, 5], rep(180, 3))
   expect_equal(result$y$labels, labels)
 })
-
-# --- item_transform_hflip tests ---
 
 test_that("item_transform_hflip rejects non-item inputs", {
   img <- torch_randn(3, 100, 200)
@@ -384,10 +382,10 @@ test_that("item_transform_hflip can be composed", {
     item_transform_hflip() |>
     item_transform_hflip()
 
-  expect_equal(result$x$shape, c(3, 410, 300))
+  expect_tensor_shape(result$x, c(3, 410, 300))
   expect_equal(result$y$image_height, 410)
   expect_equal(result$y$image_width, 300)
-  expect_equal(result$y$boxes$shape, c(3, 4))
+  expect_tensor_shape(result$y$boxes, c(3, 4))
   expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-5)
   expect_equal(result$y$labels, labels)
 })
@@ -400,7 +398,8 @@ test_that("item_transform_hflip handles rotated boxes", {
   result <- item_transform_hflip(rotated)
 
   expect_s3_class(result, "image_with_rotated_box")
-  expect_equal(result$y$boxes$shape, c(1, 5))
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
   expect_equal_to_r(result$y$boxes[1, 5], -30, tolerance = 1e-5)
 })
 
@@ -414,6 +413,7 @@ test_that("item_transform_hflip composed with rotate is symmetric", {
     item_transform_hflip()
 
   expect_s3_class(result, "image_with_rotated_box")
-  expect_equal(result$y$boxes$shape, c(2, 5))
+  expect_tensor_shape(result$y$boxes, c(2, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
   expect_equal_to_r(result$y$boxes, as_array(rotated$y$boxes), tolerance = 1e-5)
 })
