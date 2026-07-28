@@ -101,3 +101,45 @@ make_segmentation_item <- function(image_size = c(100L, 200L), num_masks = 3L) {
   class(item) <- c("image_with_segmentation_mask", "list")
   item
 }
+
+# Helper to build a detection item target with boxes, labels, image metadata, area and is_crowd (as per coco dataset targets)
+make_detection_target <- function(boxes,
+                        labels = NULL,
+                        image_size = c(100L, 200L),
+                        image_id = sample.int(2^16, 1),
+                        area = NULL,
+                        iscrowd = NULL) {
+  if (is.matrix(boxes)) {
+    boxes <- torch_tensor(boxes, dtype = torch_float32())
+  }
+  if (is.null(labels)) {
+    labels <- torch_ones(boxes$size(1), dtype = torch_long())
+  }
+  if (is.null(area)) {
+    area <- (boxes[, 3] - boxes[, 1]) * (boxes[, 4] - boxes[, 2])
+  }
+  if (is.null(iscrowd)) {
+    iscrowd <- torch_zeros(boxes$size(1), dtype = torch::torch_uint8())
+  }
+  list(
+    boxes = boxes,
+    labels = labels,
+    image_height = image_size[1],
+    image_width = image_size[2],
+    image_id = torch_tensor(image_id, dtype = torch_long()),
+    area = area,
+    iscrowd = iscrowd
+  )
+}
+
+make_detection_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {
+  x <- torch_randn(3, image_size[1], image_size[2])
+  y <- make_detection_target(
+    boxes = boxes,
+    labels = labels,
+    image_size = image_size
+  )
+  item <- list(x = x, y = y)
+  class(item) <- c("image_with_bounding_box", "list")
+  item
+}

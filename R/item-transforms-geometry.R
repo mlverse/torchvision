@@ -1,12 +1,12 @@
 #' Rotate dataset item
 #'
-#' Rotates the image inside a dataset item by a given angle around its center.
+#' Rotates a dataset item by a given angle around its center.
 #' The canvas is expanded so that the entire rotated image is visible with no
-#' cropping. Empty regions are filled with black.
+#' cropping. Empty regions are filled with given fill color.
 #'
 #' The bounding boxes (if present) are shifted to account for the expanded
 #' canvas and converted to rotated format via
-#' \code{\link{target_transform_rotate_box}}.
+#' \code{\link{target_transform_rotate}}.
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} object
 #'   containing an image tensor and associated target data (boxes, labels).
@@ -29,7 +29,7 @@
 #'
 #' after <- item_transform_rotate(before, angle = 30)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = {"blue"}, width = 10)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #' tensor_image_browse(before_plot)
 #' tensor_image_browse(after_plot)
@@ -39,12 +39,12 @@
 #'
 #' @importFrom torch nnf_affine_grid nnf_grid_sample
 #' @export
-item_transform_rotate <- function(x, angle = 0) {
+item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
   UseMethod("item_transform_rotate", x)
 }
 
 #' @export
-item_transform_rotate.default <- function(x, angle = 0) {
+item_transform_rotate.default <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
   cli_abort(
     "{.fn item_transform_rotate} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
     To rotate a raw image tensor, use {.fn transform_rotate} instead."
@@ -52,69 +52,76 @@ item_transform_rotate.default <- function(x, angle = 0) {
 }
 
 #' @export
-item_transform_rotate.image_with_bounding_box <- function(x, angle = 0) {
-  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
-  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
+item_transform_rotate.image_with_bounding_box <- function(
+  x,
+  angle,
+  interpolation = 2,
+  expand = TRUE,
+  fill = 0
+) {
 
-  rotated_img <- rotate_image_tensor(x$x, angle)
-  new_h <- as.integer(rotated_img$shape[2])
-  new_w <- as.integer(rotated_img$shape[3])
+  rotated_img <- transform_rotate(
+    x$x,
+    angle = angle,
+    expand = expand,
+    interpolation = interpolation, # 2 = bilinear
+    fill = fill # 0 is padding with black
+  )
 
-  dx <- (new_w - orig_w) / 2
-  dy <- (new_h - orig_h) / 2
+  orig_spatial <- tail(x$x$shape, 2)   # e.g., c(H_orig, W_orig)
+  new_spatial  <- tail(rotated_img$shape, 2)
+  shifts <- (new_spatial - orig_spatial) / 2
+  dx <- shifts[2]  # shift along second spatial dim (width in torch convention)
+  dy <- shifts[1]  # shift along first spatial dim (height in torch convention)
 
-  shifted_boxes <- x$y$boxes$clone()
-  if (shifted_boxes$size(1) > 0) {
-    shifted_boxes[, 1] <- shifted_boxes[, 1] + dx
-    shifted_boxes[, 3] <- shifted_boxes[, 3] + dx
-    shifted_boxes[, 2] <- shifted_boxes[, 2] + dy
-    shifted_boxes[, 4] <- shifted_boxes[, 4] + dy
-  }
+  # Shift boxes safely
+  x1 <- x$y$boxes[, 1]
+  y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]
+  y2 <- x$y$boxes[, 4]
+  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- shifted_boxes
-  x$y$image_height <- new_h
-  x$y$image_width <- new_w
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
+  x$y$image_width <- new_spatial[2]
 
-  x$y <- target_transform_rotate_box(x$y, angle = angle)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }
 
-rotate_image_tensor <- function(img, angle) {
-  if (abs(angle) < 1e-6) {
-    if (img$ndim == 4) img <- img$squeeze(1)
-    return(img)
-  }
-  if (img$ndim == 3) img <- img$unsqueeze(1)
+#' @export
+item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
+  rotated_img <- transform_rotate(
+    x$x,
+    angle = angle,
+    expand = expand,
+    interpolation = interpolation,
+    fill = fill
+  )
 
-  img_shape <- img$shape
-  C <- img_shape[[2]]
-  H <- img_shape[[3]]
-  W <- img_shape[[4]]
+  orig_spatial <- tail(x$x$shape, 2)
+  new_spatial  <- tail(rotated_img$shape, 2)
+  shifts <- (new_spatial - orig_spatial) / 2
+  dx <- shifts[2]
+  dy <- shifts[1]
 
-  theta_rad <- angle * pi / 180
-  ct <- cos(theta_rad)
-  st <- sin(theta_rad)
-  if (abs(ct) < 1e-10) ct <- 0
-  if (abs(st) < 1e-10) st <- 0
+  # Shift existing xyxyr boxes
+  x1 <- x$y$boxes[, 1]
+  y1 <- x$y$boxes[, 2]
+  x2 <- x$y$boxes[, 3]
+  y2 <- x$y$boxes[, 4]
+  angle_col <- x$y$boxes[, 5, drop = FALSE]
 
-  new_W <- as.integer(ceiling(W * abs(ct) + H * abs(st)))
-  new_H <- as.integer(ceiling(W * abs(st) + H * abs(ct)))
+  shifted_xy <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
+  shifted_boxes <- torch_cat(list(shifted_xy, angle_col), dim = -1L)
 
-  a <- ct * new_W / W
-  b <- st * new_H / W
-  c <- -st * new_W / H
-  d <- ct * new_H / H
-
-  theta_mat <- torch_tensor(matrix(c(a, b, 0, c, d, 0), nrow = 2, byrow = TRUE),
-                            dtype = torch_float32())$unsqueeze(1)
-
-  grid <- nnf_affine_grid(theta_mat, size = c(1L, C, new_H, new_W), align_corners = FALSE)
-  nnf_grid_sample(img, grid, mode = "bilinear", padding_mode = "zeros",
-                  align_corners = FALSE)$squeeze(1)
+  x$x <- rotated_img
+  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width  <- new_spatial[2]
+  x
 }
-
 
 #' Horizontally flip a dataset item
 #'
@@ -141,7 +148,6 @@ rotate_image_tensor <- function(img, angle) {
 #'
 #' after <- item_transform_hflip(before)
 #'
-#' # Draw and visualize side by side
 #' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
 #'
@@ -154,6 +160,16 @@ rotate_image_tensor <- function(img, angle) {
 #' @export
 item_transform_hflip <- function(x) {
   UseMethod("item_transform_hflip", x)
+}
+
+#' @export
+item_transform_hflip.dataset <- function(x) {
+  original_getitem <- x$.getitem
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_hflip(item)
+  }
+  x
 }
 
 #' @export
@@ -185,22 +201,7 @@ item_transform_hflip.image_with_bounding_box <- function(x) {
 #' @export
 item_transform_hflip.image_with_segmentation_mask <- function(x) {
   x$x <- transform_hflip(x$x)
+  x$y$masks <- transform_hflip(x$y$masks)
 
-  masks <- x$y$masks
-  if (!is.null(masks) && masks$ndim >= 3) {
-    x$y$masks <- masks$flip(-1)
-  }
-
-  x
-}
-
-#' @export
-item_transform_hflip.dataset <- function(x) {
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
-    item_transform_hflip(item)
-  }
   x
 }

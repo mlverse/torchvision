@@ -54,7 +54,7 @@ test_that("cityscapes_dataset validates target_type parameter", {
       root = tempdir(),
       target_type = c("instance", "invalid", "semantic")
     ),
-    "Got invalid types"
+    "target_type must be one or more of"
   )
 })
 

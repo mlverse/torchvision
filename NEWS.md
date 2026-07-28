@@ -14,17 +14,17 @@
 ## New features
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
-* Added `target_transform_rotate_box()` for converting bounding boxes from xyxy to xyxyr format with a rotation angle. Operates directly on detection targets (the `y` part of a dataset item) for composable target transform pipelines. Includes a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons. (@DerrickUnleashed, #338)
+* Added `target_transform_rotate()` for converting bounding boxes from xyxy to xyxyr format with a rotation angle (@DerrickUnleashed, #338).
+  Operates on detection item targets (the `y` part of a dataset item) for composable target transform pipelines.
+* Added a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons (@DerrickUnleashed, #338).
 * Added `item_transform_hflip()` for horizontally flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #350).
+* Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
 
 ## Bug fixes and improvements
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 
-## New Features
-
-* Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
 
 # torchvision 0.9.0
 

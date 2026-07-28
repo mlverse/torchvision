@@ -1,4 +1,5 @@
 #' @importFrom magrittr %>%
+#' @importFrom torch torch_uint8
 NULL
 
 #' A simplified version of torchvision.utils.make_grid
@@ -342,25 +343,25 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
   hw <- (xmax - xmin) / 2
   hh <- (ymax - ymin) / 2
 
-  theta_rad <- theta * pi / 180
+  theta_rad <- deg2rad(theta)
   ct <- cos(theta_rad)
-  st <- sin(theta_rad)
+  st <- -sin(theta_rad)
 
-  all_x <- rbind(
+  all_x <- cbind(
     cx - hw * ct + hh * st,
     cx + hw * ct + hh * st,
     cx + hw * ct - hh * st,
     cx - hw * ct - hh * st
   )
-  all_y <- rbind(
+  all_y <- cbind(
     cy - hw * st - hh * ct,
     cy + hw * st - hh * ct,
     cy + hw * st + hh * ct,
     cy - hw * st + hh * ct
   )
 
-  poly_x <- c(apply(all_x, 2, function(col) c(col, NA)))
-  poly_y <- c(apply(all_y, 2, function(col) c(col, NA)))
+  poly_x <- c(t(cbind(c(all_x, NA))))
+  poly_y <- c(t(cbind(c(all_y, NA))))
 
   graphics::polygon(poly_x, poly_y,
                     col = fill_col, border = colors, lwd = width)
