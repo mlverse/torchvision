@@ -342,11 +342,11 @@ test_that("item_transform_hflip flips masks for segmentation", {
 
 test_that("item_transform_hflip preserves labels for segmentation", {
   item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-  original_labels <- item$y$labels$clone()
+  original_labels <- as.integer(as_array(item$y$labels))
 
   result <- item_transform_hflip(item)
 
-  expect_true(result$y$labels$eq(original_labels)$all()$item())
+  expect_equal_to_r(result$y$labels, original_labels)
 })
 
 test_that("item_transform_hflip preserves image_height and image_width for segmentation", {
