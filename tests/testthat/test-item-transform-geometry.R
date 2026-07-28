@@ -286,16 +286,15 @@ test_that("item_transform_hflip handles multiple boxes", {
 })
 
 test_that("item_transform_hflip does not mutate input for detection", {
-  boxes <- torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4))
-  item <- make_item(boxes)
-  original_img <- item$x$clone()
-  original_boxes <- item$y$boxes$clone()
+  boxes <-matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_item( torch_tensor(boxes))
+  original_img <- as_array(item$x)
   original_class <- class(item)
 
   result <- item_transform_hflip(item)
 
-  expect_true(item$x$eq(original_img)$all()$item())
-  expect_equal_to_r(item$y$boxes, as.array(original_boxes$cpu()))
+  expect_equal_to_r(item$x, original_img)
+  expect_equal_to_r(item$y$boxes, boxes)
   expect_equal(class(item), original_class)
 })
 
