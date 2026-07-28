@@ -277,6 +277,12 @@ test_that("item_transform_hflip handles multiple boxes", {
   expect_equal_to_r(result$y$boxes[2, 3], 600 - 100)
   expect_equal_to_r(result$y$boxes[3, 1], 600 - 300)
   expect_equal_to_r(result$y$boxes[3, 3], 600 - 0)
+  expect_equal_to_r(result$y$boxes[1, 2], 20)
+  expect_equal_to_r(result$y$boxes[1, 4], 60)
+  expect_equal_to_r(result$y$boxes[2, 2], 200)
+  expect_equal_to_r(result$y$boxes[2, 4], 250)
+  expect_equal_to_r(result$y$boxes[3, 2], 0)
+  expect_equal_to_r(result$y$boxes[3, 4], 400)
 })
 
 test_that("item_transform_hflip does not mutate input for detection", {
