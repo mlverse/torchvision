@@ -205,3 +205,22 @@ item_transform_hflip.image_with_segmentation_mask <- function(x) {
 
   x
 }
+
+#' @export
+item_transform_hflip.image_with_rotated_box <- function(x) {
+  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
+
+  x$x <- transform_hflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    x1 <- boxes[, 1]$clone()
+    x3 <- boxes[, 3]$clone()
+    boxes[, 1] <- orig_w - x3
+    boxes[, 3] <- orig_w - x1
+    boxes[, 5] <- -boxes[, 5]
+  }
+  x$y$boxes <- boxes
+
+  x
+}

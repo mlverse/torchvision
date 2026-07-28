@@ -391,3 +391,32 @@ test_that("item_transform_hflip can be composed", {
   expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-5)
   expect_equal_to_r(result$y$labels$to(torch_int()), labels)
 })
+
+test_that("item_transform_hflip handles rotated boxes", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_hflip(rotated)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_equal(result$y$boxes$shape, c(1, 5))
+  expect_equal_to_r(result$y$boxes[1, 5], -30, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 1], 200 - 50)
+  expect_equal_to_r(result$y$boxes[1, 3], 200 - 10)
+})
+
+test_that("item_transform_hflip composed with rotate round-trips", {
+  boxes <- matrix(c(10, 20, 50, 60, 100, 200, 150, 250), ncol = 4, byrow = TRUE)
+  item <- make_detection_item(boxes, image_size = c(300L, 400L))
+  result <- item |>
+    item_transform_rotate(angle = 30) |>
+    item_transform_hflip() |>
+    item_transform_hflip() |>
+    item_transform_rotate(angle = -30)
+
+  expect_equal(result$x$shape, c(3, 300, 400))
+  expect_equal(result$y$boxes$shape, c(2, 5))
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes[, 5], 0, tolerance = 1e-4)
+})
