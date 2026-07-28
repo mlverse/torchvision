@@ -224,3 +224,105 @@ item_transform_hflip.image_with_rotated_box <- function(x) {
 
   x
 }
+
+#' Vertically flip a dataset item
+#'
+#' Flips the image inside a dataset item vertically. For detection items,
+#' bounding box y-coordinates are adjusted to remain correct after the flip.
+#' For segmentation items, both the image and the masks are flipped.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#'
+#' @return A dataset item of the same class with the image and target
+#'   vertically flipped.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_vflip(before)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_vflip <- function(x) {
+  UseMethod("item_transform_vflip", x)
+}
+
+#' @export
+item_transform_vflip.dataset <- function(x) {
+  original_getitem <- x$.getitem
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_vflip(item)
+  }
+  x
+}
+
+#' @export
+item_transform_vflip.default <- function(x) {
+  cli_abort(
+    "{.fn item_transform_vflip} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To flip a raw image tensor, use {.fn transform_vflip} instead."
+  )
+}
+
+#' @export
+item_transform_vflip.image_with_bounding_box <- function(x) {
+  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
+
+  x$x <- transform_vflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    y1 <- boxes[, 2]$clone()
+    y2 <- boxes[, 4]$clone()
+    boxes[, 2] <- orig_h - y2
+    boxes[, 4] <- orig_h - y1
+  }
+  x$y$boxes <- boxes
+
+  x
+}
+
+#' @export
+item_transform_vflip.image_with_segmentation_mask <- function(x) {
+  x$x <- transform_vflip(x$x)
+  x$y$masks <- transform_vflip(x$y$masks)
+
+  x
+}
+
+#' @export
+item_transform_vflip.image_with_rotated_box <- function(x) {
+  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
+
+  x$x <- transform_vflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    y1 <- boxes[, 2]$clone()
+    y2 <- boxes[, 4]$clone()
+    boxes[, 2] <- orig_h - y2
+    boxes[, 4] <- orig_h - y1
+    boxes[, 5] <- -boxes[, 5]
+  }
+  x$y$boxes <- boxes
+
+  x
+}
