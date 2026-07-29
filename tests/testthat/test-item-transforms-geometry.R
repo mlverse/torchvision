@@ -628,3 +628,200 @@ test_that("item_transform_vflip composed with rotate is symmetric", {
   expect_tensor_dtype(result$y$boxes, torch_float())
   expect_equal_to_r(result$y$boxes, as_array(rotated$y$boxes), tolerance = 1e-5)
 })
+
+# --- item_transform_center_crop tests ---
+
+test_that("item_transform_center_crop rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_center_crop(img, size = 50),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_center_crop rejects numeric input", {
+  expect_error(
+    item_transform_center_crop(42, size = 50),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_center_crop preserves image shape and adjusts boxes", {
+  item <- make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+  # crop_top = (200-100)/2 = 50 (1-based), offset = 49
+  # crop_left = (400-200)/2 = 100 (1-based), offset = 99
+  expect_equal_to_r(result$y$boxes[1, 1], 120 - 99) # x1
+  expect_equal_to_r(result$y$boxes[1, 3], 180 - 99) # x2
+  expect_equal_to_r(result$y$boxes[1, 2], 70 - 49)  # y1
+  expect_equal_to_r(result$y$boxes[1, 4], 130 - 49) # y2
+})
+
+test_that("item_transform_center_crop square crop via single int", {
+  item <- make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = 100)
+
+  expect_tensor_shape(result$x, c(3, 100, 100))
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 100L)
+})
+
+test_that("item_transform_center_crop preserves labels and metadata", {
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item <- make_detection_item(
+    matrix(c(120, 70, 180, 130, 210, 80, 280, 120), ncol = 4, byrow = TRUE),
+    labels = labels,
+    image_size = c(200L, 400L)
+  )
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_equal_to_r(result$y$labels, as.integer(as_array(labels)))
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+})
+
+test_that("item_transform_center_crop handles empty boxes", {
+  item <- make_detection_item(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_shape(result$y$boxes, c(0, 4))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+})
+
+test_that("item_transform_center_crop handles multiple boxes", {
+  boxes <- matrix(c(
+    120, 70,  180, 130,
+    150, 60,  280, 140,
+    110, 80,  140, 120
+  ), ncol = 4, byrow = TRUE)
+  item <- make_detection_item(boxes, image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_shape(result$y$boxes, c(3, 4))
+  # crop_top = 50 (1-based), offset = 49
+  # crop_left = 100 (1-based), offset = 99
+  expected_boxes <- boxes
+  expected_boxes[, 1] <- pmax(0, boxes[, 1] - 99)
+  expected_boxes[, 3] <- pmin(200, boxes[, 3] - 99)
+  expected_boxes[, 2] <- pmax(0, boxes[, 2] - 49)
+  expected_boxes[, 4] <- pmin(100, boxes[, 4] - 49)
+  expect_equal_to_r(result$y$boxes[, 1], expected_boxes[, 1])
+  expect_equal_to_r(result$y$boxes[, 3], expected_boxes[, 3])
+  expect_equal_to_r(result$y$boxes[, 2], expected_boxes[, 2])
+  expect_equal_to_r(result$y$boxes[, 4], expected_boxes[, 4])
+})
+
+test_that("item_transform_center_crop does not mutate input for detection", {
+  boxes <- matrix(c(120, 70, 180, 130), ncol = 4)
+  item <- make_detection_item(torch_tensor(boxes), image_size = c(200L, 400L))
+  original_img <- as_array(item$x)
+  original_class <- class(item)
+
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_equal_to_r(item$x, original_img)
+  expect_equal_to_r(item$y$boxes, boxes)
+  expect_equal(class(item), original_class)
+})
+
+test_that("item_transform_center_crop preserves class", {
+  item <- make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_s3_class(result, "image_with_bounding_box")
+})
+
+test_that("item_transform_center_crop actually crops image pixels", {
+  item <- make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  original_img <- item$x$clone()
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expected_img <- transform_center_crop(original_img, size = c(100L, 200L))
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_true(torch_equal(result$x, expected_img))
+})
+
+test_that("item_transform_center_crop image dtype is preserved for detection", {
+  item <- make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_dtype(result$x, item$x$dtype)
+})
+
+test_that("item_transform_center_crop preserves image shape for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+})
+
+test_that("item_transform_center_crop crops masks for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expected_masks <- transform_center_crop(original_masks, size = c(100L, 200L))
+  expect_tensor_shape(result$y$masks, c(2, 100, 200))
+  expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_true(result$y$masks$equal(expected_masks))
+})
+
+test_that("item_transform_center_crop preserves labels for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L), num_masks = 2L)
+  original_labels <- as.integer(as_array(item$y$labels))
+
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_equal_to_r(result$y$labels, original_labels)
+})
+
+test_that("item_transform_center_crop updates image_height and image_width for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+})
+
+test_that("item_transform_center_crop preserves class for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_s3_class(result, "image_with_segmentation_mask")
+})
+
+test_that("item_transform_center_crop image dtype is preserved for segmentation", {
+  item <- make_segmentation_item(image_size = c(200L, 400L))
+  result <- item_transform_center_crop(item, size = c(100L, 200L))
+
+  expect_tensor_dtype(result$x, item$x$dtype)
+})
+
+test_that("item_transform_center_crop pads when crop is larger than image", {
+  item <- make_detection_item(matrix(c(5, 5, 15, 15), ncol = 4), image_size = c(20L, 30L))
+  result <- item_transform_center_crop(item, size = c(30L, 40L))
+
+  expect_tensor_shape(result$x, c(3, 30, 40))
+  expect_equal(result$y$image_height, 30L)
+  expect_equal(result$y$image_width, 40L)
+})
+
+test_that("item_transform_center_crop handles rotated boxes", {
+  boxes <- matrix(c(120, 70, 180, 130), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(200L, 400L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_center_crop(rotated, size = c(100L, 200L))
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+})
