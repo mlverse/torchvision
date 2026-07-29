@@ -38,7 +38,7 @@ Imports:
     abind,
     jsonlite,
     withr,
-    cli,
+    cli (>= 3.6.3),
     glue,
     zeallot
 Suggests:

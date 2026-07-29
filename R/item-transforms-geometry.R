@@ -122,3 +122,106 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
   x$y$image_width  <- new_spatial[2]
   x
 }
+
+#' Horizontally flip a dataset item
+#'
+#' Flips the image inside a dataset item horizontally. For detection items,
+#' bounding box x-coordinates are adjusted to remain correct after the flip.
+#' For segmentation items, both the image and the masks are flipped.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#'
+#' @return A dataset item of the same class with the image and target
+#'   horizontally flipped.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_hflip(before)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_hflip <- function(x) {
+  UseMethod("item_transform_hflip", x)
+}
+
+#' @export
+item_transform_hflip.dataset <- function(x) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_hflip(item)
+  }
+  x
+}
+
+#' @export
+item_transform_hflip.default <- function(x) {
+  cli_abort(
+    "{.fn item_transform_hflip} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To flip a raw image tensor, use {.fn transform_hflip} instead."
+  )
+}
+
+#' @export
+item_transform_hflip.image_with_bounding_box <- function(x) {
+  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
+
+  x$x <- transform_hflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    x1 <- boxes[, 1]$clone()
+    x3 <- boxes[, 3]$clone()
+    boxes[, 1] <- orig_w - x3
+    boxes[, 3] <- orig_w - x1
+  }
+  x$y$boxes <- boxes
+
+  x
+}
+
+#' @export
+item_transform_hflip.image_with_segmentation_mask <- function(x) {
+  x$x <- transform_hflip(x$x)
+  x$y$masks <- transform_hflip(x$y$masks)
+
+  x
+}
+
+#' @export
+item_transform_hflip.image_with_rotated_box <- function(x) {
+  orig_w <- as.numeric(x$x$shape[length(x$x$shape)])
+
+  x$x <- transform_hflip(x$x)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    x1 <- boxes[, 1]$clone()
+    x3 <- boxes[, 3]$clone()
+    boxes[, 1] <- orig_w - x3
+    boxes[, 3] <- orig_w - x1
+    boxes[, 5] <- -boxes[, 5]
+  }
+  x$y$boxes <- boxes
+
+  x
+}
