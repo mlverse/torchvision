@@ -165,6 +165,7 @@ item_transform_hflip <- function(x) {
 #' @export
 item_transform_hflip.dataset <- function(x) {
   original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
     item <- original_getitem(index)
     item_transform_hflip(item)
