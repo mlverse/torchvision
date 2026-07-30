@@ -312,7 +312,7 @@ item_transform_vflip.image_with_segmentation_mask <- function(x) {
 
 #' @export
 item_transform_vflip.image_with_rotated_box <- function(x) {
-  orig_h <- as.numeric(x$x$shape[length(x$x$shape) - 1])
+  orig_h < get_image_size(x$x)[2]
 
   x$x <- transform_vflip(x$x)
 
