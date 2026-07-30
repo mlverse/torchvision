@@ -63,6 +63,7 @@ tensor_image_browse(after_plot)
 }
 \seealso{
 Other item_unitary_transforms:
-\code{\link[=item_transform_hflip]{item_transform_hflip()}}
+\code{\link[=item_transform_hflip]{item_transform_hflip()}},
+\code{\link[=item_transform_vflip]{item_transform_vflip()}}
 }
 \concept{item_unitary_transforms}

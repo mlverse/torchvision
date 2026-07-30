@@ -18,6 +18,7 @@
   Both operates on detection item targets (the `y` part of a dataset item) for composable target transform pipelines. 
 * Added a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons (@DerrickUnleashed, #338). 
 * Added `item_transform_hflip()` for horizontally flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #366).
+* Added `item_transform_vflip()` for vertically flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #369).
 * Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
 
 ## Bug fixes and improvements

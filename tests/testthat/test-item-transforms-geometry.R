@@ -417,3 +417,214 @@ test_that("item_transform_hflip composed with rotate is symmetric", {
   expect_tensor_dtype(result$y$boxes, torch_float())
   expect_equal_to_r(result$y$boxes, as_array(rotated$y$boxes), tolerance = 1e-5)
 })
+
+# --- item_transform_vflip tests ---
+
+test_that("item_transform_vflip rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_vflip(img),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_vflip rejects numeric input", {
+  expect_error(
+    item_transform_vflip(42),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_vflip preserves image shape and flips y-coordinates", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_equal_to_r(result$y$boxes[1, 1], 10)
+  expect_equal_to_r(result$y$boxes[1, 3], 50)
+  expect_equal_to_r(result$y$boxes[1, 2], 100 - 60)
+  expect_equal_to_r(result$y$boxes[1, 4], 100 - 20)
+})
+
+test_that("item_transform_vflip preserves labels and metadata", {
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item <- make_detection_item(
+    matrix(c(10, 20, 50, 60, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = labels,
+    image_size = c(100L, 200L)
+  )
+  result <- item_transform_vflip(item)
+
+  expect_equal_to_r(result$y$labels, as.integer(as_array(labels)))
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+})
+
+test_that("item_transform_vflip handles empty boxes", {
+  item <- make_detection_item(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$y$boxes, c(0, 4))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+})
+
+test_that("item_transform_vflip handles multiple boxes", {
+  boxes <- matrix(c(
+    10, 20, 50, 60,
+    100, 200, 150, 250,
+    0, 0, 300, 400
+  ), ncol = 4, byrow = TRUE)
+  item <- make_detection_item(boxes, image_size = c(500L, 600L))
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$y$boxes, c(3, 4))
+  expect_equal_to_r(result$y$boxes[1, 1], 10)
+  expect_equal_to_r(result$y$boxes[1, 3], 50)
+  expect_equal_to_r(result$y$boxes[2, 1], 100)
+  expect_equal_to_r(result$y$boxes[2, 3], 150)
+  expect_equal_to_r(result$y$boxes[3, 1], 0)
+  expect_equal_to_r(result$y$boxes[3, 3], 300)
+  expect_equal_to_r(result$y$boxes[1, 2], 500 - 60)
+  expect_equal_to_r(result$y$boxes[1, 4], 500 - 20)
+  expect_equal_to_r(result$y$boxes[2, 2], 500 - 250)
+  expect_equal_to_r(result$y$boxes[2, 4], 500 - 200)
+  expect_equal_to_r(result$y$boxes[3, 2], 500 - 400)
+  expect_equal_to_r(result$y$boxes[3, 4], 500 - 0)
+})
+
+test_that("item_transform_vflip does not mutate input for detection", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(torch_tensor(boxes))
+  original_img <- as_array(item$x)
+  original_class <- class(item)
+
+  result <- item_transform_vflip(item)
+
+  expect_equal_to_r(item$x, original_img)
+  expect_equal_to_r(item$y$boxes, boxes)
+  expect_equal(class(item), original_class)
+})
+
+test_that("item_transform_vflip preserves class", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- item_transform_vflip(item)
+
+  expect_s3_class(result, "image_with_bounding_box")
+})
+
+test_that("item_transform_vflip actually flips image pixels", {
+  h <- 100L
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(h, 200L))
+  original_img <- item$x$clone()
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$x, c(3, h, 200L))
+  expect_true(torch_equal(result$x, transform_vflip(original_img)))
+})
+
+test_that("item_transform_vflip image dtype is preserved for detection", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- item_transform_vflip(item)
+
+  expect_tensor_dtype(result$x, item$x$dtype)
+})
+
+test_that("item_transform_vflip preserves image shape for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L))
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+})
+
+test_that("item_transform_vflip flips masks for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_vflip(item)
+
+  expect_tensor_shape(result$y$masks, original_masks$shape)
+  expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_true(result$y$masks$equal(original_masks$flip(-2)))
+})
+
+test_that("item_transform_vflip preserves labels for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_labels <- as.integer(as_array(item$y$labels))
+
+  result <- item_transform_vflip(item)
+
+  expect_equal_to_r(result$y$labels, original_labels)
+})
+
+test_that("item_transform_vflip preserves image_height and image_width for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L))
+  result <- item_transform_vflip(item)
+
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
+})
+
+test_that("item_transform_vflip preserves class for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L))
+  result <- item_transform_vflip(item)
+
+  expect_s3_class(result, "image_with_segmentation_mask")
+})
+
+test_that("item_transform_vflip image dtype is preserved for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L))
+  result <- item_transform_vflip(item)
+
+  expect_tensor_dtype(result$x, item$x$dtype)
+})
+
+test_that("item_transform_vflip can be composed", {
+  boxes <- matrix(c(
+    10, 20, 50, 60,
+    100, 200, 150, 250,
+    0, 0, 300, 400
+  ), ncol = 4, byrow = TRUE)
+  labels <- sample.int(2^16, 3)
+  item <- make_detection_item(boxes, labels = labels, image_size = c(410, 300))
+  result <- item |>
+    item_transform_vflip() |>
+    item_transform_vflip()
+
+  expect_tensor_shape(result$x, c(3, 410, 300))
+  expect_equal(result$y$image_height, 410)
+  expect_equal(result$y$image_width, 300)
+  expect_tensor_shape(result$y$boxes, c(3, 4))
+  expect_equal_to_r(result$y$boxes[, 1:4], boxes, tolerance = 1e-5)
+  expect_equal(result$y$labels, labels)
+})
+
+test_that("item_transform_vflip handles rotated boxes", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_vflip(rotated)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+  expect_equal_to_r(result$y$boxes[1, 5], -30, tolerance = 1e-5)
+})
+
+test_that("item_transform_vflip composed with rotate is symmetric", {
+  boxes <- matrix(c(10, 20, 50, 60, 100, 200, 150, 250), ncol = 4, byrow = TRUE)
+  item <- make_detection_item(boxes, image_size = c(300L, 400L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- rotated |>
+    item_transform_vflip() |>
+    item_transform_vflip()
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(2, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+  expect_equal_to_r(result$y$boxes, as_array(rotated$y$boxes), tolerance = 1e-5)
+})
