@@ -52,6 +52,7 @@
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/item_transform_hflip.html</loc></url>
 <url><loc>/reference/item_transform_rotate.html</loc></url>
+<url><loc>/reference/item_transform_vflip.html</loc></url>
 <url><loc>/reference/lfw_dataset.html</loc></url>
 <url><loc>/reference/list_collection_datasets.html</loc></url>
 <url><loc>/reference/magick_loader.html</loc></url>
