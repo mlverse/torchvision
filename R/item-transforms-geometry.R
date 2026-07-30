@@ -190,10 +190,10 @@ item_transform_crop.image_with_bounding_box <- function(x, top, left, height, wi
     new_x2 <- torch_clamp(orig_x2 - offset_x, 0, width)
     new_y2 <- torch_clamp(orig_y2 - offset_y, 0, height)
 
-    keep <- (new_x2 > new_x1) & (new_y2 > new_y1)
+    keep <- as.logical(as_array((new_x2 > new_x1) & (new_y2 > new_y1)))
     boxes <- torch_stack(list(new_x1, new_y1, new_x2, new_y2), dim = -1L)
 
-    if (keep$sum()$item() < boxes$size(1)) {
+    if (!all(keep)) {
       boxes <- boxes[keep, ]
       if (!is.null(x$y$labels)) {
         x$y$labels <- x$y$labels[keep]
