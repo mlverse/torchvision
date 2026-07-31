@@ -12,10 +12,10 @@ NULL
 #'
 #' @return boxes (Tensor(N, 4)): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 box_cxcywh_to_xyxy <- function(boxes) {
-  cx <- boxes[..., 1, drop = FALSE]
-  cy <- boxes[..., 2, drop = FALSE]
-  w  <- boxes[..., 3, drop = FALSE]
-  h  <- boxes[..., 4, drop = FALSE]
+  cx <- boxes[.. , 1, drop = FALSE]
+  cy <- boxes[.. , 2, drop = FALSE]
+  w  <- boxes[.. , 3, drop = FALSE]
+  h  <- boxes[.. , 4, drop = FALSE]
 
   x1 <- cx - 0.5 * w
   y1 <- cy - 0.5 * h
@@ -35,10 +35,10 @@ box_cxcywh_to_xyxy <- function(boxes) {
 #'
 #' @return boxes (Tensor(N, 4)): boxes in \eqn{(c_x, c_y, w, h)} format.
 box_xyxy_to_cxcywh <- function(boxes) {
-  x1 <- boxes[..., 1, drop = FALSE]
-  y1 <- boxes[..., 2, drop = FALSE]
-  x2 <- boxes[..., 3, drop = FALSE]
-  y2 <- boxes[..., 4, drop = FALSE]
+  x1 <- boxes[.. , 1, drop = FALSE]
+  y1 <- boxes[.. , 2, drop = FALSE]
+  x2 <- boxes[.. , 3, drop = FALSE]
+  y2 <- boxes[.. , 4, drop = FALSE]
 
   cx <- (x1 + x2) * 0.5
   cy <- (y1 + y2) * 0.5
@@ -58,10 +58,10 @@ box_xyxy_to_cxcywh <- function(boxes) {
 #'
 #' @return boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 box_xywh_to_xyxy <- function(boxes) {
-  x <- boxes[..., 1, drop = FALSE]
-  y <- boxes[..., 2, drop = FALSE]
-  w <- boxes[..., 3, drop = FALSE]
-  h <- boxes[..., 4, drop = FALSE]
+  x <- boxes[.. , 1, drop = FALSE]
+  y <- boxes[.. , 2, drop = FALSE]
+  w <- boxes[.. , 3, drop = FALSE]
+  h <- boxes[.. , 4, drop = FALSE]
 
   torch::torch_cat(list(x, y, x + w, y + h), dim = -1)
 }
@@ -76,10 +76,10 @@ box_xywh_to_xyxy <- function(boxes) {
 #'
 #' @return boxes (Tensor\[N, 4\]): boxes in (x, y, w, h) format.
 box_xyxy_to_xywh <- function(boxes) {
-  x1 <- boxes[..., 1, drop = FALSE]
-  y1 <- boxes[..., 2, drop = FALSE]
-  x2 <- boxes[..., 3, drop = FALSE]
-  y2 <- boxes[..., 4, drop = FALSE]
+  x1 <- boxes[.. , 1, drop = FALSE]
+  y1 <- boxes[.. , 2, drop = FALSE]
+  x2 <- boxes[.. , 3, drop = FALSE]
+  y2 <- boxes[.. , 4, drop = FALSE]
 
   w <- x2 - x1
   h <- y2 - y1
