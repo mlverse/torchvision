@@ -397,25 +397,7 @@ item_transform_center_crop.dataset <- function(x, size) {
 
 #' @export
 item_transform_center_crop.image_with_bounding_box <- function(x, size) {
-  center_crop_item(x, size)
-}
-
-#' @export
-item_transform_center_crop.image_with_segmentation_mask <- function(x, size) {
-  center_crop_item(x, size)
-}
-
-#' @export
-item_transform_center_crop.image_with_rotated_box <- function(x, size) {
-  center_crop_item(x, size)
-}
-
-center_crop_item <- function(x, size) {
-  output_size <- size
-  if (length(size) == 1) {
-    output_size <- rep(size, 2)
-  }
-  output_size <- as.integer(output_size)
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
   crop_h <- output_size[1]
   crop_w <- output_size[2]
 
@@ -431,39 +413,92 @@ center_crop_item <- function(x, size) {
   if (crop_top == 0L) crop_top <- 1L
   if (crop_left == 0L) crop_left <- 1L
 
-  # Crop image and masks if present
   x$x <- transform_center_crop(x$x, size)
-  if (!is.null(x$y$masks)) {
-    x$y$masks <- transform_center_crop(x$y$masks, size)
-  }
 
-  # Adjust boxes if present
-  if (!is.null(x$y$boxes)) {
-    left_offset <- crop_left - 1L
-    top_offset <- crop_top - 1L
+  left_offset <- crop_left - 1L
+  top_offset <- crop_top - 1L
 
-    boxes <- x$y$boxes$clone()
-    if (boxes$size(1) > 0) {
-      boxes[, 1] <- torch_clamp(boxes[, 1] - left_offset, 0, crop_w)
-      boxes[, 3] <- torch_clamp(boxes[, 3] - left_offset, 0, crop_w)
-      boxes[, 2] <- torch_clamp(boxes[, 2] - top_offset, 0, crop_h)
-      boxes[, 4] <- torch_clamp(boxes[, 4] - top_offset, 0, crop_h)
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] - left_offset, 0, crop_w)
+    boxes[, 3] <- torch_clamp(boxes[, 3] - left_offset, 0, crop_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] - top_offset, 0, crop_h)
+    boxes[, 4] <- torch_clamp(boxes[, 4] - top_offset, 0, crop_h)
 
-      keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
-      if (!all(keep)) {
-        boxes <- boxes[keep, ]
-        x$y$labels <- x$y$labels[keep]
-        if (!is.null(x$y$area)) {
-          x$y$area <- x$y$area[keep]
-        }
-        if (!is.null(x$y$iscrowd)) {
-          x$y$iscrowd <- x$y$iscrowd[keep]
-        }
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
       }
     }
-    x$y$boxes <- boxes
   }
+  x$y$boxes <- boxes
+  x$y$image_height <- crop_h
+  x$y$image_width <- crop_w
 
+  x
+}
+
+#' @export
+item_transform_center_crop.image_with_segmentation_mask <- function(x, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+
+  x$x <- transform_center_crop(x$x, size)
+  x$y$masks <- transform_center_crop(x$y$masks, size)
+  x$y$image_height <- output_size[1]
+  x$y$image_width <- output_size[2]
+
+  x
+}
+
+#' @export
+item_transform_center_crop.image_with_rotated_box <- function(x, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+  crop_h <- output_size[1]
+  crop_w <- output_size[2]
+
+  img_size <- get_image_size(x$x)
+  img_w <- img_size[1]
+  img_h <- img_size[2]
+
+  # crop offsets are relative to the (possibly padded) image, see
+  # transform_center_crop
+  crop_top <- as.integer((max(img_h, crop_h) - crop_h) / 2)
+  crop_left <- as.integer((max(img_w, crop_w) - crop_w) / 2)
+
+  if (crop_top == 0L) crop_top <- 1L
+  if (crop_left == 0L) crop_left <- 1L
+
+  x$x <- transform_center_crop(x$x, size)
+
+  left_offset <- crop_left - 1L
+  top_offset <- crop_top - 1L
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] - left_offset, 0, crop_w)
+    boxes[, 3] <- torch_clamp(boxes[, 3] - left_offset, 0, crop_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] - top_offset, 0, crop_h)
+    boxes[, 4] <- torch_clamp(boxes[, 4] - top_offset, 0, crop_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
   x$y$image_height <- crop_h
   x$y$image_width <- crop_w
 
