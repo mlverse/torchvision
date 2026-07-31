@@ -411,10 +411,6 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
 }
 
 center_crop_item <- function(x, size) {
-  img_size <- get_image_size(x$x)
-  img_w <- img_size[1]
-  img_h <- img_size[2]
-
   output_size <- size
   if (length(size) == 1) {
     output_size <- rep(size, 2)
@@ -423,48 +419,22 @@ center_crop_item <- function(x, size) {
   crop_h <- output_size[1]
   crop_w <- output_size[2]
 
-  # Handle padding if crop larger than image
-  pad_left <- 0L
-  pad_right <- 0L
-  pad_top <- 0L
-  pad_bottom <- 0L
-  if (crop_w > img_w) {
-    pad_left <- floor((crop_w - img_w) / 2)
-    pad_right <- ceiling((crop_w - img_w) / 2)
-  }
-  if (crop_h > img_h) {
-    pad_top <- floor((crop_h - img_h) / 2)
-    pad_bottom <- ceiling((crop_h - img_h) / 2)
-  }
+  img_size <- get_image_size(x$x)
+  img_w <- img_size[1]
+  img_h <- img_size[2]
 
-  if (pad_left > 0L || pad_right > 0L || pad_top > 0L || pad_bottom > 0L) {
-    padding <- c(pad_left, pad_right, pad_top, pad_bottom)
-    x$x <- transform_pad(x$x, padding, fill = 0)
-    if (!is.null(x$y$masks)) {
-      x$y$masks <- transform_pad(x$y$masks, padding, fill = 0)
-    }
-    img_h <- img_h + pad_top + pad_bottom
-    img_w <- img_w + pad_left + pad_right
-
-    if (crop_w == img_w && crop_h == img_h) {
-      x$y$image_height <- crop_h
-      x$y$image_width <- crop_w
-      return(x)
-    }
-  }
-
-  crop_top <- as.integer((img_h - crop_h) / 2)
-  crop_left <- as.integer((img_w - crop_w) / 2)
+  # crop offsets are relative to the (possibly padded) image, see
+  # transform_center_crop
+  crop_top <- as.integer((max(img_h, crop_h) - crop_h) / 2)
+  crop_left <- as.integer((max(img_w, crop_w) - crop_w) / 2)
 
   if (crop_top == 0L) crop_top <- 1L
   if (crop_left == 0L) crop_left <- 1L
 
-  # Crop image
-  x$x <- transform_crop(x$x, crop_top, crop_left, crop_h, crop_w)
-
-  # Crop masks if present
+  # Crop image and masks if present
+  x$x <- transform_center_crop(x$x, size)
   if (!is.null(x$y$masks)) {
-    x$y$masks <- transform_crop(x$y$masks, crop_top, crop_left, crop_h, crop_w)
+    x$y$masks <- transform_center_crop(x$y$masks, size)
   }
 
   # Adjust boxes if present
