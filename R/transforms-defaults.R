@@ -49,8 +49,8 @@ transform_center_crop.default <- function(img, size) {
     img <- transform_pad(img, padding_ltrb, fill = 0)  # PIL uses fill value 0
 
     size <- get_image_size(img)
-    image_height <- size[1]
-    image_width <- size[2]
+    image_height <- size[2]
+    image_width <- size[1]
 
     if (crop_width == image_width && crop_height == image_height) return(img)
   }
