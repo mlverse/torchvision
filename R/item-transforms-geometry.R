@@ -145,6 +145,28 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
 #' @return A dataset item of the same class with the cropped image and
 #'   adjusted target.
 #'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_crop(before, top = 100, left = 200, height = 500, width = 800)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' before_plot <- transform_resize(before_plot, c(2000, 3000))
+#' after_plot <- transform_resize(after_plot, c(2000, 3000))
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
 #' @family item_unitary_transforms
 #'
 #' @export
