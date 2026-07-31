@@ -411,8 +411,9 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
 }
 
 center_crop_item <- function(x, size) {
-  img_h <- as.numeric(x$x$shape[2])
-  img_w <- as.numeric(x$x$shape[3])
+  img_size <- get_image_size(x$x)
+  img_w <- img_size[1]
+  img_h <- img_size[2]
 
   output_size <- size
   if (length(size) == 1) {
