@@ -460,10 +460,13 @@ item_transform_vflip.image_with_rotated_box <- function(x) {
 #' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
-#' after <- item_transform_center_crop(before, size = c(300, 300))
+#' after <- item_transform_center_crop(before, size = c(1500, 1500))
 #'
 #' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' before_plot <- transform_resize(before_plot, c(1500, 1500))
+#' after_plot <- transform_resize(after_plot, c(1500, 1500))
 #'
 #' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
 #' tensor_image_browse(grid)
