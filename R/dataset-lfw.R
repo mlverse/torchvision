@@ -78,10 +78,10 @@ lfw_people_dataset <- torch::dataset(
     "original" = "170 MB",
     "funneled" = "230 MB"
   ),
-  base_url = "https://ndownloader.figshare.com/files/",
+  base_url = "https://huggingface.co/datasets/DerrickUnleashed/LFW/resolve/main/",
   resources = list(
-    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
-    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad")
+    original = c("lfw.tgz", "a17d05bd522c52d84eca14327a23d494"),
+    funneled = c("lfwfunneled.tgz", "1b42dfed7d15c9b2dd63d5e5840c86ad")
   ),
 
   initialize = function(
@@ -208,13 +208,13 @@ lfw_pairs_dataset <- torch::dataset(
     "original" = "170 MB",
     "funneled" = "230 MB"
   ),
-  base_url = "https://ndownloader.figshare.com/files/",
+  base_url = "https://huggingface.co/datasets/DerrickUnleashed/LFW/resolve/main/",
   resources = list(
-    original = c("5976018", "a17d05bd522c52d84eca14327a23d494"),
-    funneled = c("5976015", "1b42dfed7d15c9b2dd63d5e5840c86ad"),
-    pairsDevTrain.txt = c("5976012", "4f27cbf15b2da4a85c1907eb4181ad21"),
-    pairsDevTest.txt = c("5976009", "5132f7440eb68cf58910c8a45a2ac10b"),
-    pairs.txt = c("5976006", "9f1ba174e4e1c508ff7cdf10ac338a7d")
+    original = c("lfw.tgz", "a17d05bd522c52d84eca14327a23d494"),
+    funneled = c("lfwfunneled.tgz", "1b42dfed7d15c9b2dd63d5e5840c86ad"),
+    pairsDevTrain.txt = c("pairsDevTrain.txt", "4f27cbf15b2da4a85c1907eb4181ad21"),
+    pairsDevTest.txt = c("pairsDevTest.txt", "5132f7440eb68cf58910c8a45a2ac10b"),
+    pairs.txt = c("pairs.txt", "9f1ba174e4e1c508ff7cdf10ac338a7d")
   ),
 
   initialize = function(
