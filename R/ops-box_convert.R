@@ -12,16 +12,17 @@ NULL
 #'
 #' @return boxes (Tensor(N, 4)): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 box_cxcywh_to_xyxy <- function(boxes) {
-  # We need to change all 4 of them so some temporary variable is needed.
-  c(cx, cy, w, h) %<-% boxes$unbind(-1)
+  cx <- boxes[..., 1, drop = FALSE]
+  cy <- boxes[..., 2, drop = FALSE]
+  w  <- boxes[..., 3, drop = FALSE]
+  h  <- boxes[..., 4, drop = FALSE]
+
   x1 <- cx - 0.5 * w
   y1 <- cy - 0.5 * h
   x2 <- cx + 0.5 * w
   y2 <- cy + 0.5 * h
 
-  boxes <- torch::torch_stack(list(x1, y1, x2, y2), dim = -1)
-
-  return(boxes)
+  torch::torch_cat(list(x1, y1, x2, y2), dim = -1)
 }
 
 #' box_xyxy_to_cxcywh
@@ -34,15 +35,17 @@ box_cxcywh_to_xyxy <- function(boxes) {
 #'
 #' @return boxes (Tensor(N, 4)): boxes in \eqn{(c_x, c_y, w, h)} format.
 box_xyxy_to_cxcywh <- function(boxes) {
-  c(x1, y1, x2, y2) %<-% boxes$unbind(-1)
-  cx <- (x1 + x2) / 2
-  cy <- (y1 + y2) / 2
+  x1 <- boxes[..., 1, drop = FALSE]
+  y1 <- boxes[..., 2, drop = FALSE]
+  x2 <- boxes[..., 3, drop = FALSE]
+  y2 <- boxes[..., 4, drop = FALSE]
+
+  cx <- (x1 + x2) * 0.5
+  cy <- (y1 + y2) * 0.5
   w <- x2 - x1
   h <- y2 - y1
 
-  boxes <- torch::torch_stack(list(cx, cy, w, h), dim = -1)
-
-  return(boxes)
+  torch::torch_cat(list(cx, cy, w, h), dim = -1)
 }
 
 #' box_xywh_to_xyxy
@@ -55,9 +58,12 @@ box_xyxy_to_cxcywh <- function(boxes) {
 #'
 #' @return boxes (Tensor\[N, 4\]): boxes in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 box_xywh_to_xyxy <- function(boxes) {
-  c(x, y, w, h) %<-% boxes$unbind(-1)
-  boxes <- torch::torch_stack(list(x, y, x + w, y + h), dim = -1)
-  return(boxes)
+  x <- boxes[..., 1, drop = FALSE]
+  y <- boxes[..., 2, drop = FALSE]
+  w <- boxes[..., 3, drop = FALSE]
+  h <- boxes[..., 4, drop = FALSE]
+
+  torch::torch_cat(list(x, y, x + w, y + h), dim = -1)
 }
 
 #' box_xyxy_to_xywh
@@ -70,11 +76,15 @@ box_xywh_to_xyxy <- function(boxes) {
 #'
 #' @return boxes (Tensor\[N, 4\]): boxes in (x, y, w, h) format.
 box_xyxy_to_xywh <- function(boxes) {
-  c(x1, y1, x2, y2) %<-% boxes$unbind(-1)
-  w <- x2 - x1 # x2 - x1
-  h <- y2 - y1 # y2 - y1
-  boxes <- torch::torch_stack(list(x1, y1, w, h), dim = -1)
-  return(boxes)
+  x1 <- boxes[..., 1, drop = FALSE]
+  y1 <- boxes[..., 2, drop = FALSE]
+  x2 <- boxes[..., 3, drop = FALSE]
+  y2 <- boxes[..., 4, drop = FALSE]
+
+  w <- x2 - x1
+  h <- y2 - y1
+
+  torch::torch_cat(list(x1, y1, w, h), dim = -1)
 }
 
 #' box_xyxy_to_xyxyr
@@ -96,26 +106,24 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
 
   # Handle empty input early
   if (n == 0) {
-    angle_t <- torch_zeros(0, 1, dtype = boxes$dtype)
-    return(torch_cat(list(boxes, angle_t), dim = -1))
+    angle_t <- torch::torch_zeros(0, 1, dtype = boxes$dtype, device = boxes$device)
+    return(torch::torch_cat(list(boxes, angle_t), dim = -1))
   }
 
-  cx <- cy <- hw <- hh <- curr_angle <- NULL
+  x1 <- boxes[, 1, drop = FALSE]
+  y1 <- boxes[, 2, drop = FALSE]
+  x2 <- boxes[, 3, drop = FALSE]
+  y2 <- boxes[, 4, drop = FALSE]
+
+  cx <- (x1 + x2) * 0.5
+  cy <- (y1 + y2) * 0.5
 
   if (is_already_rotated) {
-    # Input is already xyxyr: recover physical half-dimensions from the current AABB
-    x1 <- boxes[, 1, drop = FALSE]
-    y1 <- boxes[, 2, drop = FALSE]
-    x2 <- boxes[, 3, drop = FALSE]
-    y2 <- boxes[, 4, drop = FALSE]
     curr_angle <- boxes[, 5, drop = FALSE]
 
-    cx <- (x1 + x2) * 0.5
-    cy <- (y1 + y2) * 0.5
     hw_aabb <- (x2 - x1) * 0.5
     hh_aabb <- (y2 - y1) * 0.5
 
-    # Invert the projection matrix to retrieve physical half-dimensions
     curr_rad <- deg2rad(curr_angle)
     c_abs <- torch_abs(torch_cos(curr_rad))
     s_abs <- torch_abs(torch_sin(curr_rad))
@@ -123,7 +131,6 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
     # Determinant of the projection matrix: cos^2(theta) - sin^2(theta) = cos(2*theta)
     # The sign is needed for correct inversion (e.g., -1 at 90 degrees)
     det <- c_abs^2 - s_abs^2
-
     # Clamp away from zero to avoid division by zero at 45 degrees, preserving sign
     det <- torch_sign(det) * torch_clamp(torch_abs(det), min = 1e-6)
 
@@ -134,13 +141,6 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
     hw <- torch_clamp(hw, min = 0)
     hh <- torch_clamp(hh, min = 0)
   } else {
-    # Standard xyxy input: physical dimensions equal AABB dimensions
-    x1 <- boxes[, 1, drop = FALSE]
-    y1 <- boxes[, 2, drop = FALSE]
-    x2 <- boxes[, 3, drop = FALSE]
-    y2 <- boxes[, 4, drop = FALSE]
-    cx <- (x1 + x2) * 0.5
-    cy <- (y1 + y2) * 0.5
     hw <- (x2 - x1) * 0.5
     hh <- (y2 - y1) * 0.5
     curr_angle <- torch_zeros_like(cx)
@@ -148,9 +148,9 @@ box_xyxy_to_xyxyr <- function(boxes, angle = 0) {
 
   # Normalize and accumulate rotation angle
   angle_deg <- if (inherits(angle, "torch_tensor")) {
-    angle$to(dtype = boxes$dtype)$reshape(c(-1, 1))
+    angle$to(dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))
   } else {
-    torch_tensor(angle, dtype = boxes$dtype)$reshape(c(-1, 1))
+    torch::torch_tensor(angle, dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))
   }
 
   if (angle_deg$size(1) == 1 && n > 1) {
