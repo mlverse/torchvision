@@ -27,9 +27,8 @@ adjusted target.
 Crops the image inside a dataset item at the specified location and output
 size. For detection items, bounding box coordinates are adjusted to remain
 correct after cropping. For segmentation items, both the image and the masks
-are cropped.
-}
-\details{
+are cropped. For rotated-box items, box coordinates are adjusted and the
+rotation angle is preserved.
 If the crop area extends beyond the image boundaries, boxes that fall
 completely outside the crop are removed, and boxes that intersect the crop
 boundary are clipped to the cropped region.

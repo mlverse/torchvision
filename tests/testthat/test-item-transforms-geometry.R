@@ -945,3 +945,31 @@ test_that("item_transform_crop transforms segmentation items", {
   expect_equal(result$y$image_width, 160L)
   expect_s3_class(result, "image_with_segmentation_mask")
 })
+
+test_that("item_transform_crop transforms rotated-box items", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+  original_angles <- as_array(rotated$y$boxes[, 5])
+
+  result <- item_transform_crop(rotated, top = 11, left = 21, height = 80, width = 160)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$x, c(3, 80, 160))
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_tensor_dtype(result$y$boxes, torch_float())
+  expect_equal(result$y$image_height, 80L)
+  expect_equal(result$y$image_width, 160L)
+  expect_equal_to_r(result$y$boxes[, 5], original_angles)
+})
+
+test_that("item_transform_crop removes rotated boxes outside crop area", {
+  item <- make_detection_item(
+    matrix(c(150, 50, 180, 80), ncol = 4),
+    image_size = c(200L, 300L)
+  )
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_crop(rotated, top = 1, left = 140, height = 100, width = 40)
+
+  expect_tensor_shape(result$y$boxes, c(0, 5))
+})
