@@ -40,7 +40,7 @@ model_convnext_small_22k1k(
   pretrained = FALSE,
   progress = TRUE,
   channels = 3,
-  num_classes = 21841,
+  num_classes = 1000,
   ...
 )
 
@@ -99,8 +99,9 @@ Implements the ConvNeXt architecture from \href{https://arxiv.org/pdf/2201.03545
 
 \item \code{model_convnext_small_22k()}: ConvNeXt Small model trained on Imagenet 22k.
 
-\item \code{model_convnext_small_22k1k()}: ConvNeXt Small model pretrained on Imagenet 1k
-and fine-tuned on Imagenet 22k classes.
+\item \code{model_convnext_small_22k1k()}: ConvNeXt Small model pretrained on Imagenet 22k
+and fine-tuned on Imagenet 1k classes. Note that, unlike the other \verb{_22k} models, its
+pretrained weights therefore predict the 1000 Imagenet 1k classes.
 
 \item \code{model_convnext_base_1k()}: ConvNeXt Base model trained on Imagenet 1k.
 
@@ -120,7 +121,7 @@ and fine-tuned on Imagenet 22k classes.
 | convnext_tiny_1k     | 82.1\%    | 28M    | 4.5    | 109 MB    |         1000 | 224 x 224  |
 | convnext_tiny_22k    | 82.9\%    | 29M    | 4.5    | 170 MB    |        21841 | 224 x 224  |
 | convnext_small_22k   | 84.6\%    | 50M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
-| convnext_small_22k1k | 84.6\%    | 50M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
+| convnext_small_22k1k | 84.6\%    | 50M    | 8.7    | 192 MB    |         1000 | 224 x 224  |
 | convnext_base_1k     | 85.1\%    | 89M    | 15.4   | 338 MB    |         1000 | 224 x 224  |
 | convnext_base_22k    | 85.8\%    | 89M    | 15.4   | 420 MB    |        21841 | 224 x 224  |
 | convnext_large_1k    | 84.3\%    | 198M   | 34.4   | 750 MB    |         1000 | 224 x 224  |
