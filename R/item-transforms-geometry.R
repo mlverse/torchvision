@@ -123,6 +123,173 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
   x
 }
 
+#' Crop a dataset item
+#'
+#' Crops the image inside a dataset item at the specified location and output
+#' size. For detection items, bounding box coordinates are adjusted to remain
+#' correct after cropping. For segmentation items, both the image and the masks
+#' are cropped. For rotated-box items, box coordinates are adjusted and the
+#' rotation angle is preserved.
+#' If the crop area extends beyond the image boundaries, boxes that fall
+#' completely outside the crop are removed, and boxes that intersect the crop
+#' boundary are clipped to the cropped region.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @param top integer: Vertical component of the top left corner of the crop box.
+#' @param left integer: Horizontal component of the top left corner of the crop box.
+#' @param height integer: Height of the crop box.
+#' @param width integer: Width of the crop box.
+#'
+#' @return A dataset item of the same class with the cropped image and
+#'   adjusted target.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_crop(before, top = 100, left = 200, height = 500, width = 800)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' before_plot <- transform_resize(before_plot, c(2000, 3000))
+#' after_plot <- transform_resize(after_plot, c(2000, 3000))
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_crop <- function(x, top, left, height, width) {
+  UseMethod("item_transform_crop", x)
+}
+
+#' @export
+item_transform_crop.dataset <- function(x, top, left, height, width) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_crop(item, top, left, height, width)
+  }
+  x
+}
+
+#' @export
+item_transform_crop.default <- function(x, top, left, height, width) {
+  cli_abort(
+    "{.fn item_transform_crop} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To crop a raw image tensor, use {.fn transform_crop} instead."
+  )
+}
+
+#' @export
+item_transform_crop.image_with_bounding_box <- function(x, top, left, height, width) {
+  x$x <- transform_crop(x$x, top, left, height, width)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    orig_x1 <- boxes[, 1]
+    orig_y1 <- boxes[, 2]
+    orig_x2 <- boxes[, 3]
+    orig_y2 <- boxes[, 4]
+
+    offset_x <- as.numeric(left) - 1
+    offset_y <- as.numeric(top) - 1
+
+    new_x1 <- torch_clamp(orig_x1 - offset_x, 0, width)
+    new_y1 <- torch_clamp(orig_y1 - offset_y, 0, height)
+    new_x2 <- torch_clamp(orig_x2 - offset_x, 0, width)
+    new_y2 <- torch_clamp(orig_y2 - offset_y, 0, height)
+
+    keep <- as.logical(as_array((new_x2 > new_x1) & (new_y2 > new_y1)))
+    boxes <- torch_stack(list(new_x1, new_y1, new_x2, new_y2), dim = -1L)
+
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- as.integer(height)
+  x$y$image_width <- as.integer(width)
+
+  x
+}
+
+#' @export
+item_transform_crop.image_with_segmentation_mask <- function(x, top, left, height, width) {
+  x$x <- transform_crop(x$x, top, left, height, width)
+  x$y$masks <- transform_crop(x$y$masks, top, left, height, width)
+  x$y$image_height <- as.integer(height)
+  x$y$image_width <- as.integer(width)
+
+  x
+}
+
+#' @export
+item_transform_crop.image_with_rotated_box <- function(x, top, left, height, width) {
+  x$x <- transform_crop(x$x, top, left, height, width)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    orig_x1 <- boxes[, 1]
+    orig_y1 <- boxes[, 2]
+    orig_x2 <- boxes[, 3]
+    orig_y2 <- boxes[, 4]
+    angle_col <- boxes[, 5, drop = FALSE]
+
+    offset_x <- as.numeric(left) - 1
+    offset_y <- as.numeric(top) - 1
+
+    new_x1 <- torch_clamp(orig_x1 - offset_x, 0, width)
+    new_y1 <- torch_clamp(orig_y1 - offset_y, 0, height)
+    new_x2 <- torch_clamp(orig_x2 - offset_x, 0, width)
+    new_y2 <- torch_clamp(orig_y2 - offset_y, 0, height)
+
+    keep <- as.logical(as_array((new_x2 > new_x1) & (new_y2 > new_y1)))
+    new_xy <- torch_stack(list(new_x1, new_y1, new_x2, new_y2), dim = -1L)
+
+    if (!all(keep)) {
+      new_xy <- new_xy[keep, ]
+      angle_col <- angle_col[keep, ]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+    boxes <- torch_cat(list(new_xy, angle_col), dim = -1L)
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- as.integer(height)
+  x$y$image_width <- as.integer(width)
+
+  x
+}
+
 #' Horizontally flip a dataset item
 #'
 #' Flips the image inside a dataset item horizontally. For detection items,
