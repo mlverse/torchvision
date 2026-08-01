@@ -145,3 +145,24 @@ test_that("pretrained model_convnext_large_* works", {
   rm(model_22k)
   gc()
 })
+
+test_that("model_convnext_small_22k1k defaults to the 1000 classes of its weights", {
+  # "22k1k" means pretrained on Imagenet 22k and *fine-tuned* on Imagenet 1k, so unlike the
+  # other `_22k` models the published weights have a 1000-class head. A default of 21841 makes
+  # the state dict fail to load, which cannot be worked around by the caller either, because
+  # `load_state_dict()` of torch for R has no `strict` argument.
+  expect_equal(formals(model_convnext_small_22k1k)$num_classes, 1000)
+
+  model <- model_convnext_small_22k1k(pretrained = FALSE)
+  model$eval()
+  expect_tensor_shape(model(torch_randn(1, 3, 224, 224)), c(1, 1000))
+})
+
+test_that("pretrained model_convnext_small_22k1k loads", {
+  skip_if(Sys.getenv("TEST_LARGE_MODELS", unset = 0) != 1,
+          "Skipping test: set TEST_LARGE_MODELS=1 to enable tests requiring large downloads.")
+
+  expect_no_error(model <- model_convnext_small_22k1k(pretrained = TRUE))
+  model$eval()
+  expect_tensor_shape(model(torch_randn(1, 3, 224, 224)), c(1, 1000))
+})
