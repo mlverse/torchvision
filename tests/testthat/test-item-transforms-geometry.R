@@ -925,52 +925,23 @@ test_that("item_transform_crop image dtype is preserved for detection", {
   expect_tensor_dtype(result$x, item$x$dtype)
 })
 
-test_that("item_transform_crop preserves image shape for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L))
-  result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
-
-  expect_tensor_shape(result$x, c(3, 80, 160))
-})
-
-test_that("item_transform_crop crops masks for segmentation", {
+test_that("item_transform_crop transforms segmentation items", {
   item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
   original_masks <- item$y$masks$clone()
+  original_labels <- as.integer(as_array(item$y$labels))
+  original_dtype <- item$x$dtype
 
   result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
 
   expected_masks <- transform_crop(original_masks, top = 11, left = 21, height = 80, width = 160)
+
+  expect_tensor_shape(result$x, c(3, 80, 160))
+  expect_tensor_dtype(result$x, original_dtype)
   expect_tensor_shape(result$y$masks, c(2, 80, 160))
   expect_tensor_dtype(result$y$masks, torch_bool())
   expect_true(result$y$masks$equal(expected_masks))
-})
-
-test_that("item_transform_crop preserves labels for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-  original_labels <- as.integer(as_array(item$y$labels))
-
-  result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
-
   expect_equal_to_r(result$y$labels, original_labels)
-})
-
-test_that("item_transform_crop updates image_height and image_width for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L))
-  result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
-
   expect_equal(result$y$image_height, 80L)
   expect_equal(result$y$image_width, 160L)
-})
-
-test_that("item_transform_crop preserves class for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L))
-  result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
-
   expect_s3_class(result, "image_with_segmentation_mask")
-})
-
-test_that("item_transform_crop image dtype is preserved for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L))
-  result <- item_transform_crop(item, top = 11, left = 21, height = 80, width = 160)
-
-  expect_tensor_dtype(result$x, item$x$dtype)
 })
