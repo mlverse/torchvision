@@ -801,40 +801,28 @@ test_that("item_transform_perspective rejects non-item inputs", {
   )
 })
 
-test_that("item_transform_perspective identity preserves image and boxes", {
-  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
-  item <- make_detection_item(boxes, image_size = c(100L, 200L))
-  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
-  result <- item_transform_perspective(item, sp, sp)
-
-  expect_s3_class(result, "image_with_bounding_box")
-  expect_tensor_shape(result$x, c(3, 100, 200))
-  expect_true(result$x$allclose(item$x, atol = 1e-4))
-  expect_equal_to_r(result$y$boxes, boxes)
-})
-
-test_that("item_transform_perspective translates boxes with endpoints", {
-  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
-  ep <- list(c(10, 20), c(209, 20), c(209, 119), c(10, 119))
-
-  result <- item_transform_perspective(item, sp, ep)
-
-  expect_equal_to_r(result$y$boxes[1, 1], 20)
-  expect_equal_to_r(result$y$boxes[1, 2], 40)
-  expect_equal_to_r(result$y$boxes[1, 3], 60)
-  expect_equal_to_r(result$y$boxes[1, 4], 80)
-})
-
-test_that("item_transform_perspective does not mutate input", {
+test_that("item_transform_perspective applies box transforms without mutating input", {
   boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
   item <- make_detection_item(torch_tensor(boxes), image_size = c(100L, 200L))
   sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
-  ep <- list(c(10, 20), c(209, 20), c(209, 119), c(10, 119))
   original_img <- as_array(item$x)
   original_class <- class(item)
 
-  result <- item_transform_perspective(item, sp, ep)
+  identity <- item_transform_perspective(item, sp, sp)
+
+  expect_s3_class(identity, "image_with_bounding_box")
+  expect_tensor_shape(identity$x, c(3, 100, 200))
+  expect_true(identity$x$allclose(item$x, atol = 1e-4))
+  expect_equal_to_r(identity$y$boxes, boxes)
+  expect_equal(identity$x$dtype, item$x$dtype)
+
+  ep <- list(c(10, 20), c(209, 20), c(209, 119), c(10, 119))
+  translated <- item_transform_perspective(item, sp, ep)
+
+  expect_equal_to_r(translated$y$boxes[1, 1], 20)
+  expect_equal_to_r(translated$y$boxes[1, 2], 40)
+  expect_equal_to_r(translated$y$boxes[1, 3], 60)
+  expect_equal_to_r(translated$y$boxes[1, 4], 80)
 
   expect_equal_to_r(item$x, original_img)
   expect_equal_to_r(item$y$boxes, boxes)
@@ -857,47 +845,40 @@ test_that("item_transform_perspective preserves labels and metadata", {
   expect_equal(result$y$image_width, 200L)
 })
 
-test_that("item_transform_perspective handles empty boxes", {
-  item <- make_detection_item(
+test_that("item_transform_perspective handles box edge cases", {
+  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
+
+  empty <- make_detection_item(
     boxes = matrix(numeric(0), ncol = 4),
     labels = torch_zeros(0L, dtype = torch_long())
   )
-  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
+  result_empty <- item_transform_perspective(empty, sp, sp)
+  expect_tensor_shape(result_empty$y$boxes, c(0, 4))
+  expect_tensor_dtype(result_empty$y$boxes, torch_float())
 
-  result <- item_transform_perspective(item, sp, sp)
-
-  expect_tensor_shape(result$y$boxes, c(0, 4))
-  expect_tensor_dtype(result$y$boxes, torch_float())
-})
-
-test_that("item_transform_perspective handles multiple boxes", {
   boxes <- matrix(c(
     10, 20, 50, 60,
     100, 200, 150, 250,
     0, 0, 300, 400
   ), ncol = 4, byrow = TRUE)
-  item <- make_detection_item(boxes, image_size = c(500L, 600L))
-  sp <- list(c(0, 0), c(599, 0), c(599, 499), c(0, 499))
-  ep <- list(c(10, 20), c(609, 20), c(609, 519), c(10, 519))
+  multi <- make_detection_item(boxes, image_size = c(500L, 600L))
+  sp600 <- list(c(0, 0), c(599, 0), c(599, 499), c(0, 499))
+  ep600 <- list(c(10, 20), c(609, 20), c(609, 519), c(10, 519))
+  result_multi <- item_transform_perspective(multi, sp600, ep600)
 
-  result <- item_transform_perspective(item, sp, ep)
+  expect_tensor_shape(result_multi$y$boxes, c(3, 4))
+  expect_equal_to_r(result_multi$y$boxes[, 1], boxes[, 1] + 10)
+  expect_equal_to_r(result_multi$y$boxes[, 2], boxes[, 2] + 20)
+  expect_equal_to_r(result_multi$y$boxes[, 3], pmin(600, boxes[, 3] + 10))
+  expect_equal_to_r(result_multi$y$boxes[, 4], pmin(500, boxes[, 4] + 20))
 
-  expect_tensor_shape(result$y$boxes, c(3, 4))
-  expect_equal_to_r(result$y$boxes[, 1], boxes[, 1] + 10)
-  expect_equal_to_r(result$y$boxes[, 2], boxes[, 2] + 20)
-  expect_equal_to_r(result$y$boxes[, 3], pmin(600, boxes[, 3] + 10))
-  expect_equal_to_r(result$y$boxes[, 4], pmin(500, boxes[, 4] + 20))
-})
+  outside <- make_detection_item(matrix(c(80, 80, 90, 90), ncol = 4), image_size = c(100L, 100L))
+  sp100 <- list(c(0, 0), c(99, 0), c(99, 99), c(0, 99))
+  ep100 <- list(c(50, 0), c(149, 0), c(149, 99), c(50, 99))
+  result_outside <- item_transform_perspective(outside, sp100, ep100)
 
-test_that("item_transform_perspective removes boxes pushed outside the canvas", {
-  item <- make_detection_item(matrix(c(80, 80, 90, 90), ncol = 4), image_size = c(100L, 100L))
-  sp <- list(c(0, 0), c(99, 0), c(99, 99), c(0, 99))
-  ep <- list(c(50, 0), c(149, 0), c(149, 99), c(50, 99))
-
-  result <- item_transform_perspective(item, sp, ep)
-
-  expect_tensor_shape(result$y$boxes, c(0, 4))
-  expect_tensor_shape(result$y$labels, 0L)
+  expect_tensor_shape(result_outside$y$boxes, c(0, 4))
+  expect_tensor_shape(result_outside$y$labels, 0L)
 })
 
 test_that("item_transform_perspective transforms segmentation masks", {
@@ -906,6 +887,7 @@ test_that("item_transform_perspective transforms segmentation masks", {
   ep <- list(c(10, 5), c(190, 0), c(195, 95), c(5, 100))
   original_masks <- item$y$masks$clone()
   original_dtype <- item$x$dtype
+  original_labels <- as.integer(as_array(item$y$labels))
 
   result <- item_transform_perspective(item, sp, ep)
 
@@ -914,30 +896,13 @@ test_that("item_transform_perspective transforms segmentation masks", {
   expect_tensor_shape(result$x, c(3, 100, 200))
   expect_tensor_shape(result$y$masks, original_masks$shape)
   expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_equal_to_r(result$y$labels, original_labels)
+  expect_equal(result$y$image_height, 100L)
+  expect_equal(result$y$image_width, 200L)
 
   expected_masks <- transform_perspective(original_masks, startpoints = sp, endpoints = ep,
                                           interpolation = 0)
   expect_true(result$y$masks$equal(expected_masks))
-})
-
-test_that("item_transform_perspective preserves labels for segmentation", {
-  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
-  original_labels <- as.integer(as_array(item$y$labels))
-
-  result <- item_transform_perspective(item, sp, sp)
-
-  expect_equal_to_r(result$y$labels, original_labels)
-  expect_equal(result$y$image_height, 100L)
-  expect_equal(result$y$image_width, 200L)
-})
-
-test_that("item_transform_perspective image dtype is preserved", {
-  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
-  result <- item_transform_perspective(item, sp, sp)
-
-  expect_equal(result$x$dtype, item$x$dtype)
 })
 
 test_that("item_transform_perspective can be composed", {
