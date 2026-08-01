@@ -48,6 +48,7 @@ tiny_imagenet_dataset <- torch::dataset(
     cli_inform("Processing {.cls {class(self)[[1]]}} ...")
 
     utils::unzip(raw_path, exdir = self$root_path)
+    fs::file_delete(raw_path)
 
     # organize validation images
     val_path <- fs::path_join(c(self$root_path, self$tar_name, "val"))
