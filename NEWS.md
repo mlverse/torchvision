@@ -21,6 +21,8 @@
 * Added `item_transform_vflip()` for vertically flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #369).
 * Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
 * Added `item_transform_center_crop()` for cropping images from the center to a specified size for dataset items, with support for detection and segmentation item types and datasets  (@DerrickUnleashed, #370).
+* Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
+* Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
 
 ## Bug fixes and improvements
 
