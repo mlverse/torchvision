@@ -128,8 +128,8 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
 #' Crops the image inside a dataset item at the specified location and output
 #' size. For detection items, bounding box coordinates are adjusted to remain
 #' correct after cropping. For segmentation items, both the image and the masks
-#' are cropped.
-#'
+#' are cropped. For rotated-box items, box coordinates are adjusted and the
+#' rotation angle is preserved.
 #' If the crop area extends beyond the image boundaries, boxes that fall
 #' completely outside the crop are removed, and boxes that intersect the crop
 #' boundary are clipped to the cropped region.
@@ -239,6 +239,51 @@ item_transform_crop.image_with_bounding_box <- function(x, top, left, height, wi
 item_transform_crop.image_with_segmentation_mask <- function(x, top, left, height, width) {
   x$x <- transform_crop(x$x, top, left, height, width)
   x$y$masks <- transform_crop(x$y$masks, top, left, height, width)
+  x$y$image_height <- as.integer(height)
+  x$y$image_width <- as.integer(width)
+
+  x
+}
+
+#' @export
+item_transform_crop.image_with_rotated_box <- function(x, top, left, height, width) {
+  x$x <- transform_crop(x$x, top, left, height, width)
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    orig_x1 <- boxes[, 1]
+    orig_y1 <- boxes[, 2]
+    orig_x2 <- boxes[, 3]
+    orig_y2 <- boxes[, 4]
+    angle_col <- boxes[, 5, drop = FALSE]
+
+    offset_x <- as.numeric(left) - 1
+    offset_y <- as.numeric(top) - 1
+
+    new_x1 <- torch_clamp(orig_x1 - offset_x, 0, width)
+    new_y1 <- torch_clamp(orig_y1 - offset_y, 0, height)
+    new_x2 <- torch_clamp(orig_x2 - offset_x, 0, width)
+    new_y2 <- torch_clamp(orig_y2 - offset_y, 0, height)
+
+    keep <- as.logical(as_array((new_x2 > new_x1) & (new_y2 > new_y1)))
+    new_xy <- torch_stack(list(new_x1, new_y1, new_x2, new_y2), dim = -1L)
+
+    if (!all(keep)) {
+      new_xy <- new_xy[keep, ]
+      angle_col <- angle_col[keep, ]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+    boxes <- torch_cat(list(new_xy, angle_col), dim = -1L)
+  }
+  x$y$boxes <- boxes
   x$y$image_height <- as.integer(height)
   x$y$image_width <- as.integer(width)
 
