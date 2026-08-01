@@ -118,7 +118,7 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  channels <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  num_classes <span class="op">=</span> <span class="fl">21841</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -186,8 +186,9 @@ stderr.</p></dd>
 <ul><li><p><code>model_convnext_tiny_1k()</code>: ConvNeXt Tiny model trained on Imagenet 1k.</p></li>
 <li><p><code>model_convnext_tiny_22k()</code>: ConvNeXt Tiny model trained on Imagenet 22k.</p></li>
 <li><p><code>model_convnext_small_22k()</code>: ConvNeXt Small model trained on Imagenet 22k.</p></li>
-<li><p><code>model_convnext_small_22k1k()</code>: ConvNeXt Small model pretrained on Imagenet 1k
-and fine-tuned on Imagenet 22k classes.</p></li>
+<li><p><code>model_convnext_small_22k1k()</code>: ConvNeXt Small model pretrained on Imagenet 22k
+and fine-tuned on Imagenet 1k classes. Note that, unlike the other <code>_22k</code> models, its
+pretrained weights therefore predict the 1000 Imagenet 1k classes.</p></li>
 <li><p><code>model_convnext_base_1k()</code>: ConvNeXt Base model trained on Imagenet 1k.</p></li>
 <li><p><code>model_convnext_base_22k()</code>: ConvNeXt Base model trained on Imagenet 22k.</p></li>
 <li><p><code>model_convnext_large_1k()</code>: ConvNeXt Large model trained on Imagenet 1k.</p></li>
@@ -206,7 +207,7 @@ and fine-tuned on Imagenet 22k classes.</p></li>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="er">|</span> convnext_tiny_1k     <span class="sc">|</span> <span class="fl">82.1</span>%    <span class="sc">|</span> <span class="dv">28</span>M    <span class="sc">|</span> <span class="fl">4.5</span>    <span class="sc">|</span> <span class="dv">109</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="er">|</span> convnext_tiny_22k    <span class="sc">|</span> <span class="fl">82.9</span>%    <span class="sc">|</span> <span class="dv">29</span>M    <span class="sc">|</span> <span class="fl">4.5</span>    <span class="sc">|</span> <span class="dv">170</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="er">|</span> convnext_small_22k   <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">252</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="er">|</span> convnext_small_22k1k <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">252</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="er">|</span> convnext_small_22k1k <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">192</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="er">|</span> convnext_base_1k     <span class="sc">|</span> <span class="fl">85.1</span>%    <span class="sc">|</span> <span class="dv">89</span>M    <span class="sc">|</span> <span class="fl">15.4</span>   <span class="sc">|</span> <span class="dv">338</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="er">|</span> convnext_base_22k    <span class="sc">|</span> <span class="fl">85.8</span>%    <span class="sc">|</span> <span class="dv">89</span>M    <span class="sc">|</span> <span class="fl">15.4</span>   <span class="sc">|</span> <span class="dv">420</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="er">|</span> convnext_large_1k    <span class="sc">|</span> <span class="fl">84.3</span>%    <span class="sc">|</span> <span class="dv">198</span>M   <span class="sc">|</span> <span class="fl">34.4</span>   <span class="sc">|</span> <span class="dv">750</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
