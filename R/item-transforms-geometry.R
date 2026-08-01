@@ -507,3 +507,140 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
 
   x
 }
+
+# ---- item_transform_perspective ----
+
+#' Apply a perspective transform to a dataset item
+#'
+#' Applies a perspective transform to the image inside a dataset item, as
+#' defined by \code{\link{transform_perspective}}. For detection items,
+#' bounding box coordinates are transformed accordingly and clamped to the
+#' image canvas, boxes that end up completely outside the image are removed.
+#' For segmentation items, both the image and the masks are transformed,
+#' using nearest neighbour interpolation for the masks.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @inheritParams transform_perspective
+#'
+#' @return A dataset item of the same class with the image and target
+#'   perspective transformed.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' startpoints <- list(c(0, 0), c(2880, 0), c(2880, 1860), c(0, 1860))
+#' endpoints <- list(c(100, 50), c(2700, 0), c(2800, 1800), c(80, 1900))
+#'
+#' after <- item_transform_perspective(before, startpoints, endpoints)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_perspective <- function(x, startpoints, endpoints, interpolation = 2,
+                                       fill = NULL) {
+  UseMethod("item_transform_perspective", x)
+}
+
+#' @export
+item_transform_perspective.default <- function(x, startpoints, endpoints, interpolation = 2,
+                                               fill = NULL) {
+  cli_abort(
+    "{.fn item_transform_perspective} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To transform a raw image tensor, use {.fn transform_perspective} instead."
+  )
+}
+
+#' @export
+item_transform_perspective.dataset <- function(x, startpoints, endpoints, interpolation = 2,
+                                               fill = NULL) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_perspective(item,
+      startpoints = startpoints,
+      endpoints = endpoints,
+      interpolation = interpolation,
+      fill = fill
+    )
+  }
+  x
+}
+
+#' @export
+item_transform_perspective.image_with_bounding_box <- function(x, startpoints, endpoints,
+                                                               interpolation = 2, fill = NULL) {
+  x$x <- transform_perspective(
+    x$x,
+    startpoints = startpoints,
+    endpoints = endpoints,
+    interpolation = interpolation,
+    fill = fill
+  )
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes <- perspective_boxes(boxes, startpoints = startpoints, endpoints = endpoints)
+
+    img_size <- get_image_size(x$x)
+    img_w <- img_size[1]
+    img_h <- img_size[2]
+
+    boxes[, 1] <- torch_clamp(boxes[, 1], 0, img_w)
+    boxes[, 3] <- torch_clamp(boxes[, 3], 0, img_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2], 0, img_h)
+    boxes[, 4] <- torch_clamp(boxes[, 4], 0, img_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+
+  x
+}
+
+#' @export
+item_transform_perspective.image_with_segmentation_mask <- function(x, startpoints, endpoints,
+                                                                    interpolation = 2, fill = NULL) {
+  x$x <- transform_perspective(
+    x$x,
+    startpoints = startpoints,
+    endpoints = endpoints,
+    interpolation = interpolation,
+    fill = fill
+  )
+  x$y$masks <- transform_perspective(
+    x$y$masks,
+    startpoints = startpoints,
+    endpoints = endpoints,
+    interpolation = 0, # nearest is used for masks
+    fill = NULL
+  )
+
+  x
+}
