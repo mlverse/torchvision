@@ -26,6 +26,7 @@
 
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
+* `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode.
 
 
 # torchvision 0.9.0

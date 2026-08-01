@@ -438,6 +438,18 @@ model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
 
     state_dict <- torch::load_state_dict(state_dict_path)
     model$load_state_dict(state_dict)
+
+    # The auxiliary branch had to be enabled above so that the pretrained state dict, which
+    # contains the `AuxLogits.*` tensors, can be loaded. Now that the weights are in place we can
+    # honour the `aux_logits = FALSE` that the caller asked for. Note that assigning `NULL` does
+    # not deregister a submodule in torch for R, so the branch is replaced by `nn_identity()`,
+    # which drops its parameters. Both `aux_logits` and `AuxLogits` have to be reset, because
+    # `forward()` dispatches on the former and `.forward()` on the latter.
+    if (!original_aux_logits) {
+      model$aux_logits <- FALSE
+      model$AuxLogits <- torch::nn_identity()
+    }
+
     return(model)
   }
 
