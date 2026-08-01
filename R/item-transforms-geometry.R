@@ -328,3 +328,182 @@ item_transform_vflip.image_with_rotated_box <- function(x) {
 
   x
 }
+
+# ---- item_transform_center_crop ----
+
+#' Center crop a dataset item
+#'
+#' Center crops the image inside a dataset item. For detection items,
+#' bounding box coordinates are adjusted to remain correct after cropping.
+#' For segmentation items, both the image and the masks are center cropped.
+#' If the image is smaller than the requested crop size along any edge,
+#' the image is padded with zeros and then center cropped.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @param size Desired output size. If \code{size} is an integer vector of
+#'   length 2 like \code{c(h, w)}, the output will be matched to this.
+#'   If \code{size} is a bare integer, a square crop of \code{c(size, size)}
+#'   is made.
+#'
+#' @return A dataset item of the same class with the image and target
+#'   center cropped.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_center_crop(before, size = c(1500, 1500))
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' before_plot <- transform_resize(before_plot, c(1500, 1500))
+#' after_plot <- transform_resize(after_plot, c(1500, 1500))
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_center_crop <- function(x, size) {
+  UseMethod("item_transform_center_crop", x)
+}
+
+#' @export
+item_transform_center_crop.default <- function(x, size) {
+  cli_abort(
+    "{.fn item_transform_center_crop} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To center crop a raw image tensor, use {.fn transform_center_crop} instead."
+  )
+}
+
+#' @export
+item_transform_center_crop.dataset <- function(x, size) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_center_crop(item, size = size)
+  }
+  x
+}
+
+#' @export
+item_transform_center_crop.image_with_bounding_box <- function(x, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+  crop_h <- output_size[1]
+  crop_w <- output_size[2]
+
+  img_size <- get_image_size(x$x)
+  img_w <- img_size[1]
+  img_h <- img_size[2]
+
+  # crop offsets are relative to the (possibly padded) image, see
+  # transform_center_crop
+  crop_top <- as.integer((max(img_h, crop_h) - crop_h) / 2)
+  crop_left <- as.integer((max(img_w, crop_w) - crop_w) / 2)
+
+  if (crop_top == 0L) crop_top <- 1L
+  if (crop_left == 0L) crop_left <- 1L
+
+  x$x <- transform_center_crop(x$x, size)
+
+  left_offset <- crop_left - 1L
+  top_offset <- crop_top - 1L
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] - left_offset, 0, crop_w)
+    boxes[, 3] <- torch_clamp(boxes[, 3] - left_offset, 0, crop_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] - top_offset, 0, crop_h)
+    boxes[, 4] <- torch_clamp(boxes[, 4] - top_offset, 0, crop_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- crop_h
+  x$y$image_width <- crop_w
+
+  x
+}
+
+#' @export
+item_transform_center_crop.image_with_segmentation_mask <- function(x, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+
+  x$x <- transform_center_crop(x$x, size)
+  x$y$masks <- transform_center_crop(x$y$masks, size)
+  x$y$image_height <- output_size[1]
+  x$y$image_width <- output_size[2]
+
+  x
+}
+
+#' @export
+item_transform_center_crop.image_with_rotated_box <- function(x, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+  crop_h <- output_size[1]
+  crop_w <- output_size[2]
+
+  img_size <- get_image_size(x$x)
+  img_w <- img_size[1]
+  img_h <- img_size[2]
+
+  # crop offsets are relative to the (possibly padded) image, see
+  # transform_center_crop
+  crop_top <- as.integer((max(img_h, crop_h) - crop_h) / 2)
+  crop_left <- as.integer((max(img_w, crop_w) - crop_w) / 2)
+
+  if (crop_top == 0L) crop_top <- 1L
+  if (crop_left == 0L) crop_left <- 1L
+
+  x$x <- transform_center_crop(x$x, size)
+
+  left_offset <- crop_left - 1L
+  top_offset <- crop_top - 1L
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] - left_offset, 0, crop_w)
+    boxes[, 3] <- torch_clamp(boxes[, 3] - left_offset, 0, crop_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] - top_offset, 0, crop_h)
+    boxes[, 4] <- torch_clamp(boxes[, 4] - top_offset, 0, crop_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- crop_h
+  x$y$image_width <- crop_w
+
+  x
+}
