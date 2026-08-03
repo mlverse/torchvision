@@ -23,6 +23,21 @@
 
 ## Bug fixes and improvements
 
+* `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
+  output always has the requested size. It previously returned only the part of the image the crop
+  covered, which could even be empty.
+* `transform_center_crop()` now pads correctly when the requested `size` is not square. Height and
+  width were used in the wrong order in the padding branch, so e.g. cropping a `(16, 20)` image to
+  `c(24, 30)` returned a `(22, 0)` image.
+* `transform_rgb_to_grayscale()` now returns an image with one channel instead of dropping the
+  channel dimension, i.e. `(3, H, W)` becomes `(1, H, W)` and not `(H, W)`. This also fixes
+  `transform_grayscale()` for batched input.
+* `hsv2rgb()` computed the fractional part of the hue sector and the `t` component incorrectly, so
+  converting an image to HSV and back did not return the original image. This affected
+  `transform_adjust_hue()` and `transform_color_jitter(hue = ...)`.
+* `transform_adjust_hue()` now handles negative `hue_factor`s, which produced a black image before,
+  and rejects images that do not have 1 or 3 channels instead of silently dropping the additional
+  ones.
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 

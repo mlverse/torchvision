@@ -518,3 +518,120 @@ test_that("random choice transform works", {
 
 })
 
+
+test_that("crop pads when the crop leaves the image", {
+  x <- torch_arange(1, 24)$reshape(c(1, 4, 6))
+
+  # fully inside: identical to indexing the image
+  expect_equal_to_r(transform_crop(x, 2, 3, 2, 3), as_array(x[, 2:3, 3:5]))
+
+  # partially outside: the requested size, the overlap unchanged, zeros elsewhere
+  o <- transform_crop(x, top = 3, left = 5, height = 4, width = 4)
+  expect_equal(dim(o), c(1, 4, 4))
+  expect_equal_to_r(o[, 1:2, 1:2], as_array(x[, 3:4, 5:6]))
+  expect_equal(as.numeric(o$sum()), as.numeric(x[, 3:4, 5:6]$sum()))
+
+  # a start before the image pads on the top and the left
+  o <- transform_crop(x, top = -1, left = 0, height = 4, width = 4)
+  expect_equal(dim(o), c(1, 4, 4))
+  expect_equal(as.numeric(o[, 1:2, ]$sum()), 0)          # the two padded rows
+  expect_equal(as.numeric(o[, , 1]$sum()), 0)            # the padded column
+  expect_equal_to_r(o[, 3:4, 2:4], as_array(x[, 1:2, 1:3]))
+
+  # fully outside: all zeros, but still the requested size
+  o <- transform_crop(x, top = 30, left = 30, height = 4, width = 4)
+  expect_equal(dim(o), c(1, 4, 4))
+  expect_equal(as.numeric(o$sum()), 0)
+
+  # batch tensors behave the same way
+  expect_equal(dim(transform_crop(x$unsqueeze(1), 3, 5, 4, 4)), c(1, 1, 4, 4))
+
+  # the dtype is preserved, also on the padded path
+  xi <- torch_ones(1, 2, 2, dtype = torch_long())
+  expect_true(transform_crop(xi, 1, 1, 4, 4)$dtype == torch_long())
+  expect_true(transform_crop(xi, 1, 1, 2, 2)$dtype == torch_long())
+})
+
+test_that("rgb_to_grayscale keeps the channel dimension", {
+  x <- torch_rand(3, 4, 6)
+  o <- transform_rgb_to_grayscale(x)
+  expect_equal(dim(o), c(1, 4, 6))
+  # the values are the usual luminance weights
+  expect_equal(
+    round(as_array(o[1, , ]), 5),
+    round(as_array(0.2989 * x[1, , ] + 0.5870 * x[2, , ] + 0.1140 * x[3, , ]), 5)
+  )
+  expect_equal(dim(transform_rgb_to_grayscale(x$unsqueeze(1))), c(1, 1, 4, 6))
+
+  # `transform_grayscale()` repeats that channel, also for batch tensors
+  expect_equal(dim(transform_grayscale(x, num_output_channels = 1)), c(1, 4, 6))
+  g3 <- transform_grayscale(x, num_output_channels = 3)
+  expect_equal(dim(g3), c(3, 4, 6))
+  # every repeated channel is the same grayscale image
+  expect_equal_to_r(g3[2, , ], as_array(o[1, , ]))
+  expect_equal_to_r(g3[3, , ], as_array(o[1, , ]))
+  expect_equal(dim(transform_grayscale(x$unsqueeze(1), num_output_channels = 3)), c(1, 3, 4, 6))
+
+  # the dtype is preserved
+  xi <- torch_ones(3, 2, 2, dtype = torch_uint8())
+  expect_true(transform_rgb_to_grayscale(xi)$dtype == torch_uint8())
+
+  # the operators that build on it are unaffected by the extra dimension
+  expect_equal(dim(transform_adjust_saturation(x, 1.5)), c(3, 4, 6))
+  expect_equal(dim(transform_adjust_contrast(x, 1.5)), c(3, 4, 6))
+})
+
+test_that("rgb2hsv and hsv2rgb are inverse to each other", {
+  x <- torch_rand(3, 8, 10)
+  expect_equal(round(as_array(hsv2rgb(rgb2hsv(x))), 4), round(as_array(x), 4))
+
+  b <- torch_rand(2, 3, 8, 10)
+  expect_equal(round(as_array(hsv2rgb(rgb2hsv(b))), 4), round(as_array(b), 4))
+
+  # known colours: (h, s, v) of pure red is (0, 1, 1), of pure blue (2/3, 1, 1)
+  red <- torch_tensor(array(c(1, 0, 0), dim = c(3, 1, 1)))
+  expect_equal(round(as.numeric(rgb2hsv(red)), 4), c(0, 1, 1))
+  blue <- torch_tensor(array(c(0, 0, 1), dim = c(3, 1, 1)))
+  expect_equal(round(as.numeric(rgb2hsv(blue)), 4), round(c(2 / 3, 1, 1), 4))
+})
+
+test_that("adjust_hue rotates the hue in both directions", {
+  red <- torch_tensor(array(c(1, 0, 0), dim = c(3, 1, 1)))
+  # a third of the hue wheel takes red to green, and back to blue in the other direction
+  expect_equal(round(as.numeric(transform_adjust_hue(red, 1 / 3)), 3), c(0, 1, 0))
+  expect_equal(round(as.numeric(transform_adjust_hue(red, -1 / 3)), 3), c(0, 0, 1))
+  # half a turn is the same in both directions
+  expect_equal(round(as.numeric(transform_adjust_hue(red, 0.5)), 3), c(0, 1, 1))
+  expect_equal(round(as.numeric(transform_adjust_hue(red, -0.5)), 3), c(0, 1, 1))
+
+  x <- torch_rand(3, 4, 6)
+  # a hue factor of 0 leaves the image unchanged, and opposite rotations cancel out
+  expect_equal(round(as_array(transform_adjust_hue(x, 0)), 4), round(as_array(x), 4))
+  expect_equal(
+    round(as_array(transform_adjust_hue(transform_adjust_hue(x, -0.5), 0.5)), 4),
+    round(as_array(x), 4)
+  )
+  expect_equal(
+    round(as_array(transform_adjust_hue(transform_adjust_hue(x, -0.25), -0.25)), 4),
+    round(as_array(transform_adjust_hue(x, -0.5)), 4)
+  )
+
+  # uint8 images keep their dtype
+  xi <- (x * 255)$to(dtype = torch_uint8())
+  expect_true(transform_adjust_hue(xi, 0.2)$dtype == torch_uint8())
+})
+
+test_that("adjust_hue only accepts 1 or 3 channels", {
+  x <- torch_rand(3, 4, 6)
+  expect_equal(dim(transform_adjust_hue(x, 0.2)), c(3, 4, 6))
+
+  # a single channel has no hue to adjust and is returned unchanged
+  gray <- torch_rand(1, 4, 6)
+  expect_equal_to_r(transform_adjust_hue(gray, 0.2), as_array(gray))
+  expect_equal_to_r(transform_adjust_hue(gray$unsqueeze(1), 0.2), as_array(gray$unsqueeze(1)))
+
+  expect_error(transform_adjust_hue(torch_rand(4, 4, 6), 0.2), "channel values are 1 or 3")
+  expect_error(transform_adjust_hue(torch_rand(2, 2, 4, 6), 0.2), "channel values are 1 or 3")
+  # `transform_color_jitter()` reaches the same check through its `hue` argument
+  expect_error(transform_color_jitter(torch_rand(4, 4, 6), hue = 0.2), "channel values are 1 or 3")
+})
