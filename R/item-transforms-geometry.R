@@ -6,14 +6,17 @@
 #'
 #' The bounding boxes (if present) are shifted to account for the expanded
 #' canvas and converted to rotated format via
-#' \code{\link{target_transform_rotate}}.
+#' \code{\link{target_transform_rotate}}. For segmentation items, the masks are
+#' rotated alongside the image using nearest-neighbour sampling.
 #'
-#' @param x A dataset item, typically an \code{image_with_bounding_box} object
-#'   containing an image tensor and associated target data (boxes, labels).
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
 #' @inheritParams transform_rotate
 #'
-#' @return An \code{image_with_rotated_box} object with the rotated image and
-#'   converted boxes in xyxyr format.
+#' @return A dataset item with the image and target rotated. Detection items are
+#'   returned as \code{image_with_rotated_box} with boxes in xyxyr format;
+#'   segmentation items keep their class.
 #'
 #' @examples
 #' \dontrun{
@@ -41,6 +44,18 @@
 #' @export
 item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
   UseMethod("item_transform_rotate", x)
+}
+
+#' @export
+item_transform_rotate.dataset <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_rotate(item, angle = angle, interpolation = interpolation,
+                          expand = expand, fill = fill)
+  }
+  x
 }
 
 #' @export
@@ -87,6 +102,32 @@ item_transform_rotate.image_with_bounding_box <- function(
   x$y$image_width <- new_spatial[2]
 
   class(x) <- c("image_with_rotated_box", "list")
+  x
+}
+
+#' @export
+item_transform_rotate.image_with_segmentation_mask <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
+  rotated_img <- transform_rotate(
+    x$x,
+    angle = angle,
+    expand = expand,
+    interpolation = interpolation,
+    fill = fill
+  )
+  rotated_masks <- transform_rotate(
+    x$y$masks,
+    angle = angle,
+    expand = expand,
+    interpolation = 0,
+    fill = 0
+  )
+
+  new_spatial <- tail(rotated_img$shape, 2)
+
+  x$x <- rotated_img
+  x$y$masks <- rotated_masks
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width  <- new_spatial[2]
   x
 }
 

@@ -209,6 +209,64 @@ test_that("item_transform_rotate can be composed", {
   expect_equal(result$y$labels, labels)
 })
 
+test_that("item_transform_rotate 0 degrees preserves masks for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_rotate(item, angle = 0)
+
+  expect_s3_class(result, "image_with_segmentation_mask")
+  expect_true(result$y$masks$equal(original_masks))
+})
+
+test_that("item_transform_rotate rotates masks for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_rotate(item, angle = 90)
+
+  expect_tensor_shape(result$y$masks, c(2, 200, 100))
+  expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_true(result$y$masks$equal(original_masks$transpose(-1, -2)$flip(-2)))
+})
+
+test_that("item_transform_rotate expands image and masks together for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  result <- item_transform_rotate(item, angle = 30)
+
+  expect_equal(result$y$masks$shape[2], result$x$shape[2])
+  expect_equal(result$y$masks$shape[3], result$x$shape[3])
+  expect_equal(result$y$image_height, result$x$shape[2])
+  expect_equal(result$y$image_width, result$x$shape[3])
+})
+
+test_that("item_transform_rotate preserves labels for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_labels <- item$y$labels$clone()
+
+  result <- item_transform_rotate(item, angle = 30)
+
+  expect_true(result$y$labels$eq(original_labels)$all()$item())
+})
+
+test_that("item_transform_rotate works on a segmentation dataset", {
+  ds <- dataset(
+    name = "toy_segmentation",
+    initialize = function() {},
+    .getitem = function(index) {
+      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+    },
+    .length = function() 1L
+  )()
+
+  ds <- item_transform_rotate(ds, angle = 90)
+  item <- ds$.getitem(1)
+
+  expect_s3_class(item, "image_with_segmentation_mask")
+  expect_tensor_shape(item$x, c(3, 200, 100))
+  expect_tensor_shape(item$y$masks, c(2, 200, 100))
+})
+
 test_that("item_transform_hflip rejects non-item inputs", {
   img <- torch_randn(3, 100, 200)
   expect_error(
