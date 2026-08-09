@@ -38,7 +38,7 @@ after <- item_transform_random_vertical_flip(before)
 before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
 after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
 
-grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), num_rows = 1, scale = TRUE)
 tensor_image_browse(grid)
 }
 
