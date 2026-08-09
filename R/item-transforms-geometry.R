@@ -507,3 +507,109 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
 
   x
 }
+
+# ---- item_transform_resize ----
+
+#' Resize a dataset item
+#'
+#' Resizes the image inside a dataset item. For detection items, bounding box
+#' coordinates are rescaled by the same factors as the image. For segmentation
+#' items, the masks are resized alongside the image with nearest-neighbour
+#' sampling, so that they keep their discrete values.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @inheritParams transform_resize
+#'
+#' @return A dataset item of the same class with the image and target resized.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_resize(before, size = c(600, 800))
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_resize <- function(x, size, interpolation = 2) {
+  UseMethod("item_transform_resize", x)
+}
+
+#' @export
+item_transform_resize.default <- function(x, size, interpolation = 2) {
+  cli_abort(
+    "{.fn item_transform_resize} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To resize a raw image tensor, use {.fn transform_resize} instead."
+  )
+}
+
+#' @export
+item_transform_resize.dataset <- function(x, size, interpolation = 2) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_resize(item, size = size, interpolation = interpolation)
+  }
+  x
+}
+
+#' @export
+item_transform_resize.image_with_bounding_box <- function(x, size, interpolation = 2) {
+  orig_spatial <- tail(x$x$shape, 2)
+
+  x$x <- transform_resize(x$x, size, interpolation)
+
+  new_spatial <- tail(x$x$shape, 2)
+  scale_h <- new_spatial[1] / orig_spatial[1]
+  scale_w <- new_spatial[2] / orig_spatial[2]
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- boxes[, 1] * scale_w
+    boxes[, 2] <- boxes[, 2] * scale_h
+    boxes[, 3] <- boxes[, 3] * scale_w
+    boxes[, 4] <- boxes[, 4] * scale_h
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width <- new_spatial[2]
+
+  x
+}
+
+#' @export
+item_transform_resize.image_with_segmentation_mask <- function(x, size, interpolation = 2) {
+  x$x <- transform_resize(x$x, size, interpolation)
+
+  new_spatial <- tail(x$x$shape, 2)
+  masks <- x$y$masks
+  x$y$masks <- if (masks$size(1) > 0) {
+    transform_resize(masks, new_spatial, interpolation = 0)
+  } else {
+    torch_zeros(c(0, new_spatial), dtype = masks$dtype, device = masks$device)
+  }
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width <- new_spatial[2]
+
+  x
+}
+
+#' @export
+item_transform_resize.image_with_rotated_box <- function(x, size, interpolation = 2) {
+  item_transform_resize.image_with_bounding_box(x, size = size, interpolation = interpolation)
+}
