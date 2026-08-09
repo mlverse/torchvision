@@ -23,7 +23,7 @@
 #' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
-#' after <- item_transform_random_horizontal_flip(before, p = 1)
+#' after <- item_transform_random_horizontal_flip(before)
 #'
 #' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
