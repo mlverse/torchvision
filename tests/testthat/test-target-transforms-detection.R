@@ -322,3 +322,69 @@ test_that("target_transform_rotate can be composed with pipe", {
 })
 
 
+
+
+test_that("target_transform_affine rejects unsupported input", {
+  expect_error(target_transform_affine(torch_randn(3, 10, 10)))
+})
+
+test_that("target_transform_affine returns xyxyr boxes", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- target_transform_affine(target)
+
+  expect_tensor_shape(result$boxes, c(1, 5))
+  expect_tensor_dtype(result$boxes, torch_float())
+  expect_equal_to_r(result$boxes, matrix(c(10, 20, 50, 60, 0), ncol = 5))
+})
+
+test_that("target_transform_affine translates the box centre", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- target_transform_affine(target, translate = c(30, 10))
+
+  expect_equal_to_r(result$boxes, matrix(c(40, 30, 80, 70, 0), ncol = 5))
+})
+
+test_that("target_transform_affine scales boxes around the image center", {
+  target <- make_detection_target(matrix(c(80, 40, 120, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- target_transform_affine(target, scale = 2)
+
+  expect_equal_to_r(result$boxes, matrix(c(60, 30, 140, 70, 0), ncol = 5))
+})
+
+test_that("target_transform_affine sets the rotation angle", {
+  target <- make_detection_target(matrix(c(50, 80, 150, 120), ncol = 4), image_size = c(200L, 200L))
+  result <- target_transform_affine(target, angle = 90)
+
+  expect_equal_to_r(result$boxes[1, 5], 90)
+  expect_equal(as.numeric(result$boxes[1, 1]), 80, tolerance = 1e-4)
+  expect_equal(as.numeric(result$boxes[1, 4]), 150, tolerance = 1e-4)
+})
+
+test_that("target_transform_affine handles empty boxes", {
+  target <- make_detection_target(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  result <- target_transform_affine(target, angle = 30)
+
+  expect_tensor_shape(result$boxes, c(0, 5))
+})
+
+test_that("target_transform_affine preserves labels and metadata", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- target_transform_affine(target, angle = 20, translate = c(5, 5))
+
+  expect_equal_to_r(result$labels, as.array(target$labels$cpu()))
+  expect_equal(result$image_height, target$image_height)
+  expect_equal(result$image_width, target$image_width)
+})
+
+test_that("target_transform_affine composes", {
+  target <- make_detection_target(matrix(c(50, 80, 150, 120), ncol = 4), image_size = c(200L, 200L))
+  composed <- target |>
+    target_transform_affine(angle = 30) |>
+    target_transform_affine(angle = 30)
+  single <- target_transform_affine(target, angle = 60)
+
+  expect_equal_to_r(composed$boxes, as.array(single$boxes$cpu()), tolerance = 1e-4)
+})

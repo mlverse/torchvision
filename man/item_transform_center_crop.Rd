@@ -52,6 +52,7 @@ tensor_image_browse(grid)
 }
 \seealso{
 Other item_unitary_transforms:
+\code{\link[=item_transform_affine]{item_transform_affine()}},
 \code{\link[=item_transform_hflip]{item_transform_hflip()}},
 \code{\link[=item_transform_rotate]{item_transform_rotate()}},
 \code{\link[=item_transform_vflip]{item_transform_vflip()}}

@@ -71,6 +71,7 @@ tensor_image_browse(grid)
 \seealso{
 Other target_transforms_detection:
 \code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
+\code{\link[=target_transform_affine]{target_transform_affine()}},
 \code{\link[=target_transform_resize]{target_transform_resize()}}
 }
 \concept{target_transforms_detection}

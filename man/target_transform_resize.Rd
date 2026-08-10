@@ -60,6 +60,7 @@ new_target <- transform_fn(target)
 \seealso{
 Other target_transforms_detection:
 \code{\link[=prepare_sahi_split]{prepare_sahi_split()}},
+\code{\link[=target_transform_affine]{target_transform_affine()}},
 \code{\link[=target_transform_rotate]{target_transform_rotate()}}
 }
 \concept{target_transforms_detection}
