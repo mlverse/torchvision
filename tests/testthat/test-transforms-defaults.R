@@ -14,13 +14,13 @@ test_that("center_crop pads a non-square size correctly", {
   x <- torch_ones(3, 16, 20)
 
   # no padding needed
-  expect_equal(dim(transform_center_crop(x, c(8, 10))), c(3, 8, 10))
+  expect_tensor_shape(transform_center_crop(x, c(8, 10)), c(3, 8, 10))
 
   # padded on both axes, on one axis only, and with a square size
-  expect_equal(dim(transform_center_crop(x, c(24, 30))), c(3, 24, 30))
-  expect_equal(dim(transform_center_crop(x, c(24, 10))), c(3, 24, 10))
-  expect_equal(dim(transform_center_crop(x, c(8, 30))), c(3, 8, 30))
-  expect_equal(dim(transform_center_crop(x, 32)), c(3, 32, 32))
+  expect_tensor_shape(transform_center_crop(x, c(24, 30)), c(3, 24, 30))
+  expect_tensor_shape(transform_center_crop(x, c(24, 10)), c(3, 24, 10))
+  expect_tensor_shape(transform_center_crop(x, c(8, 30)), c(3, 8, 30))
+  expect_tensor_shape(transform_center_crop(x, 32), c(3, 32, 32))
 
   # the image ends up centred in the padding
   o <- transform_center_crop(torch_ones(1, 2, 2), c(4, 6))
