@@ -111,6 +111,16 @@
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code><a href="../reference/transform_crop.html">transform_crop()</a></code> now pads the result with zeros when the crop leaves the image, so that the output always has the requested size. It previously returned only the part of the image the crop covered, which could even be empty.</li>
+<li>
+<code><a href="../reference/transform_center_crop.html">transform_center_crop()</a></code> now pads correctly when the requested <code>size</code> is not square. Height and width were used in the wrong order in the padding branch, so e.g. cropping a <code>(16, 20)</code> image to <code>c(24, 30)</code> returned a <code>(22, 0)</code> image.</li>
+<li>
+<code><a href="../reference/transform_rgb_to_grayscale.html">transform_rgb_to_grayscale()</a></code> now returns an image with one channel instead of dropping the channel dimension, i.e. <code>(3, H, W)</code> becomes <code>(1, H, W)</code> and not <code>(H, W)</code>. This also fixes <code><a href="../reference/transform_grayscale.html">transform_grayscale()</a></code> for batched input.</li>
+<li>
+<code>hsv2rgb()</code> computed the fractional part of the hue sector and the <code>t</code> component incorrectly, so converting an image to HSV and back did not return the original image. This affected <code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> and <code>transform_color_jitter(hue = ...)</code>.</li>
+<li>
+<code><a href="../reference/transform_adjust_hue.html">transform_adjust_hue()</a></code> now handles negative <code>hue_factor</code>s, which produced a black image before, and rejects images that do not have 1 or 3 channels instead of silently dropping the additional ones.</li>
+<li>
 <code><a href="../reference/nms.html">nms()</a></code> now uses <code><a href="https://rdrr.io/pkg/torchvisionlib/man/ops_nms.html" class="external-link">torchvisionlib::ops_nms()</a></code> when torchvisionlib is installed, speeding up inference for <code>model_fasterrcnn_*()</code> and <code>model_maskrcnn_*()</code> (<a href="https://github.com/mlverse/torchvision/issues/321" class="external-link">#321</a>, <a href="https://github.com/mlverse/torchvision/issues/322" class="external-link">#322</a>).</li>
 <li>Lists and vectors are now preallocated to their target size instead of being grown one element at a time (<a href="https://github.com/srishtiii28" class="external-link">@srishtiii28</a>, <a href="https://github.com/mlverse/torchvision/issues/335" class="external-link">#335</a>).</li>
 <li>
