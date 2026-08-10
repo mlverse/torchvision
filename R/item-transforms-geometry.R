@@ -675,6 +675,136 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
   x
 }
 
+#' Apply an affine transformation on a dataset item
+#'
+#' Applies an affine transformation (rotation, translation, scale and shear) to
+#' the image inside a dataset item, keeping the image size unchanged. The target
+#' is transformed with the same geometry so that it stays aligned with the
+#' image.
+#'
+#' For detection items, the bounding boxes are transformed via
+#' [target_transform_affine()] so that they follow the image, and the item is
+#' returned as an \code{image_with_rotated_box} with boxes in xyxyr format. For
+#' segmentation items, the masks are transformed alongside the image using
+#' nearest-neighbour sampling.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box},
+#'   \code{image_with_rotated_box} or \code{image_with_segmentation_mask} object
+#'   containing an image tensor and associated target data.
+#' @inheritParams transform_affine
+#'
+#' @return A dataset item with the image and target transformed. Detection items
+#'   are returned as \code{image_with_rotated_box}; segmentation items keep their
+#'   class.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"},
+#'                                   image_height = img$shape[2], image_width = img$shape[3]))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_affine(before, angle = 20, translate = c(50, 30),
+#'                                scale = 1.1, shear = 10)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_affine <- function(x, angle = 0, translate = c(0, 0), scale = 1,
+                                  shear = 0, interpolation = 0, fill = NULL,
+                                  center = NULL) {
+  UseMethod("item_transform_affine", x)
+}
+
+#' @export
+item_transform_affine.default <- function(x, angle = 0, translate = c(0, 0),
+                                          scale = 1, shear = 0, interpolation = 0,
+                                          fill = NULL, center = NULL) {
+  cli_abort(
+    "{.fn item_transform_affine} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To transform a raw image tensor, use {.fn transform_affine} instead."
+  )
+}
+
+#' @export
+item_transform_affine.image_with_bounding_box <- function(x, angle = 0,
+                                                          translate = c(0, 0),
+                                                          scale = 1, shear = 0,
+                                                          interpolation = 0,
+                                                          fill = NULL,
+                                                          center = NULL) {
+  x$x <- transform_affine(x$x, angle = angle, translate = translate,
+                          scale = scale, shear = shear,
+                          interpolation = interpolation, fill = fill,
+                          center = center)
+  x$y <- target_transform_affine(x$y, angle = angle, translate = translate,
+                                 scale = scale, shear = shear, center = center)
+  class(x) <- c("image_with_rotated_box", "list")
+  x
+}
+
+#' @export
+item_transform_affine.image_with_rotated_box <- function(x, angle = 0,
+                                                         translate = c(0, 0),
+                                                         scale = 1, shear = 0,
+                                                         interpolation = 0,
+                                                         fill = NULL,
+                                                         center = NULL) {
+  item_transform_affine.image_with_bounding_box(
+    x, angle = angle, translate = translate, scale = scale, shear = shear,
+    interpolation = interpolation, fill = fill, center = center
+  )
+}
+
+#' @export
+item_transform_affine.image_with_segmentation_mask <- function(x, angle = 0,
+                                                               translate = c(0, 0),
+                                                               scale = 1, shear = 0,
+                                                               interpolation = 0,
+                                                               fill = NULL,
+                                                               center = NULL) {
+  x$x <- transform_affine(x$x, angle = angle, translate = translate,
+                          scale = scale, shear = shear,
+                          interpolation = interpolation, fill = fill,
+                          center = center)
+
+  masks <- x$y$masks
+  if (!is.null(masks) && masks$ndim >= 3) {
+    dtype <- masks$dtype
+    masks <- transform_affine(masks, angle = angle, translate = translate,
+                              scale = scale, shear = shear,
+                              interpolation = 0, fill = fill, center = center)
+    x$y$masks <- masks$to(dtype = dtype)
+  }
+  x
+}
+
+#' @export
+item_transform_affine.dataset <- function(x, angle = 0, translate = c(0, 0),
+                                          scale = 1, shear = 0, interpolation = 0,
+                                          fill = NULL, center = NULL) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_affine(item, angle = angle, translate = translate,
+                          scale = scale, shear = shear,
+                          interpolation = interpolation, fill = fill,
+                          center = center)
+  }
+  x
+}
+
 #' Pad a dataset item
 #'
 #' Pads the image inside a dataset item on all sides with the given "pad"
@@ -837,3 +967,4 @@ item_transform_pad.image_with_rotated_box <- function(x, padding, fill = 0, padd
 
   x
 }
+
