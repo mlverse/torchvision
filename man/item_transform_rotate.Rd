@@ -67,6 +67,7 @@ Other item_unitary_transforms:
 \code{\link[=item_transform_center_crop]{item_transform_center_crop()}},
 \code{\link[=item_transform_crop]{item_transform_crop()}},
 \code{\link[=item_transform_hflip]{item_transform_hflip()}},
+\code{\link[=item_transform_pad]{item_transform_pad()}},
 \code{\link[=item_transform_vflip]{item_transform_vflip()}}
 }
 \concept{item_unitary_transforms}

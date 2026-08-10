@@ -782,6 +782,7 @@ test_that("item_transform_center_crop handles rotated boxes", {
 })
 
 
+
 # item_transform_affine
 
 test_that("item_transform_affine rejects non-item inputs", {
@@ -1129,5 +1130,159 @@ test_that("item_transform_crop removes rotated boxes outside crop area", {
   result <- item_transform_crop(rotated, top = 1, left = 140, height = 100, width = 40)
 
   expect_tensor_shape(result$y$boxes, c(0, 5))
+})
+
+#  item_transform_pad
+
+test_that("item_transform_pad rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_pad(img, padding = 10),
+    "requires a dataset item"
+  )
+  expect_error(
+    item_transform_pad(42, padding = 10),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_pad supports single-int, length-2, and length-4 padding", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+
+  single <- item_transform_pad(item, padding = 10)
+  expect_tensor_shape(single$x, c(3, 120, 220))
+  expect_true(torch_equal(single$x, transform_pad(item$x, 10)))
+  expect_equal_to_r(single$y$boxes[1, ], c(20, 30, 60, 70))
+  expect_equal(single$y$image_height, 120L)
+  expect_equal(single$y$image_width, 220L)
+
+  len2 <- item_transform_pad(item, padding = c(5, 15))
+  expect_tensor_shape(len2$x, c(3, 130, 210))
+  expect_equal_to_r(len2$y$boxes[1, 1], 15)
+  expect_equal_to_r(len2$y$boxes[1, 2], 35)
+  expect_equal(len2$y$image_height, 130L)
+  expect_equal(len2$y$image_width, 210L)
+
+  len4 <- item_transform_pad(item, padding = c(5, 7, 9, 11))
+  expect_tensor_shape(len4$x, c(3, 120, 212))
+  expect_equal_to_r(len4$y$boxes[1, ], c(15, 29, 55, 69))
+  expect_equal(len4$y$image_height, 120L)
+  expect_equal(len4$y$image_width, 212L)
+})
+
+test_that("item_transform_pad preserves labels and metadata", {
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item <- make_detection_item(
+    matrix(c(10, 20, 50, 60, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = labels,
+    image_size = c(100L, 200L)
+  )
+  result <- item_transform_pad(item, padding = 5)
+
+  expect_equal_to_r(result$y$labels, as.integer(as_array(labels)))
+  expect_tensor_shape(result$y$area, c(2))
+  expect_tensor_shape(result$y$iscrowd, c(2))
+  expect_equal(result$y$image_height, 110L)
+  expect_equal(result$y$image_width, 210L)
+})
+
+test_that("item_transform_pad handles box edge cases", {
+  empty <- make_detection_item(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  result_empty <- item_transform_pad(empty, padding = 5)
+  expect_tensor_shape(result_empty$y$boxes, c(0, 4))
+  expect_tensor_dtype(result_empty$y$boxes, torch_float())
+
+  boxes <- matrix(c(
+    10, 20, 50, 60,
+    100, 200, 150, 250,
+    0, 0, 300, 400
+  ), ncol = 4, byrow = TRUE)
+  multi <- make_detection_item(boxes, image_size = c(500L, 600L))
+  result_multi <- item_transform_pad(multi, padding = 10)
+
+  expect_tensor_shape(result_multi$y$boxes, c(3, 4))
+  expect_equal_to_r(result_multi$y$boxes[1, 1], 20)
+  expect_equal_to_r(result_multi$y$boxes[1, 3], 60)
+  expect_equal_to_r(result_multi$y$boxes[2, 1], 110)
+  expect_equal_to_r(result_multi$y$boxes[2, 3], 160)
+  expect_equal_to_r(result_multi$y$boxes[3, 1], 10)
+  expect_equal_to_r(result_multi$y$boxes[3, 3], 310)
+})
+
+test_that("item_transform_pad fills pixels without mutating input", {
+  boxes <- matrix(c(2, 2, 4, 4), ncol = 4)
+  item <- make_detection_item(torch_tensor(boxes), image_size = c(10L, 10L))
+  item$x <- torch_ones(3, 10, 10)
+  original_img <- as_array(item$x)
+  original_class <- class(item)
+
+  result <- item_transform_pad(item, padding = 2)
+  expect_equal(as.numeric(result$x[1, 1, 1]$cpu()), 0)
+  expect_equal(as.numeric(result$x[1, 3, 3]$cpu()), 1)
+  expect_equal(as.numeric(result$x[1, 2, 11]$cpu()), 0)
+
+  result_filled <- item_transform_pad(item, padding = 2, fill = 1)
+  expect_equal(as.numeric(result_filled$x[1, 1, 1]$cpu()), 1)
+
+  expect_equal_to_r(item$x, original_img)
+  expect_equal_to_r(item$y$boxes, boxes)
+  expect_equal(class(item), original_class)
+  expect_equal(class(result), original_class)
+
+  item$x <- torch_randn(3, 100, 200, dtype = torch_float64())
+  result_dtype <- item_transform_pad(item, padding = 5)
+  expect_tensor_dtype(result_dtype$x, torch_float64())
+})
+
+test_that("item_transform_pad pads masks for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+  original_labels <- as.integer(as_array(item$y$labels))
+
+  result <- item_transform_pad(item, padding = 5)
+
+  expect_s3_class(result, "image_with_segmentation_mask")
+  expect_tensor_shape(result$x, c(3, 110, 210))
+  expect_tensor_shape(result$y$masks, c(2, 110, 210))
+  expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_true(torch_equal(result$y$masks, transform_pad(original_masks, 5, fill = 0)))
+  expect_equal_to_r(result$y$labels, original_labels)
+  expect_equal(result$y$image_height, 110L)
+  expect_equal(result$y$image_width, 210L)
+})
+
+test_that("item_transform_pad handles rotated boxes", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+  original_boxes <- rotated$y$boxes$clone()
+
+  result <- item_transform_pad(rotated, padding = 5)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_equal_to_r(result$y$boxes[1, 1], as_array(original_boxes[1, 1]) + 5)
+  expect_equal_to_r(result$y$boxes[1, 2], as_array(original_boxes[1, 2]) + 5)
+  expect_equal_to_r(result$y$boxes[1, 3], as_array(original_boxes[1, 3]) + 5)
+  expect_equal_to_r(result$y$boxes[1, 4], as_array(original_boxes[1, 4]) + 5)
+  expect_equal_to_r(result$y$boxes[1, 5], 30, tolerance = 1e-5)
+})
+
+test_that("item_transform_pad negative padding clips and drops boxes outside the crop", {
+  item <- make_detection_item(
+    matrix(c(0, 0, 10, 10, 120, 70, 180, 130), ncol = 4, byrow = TRUE),
+    labels = torch_tensor(c(1L, 2L), dtype = torch_long()),
+    image_size = c(200L, 400L)
+  )
+
+  result <- item_transform_pad(item, padding = c(-50, 0, 0, 0))
+
+  expect_equal_to_r(result$y$boxes, matrix(c(70, 70, 130, 130), ncol = 4))
+  expect_equal_to_r(result$y$labels, 2L)
+  expect_equal(result$y$image_height, 200L)
+  expect_equal(result$y$image_width, 350L)
 })
 

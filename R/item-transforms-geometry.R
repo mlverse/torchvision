@@ -804,3 +804,167 @@ item_transform_affine.dataset <- function(x, angle = 0, translate = c(0, 0),
   }
   x
 }
+
+#' Pad a dataset item
+#'
+#' Pads the image inside a dataset item on all sides with the given "pad"
+#' value. For detection items, bounding box coordinates are shifted to remain
+#' correct after padding. For segmentation items, both the image and the masks
+#' are padded.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @inheritParams transform_pad
+#'
+#' @return A dataset item of the same class with the padded image and adjusted
+#'   target.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_pad(before, padding = 100)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' before_plot <- transform_resize(before_plot, c(2000, 3000))
+#' after_plot <- transform_resize(after_plot, c(2000, 3000))
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_pad <- function(x, padding, fill = 0, padding_mode = "constant") {
+  UseMethod("item_transform_pad", x)
+}
+
+#' @export
+item_transform_pad.dataset <- function(x, padding, fill = 0, padding_mode = "constant") {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_pad(item, padding = padding, fill = fill, padding_mode = padding_mode)
+  }
+  x
+}
+
+#' @export
+item_transform_pad.default <- function(x, padding, fill = 0, padding_mode = "constant") {
+  cli_abort(
+    "{.fn item_transform_pad} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To pad a raw image tensor, use {.fn transform_pad} instead."
+  )
+}
+
+#' @export
+item_transform_pad.image_with_bounding_box <- function(x, padding, fill = 0, padding_mode = "constant") {
+  x$x <- transform_pad(x$x, padding, fill, padding_mode)
+
+  if (length(padding) == 1) {
+    pad_left <- pad_top <- as.numeric(padding)
+  } else if (length(padding) == 2) {
+    pad_left <- as.numeric(padding[1])
+    pad_top <- as.numeric(padding[2])
+  } else {
+    pad_left <- as.numeric(padding[1])
+    pad_top <- as.numeric(padding[3])
+  }
+
+  img_size <- get_image_size(x$x)
+  new_w <- img_size[1]
+  new_h <- img_size[2]
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] + pad_left, 0, new_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] + pad_top, 0, new_h)
+    boxes[, 3] <- torch_clamp(boxes[, 3] + pad_left, 0, new_w)
+    boxes[, 4] <- torch_clamp(boxes[, 4] + pad_top, 0, new_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- new_h
+  x$y$image_width <- new_w
+
+  x
+}
+
+#' @export
+item_transform_pad.image_with_segmentation_mask <- function(x, padding, fill = 0, padding_mode = "constant") {
+  x$x <- transform_pad(x$x, padding, fill, padding_mode)
+  x$y$masks <- transform_pad(x$y$masks, padding, fill = 0, padding_mode = padding_mode)
+
+  img_size <- get_image_size(x$x)
+  x$y$image_height <- img_size[2]
+  x$y$image_width <- img_size[1]
+
+  x
+}
+
+#' @export
+item_transform_pad.image_with_rotated_box <- function(x, padding, fill = 0, padding_mode = "constant") {
+  x$x <- transform_pad(x$x, padding, fill, padding_mode)
+
+  if (length(padding) == 1) {
+    pad_left <- pad_top <- as.numeric(padding)
+  } else if (length(padding) == 2) {
+    pad_left <- as.numeric(padding[1])
+    pad_top <- as.numeric(padding[2])
+  } else {
+    pad_left <- as.numeric(padding[1])
+    pad_top <- as.numeric(padding[3])
+  }
+
+  img_size <- get_image_size(x$x)
+  new_w <- img_size[1]
+  new_h <- img_size[2]
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- torch_clamp(boxes[, 1] + pad_left, 0, new_w)
+    boxes[, 2] <- torch_clamp(boxes[, 2] + pad_top, 0, new_h)
+    boxes[, 3] <- torch_clamp(boxes[, 3] + pad_left, 0, new_w)
+    boxes[, 4] <- torch_clamp(boxes[, 4] + pad_top, 0, new_h)
+
+    keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
+    if (!all(keep)) {
+      boxes <- boxes[keep, ]
+      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- new_h
+  x$y$image_width <- new_w
+
+  x
+}
+
