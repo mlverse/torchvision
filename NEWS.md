@@ -20,11 +20,30 @@
 * Added `item_transform_hflip()` for horizontally flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #366).
 * Added `item_transform_vflip()` for vertically flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #369).
 * Added SAHI (Slicing Aided Hyper Inference) support via a three-function pipeline: `prepare_sahi_split()` precomputes overlapping crop windows, then `transform_sahi_crop()` slices images and `target_transform_sahi_crop()` adjusts detection targets per crop. (@DerrickUnleashed, #324)
+* Added `item_transform_affine()` and `target_transform_affine()` for applying an affine transformation to a dataset item and its detection target, with support for detection and segmentation items and datasets (#367).
 * Added `item_transform_center_crop()` for cropping images from the center to a specified size for dataset items, with support for detection and segmentation item types and datasets  (@DerrickUnleashed, #370).
 * Added `item_transform_resize()` for resizing dataset items, with support for detection and segmentation item types and datasets (@srishtiii28, #362).
+* `item_transform_rotate()` now supports segmentation items and datasets, rotating the masks alongside the image (@srishtiii28, #379).
+* Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
+* Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
 
 ## Bug fixes and improvements
 
+* `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
+  output always has the requested size. It previously returned only the part of the image the crop
+  covered, which could even be empty.
+* `transform_center_crop()` now pads correctly when the requested `size` is not square. Height and
+  width were used in the wrong order in the padding branch, so e.g. cropping a `(16, 20)` image to
+  `c(24, 30)` returned a `(22, 0)` image.
+* `transform_rgb_to_grayscale()` now returns an image with one channel instead of dropping the
+  channel dimension, i.e. `(3, H, W)` becomes `(1, H, W)` and not `(H, W)`. This also fixes
+  `transform_grayscale()` for batched input.
+* `hsv2rgb()` computed the fractional part of the hue sector and the `t` component incorrectly, so
+  converting an image to HSV and back did not return the original image. This affected
+  `transform_adjust_hue()` and `transform_color_jitter(hue = ...)`.
+* `transform_adjust_hue()` now handles negative `hue_factor`s, which produced a black image before,
+  and rejects images that do not have 1 or 3 channels instead of silently dropping the additional
+  ones.
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)

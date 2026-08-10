@@ -5,12 +5,12 @@ test_that("convert_image_dtype", {
   o <- transform_convert_image_dtype(x, torch_int16())
   y <- transform_convert_image_dtype(o, torch_float32())
 
-  expect_equal(round(as_array(x),1), round(as_array(y),1))
+  expect_equal_to_r(x, as_array(y), tolerance  = 1e-4)
 
   ob <- transform_convert_image_dtype(x$unsqueeze(1), torch_int16())
   yb <- transform_convert_image_dtype(ob, torch_float32())
 
-  expect_equal(round(as_array(x$unsqueeze(1)),1), round(as_array(yb),1))
+  expect_equal_to_r(x$unsqueeze(1), as_array(yb), tolerance  = 1e-4)
 
 })
 
@@ -374,11 +374,11 @@ test_that("linear transformation", {
 
   out <- transform_linear_transformation(tensor, matrix, mean_vector)
 
-  expect_equal(dim(out), c(3, 24, 32))
+  expect_tensor_shape(out, c(3, 24, 32))
 
   outb <- transform_linear_transformation(tensor$unsqueeze(1), matrix, mean_vector)
 
-  expect_equal(dim(outb), c(1, 3, 24, 32))
+  expect_tensor_shape(outb, c(1, 3, 24, 32))
 })
 
 test_that("adjust hue", {
@@ -388,12 +388,12 @@ test_that("adjust hue", {
 
   for (f in hue_factor) {
     out <- transform_adjust_hue(x, f)
-    expect_equal(dim(out), dim(x))
+    expect_tensor_shape(out, dim(x))
   }
 
   for (f in hue_factor) {
     out <- transform_adjust_hue(x$unsqueeze(1), f)
-    expect_equal(dim(out), dim(x$unsqueeze(1)))
+    expect_tensor_shape(out, dim(x$unsqueeze(1)))
   }
 
 })
@@ -402,7 +402,7 @@ test_that("grayscale", {
 
   x <- torch::torch_rand(3, 24, 32)
   out <- transform_grayscale(x, 3)
-  expect_equal(dim(out), dim(x))
+  expect_tensor_shape(out, dim(x))
   expect_equal(dim(out)[1], 3)
 
   out <- transform_grayscale(x, 1)
@@ -410,7 +410,7 @@ test_that("grayscale", {
   expect_equal(dim(out)[1], 1)
 
   outb <- transform_grayscale(x$unsqueeze(1), 3)
-  expect_equal(dim(outb), dim(x$unsqueeze(1)))
+  expect_tensor_shape(outb, dim(x$unsqueeze(1)))
   expect_equal(dim(outb)[2], 3)
 
   outb <- transform_grayscale(x$unsqueeze(1), 1)
@@ -424,12 +424,12 @@ test_that("random grayscale", {
   tensor <- torch::torch_rand(3, 24, 32)
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_grayscale(tensor, p)
-    expect_equal(dim(out), dim(tensor))
+    expect_tensor_shape(out, dim(tensor))
   }
 
   for (p in seq(0, 1, length.out = 10)) {
     outb <- transform_random_grayscale(tensor$unsqueeze(1), p)
-    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+    expect_tensor_shape(outb, dim(tensor$unsqueeze(1)))
   }
 
 })
@@ -441,20 +441,20 @@ test_that("random vertical flip", {
 
   for (i in 1:10) {
     out <- transform_random_vertical_flip(tensor)
-    expect_equal(dim(out), dim(tensor))
+    expect_tensor_shape(out, dim(tensor))
   }
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_vertical_flip(tensor, p)
-    expect_equal(dim(out), dim(tensor))
+    expect_tensor_shape(out, dim(tensor))
   }
 
   for (i in 1:10) {
     outb <- transform_random_vertical_flip(tensor$unsqueeze(1))
-    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+    expect_tensor_shape(outb, dim(tensor$unsqueeze(1)))
   }
   for (p in seq(0, 1, length.out = 10)) {
     outb <- transform_random_vertical_flip(tensor$unsqueeze(1), p)
-    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+    expect_tensor_shape(outb, dim(tensor$unsqueeze(1)))
   }
 })
 
@@ -466,8 +466,8 @@ test_that("random rotation works", {
   # Transforms
   rotate <- function(img) transform_random_rotation(img, 20)
 
-  expect_error(rotate(x), regexp = NA)
-  expect_error(rotate(x$unsqueeze(1)), regexp = NA)
+  expect_no_error(rotate(x))
+  expect_no_error(rotate(x$unsqueeze(1)))
 
 
 })
@@ -488,8 +488,7 @@ test_that("random choice transform works", {
   identity <- function(img) img
 
   # Select a Random Transform to Apply
-  expect_error(regexp = NA, {
-    transform_random_choice(
+  expect_no_error(transform_random_choice(
       x,
       list(
         color_transform,
@@ -500,10 +499,9 @@ test_that("random choice transform works", {
         identity
       )
     )
-  })
+  )
 
-  expect_error(regexp = NA, {
-    transform_random_choice(
+  expect_no_error(transform_random_choice(
       x$unsqueeze(1),
       list(
         color_transform,
@@ -514,7 +512,121 @@ test_that("random choice transform works", {
         identity
       )
     )
-  })
+  )
 
 })
 
+
+test_that("crop pads when the crop leaves the image", {
+  x <- torch_arange(1, 24)$reshape(c(1, 4, 6))
+
+  # fully inside: identical to indexing the image
+  expect_equal_to_r(transform_crop(x, 2, 3, 2, 3), as_array(x[, 2:3, 3:5]))
+
+  # partially outside: the requested size, the overlap unchanged, zeros elsewhere
+  o <- transform_crop(x, top = 3, left = 5, height = 4, width = 4)
+  expect_tensor_shape(o, c(1, 4, 4))
+  expect_equal_to_r(o[, 1:2, 1:2], as_array(x[, 3:4, 5:6]))
+  expect_equal_to_r(o$sum(), as_array(x[, 3:4, 5:6]$sum()))
+
+  # a start before the image pads on the top and the left
+  o <- transform_crop(x, top = -1, left = 0, height = 4, width = 4)
+  expect_tensor_shape(o, c(1, 4, 4))
+  expect_equal_to_r(o[, 1:2, ]$sum(), 0)          # the two padded rows
+  expect_equal_to_r(o[, , 1]$sum(), 0)            # the padded column
+  expect_equal_to_r(o[, 3:4, 2:4], as_array(x[, 1:2, 1:3]))
+
+  # fully outside: all zeros, but still the requested size
+  o <- transform_crop(x, top = 30, left = 30, height = 4, width = 4)
+  expect_tensor_shape(o, c(1, 4, 4))
+  expect_equal_to_r(o$sum(), 0)
+
+  # batch tensors behave the same way
+  expect_equal(dim(transform_crop(x$unsqueeze(1), 3, 5, 4, 4)), c(1, 1, 4, 4))
+
+  # the dtype is preserved, also on the padded path
+  xi <- torch_ones(1, 2, 2, dtype = torch_long())
+  expect_tensor_dtype(transform_crop(xi, 1, 1, 4, 4), torch_long())
+  expect_tensor_dtype(transform_crop(xi, 1, 1, 2, 2), torch_long())
+})
+
+test_that("rgb_to_grayscale keeps the channel dimension", {
+  x <- torch_rand(3, 4, 6)
+  o <- transform_rgb_to_grayscale(x)
+  expect_tensor_shape(o, c(1, 4, 6))
+  # the values are the usual luminance weights
+  expect_equal_to_r(o[1, , ],  as_array(0.2989 * x[1, , ] + 0.5870 * x[2, , ] + 0.1140 * x[3, , ]))
+  expect_tensor_shape(transform_rgb_to_grayscale(x$unsqueeze(1)), c(1, 1, 4, 6))
+
+  # `transform_grayscale()` repeats that channel, also for batch tensors
+  expect_tensor_shape(transform_grayscale(x, num_output_channels = 1), c(1, 4, 6))
+  g3 <- transform_grayscale(x, num_output_channels = 3)
+  expect_tensor_shape(g3, c(3, 4, 6))
+  # every repeated channel is the same grayscale image
+  expect_equal_to_r(g3[2, , ], as_array(o[1, , ]))
+  expect_equal_to_r(g3[3, , ], as_array(o[1, , ]))
+  expect_tensor_shape(transform_grayscale(x$unsqueeze(1), num_output_channels = 3), c(1, 3, 4, 6))
+
+  # the dtype is preserved
+  xi <- torch_ones(3, 2, 2, dtype = torch_uint8())
+  expect_tensor_dtype(transform_rgb_to_grayscale(xi), torch_uint8())
+
+  # the operators that build on it are unaffected by the extra dimension
+  expect_tensor_shape(transform_adjust_saturation(x, 1.5), c(3, 4, 6))
+  expect_tensor_shape(transform_adjust_contrast(x, 1.5), c(3, 4, 6))
+})
+
+test_that("rgb2hsv and hsv2rgb are inverse to each other", {
+  x <- torch_rand(3, 8, 10)
+  expect_equal_to_r(hsv2rgb(rgb2hsv(x)), as_array(x), tolerance = 1e-6)
+
+  b <- torch_rand(2, 3, 8, 10)
+  expect_equal_to_r(hsv2rgb(rgb2hsv(b)), as_array(b), tolerance = 1e-6)
+
+  # known colours: (h, s, v) of pure red is (0, 1, 1), of pure blue (2/3, 1, 1)
+  red <- torch_tensor(array(c(1, 0, 0), dim = c(3, 1, 1)))
+  expect_equal_to_r(rgb2hsv(red), array(c(0, 1, 1),dim = c(3,1,1)), tolerance = 1e-7)
+  blue <- torch_tensor(array(c(0, 0, 1), dim = c(3, 1, 1)))
+  expect_equal_to_r(rgb2hsv(blue), array(c(2 / 3, 1, 1),dim = c(3,1,1)), tolerance = 1e-7)
+})
+
+test_that("adjust_hue rotates the hue in both directions", {
+  red <- torch_tensor(array(c(1, 0, 0), dim = c(3, 1, 1)))
+  # a third of the hue wheel takes red to green, and back to blue in the other direction
+  expect_equal_to_r(transform_adjust_hue(red, 1 / 3), array(c(0, 1, 0), dim = c(3, 1, 1)))
+  expect_equal_to_r(transform_adjust_hue(red, -1 / 3), array(c(0, 0, 1), dim = c(3, 1, 1)), tolerance = 1e-6)
+  # half a turn is the same in both directions
+  expect_equal_to_r(transform_adjust_hue(red, 0.5), array(c(0, 1, 1), dim = c(3, 1, 1)))
+  expect_equal_to_r(transform_adjust_hue(red, -0.5), array(c(0, 1, 1), dim = c(3, 1, 1)))
+
+  x <- torch_rand(3, 4, 6)
+  # a hue factor of 0 leaves the image unchanged, and opposite rotations cancel out
+  expect_equal_to_r(transform_adjust_hue(x, 0), as_array(x), tolerance = 1e-6)
+  expect_equal_to_r(
+    transform_adjust_hue(transform_adjust_hue(x, -0.5), 0.5),
+    as_array(x), tolerance = 1e-6
+  )
+  expect_equal_to_r(
+    transform_adjust_hue(transform_adjust_hue(x, -0.25), -0.25),
+    as_array(transform_adjust_hue(x, -0.5)), tolerance = 1e-6
+  )
+
+  # uint8 images keep their dtype
+  xi <- (x * 255)$to(dtype = torch_uint8())
+  expect_tensor_dtype(transform_adjust_hue(xi, 0.2), torch_uint8())
+})
+
+test_that("adjust_hue only accepts 1 or 3 channels", {
+  x <- torch_rand(3, 4, 6)
+  expect_tensor_shape(transform_adjust_hue(x, 0.2), c(3, 4, 6))
+
+  # a single channel has no hue to adjust and is returned unchanged
+  gray <- torch_rand(1, 4, 6)
+  expect_equal_to_r(transform_adjust_hue(gray, 0.2), as_array(gray))
+  expect_equal_to_r(transform_adjust_hue(gray$unsqueeze(1), 0.2), as_array(gray$unsqueeze(1)))
+
+  expect_error(transform_adjust_hue(torch_rand(4, 4, 6), 0.2), "channel values are 1 or 3")
+  expect_error(transform_adjust_hue(torch_rand(2, 2, 4, 6), 0.2), "channel values are 1 or 3")
+  # `transform_color_jitter()` reaches the same check through its `hue` argument
+  expect_error(transform_color_jitter(torch_rand(4, 4, 6), hue = 0.2), "channel values are 1 or 3")
+})
