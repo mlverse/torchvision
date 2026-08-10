@@ -84,6 +84,7 @@ Collate:
     'extension.R'
     'globals.R'
     'item-transforms-geometry.R'
+    'item-transforms-random-geometry.R'
     'models-alexnet.R'
     'models-convnext.R'
     'models-convnext_detection.R'
