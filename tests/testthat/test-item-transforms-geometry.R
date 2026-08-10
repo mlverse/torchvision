@@ -414,7 +414,7 @@ test_that("item_transform_hflip composed with rotate is symmetric", {
   expect_equal_to_r(result$y$boxes, as_array(rotated$y$boxes), tolerance = 1e-5)
 })
 
-# --- item_transform_vflip tests ---
+# item_transform_vflip
 
 test_that("item_transform_vflip rejects non-item inputs", {
   img <- torch_randn(3, 100, 200)
@@ -781,6 +781,7 @@ test_that("item_transform_center_crop handles rotated boxes", {
   expect_tensor_dtype(result$y$boxes, torch_float())
 })
 
+
 # item_transform_affine
 
 test_that("item_transform_affine rejects non-item inputs", {
@@ -979,7 +980,7 @@ test_that("item_transform_affine works on a dataset", {
   expect_equal_to_r(item$y$boxes, matrix(c(40, 30, 80, 70, 0), ncol = 5))
 })
 
-# item_transform_crop tests
+# item_transform_crop
 
   test_that("item_transform_crop rejects non-item inputs", {
     img <- torch_randn(3, 100, 200)
@@ -1129,3 +1130,4 @@ test_that("item_transform_crop removes rotated boxes outside crop area", {
 
   expect_tensor_shape(result$y$boxes, c(0, 5))
 })
+
