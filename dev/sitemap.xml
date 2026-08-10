@@ -54,6 +54,7 @@
 <url><loc>/reference/item_transform_center_crop.html</loc></url>
 <url><loc>/reference/item_transform_crop.html</loc></url>
 <url><loc>/reference/item_transform_hflip.html</loc></url>
+<url><loc>/reference/item_transform_pad.html</loc></url>
 <url><loc>/reference/item_transform_rotate.html</loc></url>
 <url><loc>/reference/item_transform_vflip.html</loc></url>
 <url><loc>/reference/lfw_dataset.html</loc></url>
