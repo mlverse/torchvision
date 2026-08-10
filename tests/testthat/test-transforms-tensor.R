@@ -374,11 +374,11 @@ test_that("linear transformation", {
 
   out <- transform_linear_transformation(tensor, matrix, mean_vector)
 
-  expect_equal(dim(out), c(3, 24, 32))
+  expect_tensor_shape(out, c(3, 24, 32))
 
   outb <- transform_linear_transformation(tensor$unsqueeze(1), matrix, mean_vector)
 
-  expect_equal(dim(outb), c(1, 3, 24, 32))
+  expect_tensor_shape(outb, c(1, 3, 24, 32))
 })
 
 test_that("adjust hue", {
@@ -388,12 +388,12 @@ test_that("adjust hue", {
 
   for (f in hue_factor) {
     out <- transform_adjust_hue(x, f)
-    expect_equal(dim(out), dim(x))
+    expect_tensor_shape(out, dim(x))
   }
 
   for (f in hue_factor) {
     out <- transform_adjust_hue(x$unsqueeze(1), f)
-    expect_equal(dim(out), dim(x$unsqueeze(1)))
+    expect_tensor_shape(out, dim(x$unsqueeze(1)))
   }
 
 })
@@ -402,7 +402,7 @@ test_that("grayscale", {
 
   x <- torch::torch_rand(3, 24, 32)
   out <- transform_grayscale(x, 3)
-  expect_equal(dim(out), dim(x))
+  expect_tensor_shape(out, dim(x))
   expect_equal(dim(out)[1], 3)
 
   out <- transform_grayscale(x, 1)
@@ -410,7 +410,7 @@ test_that("grayscale", {
   expect_equal(dim(out)[1], 1)
 
   outb <- transform_grayscale(x$unsqueeze(1), 3)
-  expect_equal(dim(outb), dim(x$unsqueeze(1)))
+  expect_tensor_shape(outb, dim(x$unsqueeze(1)))
   expect_equal(dim(outb)[2], 3)
 
   outb <- transform_grayscale(x$unsqueeze(1), 1)
@@ -424,12 +424,12 @@ test_that("random grayscale", {
   tensor <- torch::torch_rand(3, 24, 32)
   for (p in seq(0, 1, length.out = 10)) {
     out <- transform_random_grayscale(tensor, p)
-    expect_equal(dim(out), dim(tensor))
+    expect_tensor_shape(out, dim(tensor))
   }
 
   for (p in seq(0, 1, length.out = 10)) {
     outb <- transform_random_grayscale(tensor$unsqueeze(1), p)
-    expect_equal(dim(outb), dim(tensor$unsqueeze(1)))
+    expect_tensor_shape(outb, dim(tensor$unsqueeze(1)))
   }
 
 })
@@ -538,33 +538,30 @@ test_that("crop pads when the crop leaves the image", {
 
   # fully outside: all zeros, but still the requested size
   o <- transform_crop(x, top = 30, left = 30, height = 4, width = 4)
-  expect_equal(dim(o), c(1, 4, 4))
-  expect_equal(as.numeric(o$sum()), 0)
+  expect_tensor_shape(o, c(1, 4, 4))
+  expect_equal_to_r(o$sum(), 0)
 
   # batch tensors behave the same way
   expect_equal(dim(transform_crop(x$unsqueeze(1), 3, 5, 4, 4)), c(1, 1, 4, 4))
 
   # the dtype is preserved, also on the padded path
   xi <- torch_ones(1, 2, 2, dtype = torch_long())
-  expect_true(transform_crop(xi, 1, 1, 4, 4)$dtype == torch_long())
-  expect_true(transform_crop(xi, 1, 1, 2, 2)$dtype == torch_long())
+  expect_tensor_dtype(transform_crop(xi, 1, 1, 4, 4), torch_long())
+  expect_tensor_dtype(transform_crop(xi, 1, 1, 2, 2), torch_long())
 })
 
 test_that("rgb_to_grayscale keeps the channel dimension", {
   x <- torch_rand(3, 4, 6)
   o <- transform_rgb_to_grayscale(x)
-  expect_equal(dim(o), c(1, 4, 6))
+  expect_tensor_shape(o, c(1, 4, 6))
   # the values are the usual luminance weights
-  expect_equal(
-    round(as_array(o[1, , ]), 5),
-    round(as_array(0.2989 * x[1, , ] + 0.5870 * x[2, , ] + 0.1140 * x[3, , ]), 5)
-  )
-  expect_equal(dim(transform_rgb_to_grayscale(x$unsqueeze(1))), c(1, 1, 4, 6))
+  expect_equal_to_r(o[1, , ],  as_array(0.2989 * x[1, , ] + 0.5870 * x[2, , ] + 0.1140 * x[3, , ]))
+  expect_tensor_shape(transform_rgb_to_grayscale(x$unsqueeze(1)), c(1, 1, 4, 6))
 
   # `transform_grayscale()` repeats that channel, also for batch tensors
-  expect_equal(dim(transform_grayscale(x, num_output_channels = 1)), c(1, 4, 6))
+  expect_tensor_shape(transform_grayscale(x, num_output_channels = 1), c(1, 4, 6))
   g3 <- transform_grayscale(x, num_output_channels = 3)
-  expect_equal(dim(g3), c(3, 4, 6))
+  expect_tensor_shape(g3, c(3, 4, 6))
   # every repeated channel is the same grayscale image
   expect_equal_to_r(g3[2, , ], as_array(o[1, , ]))
   expect_equal_to_r(g3[3, , ], as_array(o[1, , ]))
