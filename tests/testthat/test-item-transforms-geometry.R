@@ -785,7 +785,7 @@ test_that("item_transform_center_crop handles rotated boxes", {
   expect_tensor_dtype(result$y$boxes, torch_float())
 })
 
-# --- item_transform_crop tests ---
+# item_transform_crop
 
 test_that("item_transform_crop rejects non-item inputs", {
   img <- torch_randn(3, 100, 200)
@@ -795,6 +795,19 @@ test_that("item_transform_crop rejects non-item inputs", {
   )
   expect_error(
     item_transform_crop(42, top = 1, left = 1, height = 50, width = 100),
+# item_transform_affine
+
+test_that("item_transform_affine rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_affine(img, angle = 30),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_affine rejects numeric input", {
+  expect_error(
+    item_transform_affine(42),
     "requires a dataset item"
   )
 })
@@ -856,15 +869,132 @@ test_that("item_transform_crop handles multiple boxes and preserves labels", {
 })
 
 test_that("item_transform_crop handles empty boxes", {
+test_that("item_transform_affine identity preserves image and boxes", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  original_img <- item$x$clone()
+
+  result <- item_transform_affine(item)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_true(torch_equal(result$x, original_img))
+  expect_equal_to_r(result$y$boxes, matrix(c(10, 20, 50, 60, 0), ncol = 5))
+})
+
+test_that("item_transform_affine returns rotated boxes in xyxyr format", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- item_transform_affine(item, angle = 25)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+  expect_equal_to_r(result$y$boxes[1, 5], 25)
+})
+
+test_that("item_transform_affine preserves image shape for detection", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- item_transform_affine(item, angle = 25, translate = c(10, 5),
+                                  scale = 1.2, shear = 8)
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+})
+
+test_that("item_transform_affine transforms the image like transform_affine", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  original_img <- item$x$clone()
+
+  result <- item_transform_affine(item, angle = 15, translate = c(4, -3),
+                                  scale = 0.9, shear = 5)
+  expected <- transform_affine(original_img, angle = 15, translate = c(4, -3),
+                               scale = 0.9, shear = 5)
+
+  expect_true(torch_equal(result$x, expected))
+})
+
+test_that("item_transform_affine translates box centre", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- item_transform_affine(item, translate = c(30, 10))
+
+  expect_equal_to_r(result$y$boxes, matrix(c(40, 30, 80, 70, 0), ncol = 5))
+})
+
+test_that("item_transform_affine scales boxes around the image center", {
+  item <- make_detection_item(matrix(c(80, 40, 120, 60), ncol = 4), image_size = c(100L, 200L))
+  result <- item_transform_affine(item, scale = 2)
+
+  expect_equal_to_r(result$y$boxes, matrix(c(60, 30, 140, 70, 0), ncol = 5))
+})
+
+test_that("item_transform_affine rotates boxes around the image center", {
+  item <- make_detection_item(matrix(c(50, 80, 150, 120), ncol = 4), image_size = c(200L, 200L))
+  result <- item_transform_affine(item, angle = 90)
+
+  expect_equal(as.numeric(result$y$boxes[1, 1]), 80, tolerance = 1e-4)
+  expect_equal(as.numeric(result$y$boxes[1, 2]), 50, tolerance = 1e-4)
+  expect_equal(as.numeric(result$y$boxes[1, 3]), 120, tolerance = 1e-4)
+  expect_equal(as.numeric(result$y$boxes[1, 4]), 150, tolerance = 1e-4)
+  expect_equal(as.numeric(result$y$boxes[1, 5]), 90, tolerance = 1e-4)
+})
+
+test_that("item_transform_affine handles empty boxes", {
   item <- make_detection_item(
     boxes = matrix(numeric(0), ncol = 4),
     labels = torch_zeros(0L, dtype = torch_long())
   )
-  result <- item_transform_crop(item, top = 1, left = 1, height = 50, width = 100)
+  result <- item_transform_affine(item, angle = 30)
 
-  expect_tensor_shape(result$y$boxes, c(0, 4))
-  expect_tensor_dtype(result$y$boxes, torch_float())
+  expect_tensor_shape(result$y$boxes, c(0, 5))
 })
+
+test_that("item_transform_affine preserves labels for detection", {
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item <- make_detection_item(
+    matrix(c(10, 20, 50, 60, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = labels
+  )
+  result <- item_transform_affine(item, angle = 20)
+
+  expect_true(result$y$labels$eq(labels)$all()$item())
+})
+
+test_that("item_transform_affine does not mutate input for detection", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+
+  item_transform_affine(item, angle = 30, translate = c(10, 10))
+
+  expect_true(torch_equal(item$x, original_img))
+  expect_equal_to_r(item$y$boxes, as.array(original_boxes$cpu()))
+})
+
+test_that("item_transform_affine image dtype is preserved for detection", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4))
+  result <- item_transform_affine(item, angle = 10)
+
+  expect_tensor_dtype(result$x, item$x$dtype)
+})
+
+test_that("item_transform_affine can be composed", {
+  item <- make_detection_item(matrix(c(50, 80, 150, 120), ncol = 4), image_size = c(200L, 200L))
+  composed <- item |>
+    item_transform_affine(angle = 30) |>
+    item_transform_affine(angle = 30)
+  single <- item_transform_affine(item, angle = 60)
+
+  expect_s3_class(composed, "image_with_rotated_box")
+  expect_equal_to_r(composed$y$boxes, as.array(single$y$boxes$cpu()), tolerance = 1e-4)
+})
+
+test_that("item_transform_affine composed on empty boxes stays xyxyr", {
+  item <- make_detection_item(
+    boxes = matrix(numeric(0), ncol = 4),
+    labels = torch_zeros(0L, dtype = torch_long())
+  )
+  composed <- item |>
+    item_transform_affine(angle = 30) |>
+    item_transform_affine(angle = 30)
+
+  expect_tensor_shape(composed$y$boxes, c(0, 5))
+  })
 
 test_that("item_transform_crop does not mutate input", {
   boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
@@ -934,4 +1064,58 @@ test_that("item_transform_crop removes rotated boxes outside crop area", {
   result <- item_transform_crop(rotated, top = 1, left = 140, height = 100, width = 40)
 
   expect_tensor_shape(result$y$boxes, c(0, 5))
+})
+
+test_that("item_transform_affine preserves image shape and class for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L))
+  result <- item_transform_affine(item, angle = 20, translate = c(5, 5), scale = 1.1)
+
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_s3_class(result, "image_with_segmentation_mask")
+})
+
+test_that("item_transform_affine identity preserves masks", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_affine(item)
+
+  expect_true(result$y$masks$equal(original_masks))
+})
+
+test_that("item_transform_affine transforms masks and preserves dtype", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_affine(item, angle = 45)
+
+  expect_tensor_shape(result$y$masks, original_masks$shape)
+  expect_tensor_dtype(result$y$masks, torch_bool())
+  expect_false(result$y$masks$equal(original_masks))
+})
+
+test_that("item_transform_affine preserves labels for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_labels <- item$y$labels$clone()
+
+  result <- item_transform_affine(item, angle = 20)
+
+  expect_true(result$y$labels$eq(original_labels)$all()$item())
+})
+
+test_that("item_transform_affine works on a dataset", {
+  ds <- dataset(
+    name = "toy_detection",
+    initialize = function() {},
+    .getitem = function(index) {
+      make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+    },
+    .length = function() 1L
+  )()
+
+  ds <- item_transform_affine(ds, translate = c(30, 10))
+  item <- ds$.getitem(1)
+
+  expect_s3_class(item, "image_with_rotated_box")
+  expect_equal_to_r(item$y$boxes, matrix(c(40, 30, 80, 70, 0), ncol = 5))
 })
