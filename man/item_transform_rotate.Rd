@@ -7,8 +7,9 @@
 item_transform_rotate(x, angle, interpolation = 2, expand = TRUE, fill = 0)
 }
 \arguments{
-\item{x}{A dataset item, typically an \code{image_with_bounding_box} object
-containing an image tensor and associated target data (boxes, labels).}
+\item{x}{A dataset item, typically an \code{image_with_bounding_box} or
+\code{image_with_segmentation_mask} object containing an image tensor
+and associated target data.}
 
 \item{angle}{(numeric): Rotation angle value in degrees, counter-clockwise.}
 
@@ -27,8 +28,9 @@ channels. Defaults to \code{0} for all channels. This option is not supported fo
 value for the area outside the transform in the output image is always 0.}
 }
 \value{
-An \code{image_with_rotated_box} object with the rotated image and
-converted boxes in xyxyr format.
+A dataset item with the image and target rotated. Detection items are
+returned as \code{image_with_rotated_box} with boxes in xyxyr format;
+segmentation items keep their class.
 }
 \description{
 Rotates a dataset item by a given angle around its center.
@@ -38,7 +40,8 @@ cropping. Empty regions are filled with given fill color.
 \details{
 The bounding boxes (if present) are shifted to account for the expanded
 canvas and converted to rotated format via
-\code{\link{target_transform_rotate}}.
+\code{\link{target_transform_rotate}}. For segmentation items, the masks are
+rotated alongside the image using nearest-neighbour sampling.
 }
 \examples{
 \dontrun{
@@ -63,8 +66,11 @@ tensor_image_browse(after_plot)
 }
 \seealso{
 Other item_unitary_transforms:
+\code{\link[=item_transform_affine]{item_transform_affine()}},
 \code{\link[=item_transform_center_crop]{item_transform_center_crop()}},
+\code{\link[=item_transform_crop]{item_transform_crop()}},
 \code{\link[=item_transform_hflip]{item_transform_hflip()}},
+\code{\link[=item_transform_pad]{item_transform_pad()}},
 \code{\link[=item_transform_vflip]{item_transform_vflip()}}
 }
 \concept{item_unitary_transforms}

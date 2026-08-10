@@ -48,6 +48,7 @@ transform_center_crop.default <- function(img, size) {
 
     img <- transform_pad(img, padding_ltrb, fill = 0)  # PIL uses fill value 0
 
+    # `get_image_size()` returns (width, height), as above
     size <- get_image_size(img)
     image_height <- size[2]
     image_width <- size[1]
