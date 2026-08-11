@@ -334,7 +334,31 @@ transform_grayscale.torch_tensor <- function(img, num_output_channels) {
 transform_crop.torch_tensor <- function(img, top, left, height, width) {
   check_img(img)
 
-  img[.., top:(top + height - 1), left:(left + width - 1)]
+  size <- get_image_size(img)
+  image_width <- size[1]
+  image_height <- size[2]
+
+  bottom <- top + height - 1
+  right <- left + width - 1
+
+  # A crop that leaves the image is padded with zeros, so that the output always has the requested
+  # size, as in torchvision for python.
+  pad_top <- max(1 - top, 0)
+  pad_left <- max(1 - left, 0)
+  pad_bottom <- max(bottom - image_height, 0)
+  pad_right <- max(right - image_width, 0)
+
+  if (pad_top == 0 && pad_left == 0 && pad_bottom == 0 && pad_right == 0)
+    return(img[.., top:bottom, left:right])
+
+  # the crop can also lie entirely outside the image, in which case there is nothing to index
+  if (bottom < 1 || right < 1 || top > image_height || left > image_width) {
+    out_size <- c(utils::head(img$size(), -2), height, width)
+    return(torch::torch_zeros(out_size, dtype = img$dtype, device = img$device))
+  }
+
+  cropped <- img[.., max(top, 1):min(bottom, image_height), max(left, 1):min(right, image_width)]
+  transform_pad(cropped, c(pad_left, pad_right, pad_top, pad_bottom), fill = 0)
 }
 
 #' @export
@@ -380,6 +404,14 @@ transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
 
   check_img(img)
 
+  channels <- tail(head(img$size(), -2), 1)
+  if (!channels %in% c(1, 3))
+    value_error("Input image tensor permitted channel values are 1 or 3, but found {channels}.")
+
+  # a single-channel image has no hue to adjust, as in torchvision for python
+  if (channels == 1)
+    return(img)
+
   orig_dtype <- img$dtype
   if (img$dtype == torch::torch_uint8())
     img <- img$to(dtype = torch::torch_float32())/255
@@ -389,7 +421,9 @@ transform_adjust_hue.torch_tensor <- function(img, hue_factor) {
   channel_dim <- if (img$ndim == 3) 1 else 2
   hsv <- img$unbind(channel_dim)
   hsv[[1]] <- hsv[[1]] + hue_factor
-  hsv[[1]] <- hsv[[1]] %% 1
+  # `%%` is `fmod()` for tensors and keeps the sign of the dividend, so a negative `hue_factor`
+  # would give a negative hue; the hue wraps around instead
+  hsv[[1]] <- torch::torch_remainder(hsv[[1]], 1)
   img <- torch::torch_stack(hsv, dim=channel_dim)
   img_hue_adj <- hsv2rgb(img)
 
@@ -480,7 +514,10 @@ transform_perspective.torch_tensor <- function(img, startpoints, endpoints, inte
 #' @export
 transform_rgb_to_grayscale.torch_tensor <- function(img) {
   check_img(img)
-  (0.2989 * img[..,1,,] + 0.5870 * img[..,2,,] + 0.1140 * img[..,3,,])$to(img$dtype)
+  gray <- (0.2989 * img[..,1,,] + 0.5870 * img[..,2,,] + 0.1140 * img[..,3,,])$to(img$dtype)
+  # indexing the channels drops their dimension, but the result is a single-channel image and must
+  # keep the same number of dimensions as the input, as in torchvision for python
+  gray$unsqueeze(-3)
 }
 
 # Helpers -----------------------------------------------------------------
@@ -558,12 +595,13 @@ hsv2rgb <- function(img) {
 
   hsv <- img$unbind(channel_dim)
   i <- torch::torch_floor(hsv[[1]] * 6)
-  f <- (hsv[[1]] * 6) - 1
+  # `f` is the fractional part of the sector, i.e. the distance to the sector `i` starts at
+  f <- (hsv[[1]] * 6) - i
   i <- i$to(dtype = torch::torch_int32())
 
   p <- torch::torch_clamp((hsv[[3]] * (1 - hsv[[2]])), 0, 1)
   q <- torch::torch_clamp((hsv[[3]] * (1 - hsv[[2]] * f)), 0, 1)
-  t <- torch::torch_clamp((hsv[[3]] * (1 - f)), 0, 1)
+  t <- torch::torch_clamp((hsv[[3]] * (1 - hsv[[2]] * (1 - f))), 0, 1)
   i <- i %% 6
 
   mask <- if (img$ndim == 3)
