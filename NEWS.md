@@ -26,7 +26,7 @@
 * `item_transform_rotate()` now supports segmentation items and datasets, rotating the masks alongside the image (@srishtiii28, #379).
 * Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
 * Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
-* Added `item_transform_random_crop()` for cropping dataset items at a random location with optional padding, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #355).
+* Added `item_transform_random_crop()` for cropping dataset items at a random location with optional padding, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #387).
 
 ## Bug fixes and improvements
 
