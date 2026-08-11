@@ -70,7 +70,12 @@ after <- item_transform_random_crop(before, size = c(800, 1200))
 before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
 after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
 
-grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+# the crop changes the image size, so resize before stacking into the grid
+grid <- vision_make_grid(
+  torch_stack(list(transform_resize(before_plot, c(600, 600)),
+                   transform_resize(after_plot, c(600, 600)))),
+  scale = TRUE
+)
 tensor_image_browse(grid)
 }
 
