@@ -4,10 +4,12 @@
 #' The canvas is expanded so that the entire rotated image is visible with no
 #' cropping. Empty regions are filled with given fill color.
 #'
-#' The bounding boxes (if present) are shifted to account for the expanded
-#' canvas and converted to rotated format via
-#' \code{\link{target_transform_rotate}}. For segmentation items, the masks are
-#' rotated alongside the image using nearest-neighbour sampling.
+#' The bounding boxes (if present) are rotated around the image centre so that
+#' they follow the rotated content, and returned in xyxyr format. Unlike
+#' \code{\link{target_transform_rotate}}, the boxes are not expanded: they keep
+#' their physical size and tightly enclose the rotated object. For segmentation
+#' items, the masks are rotated alongside the image using nearest-neighbour
+#' sampling.
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} or
 #'   \code{image_with_segmentation_mask} object containing an image tensor
@@ -85,19 +87,11 @@ item_transform_rotate.image_with_bounding_box <- function(
 
   orig_spatial <- tail(x$x$shape, 2)   # e.g., c(H_orig, W_orig)
   new_spatial  <- tail(rotated_img$shape, 2)
-  shifts <- (new_spatial - orig_spatial) / 2
-  dx <- shifts[2]  # shift along second spatial dim (width in torch convention)
-  dy <- shifts[1]  # shift along first spatial dim (height in torch convention)
-
-  # Shift boxes safely
-  x1 <- x$y$boxes[, 1]
-  y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]
-  y2 <- x$y$boxes[, 4]
-  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$boxes <- .rotate_item_boxes(x$y$boxes, angle = angle,
+                                  orig_spatial = orig_spatial,
+                                  new_spatial = new_spatial)
   x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
   x$y$image_width <- new_spatial[2]
 
@@ -143,25 +137,69 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
 
   orig_spatial <- tail(x$x$shape, 2)
   new_spatial  <- tail(rotated_img$shape, 2)
-  shifts <- (new_spatial - orig_spatial) / 2
-  dx <- shifts[2]
-  dy <- shifts[1]
-
-  # Shift existing xyxyr boxes
-  x1 <- x$y$boxes[, 1]
-  y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]
-  y2 <- x$y$boxes[, 4]
-  angle_col <- x$y$boxes[, 5, drop = FALSE]
-
-  shifted_xy <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
-  shifted_boxes <- torch_cat(list(shifted_xy, angle_col), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$boxes <- .rotate_item_boxes(x$y$boxes, angle = angle,
+                                  orig_spatial = orig_spatial,
+                                  new_spatial = new_spatial)
   x$y$image_height <- new_spatial[1]
   x$y$image_width  <- new_spatial[2]
   x
+}
+
+# Rotate detection boxes so they follow an image rotated by `angle` (degrees)
+# around its centre. The box centres are rotated around the original image
+# centre and shifted onto the (possibly expanded) output canvas, while their
+# physical size is left unchanged: unlike `target_transform_rotate`, the boxes
+# are not expanded to their enclosing axis-aligned rectangle.
+# `boxes` may be in xyxy (N x 4) or xyxyr (N x 5) format; the result is always
+# xyxyr with the accumulated rotation angle.
+#' @noRd
+.rotate_item_boxes <- function(boxes, angle, orig_spatial, new_spatial) {
+  n <- boxes$size(1)
+  is_rotated <- boxes$size(2) == 5
+
+  if (n == 0) {
+    if (is_rotated) {
+      return(boxes$clone())
+    }
+    angle_t <- torch_zeros(0, 1, dtype = boxes$dtype, device = boxes$device)
+    return(torch_cat(list(boxes, angle_t), dim = -1L))
+  }
+
+  H <- orig_spatial[1]
+  W <- orig_spatial[2]
+  H2 <- new_spatial[1]
+  W2 <- new_spatial[2]
+
+  x1 <- boxes[, 1]
+  y1 <- boxes[, 2]
+  x2 <- boxes[, 3]
+  y2 <- boxes[, 4]
+
+  cx <- (x1 + x2) * 0.5
+  cy <- (y1 + y2) * 0.5
+  hw <- (x2 - x1) * 0.5
+  hh <- (y2 - y1) * 0.5
+
+  angle_rad <- deg2rad(angle)
+  ct <- torch_cos(angle_rad)
+  st <- torch_sin(angle_rad)
+
+  # Rotate the box centres around the original image centre, then shift them
+  # onto the output canvas. This matches the geometry of transform_rotate.
+  cx_new <- W2 * 0.5 + (cx - W * 0.5) * ct + (cy - H * 0.5) * st
+  cy_new <- H2 * 0.5 - (cx - W * 0.5) * st + (cy - H * 0.5) * ct
+
+  new_xyxy <- torch_stack(list(cx_new - hw, cy_new - hh, cx_new + hw, cy_new + hh), dim = -1L)
+
+  total_angle <- if (is_rotated) {
+    boxes[, 5, drop = FALSE] + angle
+  } else {
+    torch_tensor(angle, dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
+  }
+
+  torch_cat(list(new_xyxy, total_angle), dim = -1L)
 }
 
 #' Crop a dataset item

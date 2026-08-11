@@ -29,6 +29,10 @@
 
 ## Bug fixes and improvements
 
+* `item_transform_rotate()` no longer expands detection boxes: boxes are rotated
+  around the image centre so they follow the rotated content while keeping their
+  physical size, instead of being enlarged to their enclosing axis-aligned
+  rectangle (#382).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
