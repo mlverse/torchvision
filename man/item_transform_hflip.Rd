@@ -46,6 +46,7 @@ Other item_unitary_transforms:
 \code{\link[=item_transform_center_crop]{item_transform_center_crop()}},
 \code{\link[=item_transform_crop]{item_transform_crop()}},
 \code{\link[=item_transform_pad]{item_transform_pad()}},
+\code{\link[=item_transform_perspective]{item_transform_perspective()}},
 \code{\link[=item_transform_rotate]{item_transform_rotate()}},
 \code{\link[=item_transform_vflip]{item_transform_vflip()}}
 }
