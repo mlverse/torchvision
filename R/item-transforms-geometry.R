@@ -4,12 +4,10 @@
 #' The canvas is expanded so that the entire rotated image is visible with no
 #' cropping. Empty regions are filled with given fill color.
 #'
-#' The bounding boxes (if present) are rotated around the image centre so that
-#' they follow the rotated content, and returned in xyxyr format. Unlike
-#' \code{\link{target_transform_rotate}}, the boxes are not expanded: they keep
-#' their physical size and tightly enclose the rotated object. For segmentation
-#' items, the masks are rotated alongside the image using nearest-neighbour
-#' sampling.
+#' The bounding boxes (if present) are shifted to account for the expanded
+#' canvas and converted to rotated format via
+#' \code{\link{target_transform_rotate}}. For segmentation items, the masks are
+#' rotated alongside the image using nearest-neighbour sampling.
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} or
 #'   \code{image_with_segmentation_mask} object containing an image tensor
