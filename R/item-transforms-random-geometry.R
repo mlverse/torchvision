@@ -256,8 +256,36 @@ item_transform_random_crop.image_with_bounding_box <- function(x, size, padding 
                                                               pad_if_needed = FALSE,
                                                               fill = 0,
                                                               padding_mode = "constant") {
-  .random_crop_item(x, size = size, padding = padding, pad_if_needed = pad_if_needed,
-                    fill = fill, padding_mode = padding_mode)
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+
+  if (!is.null(padding)) {
+    x <- item_transform_pad(x, padding, fill = fill, padding_mode = padding_mode)
+  }
+
+  if (pad_if_needed) {
+    img_size <- get_image_size(x$x)
+    if (img_size[1] < output_size[2]) {
+      x <- item_transform_pad(x, c(output_size[2] - img_size[1], 0),
+                              fill = fill, padding_mode = padding_mode)
+    }
+    img_size <- get_image_size(x$x)
+    if (img_size[2] < output_size[1]) {
+      x <- item_transform_pad(x, c(0, output_size[1] - img_size[2]),
+                              fill = fill, padding_mode = padding_mode)
+    }
+  }
+
+  img_size <- get_image_size(x$x)
+  if (img_size[1] < output_size[2] || img_size[2] < output_size[1]) {
+    cli_abort(
+      "Required crop size ({output_size[1]}, {output_size[2]}) is larger than input image size ({img_size[2]}, {img_size[1]})."
+    )
+  }
+
+  params <- get_random_crop_params(x$x, output_size)
+
+  item_transform_crop(x, top = params[1], left = params[2],
+                      height = params[3], width = params[4])
 }
 
 #' @export
@@ -265,8 +293,36 @@ item_transform_random_crop.image_with_segmentation_mask <- function(x, size, pad
                                                                    pad_if_needed = FALSE,
                                                                    fill = 0,
                                                                    padding_mode = "constant") {
-  .random_crop_item(x, size = size, padding = padding, pad_if_needed = pad_if_needed,
-                    fill = fill, padding_mode = padding_mode)
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+
+  if (!is.null(padding)) {
+    x <- item_transform_pad(x, padding, fill = fill, padding_mode = padding_mode)
+  }
+
+  if (pad_if_needed) {
+    img_size <- get_image_size(x$x)
+    if (img_size[1] < output_size[2]) {
+      x <- item_transform_pad(x, c(output_size[2] - img_size[1], 0),
+                              fill = fill, padding_mode = padding_mode)
+    }
+    img_size <- get_image_size(x$x)
+    if (img_size[2] < output_size[1]) {
+      x <- item_transform_pad(x, c(0, output_size[1] - img_size[2]),
+                              fill = fill, padding_mode = padding_mode)
+    }
+  }
+
+  img_size <- get_image_size(x$x)
+  if (img_size[1] < output_size[2] || img_size[2] < output_size[1]) {
+    cli_abort(
+      "Required crop size ({output_size[1]}, {output_size[2]}) is larger than input image size ({img_size[2]}, {img_size[1]})."
+    )
+  }
+
+  params <- get_random_crop_params(x$x, output_size)
+
+  item_transform_crop(x, top = params[1], left = params[2],
+                      height = params[3], width = params[4])
 }
 
 #' @export
@@ -274,17 +330,6 @@ item_transform_random_crop.image_with_rotated_box <- function(x, size, padding =
                                                               pad_if_needed = FALSE,
                                                               fill = 0,
                                                               padding_mode = "constant") {
-  .random_crop_item(x, size = size, padding = padding, pad_if_needed = pad_if_needed,
-                    fill = fill, padding_mode = padding_mode)
-}
-
-# Draw a random crop box over a dataset item and apply it through
-# item_transform_crop so that image and targets stay aligned. Any requested
-# padding is applied to the whole item first (image and targets), matching the
-# behaviour of transform_random_crop.
-#' @noRd
-.random_crop_item <- function(x, size, padding = NULL, pad_if_needed = FALSE,
-                              fill = 0, padding_mode = "constant") {
   output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
 
   if (!is.null(padding)) {
