@@ -45,22 +45,28 @@ rotated alongside the image using nearest-neighbour sampling.
 }
 \examples{
 \dontrun{
-url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
+url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+angle <- 30
 
 img <- base_loader(url) |>
   transform_to_tensor()
 
-boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
+boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
+before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
 class(before) <- c("image_with_bounding_box", "list")
 
-after <- item_transform_rotate(before, angle = 30)
+after <- item_transform_rotate(before, angle = angle)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
-tensor_image_browse(before_plot)
-tensor_image_browse(after_plot)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+
+grid <- vision_make_grid(
+  torch_stack(list(transform_resize(before_plot, c(600, 600)),
+                   transform_resize(after_plot, c(600, 600)))),
+  scale = TRUE
+)
+tensor_image_browse(grid)
 }
 
 }
