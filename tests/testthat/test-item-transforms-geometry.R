@@ -1486,22 +1486,13 @@ test_that("item_transform_perspective applies to datasets", {
   sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
   ep <- list(c(10, 20), c(209, 20), c(209, 119), c(10, 119))
 
-  make_item <- function(x0, y0, x1, y1) {
-    item <- list(
-      x = torch_randn(3, 100, 200),
-      y = list(
-        boxes = torch_tensor(matrix(c(x0, y0, x1, y1), ncol = 4), dtype = torch_float32()),
-        labels = torch_ones(1, dtype = torch_long())
-      )
-    )
-    class(item) <- c("image_with_bounding_box", "list")
-    item
-  }
-
   ds <- torch::dataset(
     name = "perspective_test",
     initialize = function() {
-      self$items <- list(make_item(10, 10, 20, 20), make_item(5, 5, 15, 15))
+      self$items <- list(
+        make_detection_item(matrix(c(10, 10, 20, 20), ncol = 4)),
+        make_detection_item(matrix(c(5, 5, 15, 15), ncol = 4))
+      )
     },
     .getitem = function(index) self$items[[index]],
     .length = function() length(self$items)
