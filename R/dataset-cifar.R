@@ -112,6 +112,7 @@ cifar10_dataset <- torch::dataset(
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
 
     utils::untar(archive, exdir = self$root)
+    fs::file_delete(archive)
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
