@@ -90,6 +90,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     archive_gz <- fs::path(self$data_dir, basename(archive))
     fs::file_copy(archive, archive_gz, overwrite = TRUE)
     utils::untar(archive_gz, exdir = self$data_dir)
+    fs::file_delete(archive_gz)
     # workaround the `--strip-compoents = 8` not widely available
     fs::file_move(
       fs::path_filter(
