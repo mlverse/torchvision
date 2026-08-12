@@ -156,6 +156,7 @@ lfw_people_dataset <- torch::dataset(
     }
 
     untar(archive, exdir = self$root)
+    fs::file_delete(archive)
 
     if (class(self)[[1]] == "lfw_pairs") {
       for (name in c("pairsDevTrain.txt", "pairsDevTest.txt", "pairs.txt")) {
