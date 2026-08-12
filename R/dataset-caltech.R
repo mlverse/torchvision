@@ -127,10 +127,13 @@ caltech101_dataset <- torch::dataset(
         utils::unzip(dest, exdir = self$root)
       else
         utils::untar(dest, exdir = self$root)
+      fs::file_delete(dest)
 
       extracted <- fs::path(self$root, class(self)[[1]])
-      if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz")))
+      if (fs::file_exists(fs::path(extracted, "101_ObjectCategories.tar.gz"))) {
         utils::untar(fs::path(extracted, "101_ObjectCategories.tar.gz"), exdir = extracted)
+        fs::file_delete(fs::path(extracted, "101_ObjectCategories.tar.gz"))
+      }
     }))
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
