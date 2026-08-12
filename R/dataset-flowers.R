@@ -140,6 +140,7 @@ flowers102_dataset <- dataset(
     cli_inform("{.cls {class(self)[[1]]}} Extracting images and processing dataset...")
 
     untar(archives[[1]], exdir = self$raw_folder)
+    fs::file_delete(archives[[1]])
     labels <- R.matlab::readMat(archives[[2]])$labels
     setids <- R.matlab::readMat(archives[[3]])
 
