@@ -179,6 +179,7 @@ pascal_segmentation_dataset <- torch::dataset(
     }
 
     utils::untar(archive, exdir = self$raw_folder)
+    fs::file_delete(archive)
 
     voc_dir <- file.path(self$raw_folder, "VOCdevkit", paste0("VOC", self$year))
     voc_root <- self$raw_folder
