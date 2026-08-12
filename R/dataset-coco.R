@@ -185,6 +185,7 @@ coco_detection_dataset <- torch::dataset(
 
     utils::unzip(ann_zip, exdir = self$data_dir)
     utils::unzip(archive, exdir = self$data_dir)
+    fs::file_delete(c(ann_zip, archive))
 
     cli_inform("Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully.")
   },
