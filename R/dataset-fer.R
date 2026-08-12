@@ -130,6 +130,7 @@ fer_dataset <- dataset(
     }
 
     untar(archive, exdir = self$root)
+    fs::file_delete(archive)
     cli_inform(
       "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
     )
