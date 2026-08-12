@@ -91,6 +91,7 @@ eurosat_dataset <- torch::dataset(
     if (!dir.exists(self$images_dir)) {
       cli_inform("Extracting {.cls {class(self)[[1]]}} archive...")
       utils::unzip(archive, exdir = self$images_dir)
+      fs::file_delete(archive)
       cli_inform("Extraction of {.cls {class(self)[[1]]}} is complete.")
     }
 
