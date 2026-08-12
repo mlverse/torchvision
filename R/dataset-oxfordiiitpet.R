@@ -123,6 +123,7 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       }
 
       utils::untar(archive, exdir = self$raw_folder)
+      fs::file_delete(archive)
     }
 
     for (split in c("trainval", "test")) {
