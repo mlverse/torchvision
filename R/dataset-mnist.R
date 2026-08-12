@@ -448,6 +448,7 @@ emnist_collection <- dataset(
     unzip_dir <- file.path(self$raw_folder, "unzipped")
     fs::dir_create(unzip_dir)
     unzip(archive, exdir = unzip_dir)
+    fs::file_delete(archive)
 
     # unzip second level of archives
     unzipped_root <- fs::dir_ls(unzip_dir, type = "directory", recurse = FALSE)[1]
