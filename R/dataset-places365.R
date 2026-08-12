@@ -187,6 +187,7 @@ places365_dataset <- torch::dataset(
         cli_abort("Corrupt file! Delete the file in {archive} and try again.")
 
       utils::untar(archive, exdir = self$base_dir)
+      fs::file_delete(archive)
     }
   },
 
