@@ -101,6 +101,7 @@ vggface2_dataset <- torch::dataset(
       fs::file_move(archive[file_id], self$split_file[file_id])
     }
     utils::untar(archive[[1]], exdir = self$raw_folder)
+    fs::file_delete(archive[[1]])
 
     identity_df <- read.csv(archive[[3]], sep = ",", stringsAsFactors = FALSE, strip.white = TRUE)
     identity_df$Class_ID <- trimws(identity_df$Class_ID)
@@ -119,7 +120,8 @@ vggface2_dataset <- torch::dataset(
   },
 
   check_exists = function() {
-    all(fs::file_exists(self$split_file)) &&
+    label_files <- self$split_file[self$resources[self$resources$split %in% c(self$split, "identity"), ]$kind == "label"]
+    all(fs::file_exists(label_files)) &&
       fs::file_exists(file.path(self$processed_folder, glue::glue("{self$split}.rds")))
   },
 
