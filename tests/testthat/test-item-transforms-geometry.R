@@ -1344,3 +1344,139 @@ test_that("item_transform_pad negative padding clips and drops boxes outside the
   expect_equal(result$y$image_width, 350L)
 })
 
+# item_transform_random_erasing
+
+test_that("item_transform_random_erasing rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_random_erasing(img),
+    "requires a dataset item"
+  )
+  expect_error(
+    item_transform_random_erasing(42),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_random_erasing with p=0 never erases", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+
+  result <- item_transform_random_erasing(item, p = 0)
+
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$boxes, original_boxes))
+})
+
+test_that("item_transform_random_erasing with p=1 erases the image and keeps boxes", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+
+  result <- item_transform_random_erasing(item, p = 1)
+
+  expect_true(torch_equal(result$y$boxes, original_boxes))
+  expect_false(torch_equal(result$x, original_img))
+  expect_true((result$x == 0)$any()$item())
+})
+
+test_that("item_transform_random_erasing does not mutate the input item", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_class <- class(item)
+
+  result <- item_transform_random_erasing(item, p = 1)
+
+  expect_true(torch_equal(item$x, original_img))
+  expect_equal(class(item), original_class)
+  expect_s3_class(result, "image_with_bounding_box")
+})
+
+test_that("item_transform_random_erasing supports a per-channel value", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+
+  result <- item_transform_random_erasing(item, p = 1, value = c(1, 2, 3))
+
+  region <- (result$x[1, , ] == 1) & (result$x[2, , ] == 2) & (result$x[3, , ] == 3)
+  expect_true(region$any()$item())
+})
+
+test_that("item_transform_random_erasing supports the random value", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+
+  result <- item_transform_random_erasing(item, p = 1, value = "random")
+
+  expect_false(torch_equal(result$x, item$x))
+})
+
+test_that("item_transform_random_erasing with p=0 does not mutate segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_img <- item$x$clone()
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_random_erasing(item, p = 0)
+
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$masks, original_masks))
+})
+
+test_that("item_transform_random_erasing with p=1 keeps segmentation masks unchanged", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_random_erasing(item, p = 1)
+
+  expect_true(torch_equal(result$y$masks, original_masks))
+  expect_false(torch_equal(result$x, item$x))
+})
+
+test_that("item_transform_random_erasing with p=1 works for rotated boxes", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_random_erasing(rotated, p = 1)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_true(torch_equal(result$y$boxes, rotated$y$boxes))
+})
+
+test_that("item_transform_random_erasing works on a dataset", {
+  ds <- dataset(
+    name = "toy_detection",
+    initialize = function() {},
+    .getitem = function(index) {
+      make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+    },
+    .length = function() 1L
+  )()
+
+  transformed <- item_transform_random_erasing(ds, p = 0)
+  item <- transformed$.getitem(1)
+
+  expect_s3_class(item, "image_with_bounding_box")
+})
+
+test_that("item_transform_random_erasing default parameters", {
+  fmls <- formals(item_transform_random_erasing)
+  expect_equal(fmls$p, 0.5)
+  expect_equal(eval(fmls$scale), c(0.02, 0.33))
+  expect_equal(eval(fmls$ratio), c(0.3, 3.3))
+  expect_equal(fmls$value, 0)
+  expect_false(fmls$inplace)
+})
+
+test_that("item_transform_random_erasing rejects invalid p", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  expect_error(item_transform_random_erasing(item, p = 2), "between 0 and 1")
+  expect_error(item_transform_random_erasing(item, p = -1), "between 0 and 1")
+})
+
+test_that("item_transform_random_erasing rejects invalid scale and ratio", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  expect_error(item_transform_random_erasing(item, scale = c(0.5, 0.1)), "min, max")
+  expect_error(item_transform_random_erasing(item, scale = 0.5), "length 2")
+  expect_error(item_transform_random_erasing(item, ratio = c(1, 0.5)), "min, max")
+})
+
