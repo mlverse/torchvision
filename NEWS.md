@@ -29,6 +29,8 @@
 
 ## Bug fixes and improvements
 
+* `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
+  instead of `shear`, which left the shear range incomplete and made the sampling fail (#354).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
