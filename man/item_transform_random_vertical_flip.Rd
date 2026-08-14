@@ -45,6 +45,7 @@ tensor_image_browse(grid)
 }
 \seealso{
 Other item_random_transforms:
+\code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}}
 }
 \concept{item_random_transforms}
