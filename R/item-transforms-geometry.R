@@ -1111,6 +1111,4 @@ item_transform_resize.image_with_segmentation_mask <- function(x, size, interpol
 }
 
 #' @export
-item_transform_resize.image_with_rotated_box <- function(x, size, interpolation = 2) {
-  item_transform_resize.image_with_bounding_box(x, size = size, interpolation = interpolation)
-}
+item_transform_resize.image_with_rotated_box <- item_transform_resize.image_with_bounding_box

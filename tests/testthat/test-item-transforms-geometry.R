@@ -1372,7 +1372,12 @@ test_that("item_transform_resize resizes detection items and rescales boxes", {
   expect_equal(result$y$image_height, 100L)
   expect_equal(result$y$image_width, 200L)
   expect_true(torch_equal(result$x, transform_resize(original_img, size = c(100L, 200L))))
-  expect_equal_to_r(result$y$boxes[1, ], c(60, 35, 90, 65))
+  expect_equal_to_r(result$y$boxes[1, ], boxes[1, ] / 2)
+
+  # a bare integer size matches the smaller edge
+  bare <- item_transform_resize(item, size = 100)
+  expect_true(torch_equal(bare$x, result$x))
+  expect_true(torch_equal(bare$y$boxes, result$y$boxes))
 
   # input is not mutated
   expect_equal_to_r(item$x, as_array(original_img))
@@ -1393,18 +1398,6 @@ test_that("item_transform_resize rescales boxes with an anisotropic size", {
   expect_tensor_shape(result$y$boxes, c(2, 4))
   expect_equal_to_r(result$y$boxes[1, ], c(30, 35, 45, 65))
   expect_equal_to_r(result$y$boxes[2, ], c(0, 0, 100, 100))
-})
-
-test_that("item_transform_resize matches the smaller edge for a bare integer size", {
-  boxes <- matrix(c(120, 70, 180, 130), ncol = 4)
-  item <- make_detection_item(boxes, image_size = c(200L, 400L))
-
-  result <- item_transform_resize(item, size = 100)
-
-  expect_tensor_shape(result$x, c(3, 100, 200))
-  expect_equal(result$y$image_height, 100L)
-  expect_equal(result$y$image_width, 200L)
-  expect_equal_to_r(result$y$boxes[1, ], c(60, 35, 90, 65))
 })
 
 test_that("item_transform_resize preserves labels and handles empty boxes", {
