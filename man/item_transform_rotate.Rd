@@ -38,9 +38,10 @@ The canvas is expanded so that the entire rotated image is visible with no
 cropping. Empty regions are filled with given fill color.
 }
 \details{
-The bounding boxes (if present) are shifted to account for the expanded
-canvas and converted to rotated format via
-\code{\link{target_transform_rotate}}. For segmentation items, the masks are
+The bounding boxes (if present) are rotated around the original image centre
+and shifted onto the (possibly expanded) output canvas, while their physical
+size is left unchanged. The result is always in xyxyr format with the
+accumulated rotation angle. For segmentation items, the masks are
 rotated alongside the image using nearest-neighbour sampling.
 }
 \examples{
