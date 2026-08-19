@@ -215,15 +215,15 @@ item_transform_random_vertical_flip.image_with_rotated_box <- function(x, p = 0.
 #'
 #' @importFrom torch torch_atan2
 #' @export
-item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1.0),
-                                              ratio = c(3. / 4., 4. / 3.),
+item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1),
+                                              ratio = c(3 / 4, 4 / 3),
                                               interpolation = 2) {
   UseMethod("item_transform_random_resize_crop", x)
 }
 
 #' @export
-item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1.0),
-                                                      ratio = c(3. / 4., 4. / 3.),
+item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1),
+                                                      ratio = c(3 / 4, 4 / 3),
                                                       interpolation = 2) {
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
@@ -236,8 +236,8 @@ item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1
 }
 
 #' @export
-item_transform_random_resize_crop.default <- function(x, size, scale = c(0.08, 1.0),
-                                                      ratio = c(3. / 4., 4. / 3.),
+item_transform_random_resize_crop.default <- function(x, size, scale = c(0.08, 1),
+                                                      ratio = c(3 / 4, 4 / 3),
                                                       interpolation = 2) {
   cli_abort(
     "{.fn item_transform_random_resize_crop} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
@@ -246,8 +246,8 @@ item_transform_random_resize_crop.default <- function(x, size, scale = c(0.08, 1
 }
 
 #' @export
-item_transform_random_resize_crop.image_with_bounding_box <- function(x, size, scale = c(0.08, 1.0),
-                                                                      ratio = c(3. / 4., 4. / 3.),
+item_transform_random_resize_crop.image_with_bounding_box <- function(x, size, scale = c(0.08, 1),
+                                                                      ratio = c(3 / 4, 4 / 3),
                                                                       interpolation = 2) {
   params <- get_random_resized_crop_params(x$x, scale, ratio)
   x <- item_transform_crop(x, top = params[1], left = params[2],
@@ -280,8 +280,8 @@ item_transform_random_resize_crop.image_with_bounding_box <- function(x, size, s
 }
 
 #' @export
-item_transform_random_resize_crop.image_with_segmentation_mask <- function(x, size, scale = c(0.08, 1.0),
-                                                                           ratio = c(3. / 4., 4. / 3.),
+item_transform_random_resize_crop.image_with_segmentation_mask <- function(x, size, scale = c(0.08, 1),
+                                                                           ratio = c(3 / 4, 4 / 3),
                                                                            interpolation = 2) {
   params <- get_random_resized_crop_params(x$x, scale, ratio)
   x <- item_transform_crop(x, top = params[1], left = params[2],
@@ -305,13 +305,7 @@ item_transform_random_resize_crop.image_with_segmentation_mask <- function(x, si
 }
 
 #' @export
-item_transform_random_resize_crop.image_with_rotated_box <- function(x, size, scale = c(0.08, 1.0),
-                                                                     ratio = c(3. / 4., 4. / 3.),
-                                                                     interpolation = 2) {
-  item_transform_random_resize_crop.image_with_bounding_box(
-    x, size = size, scale = scale, ratio = ratio, interpolation = interpolation
-  )
-}
+item_transform_random_resize_crop.image_with_rotated_box <- item_transform_random_resize_crop.image_with_bounding_box
 
 rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
   if (scale_w == scale_h) {
