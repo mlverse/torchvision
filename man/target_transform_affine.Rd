@@ -3,6 +3,7 @@
 \name{target_transform_affine}
 \alias{target_transform_affine}
 \alias{target_transform_affine.list}
+\alias{target_transform_affine.object_detection_target}
 \title{Apply an affine transformation to a detection target}
 \usage{
 target_transform_affine(
@@ -15,6 +16,15 @@ target_transform_affine(
 )
 
 \method{target_transform_affine}{list}(
+  target,
+  angle = 0,
+  translate = c(0, 0),
+  scale = 1,
+  shear = 0,
+  center = NULL
+)
+
+\method{target_transform_affine}{object_detection_target}(
   target,
   angle = 0,
   translate = c(0, 0),

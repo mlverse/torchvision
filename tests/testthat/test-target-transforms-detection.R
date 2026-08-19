@@ -388,3 +388,53 @@ test_that("target_transform_affine composes", {
 
   expect_equal_to_r(composed$boxes, as.array(single$boxes$cpu()), tolerance = 1e-4)
 })
+
+test_that("target transforms dispatch on object_detection_target", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  class(target) <- c("object_detection_target", class(target))
+
+  rotated <- target_transform_rotate(target, angle = 30)
+  expect_s3_class(rotated, "object_detection_target")
+  expect_tensor_shape(rotated$boxes, c(1, 5))
+
+  affined <- target_transform_affine(target, angle = 30)
+  expect_s3_class(affined, "object_detection_target")
+  expect_tensor_shape(affined$boxes, c(1, 5))
+})
+
+test_that("target transforms tag bare lists and reject non-detection targets", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  expect_s3_class(target_transform_rotate(target, angle = 30), "object_detection_target")
+  expect_s3_class(target_transform_affine(target, angle = 30), "object_detection_target")
+
+  segmentation_target <- list(masks = torch_rand(2, 8, 8), labels = 1L,
+                              image_height = 8L, image_width = 8L)
+  expect_error(target_transform_rotate(segmentation_target, angle = 30),
+               "not an object detection target")
+  expect_error(target_transform_affine(segmentation_target, angle = 30),
+               "not an object detection target")
+})
+
+test_that("target_transform_affine requires an image size or an explicit center", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  target$image_height <- NULL
+  target$image_width <- NULL
+
+  expect_error(target_transform_affine(target, angle = 30), "image_height")
+  expect_tensor_shape(
+    target_transform_affine(target, angle = 30, center = c(50, 50))$boxes,
+    c(1, 5)
+  )
+})
+
+test_that("target_transform_rotate handles targets without an image size", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  target$image_height <- NULL
+  target$image_width <- NULL
+
+  result <- target_transform_rotate(target, angle = 30)
+  expect_tensor_shape(result$boxes, c(1, 5))
+  expect_equal_to_r(result$boxes[1, 5], 30)
+  expect_equal_to_r(result$boxes[1, 1:4], c(2.679492, 12.679492, 57.320508, 67.320508),
+                    tolerance = 1e-5)
+})

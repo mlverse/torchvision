@@ -27,6 +27,7 @@
 * Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
 * Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
 * Added `item_transform_perspective()` for applying a perspective transform to dataset items, with support for detection and segmentation item types and datasets, and implemented `transform_perspective()` for tensor images (@DerrickUnleashed, #377).
+* Object detection datasets (`coco_detection_dataset()`, `pascal_detection_dataset()` and the `rf100_*_collection()`s) now inherit the `object_detection_dataset` class, and their item target `y` inherits the `object_detection_target` class. Target transforms dispatch on it, so `target_transform_rotate()` and `target_transform_affine()` no longer inspect the target fields to recognise a detection target (@srishtiii28, #364).
 
 ## Bug fixes and improvements
 

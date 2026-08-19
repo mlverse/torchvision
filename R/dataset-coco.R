@@ -18,7 +18,10 @@
 #' - `y$iscrowd`: a boolean `torch_tensor`, where `TRUE` marks the object as part of a crowd.
 #'
 #' The returned object has S3 class \code{"image_with_bounding_box"}
-#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+#' to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()},
+#' and its `y` has S3 class \code{"object_detection_target"} so that target transforms
+#' such as \code{\link{target_transform_rotate}()} dispatch on it. The dataset itself
+#' inherits \code{"object_detection_dataset"}.
 #'
 #' For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 #'
@@ -103,6 +106,7 @@ coco_detection_dataset <- torch::dataset(
     }
 
     self$load_annotations()
+    as_object_detection_dataset(self)
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
@@ -143,14 +147,14 @@ coco_detection_dataset <- torch::dataset(
       anns$segmentation <- list()
     }
 
-    y <- list(
+    y <- as_object_detection_target(list(
       boxes = boxes,
       labels = labels,
       area = area,
       iscrowd = iscrowd,
       image_height = height,
       image_width = width
-    )
+    ))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)

@@ -3,12 +3,15 @@
 \name{target_transform_rotate}
 \alias{target_transform_rotate}
 \alias{target_transform_rotate.list}
+\alias{target_transform_rotate.object_detection_target}
 \alias{target_transform_rotate.dataset}
 \title{Convert bounding boxes to rotated format}
 \usage{
 target_transform_rotate(target, angle = 0)
 
 \method{target_transform_rotate}{list}(target, angle = 0)
+
+\method{target_transform_rotate}{object_detection_target}(target, angle = 0)
 
 \method{target_transform_rotate}{dataset}(target, angle = 0)
 }

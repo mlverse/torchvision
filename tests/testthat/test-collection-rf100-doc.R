@@ -18,6 +18,7 @@ for (ds_name in dataset$name) {
     ds <- rf100_document_collection(dataset = ds_name, split = "train", download = TRUE)
 
     expect_s3_class(ds, "rf100_document_collection")
+    expect_s3_class(ds, "object_detection_dataset")
     expect_gt(ds$.length(), 1)
     expect_type(ds$classes, "character")
     expect_length(unique(ds$classes), dataset[dataset$name == ds_name,]$num_classes)
@@ -26,6 +27,7 @@ for (ds_name in dataset$name) {
 
     expect_type(item$y, "list")
     expect_named(item$y, c("image_id","labels","boxes"))
+    expect_s3_class(item$y, "object_detection_target")
     expect_type(item$y$labels, "integer")
     expect_tensor(item$y$boxes)
     expect_equal(item$y$boxes$ndim, 2)

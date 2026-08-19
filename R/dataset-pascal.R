@@ -262,10 +262,12 @@ pascal_segmentation_dataset <- torch::dataset(
 #'
 #' @inheritParams pascal_segmentation_dataset
 #'
-#' @return A torch dataset of class \code{pascal_detection_dataset}.
+#' @return A torch dataset of class \code{pascal_detection_dataset}, also inheriting
+#' \code{object_detection_dataset}.
 #'
 #' The returned list inherits class \code{image_with_bounding_box}, which allows generic visualization
-#' utilities to be applied.
+#' utilities to be applied, and its `y` inherits \code{object_detection_target}, which target
+#' transforms such as \code{\link{target_transform_rotate}()} dispatch on.
 #'
 #' Each element is a named list:
 #' - `x`: a H x W x 3 array representing the RGB image.
@@ -326,6 +328,8 @@ pascal_detection_dataset <- torch::dataset(
       install.packages("xml2")
     }
 
+    as_object_detection_dataset(self)
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
@@ -333,7 +337,7 @@ pascal_detection_dataset <- torch::dataset(
 
     x <- jpeg::readJPEG(self$img_path[index])
     ann_path <- self$annotation_paths[index]
-    y <- self$parse_voc_xml(xml2::read_xml(ann_path))
+    y <- as_object_detection_target(self$parse_voc_xml(xml2::read_xml(ann_path)))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)

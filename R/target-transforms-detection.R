@@ -272,10 +272,12 @@ target_transform_rotate.default <- function(target,...) {
 #' @rdname target_transform_rotate
 #' @export
 target_transform_rotate.list <- function(target, angle = 0) {
-  # check list target is an object_detection_target
-  if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
-    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fn target_transform_rotate}.")
-  }
+  target_transform_rotate(as_object_detection_target(target), angle = angle)
+}
+
+#' @rdname target_transform_rotate
+#' @export
+target_transform_rotate.object_detection_target <- function(target, angle = 0) {
   orig_boxes <- target$boxes
 
   cxcywh <- box_xyxy_to_cxcywh(orig_boxes)
@@ -361,8 +363,7 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
   # Override getitem to apply rotation transform on-the-fly
   target$.getitem <- function(index) {
     item <- original_getitem(index)
-    # Explicit dispatch to list method to avoid ambiguity
-    item$y <- target_transform_rotate.list(item$y, angle = angle)
+    item$y <- target_transform_rotate(item$y, angle = angle)
     item
   }
 
@@ -421,8 +422,17 @@ target_transform_affine.default <- function(target, ...) {
 #' @export
 target_transform_affine.list <- function(target, angle = 0, translate = c(0, 0),
                                          scale = 1, shear = 0, center = NULL) {
-  if (!all(c("boxes", "image_height", "image_width") %in% names(target))) {
-    type_error("The provided target with attributes {.cls {names(target)}} is not supported by {.fn target_transform_affine}.")
+  target_transform_affine(as_object_detection_target(target), angle = angle,
+                          translate = translate, scale = scale, shear = shear,
+                          center = center)
+}
+
+#' @rdname target_transform_affine
+#' @export
+target_transform_affine.object_detection_target <- function(target, angle = 0, translate = c(0, 0),
+                                                            scale = 1, shear = 0, center = NULL) {
+  if (is.null(center) && !all(c("image_height", "image_width") %in% names(target))) {
+    cli_abort("The provided target has no {.field image_height} / {.field image_width} to centre the transformation on. Supply {.arg center} instead.")
   }
 
   boxes <- target$boxes
