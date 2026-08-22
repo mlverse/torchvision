@@ -30,10 +30,8 @@
 
 ## Bug fixes and improvements
 
-* `transform_random_resized_crop()` no longer loses the last row and column of the image when it
-  falls back to a central crop. The fallback returned a zero-based corner while the sampled crops
-  return a one-based one, so the crop started one pixel above and left of the image and the result
-  was padded with a black edge (#361).
+* `transform_random_resized_crop()` no longer loses the last row and column of the image, and no longer
+  padded with a black edge when it falls back to a central crop (#361).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
