@@ -27,14 +27,12 @@
 * `item_transform_rotate()` now supports segmentation items and datasets, rotating the masks alongside the image (@srishtiii28, #379).
 * Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
 * Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
-* Added `item_transform_perspective()` for applying a perspective transform to dataset items, with support for detection and segmentation item types and datasets, and implemented `transform_perspective()` for tensor images (@DerrickUnleashed, #377).
+* Added `item_transform_random_resize_crop()` for cropping dataset items to a random area and aspect ratio before resizing them to a given size, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #361).
 
 ## Bug fixes and improvements
 
-* `item_transform_rotate()` no longer expands detection boxes: boxes are rotated
-  around the image centre so they follow the rotated content while keeping their
-  physical size, instead of being enlarged to their enclosing axis-aligned
-  rectangle (#382).
+* `transform_random_resized_crop()` no longer loses the last row and column of the image, and no longer
+  padded with a black edge when it falls back to a central crop (#361).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
