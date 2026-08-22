@@ -116,6 +116,8 @@
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code><a href="../reference/item_transform_rotate.html">item_transform_rotate()</a></code> no longer expands detection boxes: boxes are rotated around the image centre so they follow the rotated content while keeping their physical size, instead of being enlarged to their enclosing axis-aligned rectangle (<a href="https://github.com/mlverse/torchvision/issues/382" class="external-link">#382</a>).</li>
+<li>
 <code><a href="../reference/transform_crop.html">transform_crop()</a></code> now pads the result with zeros when the crop leaves the image, so that the output always has the requested size. It previously returned only the part of the image the crop covered, which could even be empty.</li>
 <li>
 <code><a href="../reference/transform_center_crop.html">transform_center_crop()</a></code> now pads correctly when the requested <code>size</code> is not square. Height and width were used in the wrong order in the padding branch, so e.g. cropping a <code>(16, 20)</code> image to <code>c(24, 30)</code> returned a <code>(22, 0)</code> image.</li>
