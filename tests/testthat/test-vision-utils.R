@@ -47,6 +47,60 @@ test_that("draw_bounding_boxes correctly mask a complete image", {
 
 })
 
+test_that("draw_bounding_boxes draws each rotated box as a separate tight rectangle", {
+
+  H <- 200
+  W <- 300
+  image <- torch::torch_zeros(3, H, W)
+  boxes <- torch::torch_tensor(rbind(
+    c(60, 60, 90, 90),
+    c(210, 110, 240, 140)
+  ), dtype = torch::torch_float32())
+
+  item <- list(x = image, y = list(boxes = boxes, labels = c("a", "b"),
+                                   image_height = H, image_width = W))
+  class(item) <- c("image_with_bounding_box", "list")
+
+  rotated <- item_transform_rotate(item, angle = 30, expand = FALSE)
+  drawn <- draw_bounding_boxes(rotated, colors = "red", width = 3)
+  red <- as_array(drawn[1, , ]$to(dtype = torch::torch_float()))
+
+  boxes_r <- as.matrix(rotated$y$boxes$to(device = "cpu"))
+  xmin <- boxes_r[, 1]; ymin <- boxes_r[, 2]
+  xmax <- boxes_r[, 3]; ymax <- boxes_r[, 4]
+  theta <- boxes_r[, 5]
+  cx <- (xmin + xmax) / 2; cy <- (ymin + ymax) / 2
+  hw <- (xmax - xmin) / 2; hh <- (ymax - ymin) / 2
+  theta_rad <- deg2rad(theta)
+  ct <- cos(theta_rad); st <- -sin(theta_rad)
+  all_x <- cbind(cx - hw * ct + hh * st, cx + hw * ct + hh * st,
+                 cx + hw * ct - hh * st, cx - hw * ct - hh * st)
+  all_y <- cbind(cy - hw * st - hh * ct, cy + hw * st - hh * ct,
+                 cy + hw * st + hh * ct, cy - hw * st + hh * ct)
+
+  read_px <- function(pts) {
+    x <- round(pts[1]); y <- round(pts[2])
+    red[y + 1, x + 1]
+  }
+
+  # the border of each box must pass through the midpoint of each of its edges
+  for (j in 1:2) {
+    corners <- cbind(all_x[j, ], all_y[j, ])
+    for (e in 1:4) {
+      a <- corners[e, ]
+      nxt <- corners[ifelse(e == 4, 1, e + 1), ]
+      expect_gt(read_px((a + nxt) / 2), 200)
+    }
+  }
+
+  # no border may be drawn along the straight lines joining one box to the other
+  for (e in 1:4) {
+    a <- c(all_x[1, e], all_y[1, e])
+    b <- c(all_x[2, e], all_y[2, e])
+    expect_lt(read_px((a + b) / 2), 100)
+  }
+})
+
 test_that("draw_segmentation_masks works with boolean mask", {
 
   image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)

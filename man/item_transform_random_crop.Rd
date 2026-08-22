@@ -83,6 +83,7 @@ tensor_image_browse(grid)
 \seealso{
 Other item_random_transforms:
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
+\code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}
 }
 \concept{item_random_transforms}
