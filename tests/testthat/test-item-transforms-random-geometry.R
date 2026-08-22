@@ -528,7 +528,7 @@ test_that("item_transform_random_crop works for rotated boxes", {
 
   expect_s3_class(result, "image_with_rotated_box")
   expect_tensor_shape(result$x, c(3, 50, 80))
-  expect_equal_to_r(result$y$boxes[1, 5], 30, tolerance = 1e-5)
+  expect_equal_to_r(result$y$boxes[1, 5], 30)
   expect_equal_to_r(result$y$boxes[1, 3], 80)
   expect_equal_to_r(result$y$boxes[1, 4], 50)
 })

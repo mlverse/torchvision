@@ -102,15 +102,14 @@ transform_random_order.default <- function(img, transforms) {
 
 get_random_crop_params <- function(img, output_size) {
 
-  img_size <- get_image_size(img)
-  w <- img_size[1]; h <- img_size[2]
-  th <- output_size[1]; tw <- output_size[2]
+  c(w, h) %<-% get_image_size(img)
+  c(th, tw) %<-% output_size
 
   if (w == tw && h == th)
     return(c(1, 1, h, w))
 
-  i <- as.integer(torch::torch_randint(1, h - th + 1, size=1))
-  j <- as.integer(torch::torch_randint(1, w - tw + 1, size=1))
+  i <- runif(1, 1, h - th + 1)
+  j <- runif(1, 1, w - tw + 1)
 
   c(i, j, th, tw)
 }
