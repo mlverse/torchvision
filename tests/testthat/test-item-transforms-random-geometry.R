@@ -221,7 +221,7 @@ test_that("item_transform_random_crop works for segmentation items", {
 
   expect_tensor_shape(result$x, c(3, 50, 80))
   expect_tensor_shape(result$y$masks, c(2, 50, 80))
-  expect_true(all(as_array(result$y$masks)))
+  expect_equal_to_r(result$y$masks$min(), TRUE)
 })
 
 test_that("item_transform_random_crop works for rotated boxes", {
