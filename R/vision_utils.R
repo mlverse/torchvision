@@ -360,15 +360,15 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
     cy - hw * st + hh * ct
   )
 
-  poly_x <- c(t(cbind(c(all_x, NA))))
-  poly_y <- c(t(cbind(c(all_y, NA))))
+  poly_x <- as.vector(t(cbind(all_x, NA)))
+  poly_y <- as.vector(t(cbind(all_y, NA)))
 
   graphics::polygon(poly_x, poly_y,
                     col = fill_col, border = colors, lwd = width)
 
   if (!is.null(labels)) {
-    label_x <- all_x[1, ] + 2 * width + font_size
-    label_y <- all_y[1, ] + 2 * width
+    label_x <- all_x[, 1] + 2 * width + font_size
+    label_y <- all_y[, 1] + 2 * width
     graphics::text(label_x, label_y,
                    labels = labels,
                    col = colors,

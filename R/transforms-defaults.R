@@ -107,7 +107,7 @@ get_random_crop_params <- function(img, output_size) {
   th <- output_size[1]; tw <- output_size[2]
 
   if (w == tw && h == th)
-    return(c(0, 0, h, w))
+    return(c(1, 1, h, w))
 
   i <- as.integer(torch::torch_randint(1, h - th + 1, size=1))
   j <- as.integer(torch::torch_randint(1, w - tw + 1, size=1))
@@ -208,8 +208,8 @@ get_random_resized_crop_params <- function(img, scale, ratio) {
     w <- width
     h <- height
   }
-  i <- (height - h) %/% 2
-  j <- (width - w) %/% 2
+  i <- (height - h) %/% 2 + 1
+  j <- (width - w) %/% 2 + 1
 
   c(i, j, h, w)
 }
