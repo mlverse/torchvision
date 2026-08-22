@@ -122,4 +122,4 @@ Depends:
     R (>= 3.5)
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 8.0.0
+Config/roxygen2/version: 8.1.0
