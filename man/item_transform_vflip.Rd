@@ -48,6 +48,7 @@ Other item_unitary_transforms:
 \code{\link[=item_transform_hflip]{item_transform_hflip()}},
 \code{\link[=item_transform_pad]{item_transform_pad()}},
 \code{\link[=item_transform_perspective]{item_transform_perspective()}},
+\code{\link[=item_transform_resize]{item_transform_resize()}},
 \code{\link[=item_transform_rotate]{item_transform_rotate()}}
 }
 \concept{item_unitary_transforms}
