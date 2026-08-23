@@ -3,16 +3,17 @@
 #' Converts COCO-style polygon segmentation annotations from target `$segmentation` variable
 #' into boolean mask tensors as target `$masks` variable in order to ease later-on visualisation
 #' via `draw_segmentation_mask()`.
-#' Use as `target_transform` in `coco_detection_dataset()`.
+#' Use as `target_transform` in `coco_segmentation_dataset()`.
 #'
-#' @param y list being COCO dataset target variable, with names `segmentation`, `image_height`, `image_width`.
+#' @param y a `segmentation_target`, as returned by the `.getitem()` method of
+#' [coco_segmentation_dataset()], with names `segmentation`, `image_height`, `image_width`.
 #'
 #' @return Modified `y` list with added `masks` field (N, H, W) boolean tensor, N being the number of
 #' classes.
 #'
 #' @examples
 #' \dontrun{
-#' ds <- coco_detection_dataset(
+#' ds <- coco_segmentation_dataset(
 #'   root = "data",
 #'   target_transform = target_transform_coco_masks
 #' )
@@ -23,12 +24,23 @@
 #' @family target_transforms_segmentation
 #' @export
 target_transform_coco_masks <- function(y) {
+  UseMethod("target_transform_coco_masks")
+}
+
+#' @export
+target_transform_coco_masks.default <- function(y) {
+  not_implemented_for_class(y)
+}
+
+#' @rdname target_transform_coco_masks
+#' @export
+target_transform_coco_masks.segmentation_target <- function(y) {
 
   if (!"segmentation" %in% names(y)) {
-    cli::cli_abort("Target must contain 'segmentation' field")
+    cli_abort("Target must contain a {.field segmentation} field.")
   }
   if (!all(c("image_height", "image_width") %in% names(y))) {
-    cli::cli_abort("Target must contain both 'image_height' and 'image_width' fields")
+    cli_abort("Target must contain both {.field image_height} and {.field image_width} fields.")
   }
 
   masks_list <- lapply(y$segmentation, function(seg) {
@@ -58,7 +70,8 @@ target_transform_coco_masks <- function(y) {
 #' via `draw_segmentation_mask()`.
 #' Use as `target_transform` in `oxfordiiitpet_segmentation_dataset()`.
 #'
-#' @param y List containing `trimap` field (H, W) tensor with values 1, 2, 3
+#' @param y a `segmentation_target` containing a `trimap` field, a (H, W) tensor
+#' with values 1, 2, 3
 #'
 #' @return Modified y list with added `masks` field (3, H, W) boolean tensor
 #'
@@ -83,8 +96,19 @@ target_transform_coco_masks <- function(y) {
 #' @family target_transforms_segmentation
 #' @export
 target_transform_trimap_masks <- function(y) {
+  UseMethod("target_transform_trimap_masks")
+}
+
+#' @export
+target_transform_trimap_masks.default <- function(y) {
+  not_implemented_for_class(y)
+}
+
+#' @rdname target_transform_trimap_masks
+#' @export
+target_transform_trimap_masks.segmentation_target <- function(y) {
   if (!"trimap" %in% names(y)) {
-    cli::cli_abort("Target must contain 'trimap' field")
+    cli_abort("Target must contain a {.field trimap} field.")
   }
 
   trimap <- y$trimap
@@ -94,7 +118,7 @@ target_transform_trimap_masks <- function(y) {
   }
 
   if (trimap$ndim != 2) {
-    cli::cli_abort("Trimap must be a 2D tensor")
+    cli_abort("Trimap must be a 2D tensor.")
   }
 
   mask1 <- (trimap == 1)

@@ -1,8 +1,14 @@
 context("target-transforms-segmentation")
 
+# Helper to class a mock target the way a segmentation dataset does
+as_mock_segmentation_target <- function(y) {
+  class(y) <- c("segmentation_target", "list")
+  y
+}
+
 # Helper to create mock COCO target
 mock_coco_target <- function(h = 100, w = 100) {
-  list(
+  as_mock_segmentation_target(list(
     boxes = torch_tensor(matrix(c(10, 20, 50, 60), nrow = 1)),
     labels = "cat",
     area = torch_tensor(c(800)),
@@ -10,7 +16,7 @@ mock_coco_target <- function(h = 100, w = 100) {
     segmentation = list(list(c(10, 20, 50, 20, 50, 60, 10, 60))),
     image_height = h,
     image_width = w
-  )
+  ))
 }
 
 # Helper to create mock trimap
@@ -19,6 +25,11 @@ mock_trimap <- function(h = 3, w = 3) {
     array(rep(c(1, 2, 3), length.out = h * w), dim = c(h, w)),
     dtype = torch_int32()
   )
+}
+
+# Helper to create mock trimap target
+mock_trimap_target <- function(h = 3, w = 3) {
+  as_mock_segmentation_target(list(trimap = mock_trimap(h, w), label = 1L))
 }
 
 # COCO mask transformation tests
@@ -37,13 +48,13 @@ test_that("target_transform_coco_masks() converts polygons to masks", {
 
 test_that("target_transform_coco_masks() handles empty segmentation", {
   skip_if_not_installed("torch")
-  y <- list(
+  y <- as_mock_segmentation_target(list(
     boxes = torch_zeros(c(0, 4)),
     labels = character(),
     segmentation = list(),
     image_height = 100,
     image_width = 100
-  )
+  ))
   result <- target_transform_coco_masks(y)
   expect_tensor(result$masks)
   expect_equal(result$masks$shape[1], 0)
@@ -52,7 +63,7 @@ test_that("target_transform_coco_masks() handles empty segmentation", {
 test_that("target_transform_coco_masks() handles multiple objects", {
   skip_if_not_installed("torch")
   skip_if_not_installed("magick")
-  y <- list(
+  y <- as_mock_segmentation_target(list(
     boxes = torch_tensor(matrix(c(10,20,50,60, 60,10,90,40), nrow = 2, byrow = TRUE)),
     labels = c("cat", "dog"),
     segmentation = list(
@@ -61,7 +72,7 @@ test_that("target_transform_coco_masks() handles multiple objects", {
     ),
     image_height = 100,
     image_width = 100
-  )
+  ))
   result <- target_transform_coco_masks(y)
   expect_equal(result$masks$shape, c(2, 100, 100))
 })
@@ -70,7 +81,7 @@ test_that("target_transform_coco_masks() handles multiple objects", {
 
 test_that("target_transform_trimap_masks() converts trimap to masks", {
   skip_if_not_installed("torch")
-  y <- list(trimap = mock_trimap(), label = 1L)
+  y <- mock_trimap_target()
   result <- target_transform_trimap_masks(y)
   expect_true("masks" %in% names(result))
   expect_tensor(result$masks)
@@ -81,10 +92,18 @@ test_that("target_transform_trimap_masks() converts trimap to masks", {
 
 test_that("target_transform_trimap_masks() creates mutually exclusive masks", {
   skip_if_not_installed("torch")
-  y <- list(trimap = mock_trimap(), label = 1L)
+  y <- mock_trimap_target()
   result <- target_transform_trimap_masks(y)
   mask_sum <- result$masks$sum(dim = 1)
   expect_true(all(as.array(mask_sum) == 1))
+})
+
+test_that("segmentation target transforms reject targets that are not segmentation_target", {
+  skip_if_not_installed("torch")
+  expect_error(target_transform_coco_masks(unclass(mock_coco_target())),
+               class = "not_implemented_error")
+  expect_error(target_transform_trimap_masks(unclass(mock_trimap_target())),
+               class = "not_implemented_error")
 })
 
 # Dataset behavior tests (skipped unless TEST_LARGE_DATASETS=1)
@@ -109,7 +128,7 @@ test_that("transformed masks work with draw_segmentation_masks()", {
   skip_if_not_installed("torch")
   skip_if_not_installed("magick")
   image <- torch_randint(100, 200, c(3, 50, 50), dtype = torch_uint8())
-  y <- list(trimap = mock_trimap(50, 50), label = 1L)
+  y <- mock_trimap_target(50, 50)
   transformed_y <- target_transform_trimap_masks(y)
   item <- list(x = image, y = transformed_y)
   class(item) <- c("image_with_segmentation_mask", class(item))
@@ -147,6 +166,7 @@ test_that("target_transform_sahi_crop clips and translates boxes correctly", {
     boxes = torch_tensor(matrix(c(10, 10, 60, 60, 80, 80, 150, 150), nrow = 2, byrow = TRUE)),
     labels = c("a", "b")
   )
+  class(y) <- c("object_detection_target", "list")
 
   # 1-based crop windows (top/left = 1 means first pixel)
   sp <- structure(list(
@@ -173,6 +193,7 @@ test_that("target_transform_sahi_crop preserves label types and empty outputs", 
     boxes = torch_zeros(c(0, 4)),
     labels = character()
   )
+  class(y) <- c("object_detection_target", "list")
 
   sp <- structure(list(
     crop_windows = list(list(top = 1, left = 1, height = 10, width = 10))
@@ -193,6 +214,7 @@ test_that("target_transform_sahi_crop filters by min_area_ratio", {
     boxes = torch_tensor(matrix(c(0, 0, 100, 100), nrow = 1)),
     labels = torch_tensor(1L)
   )
+  class(y) <- c("object_detection_target", "list")
 
   sp <- structure(list(
     crop_windows = list(list(top = 1, left = 1, height = 10, width = 10))
@@ -215,10 +237,12 @@ test_that("target_transform_sahi_crop handles batch of targets", {
     boxes = torch_tensor(matrix(c(10, 10, 60, 60), nrow = 1, byrow = TRUE)),
     labels = "a"
   )
+  class(y1) <- c("object_detection_target", "list")
   y2 <- list(
     boxes = torch_tensor(matrix(c(5, 5, 20, 20), nrow = 1, byrow = TRUE)),
     labels = "b"
   )
+  class(y2) <- c("object_detection_target", "list")
   y_batch <- list(y1, y2)
 
   sp <- structure(list(

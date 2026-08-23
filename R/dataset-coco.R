@@ -241,7 +241,10 @@ coco_detection_dataset <- torch::dataset(
 #' - `y$masks`: a `(N, H, W)` boolean `torch_tensor` containing binary segmentation masks (when using target_transform_coco_masks).
 #'
 #' The returned object has S3 class \code{"image_with_segmentation_mask"}
-#' to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()}.
+#' to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()},
+#' and its `y` has S3 class \code{"segmentation_target"} so that target transforms
+#' such as \code{\link{target_transform_coco_masks}()} dispatch on it. The dataset
+#' itself inherits \code{"segmentation_dataset"}.
 #'
 #' For object detection tasks without segmentation, use \code{\link{coco_detection_dataset}} instead.
 #'
@@ -275,6 +278,25 @@ coco_segmentation_dataset <- torch::dataset(
   name = "coco_segmentation_dataset",
   inherit = coco_detection_dataset,
 
+  initialize = function(
+    root = tempdir(),
+    train = TRUE,
+    year = c("2017", "2014"),
+    download = FALSE,
+    transform = NULL,
+    target_transform = NULL
+  ) {
+    super$initialize(
+      root = root,
+      train = train,
+      year = year,
+      download = download,
+      transform = transform,
+      target_transform = target_transform
+    )
+    as_segmentation_dataset(self)
+  },
+
   .getitem = function(index) {
     image_id <- self$image_ids[index]
     image_info <- self$image_metadata[[as.character(image_id)]]
@@ -299,13 +321,13 @@ coco_segmentation_dataset <- torch::dataset(
       anns$segmentation <- list()
     }
 
-    y <- list(
+    y <- as_segmentation_target(list(
       labels = labels,
       iscrowd = iscrowd,
       segmentation = anns$segmentation,
       image_height = height,
       image_width = width
-    )
+    ))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)

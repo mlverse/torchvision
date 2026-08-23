@@ -35,10 +35,12 @@ pascal_voc_classes <- function(class_id = 1:21) {
 #' @param year Character. VOC dataset version to use. One of `"2007"`, `"2008"`, `"2009"`, `"2010"`, `"2011"`, or `"2012"`. Default is `"2012"`.
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Determines the dataset split. Default is `"train"`.
 #'
-#' @return A torch dataset of class \code{pascal_segmentation_dataset}.
+#' @return A torch dataset of class \code{pascal_segmentation_dataset}, also
+#' inheriting \code{segmentation_dataset}.
 #'
 #' The returned list inherits class \code{image_with_segmentation_mask}, which allows generic visualization
-#' utilities to be applied.
+#' utilities to be applied, and its `y` inherits \code{segmentation_target}, which
+#' target transforms dispatch on.
 #'
 #' Each element is a named list with the following structure:
 #' - `x`: a H x W x 3 array representing the RGB image.
@@ -156,6 +158,8 @@ pascal_segmentation_dataset <- torch::dataset(
     self$img_path <- data$img_path
     self$mask_paths <- data$mask_paths
 
+    as_segmentation_dataset(self)
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
@@ -230,7 +234,7 @@ pascal_segmentation_dataset <- torch::dataset(
     masks <- (class_ids == class_idx_tensor$unsqueeze(1))$to(dtype = torch_bool())
     labels <- which(as_array(masks$any(dim = c(2, 3))))
 
-    y <- list(labels = labels, masks = masks)
+    y <- as_segmentation_target(list(labels = labels, masks = masks))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)

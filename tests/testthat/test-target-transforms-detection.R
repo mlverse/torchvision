@@ -178,10 +178,8 @@ test_that("target_transform_resize can be composed with pipe", {
 })
 
 test_that("target_transform_resize errors when one of image size is missing", {
-  target <- list(
-    boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
-    labels = torch_ones(1L, dtype = torch_long())
-  )
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  target$image_width <- NULL
 
   expect_error(target_transform_resize(target, c(200L, 400L)), "image_width")
 })
@@ -391,7 +389,7 @@ test_that("target_transform_affine composes", {
 
 test_that("target transforms dispatch on object_detection_target", {
   target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
-  class(target) <- c("object_detection_target", class(target))
+  expect_s3_class(target, "object_detection_target")
 
   rotated <- target_transform_rotate(target, angle = 30)
   expect_s3_class(rotated, "object_detection_target")
@@ -400,19 +398,21 @@ test_that("target transforms dispatch on object_detection_target", {
   affined <- target_transform_affine(target, angle = 30)
   expect_s3_class(affined, "object_detection_target")
   expect_tensor_shape(affined$boxes, c(1, 5))
+
+  resized <- target_transform_resize(target, c(200L, 400L))
+  expect_s3_class(resized, "object_detection_target")
 })
 
-test_that("target transforms tag bare lists and reject non-detection targets", {
-  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
-  expect_s3_class(target_transform_rotate(target, angle = 30), "object_detection_target")
-  expect_s3_class(target_transform_affine(target, angle = 30), "object_detection_target")
+test_that("target transforms reject targets that are not object_detection_target", {
+  bare <- unclass(make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4)))
 
-  segmentation_target <- list(masks = torch_rand(2, 8, 8), labels = 1L,
-                              image_height = 8L, image_width = 8L)
-  expect_error(target_transform_rotate(segmentation_target, angle = 30),
-               "not an object detection target")
-  expect_error(target_transform_affine(segmentation_target, angle = 30),
-               "not an object detection target")
+  expect_error(target_transform_rotate(bare, angle = 30), class = "not_implemented_error")
+  expect_error(target_transform_affine(bare, angle = 30), class = "not_implemented_error")
+  expect_error(target_transform_resize(bare, c(200L, 400L)), class = "not_implemented_error")
+
+  segmentation <- make_segmentation_item(image_size = c(8L, 8L), num_masks = 2L)$y
+  expect_error(target_transform_rotate(segmentation, angle = 30), class = "not_implemented_error")
+  expect_error(target_transform_affine(segmentation, angle = 30), class = "not_implemented_error")
 })
 
 test_that("target_transform_affine requires an image size or an explicit center", {

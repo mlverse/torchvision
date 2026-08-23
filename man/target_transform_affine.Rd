@@ -2,20 +2,10 @@
 % Please edit documentation in R/target-transforms-detection.R
 \name{target_transform_affine}
 \alias{target_transform_affine}
-\alias{target_transform_affine.list}
 \alias{target_transform_affine.object_detection_target}
 \title{Apply an affine transformation to a detection target}
 \usage{
 target_transform_affine(
-  target,
-  angle = 0,
-  translate = c(0, 0),
-  scale = 1,
-  shear = 0,
-  center = NULL
-)
-
-\method{target_transform_affine}{list}(
   target,
   angle = 0,
   translate = c(0, 0),
@@ -34,7 +24,9 @@ target_transform_affine(
 )
 }
 \arguments{
-\item{target}{A list representing the detection target, containing at least:
+\item{target}{An \code{object_detection_target}, as returned by the \code{.getitem()}
+method of an \link[=coco_detection_dataset]{object detection dataset}, containing
+at least:
 \itemize{
 \item \code{boxes} — tensor of shape \verb{(N, 4)} in xyxy format, or \verb{(N, 5)} in
 xyxyr format for an already rotated target
@@ -79,6 +71,7 @@ target <- list(
   image_height = 100L,
   image_width = 200L
 )
+class(target) <- c("object_detection_target", "list")
 target_transform_affine(target, angle = 20, translate = c(10, 5), scale = 1.1, shear = 8)
 }
 

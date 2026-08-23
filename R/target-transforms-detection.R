@@ -5,7 +5,9 @@
 #'   shape `(N, 4)` in xyxy format and an `orig_size` field with the original
 #'   image dimensions `(H, W)`.
 #'
-#' @param target A list containing at least:
+#' @param target An `object_detection_target`, as returned by the `.getitem()`
+#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
 #'     \item `orig_size` — integer vector or tensor of length 2 with `(height, width)`
@@ -34,8 +36,9 @@
 #'   boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
 #'   labels = torch_tensor(1L, dtype = torch_long()),
 #'   image_height  = 100L,
-#'   image_width = 100L)
+#'   image_width = 100L
 #' )
+#' class(target) <- c("object_detection_target", "list")
 #'
 #' # Resize to fixed size
 #' transform_fn <- target_transform_resize(c(200L, 200L))
@@ -50,8 +53,19 @@
 #'
 #' @export
 target_transform_resize <- function(target, size) {
+  UseMethod("target_transform_resize")
+}
+
+#' @export
+target_transform_resize.default <- function(target, ...) {
+  not_implemented_for_class(target)
+}
+
+#' @rdname target_transform_resize
+#' @export
+target_transform_resize.object_detection_target <- function(target, size) {
   if (!"image_height" %in% names(target) || !"image_width" %in% names(target)) {
-    cli::cli_abort("Target must contain both 'image_height' and 'image_width' fields")
+    cli_abort("Target must contain both {.field image_height} and {.field image_width} fields.")
   }
   # Extract original dimensions
   orig_h <- target$image_height
@@ -93,14 +107,24 @@ target_transform_resize <- function(target, size) {
 #' @family target_transforms_detection
 #' @export
 target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
-  # Detect batch input: list of target lists
-  if (is.list(y) && !"boxes" %in% names(y)) {
-    if (is.list(sahi_split) && !inherits(sahi_split, "sahi_split")) {
-      return(Map(function(yi, sp) target_transform_sahi_crop(yi, sp, min_area_ratio), y, sahi_split))
-    }
-    return(lapply(y, function(yi) target_transform_sahi_crop(yi, sahi_split, min_area_ratio)))
-  }
+  UseMethod("target_transform_sahi_crop")
+}
 
+#' @export
+target_transform_sahi_crop.default <- function(y, sahi_split, min_area_ratio = 0.1) {
+  # A batch is a bare list of already classed targets, one per image.
+  if (!is.list(y) || !length(y) || !all(vapply(y, inherits, logical(1), "object_detection_target")))
+    not_implemented_for_class(y)
+
+  if (is.list(sahi_split) && !inherits(sahi_split, "sahi_split"))
+    return(Map(function(yi, sp) target_transform_sahi_crop(yi, sp, min_area_ratio), y, sahi_split))
+
+  lapply(y, function(yi) target_transform_sahi_crop(yi, sahi_split, min_area_ratio))
+}
+
+#' @rdname transform_sahi_crop
+#' @export
+target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, min_area_ratio = 0.1) {
   boxes <- y$boxes
   labels <- y$labels
   labels_is_tensor <- inherits(labels, "torch_tensor")
@@ -212,7 +236,9 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #' \eqn{r} is the rotation angle in degrees (counter-clockwise).
 #' For axis-aligned boxes, \eqn{r = 0}.
 #'
-#' @param target A list representing the detection target, containing at least:
+#' @param target An `object_detection_target`, as returned by the `.getitem()`
+#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
 #'     \item `image_height` (optional) — original image height, used for
@@ -245,6 +271,7 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 #'   image_height = img$shape[2],
 #'   image_width = img$shape[3]
 #' )
+#' class(target) <- c("object_detection_target", "list")
 #' rotated_target <- target_transform_rotate(target, angle = 4)
 #'
 #' # Rotated boxes (red, drawn as polygons)
@@ -267,12 +294,6 @@ target_transform_rotate <- function(target, angle = 0) {
 #' @export
 target_transform_rotate.default <- function(target,...) {
   not_implemented_for_class(target)
-}
-
-#' @rdname target_transform_rotate
-#' @export
-target_transform_rotate.list <- function(target, angle = 0) {
-  target_transform_rotate(as_object_detection_target(target), angle = angle)
 }
 
 #' @rdname target_transform_rotate
@@ -381,7 +402,9 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
 #' rotated box in xyxyr format. Passing an already rotated target accumulates the
 #' rotation, so transforms compose.
 #'
-#' @param target A list representing the detection target, containing at least:
+#' @param target An `object_detection_target`, as returned by the `.getitem()`
+#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` in xyxy format, or `(N, 5)` in
 #'       xyxyr format for an already rotated target
@@ -402,6 +425,7 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
 #'   image_height = 100L,
 #'   image_width = 200L
 #' )
+#' class(target) <- c("object_detection_target", "list")
 #' target_transform_affine(target, angle = 20, translate = c(10, 5), scale = 1.1, shear = 8)
 #' }
 #'
@@ -416,15 +440,6 @@ target_transform_affine <- function(target, angle = 0, translate = c(0, 0),
 #' @export
 target_transform_affine.default <- function(target, ...) {
   not_implemented_for_class(target)
-}
-
-#' @rdname target_transform_affine
-#' @export
-target_transform_affine.list <- function(target, angle = 0, translate = c(0, 0),
-                                         scale = 1, shear = 0, center = NULL) {
-  target_transform_affine(as_object_detection_target(target), angle = angle,
-                          translate = translate, scale = scale, shear = shear,
-                          center = center)
 }
 
 #' @rdname target_transform_affine

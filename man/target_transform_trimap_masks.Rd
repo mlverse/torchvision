@@ -2,12 +2,16 @@
 % Please edit documentation in R/target-transforms-segmentation.R
 \name{target_transform_trimap_masks}
 \alias{target_transform_trimap_masks}
+\alias{target_transform_trimap_masks.segmentation_target}
 \title{Target Transform: Trimap to Boolean Masks}
 \usage{
 target_transform_trimap_masks(y)
+
+\method{target_transform_trimap_masks}{segmentation_target}(y)
 }
 \arguments{
-\item{y}{List containing \code{trimap} field (H, W) tensor with values 1, 2, 3}
+\item{y}{a \code{segmentation_target} containing a \code{trimap} field, a (H, W) tensor
+with values 1, 2, 3}
 }
 \value{
 Modified y list with added \code{masks} field (3, H, W) boolean tensor

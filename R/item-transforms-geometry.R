@@ -788,8 +788,9 @@ item_transform_affine.image_with_bounding_box <- function(x, angle = 0,
                           scale = scale, shear = shear,
                           interpolation = interpolation, fill = fill,
                           center = center)
-  x$y <- target_transform_affine(x$y, angle = angle, translate = translate,
-                                 scale = scale, shear = shear, center = center)
+  x$y <- target_transform_affine(as_object_detection_target(x$y), angle = angle,
+                                 translate = translate, scale = scale,
+                                 shear = shear, center = center)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }
