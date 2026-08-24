@@ -1052,8 +1052,6 @@ item_transform_pad.image_with_rotated_box <- function(x, padding, fill = 0, padd
   x
 }
 
-
-
 # ---- item_transform_perspective ----
 
 #' Apply a perspective transform to a dataset item

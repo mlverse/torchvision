@@ -1380,9 +1380,6 @@ test_that("item_transform_pad negative padding clips and drops boxes outside the
   expect_equal(result$y$image_width, 350L)
 })
 
-
-
-
 # --- item_transform_perspective tests ---
 
 test_that("item_transform_perspective rejects non-item inputs", {
