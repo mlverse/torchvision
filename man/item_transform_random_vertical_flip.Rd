@@ -48,6 +48,7 @@ Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_crop]{item_transform_random_crop()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
+\code{\link[=item_transform_random_perspective]{item_transform_random_perspective()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}}
 }
 \concept{item_random_transforms}

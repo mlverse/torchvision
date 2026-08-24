@@ -84,6 +84,7 @@ tensor_image_browse(grid)
 Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
+\code{\link[=item_transform_random_perspective]{item_transform_random_perspective()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}
 }
