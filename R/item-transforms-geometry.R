@@ -1149,7 +1149,11 @@ item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, sc
                                                                  ratio = c(0.3, 3.3), value = 0,
                                                                  inplace = FALSE) {
   if (stats::runif(1) < p) {
-    x$x <- random_erasing_apply(x$x, scale = scale, ratio = ratio, value = value, inplace = inplace)
+    img_size <- get_image_size(x$x)
+    params <- get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
+    if (!is.null(params)) {
+      x$x <- erase_tensor_region(x$x, params$top, params$left, params$height, params$width, value, inplace)
+    }
   }
   x
 }
@@ -1238,20 +1242,6 @@ erase_tensor_region <- function(img, top, left, height, width, value, inplace) {
   }
 
   img
-}
-
-# Sample erasing parameters and apply them to a torch image tensor.
-random_erasing_apply <- function(img, scale, ratio, value, inplace) {
-  img_size <- get_image_size(img)
-  img_w <- img_size[1]
-  img_h <- img_size[2]
-
-  params <- get_random_erasing_params(img_h, img_w, scale, ratio)
-  if (is.null(params)) {
-    return(img)
-  }
-
-  erase_tensor_region(img, params$top, params$left, params$height, params$width, value, inplace)
 }
 
 
