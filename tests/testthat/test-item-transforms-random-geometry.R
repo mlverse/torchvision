@@ -778,3 +778,150 @@ test_that("item_transform_random_affine works on detection and segmentation data
   expect_tensor_shape(item$y$masks, c(2, 100, 200))
 })
 
+# item_transform_random_perspective
+
+test_that("item_transform_random_perspective rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_random_perspective(img),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_random_perspective rejects numeric input", {
+  expect_error(
+    item_transform_random_perspective(42),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_random_perspective with p=0 never transforms", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+
+  result <- item_transform_random_perspective(item, p = 0)
+
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$boxes, original_boxes))
+})
+
+test_that("item_transform_random_perspective with p=1 always transforms", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+
+  result <- item_transform_random_perspective(item, p = 1)
+
+  expect_false(torch_equal(result$x, original_img))
+  expect_tensor_shape(result$y$boxes, c(1, 4))
+})
+
+test_that("item_transform_random_perspective with p=0 does not mutate segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_img <- item$x$clone()
+  original_masks <- item$y$masks$clone()
+
+  result <- item_transform_random_perspective(item, p = 0)
+
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$masks, original_masks))
+})
+
+test_that("item_transform_random_perspective with p=1 works for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+
+  result <- item_transform_random_perspective(item, p = 1)
+
+  expect_s3_class(result, "image_with_segmentation_mask")
+  expect_tensor_shape(result$x, c(3, 100, 200))
+  expect_tensor_shape(result$y$masks, c(2, 100, 200))
+})
+
+test_that("item_transform_random_perspective with p=1 works for rotated boxes", {
+  boxes <- matrix(c(10, 20, 50, 60), ncol = 4)
+  item <- make_detection_item(boxes, image_size = c(100L, 200L))
+  rotated <- item_transform_rotate(item, angle = 30)
+
+  result <- item_transform_random_perspective(rotated, p = 1)
+
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_tensor_shape(result$y$boxes, c(1, 5))
+})
+
+test_that("item_transform_random_perspective default parameters", {
+  fmls <- formals(item_transform_random_perspective)
+  expect_equal(fmls$distortion_scale, 0.5)
+  expect_equal(fmls$p, 0.5)
+  expect_equal(fmls$interpolation, 2)
+  expect_equal(fmls$fill, 0)
+})
+
+test_that("item_transform_random_perspective preserves labels for detection", {
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item <- make_detection_item(
+    matrix(c(20, 30, 80, 90, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = labels
+  )
+  result <- item_transform_random_perspective(item, p = 1)
+
+  expect_true(result$y$labels$eq(labels)$all()$item())
+})
+
+test_that("item_transform_random_perspective preserves labels for segmentation", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_labels <- as_array(item$y$labels)
+
+  result <- item_transform_random_perspective(item, p = 1)
+
+  expect_equal_to_r(result$y$labels, original_labels)
+})
+
+test_that("item_transform_random_perspective does not mutate input", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_boxes <- as_array(item$y$boxes)
+
+  item_transform_random_perspective(item, p = 1)
+
+  expect_true(torch_equal(item$x, original_img))
+  expect_equal_to_r(item$y$boxes, original_boxes)
+})
+
+test_that("item_transform_random_perspective works on a detection dataset", {
+  detection_item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  ds <- dataset(
+    name = "toy_detection",
+    initialize = function() {},
+    .getitem = function(index) detection_item,
+    .length = function() 1L
+  )()
+
+  ds <- item_transform_random_perspective(ds, p = 1)
+  item <- ds$.getitem(1)
+
+  expect_s3_class(item, "image_with_bounding_box")
+  expect_tensor_shape(item$x, c(3, 100, 200))
+
+  other <- ds$.getitem(1)
+  expect_false(torch_equal(item$x, other$x))
+  expect_equal_to_r(detection_item$y$boxes, matrix(c(10, 20, 50, 60), ncol = 4))
+})
+
+test_that("item_transform_random_perspective works on a segmentation dataset", {
+  ds <- dataset(
+    name = "toy_segmentation",
+    initialize = function() {},
+    .getitem = function(index) {
+      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+    },
+    .length = function() 1L
+  )()
+
+  ds <- item_transform_random_perspective(ds, p = 1)
+  item <- ds$.getitem(1)
+
+  expect_s3_class(item, "image_with_segmentation_mask")
+  expect_tensor_shape(item$x, c(3, 100, 200))
+  expect_tensor_shape(item$y$masks, c(2, 100, 200))
+})
+
