@@ -629,3 +629,109 @@ random_affine_item <- function(x, degrees, translate, scale, shear, interpolatio
                         scale = params[[3]], shear = params[[4]],
                         interpolation = interpolation, fill = fill, center = center)
 }
+
+#' Randomly rotate a dataset item
+#'
+#' Draws a random angle inside the given range and rotates the dataset item by
+#' that angle with \code{\link{item_transform_rotate}}. Image and target share
+#' the same draw, so that boxes and masks stay aligned with the rotated image.
+#'
+#' The angle is drawn again for every item, so that a dataset wrapped with this
+#' transform yields a different rotation on each access. Unlike
+#' \code{\link{item_transform_rotate}}, the canvas is not expanded by default, so
+#' that every item keeps the size it had and a wrapped dataset can still be
+#' collated into batches. Pass \code{expand = TRUE} to hold the whole rotated
+#' image instead.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box},
+#'   \code{image_with_rotated_box} or \code{image_with_segmentation_mask} object
+#'   containing an image tensor and associated target data.
+#' @param interpolation (integer, optional): Interpolation mode. \code{0} for
+#'   nearest, \code{2} for bilinear. Default is \code{2} (bilinear), as in
+#'   \code{\link{item_transform_rotate}}. Masks are always resampled with
+#'   nearest so that they keep their discrete values.
+#' @inheritParams transform_random_rotation
+#'
+#' @return A dataset item with the image and target rotated. Detection items are
+#'   returned as \code{image_with_rotated_box} with boxes in xyxyr format;
+#'   segmentation items keep their class.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_random_rotation(before, degrees = 30)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
+#' }
+#'
+#' @family item_random_transforms
+#'
+#' @export
+item_transform_random_rotation <- function(x, degrees, interpolation = 2,
+                                           expand = FALSE, fill = 0) {
+  UseMethod("item_transform_random_rotation", x)
+}
+
+#' @export
+item_transform_random_rotation.default <- function(x, degrees, interpolation = 2,
+                                                   expand = FALSE, fill = 0) {
+  cli_abort(
+    "{.fn item_transform_random_rotation} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To rotate a raw image tensor, use {.fn transform_random_rotation} instead."
+  )
+}
+
+#' @export
+item_transform_random_rotation.dataset <- function(x, degrees, interpolation = 2,
+                                                   expand = FALSE, fill = 0) {
+  force(degrees)
+  force(interpolation)
+  force(expand)
+  force(fill)
+
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_random_rotation(item, degrees = degrees,
+                                   interpolation = interpolation,
+                                   expand = expand, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_rotation.image_with_bounding_box <- function(x, degrees, interpolation = 2,
+                                                                   expand = FALSE, fill = 0) {
+  random_rotation_item(x, degrees, interpolation, expand, fill)
+}
+
+#' @export
+item_transform_random_rotation.image_with_rotated_box <- function(x, degrees, interpolation = 2,
+                                                                  expand = FALSE, fill = 0) {
+  random_rotation_item(x, degrees, interpolation, expand, fill)
+}
+
+#' @export
+item_transform_random_rotation.image_with_segmentation_mask <- function(x, degrees, interpolation = 2,
+                                                                        expand = FALSE, fill = 0) {
+  random_rotation_item(x, degrees, interpolation, expand, fill)
+}
+
+random_rotation_item <- function(x, degrees, interpolation, expand, fill) {
+  degrees <- check_random_rotation_params(degrees)
+  angle <- get_random_rotation_params(degrees)
+
+  item_transform_rotate(x, angle = angle, interpolation = interpolation,
+                        expand = expand, fill = fill)
+}

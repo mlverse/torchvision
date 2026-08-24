@@ -201,7 +201,7 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
   total_angle <- if (is_rotated) {
     boxes[, 5, drop = FALSE] + angle
   } else {
-    torch_tensor(angle, dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
+    torch_tensor(angle, dtype = new_xyxy$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
   }
 
   torch_cat(list(new_xyxy, total_angle), dim = -1L)
