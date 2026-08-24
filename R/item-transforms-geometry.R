@@ -1179,24 +1179,22 @@ item_transform_random_erasing.image_with_rotated_box <- function(x, p = 0.5, sca
 # is returned unchanged).
 get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
   area <- img_h * img_w
-
   log_ratio <- log(ratio)
-  for (i in seq_len(10)) {
-    erase_area <- area * stats::runif(1, min = scale[1], max = scale[2])
-    aspect_ratio <- exp(stats::runif(1, min = log_ratio[1], max = log_ratio[2]))
 
-    h <- round(sqrt(erase_area * aspect_ratio))
-    w <- round(sqrt(erase_area / aspect_ratio))
-    if (!(h < img_h && w < img_w)) {
-      next
-    }
+  erase_area <- area * stats::runif(10, min = scale[1], max = scale[2])
+  aspect_ratio <- exp(stats::runif(10, min = log_ratio[1], max = log_ratio[2]))
 
-    top <- as.integer(floor(stats::runif(1, 0, img_h - h + 1)))
-    left <- as.integer(floor(stats::runif(1, 0, img_w - w + 1)))
-    return(list(top = top, left = left, height = h, width = w))
-  }
+  h <- round(sqrt(erase_area * aspect_ratio))
+  w <- round(sqrt(erase_area / aspect_ratio))
 
-  NULL
+  valid <- which(h < img_h & w < img_w)
+  if (length(valid) == 0L) return(NULL)
+
+  idx <- valid[1L]
+  top <- as.integer(floor(stats::runif(1, 0, img_h - h[idx] + 1)))
+  left <- as.integer(floor(stats::runif(1, 0, img_w - w[idx] + 1)))
+
+  list(top = top, left = left, height = h[idx], width = w[idx])
 }
 
 # Erase the rectangle at 0-indexed (top, left) with the given value.
