@@ -35,7 +35,8 @@
 #' @family item_random_transforms
 #'
 #' @export
-#' @importFrom stats head runif
+#' @importFrom utils head
+#' @importFrom stats runif
 item_transform_random_horizontal_flip <- function(x, p = 0.5) {
   UseMethod("item_transform_random_horizontal_flip", x)
 }
