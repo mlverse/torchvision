@@ -1185,8 +1185,8 @@ get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
     erase_area <- area * stats::runif(1, min = scale[1], max = scale[2])
     aspect_ratio <- exp(stats::runif(1, min = log_ratio[1], max = log_ratio[2]))
 
-    h <- as.integer(round(sqrt(erase_area * aspect_ratio)))
-    w <- as.integer(round(sqrt(erase_area / aspect_ratio)))
+    h <- round(sqrt(erase_area * aspect_ratio))
+    w <- round(sqrt(erase_area / aspect_ratio))
     if (!(h < img_h && w < img_w)) {
       next
     }
