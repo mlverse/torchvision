@@ -102,15 +102,14 @@ transform_random_order.default <- function(img, transforms) {
 
 get_random_crop_params <- function(img, output_size) {
 
-  img_size <- get_image_size(img)
-  w <- img_size[1]; h <- img_size[2]
-  th <- output_size[1]; tw <- output_size[2]
+  c(w, h) %<-% get_image_size(img)
+  c(th, tw) %<-% output_size
 
   if (w == tw && h == th)
-    return(c(0, 0, h, w))
+    return(c(1, 1, h, w))
 
-  i <- as.integer(torch::torch_randint(1, h - th + 1, size=1))
-  j <- as.integer(torch::torch_randint(1, w - tw + 1, size=1))
+  i <- runif(1, 1, h - th + 1)
+  j <- runif(1, 1, w - tw + 1)
 
   c(i, j, th, tw)
 }
@@ -208,8 +207,8 @@ get_random_resized_crop_params <- function(img, scale, ratio) {
     w <- width
     h <- height
   }
-  i <- (height - h) %/% 2
-  j <- (width - w) %/% 2
+  i <- (height - h) %/% 2 + 1
+  j <- (width - w) %/% 2 + 1
 
   c(i, j, h, w)
 }
@@ -366,6 +365,57 @@ transform_random_rotation.default <- function(img, degrees, interpolation=0,
 }
 
 
+check_random_affine_params <- function(degrees, translate, scale, shear) {
+  if (length(degrees) == 1) {
+
+    if (degrees < 0)
+      value_error("degrees must be positive if it's a single value")
+
+    degrees <- c(-degrees, degrees)
+
+  } else if (length(degrees) != 2) {
+    value_error("degrees must be length 1 or 2")
+  }
+
+
+  if (!is.null(translate)) {
+
+    if (length(translate) != 2)
+      value_error("translate must be length 2")
+
+    if (any(translate > 1) || any(translate < 0))
+      value_error("translate must be between 0 and 1")
+
+  }
+
+  if (!is.null(scale)) {
+
+    if (length(scale) != 2)
+      value_error("scale must be length 2")
+
+    if (any(scale < 0))
+      value_error("scale must be positive")
+
+  }
+
+  if (!is.null(shear)) {
+
+    if (length(shear) == 1) {
+
+      if (shear < 0)
+        value_error("shear must be positive if it's a single value")
+
+      shear <- c(-shear, shear)
+
+    } else if (!length(shear) %in% c(2, 4)) {
+      value_error("shear's length must be 1, 2, or 4")
+    }
+
+  }
+
+  list(degrees = degrees, shear = shear)
+}
+
 get_random_affine_params <- function(degrees,
                                      translate,
                                      scale_ranges,
@@ -415,57 +465,11 @@ transform_random_affine.default <- function(img, degrees, translate=NULL, scale=
     fill <- fillcolor
   }
 
-  if (length(degrees) == 1) {
-
-    if (degrees < 0)
-      value_error("degrees must be positive if it's a single value")
-
-    degrees <- c(-degrees, degrees)
-
-  } else if (length(degrees) != 2) {
-    value_error("degrees must be length 1 or 2")
-  }
-
-
-  if (!is.null(translate)) {
-
-    if (length(translate) != 2)
-      value_error("translate must be length 2")
-
-    if (any(translate > 1) || any(translate < 0))
-      value_error("translate must be between 0 and 1")
-
-  }
-
-  if (!is.null(scale)) {
-
-    if (length(scale) != 2)
-      value_error("scale must be length 2")
-
-    if (any(scale < 0))
-      value_error("scale must be positive")
-
-  }
-
-  if (!is.null(shear)) {
-
-    if (length(shear) == 1) {
-
-      if (shear < 0)
-        value_error("shear must be positive if it's a single value")
-
-      degrees <- c(-degrees, degrees)
-
-    } else if (!length(shear) %in% c(2, 4)) {
-      value_error("shear's length must be 1, 2, or 4")
-    }
-
-  }
-
+  args <- check_random_affine_params(degrees, translate, scale, shear)
 
   img_size <- get_image_size(img)
 
-  ret <- get_random_affine_params(degrees, translate, scale, shear, img_size)
+  ret <- get_random_affine_params(args$degrees, translate, scale, args$shear, img_size)
 
   transform_affine(img, ret[[1]], ret[[2]], ret[[3]], ret[[4]],
                    interpolation=interpolation, fill=fill)

@@ -4,9 +4,10 @@
 #' The canvas is expanded so that the entire rotated image is visible with no
 #' cropping. Empty regions are filled with given fill color.
 #'
-#' The bounding boxes (if present) are shifted to account for the expanded
-#' canvas and converted to rotated format via
-#' \code{\link{target_transform_rotate}}. For segmentation items, the masks are
+#' The bounding boxes (if present) are rotated around the original image centre
+#' and shifted onto the (possibly expanded) output canvas, while their physical
+#' size is left unchanged. The result is always in xyxyr format with the
+#' accumulated rotation angle. For segmentation items, the masks are
 #' rotated alongside the image using nearest-neighbour sampling.
 #'
 #' @param x A dataset item, typically an \code{image_with_bounding_box} or
@@ -20,22 +21,28 @@
 #'
 #' @examples
 #' \dontrun{
-#' url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' angle <- 30
 #'
 #' img <- base_loader(url) |>
 #'   transform_to_tensor()
 #'
-#' boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
-#' after <- item_transform_rotate(before, angle = 30)
+#' after <- item_transform_rotate(before, angle = angle)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
-#' tensor_image_browse(before_plot)
-#' tensor_image_browse(after_plot)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(
+#'   torch_stack(list(transform_resize(before_plot, c(600, 600)),
+#'                    transform_resize(after_plot, c(600, 600)))),
+#'   scale = TRUE
+#' )
+#' tensor_image_browse(grid)
 #' }
 #'
 #' @family item_unitary_transforms
@@ -85,19 +92,11 @@ item_transform_rotate.image_with_bounding_box <- function(
 
   orig_spatial <- tail(x$x$shape, 2)   # e.g., c(H_orig, W_orig)
   new_spatial  <- tail(rotated_img$shape, 2)
-  shifts <- (new_spatial - orig_spatial) / 2
-  dx <- shifts[2]  # shift along second spatial dim (width in torch convention)
-  dy <- shifts[1]  # shift along first spatial dim (height in torch convention)
-
-  # Shift boxes safely
-  x1 <- x$y$boxes[, 1]
-  y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]
-  y2 <- x$y$boxes[, 4]
-  shifted_boxes <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$boxes <- .rotate_item_boxes(x$y$boxes, angle = angle,
+                                  orig_spatial = orig_spatial,
+                                  new_spatial = new_spatial)
   x$y$image_height <- new_spatial[1]  # First spatial dim in torch = height
   x$y$image_width <- new_spatial[2]
 
@@ -143,25 +142,69 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
 
   orig_spatial <- tail(x$x$shape, 2)
   new_spatial  <- tail(rotated_img$shape, 2)
-  shifts <- (new_spatial - orig_spatial) / 2
-  dx <- shifts[2]
-  dy <- shifts[1]
-
-  # Shift existing xyxyr boxes
-  x1 <- x$y$boxes[, 1]
-  y1 <- x$y$boxes[, 2]
-  x2 <- x$y$boxes[, 3]
-  y2 <- x$y$boxes[, 4]
-  angle_col <- x$y$boxes[, 5, drop = FALSE]
-
-  shifted_xy <- torch_stack(list(x1 + dx, y1 + dy, x2 + dx, y2 + dy), dim = -1L)
-  shifted_boxes <- torch_cat(list(shifted_xy, angle_col), dim = -1L)
 
   x$x <- rotated_img
-  x$y$boxes <- box_xyxy_to_xyxyr(shifted_boxes, angle = angle)
+  x$y$boxes <- .rotate_item_boxes(x$y$boxes, angle = angle,
+                                  orig_spatial = orig_spatial,
+                                  new_spatial = new_spatial)
   x$y$image_height <- new_spatial[1]
   x$y$image_width  <- new_spatial[2]
   x
+}
+
+# Rotate detection boxes so they follow an image rotated by `angle` (degrees)
+# around its centre. The box centres are rotated around the original image
+# centre and shifted onto the (possibly expanded) output canvas, while their
+# physical size is left unchanged: unlike `target_transform_rotate`, the boxes
+# are not expanded to their enclosing axis-aligned rectangle.
+# `boxes` may be in xyxy (N x 4) or xyxyr (N x 5) format; the result is always
+# xyxyr with the accumulated rotation angle.
+#' @noRd
+.rotate_item_boxes <- function(boxes, angle, orig_spatial, new_spatial) {
+  n <- boxes$size(1)
+  is_rotated <- boxes$size(2) == 5
+
+  if (n == 0) {
+    if (is_rotated) {
+      return(boxes$clone())
+    }
+    angle_t <- torch_zeros(0, 1, dtype = boxes$dtype, device = boxes$device)
+    return(torch_cat(list(boxes, angle_t), dim = -1L))
+  }
+
+  H <- orig_spatial[1]
+  W <- orig_spatial[2]
+  H2 <- new_spatial[1]
+  W2 <- new_spatial[2]
+
+  x1 <- boxes[, 1]
+  y1 <- boxes[, 2]
+  x2 <- boxes[, 3]
+  y2 <- boxes[, 4]
+
+  cx <- (x1 + x2) * 0.5
+  cy <- (y1 + y2) * 0.5
+  hw <- (x2 - x1) * 0.5
+  hh <- (y2 - y1) * 0.5
+
+  angle_rad <- deg2rad(angle)
+  ct <- torch_cos(angle_rad)
+  st <- torch_sin(angle_rad)
+
+  # Rotate the box centres around the original image centre, then shift them
+  # onto the output canvas. This matches the geometry of transform_rotate.
+  cx_new <- W2 * 0.5 + (cx - W * 0.5) * ct + (cy - H * 0.5) * st
+  cy_new <- H2 * 0.5 - (cx - W * 0.5) * st + (cy - H * 0.5) * ct
+
+  new_xyxy <- torch_stack(list(cx_new - hw, cy_new - hh, cx_new + hw, cy_new + hh), dim = -1L)
+
+  total_angle <- if (is_rotated) {
+    boxes[, 5, drop = FALSE] + angle
+  } else {
+    torch_tensor(angle, dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
+  }
+
+  torch_cat(list(new_xyxy, total_angle), dim = -1L)
 }
 
 #' Crop a dataset item
@@ -1147,3 +1190,106 @@ item_transform_perspective.image_with_segmentation_mask <- function(x, startpoin
   x
 }
 
+# item_transform_resize
+
+#' Resize a dataset item
+#'
+#' Resizes the image inside a dataset item. For detection items, bounding box
+#' coordinates are rescaled by the same factors as the image. For segmentation
+#' items, the masks are resized alongside the image with nearest-neighbour
+#' sampling, so that they keep their discrete values.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @inheritParams transform_resize
+#'
+#' @return A dataset item of the same class with the image and target resized.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_resize(before, size = c(600, 800))
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
+#' }
+#'
+#' @family item_unitary_transforms
+#'
+#' @export
+item_transform_resize <- function(x, size, interpolation = 2) {
+  UseMethod("item_transform_resize", x)
+}
+
+#' @export
+item_transform_resize.default <- function(x, size, interpolation = 2) {
+  cli_abort(
+    "{.fn item_transform_resize} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To resize a raw image tensor, use {.fn transform_resize} instead."
+  )
+}
+
+#' @export
+item_transform_resize.dataset <- function(x, size, interpolation = 2) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_resize(item, size = size, interpolation = interpolation)
+  }
+  x
+}
+
+#' @export
+item_transform_resize.image_with_bounding_box <- function(x, size, interpolation = 2) {
+  orig_spatial <- tail(x$x$shape, 2)
+
+  x$x <- transform_resize(x$x, size, interpolation)
+
+  new_spatial <- tail(x$x$shape, 2)
+  scale_h <- new_spatial[1] / orig_spatial[1]
+  scale_w <- new_spatial[2] / orig_spatial[2]
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    boxes[, 1] <- boxes[, 1] * scale_w
+    boxes[, 2] <- boxes[, 2] * scale_h
+    boxes[, 3] <- boxes[, 3] * scale_w
+    boxes[, 4] <- boxes[, 4] * scale_h
+  }
+  x$y$boxes <- boxes
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width <- new_spatial[2]
+
+  x
+}
+
+#' @export
+item_transform_resize.image_with_segmentation_mask <- function(x, size, interpolation = 2) {
+  x$x <- transform_resize(x$x, size, interpolation)
+
+  new_spatial <- tail(x$x$shape, 2)
+  masks <- x$y$masks
+  x$y$masks <- if (masks$size(1) > 0) {
+    transform_resize(masks, new_spatial, interpolation = 0)
+  } else {
+    torch_zeros(c(0, new_spatial), dtype = masks$dtype, device = masks$device)
+  }
+  x$y$image_height <- new_spatial[1]
+  x$y$image_width <- new_spatial[2]
+
+  x
+}
+
+#' @export
+item_transform_resize.image_with_rotated_box <- item_transform_resize.image_with_bounding_box

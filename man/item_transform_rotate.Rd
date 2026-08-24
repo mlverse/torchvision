@@ -38,29 +38,36 @@ The canvas is expanded so that the entire rotated image is visible with no
 cropping. Empty regions are filled with given fill color.
 }
 \details{
-The bounding boxes (if present) are shifted to account for the expanded
-canvas and converted to rotated format via
-\code{\link{target_transform_rotate}}. For segmentation items, the masks are
+The bounding boxes (if present) are rotated around the original image centre
+and shifted onto the (possibly expanded) output canvas, while their physical
+size is left unchanged. The result is always in xyxyr format with the
+accumulated rotation angle. For segmentation items, the masks are
 rotated alongside the image using nearest-neighbour sampling.
 }
 \examples{
 \dontrun{
-url <- "https://upload.wikimedia.org/wikipedia/commons/6/66/The_Leaning_Tower_of_Pisa_SB.jpeg"
+url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+angle <- 30
 
 img <- base_loader(url) |>
   transform_to_tensor()
 
-boxes <- torch_tensor(matrix(c(720, 620, 1900, 3700), ncol = 4), dtype = torch_float32())
+boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"Leaning Tower of Pisa"}))
+before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
 class(before) <- c("image_with_bounding_box", "list")
 
-after <- item_transform_rotate(before, angle = 30)
+after <- item_transform_rotate(before, angle = angle)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
-tensor_image_browse(before_plot)
-tensor_image_browse(after_plot)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+
+grid <- vision_make_grid(
+  torch_stack(list(transform_resize(before_plot, c(600, 600)),
+                   transform_resize(after_plot, c(600, 600)))),
+  scale = TRUE
+)
+tensor_image_browse(grid)
 }
 
 }
@@ -72,6 +79,7 @@ Other item_unitary_transforms:
 \code{\link[=item_transform_hflip]{item_transform_hflip()}},
 \code{\link[=item_transform_pad]{item_transform_pad()}},
 \code{\link[=item_transform_perspective]{item_transform_perspective()}},
+\code{\link[=item_transform_resize]{item_transform_resize()}},
 \code{\link[=item_transform_vflip]{item_transform_vflip()}}
 }
 \concept{item_unitary_transforms}

@@ -336,6 +336,9 @@ test_that("random_affine", {
   expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(ob)))
   expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(ob)))
 
+  o <- transform_random_affine(x, 0, shear = 10)
+  expect_tensor_shape(o, c(1, 8, 8))
+
 })
 
 test_that("affine", {
