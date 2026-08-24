@@ -30,6 +30,7 @@
 * Added `item_transform_random_affine()` for applying an affine transformation drawn from the given ranges to dataset items, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #354).
 * Added `item_transform_random_crop()` for cropping dataset items at a random location with optional padding, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #387).
 * Added `item_transform_random_resize_crop()` for cropping dataset items to a random area and aspect ratio before resizing them to a given size, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #361).
+* Added `item_transform_random_perspective()` for applying a random perspective transformation to dataset items with probability `p`, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #393).
 
 ## Bug fixes and improvements
 
