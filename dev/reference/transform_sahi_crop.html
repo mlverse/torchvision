@@ -109,6 +109,9 @@ magick image).</p></li>
 <span></span>
 <span><span class="fu">target_transform_sahi_crop</span><span class="op">(</span><span class="va">y</span>, <span class="va">sahi_split</span>, min_area_ratio <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'object_detection_target'</span></span>
+<span><span class="fu">target_transform_sahi_crop</span><span class="op">(</span><span class="va">y</span>, <span class="va">sahi_split</span>, min_area_ratio <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">transform_sahi_crop</span><span class="op">(</span><span class="va">x</span>, <span class="va">sahi_split</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -132,8 +135,9 @@ overlap ratios <code>c(overlap_h, overlap_w)</code>.</p></dd>
 
 
 <dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>Detection target list containing <code>boxes</code> and <code>labels</code>.
-Bounding boxes in <code>(x1, y1, x2, y2)</code> format.</p></dd>
+<dd><p>An <code>object_detection_target</code> containing <code>boxes</code> and
+<code>labels</code>, with bounding boxes in <code>(x1, y1, x2, y2)</code> format, or a
+list of such targets to transform as a batch.</p></dd>
 
 
 <dt id="arg-sahi-split">sahi_split<a class="anchor" aria-label="anchor" href="#arg-sahi-split"></a></dt>

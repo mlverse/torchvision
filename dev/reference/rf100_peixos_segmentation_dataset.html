@@ -137,7 +137,9 @@ C × H × W tensor).</p></li>
 <li><p><code>labels</code>: integer vector with the class index (always 1 for "fish").</p></li>
 </ul></li>
 </ul><p>The returned item is given class <code>image_with_segmentation_mask</code> so it can be
-visualised with helpers like <code><a href="draw_segmentation_masks.html">draw_segmentation_masks()</a></code>.</p>
+visualised with helpers like <code><a href="draw_segmentation_masks.html">draw_segmentation_masks()</a></code>, and its <code>y</code> is given
+class <code>segmentation_target</code>, which target transforms dispatch on. The dataset
+itself inherits <code>segmentation_dataset</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

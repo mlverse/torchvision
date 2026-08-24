@@ -139,17 +139,21 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A torch dataset of class <code>pascal_segmentation_dataset</code>.</p>
+    <p>A torch dataset of class <code>pascal_segmentation_dataset</code>, also
+inheriting <code>segmentation_dataset</code>.</p>
 <p>The returned list inherits class <code>image_with_segmentation_mask</code>, which allows generic visualization
-utilities to be applied.</p>
+utilities to be applied, and its <code>y</code> inherits <code>segmentation_target</code>, which
+target transforms dispatch on.</p>
 <p>Each element is a named list with the following structure:</p><ul><li><p><code>x</code>: a H x W x 3 array representing the RGB image.</p></li>
 <li><p><code>y</code>: A named list containing:</p><ul><li><p><code>masks</code>: A <code>torch_tensor</code> of dtype <code>bool</code> and shape <code>(21, H, W)</code>, representing a multi-channel segmentation mask.
 Each of the 21 channels corresponds to a Pascal VOC classes</p></li>
 <li><p><code>labels</code>: An integer vector indicating the indices of the classes present in the mask.</p></li>
 </ul></li>
-</ul><p>A torch dataset of class <code>pascal_detection_dataset</code>.</p>
+</ul><p>A torch dataset of class <code>pascal_detection_dataset</code>, also inheriting
+<code>object_detection_dataset</code>.</p>
 <p>The returned list inherits class <code>image_with_bounding_box</code>, which allows generic visualization
-utilities to be applied.</p>
+utilities to be applied, and its <code>y</code> inherits <code>object_detection_target</code>, which target
+transforms such as <code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> dispatch on.</p>
 <p>Each element is a named list:</p><ul><li><p><code>x</code>: a H x W x 3 array representing the RGB image.</p></li>
 <li><p><code>y</code>: a list with:</p><ul><li><p><code>labels</code>: a character vector with object class names.</p></li>
 <li><p><code>boxes</code>: a tensor of shape (N, 4) with bounding box coordinates in <code>(xmin, ymin, xmax, ymax)</code> format.</p></li>

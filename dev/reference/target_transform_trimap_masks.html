@@ -96,7 +96,10 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'segmentation_target'</span></span>
+<span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -104,7 +107,8 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
 
 
 <dl><dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>List containing <code>trimap</code> field (H, W) tensor with values 1, 2, 3</p></dd>
+<dd><p>a <code>segmentation_target</code> containing a <code>trimap</code> field, a (H, W) tensor
+with values 1, 2, 3</p></dd>
 
 </dl></div>
     <div id="value">

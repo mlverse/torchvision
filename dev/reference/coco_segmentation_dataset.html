@@ -137,7 +137,10 @@ Use <code>target_transform_coco_masks</code> to convert polygon annotations to b
 <li><p><code>y$segmentation</code>: a list of segmentation polygons for each object.</p></li>
 <li><p><code>y$masks</code>: a <code>(N, H, W)</code> boolean <code>torch_tensor</code> containing binary segmentation masks (when using target_transform_coco_masks).</p></li>
 </ul><p>The returned object has S3 class <code>"image_with_segmentation_mask"</code>
-to enable automatic dispatch by visualization functions such as <code><a href="draw_segmentation_masks.html">draw_segmentation_masks()</a></code>.</p>
+to enable automatic dispatch by visualization functions such as <code><a href="draw_segmentation_masks.html">draw_segmentation_masks()</a></code>,
+and its <code>y</code> has S3 class <code>"segmentation_target"</code> so that target transforms
+such as <code><a href="target_transform_coco_masks.html">target_transform_coco_masks()</a></code> dispatch on it. The dataset
+itself inherits <code>"segmentation_dataset"</code>.</p>
 <p>For object detection tasks without segmentation, use <code><a href="coco_detection_dataset.html">coco_detection_dataset</a></code> instead.</p>
     </div>
     <div id="details">

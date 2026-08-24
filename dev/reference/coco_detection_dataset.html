@@ -136,7 +136,10 @@
 <li><p><code>y$area</code>: a float <code>torch_tensor</code> indicating the area of each object.</p></li>
 <li><p><code>y$iscrowd</code>: a boolean <code>torch_tensor</code>, where <code>TRUE</code> marks the object as part of a crowd.</p></li>
 </ul><p>The returned object has S3 class <code>"image_with_bounding_box"</code>
-to enable automatic dispatch by visualization functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>.</p>
+to enable automatic dispatch by visualization functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>,
+and its <code>y</code> has S3 class <code>"object_detection_target"</code> so that target transforms
+such as <code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> dispatch on it. The dataset itself
+inherits <code>"object_detection_dataset"</code>.</p>
 <p>For instance segmentation tasks, use <code><a href="coco_segmentation_dataset.html">coco_segmentation_dataset</a></code> instead.</p>
     </div>
     <div id="details">

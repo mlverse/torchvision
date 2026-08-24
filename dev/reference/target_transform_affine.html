@@ -111,7 +111,7 @@ rotation, so transforms compose.</p>
 <span>  center <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for class 'list'</span></span>
+<span><span class="co"># S3 method for class 'object_detection_target'</span></span>
 <span><span class="fu">target_transform_affine</span><span class="op">(</span></span>
 <span>  <span class="va">target</span>,</span>
 <span>  angle <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -127,7 +127,9 @@ rotation, so transforms compose.</p>
 
 
 <dl><dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
-<dd><p>A list representing the detection target, containing at least:</p><ul><li><p><code>boxes</code> — tensor of shape <code>(N, 4)</code> in xyxy format, or <code>(N, 5)</code> in
+<dd><p>An <code>object_detection_target</code>, as returned by the <code>.getitem()</code>
+method of an <a href="coco_detection_dataset.html">object detection dataset</a>, containing
+at least:</p><ul><li><p><code>boxes</code> — tensor of shape <code>(N, 4)</code> in xyxy format, or <code>(N, 5)</code> in
 xyxyr format for an already rotated target</p></li>
 <li><p><code>image_height</code> — original image height, defining the rotation centre</p></li>
 <li><p><code>image_width</code> — original image width, defining the rotation centre</p></li>
@@ -182,6 +184,7 @@ tensor of shape <code>(N, 5)</code> in xyxyr format.</p>
 <span class="r-in"><span>  image_height <span class="op">=</span> <span class="fl">100L</span>,</span></span>
 <span class="r-in"><span>  image_width <span class="op">=</span> <span class="fl">200L</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">target</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"object_detection_target"</span>, <span class="st">"list"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">target_transform_affine</span><span class="op">(</span><span class="va">target</span>, angle <span class="op">=</span> <span class="fl">20</span>, translate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fl">1.1</span>, shear <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

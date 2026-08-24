@@ -141,7 +141,9 @@ It is commonly used for evaluating models on object segmentation tasks.</p>
 <li><p><code>y$label</code>: an integer representing the class label, depending on the <code>target_type</code>:</p><ul><li><p><code>"category"</code>: an integer in 1–37 indicating the pet breed.</p></li>
 <li><p><code>"binary-category"</code>: 1 for Cat, 2 for Dog.</p></li>
 </ul></li>
-</ul></div>
+</ul><p>The dataset inherits <code>segmentation_dataset</code> and its <code>y</code> inherits
+<code>segmentation_target</code>, which target transforms dispatch on.</p>
+    </div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other segmentation_dataset:

@@ -134,7 +134,10 @@ bounding box annotations for object-detection task.</p>
 <li><p><code>boxes</code>: a torch_tensor of shape (N, 4) with bounding boxes, each in \((x_{min}, y_{min}, x_{max}, y_{max})\) format.</p></li>
 </ul></li>
 </ul><p>The returned item inherits the class <code>image_with_bounding_box</code> so it can be
-visualised with helper functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>.</p>
+visualised with helper functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>, and its <code>y</code>
+inherits <code>object_detection_target</code>, which target transforms such as
+<code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> dispatch on. The collection itself inherits
+<code>object_detection_dataset</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
