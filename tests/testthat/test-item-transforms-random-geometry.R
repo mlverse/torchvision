@@ -802,12 +802,19 @@ test_that("item_transform_random_rotation validates its range", {
 
 test_that("item_transform_random_rotation with a zero range is the identity", {
   item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  original_img <- item$x$clone()
+  original_img <- as_array(item$x)
 
   result <- item_transform_random_rotation(item, degrees = 0)
 
   expect_s3_class(result, "image_with_rotated_box")
-  expect_equal(as_array(result$x), as_array(original_img), tolerance = 1e-4)
+  expect_equal_to_r(result$x, original_img, tolerance = 1e-4)
+  expect_equal_to_r(result$y$boxes, matrix(c(10, 20, 50, 60, 0), ncol = 5))
+
+  rot_item <- item_transform_rotate(item, angle = 0, expand = FALSE)
+  result <- item_transform_random_rotation(rot_item, degrees = 0)
+  
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_equal_to_r(result$x, original_img, tolerance = 1e-4)
   expect_equal_to_r(result$y$boxes, matrix(c(10, 20, 50, 60, 0), ncol = 5))
 })
 
