@@ -629,3 +629,195 @@ random_affine_item <- function(x, degrees, translate, scale, shear, interpolatio
                         scale = params[[3]], shear = params[[4]],
                         interpolation = interpolation, fill = fill, center = center)
 }
+
+
+
+#' Randomly erase a rectangular region of a dataset item
+#'
+#' Randomly selects a rectangular region in the image inside a dataset item and
+#' erases its pixel values with a given probability. Only the image pixels are
+#' modified: bounding boxes and masks are left unchanged.
+#'
+#' 'Random Erasing Data Augmentation' by Zhong _et al._ See
+#' <https://arxiv.org/abs/1708.04896>
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @param p (numeric): Probability that the random erasing operation will be
+#'   performed. Default is 0.5.
+#' @param scale (numeric vector of length 2): Range of proportion of erased
+#'   area against input image.
+#' @param ratio (numeric vector of length 2): Range of aspect ratio of erased
+#'   area.
+#' @param value (numeric vector or numeric or character): Erasing value.
+#'   Default is `0`. If a single numeric value, it is used to erase all
+#'   pixels. If a numeric vector of length 3, it is used to erase R, G, B
+#'   channels respectively. If the string `"random"`, erasing each pixel with
+#'   random values.
+#' @param inplace (logical): Boolean to make this transform inplace. Default
+#'   set to `FALSE`.
+#'
+#' @return A dataset item of the same class. With probability \code{p}, the
+#'   image is randomly erased; otherwise it is returned unchanged.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_random_erasing(before)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_random_transforms
+#'
+#' @export
+item_transform_random_erasing <- function(x, p = 0.5, scale = c(0.02, 0.33), ratio = c(0.3, 3.3),
+                                          value = 0, inplace = FALSE) {
+  if (!is.numeric(p) || length(p) != 1 || p < 0 || p > 1) {
+    cli_abort("Random erasing probability should be between 0 and 1.")
+  }
+  if (length(scale) != 2 || length(ratio) != 2 || !is.numeric(scale) || !is.numeric(ratio)) {
+    cli_abort("Scale and ratio should be numeric vectors of length 2.")
+  }
+  if (scale[1] > scale[2] || ratio[1] > ratio[2]) {
+    cli_abort("Scale and ratio should be of kind (min, max).")
+  }
+  if (scale[1] < 0 || scale[2] > 1) {
+    cli_abort("Scale should be between 0 and 1.")
+  }
+  if (is.character(value) && value != "random") {
+    cli_abort("If value is a string, it should be {.val random}.")
+  }
+  if (!is.numeric(value) && !is.character(value)) {
+    cli_abort("Value should be a number, a numeric vector or the string {.val random}.")
+  }
+  if (is.numeric(value) && !(length(value) %in% c(1, 3))) {
+    cli_abort("If value is a sequence, it should have either a single value or 3 (number of input channels).")
+  }
+
+  UseMethod("item_transform_random_erasing", x)
+}
+
+#' @export
+item_transform_random_erasing.default <- function(x, p = 0.5, scale = c(0.02, 0.33), ratio = c(0.3, 3.3),
+                                                 value = 0, inplace = FALSE) {
+  cli_abort(
+    "{.fn item_transform_random_erasing} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To erase a raw image tensor, use {.fn transform_random_erasing} instead."
+  )
+}
+
+#' @export
+item_transform_random_erasing.dataset <- function(x, p = 0.5, scale = c(0.02, 0.33), ratio = c(0.3, 3.3),
+                                                 value = 0, inplace = FALSE) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_random_erasing(item, p = p, scale = scale, ratio = ratio,
+                                  value = value, inplace = inplace)
+  }
+  x
+}
+
+#' @export
+item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, scale = c(0.02, 0.33),
+                                                                 ratio = c(0.3, 3.3), value = 0,
+                                                                 inplace = FALSE) {
+  if (stats::runif(1) < p) {
+    img_size <- get_image_size(x$x)
+    params <- get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
+    if (!is.null(params)) {
+      x$x <- erase_tensor_region(x$x, params$top, params$left, params$height, params$width, value, inplace)
+    }
+  }
+  x
+}
+
+#' @export
+item_transform_random_erasing.image_with_segmentation_mask <- function(x, p = 0.5, scale = c(0.02, 0.33),
+                                                                      ratio = c(0.3, 3.3), value = 0,
+                                                                      inplace = FALSE) {
+  item_transform_random_erasing.image_with_bounding_box(
+    x, p = p, scale = scale, ratio = ratio, value = value, inplace = inplace
+  )
+}
+
+#' @export
+item_transform_random_erasing.image_with_rotated_box <- function(x, p = 0.5, scale = c(0.02, 0.33),
+                                                                ratio = c(0.3, 3.3), value = 0,
+                                                                inplace = FALSE) {
+  item_transform_random_erasing.image_with_bounding_box(
+    x, p = p, scale = scale, ratio = ratio, value = value, inplace = inplace
+  )
+}
+
+# Sample the location and size of a random erasing rectangle.
+#
+# Returns a list with 0-indexed `top` and `left` and positive `height` and
+# `width`, or NULL when no valid rectangle was found (in which case the image
+# is returned unchanged).
+get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
+  area <- img_h * img_w
+  log_ratio <- log(ratio)
+
+  erase_area <- area * stats::runif(10, min = scale[1], max = scale[2])
+  aspect_ratio <- exp(stats::runif(10, min = log_ratio[1], max = log_ratio[2]))
+
+  h <- round(sqrt(erase_area * aspect_ratio))
+  w <- round(sqrt(erase_area / aspect_ratio))
+
+  valid <- which(h < img_h & w < img_w)
+  if (length(valid) == 0L) return(NULL)
+
+  idx <- valid[1L]
+  top <- as.integer(floor(stats::runif(1, 0, img_h - h[idx] + 1)))
+  left <- as.integer(floor(stats::runif(1, 0, img_w - w[idx] + 1)))
+
+  list(top = top, left = left, height = h[idx], width = w[idx])
+}
+
+# Erase the rectangle at 0-indexed (top, left) with the given value.
+erase_tensor_region <- function(img, top, left, height, width, value, inplace) {
+  img_c <- img$size(1)
+
+  if (!inplace) {
+    img <- img$clone()
+  }
+
+  img_h <- img$size(2)
+  img_w <- img$size(3)
+
+  top <- max(0L, as.integer(top))
+  left <- max(0L, as.integer(left))
+  h <- min(as.integer(height), img_h - top)
+  w <- min(as.integer(width), img_w - left)
+
+  if (h <= 0L || w <= 0L) {
+    return(img)
+  }
+
+  region <- img$narrow(2, top + 1L, h)$narrow(3, left + 1L, w)
+
+  if (is.character(value)) {
+    region$copy_(torch::torch_randn(img_c, h, w, dtype = torch::torch_float32()))
+  } else if (length(value) == 1) {
+    region$fill_(value)
+  } else {
+    region$copy_(torch::torch_tensor(value, dtype = img$dtype, device = img$device)$view(c(img_c, 1, 1)))
+  }
+
+  img
+}
