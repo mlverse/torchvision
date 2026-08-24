@@ -213,7 +213,7 @@ item_transform_random_vertical_flip.image_with_rotated_box <- function(x, p = 0.
 #'
 #' @family item_random_transforms
 #'
-#' @importFrom torch torch_atan2
+#' @importFrom torch torch_atan2 torch_rand
 #' @export
 item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1),
                                               ratio = c(3 / 4, 4 / 3),
@@ -601,26 +601,6 @@ item_transform_random_affine.image_with_bounding_box <- function(x, degrees, tra
                                                                  scale = NULL, shear = NULL,
                                                                  interpolation = 0, fill = NULL,
                                                                  center = NULL) {
-  random_affine_item(x, degrees, translate, scale, shear, interpolation, fill, center)
-}
-
-#' @export
-item_transform_random_affine.image_with_rotated_box <- function(x, degrees, translate = NULL,
-                                                                scale = NULL, shear = NULL,
-                                                                interpolation = 0, fill = NULL,
-                                                                center = NULL) {
-  random_affine_item(x, degrees, translate, scale, shear, interpolation, fill, center)
-}
-
-#' @export
-item_transform_random_affine.image_with_segmentation_mask <- function(x, degrees, translate = NULL,
-                                                                      scale = NULL, shear = NULL,
-                                                                      interpolation = 0, fill = NULL,
-                                                                      center = NULL) {
-  random_affine_item(x, degrees, translate, scale, shear, interpolation, fill, center)
-}
-
-random_affine_item <- function(x, degrees, translate, scale, shear, interpolation, fill, center) {
   args <- check_random_affine_params(degrees, translate, scale, shear)
   params <- get_random_affine_params(args$degrees, translate, scale, args$shear,
                                      get_image_size(x$x))
@@ -630,6 +610,11 @@ random_affine_item <- function(x, degrees, translate, scale, shear, interpolatio
                         interpolation = interpolation, fill = fill, center = center)
 }
 
+#' @export
+item_transform_random_affine.image_with_rotated_box <- item_transform_random_affine.image_with_bounding_box
+
+#' @export
+item_transform_random_affine.image_with_segmentation_mask <- item_transform_random_affine.image_with_bounding_box
 
 
 #' Randomly erase a rectangular region of a dataset item
@@ -716,31 +701,45 @@ item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, sc
                                                                  inplace = FALSE) {
   if (stats::runif(1) < p) {
     img_size <- get_image_size(x$x)
-    params <- get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
-    if (!is.null(params)) {
-      x$x <- erase_tensor_region(x$x, params$top, params$left, params$height, params$width, value, inplace)
+    c(top, left, height, width) %<-% get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
+    if (!is.null(top)) {
+      # x$x <- erase_tensor_region(x$x, top, left, height, width, value, inplace)
+      img_c <- x$x$size(1)
+
+      if (!inplace) {
+        x$x <- x$x$clone()
+      }
+
+      c(img_w, img_h) %<-% get_image_size(x$x)
+
+      top <- max(0L, top)
+      left <- max(0L, left)
+      h <- min(height, img_h - top)
+      w <- min(width, img_w - left)
+
+      if (!(h <= 0L || w <= 0L)) {
+        # inplace region replacement
+        region <- x$x$narrow(2, top + 1L, h)$narrow(3, left + 1L, w)
+
+        if (is.character(value)) {
+          region$copy_(torch_randn(img_c, h, w, dtype = torch_float32()))
+        } else if (length(value) == 1) {
+          region$fill_(value)
+        } else {
+          region$copy_(torch_tensor(value, dtype = x$x$dtype, device = x$x$device)$view(c(img_c, 1, 1)))
+        }
+
+      }
     }
   }
   x
 }
 
 #' @export
-item_transform_random_erasing.image_with_segmentation_mask <- function(x, p = 0.5, scale = c(0.02, 0.33),
-                                                                      ratio = c(0.3, 3.3), value = 0,
-                                                                      inplace = FALSE) {
-  item_transform_random_erasing.image_with_bounding_box(
-    x, p = p, scale = scale, ratio = ratio, value = value, inplace = inplace
-  )
-}
+item_transform_random_erasing.image_with_segmentation_mask <- item_transform_random_erasing.image_with_bounding_box
 
 #' @export
-item_transform_random_erasing.image_with_rotated_box <- function(x, p = 0.5, scale = c(0.02, 0.33),
-                                                                ratio = c(0.3, 3.3), value = 0,
-                                                                inplace = FALSE) {
-  item_transform_random_erasing.image_with_bounding_box(
-    x, p = p, scale = scale, ratio = ratio, value = value, inplace = inplace
-  )
-}
+item_transform_random_erasing.image_with_rotated_box <- item_transform_random_erasing.image_with_bounding_box
 
 # Sample the location and size of a random erasing rectangle.
 #
@@ -767,35 +766,3 @@ get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
   list(top = top, left = left, height = h[idx], width = w[idx])
 }
 
-# Erase the rectangle at 0-indexed (top, left) with the given value.
-erase_tensor_region <- function(img, top, left, height, width, value, inplace) {
-  img_c <- img$size(1)
-
-  if (!inplace) {
-    img <- img$clone()
-  }
-
-  img_h <- img$size(2)
-  img_w <- img$size(3)
-
-  top <- max(0L, as.integer(top))
-  left <- max(0L, as.integer(left))
-  h <- min(as.integer(height), img_h - top)
-  w <- min(as.integer(width), img_w - left)
-
-  if (h <= 0L || w <= 0L) {
-    return(img)
-  }
-
-  region <- img$narrow(2, top + 1L, h)$narrow(3, left + 1L, w)
-
-  if (is.character(value)) {
-    region$copy_(torch::torch_randn(img_c, h, w, dtype = torch::torch_float32()))
-  } else if (length(value) == 1) {
-    region$fill_(value)
-  } else {
-    region$copy_(torch::torch_tensor(value, dtype = img$dtype, device = img$device)$view(c(img_c, 1, 1)))
-  }
-
-  img
-}

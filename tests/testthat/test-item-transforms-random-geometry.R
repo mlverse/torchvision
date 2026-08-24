@@ -824,7 +824,7 @@ test_that("item_transform_random_erasing works on detection items", {
 
   # rotated-box items
   rotated <- item_transform_rotate(item, angle = 30)
-  result <- item_transform_random_erasing(rotated, p = 1)
+  result <- item_transform_random_erasing(rotated, p = 1, value = c(5, 0.1, 7e9), ratio = c(0.1, 3.9), scale = c(0.1, 3.9))
   expect_s3_class(result, "image_with_rotated_box")
   expect_true(torch_equal(result$y$boxes, rotated$y$boxes))
 })

@@ -27,17 +27,17 @@
 * `item_transform_rotate()` now supports segmentation items and datasets, rotating the masks alongside the image (@srishtiii28, #379).
 * Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
 * Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
-* Added `item_transform_random_affine()` for applying an affine transformation drawn from the given ranges to dataset items, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #354).
+* Added `item_transform_random_affine()` for applying an affine transformation drawn from the given ranges to dataset items, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #390).
 * Added `item_transform_random_crop()` for cropping dataset items at a random location with optional padding, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #387).
-* Added `item_transform_random_resize_crop()` for cropping dataset items to a random area and aspect ratio before resizing them to a given size, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #361).
-* Added `item_transform_random_erasing()` for randomly erasing a rectangular region of dataset items with probability `p`, with support for detection, segmentation and rotated-box item types and datasets (#358).
+* Added `item_transform_random_resize_crop()` for cropping dataset items to a random area and aspect ratio before resizing them to a given size, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #386).
+* Added `item_transform_random_erasing()` for randomly erasing a rectangular region of dataset items with probability `p`, with support for detection, segmentation and rotated-box item types and datasets (#389).
 
 ## Bug fixes and improvements
 
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
-  instead of `shear`, which left the shear range incomplete and made the sampling fail (#354).
+  instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
 * `transform_random_resized_crop()` no longer loses the last row and column of the image, and no longer
-  padded with a black edge when it falls back to a central crop (#361).
+  padded with a black edge when it falls back to a central crop (#386).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
