@@ -58,6 +58,7 @@
 <url><loc>/reference/item_transform_perspective.html</loc></url>
 <url><loc>/reference/item_transform_random_affine.html</loc></url>
 <url><loc>/reference/item_transform_random_crop.html</loc></url>
+<url><loc>/reference/item_transform_random_erasing.html</loc></url>
 <url><loc>/reference/item_transform_random_horizontal_flip.html</loc></url>
 <url><loc>/reference/item_transform_random_resize_crop.html</loc></url>
 <url><loc>/reference/item_transform_random_rotation.html</loc></url>
