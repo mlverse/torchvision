@@ -812,7 +812,7 @@ test_that("item_transform_random_rotation with a zero range is the identity", {
 
   rot_item <- item_transform_rotate(item, angle = 0, expand = FALSE)
   result <- item_transform_random_rotation(rot_item, degrees = 0)
-  
+
   expect_s3_class(result, "image_with_rotated_box")
   expect_equal_to_r(result$x, original_img, tolerance = 1e-4)
   expect_equal_to_r(result$y$boxes, matrix(c(10, 20, 50, 60, 0), ncol = 5))
@@ -968,4 +968,96 @@ test_that("item_transform_random_rotation keeps the range given when the dataset
   angles <- vapply(1:10, function(i) as.numeric(ds$.getitem(1)$y$boxes[1, 5]), numeric(1))
 
   expect_true(all(abs(angles) <= 5))
+})
+
+
+# item_transform_random_erasing
+
+test_that("item_transform_random_erasing rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_random_erasing(img),
+    "requires a dataset item"
+  )
+  expect_error(
+    item_transform_random_erasing(42),
+    "requires a dataset item"
+  )
+})
+
+test_that("item_transform_random_erasing works on detection items", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+
+  # p = 0 never erases
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+  result <- item_transform_random_erasing(item, p = 0)
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$boxes, original_boxes))
+
+  # p = 1 erases the image but keeps boxes unchanged
+  result <- item_transform_random_erasing(item, p = 1)
+  expect_true(torch_equal(result$y$boxes, original_boxes))
+  expect_false(torch_equal(result$x, original_img))
+  expect_true((result$x == 0)$any()$item())
+
+  # the input item is never mutated
+  expect_true(torch_equal(item$x, original_img))
+  expect_s3_class(result, "image_with_bounding_box")
+
+  # per-channel value
+  result <- item_transform_random_erasing(item, p = 1, value = c(1, 2, 3))
+  region <- (result$x[1, , ] == 1) & (result$x[2, , ] == 2) & (result$x[3, , ] == 3)
+  expect_true(region$any()$item())
+
+  # random value
+  result <- item_transform_random_erasing(item, p = 1, value = "random")
+  expect_false(torch_equal(result$x, item$x))
+
+  # rotated-box items
+  rotated <- item_transform_rotate(item, angle = 30)
+  result <- item_transform_random_erasing(rotated, p = 1, value = c(5, 0.1, 7e9), ratio = c(0.1, 3.9), scale = c(0.1, 3.9))
+  expect_s3_class(result, "image_with_rotated_box")
+  expect_true(torch_equal(result$y$boxes, rotated$y$boxes))
+})
+
+test_that("item_transform_random_erasing works on segmentation items", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_img <- item$x$clone()
+  original_masks <- item$y$masks$clone()
+
+  # p = 0 never erases
+  result <- item_transform_random_erasing(item, p = 0)
+  expect_true(torch_equal(result$x, original_img))
+  expect_true(torch_equal(result$y$masks, original_masks))
+
+  # p = 1 erases the image but keeps masks unchanged
+  result <- item_transform_random_erasing(item, p = 1)
+  expect_true(torch_equal(result$y$masks, original_masks))
+  expect_false(torch_equal(result$x, item$x))
+})
+
+test_that("item_transform_random_erasing works on a dataset", {
+  ds <- dataset(
+    name = "toy_detection",
+    initialize = function() {},
+    .getitem = function(index) {
+      make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+    },
+    .length = function() 1L
+  )()
+
+  transformed <- item_transform_random_erasing(ds, p = 0)
+  item <- transformed$.getitem(1)
+
+  expect_s3_class(item, "image_with_bounding_box")
+})
+
+test_that("item_transform_random_erasing default parameters", {
+  fmls <- formals(item_transform_random_erasing)
+  expect_equal(fmls$p, 0.5)
+  expect_equal(eval(fmls$scale), c(0.02, 0.33))
+  expect_equal(eval(fmls$ratio), c(0.3, 3.3))
+  expect_equal(fmls$value, 0)
+  expect_false(fmls$inplace)
 })
