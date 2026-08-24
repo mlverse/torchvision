@@ -36,7 +36,9 @@ C × H × W tensor).
 }
 
 The returned item is given class \code{image_with_segmentation_mask} so it can be
-visualised with helpers like \code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}}.
+visualised with helpers like \code{\link[=draw_segmentation_masks]{draw_segmentation_masks()}}, and its \code{y} is given
+class \code{segmentation_target}, which target transforms dispatch on. The dataset
+itself inherits \code{segmentation_dataset}.
 }
 \description{
 Loads the Roboflow 100 "peixos" dataset for semantic segmentation.

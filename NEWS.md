@@ -27,15 +27,21 @@
 * `item_transform_rotate()` now supports segmentation items and datasets, rotating the masks alongside the image (@srishtiii28, #379).
 * Added `item_transform_crop()` for cropping dataset items at a specified location and size, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #371).
 * Added `item_transform_pad()` for padding dataset items on all sides, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #373).
+* Added `item_transform_perspective()` for applying a perspective transform to dataset items, with support for detection and segmentation item types and datasets, and implemented `transform_perspective()` for tensor images (@DerrickUnleashed, #377).
 * Added `item_transform_random_affine()` for applying an affine transformation drawn from the given ranges to dataset items, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #390).
 * Added `item_transform_random_crop()` for cropping dataset items at a random location with optional padding, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #387).
 * Added `item_transform_random_resize_crop()` for cropping dataset items to a random area and aspect ratio before resizing them to a given size, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #386).
 * Added `item_transform_random_erasing()` for randomly erasing a rectangular region of dataset items with probability `p`, with support for detection, segmentation and rotated-box item types and datasets (#389).
+* Detection datasets (`coco_detection_dataset()`, `pascal_detection_dataset()` and the `rf100_*_collection()`s) now inherit the `object_detection_dataset` class and their item target `y` the `object_detection_target` class.
+  Segmentation datasets (`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`, `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and `rf100_peixos_segmentation_dataset()`) now inherit the `segmentation_dataset` and `segmentation_target` classes. 
+  Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
 
 ## Bug fixes and improvements
 
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
+* `item_transform_rotate()` no longer truncates the rotation angle to a whole number of degrees
+  when the target stores its boxes as an integer tensor, as `pascal_detection_dataset()` does (#360).
 * `transform_random_resized_crop()` no longer loses the last row and column of the image, and no longer
   padded with a black edge when it falls back to a central crop (#386).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the

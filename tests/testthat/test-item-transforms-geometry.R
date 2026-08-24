@@ -241,6 +241,15 @@ test_that("item_transform_rotate can be composed", {
   expect_equal(result$y$labels, labels)
 })
 
+test_that("item_transform_rotate keeps a fractional angle for integer boxes", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  item$y$boxes <- item$y$boxes$to(dtype = torch_long())
+
+  result <- item_transform_rotate(item, angle = 12.7, expand = FALSE)
+
+  expect_equal_to_r(result$y$boxes[1, 5], 12.7, tolerance = 1e-5)
+})
+
 test_that("item_transform_rotate 0 degrees preserves masks for segmentation", {
   item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
   original_masks <- item$y$masks$clone()

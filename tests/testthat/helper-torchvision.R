@@ -98,6 +98,7 @@ make_segmentation_item <- function(image_size = c(100L, 200L), num_masks = 3L) {
   masks <- torch_rand(num_masks, image_size[1], image_size[2]) > 0.5
   labels <- torch_ones(num_masks, dtype = torch_long())
   y <- list(masks = masks, labels = labels, image_height = image_size[1], image_width = image_size[2])
+  class(y) <- c("segmentation_target", "list")
   item <- list(x = x, y = y)
   class(item) <- c("image_with_segmentation_mask", "list")
   item
@@ -122,7 +123,7 @@ make_detection_target <- function(boxes,
   if (is.null(iscrowd)) {
     iscrowd <- torch_zeros(boxes$size(1), dtype = torch::torch_uint8())
   }
-  list(
+  target <- list(
     boxes = boxes,
     labels = labels,
     image_height = image_size[1],
@@ -131,6 +132,8 @@ make_detection_target <- function(boxes,
     area = area,
     iscrowd = iscrowd
   )
+  class(target) <- c("object_detection_target", "list")
+  target
 }
 
 make_detection_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)) {

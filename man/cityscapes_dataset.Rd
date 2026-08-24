@@ -46,6 +46,9 @@ A torch dataset object. Each item is a named list:
 \item \code{polygon}: Polygon annotations (nested list structure)
 }
 }
+
+The dataset inherits \code{segmentation_dataset} and its \code{y} inherits
+\code{segmentation_target}, which target transforms dispatch on.
 }
 \description{
 The Cityscapes dataset contains street scene images from 50 European cities

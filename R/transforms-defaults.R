@@ -341,14 +341,7 @@ get_random_rotation_params <- function(degrees) {
   as.numeric(torch_empty(1)$uniform_(degrees[1], degrees[2]))
 }
 
-#' @export
-transform_random_rotation.default <- function(img, degrees, interpolation=0,
-                                              expand=FALSE, center=NULL, fill=NULL, resample) {
-  if (!missing(resample)) {
-    deprecated("'resample' is deprecated, use 'interpolation' instead")
-    interpolation <- resample
-  }
-
+check_random_rotation_params <- function(degrees) {
   if (length(degrees) == 1) {
 
     if (degrees < 0)
@@ -359,6 +352,19 @@ transform_random_rotation.default <- function(img, degrees, interpolation=0,
   } else if (length(degrees) != 2) {
     value_error("degrees must be length 1 or 2")
   }
+
+  degrees
+}
+
+#' @export
+transform_random_rotation.default <- function(img, degrees, interpolation=0,
+                                              expand=FALSE, center=NULL, fill=NULL, resample) {
+  if (!missing(resample)) {
+    deprecated("'resample' is deprecated, use 'interpolation' instead")
+    interpolation <- resample
+  }
+
+  degrees <- check_random_rotation_params(degrees)
 
   angle <- get_random_rotation_params(degrees)
   transform_rotate(img, angle, interpolation, expand, center, fill)
