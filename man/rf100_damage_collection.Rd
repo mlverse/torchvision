@@ -36,7 +36,10 @@ A torch dataset. Each element is a named list with:
 }
 
 The returned item inherits the class \code{image_with_bounding_box} so it can be
-visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}.
+visualised with helper functions such as \code{\link[=draw_bounding_boxes]{draw_bounding_boxes()}}, and its \code{y}
+inherits \code{object_detection_target}, which target transforms such as
+\code{\link[=target_transform_rotate]{target_transform_rotate()}} dispatch on. The collection itself inherits
+\code{object_detection_dataset}.
 }
 \description{
 Loads one of the RoboFlow 100 Damage & Risk assesment datasets with

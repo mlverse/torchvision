@@ -22,11 +22,13 @@ test_that("coco_detection_dataset loads a single example correctly", {
   ds <- coco_detection_dataset(root = tmp, train = FALSE, year = "2017", download = TRUE)
 
   expect_s3_class(ds, "coco_detection_dataset")
+  expect_s3_class(ds, "object_detection_dataset")
   expect_gt(length(ds), 0)
 
   item <- ds[1]
   expect_s3_class(item, "image_with_bounding_box")
   y <- item$y
+  expect_s3_class(y, "object_detection_target")
 
   expect_is(item$x, "array")
   expect_length(dim(item$x), 3)

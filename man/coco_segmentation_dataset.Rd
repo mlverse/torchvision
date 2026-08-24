@@ -38,7 +38,10 @@ An object of class \code{coco_segmentation_dataset}. Each item is a list:
 }
 
 The returned object has S3 class \code{"image_with_segmentation_mask"}
-to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()}.
+to enable automatic dispatch by visualization functions such as \code{draw_segmentation_masks()},
+and its \code{y} has S3 class \code{"segmentation_target"} so that target transforms
+such as \code{\link{target_transform_coco_masks}()} dispatch on it. The dataset
+itself inherits \code{"segmentation_dataset"}.
 
 For object detection tasks without segmentation, use \code{\link{coco_detection_dataset}} instead.
 }

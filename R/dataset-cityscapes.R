@@ -31,6 +31,9 @@
 #'     }
 #' }
 #'
+#' The dataset inherits `segmentation_dataset` and its `y` inherits
+#' `segmentation_target`, which target transforms dispatch on.
+#'
 #' @section Dataset Structure:
 #' The Cityscapes dataset includes:
 #' \itemize{
@@ -204,6 +207,8 @@ cityscapes_dataset <- torch::dataset(
       )
     }
 
+    as_segmentation_dataset(self)
+
     cli_inform(
       c(
         "v" = "Loaded {.cls {class(self)[[1]]}} dataset",
@@ -279,7 +284,7 @@ cityscapes_dataset <- torch::dataset(
     x <- magick_loader(img_path)
 
     # Load targets based on target_type
-    y <- list()
+    y <- as_segmentation_target(list())
 
     for (ttype in self$target_type) {
       target_path <- self$get_target_path(img_path, ttype)

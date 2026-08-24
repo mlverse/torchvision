@@ -4,12 +4,15 @@
 \name{prepare_sahi_split}
 \alias{prepare_sahi_split}
 \alias{target_transform_sahi_crop}
+\alias{target_transform_sahi_crop.object_detection_target}
 \alias{transform_sahi_crop}
 \title{Slicing Aid for Hyper Inference (SAHI)}
 \usage{
 prepare_sahi_split(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2))
 
 target_transform_sahi_crop(y, sahi_split, min_area_ratio = 0.1)
+
+\method{target_transform_sahi_crop}{object_detection_target}(y, sahi_split, min_area_ratio = 0.1)
 
 transform_sahi_crop(x, sahi_split)
 }
@@ -23,8 +26,9 @@ a numeric vector \code{c(height, width)} or a dataset.}
 \item{overlap_size_ratio}{Numeric vector of length 2: vertical and horizontal
 overlap ratios \code{c(overlap_h, overlap_w)}.}
 
-\item{y}{Detection target list containing \code{boxes} and \code{labels}.
-Bounding boxes in \code{(x1, y1, x2, y2)} format.}
+\item{y}{An \code{object_detection_target} containing \code{boxes} and
+\code{labels}, with bounding boxes in \code{(x1, y1, x2, y2)} format, or a
+list of such targets to transform as a batch.}
 
 \item{sahi_split}{An object of class \code{sahi_split} created by
 \code{prepare_sahi_split()}.}

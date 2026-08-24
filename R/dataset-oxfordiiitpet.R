@@ -16,6 +16,9 @@
 #'   - \code{"category"}: an integer in 1–37 indicating the pet breed.
 #'   - \code{"binary-category"}: 1 for Cat, 2 for Dog.
 #'
+#' The dataset inherits \code{segmentation_dataset} and its `y` inherits
+#' \code{segmentation_target}, which target transforms dispatch on.
+#'
 #' @examples
 #' \dontrun{
 #' # Load the Oxford-IIIT Pet dataset with basic tensor transform
@@ -102,6 +105,8 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       self$classes <- c("Cat", "Dog")
     }
 
+    as_segmentation_dataset(self)
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
@@ -186,10 +191,10 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
       self$classes <- c("Cat","Dog")
     }
 
-    y <- list(
+    y <- as_segmentation_target(list(
       masks = masks,
       label = label
-    )
+    ))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)
