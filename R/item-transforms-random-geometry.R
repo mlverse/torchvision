@@ -629,3 +629,145 @@ random_affine_item <- function(x, degrees, translate, scale, shear, interpolatio
                         scale = params[[3]], shear = params[[4]],
                         interpolation = interpolation, fill = fill, center = center)
 }
+
+#' Randomly apply a perspective transform to a dataset item
+#'
+#' Applies a random perspective transformation to the image inside a dataset
+#' item with a given probability. The degree of distortion is controlled by
+#' \code{distortion_scale}. When a transform occurs, the same perspective
+#' mapping is applied to bounding boxes and masks so that the targets stay
+#' aligned with the image.
+#'
+#' The transformation is drawn again for every item, so that a dataset wrapped
+#' with this transform yields a different perspective on each access.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @param distortion_scale (numeric) Argument to control the degree of
+#'   distortion, ranging from 0 to 1. Default is 0.5.
+#' @param p (numeric) Probability of the image being transformed.
+#'   Default is 0.5.
+#' @param interpolation (integer) Interpolation mode. Default is 2
+#'   (bilinear).
+#' @param fill (number or tuple) Pixel fill value for the area outside the
+#'   transformed image. Default is 0.
+#'
+#' @return A dataset item of the same class. With probability \code{p}, the
+#'   image and targets are perspective transformed; otherwise they are
+#'   returned unchanged.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_random_perspective(before)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#'
+#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' tensor_image_browse(grid)
+#' }
+#'
+#' @family item_random_transforms
+#'
+#' @export
+item_transform_random_perspective <- function(x, distortion_scale = 0.5, p = 0.5,
+                                              interpolation = 2, fill = 0) {
+  UseMethod("item_transform_random_perspective", x)
+}
+
+#' @export
+item_transform_random_perspective.default <- function(x, distortion_scale = 0.5, p = 0.5,
+                                                      interpolation = 2, fill = 0) {
+  cli_abort(
+    "{.fn item_transform_random_perspective} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To transform a raw image tensor, use {.fn transform_random_perspective} instead."
+  )
+}
+
+#' @export
+item_transform_random_perspective.dataset <- function(x, distortion_scale = 0.5, p = 0.5,
+                                                      interpolation = 2, fill = 0) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_random_perspective(item, distortion_scale = distortion_scale, p = p,
+                                      interpolation = interpolation, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_perspective.image_with_bounding_box <- function(x, distortion_scale = 0.5,
+                                                                      p = 0.5, interpolation = 2,
+                                                                      fill = 0) {
+  if (stats::runif(1) < p) {
+    img_size <- get_image_size(x$x)
+    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
+    x <- item_transform_perspective(x, startpoints = params[[1]], endpoints = params[[2]],
+                                    interpolation = interpolation, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_perspective.image_with_segmentation_mask <- function(x, distortion_scale = 0.5,
+                                                                           p = 0.5, interpolation = 2,
+                                                                           fill = 0) {
+  if (stats::runif(1) < p) {
+    img_size <- get_image_size(x$x)
+    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
+    x <- item_transform_perspective(x, startpoints = params[[1]], endpoints = params[[2]],
+                                    interpolation = interpolation, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_perspective.image_with_rotated_box <- function(x, distortion_scale = 0.5,
+                                                                      p = 0.5, interpolation = 2,
+                                                                      fill = 0) {
+  if (stats::runif(1) < p) {
+    img_size <- get_image_size(x$x)
+    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
+    startpoints <- params[[1]]
+    endpoints <- params[[2]]
+
+    x$x <- transform_perspective(x$x, startpoints = startpoints, endpoints = endpoints,
+                                  interpolation = interpolation, fill = fill)
+
+    boxes <- x$y$boxes$clone()
+    if (boxes$size(1) > 0) {
+      angle <- boxes[, 5]$clone()
+      boxes_4 <- boxes[, 1:4]$clone()
+      boxes_4 <- perspective_boxes(boxes_4, startpoints = startpoints, endpoints = endpoints)
+      img_size <- get_image_size(x$x)
+      img_w <- img_size[1]
+      img_h <- img_size[2]
+      boxes_4[, 1] <- torch_clamp(boxes_4[, 1], 0, img_w)
+      boxes_4[, 3] <- torch_clamp(boxes_4[, 3], 0, img_w)
+      boxes_4[, 2] <- torch_clamp(boxes_4[, 2], 0, img_h)
+      boxes_4[, 4] <- torch_clamp(boxes_4[, 4], 0, img_h)
+      keep <- as.logical((boxes_4[, 3] > boxes_4[, 1]) & (boxes_4[, 4] > boxes_4[, 2]))
+      if (!all(keep)) {
+        boxes_4 <- boxes_4[keep, ]
+        angle <- angle[keep]
+        x$y$labels <- x$y$labels[keep]
+        if (!is.null(x$y$area)) {
+          x$y$area <- x$y$area[keep]
+        }
+      }
+      x$y$boxes <- torch_cat(list(boxes_4, angle$unsqueeze(2)), dim = 2)
+    }
+  }
+  x
+}
