@@ -685,28 +685,6 @@ random_affine_item <- function(x, degrees, translate, scale, shear, interpolatio
 #' @export
 item_transform_random_erasing <- function(x, p = 0.5, scale = c(0.02, 0.33), ratio = c(0.3, 3.3),
                                           value = 0, inplace = FALSE) {
-  if (!is.numeric(p) || length(p) != 1 || p < 0 || p > 1) {
-    cli_abort("Random erasing probability should be between 0 and 1.")
-  }
-  if (length(scale) != 2 || length(ratio) != 2 || !is.numeric(scale) || !is.numeric(ratio)) {
-    cli_abort("Scale and ratio should be numeric vectors of length 2.")
-  }
-  if (scale[1] > scale[2] || ratio[1] > ratio[2]) {
-    cli_abort("Scale and ratio should be of kind (min, max).")
-  }
-  if (scale[1] < 0 || scale[2] > 1) {
-    cli_abort("Scale should be between 0 and 1.")
-  }
-  if (is.character(value) && value != "random") {
-    cli_abort("If value is a string, it should be {.val random}.")
-  }
-  if (!is.numeric(value) && !is.character(value)) {
-    cli_abort("Value should be a number, a numeric vector or the string {.val random}.")
-  }
-  if (is.numeric(value) && !(length(value) %in% c(1, 3))) {
-    cli_abort("If value is a sequence, it should have either a single value or 3 (number of input channels).")
-  }
-
   UseMethod("item_transform_random_erasing", x)
 }
 
