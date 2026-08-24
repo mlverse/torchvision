@@ -134,14 +134,42 @@ test_that("hflip", {
 
 test_that("perspective", {
 
-  skip("not implemented")
-
   x <- torch_randn(3, 50, 50)
   o <- transform_perspective(x, startpoints = list(c(2,2), c(2,3), c(3,2), c(3,3)),
                              endpoints = list(c(4,4), c(4,5), c(5,4), c(5,5)))
 
+  expect_tensor_shape(o, c(3, 50, 50))
+  expect_tensor_dtype(o, x$dtype)
+
   ob <- transform_perspective(x$unsqueeze(1), startpoints = list(c(2,2), c(2,3), c(3,2), c(3,3)),
                              endpoints = list(c(4,4), c(4,5), c(5,4), c(5,5)))
+
+  expect_tensor_shape(ob, c(1, 3, 50, 50))
+  expect_true(o$unsqueeze(1)$allclose(ob, atol = 1e-5))
+
+})
+
+test_that("perspective identity preserves image", {
+
+  x <- torch_randn(3, 30, 40)
+  o <- transform_perspective(x,
+    startpoints = list(c(0, 0), c(39, 0), c(39, 29), c(0, 29)),
+    endpoints = list(c(0, 0), c(39, 0), c(39, 29), c(0, 29))
+  )
+
+  expect_true(o$allclose(x, atol = 1e-4))
+
+})
+
+test_that("perspective uint8 preserves dtype", {
+
+  x <- (torch_rand(3, 30, 40) * 255)$to(dtype = torch_uint8())
+  o <- transform_perspective(x,
+    startpoints = list(c(0, 0), c(39, 0), c(39, 29), c(0, 29)),
+    endpoints = list(c(2, 1), c(38, 2), c(37, 27), c(1, 28))
+  )
+
+  expect_tensor_dtype(o, torch_uint8())
 
 })
 
@@ -307,6 +335,9 @@ test_that("random_affine", {
   ob <- transform_random_affine(x$unsqueeze(1), 0, c(0, 0.1))
   expect_lte(as.numeric(torch_sum(x) - 1), as.numeric(torch_sum(ob)))
   expect_gte(as.numeric(torch_sum(x)), as.numeric(torch_sum(ob)))
+
+  o <- transform_random_affine(x, 0, shear = 10)
+  expect_tensor_shape(o, c(1, 8, 8))
 
 })
 

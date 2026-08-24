@@ -10,6 +10,16 @@ test_that("random_resized_crop", {
 
 })
 
+test_that("random_resized_crop crops inside the image when it falls back to a central crop", {
+  img <- torch::torch_randn(3, 100, 200)
+
+  expect_equal(get_random_resized_crop_params(img, c(1, 1), c(1, 1)), c(1, 51, 100, 100))
+
+  o <- transform_random_resized_crop(img, size = c(100, 100), scale = c(1, 1), ratio = c(1, 1))
+
+  expect_true(torch_equal(o, img[, , 51:150]))
+})
+
 test_that("center_crop pads a non-square size correctly", {
   x <- torch_ones(3, 16, 20)
 
