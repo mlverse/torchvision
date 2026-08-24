@@ -80,6 +80,7 @@ tensor_image_browse(after_plot)
 Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_crop]{item_transform_random_crop()}},
+\code{\link[=item_transform_random_erasing]{item_transform_random_erasing()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}
 }
