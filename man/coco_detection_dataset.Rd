@@ -37,7 +37,10 @@ An object of class \code{coco_detection_dataset}. Each item is a list:
 }
 
 The returned object has S3 class \code{"image_with_bounding_box"}
-to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()}.
+to enable automatic dispatch by visualization functions such as \code{draw_bounding_boxes()},
+and its \code{y} has S3 class \code{"object_detection_target"} so that target transforms
+such as \code{\link{target_transform_rotate}()} dispatch on it. The dataset itself
+inherits \code{"object_detection_dataset"}.
 
 For instance segmentation tasks, use \code{\link{coco_segmentation_dataset}} instead.
 }

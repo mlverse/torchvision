@@ -21,7 +21,10 @@ NULL
 #'     - `boxes`: a torch_tensor of shape (N, 4) with bounding boxes, each in \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
 #'
 #' The returned item inherits the class `image_with_bounding_box` so it can be
-#' visualised with helper functions such as [draw_bounding_boxes()].
+#' visualised with helper functions such as [draw_bounding_boxes()], and its `y`
+#' inherits `object_detection_target`, which target transforms such as
+#' [target_transform_rotate()] dispatch on. The collection itself inherits
+#' `object_detection_dataset`.
 #'
 #' @examples
 #' \dontrun{
@@ -171,6 +174,8 @@ rf100_document_collection <- torch::dataset(
       self$.data <- ads$to_data_frame() %>% subset(lengths(objects$bbox) > 0)
     }
 
+    as_object_detection_dataset(self)
+
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
 
@@ -206,7 +211,7 @@ rf100_document_collection <- torch::dataset(
       labels <- unlist(df$objects$label)
     }
 
-    y <- list(image_id = df$image_id, labels = labels, boxes = boxes)
+    y <- as_object_detection_target(list(image_id = df$image_id, labels = labels, boxes = boxes))
     if (!is.null(self$transform)) x <- self$transform(x)
     if (!is.null(self$target_transform)) y <- self$target_transform(y)
 
@@ -246,7 +251,7 @@ rf100_document_collection <- torch::dataset(
     # y step 3 repeat image_id along each of unnested value
     image_id_rep <- rep(df$image_id, lengths(unnested_df$category))
 
-    y <- list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox)
+    y <- as_object_detection_target(list(image_id = image_id_rep, labels = unnested_label, boxes = unnested_bbox))
 
     if (!is.null(self$transform)) {
       x_lst <- self$transform(x_lst)

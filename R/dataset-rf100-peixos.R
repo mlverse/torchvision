@@ -18,7 +18,9 @@ NULL
 #'     - `labels`: integer vector with the class index (always 1 for "fish").
 #'
 #' The returned item is given class `image_with_segmentation_mask` so it can be
-#' visualised with helpers like [draw_segmentation_masks()].
+#' visualised with helpers like [draw_segmentation_masks()], and its `y` is given
+#' class `segmentation_target`, which target transforms dispatch on. The dataset
+#' itself inherits `segmentation_dataset`.
 #'
 #' @examples
 #' \dontrun{
@@ -75,6 +77,8 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     }
 
     self$load_annotations()
+
+    as_segmentation_dataset(self)
 
     cli_inform("{.cls {class(self)[[1]]}} dataset loaded with {self$.length()} images across {length(self$classes)} classes.")
   },
@@ -142,7 +146,7 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
         }
       })
 
-    y <- list(masks = torch_stack(mask_lst)$sum(dim = 1, keepdim = TRUE), labels = 1L)
+    y <- as_segmentation_target(list(masks = torch_stack(mask_lst)$sum(dim = 1, keepdim = TRUE), labels = 1L))
 
     if (!is.null(self$transform)) {
       x <- self$transform(x)

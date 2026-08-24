@@ -2,18 +2,20 @@
 % Please edit documentation in R/target-transforms-detection.R
 \name{target_transform_rotate}
 \alias{target_transform_rotate}
-\alias{target_transform_rotate.list}
+\alias{target_transform_rotate.object_detection_target}
 \alias{target_transform_rotate.dataset}
 \title{Convert bounding boxes to rotated format}
 \usage{
 target_transform_rotate(target, angle = 0)
 
-\method{target_transform_rotate}{list}(target, angle = 0)
+\method{target_transform_rotate}{object_detection_target}(target, angle = 0)
 
 \method{target_transform_rotate}{dataset}(target, angle = 0)
 }
 \arguments{
-\item{target}{A list representing the detection target, containing at least:
+\item{target}{An \code{object_detection_target}, as returned by the \code{.getitem()}
+method of an \link[=coco_detection_dataset]{object detection dataset}, containing
+at least:
 \itemize{
 \item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format
 \item \code{image_height} (optional) — original image height, used for
@@ -55,6 +57,7 @@ target <- list(
   image_height = img$shape[2],
   image_width = img$shape[3]
 )
+class(target) <- c("object_detection_target", "list")
 rotated_target <- target_transform_rotate(target, angle = 4)
 
 # Rotated boxes (red, drawn as polygons)

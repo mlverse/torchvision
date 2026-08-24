@@ -2,12 +2,16 @@
 % Please edit documentation in R/target-transforms-segmentation.R
 \name{target_transform_coco_masks}
 \alias{target_transform_coco_masks}
+\alias{target_transform_coco_masks.segmentation_target}
 \title{Target Transform: COCO Polygon Segmentation to Masks}
 \usage{
 target_transform_coco_masks(y)
+
+\method{target_transform_coco_masks}{segmentation_target}(y)
 }
 \arguments{
-\item{y}{list being COCO dataset target variable, with names \code{segmentation}, \code{image_height}, \code{image_width}.}
+\item{y}{a \code{segmentation_target}, as returned by the \code{.getitem()} method of
+\code{\link[=coco_segmentation_dataset]{coco_segmentation_dataset()}}, with names \code{segmentation}, \code{image_height}, \code{image_width}.}
 }
 \value{
 Modified \code{y} list with added \code{masks} field (N, H, W) boolean tensor, N being the number of
@@ -17,11 +21,11 @@ classes.
 Converts COCO-style polygon segmentation annotations from target \verb{$segmentation} variable
 into boolean mask tensors as target \verb{$masks} variable in order to ease later-on visualisation
 via \code{draw_segmentation_mask()}.
-Use as \code{target_transform} in \code{coco_detection_dataset()}.
+Use as \code{target_transform} in \code{coco_segmentation_dataset()}.
 }
 \examples{
 \dontrun{
-ds <- coco_detection_dataset(
+ds <- coco_segmentation_dataset(
   root = "data",
   target_transform = target_transform_coco_masks
 )

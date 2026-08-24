@@ -38,10 +38,12 @@ pascal_detection_dataset(
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }
 \value{
-A torch dataset of class \code{pascal_segmentation_dataset}.
+A torch dataset of class \code{pascal_segmentation_dataset}, also
+inheriting \code{segmentation_dataset}.
 
 The returned list inherits class \code{image_with_segmentation_mask}, which allows generic visualization
-utilities to be applied.
+utilities to be applied, and its \code{y} inherits \code{segmentation_target}, which
+target transforms dispatch on.
 
 Each element is a named list with the following structure:
 \itemize{
@@ -54,10 +56,12 @@ Each of the 21 channels corresponds to a Pascal VOC classes
 }
 }
 
-A torch dataset of class \code{pascal_detection_dataset}.
+A torch dataset of class \code{pascal_detection_dataset}, also inheriting
+\code{object_detection_dataset}.
 
 The returned list inherits class \code{image_with_bounding_box}, which allows generic visualization
-utilities to be applied.
+utilities to be applied, and its \code{y} inherits \code{object_detection_target}, which target
+transforms such as \code{\link{target_transform_rotate}()} dispatch on.
 
 Each element is a named list:
 \itemize{
