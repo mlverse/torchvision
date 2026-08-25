@@ -1,0 +1,177 @@
+---
+title: "Visualization utilities"
+type: docs
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+This article walks through the drawing helpers shipped with torchvision
+(`vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and
+`draw_keypoints()`) and shows how to feed them the output of a pretrained
+detection or segmentation model. It follows the
+[Visualization utilities](https://docs.pytorch.org/vision/stable/auto_examples/others/plot_visualization_utils.html)
+tutorial from PyTorch.
+
+The code below is not evaluated when the website is built, because it downloads
+around 250 MB of model weights. Every figure was produced by running it.
+
+```{r setup}
+library(torchvision)
+library(torch)
+
+gallery <- "https://raw.githubusercontent.com/pytorch/vision/main/gallery/assets/"
+dog1 <- base_loader(paste0(gallery, "dog1.jpg")) %>% transform_to_tensor()
+dog2 <- base_loader(paste0(gallery, "dog2.jpg")) %>% transform_to_tensor()
+```
+
+## A grid of images
+
+`vision_make_grid()` tiles a batch of images into a single tensor, which is a
+quick way to eyeball a batch coming out of a `dataloader()`.
+
+```{r}
+grid <- vision_make_grid(torch_stack(list(dog1, dog2)), num_rows = 2)
+tensor_image_browse(grid)
+```
+
+![The two photographs tiled side by side into a single tensor](assets/viz-grid.jpg)
+
+## Bounding boxes
+
+`draw_bounding_boxes()` expects an `(N, 4)` tensor of boxes given as
+`(xmin, ymin, xmax, ymax)` in absolute pixel coordinates.
+
+```{r}
+boxes <- torch_tensor(rbind(
+  c(50, 50, 100, 200),
+  c(210, 150, 350, 430)
+), dtype = torch_float())
+
+boxed <- draw_bounding_boxes(dog1, boxes, colors = c("red", "yellow"), width = 5)
+tensor_image_browse(boxed)
+```
+
+![Hand-written boxes: red over the trees, yellow around the corgi](assets/viz-boxes.jpg)
+
+## Object detection with RF-DETR
+
+Boxes are usually not hand written but predicted. RF-DETR expects
+ImageNet-normalized inputs, so normalize before batching. The model still finds
+the dogs on unnormalized input, but far less confidently: the corgi below scores
+0.91 with normalization and 0.69 without.
+
+```{r}
+norm_mean <- c(0.485, 0.456, 0.406)
+norm_std <- c(0.229, 0.224, 0.225)
+
+batch <- torch_stack(list(
+  transform_normalize(dog1, norm_mean, norm_std),
+  transform_normalize(dog2, norm_mean, norm_std)
+))
+
+model <- model_rfdetr_base(pretrained = TRUE)
+model$eval()
+detections <- with_no_grad(model(batch))$detections
+```
+
+RF-DETR resizes the batch to its own working resolution internally and maps the
+boxes back to the coordinates of the images you passed in, so they can be drawn
+straight onto the original tensors. Each element of `detections` holds `boxes`,
+`labels` and `scores` sorted by decreasing score. Keep the confident ones, and
+turn the label indices into readable names with `coco_classes()`.
+
+```{r}
+draw_detection <- function(image, detection) {
+  keep <- as.logical(as.array(detection$scores > 0.5))
+  draw_bounding_boxes(
+    image,
+    detection$boxes[keep, , drop = FALSE],
+    labels = coco_classes(as.integer(detection$labels[keep])),
+    colors = "yellow",
+    width = 5,
+    font_size = 30
+  )
+}
+
+tensor_image_browse(draw_detection(dog1, detections[[1]]))
+tensor_image_browse(draw_detection(dog2, detections[[2]]))
+```
+
+![RF-DETR finds the corgi and labels it dog](assets/viz-rfdetr-dog1.jpg)
+![The second image of the same batch, labeled dog too](assets/viz-rfdetr-dog2.jpg)
+
+## Semantic segmentation masks
+
+`model_fcn_resnet50()` scores every pixel against the 21 PASCAL VOC classes. Its
+pretrained weights are evaluated at 520 pixels, so resize before normalizing,
+and keep the resized images around to draw on: masks and image must share their
+height and width.
+
+```{r}
+resized <- lapply(list(dog1, dog2), transform_resize, size = c(520, 520))
+batch <- torch_stack(list(
+  transform_normalize(resized[[1]], norm_mean, norm_std),
+  transform_normalize(resized[[2]], norm_mean, norm_std)
+))
+
+model <- model_fcn_resnet50(pretrained = TRUE)
+model$eval()
+scores <- with_no_grad(model(batch))$out
+```
+
+`scores` is a `(2, 21, 520, 520)` float tensor. Handed such a tensor,
+`draw_segmentation_masks()` takes the argmax over the class dimension and
+colors each class that appears.
+
+```{r}
+segmented <- draw_segmentation_masks(resized[[1]], scores[1, , , ], alpha = 0.6)
+tensor_image_browse(segmented)
+```
+
+![Every class the model assigns: the dog in yellow, the background in pink](assets/viz-fcn-classes.jpg)
+
+To highlight a single class instead, build the boolean mask yourself. `dog` is
+the 13th of the 21 classes, and softmax turns the scores into per-pixel
+probabilities that can be thresholded.
+
+```{r}
+dog_masks <- nnf_softmax(scores, dim = 2)[, 13, , ] > 0.7
+
+tensor_image_browse(draw_segmentation_masks(resized[[1]], dog_masks[1, , ],
+                                            alpha = 0.6, colors = "blue"))
+tensor_image_browse(draw_segmentation_masks(resized[[2]], dog_masks[2, , ],
+                                            alpha = 0.6, colors = "blue"))
+```
+
+![The dog class on its own, thresholded and shaded blue](assets/viz-fcn-dog1.jpg)
+![The same mask over the German shepherd](assets/viz-fcn-dog2.jpg)
+
+## Keypoints
+
+`draw_keypoints()` takes an `(N, K, 2)` tensor holding the `(x, y)` location of
+`K` keypoints for each of `N` instances. torchvision has no pose estimation
+model to feed it (`model_mtcnn()` predicts five landmarks, but only on human
+faces), so the keypoints here are annotated by hand: the two ear tips, the two
+eyes and the nose of the corgi. `connectivity` lists the pairs of keypoint
+indices to join with a line. Each line is drawn in the color of the keypoint it
+starts from, so leave `colors` at its default or pass one color per keypoint.
+
+```{r}
+keypoints <- torch_tensor(rbind(
+  c(220, 171),
+  c(296, 176),
+  c(239, 222),
+  c(262, 226),
+  c(242, 250)
+), dtype = torch_float())$reshape(c(1, 5, 2))
+
+connectivity <- list(c(1, 3), c(2, 4), c(3, 4), c(3, 5), c(4, 5))
+
+posed <- draw_keypoints(dog1, keypoints, connectivity = connectivity,
+                        radius = 6, width = 3)
+tensor_image_browse(posed)
+```
+
+![Five hand-annotated keypoints joined by the connectivity pairs](assets/viz-keypoints.jpg)
