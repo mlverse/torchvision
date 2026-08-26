@@ -34,7 +34,7 @@ right and bottom borders respectively.}
 desired size to avoid raising an exception. Since cropping is done
 after padding, the padding seems to be done at a random offset.}
 
-\item{fill}{(number or tuple) Pixel fill value for constant fill. Default is
+\item{fill}{(numeric or vector) Pixel fill value for constant fill. Default is
 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.}
 

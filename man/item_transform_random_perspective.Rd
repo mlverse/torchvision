@@ -17,17 +17,20 @@ item_transform_random_perspective(
 \code{image_with_segmentation_mask} object containing an image tensor
 and associated target data.}
 
-\item{distortion_scale}{(numeric) Argument to control the degree of
-distortion, ranging from 0 to 1. Default is 0.5.}
+\item{distortion_scale}{(numeric): Argument to control the degree of
+distortion and ranges from 0 to 1. Default is \code{0.5}.}
 
-\item{p}{(numeric) Probability of the image being transformed.
-Default is 0.5.}
+\item{p}{(numeric): Probability of the image being transformed. Default
+is \code{0.5}.}
 
-\item{interpolation}{(integer) Interpolation mode. Default is 2
-(bilinear).}
+\item{interpolation}{(integer, optional): Desired interpolation. An integer
+\code{0 = nearest}, \code{2 = bilinear}, and \code{3 = bicubic} or a name from
+\code{\link[magick:filter_types]{magick::filter_types()}}.}
 
-\item{fill}{(number or tuple) Pixel fill value for the area outside the
-transformed image. Default is 0.}
+\item{fill}{(numeric vector or numeric): Pixel fill value for constant fill.
+Default is \code{0}. If a numeric vector of length 3, it is used to fill R, G,
+B channels respectively. This value is only used when the \code{padding_mode}
+is constant. Only integer values are supported for Tensors.}
 }
 \value{
 A dataset item of the same class. With probability \code{p}, the
@@ -52,16 +55,15 @@ img <- base_loader(url) |> transform_to_tensor()
 
 boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_random_perspective(before)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
-
-grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-tensor_image_browse(grid)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+tensor_image_browse(before_plot)
+tensor_image_browse(after_plot)
 }
 
 }
@@ -69,8 +71,10 @@ tensor_image_browse(grid)
 Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_crop]{item_transform_random_crop()}},
+\code{\link[=item_transform_random_erasing]{item_transform_random_erasing()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
+\code{\link[=item_transform_random_rotation]{item_transform_random_rotation()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}
 }
 \concept{item_random_transforms}
