@@ -940,17 +940,7 @@ item_transform_random_perspective.image_with_bounding_box <- function(x, distort
 }
 
 #' @export
-item_transform_random_perspective.image_with_segmentation_mask <- function(x, distortion_scale = 0.5,
-                                                                           p = 0.5, interpolation = 2,
-                                                                           fill = 0) {
-  if (stats::runif(1) < p) {
-    c(width, height) %<-% get_image_size(x$x)
-    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
-    x <- item_transform_perspective(x, startpoints = startpoints, endpoints = endpoints,
-                                    interpolation = interpolation, fill = fill)
-  }
-  x
-}
+item_transform_random_perspective.image_with_segmentation_mask <- item_transform_random_perspective.image_with_bounding_box
 
 #' @export
 item_transform_random_perspective.image_with_rotated_box <- function(x, distortion_scale = 0.5,
