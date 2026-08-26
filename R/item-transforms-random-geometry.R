@@ -872,14 +872,7 @@ item_transform_random_erasing.image_with_rotated_box <- item_transform_random_er
 #' @param x A dataset item, typically an \code{image_with_bounding_box} or
 #'   \code{image_with_segmentation_mask} object containing an image tensor
 #'   and associated target data.
-#' @param distortion_scale (numeric) Argument to control the degree of
-#'   distortion, ranging from 0 to 1. Default is 0.5.
-#' @param p (numeric) Probability of the image being transformed.
-#'   Default is 0.5.
-#' @param interpolation (integer) Interpolation mode. Default is 2
-#'   (bilinear).
-#' @param fill (numeric or vector) Pixel fill value for the area outside the
-#'   transformed image. Default is 0.
+#' @inheritParams transform_random_perspective
 #'
 #' @return A dataset item of the same class. With probability \code{p}, the
 #'   image and targets are perspective transformed; otherwise they are
