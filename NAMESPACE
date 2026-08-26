@@ -58,6 +58,11 @@ S3method(item_transform_random_horizontal_flip,default)
 S3method(item_transform_random_horizontal_flip,image_with_bounding_box)
 S3method(item_transform_random_horizontal_flip,image_with_rotated_box)
 S3method(item_transform_random_horizontal_flip,image_with_segmentation_mask)
+S3method(item_transform_random_perspective,dataset)
+S3method(item_transform_random_perspective,default)
+S3method(item_transform_random_perspective,image_with_bounding_box)
+S3method(item_transform_random_perspective,image_with_rotated_box)
+S3method(item_transform_random_perspective,image_with_segmentation_mask)
 S3method(item_transform_random_resize_crop,dataset)
 S3method(item_transform_random_resize_crop,default)
 S3method(item_transform_random_resize_crop,image_with_bounding_box)
@@ -219,6 +224,7 @@ export(item_transform_random_affine)
 export(item_transform_random_crop)
 export(item_transform_random_erasing)
 export(item_transform_random_horizontal_flip)
+export(item_transform_random_perspective)
 export(item_transform_random_resize_crop)
 export(item_transform_random_rotation)
 export(item_transform_random_vertical_flip)
@@ -389,91 +395,97 @@ importFrom(grDevices,dev.off)
 importFrom(graphics,polygon)
 importFrom(jsonlite,fromJSON)
 importFrom(magrittr,"%>%")
-importFrom(stats,runif)
-importFrom(stats,setNames)
-importFrom(torch,as_array)
-importFrom(torch,dataset)
-importFrom(torch,load_state_dict)
-importFrom(torch,nn_adaptive_avg_pool2d)
-importFrom(torch,nn_batch_norm1d)
-importFrom(torch,nn_batch_norm2d)
-importFrom(torch,nn_conv2d)
-importFrom(torch,nn_conv_transpose2d)
-importFrom(torch,nn_dropout)
-importFrom(torch,nn_embedding)
-importFrom(torch,nn_gelu)
-importFrom(torch,nn_hardsigmoid)
-importFrom(torch,nn_hardswish)
-importFrom(torch,nn_identity)
-importFrom(torch,nn_init_constant_)
-importFrom(torch,nn_init_ones_)
-importFrom(torch,nn_init_trunc_normal_)
-importFrom(torch,nn_init_xavier_uniform_)
-importFrom(torch,nn_init_zeros_)
-importFrom(torch,nn_layer_norm)
-importFrom(torch,nn_linear)
-importFrom(torch,nn_max_pool2d)
-importFrom(torch,nn_module)
-importFrom(torch,nn_module_dict)
-importFrom(torch,nn_module_list)
-importFrom(torch,nn_multihead_attention)
-importFrom(torch,nn_parameter)
-importFrom(torch,nn_prelu)
-importFrom(torch,nn_relu)
-importFrom(torch,nn_sequential)
-importFrom(torch,nn_silu)
-importFrom(torch,nn_softmax)
-importFrom(torch,nnf_affine_grid)
-importFrom(torch,nnf_gelu)
-importFrom(torch,nnf_grid_sample)
-importFrom(torch,nnf_interpolate)
-importFrom(torch,nnf_layer_norm)
-importFrom(torch,nnf_normalize)
-importFrom(torch,nnf_relu)
-importFrom(torch,nnf_silu)
-importFrom(torch,nnf_softmax)
-importFrom(torch,torch_abs)
-importFrom(torch,torch_arange)
-importFrom(torch,torch_atan2)
-importFrom(torch,torch_bool)
-importFrom(torch,torch_cat)
-importFrom(torch,torch_chunk)
-importFrom(torch,torch_clamp)
-importFrom(torch,torch_cos)
-importFrom(torch,torch_cumsum)
-importFrom(torch,torch_div)
-importFrom(torch,torch_empty)
-importFrom(torch,torch_flatten)
-importFrom(torch,torch_float)
-importFrom(torch,torch_float32)
-importFrom(torch,torch_gather)
-importFrom(torch,torch_int32)
-importFrom(torch,torch_linspace)
-importFrom(torch,torch_log)
-importFrom(torch,torch_log2)
-importFrom(torch,torch_long)
-importFrom(torch,torch_matmul)
-importFrom(torch,torch_max)
-importFrom(torch,torch_meshgrid)
-importFrom(torch,torch_min)
-importFrom(torch,torch_nonzero)
-importFrom(torch,torch_ones)
-importFrom(torch,torch_ones_like)
-importFrom(torch,torch_rand)
-importFrom(torch,torch_randn)
-importFrom(torch,torch_sigmoid)
-importFrom(torch,torch_sign)
-importFrom(torch,torch_sin)
-importFrom(torch,torch_stack)
-importFrom(torch,torch_sum)
-importFrom(torch,torch_tensor)
-importFrom(torch,torch_topk)
-importFrom(torch,torch_uint8)
-importFrom(torch,torch_zeros)
-importFrom(torch,torch_zeros_like)
-importFrom(torch,with_no_grad)
-importFrom(utils,head)
-importFrom(utils,read.csv)
-importFrom(utils,read.delim)
-importFrom(utils,tail)
+importFrom(stats,
+  runif,
+  setNames
+)
+importFrom(torch,
+  as_array,
+  dataset,
+  load_state_dict,
+  nn_adaptive_avg_pool2d,
+  nn_batch_norm1d,
+  nn_batch_norm2d,
+  nn_conv2d,
+  nn_conv_transpose2d,
+  nn_dropout,
+  nn_embedding,
+  nn_gelu,
+  nn_hardsigmoid,
+  nn_hardswish,
+  nn_identity,
+  nn_init_constant_,
+  nn_init_ones_,
+  nn_init_trunc_normal_,
+  nn_init_xavier_uniform_,
+  nn_init_zeros_,
+  nn_layer_norm,
+  nn_linear,
+  nn_max_pool2d,
+  nn_module,
+  nn_module_dict,
+  nn_module_list,
+  nn_multihead_attention,
+  nn_parameter,
+  nn_prelu,
+  nn_relu,
+  nn_sequential,
+  nn_silu,
+  nn_softmax,
+  nnf_affine_grid,
+  nnf_gelu,
+  nnf_grid_sample,
+  nnf_interpolate,
+  nnf_layer_norm,
+  nnf_normalize,
+  nnf_relu,
+  nnf_silu,
+  nnf_softmax,
+  torch_abs,
+  torch_arange,
+  torch_atan2,
+  torch_bool,
+  torch_cat,
+  torch_chunk,
+  torch_clamp,
+  torch_cos,
+  torch_cumsum,
+  torch_div,
+  torch_empty,
+  torch_flatten,
+  torch_float,
+  torch_float32,
+  torch_gather,
+  torch_int32,
+  torch_linspace,
+  torch_log,
+  torch_log2,
+  torch_long,
+  torch_matmul,
+  torch_max,
+  torch_meshgrid,
+  torch_min,
+  torch_nonzero,
+  torch_ones,
+  torch_ones_like,
+  torch_rand,
+  torch_randn,
+  torch_sigmoid,
+  torch_sign,
+  torch_sin,
+  torch_stack,
+  torch_sum,
+  torch_tensor,
+  torch_topk,
+  torch_uint8,
+  torch_zeros,
+  torch_zeros_like,
+  with_no_grad
+)
+importFrom(utils,
+  head,
+  read.csv,
+  read.delim,
+  tail
+)
 importFrom(zeallot,"%<-%")

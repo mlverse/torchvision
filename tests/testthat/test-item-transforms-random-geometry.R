@@ -778,7 +778,6 @@ test_that("item_transform_random_affine works on detection and segmentation data
   expect_tensor_shape(item$y$masks, c(2, 100, 200))
 })
 
-
 # item_transform_random_rotation
 
 test_that("item_transform_random_rotation rejects non-item inputs", {
@@ -1060,4 +1059,99 @@ test_that("item_transform_random_erasing default parameters", {
   expect_equal(eval(fmls$ratio), c(0.3, 3.3))
   expect_equal(fmls$value, 0)
   expect_false(fmls$inplace)
+})
+
+
+# item_transform_random_perspective
+
+test_that("item_transform_random_perspective rejects non-item inputs", {
+  img <- torch_randn(3, 100, 200)
+  expect_error(
+    item_transform_random_perspective(img),
+    "requires a dataset item"
+  )
+  expect_error(
+    item_transform_random_perspective(42),
+    "requires a dataset item"
+  )
+  fmls <- formals(item_transform_random_perspective)
+  expect_equal(fmls$distortion_scale, 0.5)
+  expect_equal(fmls$p, 0.5)
+  expect_equal(fmls$interpolation, 2)
+  expect_equal(fmls$fill, 0)
+})
+
+test_that("item_transform_random_perspective detection items", {
+  item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  original_img <- item$x$clone()
+  original_boxes <- item$y$boxes$clone()
+
+  result_p0 <- item_transform_random_perspective(item, p = 0)
+  expect_true(torch_equal(result_p0$x, original_img))
+  expect_true(torch_equal(result_p0$y$boxes, original_boxes))
+
+  result_p1 <- item_transform_random_perspective(item, p = 1)
+  expect_false(torch_equal(result_p1$x, original_img))
+  expect_tensor_shape(result_p1$y$boxes, c(1, 4))
+
+  labels <- torch_tensor(c(1L, 2L), dtype = torch_long())
+  item_labels <- make_detection_item(
+    matrix(c(20, 30, 80, 90, 5, 5, 15, 25), ncol = 4, byrow = TRUE),
+    labels = labels
+  )
+  result_labels <- item_transform_random_perspective(item_labels, p = 1)
+  expect_true(result_labels$y$labels$eq(labels)$all()$item())
+
+  item_transform_random_perspective(item, p = 0)
+  expect_true(torch_equal(item$x, original_img))
+  expect_true(torch_equal(item$y$boxes, original_boxes))
+
+  ds <- dataset(
+    name = "toy_detection",
+    initialize = function() {},
+    .getitem = function(index) make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L)),
+    .length = function() 1L
+  )()
+  ds <- item_transform_random_perspective(ds, p = 1)
+  ds_item <- ds$.getitem(1)
+  expect_s3_class(ds_item, "image_with_bounding_box")
+  expect_tensor_shape(ds_item$x, c(3, 100, 200))
+  other <- ds$.getitem(1)
+  expect_false(torch_equal(ds_item$x, other$x))
+
+  rotated <- item_transform_rotate(item, angle = 30)
+  result_rot <- item_transform_random_perspective(rotated, p = 1)
+  expect_s3_class(result_rot, "image_with_rotated_box")
+  expect_tensor_shape(result_rot$y$boxes, c(1, 5))
+})
+
+test_that("item_transform_random_perspective segmentation items", {
+  item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  original_img <- item$x$clone()
+  original_masks <- item$y$masks$clone()
+
+  result_p0 <- item_transform_random_perspective(item, p = 0)
+  expect_true(torch_equal(result_p0$x, original_img))
+  expect_true(torch_equal(result_p0$y$masks, original_masks))
+
+  result_p1 <- item_transform_random_perspective(item, p = 1)
+  expect_s3_class(result_p1, "image_with_segmentation_mask")
+  expect_tensor_shape(result_p1$x, c(3, 100, 200))
+  expect_tensor_shape(result_p1$y$masks, c(2, 100, 200))
+
+  original_labels <- as_array(item$y$labels)
+  result_labels <- item_transform_random_perspective(item, p = 1)
+  expect_equal_to_r(result_labels$y$labels, original_labels)
+
+  ds <- dataset(
+    name = "toy_segmentation",
+    initialize = function() {},
+    .getitem = function(index) make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L),
+    .length = function() 1L
+  )()
+  ds <- item_transform_random_perspective(ds, p = 1)
+  ds_item <- ds$.getitem(1)
+  expect_s3_class(ds_item, "image_with_segmentation_mask")
+  expect_tensor_shape(ds_item$x, c(3, 100, 200))
+  expect_tensor_shape(ds_item$y$masks, c(2, 100, 200))
 })

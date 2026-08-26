@@ -34,7 +34,7 @@ right and bottom borders respectively.}
 desired size to avoid raising an exception. Since cropping is done
 after padding, the padding seems to be done at a random offset.}
 
-\item{fill}{(number or tuple) Pixel fill value for constant fill. Default is
+\item{fill}{(numeric or vector) Pixel fill value for constant fill. Default is
 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.}
 
@@ -85,6 +85,7 @@ Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_erasing]{item_transform_random_erasing()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
+\code{\link[=item_transform_random_perspective]{item_transform_random_perspective()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
 \code{\link[=item_transform_random_rotation]{item_transform_random_rotation()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}

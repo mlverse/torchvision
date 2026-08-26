@@ -344,7 +344,7 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #' @param pad_if_needed (logical) It will pad the image if smaller than the
 #'   desired size to avoid raising an exception. Since cropping is done
 #'   after padding, the padding seems to be done at a random offset.
-#' @param fill (number or tuple) Pixel fill value for constant fill. Default is
+#' @param fill (numeric or vector) Pixel fill value for constant fill. Default is
 #'   0. If a tuple of length 3, it is used to fill R, G, B channels
 #'   respectively. This value is only used when the padding_mode is constant.
 #' @param padding_mode (str) Type of padding. Should be: constant, edge,
@@ -822,7 +822,6 @@ item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, sc
     img_size <- get_image_size(x$x)
     c(top, left, height, width) %<-% get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
     if (!is.null(top)) {
-      # x$x <- erase_tensor_region(x$x, top, left, height, width, value, inplace)
       img_c <- x$x$size(1)
 
       if (!inplace) {
@@ -837,7 +836,6 @@ item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, sc
       w <- min(width, img_w - left)
 
       if (!(h <= 0L || w <= 0L)) {
-        # inplace region replacement
         region <- x$x$narrow(2, top + 1L, h)$narrow(3, left + 1L, w)
 
         if (is.character(value)) {
@@ -859,6 +857,128 @@ item_transform_random_erasing.image_with_segmentation_mask <- item_transform_ran
 
 #' @export
 item_transform_random_erasing.image_with_rotated_box <- item_transform_random_erasing.image_with_bounding_box
+
+#' Randomly apply a perspective transform to a dataset item
+#'
+#' Applies a random perspective transformation to the image inside a dataset
+#' item with a given probability. The degree of distortion is controlled by
+#' \code{distortion_scale}. When a transform occurs, the same perspective
+#' mapping is applied to bounding boxes and masks so that the targets stay
+#' aligned with the image.
+#'
+#' The transformation is drawn again for every item, so that a dataset wrapped
+#' with this transform yields a different perspective on each access.
+#'
+#' @param x A dataset item, typically an \code{image_with_bounding_box} or
+#'   \code{image_with_segmentation_mask} object containing an image tensor
+#'   and associated target data.
+#' @inheritParams transform_random_perspective
+#'
+#' @return A dataset item of the same class. With probability \code{p}, the
+#'   image and targets are perspective transformed; otherwise they are
+#'   returned unchanged.
+#'
+#' @examples
+#' \dontrun{
+#' url <- "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+#' img <- base_loader(url) |> transform_to_tensor()
+#'
+#' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
+#'
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
+#' class(before) <- c("image_with_bounding_box", "list")
+#'
+#' after <- item_transform_random_perspective(before)
+#'
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
+#' }
+#'
+#' @family item_random_transforms
+#'
+#' @export
+item_transform_random_perspective <- function(x, distortion_scale = 0.5, p = 0.5,
+                                              interpolation = 2, fill = 0) {
+  UseMethod("item_transform_random_perspective", x)
+}
+
+#' @export
+item_transform_random_perspective.default <- function(x, distortion_scale = 0.5, p = 0.5,
+                                                      interpolation = 2, fill = 0) {
+  cli_abort(
+    "{.fn item_transform_random_perspective} requires a dataset item (a list with {.var x} and {.var y} fields), not {.obj_type_friendly {x}}.
+    To transform a raw image tensor, use {.fn transform_random_perspective} instead."
+  )
+}
+
+#' @export
+item_transform_random_perspective.dataset <- function(x, distortion_scale = 0.5, p = 0.5,
+                                                      interpolation = 2, fill = 0) {
+  original_getitem <- x$.getitem
+  unlockBinding(".getitem", as.environment(x))
+  x$.getitem <- function(index) {
+    item <- original_getitem(index)
+    item_transform_random_perspective(item, distortion_scale = distortion_scale, p = p,
+                                      interpolation = interpolation, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_perspective.image_with_bounding_box <- function(x, distortion_scale = 0.5,
+                                                                      p = 0.5, interpolation = 2,
+                                                                      fill = 0) {
+  if (stats::runif(1) < p) {
+    c(width, height) %<-% get_image_size(x$x)
+    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
+    x <- item_transform_perspective(x, startpoints = startpoints, endpoints = endpoints,
+                                    interpolation = interpolation, fill = fill)
+  }
+  x
+}
+
+#' @export
+item_transform_random_perspective.image_with_segmentation_mask <- item_transform_random_perspective.image_with_bounding_box
+
+#' @export
+item_transform_random_perspective.image_with_rotated_box <- function(x, distortion_scale = 0.5,
+                                                                      p = 0.5, interpolation = 2,
+                                                                      fill = 0) {
+  if (stats::runif(1) < p) {
+    c(width, height) %<-% get_image_size(x$x)
+    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
+
+    x$x <- transform_perspective(x$x, startpoints = startpoints, endpoints = endpoints,
+                                  interpolation = interpolation, fill = fill)
+
+    boxes <- x$y$boxes$clone()
+    if (boxes$size(1) > 0) {
+      angle <- boxes[, 5]$clone()
+      boxes_4 <- boxes[, 1:4]$clone()
+      boxes_4 <- perspective_boxes(boxes_4, startpoints = startpoints, endpoints = endpoints)
+      img_size <- get_image_size(x$x)
+      img_w <- img_size[1]
+      img_h <- img_size[2]
+      boxes_4[, 1] <- torch_clamp(boxes_4[, 1], 0, img_w)
+      boxes_4[, 3] <- torch_clamp(boxes_4[, 3], 0, img_w)
+      boxes_4[, 2] <- torch_clamp(boxes_4[, 2], 0, img_h)
+      boxes_4[, 4] <- torch_clamp(boxes_4[, 4], 0, img_h)
+      keep <- as.logical((boxes_4[, 3] > boxes_4[, 1]) & (boxes_4[, 4] > boxes_4[, 2]))
+      if (!all(keep)) {
+        boxes_4 <- boxes_4[keep, ]
+        angle <- angle[keep]
+        x$y$labels <- x$y$labels[keep]
+        if (!is.null(x$y$area)) {
+          x$y$area <- x$y$area[keep]
+        }
+      }
+      x$y$boxes <- torch_cat(list(boxes_4, angle$unsqueeze(2)), dim = 2)
+    }
+  }
+  x
+}
 
 # Sample the location and size of a random erasing rectangle.
 #
