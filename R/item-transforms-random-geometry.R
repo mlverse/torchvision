@@ -890,11 +890,10 @@ item_transform_random_erasing.image_with_rotated_box <- item_transform_random_er
 #'
 #' after <- item_transform_random_perspective(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
-#'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
+#' tensor_image_browse(before_plot)
+#' tensor_image_browse(after_plot)
 #' }
 #'
 #' @family item_random_transforms
