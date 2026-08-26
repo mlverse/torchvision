@@ -931,9 +931,9 @@ item_transform_random_perspective.image_with_bounding_box <- function(x, distort
                                                                       p = 0.5, interpolation = 2,
                                                                       fill = 0) {
   if (stats::runif(1) < p) {
-    img_size <- get_image_size(x$x)
-    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
-    x <- item_transform_perspective(x, startpoints = params[[1]], endpoints = params[[2]],
+    c(width, height) %<-% get_image_size(x$x)
+    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
+    x <- item_transform_perspective(x, startpoints = startpoints, endpoints = endpoints,
                                     interpolation = interpolation, fill = fill)
   }
   x
@@ -944,9 +944,9 @@ item_transform_random_perspective.image_with_segmentation_mask <- function(x, di
                                                                            p = 0.5, interpolation = 2,
                                                                            fill = 0) {
   if (stats::runif(1) < p) {
-    img_size <- get_image_size(x$x)
-    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
-    x <- item_transform_perspective(x, startpoints = params[[1]], endpoints = params[[2]],
+    c(width, height) %<-% get_image_size(x$x)
+    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
+    x <- item_transform_perspective(x, startpoints = startpoints, endpoints = endpoints,
                                     interpolation = interpolation, fill = fill)
   }
   x
@@ -957,10 +957,8 @@ item_transform_random_perspective.image_with_rotated_box <- function(x, distorti
                                                                       p = 0.5, interpolation = 2,
                                                                       fill = 0) {
   if (stats::runif(1) < p) {
-    img_size <- get_image_size(x$x)
-    params <- get_random_perspective_params(img_size[1], img_size[2], distortion_scale)
-    startpoints <- params[[1]]
-    endpoints <- params[[2]]
+    c(width, height) %<-% get_image_size(x$x)
+    c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
 
     x$x <- transform_perspective(x$x, startpoints = startpoints, endpoints = endpoints,
                                   interpolation = interpolation, fill = fill)
