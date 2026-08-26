@@ -407,9 +407,11 @@ test_that("tests for the Pascal VOC detection dataset for train split for year 2
         "Skipping test: set TEST_LARGE_DATASETS=1 to enable tests requiring large downloads.")
 
   pascal <- pascal_detection_dataset(root = t, year = '2007', split = 'train', download = TRUE)
+  expect_s3_class(pascal, "object_detection_dataset")
   expect_length(pascal, 2501)
   first_item <- pascal[1]
   expect_named(first_item, c("x", "y"))
+  expect_s3_class(first_item$y, "object_detection_target")
   expect_length(first_item$x,499500)
   expect_type(first_item$x, "double")
   expect_type(first_item$y, "list")

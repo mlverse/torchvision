@@ -201,7 +201,7 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
   total_angle <- if (is_rotated) {
     boxes[, 5, drop = FALSE] + angle
   } else {
-    torch_tensor(angle, dtype = boxes$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
+    torch_tensor(angle, dtype = new_xyxy$dtype, device = boxes$device)$reshape(c(-1, 1))$expand(c(n, 1))
   }
 
   torch_cat(list(new_xyxy, total_angle), dim = -1L)
@@ -831,8 +831,9 @@ item_transform_affine.image_with_bounding_box <- function(x, angle = 0,
                           scale = scale, shear = shear,
                           interpolation = interpolation, fill = fill,
                           center = center)
-  x$y <- target_transform_affine(x$y, angle = angle, translate = translate,
-                                 scale = scale, shear = shear, center = center)
+  x$y <- target_transform_affine(as_object_detection_target(x$y), angle = angle,
+                                 translate = translate, scale = scale,
+                                 shear = shear, center = center)
   class(x) <- c("image_with_rotated_box", "list")
   x
 }

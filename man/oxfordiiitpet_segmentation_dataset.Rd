@@ -37,6 +37,9 @@ A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 \item \code{"binary-category"}: 1 for Cat, 2 for Dog.
 }
 }
+
+The dataset inherits \code{segmentation_dataset} and its \code{y} inherits
+\code{segmentation_target}, which target transforms dispatch on.
 }
 \description{
 The Oxford-IIIT Pet Dataset is a \strong{segmentation} dataset consisting of color images

@@ -875,67 +875,64 @@ transform_adjust_gamma.torch_tensor <- function(img, gamma, gain = 1) {
 }
 
 get_perspective_coeffs <- function(startpoints, endpoints) {
+  # Convert  lists tp matrix 4x2
+  p1 <- if (is.matrix(endpoints)) endpoints else do.call(rbind, endpoints)
+  p2 <- if (is.matrix(startpoints)) startpoints else do.call(rbind, startpoints)
 
-  a_matrix <- torch::torch_zeros(2 * length(startpoints), 8,
-                                 dtype = torch::torch_float64())
+  p1_x <- p1[, 1]; p1_y <- p1[, 2]
+  p2_x <- p2[, 1]; p2_y <- p2[, 2]
 
-  for (i in seq_along(startpoints)) {
+  # build the 8x8 matrix
+  A <- matrix(0, nrow = 8, ncol = 8)
+  odd <- c(1, 3, 5, 7)
+  even <- c(2, 4, 6, 8)
 
-    p1 <- endpoints[[i]]
-    p2 <- startpoints[[i]]
+  A[odd, 1:3]  <- cbind(p1_x, p1_y, 1)
+  A[odd, 7:8]  <- cbind(-p2_x * p1_x, -p2_x * p1_y)
+  A[even, 4:6] <- cbind(p1_x, p1_y, 1)
+  A[even, 7:8] <- cbind(-p2_y * p1_x, -p2_y * p1_y)
 
-    a_matrix[1 + 2*(i-1), ] <- torch::torch_tensor(c(p1[1], p1[2], 1, 0, 0, 0,
-                                                     -p2[1] * p1[1], -p2[1] * p1[2]),
-                                                   dtype = torch::torch_float64())
-    a_matrix[2*i,] <- torch::torch_tensor(c(0, 0, 0, p1[1], p1[2], 1,
-                                            -p2[2] * p1[1], -p2[2] * p1[2]),
-                                          dtype = torch::torch_float64())
+  b <- as.vector(t(p2))
 
-  }
+  # solve linear equation 8x8
+  A_t <- torch::torch_tensor(A, dtype = torch::torch_float64())
+  b_t <- torch::torch_tensor(b, dtype = torch::torch_float64())
 
-  b_matrix <- torch::torch_tensor(unlist(startpoints), dtype = torch::torch_float64())$view(8)
-  res <- torch::linalg_lstsq(a_matrix, b_matrix)
-
-  output <- torch::as_array(res$solution)
-  output
+  sol <- torch::linalg_solve(A_t, b_t)
+  torch::as_array(sol)
 }
 
-# https://github.com/pytorch/vision/blob/v0.20.0/torchvision/transforms/v2/functional/_geometry.py#L1968
-# x_out = (coeffs[1] * x + coeffs[2] * y + coeffs[3]) / (coeffs[7] * x + coeffs[8] * y + 1)
-# y_out = (coeffs[4] * x + coeffs[5] * y + coeffs[6]) / (coeffs[7] * x + coeffs[8] * y + 1)
 perspective_grid <- function(coeffs, ow, oh, dtype, device) {
+  theta1 <- torch::torch_tensor(
+    matrix(coeffs[1:6], nrow = 2, byrow = TRUE),
+    dtype = dtype, device = device
+  )$unsqueeze(1)
 
-  theta1 <- torch::torch_tensor(rbind(
-    c(coeffs[1], coeffs[2], coeffs[3]),
-    c(coeffs[4], coeffs[5], coeffs[6])
-  ), dtype = dtype, device = device)$view(c(1, 2, 3))
+  theta2 <- torch::torch_tensor(
+    matrix(c(coeffs[7:8], 1, coeffs[7:8], 1), nrow = 2, byrow = TRUE),
+    dtype = dtype, device = device
+  )$unsqueeze(1)
 
-  theta2 <- torch::torch_tensor(rbind(
-    c(coeffs[7], coeffs[8], 1.0),
-    c(coeffs[7], coeffs[8], 1.0)
-  ), dtype = dtype, device = device)$view(c(1, 2, 3))
+  # vectorised grid via meshgrid
+  y <- torch::torch_linspace(0.5, oh - 0.5, steps = oh, dtype = dtype, device = device)
+  x <- torch::torch_linspace(0.5, ow - 0.5, steps = ow, dtype = dtype, device = device)
+  grid <- torch::torch_meshgrid(list(y, x), indexing = "ij")
 
-  d <- 0.5
-  base_grid <- torch::torch_empty(1, oh, ow, 3, dtype = dtype, device = device)
-  base_grid[.., 1]$copy_(torch::torch_linspace(start = d, end = ow + d - 1, steps = ow,
-                                               dtype = dtype, device = device))
-  base_grid[.., 2]$copy_(torch::torch_linspace(start = d, end = oh + d - 1, steps = oh,
-                                               dtype = dtype, device = device)$unsqueeze(-1))
-  base_grid[.., 3]$fill_(1)
+  ones <- torch::torch_ones(c(oh, ow), dtype = dtype, device = device)
+  base_grid <- torch::torch_stack(list(grid[[2]], grid[[1]], ones), dim = -1)$view(c(1, oh * ow, 3))
 
   rescaled_theta1 <- theta1$transpose(2, 3)$div(
     torch::torch_tensor(c(0.5 * ow, 0.5 * oh), dtype = dtype, device = device)
   )
-  shape <- c(1, oh * ow, 3)
-  output_grid1 <- base_grid$view(shape)$bmm(rescaled_theta1)
-  output_grid2 <- base_grid$view(shape)$bmm(theta2$transpose(2, 3))
+
+  output_grid1 <- base_grid$bmm(rescaled_theta1)
+  output_grid2 <- base_grid$bmm(theta2$transpose(2, 3))
 
   output_grid <- output_grid1$div_(output_grid2)$sub_(1)
   output_grid$view(c(1, oh, ow, 2))
 }
 
 perspective_impl <- function(img, coeffs, interpolation = 2, fill = NULL) {
-
   interpolation_modes <- c(
     "0" = "nearest",
     "2" = "bilinear",
@@ -955,55 +952,42 @@ perspective_impl <- function(img, coeffs, interpolation = 2, fill = NULL) {
   apply_grid_transform(img, grid, mode)
 }
 
-# Apply the forward perspective map to xyxy boxes so that they remain valid
-# after the image was transformed. The coefficients computed by
-# get_perspective_coeffs() map endpoint coordinates back to startpoint
-# coordinates, so the inverse map (startpoint -> endpoint) is used here.
 perspective_boxes <- function(boxes, startpoints, endpoints) {
+  if (boxes$size(1) == 0) return(boxes)
 
-  if (boxes$size(1) == 0)
-    return(boxes)
+  orig_dtype <- boxes$dtype
 
+  # homography matrix 3x3 and inverse
   coeffs <- get_perspective_coeffs(startpoints, endpoints)
-  denom <- coeffs[1] * coeffs[5] - coeffs[2] * coeffs[4]
-
-  if (denom == 0)
-    runtime_error("Provided perspective coefficients can not be inverted to transform bounding boxes.")
-
-  inv_coeffs <- c(
-    (coeffs[5] - coeffs[6] * coeffs[8]) / denom,
-    (-coeffs[2] + coeffs[3] * coeffs[8]) / denom,
-    (coeffs[2] * coeffs[6] - coeffs[3] * coeffs[5]) / denom,
-    (-coeffs[4] + coeffs[6] * coeffs[7]) / denom,
-    (coeffs[1] - coeffs[3] * coeffs[7]) / denom,
-    (-coeffs[1] * coeffs[6] + coeffs[3] * coeffs[4]) / denom,
-    (-coeffs[5] * coeffs[7] + coeffs[4] * coeffs[8]) / denom,
-    (-coeffs[1] * coeffs[8] + coeffs[2] * coeffs[7]) / denom
+  H <- torch::torch_tensor(
+    matrix(c(coeffs[1:3], coeffs[4:6], coeffs[7:8], 1), nrow = 3, byrow = TRUE),
+    dtype = torch::torch_float32(), device = boxes$device
   )
+  H_inv <- torch::torch_inverse(H)
 
-  a <- inv_coeffs[1]; b <- inv_coeffs[2]; c <- inv_coeffs[3]
-  d <- inv_coeffs[4]; e <- inv_coeffs[5]; f <- inv_coeffs[6]
-  g <- inv_coeffs[7]; h <- inv_coeffs[8]
+  # Get 4 corners of N boxes (x0,y0, x1,y0, x1,y1, x0,y1) into (N, 4, 2) and explicit cast to float32
+  idx <- c(1, 2,  3, 2,  3, 4,  1, 4)
+  pts <- boxes[, idx]$view(c(-1, 4, 2))$to(dtype = torch::torch_float32())
 
-  x0 <- boxes[, 1]
-  y0 <- boxes[, 2]
-  x1 <- boxes[, 3]
-  y1 <- boxes[, 4]
+  # reshape to (N, 4, 3)
+  ones <- torch::torch_ones(c(boxes$size(1), 4, 1), dtype = torch::torch_float32(), device = boxes$device)
+  pts_homo <- torch::torch_cat(list(pts, ones), dim = 3)
 
-  xs <- torch::torch_stack(list(x0, x1, x1, x0), dim = 1)
-  ys <- torch::torch_stack(list(y0, y0, y1, y1), dim = 1)
+  # Projection : P_out = P_in x (H_inv)^T
+  trans_pts <- torch::torch_matmul(pts_homo, H_inv$t())
 
-  denoms <- g * xs + h * ys + 1
-  out_x <- (a * xs + b * ys + c) / denoms
-  out_y <- (d * xs + e * ys + f) / denoms
+  # Normalise
+  trans_xy <- trans_pts[.., 1:2] / trans_pts[.., 3]$unsqueeze(-1)
 
-  out_boxes <- torch::torch_stack(list(
-    out_x$min(dim = 1)[[1]],
-    out_y$min(dim = 1)[[1]],
-    out_x$max(dim = 1)[[1]],
-    out_y$max(dim = 1)[[1]]
-  ), dim = -1L)
+  # Min & max of transformed boxes corners
+  x_min <- trans_xy[.., 1]$min(dim = 2)[[1]]
+  y_min <- trans_xy[.., 2]$min(dim = 2)[[1]]
+  x_max <- trans_xy[.., 1]$max(dim = 2)[[1]]
+  y_max <- trans_xy[.., 2]$max(dim = 2)[[1]]
 
-  out_boxes$to(boxes$dtype)
+  out_boxes <- torch::torch_stack(list(x_min, y_min, x_max, y_max), dim = 2)
+  out_boxes$to(dtype = orig_dtype)
 }
+
+
 

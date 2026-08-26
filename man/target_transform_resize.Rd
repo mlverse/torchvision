@@ -2,12 +2,17 @@
 % Please edit documentation in R/target-transforms-detection.R
 \name{target_transform_resize}
 \alias{target_transform_resize}
+\alias{target_transform_resize.object_detection_target}
 \title{Resize the bounding boxes of a detection target}
 \usage{
 target_transform_resize(target, size)
+
+\method{target_transform_resize}{object_detection_target}(target, size)
 }
 \arguments{
-\item{target}{A list containing at least:
+\item{target}{An \code{object_detection_target}, as returned by the \code{.getitem()}
+method of an \link[=coco_detection_dataset]{object detection dataset}, containing
+at least:
 \itemize{
 \item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format
 \item \code{orig_size} — integer vector or tensor of length 2 with \verb{(height, width)}
@@ -44,8 +49,9 @@ target <- list(
   boxes = torch_tensor(matrix(c(10, 20, 50, 60), ncol = 4)),
   labels = torch_tensor(1L, dtype = torch_long()),
   image_height  = 100L,
-  image_width = 100L)
+  image_width = 100L
 )
+class(target) <- c("object_detection_target", "list")
 
 # Resize to fixed size
 transform_fn <- target_transform_resize(c(200L, 200L))
