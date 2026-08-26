@@ -344,7 +344,7 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #' @param pad_if_needed (logical) It will pad the image if smaller than the
 #'   desired size to avoid raising an exception. Since cropping is done
 #'   after padding, the padding seems to be done at a random offset.
-#' @param fill (number or tuple) Pixel fill value for constant fill. Default is
+#' @param fill (numeric or vector) Pixel fill value for constant fill. Default is
 #'   0. If a tuple of length 3, it is used to fill R, G, B channels
 #'   respectively. This value is only used when the padding_mode is constant.
 #' @param padding_mode (str) Type of padding. Should be: constant, edge,
@@ -878,7 +878,7 @@ item_transform_random_erasing.image_with_rotated_box <- item_transform_random_er
 #'   Default is 0.5.
 #' @param interpolation (integer) Interpolation mode. Default is 2
 #'   (bilinear).
-#' @param fill (number or tuple) Pixel fill value for the area outside the
+#' @param fill (numeric or vector) Pixel fill value for the area outside the
 #'   transformed image. Default is 0.
 #'
 #' @return A dataset item of the same class. With probability \code{p}, the
