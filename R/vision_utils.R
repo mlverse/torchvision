@@ -27,7 +27,7 @@ NULL
 #'   `magick-image`).
 #' @param scale whether to normalize (min-max-scale) the input tensor. Only
 #'   applied for `torch_tensor` input.
-#' @param num_rows maximum number of images per row (i.e., number of columns);
+#' @param per_row maximum number of images per row (i.e., number of columns);
 #'   remaining images wrap to the next row. Default 8.
 #' @param padding amount of padding between images in pixels (default 2).
 #' @param pad_value pixel value (0–1) to use for padding background.
@@ -37,7 +37,7 @@ NULL
 #'
 #' @family image display
 #' @export
-vision_make_grid <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
   dots <- list(...)
   if (length(dots) > 0) {
     primary_class <- class(tensor)[1]
@@ -53,13 +53,13 @@ vision_make_grid <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 
 
 #' @rdname vision_make_grid
 #' @export
-vision_make_grid.default <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
   cli_abort("The provided {.var tensor} class {.cls {class(tensor)}} is not supported by {.fn vision_make_grid}")
 }
 
 #' @rdname vision_make_grid
 #' @export
-vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
@@ -74,7 +74,10 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
   to_float_unit <- function(t) {
     if (t$dtype == torch::torch_uint8()) t$to(dtype = torch::torch_float32())$div(255) else t
   }
-  all_float_tensors <- lapply(c(list(tensor), extra_tensors), to_float_unit)
+  all_float_tensors <- if (scale)  {
+    lapply(c(list(tensor), extra_tensors), function(x) .min_max_scale(to_float_unit(x)))
+    } else c(list(tensor), extra_tensors)
+
 
   if (tensor$ndim == 3) {
     tensor <- torch::torch_stack(all_float_tensors)
@@ -82,10 +85,9 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
     tensor <- if (length(all_float_tensors) > 1) torch::torch_cat(all_float_tensors, dim = 1) else all_float_tensors[[1]]
   }
 
-  if (scale) tensor <- .min_max_scale(tensor)
 
   nmaps <- tensor$size(1)
-  xmaps <- min(num_rows, nmaps)
+  xmaps <- min(per_row, nmaps)
   ymaps <- ceiling(nmaps / xmaps)
   height <- floor(tensor$size(3) + padding)
   width <- floor(tensor$size(4) + padding)
@@ -117,7 +119,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
 
 #' @rdname vision_make_grid
 #' @export
-`vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+`vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
   rlang::check_installed("magick")
 
   imgs <- tensor
@@ -129,7 +131,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
   frame_tensors <- lapply(seq_along(imgs), function(i) transform_to_tensor(imgs[i]))
 
   batch <- torch::torch_stack(frame_tensors)
-  vision_make_grid.torch_tensor(batch, scale = scale, num_rows = num_rows,
+  vision_make_grid.torch_tensor(batch, scale = scale, per_row = per_row,
                                 padding = padding, pad_value = pad_value)
 }
 

@@ -358,7 +358,7 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #'   class(item) <- "image_with_bounding_box"
 #'   draw_bounding_boxes(item, colors = "red")
 #' })
-#' grid <- vision_make_grid(torch_stack(preview), scale = FALSE, num_rows = 3)
+#' grid <- vision_make_grid(torch_stack(preview), scale = FALSE, per_row = 3)
 #' tensor_image_browse(grid)
 #' }
 #'

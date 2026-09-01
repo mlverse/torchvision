@@ -113,7 +113,7 @@ item_transform_random_horizontal_flip.image_with_rotated_box <- function(x, p = 
 #' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
 #' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' tensor_image_browse(vision_make_grid(before_plot, after_plot, num_rows = 1, scale = TRUE))
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, per_row = 1, scale = TRUE))
 #' }
 #'
 #' @family item_random_transforms

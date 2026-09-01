@@ -38,7 +38,7 @@ after <- item_transform_random_vertical_flip(before)
 before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
 after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 
-tensor_image_browse(vision_make_grid(before_plot, after_plot, num_rows = 1, scale = TRUE))
+tensor_image_browse(vision_make_grid(before_plot, after_plot, per_row = 1, scale = TRUE))
 }
 
 }

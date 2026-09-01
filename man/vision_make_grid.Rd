@@ -11,7 +11,7 @@ vision_make_grid(
   tensor,
   ...,
   scale = TRUE,
-  num_rows = 8,
+  per_row = 8,
   padding = 2,
   pad_value = 0
 )
@@ -20,7 +20,7 @@ vision_make_grid(
   tensor,
   ...,
   scale = TRUE,
-  num_rows = 8,
+  per_row = 8,
   padding = 2,
   pad_value = 0
 )
@@ -29,7 +29,7 @@ vision_make_grid(
   tensor,
   ...,
   scale = TRUE,
-  num_rows = 8,
+  per_row = 8,
   padding = 2,
   pad_value = 0
 )
@@ -38,7 +38,7 @@ vision_make_grid(
   tensor,
   ...,
   scale = TRUE,
-  num_rows = 8,
+  per_row = 8,
   padding = 2,
   pad_value = 0
 )
@@ -54,7 +54,8 @@ tensor), or additional \code{magick-image} objects (when first argument is a
 \item{scale}{whether to normalize (min-max-scale) the input tensor. Only
 applied for \code{torch_tensor} input.}
 
-\item{num_rows}{number of images per row in the grid (default 8).}
+\item{per_row}{maximum number of images per row (i.e., number of columns);
+remaining images wrap to the next row. Default 8.}
 
 \item{padding}{amount of padding between images in pixels (default 2).}
 
