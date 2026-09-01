@@ -38,7 +38,7 @@ NULL
 #'
 #' @family image display
 #' @export
-vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows) {
+vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
   if (!is.null(num_rows)) {
     deprecated("'num_rows' is deprecated, use 'per_row' instead.")
     per_row <- num_rows
