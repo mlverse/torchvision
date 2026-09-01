@@ -63,7 +63,7 @@ rotated_target <- target_transform_rotate(target, angle = 4)
 # Rotated boxes (red, drawn as polygons)
 after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
 
-tensor_image_browse(grid, vision_make_grid(before_plot, after_plot, scale = TRUE))
+tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 }
 
 }

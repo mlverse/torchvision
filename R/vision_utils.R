@@ -34,7 +34,7 @@ NULL
 #' @param pad_value pixel value (0–1) to use for padding background.
 #'
 #' @return a 3D `torch_tensor` of shape
-#'   \eqn{\approx(C , num\_rows \times H , num\_cols \times W)} and of dtype `torch_float()`.
+#'   \eqn{\approx(C , n\_rows \times H , per\_row \times W)} and of dtype `torch_float()`.
 #'
 #' @family image display
 #' @export
@@ -79,15 +79,14 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
   to_float_unit <- function(t) {
     if (t$dtype == torch::torch_uint8()) t$to(dtype = torch::torch_float32())$div(255) else t
   }
-  all_float_tensors <- if (scale)  {
-    lapply(c(list(tensor), extra_tensors), function(x) .min_max_scale(to_float_unit(x)))
-    } else c(list(tensor), extra_tensors)
+  float_tensors <- lapply(c(list(tensor), extra_tensors), to_float_unit)
+  all_tensors <- if (scale) lapply(float_tensors, .min_max_scale) else float_tensors
 
 
   if (tensor$ndim == 3) {
-    tensor <- torch::torch_stack(all_float_tensors)
+    tensor <- torch::torch_stack(all_tensors)
   } else {
-    tensor <- if (length(all_float_tensors) > 1) torch::torch_cat(all_float_tensors, dim = 1) else all_float_tensors[[1]]
+    tensor <- if (length(all_tensors) > 1) torch::torch_cat(all_tensors, dim = 1) else all_tensors[[1]]
   }
 
 
@@ -133,10 +132,15 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
     imgs <- do.call(c, c(list(imgs), extra_imgs))
   }
 
-  frame_tensors <- lapply(seq_along(imgs), function(i) transform_to_tensor(imgs[i]))
+  # transform_to_tensor already normalises to float32 [0,1]; apply per-frame
+  # scaling here so behaviour matches the 3D-tensor path (per-image, not global).
+  frame_tensors <- lapply(seq_along(imgs), function(i) {
+    t <- transform_to_tensor(imgs[i])
+    if (scale) .min_max_scale(t) else t
+  })
 
   batch <- torch::torch_stack(frame_tensors)
-  vision_make_grid.torch_tensor(batch, scale = scale, per_row = per_row,
+  vision_make_grid.torch_tensor(batch, scale = FALSE, per_row = per_row,
                                 padding = padding, pad_value = pad_value)
 }
 

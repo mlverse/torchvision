@@ -25,14 +25,15 @@ test_that("vision_make_grid normalizes single uint8 4D batch to float [0,1]", {
   images <- torch::torch_randint(0L, 256L, size = c(4, 3, 16, 16))$to(torch::torch_uint8())
   grid <- vision_make_grid(images, per_row = 2, padding = 0, scale = FALSE)
   expect_tensor_shape(grid, c(3, 32, 32))
+  expect_tensor_dtype(grid, torch::torch_float32())
   expect_gte(grid$min()$item(), 0)
-  expect_lte(grid$max()$item(), 255)
+  expect_lte(grid$max()$item(), 1)
 })
 
 test_that("vision_make_grid normalizes mixed uint8/float inputs to float [0,1]", {
   img_float <- torch::torch_rand(c(3, 16, 16))
   img_uint8 <- torch::torch_randint(0L, 256L, size = c(3, 16, 16))$to(torch::torch_uint8())
-  grid <- vision_make_grid(img_float, img_uint8, per_row = 2, padding = 0, scale = TRUE)
+  grid <- vision_make_grid(img_float, img_uint8, per_row = 2, padding = 0, scale = FALSE)
   expect_tensor_shape(grid, c(3, 16, 32))
   expect_tensor_dtype(grid, torch::torch_float32())
   expect_gte(grid$min()$item(), 0)
@@ -61,6 +62,14 @@ test_that("vision_make_grid works with magick-image", {
 
 test_that("vision_make_grid errors on unsupported type", {
   expect_error(vision_make_grid(list(1, 2, 3)), "is not supported by")
+})
+
+test_that("vision_make_grid emits deprecation warning for num_rows", {
+  images <- torch::torch_randn(c(4, 3, 16, 16))
+  expect_warning(
+    vision_make_grid(images, num_rows = 2),
+    class = "deprecated"
+  )
 })
 
 test_that("draw_bounding_boxes works", {

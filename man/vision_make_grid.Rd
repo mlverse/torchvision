@@ -14,7 +14,7 @@ vision_make_grid(
   per_row = 8,
   padding = 2,
   pad_value = 0,
-  num_rows
+  num_rows = NULL
 )
 
 \method{vision_make_grid}{default}(
@@ -66,7 +66,7 @@ remaining images wrap to the next row. Default 8.}
 }
 \value{
 a 3D \code{torch_tensor} of shape
-\eqn{\approx(C , num\_rows \times H , num\_cols \times W)} and of dtype \code{torch_float()}.
+\eqn{\approx(C , n\_rows \times H , per\_row \times W)} and of dtype \code{torch_float()}.
 }
 \description{
 Arranges images in a grid, with optional padding between images.
