@@ -21,13 +21,28 @@ test_that("vision_make_grid works with multiple 4D tensors in ...", {
   expect_tensor_shape(grid, c(3, 32, 32))
 })
 
+test_that("vision_make_grid normalizes single uint8 4D batch to float [0,1]", {
+  images <- torch::torch_randint(0L, 256L, size = c(4, 3, 16, 16))$to(torch::torch_uint8())
+  grid <- vision_make_grid(images, num_rows = 2, padding = 0, scale = FALSE)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_tensor_dtype(grid, torch::torch_float32())
+  expect_gte(grid$min()$item(), 0)
+  expect_lte(grid$max()$item(), 1)
+})
+
 test_that("vision_make_grid normalizes mixed uint8/float inputs to float [0,1]", {
   img_float <- torch::torch_rand(c(3, 16, 16))
   img_uint8 <- torch::torch_randint(0L, 256L, size = c(3, 16, 16))$to(torch::torch_uint8())
   grid <- vision_make_grid(img_float, img_uint8, num_rows = 1, padding = 0, scale = FALSE)
   expect_tensor_shape(grid, c(3, 16, 32))
   expect_tensor_dtype(grid, torch::torch_float32())
-  expect_true(grid$min()$item() >= 0 && grid$max()$item() <= 1)
+  expect_gte(grid$min()$item(), 0)
+  expect_lte(grid$max()$item(), 1)
+})
+
+test_that("vision_make_grid errors when ... contains non-matching types", {
+  img <- torch::torch_randn(c(3, 16, 16))
+  expect_error(vision_make_grid(img, "not_a_tensor"), class = "cli_error")
 })
 
 test_that("vision_make_grid errors on mixed 3D/4D tensors in ...", {

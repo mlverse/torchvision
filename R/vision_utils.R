@@ -2,6 +2,14 @@
 #' @importFrom torch torch_uint8
 NULL
 
+.min_max_scale <- function(x) {
+  min <- x$min()$item()
+  max <- x$max()$item()
+  x$clamp_(min = min, max = max)
+  x$add_(-min)$div_(max - min + 1e-5)
+  x
+}
+
 #' A simplified version of torchvision.utils.make_grid
 #'
 #' Arranges images in a grid, with optional padding between images.
@@ -19,16 +27,27 @@ NULL
 #'   `magick-image`).
 #' @param scale whether to normalize (min-max-scale) the input tensor. Only
 #'   applied for `torch_tensor` input.
-#' @param num_rows number of images per row in the grid (default 8).
+#' @param num_rows maximum number of images per row (i.e., number of columns);
+#'   remaining images wrap to the next row. Default 8.
 #' @param padding amount of padding between images in pixels (default 2).
-#' @param pad_value pixel value (0–255) to use for padding background.
+#' @param pad_value pixel value (0–1) to use for padding background.
 #'
-#' @return For `torch_tensor` input: a 3D `torch_tensor` of shape
-#'   \eqn{\approx(C , num\_rows \times H , num\_cols \times W)}.
-#'   For `magick-image` input: a `magick-image` of the arranged grid.
+#' @return a 3D `torch_tensor` of shape
+#'   \eqn{\approx(C , num\_rows \times H , num\_cols \times W)} and of dtype `torch_float()`.
+#'
 #' @family image display
 #' @export
 vision_make_grid <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+  dots <- list(...)
+  if (length(dots) > 0) {
+    primary_class <- class(tensor)[1]
+    non_matching <- Filter(function(x) !inherits(x, primary_class), dots)
+    if (length(non_matching) > 0)
+      cli_abort(c(
+        "All arguments in {.arg ...} must be {.cls {primary_class}} objects.",
+        "x" = "Got {.cls {class(non_matching[[1]])[1]}}."
+      ))
+  }
   UseMethod("vision_make_grid")
 }
 
@@ -41,8 +60,10 @@ vision_make_grid.default <- function(tensor, ..., scale = TRUE, num_rows = 8, pa
 #' @rdname vision_make_grid
 #' @export
 vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
-  dots <- list(...)
-  extra_tensors <- Filter(function(x) inherits(x, "torch_tensor"), dots)
+  extra_tensors <- list(...)
+
+  if (!tensor$ndim %in% c(3L, 4L))
+    value_error("tensor must be 3D (C x H x W) or 4D (B x C x H x W)")
 
   if (length(extra_tensors) > 0) {
     all_ndims <- c(tensor$ndim, vapply(extra_tensors, function(x) x$ndim, integer(1)))
@@ -50,27 +71,18 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
       value_error("All tensors must have the same number of dimensions (all 3D or all 4D)")
   }
 
-  unit_to_float <- function(t) {
+  to_float_unit <- function(t) {
     if (t$dtype == torch::torch_uint8()) t$to(dtype = torch::torch_float32())$div(255) else t
   }
+  all_float_tensors <- lapply(c(list(tensor), extra_tensors), to_float_unit)
 
-  all_tensors <- lapply(c(list(tensor), extra_tensors), unit_to_float)
   if (tensor$ndim == 3) {
-    tensor <- torch::torch_stack(all_tensors)
-  } else if (tensor$ndim == 4) {
-    tensor <- if (length(all_tensors) > 1) torch::torch_cat(all_tensors, dim = 1) else all_tensors[[1]]
+    tensor <- torch::torch_stack(all_float_tensors)
   } else {
-    value_error("tensor must be 3D (C x H x W) or 4D (B x C x H x W)")
+    tensor <- if (length(all_float_tensors) > 1) torch::torch_cat(all_float_tensors, dim = 1) else all_float_tensors[[1]]
   }
 
-  min_max_scale <- function(x) {
-    min <- x$min()$item()
-    max <- x$max()$item()
-    x$clamp_(min = min, max = max)
-    x$add_(-min)$div_(max - min + 1e-5)
-    x
-  }
-  if (scale) tensor <- min_max_scale(tensor)
+  if (scale) tensor <- .min_max_scale(tensor)
 
   nmaps <- tensor$size(1)
   xmaps <- min(num_rows, nmaps)
@@ -109,8 +121,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 
   rlang::check_installed("magick")
 
   imgs <- tensor
-  dots <- list(...)
-  extra_imgs <- Filter(function(x) inherits(x, "magick-image"), dots)
+  extra_imgs <- list(...)
   if (length(extra_imgs) > 0) {
     imgs <- do.call(c, c(list(imgs), extra_imgs))
   }

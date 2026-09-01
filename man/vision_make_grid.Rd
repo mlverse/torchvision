@@ -58,12 +58,11 @@ applied for \code{torch_tensor} input.}
 
 \item{padding}{amount of padding between images in pixels (default 2).}
 
-\item{pad_value}{pixel value (0–255) to use for padding background.}
+\item{pad_value}{pixel value (0–1) to use for padding background.}
 }
 \value{
-For \code{torch_tensor} input: a 3D \code{torch_tensor} of shape
-\eqn{\approx(C , num\_rows \times H , num\_cols \times W)}.
-For \code{magick-image} input: a \code{magick-image} of the arranged grid.
+a 3D \code{torch_tensor} of shape
+\eqn{\approx(C , num\_rows \times H , num\_cols \times W)} and of dtype \code{torch_float()}.
 }
 \description{
 Arranges images in a grid, with optional padding between images.
