@@ -48,7 +48,7 @@ test_that("vision_make_grid errors when ... contains non-matching types", {
 test_that("vision_make_grid errors on mixed 3D/4D tensors in ...", {
   t3d <- torch::torch_randn(c(3, 16, 16))
   t4d <- torch::torch_randn(c(2, 3, 16, 16))
-  expect_error(vision_make_grid(t3d, t4d), class = "value_error")
+  expect_error(vision_make_grid(t3d, t4d), class = "rlang_error/error/condition")
 })
 
 test_that("vision_make_grid works with magick-image", {
