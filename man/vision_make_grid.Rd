@@ -13,7 +13,8 @@ vision_make_grid(
   scale = TRUE,
   per_row = 8,
   padding = 2,
-  pad_value = 0
+  pad_value = 0,
+  num_rows
 )
 
 \method{vision_make_grid}{default}(
@@ -60,6 +61,8 @@ remaining images wrap to the next row. Default 8.}
 \item{padding}{amount of padding between images in pixels (default 2).}
 
 \item{pad_value}{pixel value (0–1) to use for padding background.}
+
+\item{num_rows}{Deprecated. Use \code{per_row} instead.}
 }
 \value{
 a 3D \code{torch_tensor} of shape

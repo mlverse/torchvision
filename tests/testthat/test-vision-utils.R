@@ -42,13 +42,13 @@ test_that("vision_make_grid normalizes mixed uint8/float inputs to float [0,1]",
 
 test_that("vision_make_grid errors when ... contains non-matching types", {
   img <- torch::torch_randn(c(3, 16, 16))
-  expect_error(vision_make_grid(img, "not_a_tensor"), class = "cli_error")
+  expect_error(vision_make_grid(img, "not_a_tensor"), "same number of dimensions")
 })
 
 test_that("vision_make_grid errors on mixed 3D/4D tensors in ...", {
   t3d <- torch::torch_randn(c(3, 16, 16))
   t4d <- torch::torch_randn(c(2, 3, 16, 16))
-  expect_error(vision_make_grid(t3d, t4d), class = "rlang_error/error/condition")
+  expect_error(vision_make_grid(t3d, t4d), "same number of dimensions")
 })
 
 test_that("vision_make_grid works with magick-image", {
@@ -61,7 +61,7 @@ test_that("vision_make_grid works with magick-image", {
 })
 
 test_that("vision_make_grid errors on unsupported type", {
-  expect_error(vision_make_grid(list(1, 2, 3)), class = "cli_error")
+  expect_error(vision_make_grid(list(1, 2, 3)), "is not supported by")
 })
 
 test_that("draw_bounding_boxes works", {

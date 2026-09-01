@@ -29,6 +29,7 @@ NULL
 #'   applied for `torch_tensor` input.
 #' @param per_row maximum number of images per row (i.e., number of columns);
 #'   remaining images wrap to the next row. Default 8.
+#' @param num_rows Deprecated. Use `per_row` instead.
 #' @param padding amount of padding between images in pixels (default 2).
 #' @param pad_value pixel value (0–1) to use for padding background.
 #'
@@ -37,7 +38,11 @@ NULL
 #'
 #' @family image display
 #' @export
-vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
+vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows) {
+  if (!is.null(num_rows)) {
+    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
+    per_row <- num_rows
+  }
   dots <- list(...)
   if (length(dots) > 0) {
     primary_class <- class(tensor)[1]
