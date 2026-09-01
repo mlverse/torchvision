@@ -562,7 +562,7 @@ maskrcnn_model_v2 <- torch::nn_module(
 #' batch <- input$unsqueeze(1)
 #'
 #' # Mask R-CNN ResNet-50 FPN
-#' model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, , detections_per_img = 5)
+#' model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, detections_per_img = 5)
 #' model$eval()
 #'
 #' torch::with_no_grad({pred <- model(batch)$detections[[1]]})
