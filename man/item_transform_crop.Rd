@@ -45,8 +45,12 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_crop(before, top = 100, left = 200, height = 500, width = 800)
 
-before_plot <- before \%>\% draw_bounding_boxes(colors = "blue", width = 10) \%>\% transform_resize(c(2000, 3000))
-after_plot <- after \%>\% draw_bounding_boxes(colors = "red", width = 10) \%>\% transform_resize(c(2000, 3000))
+before_plot <- before \%>\%
+  draw_bounding_boxes(colors = "blue", width = 10) \%>\%
+  transform_resize(c(2000, 3000))
+after_plot <- after \%>\%
+  draw_bounding_boxes(colors = "red", width = 10) \%>\%
+  transform_resize(c(2000, 3000))
 
 tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 }

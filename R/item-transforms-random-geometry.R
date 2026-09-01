@@ -363,9 +363,13 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #'
 #' after <- item_transform_random_crop(before, size = c(800, 1200))
 #'
-#' before_plot <- before %>% draw_bounding_boxes(colors = "blue", width = 10) %>% transform_resize(c(600, 600))
-#' # the crop changes the image size, so resize before stacking into the grid
-#' after_plot <- after %>% draw_bounding_boxes(colors = "red", width = 10) %>% transform_resize(c(600, 600))
+#' # the crop will changes the image size, so resize is needed before vision_make_grid
+#' before_plot <- before %>%
+#'   draw_bounding_boxes(colors = "blue", width = 10) %>%
+#'   transform_resize(c(600, 600))
+#' after_plot <- after %>%
+#'   draw_bounding_boxes(colors = "red", width = 10) %>%
+#'   transform_resize(c(600, 600))
 #'
 #' tensor_image_browse(vision_make_grid(before_plot, after_plot))
 #' }
