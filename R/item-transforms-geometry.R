@@ -34,12 +34,11 @@
 #'
 #' after <- item_transform_rotate(before, angle = angle)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(
-#'   torch_stack(list(transform_resize(before_plot, c(600, 600)),
-#'                    transform_resize(after_plot, c(600, 600)))),
+#' grid <- vision_make_grid(transform_resize(before_plot, c(600, 600)),
+#'                          transform_resize(after_plot, c(600, 600)),
 #'   scale = TRUE
 #' )
 #' tensor_image_browse(grid)
@@ -241,14 +240,10 @@ item_transform_rotate.image_with_rotated_box <- function(x, angle, interpolation
 #'
 #' after <- item_transform_crop(before, top = 100, left = 200, height = 500, width = 800)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- before %>% draw_bounding_boxes(colors = "blue", width = 10) %>% transform_resize(c(2000, 3000))
+#' after_plot <- after %>% draw_bounding_boxes(colors = "red", width = 10) %>% transform_resize(c(2000, 3000))
 #'
-#' before_plot <- transform_resize(before_plot, c(2000, 3000))
-#' after_plot <- transform_resize(after_plot, c(2000, 3000))
-#'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_unitary_transforms
@@ -399,10 +394,10 @@ item_transform_crop.image_with_rotated_box <- function(x, top, left, height, wid
 #'
 #' after <- item_transform_hflip(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
+#' grid <- vision_make_grid(before_plot, after_plot, scale = TRUE)
 #' tensor_image_browse(grid)
 #' }
 #'
@@ -502,11 +497,10 @@ item_transform_hflip.image_with_rotated_box <- function(x) {
 #'
 #' after <- item_transform_vflip(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_unitary_transforms
@@ -613,14 +607,13 @@ item_transform_vflip.image_with_rotated_box <- function(x) {
 #'
 #' after <- item_transform_center_crop(before, size = c(1500, 1500))
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
 #' before_plot <- transform_resize(before_plot, c(1500, 1500))
 #' after_plot <- transform_resize(after_plot, c(1500, 1500))
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_unitary_transforms
@@ -917,14 +910,13 @@ item_transform_affine.dataset <- function(x, angle = 0, translate = c(0, 0),
 #'
 #' after <- item_transform_pad(before, padding = 100)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
 #' before_plot <- transform_resize(before_plot, c(2000, 3000))
 #' after_plot <- transform_resize(after_plot, c(2000, 3000))
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_unitary_transforms
@@ -1087,11 +1079,10 @@ item_transform_pad.image_with_rotated_box <- function(x, padding, fill = 0, padd
 #'
 #' after <- item_transform_perspective(before, startpoints, endpoints)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_unitary_transforms

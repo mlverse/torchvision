@@ -2,10 +2,41 @@
 % Please edit documentation in R/vision_utils.R
 \name{vision_make_grid}
 \alias{vision_make_grid}
+\alias{vision_make_grid.default}
+\alias{vision_make_grid.torch_tensor}
+\alias{vision_make_grid.magick-image}
 \title{A simplified version of torchvision.utils.make_grid}
 \usage{
 vision_make_grid(
   tensor,
+  ...,
+  scale = TRUE,
+  num_rows = 8,
+  padding = 2,
+  pad_value = 0
+)
+
+\method{vision_make_grid}{default}(
+  tensor,
+  ...,
+  scale = TRUE,
+  num_rows = 8,
+  padding = 2,
+  pad_value = 0
+)
+
+\method{vision_make_grid}{torch_tensor}(
+  tensor,
+  ...,
+  scale = TRUE,
+  num_rows = 8,
+  padding = 2,
+  pad_value = 0
+)
+
+\method{vision_make_grid}{`magick-image`}(
+  tensor,
+  ...,
   scale = TRUE,
   num_rows = 8,
   padding = 2,
@@ -13,22 +44,39 @@ vision_make_grid(
 )
 }
 \arguments{
-\item{tensor}{tensor of shape (B x C x H x W) to arrange in grid.}
+\item{tensor}{A 4D \code{torch_tensor} of shape (B x C x H x W), a 3D \code{torch_tensor}
+of shape (C x H x W), or a \code{magick-image} object.}
 
-\item{scale}{whether to normalize (min-max-scale) the input tensor.}
+\item{...}{Additional 3D \code{torch_tensor} objects (when first argument is a 3D
+tensor), or additional \code{magick-image} objects (when first argument is a
+\code{magick-image}).}
 
-\item{num_rows}{number of rows making up the grid (default 8).}
+\item{scale}{whether to normalize (min-max-scale) the input tensor. Only
+applied for \code{torch_tensor} input.}
 
-\item{padding}{amount of padding between batch images (default 2).}
+\item{num_rows}{number of images per row in the grid (default 8).}
 
-\item{pad_value}{pixel value to use for padding.}
+\item{padding}{amount of padding between images in pixels (default 2).}
+
+\item{pad_value}{pixel value (0–255) to use for padding background.}
 }
 \value{
-a 3d torch_tensor of shape \eqn{\approx(C , num\_rows \times H , num\_cols \times W)} of all images arranged in a grid.
+For \code{torch_tensor} input: a 3D \code{torch_tensor} of shape
+\eqn{\approx(C , num\_rows \times H , num\_cols \times W)}.
+For \code{magick-image} input: a \code{magick-image} of the arranged grid.
 }
 \description{
-Arranges a batch B of (image) tensors in a grid, with optional padding between
-images. Expects a 4d mini-batch tensor of shape (B x C x H x W).
+Arranges images in a grid, with optional padding between images.
+Dispatches on the class of the first argument.
+}
+\details{
+For \code{torch_tensor} input, accepts either:
+\itemize{
+\item a 4D batch tensor of shape (B x C x H x W), or
+\item one or more 3D tensors of shape (C x H x W) passed as separate arguments.
+}
+
+For \code{magick-image} input, arranges frames using \code{magick::image_montage()}.
 }
 \seealso{
 Other image display:

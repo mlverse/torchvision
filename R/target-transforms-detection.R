@@ -277,11 +277,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
 #' # Rotated boxes (red, drawn as polygons)
 #' after_plot <- draw_bounding_boxes(img, boxes = rotated_target$boxes, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(
-#'   torch_stack(list(before_plot, after_plot))$to(torch_float32()),
-#'   scale = TRUE
-#' )
-#' tensor_image_browse(grid)
+#' tensor_image_browse(grid, vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family target_transforms_detection

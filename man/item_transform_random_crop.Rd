@@ -67,16 +67,11 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_random_crop(before, size = c(800, 1200))
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
-
+before_plot <- before \%>\% draw_bounding_boxes(colors = "blue", width = 10) \%>\% transform_resize(c(600, 600))
 # the crop changes the image size, so resize before stacking into the grid
-grid <- vision_make_grid(
-  torch_stack(list(transform_resize(before_plot, c(600, 600)),
-                   transform_resize(after_plot, c(600, 600)))),
-  scale = TRUE
-)
-tensor_image_browse(grid)
+after_plot <- after \%>\% draw_bounding_boxes(colors = "red", width = 10) \%>\% transform_resize(c(600, 600))
+
+tensor_image_browse(vision_make_grid(before_plot, after_plot))
 }
 
 }
