@@ -4,23 +4,65 @@ NULL
 
 #' A simplified version of torchvision.utils.make_grid
 #'
-#' Arranges a batch B of (image) tensors in a grid, with optional padding between
-#'   images. Expects a 4d mini-batch tensor of shape (B x C x H x W).
+#' Arranges images in a grid, with optional padding between images.
+#' Dispatches on the class of the first argument.
 #'
-#' @param tensor tensor of shape (B x C x H x W) to arrange in grid.
-#' @param scale whether to normalize (min-max-scale) the input tensor.
-#' @param num_rows number of rows making up the grid (default 8).
-#' @param padding amount of padding between batch images (default 2).
-#' @param pad_value pixel value to use for padding.
+#' For `torch_tensor` input, accepts either:
+#' - a 4D batch tensor of shape (B x C x H x W), or
+#' - one or more 3D tensors of shape (C x H x W) passed as separate arguments.
 #'
-#' @return  a 3d torch_tensor of shape \eqn{\approx(C , num\_rows \times H , num\_cols \times W)} of all images arranged in a grid.
+#' For `magick-image` input, arranges frames using `magick::image_montage()`.
+#'
+#' @param tensor A 4D `torch_tensor` of shape (B x C x H x W), a 3D `torch_tensor`
+#'   of shape (C x H x W), or a `magick-image` object.
+#' @param ... Additional 3D `torch_tensor` objects (when first argument is a 3D
+#'   tensor), or additional `magick-image` objects (when first argument is a
+#'   `magick-image`).
+#' @param scale whether to normalize (min-max-scale) the input tensor. Only
+#'   applied for `torch_tensor` input.
+#' @param num_rows number of images per row in the grid (default 8).
+#' @param padding amount of padding between images in pixels (default 2).
+#' @param pad_value pixel value (0–255) to use for padding background.
+#'
+#' @return For `torch_tensor` input: a 3D `torch_tensor` of shape
+#'   \eqn{\approx(C , num\_rows \times H , num\_cols \times W)}.
+#'   For `magick-image` input: a `magick-image` of the arranged grid.
 #' @family image display
 #' @export
-vision_make_grid <- function(tensor,
-                             scale = TRUE,
-                             num_rows = 8,
-                             padding = 2,
-                             pad_value = 0) {
+vision_make_grid <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+  UseMethod("vision_make_grid")
+}
+
+#' @rdname vision_make_grid
+#' @export
+vision_make_grid.default <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+  cli_abort("The provided {.var tensor} class {.cls {class(tensor)}} is not supported by {.fn vision_make_grid}")
+}
+
+#' @rdname vision_make_grid
+#' @export
+vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+  dots <- list(...)
+  extra_tensors <- Filter(function(x) inherits(x, "torch_tensor"), dots)
+
+  if (length(extra_tensors) > 0) {
+    all_ndims <- c(tensor$ndim, vapply(extra_tensors, function(x) x$ndim, integer(1)))
+    if (length(unique(all_ndims)) > 1)
+      value_error("All tensors must have the same number of dimensions (all 3D or all 4D)")
+  }
+
+  unit_to_float <- function(t) {
+    if (t$dtype == torch::torch_uint8()) t$to(dtype = torch::torch_float32())$div(255) else t
+  }
+
+  all_tensors <- lapply(c(list(tensor), extra_tensors), unit_to_float)
+  if (tensor$ndim == 3) {
+    tensor <- torch::torch_stack(all_tensors)
+  } else if (tensor$ndim == 4) {
+    tensor <- if (length(all_tensors) > 1) torch::torch_cat(all_tensors, dim = 1) else all_tensors[[1]]
+  } else {
+    value_error("tensor must be 3D (C x H x W) or 4D (B x C x H x W)")
+  }
 
   min_max_scale <- function(x) {
     min <- x$min()$item()
@@ -29,7 +71,7 @@ vision_make_grid <- function(tensor,
     x$add_(-min)$div_(max - min + 1e-5)
     x
   }
-  if(scale) tensor <- min_max_scale(tensor)
+  if (scale) tensor <- min_max_scale(tensor)
 
   nmaps <- tensor$size(1)
   xmaps <- min(num_rows, nmaps)
@@ -60,6 +102,25 @@ vision_make_grid <- function(tensor,
   }
 
   grid
+}
+
+#' @rdname vision_make_grid
+#' @export
+`vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, num_rows = 8, padding = 2, pad_value = 0) {
+  rlang::check_installed("magick")
+
+  imgs <- tensor
+  dots <- list(...)
+  extra_imgs <- Filter(function(x) inherits(x, "magick-image"), dots)
+  if (length(extra_imgs) > 0) {
+    imgs <- do.call(c, c(list(imgs), extra_imgs))
+  }
+
+  frame_tensors <- lapply(seq_along(imgs), function(i) transform_to_tensor(imgs[i]))
+
+  batch <- torch::torch_stack(frame_tensors)
+  vision_make_grid.torch_tensor(batch, scale = scale, num_rows = num_rows,
+                                padding = padding, pad_value = pad_value)
 }
 
 

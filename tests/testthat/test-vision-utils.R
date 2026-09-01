@@ -1,15 +1,52 @@
 context("vision-utils")
 
-test_that("vision_make_grid", {
-
+test_that("vision_make_grid works with 4D batch tensor", {
   images <- torch::torch_randn(c(4, 3, 16, 16))
-
   grid <- vision_make_grid(images, num_rows = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_equal_to_r(grid$max() - grid$min(), 1, tolerance = 1e-4)
+})
 
+test_that("vision_make_grid works with multiple 3D tensors in ...", {
+  imgs <- lapply(1:4, function(i) torch::torch_randn(c(3, 16, 16)))
+  grid <- vision_make_grid(imgs[[1]], imgs[[2]], imgs[[3]], imgs[[4]], num_rows = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_equal_to_r(grid$max() - grid$min(), 1, tolerance = 1e-4)
+})
 
-  expect_equal(grid$size(), c(3, 32, 32))
-  expect_equal(as.numeric(grid$max() - grid$min()), 1, tolerance = 1e-4)
+test_that("vision_make_grid works with multiple 4D tensors in ...", {
+  batch1 <- torch::torch_randn(c(2, 3, 16, 16))
+  batch2 <- torch::torch_randn(c(2, 3, 16, 16))
+  grid <- vision_make_grid(batch1, batch2, num_rows = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+})
 
+test_that("vision_make_grid normalizes mixed uint8/float inputs to float [0,1]", {
+  img_float <- torch::torch_rand(c(3, 16, 16))
+  img_uint8 <- torch::torch_randint(0L, 256L, size = c(3, 16, 16))$to(torch::torch_uint8())
+  grid <- vision_make_grid(img_float, img_uint8, num_rows = 1, padding = 0, scale = FALSE)
+  expect_tensor_shape(grid, c(3, 16, 32))
+  expect_tensor_dtype(grid, torch::torch_float32())
+  expect_true(grid$min()$item() >= 0 && grid$max()$item() <= 1)
+})
+
+test_that("vision_make_grid errors on mixed 3D/4D tensors in ...", {
+  t3d <- torch::torch_randn(c(3, 16, 16))
+  t4d <- torch::torch_randn(c(2, 3, 16, 16))
+  expect_error(vision_make_grid(t3d, t4d), class = "value_error")
+})
+
+test_that("vision_make_grid works with magick-image", {
+  skip_if_not_installed("magick")
+  imgs <- magick::image_read(rep(system.file("img", "Rlogo.png", package = "png"), 4))
+  h <- magick::image_info(imgs[1])$height
+  w <- magick::image_info(imgs[1])$width
+  grid <- vision_make_grid(imgs, num_rows = 2, padding = 0)
+  expect_tensor_shape(grid, c(3L, 2L * h, 2L * w))
+})
+
+test_that("vision_make_grid errors on unsupported type", {
+  expect_error(vision_make_grid(list(1, 2, 3)), class = "cli_error")
 })
 
 test_that("draw_bounding_boxes works", {
