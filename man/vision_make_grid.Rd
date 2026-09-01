@@ -67,13 +67,12 @@ For \code{magick-image} input: a \code{magick-image} of the arranged grid.
 }
 \description{
 Arranges images in a grid, with optional padding between images.
-Dispatches on the class of the first argument.
 }
 \details{
 For \code{torch_tensor} input, accepts either:
 \itemize{
-\item a 4D batch tensor of shape (B x C x H x W), or
-\item one or more 3D tensors of shape (C x H x W) passed as separate arguments.
+\item one or more 3D tensors of shape (C x H x W) passed as separate arguments, or
+\item one or more 4D batch tensor of shape (B x C x H x W).
 }
 
 For \code{magick-image} input, arranges frames using \code{magick::image_montage()}.

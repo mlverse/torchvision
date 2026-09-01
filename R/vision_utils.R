@@ -5,11 +5,10 @@ NULL
 #' A simplified version of torchvision.utils.make_grid
 #'
 #' Arranges images in a grid, with optional padding between images.
-#' Dispatches on the class of the first argument.
 #'
 #' For `torch_tensor` input, accepts either:
-#' - a 4D batch tensor of shape (B x C x H x W), or
-#' - one or more 3D tensors of shape (C x H x W) passed as separate arguments.
+#' - one or more 3D tensors of shape (C x H x W) passed as separate arguments, or
+#' - one or more 4D batch tensor of shape (B x C x H x W).
 #'
 #' For `magick-image` input, arranges frames using `magick::image_montage()`.
 #'
