@@ -112,7 +112,8 @@ pascal_segmentation_dataset <- torch::dataset(
             "da459979d0c395079b5c75ee67908abb",
             "6c3384ef61512963050cb5d687e5bf1e",
             "6cd6e144f989b92b3379bac3b3de84fd"),
-    size = c("440 MB", "440 MB", "550 MB", "890 MB", "1.3 GB", "1.7 GB", "1.9 GB")
+    size = c("440 MB", "440 MB", "550 MB", "890 MB", "1.3 GB", "1.7 GB", "1.9 GB"),
+    stringsAsFactors = FALSE
   ),
   classes = pascal_voc_classes(),
   voc_colormap = c(

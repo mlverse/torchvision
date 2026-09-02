@@ -35,11 +35,10 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_random_horizontal_flip(before)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 
-grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-tensor_image_browse(grid)
+tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 }
 
 }
@@ -48,6 +47,7 @@ Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_crop]{item_transform_random_crop()}},
 \code{\link[=item_transform_random_erasing]{item_transform_random_erasing()}},
+\code{\link[=item_transform_random_perspective]{item_transform_random_perspective()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
 \code{\link[=item_transform_random_rotation]{item_transform_random_rotation()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}

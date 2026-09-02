@@ -56,7 +56,8 @@ whoi_small_plankton_dataset <- torch::dataset(
             "170921030aee26f9676725a0c55a4420",
             "332ebc8b822058cd98f778099927c50e",
             "f0747ae16fc7cd6946ea54c3fe1f30b4"),
-    size = c(217e6, 396e6, 383e6, 112e6)
+    size = c(217e6, 396e6, 383e6, 112e6),
+    stringsAsFactors = FALSE
   ),
 
   initialize = function(
@@ -171,7 +172,8 @@ whoi_plankton_dataset <- torch::dataset(
             "0f4d47f240cd9c30a7dd786171fa40ca",
             "db827a7de8790cdcae67b174c7b8ea5e",
             "d3181d9ffaed43d0c01f59455924edca"),
-    size = c(rep(450e6, 4), rep(490e6, 13), rep(450e6, 2))
+    size = c(rep(450e6, 4), rep(490e6, 13), rep(450e6, 2)),
+    stringsAsFactors = FALSE
   )
 )
 
@@ -201,6 +203,7 @@ whoi_small_coralnet_dataset <- torch::dataset(
             "f4dd2d2effc1f9c02918e3ee614b85d3",
             "d66ec691a4c5c63878a9cfff164a6aaf",
             "7ea146b9b2f7b6cee99092bd44182d06"),
-    size = c(430e6, rep(380e6, 4), 192e6)
+    size = c(430e6, rep(380e6, 4), 192e6),
+    stringsAsFactors = FALSE
   )
 )

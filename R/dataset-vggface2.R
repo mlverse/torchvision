@@ -49,7 +49,8 @@ vggface2_dataset <- torch::dataset(
             "bb7a323824d1004e14e00c23974facd3",
             "d08b10f12bc9889509364ef56d73c621",
             "d315386c7e8e166c4f60e27d9cc61acc"),
-    size = c(37.9e9, 62e6, 2.03e9, 3e6, 335e3)
+    size = c(37.9e9, 62e6, 2.03e9, 3e6, 335e3),
+    stringsAsFactors = FALSE
   ),
   initialize = function(
     root = tempdir(),

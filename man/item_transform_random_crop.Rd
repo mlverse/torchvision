@@ -34,7 +34,7 @@ right and bottom borders respectively.}
 desired size to avoid raising an exception. Since cropping is done
 after padding, the padding seems to be done at a random offset.}
 
-\item{fill}{(number or tuple) Pixel fill value for constant fill. Default is
+\item{fill}{(numeric or vector) Pixel fill value for constant fill. Default is
 0. If a tuple of length 3, it is used to fill R, G, B channels
 respectively. This value is only used when the padding_mode is constant.}
 
@@ -67,16 +67,15 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_random_crop(before, size = c(800, 1200))
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+# the crop will changes the image size, so resize is needed before vision_make_grid
+before_plot <- before \%>\%
+  draw_bounding_boxes(colors = "blue", width = 10) \%>\%
+  transform_resize(c(600, 600))
+after_plot <- after \%>\%
+  draw_bounding_boxes(colors = "red", width = 10) \%>\%
+  transform_resize(c(600, 600))
 
-# the crop changes the image size, so resize before stacking into the grid
-grid <- vision_make_grid(
-  torch_stack(list(transform_resize(before_plot, c(600, 600)),
-                   transform_resize(after_plot, c(600, 600)))),
-  scale = TRUE
-)
-tensor_image_browse(grid)
+tensor_image_browse(vision_make_grid(before_plot, after_plot))
 }
 
 }
@@ -85,6 +84,7 @@ Other item_random_transforms:
 \code{\link[=item_transform_random_affine]{item_transform_random_affine()}},
 \code{\link[=item_transform_random_erasing]{item_transform_random_erasing()}},
 \code{\link[=item_transform_random_horizontal_flip]{item_transform_random_horizontal_flip()}},
+\code{\link[=item_transform_random_perspective]{item_transform_random_perspective()}},
 \code{\link[=item_transform_random_resize_crop]{item_transform_random_resize_crop()}},
 \code{\link[=item_transform_random_rotation]{item_transform_random_rotation()}},
 \code{\link[=item_transform_random_vertical_flip]{item_transform_random_vertical_flip()}}
