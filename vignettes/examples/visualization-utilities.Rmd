@@ -32,7 +32,7 @@ dog2 <- base_loader(paste0(gallery, "dog2.jpg")) %>% transform_to_tensor()
 quick way to eyeball a batch coming out of a `dataloader()`.
 
 ```{r}
-grid <- vision_make_grid(torch_stack(list(dog1, dog2)), num_rows = 2)
+grid <- vision_make_grid(dog1, dog2, per_row = 2)
 tensor_image_browse(grid)
 ```
 
@@ -49,58 +49,79 @@ boxes <- torch_tensor(rbind(
   c(210, 150, 350, 430)
 ), dtype = torch_float())
 
-boxed <- draw_bounding_boxes(dog1, boxes, colors = c("red", "yellow"), width = 5)
+boxed <- draw_bounding_boxes(dog1, boxes, 
+                             labels = c("tree", "partial corgi"), font_size = 18, 
+                             colors = c("darkorange", "yellow"), width = 5)
 tensor_image_browse(boxed)
 ```
 
-![Hand-written boxes: red over the trees, yellow around the corgi](assets/viz-boxes.jpg)
+![Hand-written boxes: orange over the trees, yellow around the corgi](assets/viz-boxes.jpg)
 
 ## Object detection with RF-DETR
 
-Boxes are usually not hand written but predicted. RF-DETR expects
-ImageNet-normalized inputs, so normalize before batching. The model still finds
-the dogs on unnormalized input, but far less confidently: the corgi below scores
-0.91 with normalization and 0.69 without.
+Boxes are usually not hand written but predicted. We will use the RF-DETR model to do so.
+RF-DETR expects ImageNet-normalized inputs, so we assemble two images in a batch and then normalize.  
+Note: The model is able to detect the dogs on unnormalized input, but with far lower confidence: the corgi confidence scores in the previous image drops from 0.67 with normalization down 0.28 without.
 
 ```{r}
 norm_mean <- c(0.485, 0.456, 0.406)
 norm_std <- c(0.229, 0.224, 0.225)
 
-batch <- torch_stack(list(
-  transform_normalize(dog1, norm_mean, norm_std),
-  transform_normalize(dog2, norm_mean, norm_std)
-))
+batch <- list(dog1, dog2) %>%
+  torch_stack() %>% 
+  transform_normalize(norm_mean, norm_std)
 
-model <- model_rfdetr_base(pretrained = TRUE)
+model <- model_rfdetr_base(pretrained = TRUE, num_queries = 40)
 model$eval()
 detections <- with_no_grad(model(batch))$detections
 ```
 
 RF-DETR resizes the batch to its own working resolution internally and maps the
-boxes back to the coordinates of the images you passed in, so they can be drawn
+boxes back to the coordinates of the images you passed in, so images can be drawn
 straight onto the original tensors. Each element of `detections` holds `boxes`,
-`labels` and `scores` sorted by decreasing score. Keep the confident ones, and
-turn the label indices into readable names with `coco_classes()`.
+`labels` and `scores` sorted by decreasing score. 
+
+Let's first draw the objects detected with raw model output. 
 
 ```{r}
-draw_detection <- function(image, detection) {
-  keep <- as.logical(as.array(detection$scores > 0.5))
+tensor_image_browse(vision_make_grid(
+  draw_bounding_boxes(dog1, detections[[1]]$boxes),
+  draw_bounding_boxes(dog2, detections[[2]]$boxes)
+))
+```
+![RF-DETR raw output has many boxes](assets/viz-rfdetr-raw.jpg)
+
+We can see that too many boxes are detected. RF-DETR Model default to 300 object detection, but we reduced it via the `num_queries` parameter. 
+
+Let's filter them based on their associated confidence score.
+
+We will create a convenience function that keeps the confident ones, and
+turn the label indices into readable names out of `coco_classes()`.
+
+```{r}
+draw_high_confidence_bboxes <- function(image, detection, width = 5, font_size = 30, ...) {
+  keep <- as.logical(as.array(detection$scores > 0.2))
   draw_bounding_boxes(
     image,
     detection$boxes[keep, , drop = FALSE],
-    labels = coco_classes(as.integer(detection$labels[keep])),
-    colors = "yellow",
-    width = 5,
-    font_size = 30
+    labels = coco_classes(as.integer(detection$labels[keep])), 
+    width = width,
+    font_size = font_size,
+    ...
   )
 }
-
-tensor_image_browse(draw_detection(dog1, detections[[1]]))
-tensor_image_browse(draw_detection(dog2, detections[[2]]))
 ```
 
-![RF-DETR finds the corgi and labels it dog](assets/viz-rfdetr-dog1.jpg)
-![The second image of the same batch, labeled dog too](assets/viz-rfdetr-dog2.jpg)
+Now let's draw again
+```{r}
+tensor_image_browse(vision_make_grid(
+  draw_high_confidence_bboxes(dog1, detections[[1]], color = "yellow"),
+  draw_high_confidence_bboxes(dog2, detections[[2]], color = "yellow")
+))
+
+```
+
+  ![RF-DETR confidence filtered output](assets/viz-rfdetr-filtered.jpg)
 
 ## Semantic segmentation masks
 
@@ -110,11 +131,10 @@ and keep the resized images around to draw on: masks and image must share their
 height and width.
 
 ```{r}
-resized <- lapply(list(dog1, dog2), transform_resize, size = c(520, 520))
-batch <- torch_stack(list(
-  transform_normalize(resized[[1]], norm_mean, norm_std),
-  transform_normalize(resized[[2]], norm_mean, norm_std)
-))
+batch <- list(dog1, dog2) %>%
+  torch_stack() %>%
+  transform_resize(size = c(520, 520)) %>%
+  transform_normalize(norm_mean, norm_std)
 
 model <- model_fcn_resnet50(pretrained = TRUE)
 model$eval()
