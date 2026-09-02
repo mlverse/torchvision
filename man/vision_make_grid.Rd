@@ -23,7 +23,8 @@ vision_make_grid(
   scale = TRUE,
   per_row = 8,
   padding = 2,
-  pad_value = 0
+  pad_value = 0,
+  num_rows = NULL
 )
 
 \method{vision_make_grid}{torch_tensor}(
@@ -32,7 +33,8 @@ vision_make_grid(
   scale = TRUE,
   per_row = 8,
   padding = 2,
-  pad_value = 0
+  pad_value = 0,
+  num_rows = NULL
 )
 
 \method{vision_make_grid}{`magick-image`}(
@@ -41,7 +43,8 @@ vision_make_grid(
   scale = TRUE,
   per_row = 8,
   padding = 2,
-  pad_value = 0
+  pad_value = 0,
+  num_rows = NULL
 )
 }
 \arguments{
