@@ -122,6 +122,8 @@
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code><a href="../reference/vision_make_grid.html">vision_make_grid()</a></code> now accepts multiple 3D tensors with mixed uint8 and float dtype (<a href="https://github.com/mlverse/torchvision/issues/398" class="external-link">#398</a>).</li>
+<li>
 <code><a href="../reference/transform_random_affine.html">transform_random_affine()</a></code> now accepts a bare number for <code>shear</code>. It used to widen <code>degrees</code> instead of <code>shear</code>, which left the shear range incomplete and made the sampling fail (<a href="https://github.com/mlverse/torchvision/issues/390" class="external-link">#390</a>).</li>
 <li>
 <code><a href="../reference/item_transform_rotate.html">item_transform_rotate()</a></code> no longer truncates the rotation angle to a whole number of degrees when the target stores its boxes as an integer tensor, as <code><a href="../reference/pascal_voc_datasets.html">pascal_detection_dataset()</a></code> does (<a href="https://github.com/mlverse/torchvision/issues/360" class="external-link">#360</a>).</li>
