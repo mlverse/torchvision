@@ -99,7 +99,7 @@ We will create a convenience function that keeps the confident ones, and
 turn the label indices into readable names out of `coco_classes()`.
 
 ```{r}
-draw_high_confidence_bboxes <- function(image, detection, width = 5, font_size = 30, ...) {
+draw_high_confidence_bboxes <- function(image, detection, width = 4, font_size = 25, ...) {
   keep <- as.logical(as.array(detection$scores > 0.2))
   draw_bounding_boxes(
     image,
@@ -131,9 +131,11 @@ and keep the resized images around to draw on: masks and image must share their
 height and width.
 
 ```{r}
-batch <- list(dog1, dog2) %>%
+resized <- list(dog1, dog2) %>%
   torch_stack() %>%
-  transform_resize(size = c(520, 520)) %>%
+  transform_resize(size = c(520, 520)) 
+
+batch <- resized %>%
   transform_normalize(norm_mean, norm_std)
 
 model <- model_fcn_resnet50(pretrained = TRUE)
@@ -141,12 +143,12 @@ model$eval()
 scores <- with_no_grad(model(batch))$out
 ```
 
-`scores` is a `(2, 21, 520, 520)` float tensor. Handed such a tensor,
-`draw_segmentation_masks()` takes the argmax over the class dimension and
+`scores` is a `CPUFloatType{2,21,520,520}` tensor. Handeling such a tensor,
+`draw_segmentation_masks()` takes the `argmax()` over the class dimension and
 colors each class that appears.
 
 ```{r}
-segmented <- draw_segmentation_masks(resized[[1]], scores[1, , , ], alpha = 0.6)
+segmented <- draw_segmentation_masks(resized[1,..], scores[1, ..], alpha = 0.6)
 tensor_image_browse(segmented)
 ```
 
@@ -159,10 +161,11 @@ probabilities that can be thresholded.
 ```{r}
 dog_masks <- nnf_softmax(scores, dim = 2)[, 13, , ] > 0.7
 
-tensor_image_browse(draw_segmentation_masks(resized[[1]], dog_masks[1, , ],
-                                            alpha = 0.6, colors = "blue"))
-tensor_image_browse(draw_segmentation_masks(resized[[2]], dog_masks[2, , ],
-                                            alpha = 0.6, colors = "blue"))
+tensor_image_browse(vision_make_grid(
+  draw_segmentation_masks(resized[1,..], scores[1, ..], alpha = 0.6, colors = "blue"),
+  draw_segmentation_masks(resized[2,..], scores[2, ..], alpha = 0.6, colors = "blue")
+  )
+)
 ```
 
 ![The dog class on its own, thresholded and shaded blue](assets/viz-fcn-dog1.jpg)

@@ -653,6 +653,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (num_masks %% length(colors) != 0) {
     cli_abort("colors vector of size {.value {length(colors)}} cannot be broadcasted on {.value {num_masks}} masks")
   }
+  colors <- rep_len(colors, num_masks)
 
   color_tt <- colors %>%
     grDevices::col2rgb() %>%
