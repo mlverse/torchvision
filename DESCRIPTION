@@ -118,7 +118,7 @@ Collate:
     'transforms-magick.R'
     'transforms-tensor.R'
     'utils.R'
-    'vision_utils.R'
+    'vision-utils.R'
 Depends: 
     R (>= 3.5)
 LazyData: true

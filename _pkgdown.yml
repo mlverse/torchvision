@@ -31,6 +31,8 @@ navbar:
         href: articles/examples/fcnresnet.html
       - text: keypoints
         href: articles/examples/keypoints.html
+      - text: visualization-utilities
+        href: articles/examples/visualization-utilities.html
 
 reference:
 - title: Image Transforms

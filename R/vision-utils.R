@@ -145,6 +145,28 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 }
 
 
+check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
+  valid <- (boxes[, 1] < boxes[, 3])$logical_and(boxes[, 2] < boxes[, 4])
+
+  if (lazy) {
+    if ((!valid)$any()$item()) {
+      boxes <- boxes[valid, ]
+    }
+  } else {
+    if ((!valid)$any()$item()) {
+      invalid_indices <- which(as.logical(!valid))
+      first_idx <- invalid_indices[1]
+      first_box <- as.numeric(boxes[first_idx, ])
+      cli_abort(c(
+        "Bounding box {.val {first_idx}} is not in valid xyxy format.",
+        "x" = "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
+      ))
+    }
+  }
+
+  boxes
+}
+
 #' Draws bounding boxes on image.
 #'
 #' Draws bounding boxes on top of one image tensor
@@ -166,6 +188,8 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 #' @param font_size The requested font size in points.
+#' @param lazy if `TRUE`, silently filter out degenerate bounding boxes (xmin >= xmax or ymin >= ymax).
+#'    If `FALSE`, error on the first non-conforming box.
 #' @param ... Additional arguments passed to methods.
 #'
 #' @return  torch_tensor of size (C, H, W) of dtype uint8: Image Tensor with bounding boxes plotted.
@@ -177,7 +201,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 #' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 #' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", fill = TRUE)
+#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", label = "label", fill = TRUE)
 #' tensor_image_browse(bboxed)
 #' }
 #' }
@@ -202,7 +226,8 @@ draw_bounding_boxes.torch_tensor <- function(x,
                                              fill = FALSE,
                                              width = 1,
                                              font = c("serif", "plain"),
-                                             font_size = 10, ...) {
+                                             font_size = 10,
+                                             lazy = TRUE, ...) {
   rlang::check_installed("magick")
 
   if (x$ndim == 4 && x$size(1) == 1) x <- x$squeeze(1)
@@ -215,14 +240,13 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else type_error("`x` should be torch_uint8 or torch_float")
 
-  if (boxes$shape[2] == 4 &&
-      ((boxes[, 1] >= boxes[, 3])$any() %>% as.logical() ||
-       (boxes[, 2] >= boxes[, 4])$any() %>% as.logical())) {
-    value_error("Boxes must be in c(xmin, ymin, xmax, ymax) format")
-  }
+  boxes <- check_bbox_is_xyxy(boxes, lazy = lazy)
   num_boxes <- boxes$shape[1]
   if (num_boxes == 0) {
-    cli_warn("boxes doesn't contain any box. No box was drawn")
+    cli_warn(if (lazy)
+      "No valid bounding box to draw after filtering degenerate boxes."
+    else
+      "boxes doesn't contain any box. No box was drawn.")
     return(x)
   }
   if (!is.null(labels) && inherits(labels, "torch_tensor")) {
@@ -352,10 +376,12 @@ draw_bounding_boxes.image_with_rotated_box <- function(x,
                                                        fill = FALSE,
                                                        width = 1,
                                                        font = c("serif", "plain"),
-                                                       font_size = 10, ...) {
+                                                       font_size = 10,
+                                                       lazy = TRUE, ...) {
   rlang::check_installed("magick")
 
-  boxes <- x$y$boxes
+  boxes <- check_bbox_is_xyxy(x$y$boxes, lazy = lazy)
+
 
   img_to_draw <- if (x$x$dtype == torch_uint8()) {
     x$x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
@@ -627,6 +653,7 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (num_masks %% length(colors) != 0) {
     cli_abort("colors vector of size {.value {length(colors)}} cannot be broadcasted on {.value {num_masks}} masks")
   }
+  colors <- rep_len(colors, num_masks)
 
   color_tt <- colors %>%
     grDevices::col2rgb() %>%
