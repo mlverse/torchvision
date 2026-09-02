@@ -93,6 +93,49 @@ test_that("draw_bounding_boxes works", {
   expect_no_error(bboxed_image <- draw_bounding_boxes(image_uint, boxes, colors = "black", fill = TRUE))
 })
 
+test_that("draw_bounding_boxes lazy=TRUE silently filters degenerate boxes", {
+  image <- torch::torch_randint(1L, 200L, c(3L, 100L, 100L))$to(torch::torch_uint8())
+  valid_boxes <- torch::torch_tensor(rbind(c(10, 10, 50, 50), c(20, 20, 80, 80)))
+  bad_box     <- torch::torch_tensor(rbind(c(50, 10, 10, 50)))  # xmin > xmax
+  mixed_boxes <- torch::torch_cat(list(valid_boxes, bad_box), dim = 1)
+
+  expect_no_warning(result <- draw_bounding_boxes(image, mixed_boxes, lazy = TRUE))
+  expect_tensor_shape(result, c(3L, 100L, 100L))
+  expect_tensor_dtype(result, torch::torch_uint8())
+})
+
+test_that("draw_bounding_boxes lazy=FALSE errors on first degenerate box", {
+  image <- torch::torch_randint(1L, 200L, c(3L, 100L, 100L))$to(torch::torch_uint8())
+  # first box valid, second degenerate (index 2 should be reported)
+  boxes <- torch::torch_tensor(rbind(
+    c(10, 10, 50, 50),
+    c(50, 10, 10, 50)   # xmin > xmax
+  ))
+
+  expect_error(
+    draw_bounding_boxes(image, boxes, lazy = FALSE),
+    regexp = "xyxy format"
+  )
+  expect_error(
+    draw_bounding_boxes(image, boxes, lazy = FALSE),
+    regexp = "2"  # first invalid box index
+  )
+})
+
+test_that("draw_bounding_boxes lazy=TRUE warns when all boxes are degenerate", {
+  image <- torch::torch_randint(1L, 200L, c(3L, 100L, 100L))$to(torch::torch_uint8())
+  bad_boxes <- torch::torch_tensor(rbind(
+    c(50, 10, 10, 50),  # xmin > xmax
+    c(20, 80, 60, 20)   # ymin > ymax
+  ))
+
+  expect_warning(
+    result <- draw_bounding_boxes(image, bad_boxes, lazy = TRUE),
+    regexp = "No valid bounding box"
+  )
+  expect_tensor_shape(result, c(3L, 100L, 100L))
+})
+
 test_that("draw_bounding_boxes correctly mask a complete image", {
 
   image_float <- 1 - (torch::torch_randn(c(3, 360, 360)) / 20)
