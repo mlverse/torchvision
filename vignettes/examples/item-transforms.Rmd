@@ -38,13 +38,13 @@ carries bounding boxes.
 # Build a detection item manually
 boxes <- torch_tensor(matrix(c(
   #        xmin ymin xmax ymax
-            50,  80, 300, 400,
-           200, 150, 450, 500
+          200, 150, 410, 400
 ), ncol = 4, byrow = TRUE), dtype = torch_float())
 
 det_item <- list(
   x = img,
-  y = list(boxes = boxes, labels = c("dog", "dog"))
+  y = list(boxes = boxes, labels = "dog",
+           image_height = img$shape[2], image_width = img$shape[3])
 )
 class(det_item) <- c("image_with_bounding_box", "list")
 ```
