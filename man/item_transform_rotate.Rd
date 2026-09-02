@@ -59,12 +59,11 @@ class(before) <- c("image_with_bounding_box", "list")
 
 after <- item_transform_rotate(before, angle = angle)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 
-grid <- vision_make_grid(
-  torch_stack(list(transform_resize(before_plot, c(600, 600)),
-                   transform_resize(after_plot, c(600, 600)))),
+grid <- vision_make_grid(transform_resize(before_plot, c(600, 600)),
+                         transform_resize(after_plot, c(600, 600)),
   scale = TRUE
 )
 tensor_image_browse(grid)

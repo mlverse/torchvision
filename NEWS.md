@@ -39,6 +39,7 @@
 
 ## Bug fixes and improvements
 
+* `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype (#398).
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
 * `item_transform_rotate()` no longer truncates the rotation angle to a whole number of degrees

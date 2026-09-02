@@ -25,11 +25,10 @@
 #'
 #' after <- item_transform_random_horizontal_flip(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_random_transforms
@@ -111,11 +110,10 @@ item_transform_random_horizontal_flip.image_with_rotated_box <- function(x, p = 
 #'
 #' after <- item_transform_random_vertical_flip(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), num_rows = 1, scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, per_row = 1, scale = TRUE))
 #' }
 #'
 #' @family item_random_transforms
@@ -365,16 +363,15 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #'
 #' after <- item_transform_random_crop(before, size = c(800, 1200))
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' # the crop will changes the image size, so resize is needed before vision_make_grid
+#' before_plot <- before %>%
+#'   draw_bounding_boxes(colors = "blue", width = 10) %>%
+#'   transform_resize(c(600, 600))
+#' after_plot <- after %>%
+#'   draw_bounding_boxes(colors = "red", width = 10) %>%
+#'   transform_resize(c(600, 600))
 #'
-#' # the crop changes the image size, so resize before stacking into the grid
-#' grid <- vision_make_grid(
-#'   torch_stack(list(transform_resize(before_plot, c(600, 600)),
-#'                    transform_resize(after_plot, c(600, 600)))),
-#'   scale = TRUE
-#' )
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot))
 #' }
 #'
 #' @family item_random_transforms
@@ -777,11 +774,10 @@ item_transform_random_rotation.image_with_segmentation_mask <- item_transform_ra
 #'
 #' after <- item_transform_random_erasing(before)
 #'
-#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+#' before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+#' after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 #'
-#' grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-#' tensor_image_browse(grid)
+#' tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 #' }
 #'
 #' @family item_random_transforms

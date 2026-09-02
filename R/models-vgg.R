@@ -10,7 +10,7 @@ VGG <- torch::nn_module(
       torch::nn_linear(4096, 4096),
       torch::nn_relu(TRUE),
       torch::nn_dropout(),
-      torch::nn_linear(4096, num_classes),
+      torch::nn_linear(4096, num_classes)
     )
 
     if (init_weights)

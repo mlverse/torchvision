@@ -133,7 +133,8 @@ rf100_document_collection <- torch::dataset(
       "ca0b96eb696da512eed629895a433bad"
     ),
 
-    size = c(rep(50, 18), 32, 9, 5, 108, 32, 23) * 1e6 # placeholder; optional
+    size = c(rep(50, 18), 32, 9, 5, 108, 32, 23) * 1e6, # placeholder; optional
+    stringsAsFactors = FALSE
   ),
 
   initialize = function(

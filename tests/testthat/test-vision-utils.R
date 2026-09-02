@@ -1,15 +1,75 @@
 context("vision-utils")
 
-test_that("vision_make_grid", {
-
+test_that("vision_make_grid works with 4D batch tensor", {
   images <- torch::torch_randn(c(4, 3, 16, 16))
+  grid <- vision_make_grid(images, per_row = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_equal_to_r(grid$max() - grid$min(), 1, tolerance = 1e-4)
+})
 
-  grid <- vision_make_grid(images, num_rows = 2, padding = 0)
+test_that("vision_make_grid works with multiple 3D tensors in ...", {
+  imgs <- lapply(1:4, function(i) torch::torch_randn(c(3, 16, 16)))
+  grid <- vision_make_grid(imgs[[1]], imgs[[2]], imgs[[3]], imgs[[4]], per_row = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_equal_to_r(grid$max() - grid$min(), 1, tolerance = 1e-4)
+})
 
+test_that("vision_make_grid works with multiple 4D tensors in ...", {
+  batch1 <- torch::torch_randn(c(2, 3, 16, 16))
+  batch2 <- torch::torch_randn(c(2, 3, 16, 16))
+  grid <- vision_make_grid(batch1, batch2, per_row = 2, padding = 0)
+  expect_tensor_shape(grid, c(3, 32, 32))
+})
 
-  expect_equal(grid$size(), c(3, 32, 32))
-  expect_equal(as.numeric(grid$max() - grid$min()), 1, tolerance = 1e-4)
+test_that("vision_make_grid normalizes single uint8 4D batch to float [0,1]", {
+  images <- torch::torch_randint(0L, 256L, size = c(4, 3, 16, 16))$to(torch::torch_uint8())
+  grid <- vision_make_grid(images, per_row = 2, padding = 0, scale = FALSE)
+  expect_tensor_shape(grid, c(3, 32, 32))
+  expect_tensor_dtype(grid, torch::torch_float32())
+  expect_gte(grid$min()$item(), 0)
+  expect_lte(grid$max()$item(), 1)
+})
 
+test_that("vision_make_grid normalizes mixed uint8/float inputs to float [0,1]", {
+  img_float <- torch::torch_rand(c(3, 16, 16))
+  img_uint8 <- torch::torch_randint(0L, 256L, size = c(3, 16, 16))$to(torch::torch_uint8())
+  grid <- vision_make_grid(img_float, img_uint8, per_row = 2, padding = 0, scale = FALSE)
+  expect_tensor_shape(grid, c(3, 16, 32))
+  expect_tensor_dtype(grid, torch::torch_float32())
+  expect_gte(grid$min()$item(), 0)
+  expect_lte(grid$max()$item(), 1)
+})
+
+test_that("vision_make_grid errors when ... contains non-matching types", {
+  img <- torch::torch_randn(c(3, 16, 16))
+  expect_error(vision_make_grid(img, "not_a_tensor"), "<torch_tensor>")
+})
+
+test_that("vision_make_grid errors on mixed 3D/4D tensors in ...", {
+  t3d <- torch::torch_randn(c(3, 16, 16))
+  t4d <- torch::torch_randn(c(2, 3, 16, 16))
+  expect_error(vision_make_grid(t3d, t4d), "same number of dimensions")
+})
+
+test_that("vision_make_grid works with magick-image", {
+  skip_if_not_installed("magick")
+  imgs <- magick::image_read(rep(system.file("img", "Rlogo.png", package = "png"), 4))
+  h <- magick::image_info(imgs[1])$height
+  w <- magick::image_info(imgs[1])$width
+  grid <- vision_make_grid(imgs, per_row = 2, padding = 0)
+  expect_tensor_shape(grid, c(3L, 2L * h, 2L * w))
+})
+
+test_that("vision_make_grid errors on unsupported type", {
+  expect_error(vision_make_grid(list(1, 2, 3)), "is not supported by")
+})
+
+test_that("vision_make_grid emits deprecation warning for num_rows", {
+  images <- torch::torch_randn(c(4, 3, 16, 16))
+  expect_warning(
+    vision_make_grid(images, num_rows = 2),
+    class = "deprecated"
+  )
 })
 
 test_that("draw_bounding_boxes works", {

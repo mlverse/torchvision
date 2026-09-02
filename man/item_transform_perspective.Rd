@@ -62,11 +62,10 @@ endpoints <- list(c(100, 50), c(2700, 0), c(2800, 1800), c(80, 1900))
 
 after <- item_transform_perspective(before, startpoints, endpoints)
 
-before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)$to(torch_float())$div(255)
-after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)$to(torch_float())$div(255)
+before_plot <- draw_bounding_boxes(before, colors = "blue", width = 10)
+after_plot <- draw_bounding_boxes(after, colors = "red", width = 10)
 
-grid <- vision_make_grid(torch_stack(list(before_plot, after_plot)), scale = TRUE)
-tensor_image_browse(grid)
+tensor_image_browse(vision_make_grid(before_plot, after_plot, scale = TRUE))
 }
 
 }

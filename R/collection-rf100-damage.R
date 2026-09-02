@@ -54,6 +54,7 @@ rf100_damage_collection <- torch::dataset(
       # asbestos
       "f53af703c4ce594c3950d7e732003f2d",      "8e99904ce49e7f0e830735fb22986868",      "4fef507d057690d1a55fa043696248cc"
     ),
-    size = c(21.5, 5.7, 1.4,   8.5, 2.3, 1.5,  28, 7.8, 4) * 1e6
+    size = c(21.5, 5.7, 1.4,   8.5, 2.3, 1.5,  28, 7.8, 4) * 1e6,
+    stringsAsFactors = FALSE
   )
 )
