@@ -36,10 +36,11 @@
 * Detection datasets (`coco_detection_dataset()`, `pascal_detection_dataset()` and the `rf100_*_collection()`s) now inherit the `object_detection_dataset` class and their item target `y` the `object_detection_target` class.
   Segmentation datasets (`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`, `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and `rf100_peixos_segmentation_dataset()`) now inherit the `segmentation_dataset` and `segmentation_target` classes. 
   Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
-* Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #383).
+* Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #400).
 
 ## Bug fixes and improvements
 
+* `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
 * `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype (#398).
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
