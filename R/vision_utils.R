@@ -58,13 +58,13 @@ vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2
 
 #' @rdname vision_make_grid
 #' @export
-vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
+vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
   cli_abort("The provided {.var tensor} class {.cls {class(tensor)}} is not supported by {.fn vision_make_grid}")
 }
 
 #' @rdname vision_make_grid
 #' @export
-vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
+vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
@@ -123,7 +123,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 
 #' @rdname vision_make_grid
 #' @export
-`vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0) {
+`vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
   rlang::check_installed("magick")
 
   imgs <- tensor
