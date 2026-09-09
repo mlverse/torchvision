@@ -15,7 +15,7 @@
 #'   }
 #' @param size Desired output size. If `size` is a integer vector of length 2
 #'   like `c(h, w)`, output size will be matched to this. If `size` is a bare integer,
-#'   smaller edge of the image will be matched to this number.
+#'   longest edge of the image will be matched to this number.
 #'   i.e, if height > width, then image will be rescaled to
 #'   `(size * height / width, size)`.
 #'
@@ -71,7 +71,7 @@ target_transform_resize.object_detection_target <- function(target, size) {
   orig_w <- target$image_width
 
   if (length(size) == 1L) {
-    scale <- size / min(orig_h, orig_w)
+    scale <- size / max(orig_h, orig_w)
     new_h <- round(orig_h * scale)
     new_w <- round(orig_w * scale)
   } else {

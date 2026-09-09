@@ -149,7 +149,6 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 }
 
 
-#'  @keywords internal
 check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
   valid <- (boxes[, 1] < boxes[, 3])$logical_and(boxes[, 2] < boxes[, 4])
 

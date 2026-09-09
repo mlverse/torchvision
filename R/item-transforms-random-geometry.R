@@ -965,7 +965,9 @@ item_transform_random_perspective.image_with_rotated_box <- function(x, distorti
       if (!all(keep)) {
         boxes_4 <- boxes_4[keep, ]
         angle <- angle[keep]
-        x$y$labels <- x$y$labels[keep]
+        if (!is.null(x$y$labels)) {
+          x$y$labels <- x$y$labels[keep]
+        }
         if (!is.null(x$y$area)) {
           x$y$area <- x$y$area[keep]
         }

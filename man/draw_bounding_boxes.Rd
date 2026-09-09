@@ -27,17 +27,7 @@ draw_bounding_boxes(x, ...)
 
 \method{draw_bounding_boxes}{image_with_bounding_box}(x, ...)
 
-\method{draw_bounding_boxes}{image_with_rotated_box}(
-  x,
-  labels = NULL,
-  colors = NULL,
-  fill = FALSE,
-  width = 1,
-  font = c("serif", "plain"),
-  font_size = 10,
-  lazy = TRUE,
-  ...
-)
+\method{draw_bounding_boxes}{image_with_rotated_box}(x, labels = NULL, ...)
 }
 \arguments{
 \item{x}{A torch_tensor of shape (C x H x W) and dtype \code{uint8} or dtype \code{float},
@@ -83,7 +73,7 @@ image_tensor <- torch::torch_randint(170, 250, size = c(3, 360, 360))$to(torch::
 x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", label = "label", fill = TRUE)
+bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", labels = "label", fill = TRUE)
 tensor_image_browse(bboxed)
 }
 }
