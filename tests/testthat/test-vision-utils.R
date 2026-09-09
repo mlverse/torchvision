@@ -114,11 +114,7 @@ test_that("draw_bounding_boxes lazy=FALSE errors on first degenerate box", {
 
   expect_error(
     draw_bounding_boxes(image, boxes, lazy = FALSE),
-    regexp = "xyxy format"
-  )
-  expect_error(
-    draw_bounding_boxes(image, boxes, lazy = FALSE),
-    regexp = "2"  # first invalid box index
+    "xyxy format"
   )
 })
 

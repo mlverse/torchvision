@@ -143,7 +143,7 @@ model$eval()
 scores <- with_no_grad(model(batch))$out
 ```
 
-`scores` is a `CPUFloatType{2,21,520,520}` tensor. Handeling such a tensor,
+`scores` is a `CPUFloatType{2,21,520,520}` tensor. Handling such a tensor,
 `draw_segmentation_masks()` takes the `argmax()` over the class dimension and
 colors each class that appears.
 
