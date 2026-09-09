@@ -74,7 +74,7 @@ target_transform_resize.object_detection_target <- function(target, size) {
   # Compute new dimensions
   if (length(size) == 1L) {
     # Proportional resize: match smaller edge to size
-    scale <- size / max(orig_h, orig_w)
+    scale <- size / min(orig_h, orig_w)
     new_h <- round(orig_h * scale)
     new_w <- round(orig_w * scale)
   } else {
@@ -220,7 +220,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
       out_y$image_width <- crop_w
     }
 
-    out_y$iscrowd <- y$iscrowd[mask_idx]
+    if (!is.null(y$iscrowd)) out_y$iscrowd <- y$iscrowd[mask_idx]
 
     out_y
   })
