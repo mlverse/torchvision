@@ -29,7 +29,7 @@
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_rotate(before, angle = angle)
@@ -54,6 +54,7 @@ item_transform_rotate <- function(x, angle, interpolation = 2, expand = TRUE, fi
 
 #' @export
 item_transform_rotate.dataset <- function(x, angle, interpolation = 2, expand = TRUE, fill = 0) {
+  force(angle)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -259,6 +260,10 @@ item_transform_crop <- function(x, top, left, height, width) {
 
 #' @export
 item_transform_crop.dataset <- function(x, top, left, height, width) {
+  force(top)
+  force(left)
+  force(height)
+  force(width)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -393,7 +398,7 @@ item_transform_crop.image_with_rotated_box <- function(x, top, left, height, wid
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_hflip(before)
@@ -637,6 +642,7 @@ item_transform_center_crop.default <- function(x, size) {
 
 #' @export
 item_transform_center_crop.dataset <- function(x, size) {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -679,7 +685,9 @@ item_transform_center_crop.image_with_bounding_box <- function(x, size) {
     keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
     if (!all(keep)) {
       boxes <- boxes[keep, ]
-      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
       if (!is.null(x$y$area)) {
         x$y$area <- x$y$area[keep]
       }
@@ -740,7 +748,9 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
     keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
     if (!all(keep)) {
       boxes <- boxes[keep, ]
-      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
       if (!is.null(x$y$area)) {
         x$y$area <- x$y$area[keep]
       }
@@ -785,7 +795,7 @@ item_transform_center_crop.image_with_rotated_box <- function(x, size) {
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"},
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat",
 #'                                   image_height = img$shape[2], image_width = img$shape[3]))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
@@ -932,6 +942,7 @@ item_transform_pad <- function(x, padding, fill = 0, padding_mode = "constant") 
 
 #' @export
 item_transform_pad.dataset <- function(x, padding, fill = 0, padding_mode = "constant") {
+  force(padding)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -977,7 +988,9 @@ item_transform_pad.image_with_bounding_box <- function(x, padding, fill = 0, pad
     keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
     if (!all(keep)) {
       boxes <- boxes[keep, ]
-      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
       if (!is.null(x$y$area)) {
         x$y$area <- x$y$area[keep]
       }
@@ -1033,7 +1046,9 @@ item_transform_pad.image_with_rotated_box <- function(x, padding, fill = 0, padd
     keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
     if (!all(keep)) {
       boxes <- boxes[keep, ]
-      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
       if (!is.null(x$y$area)) {
         x$y$area <- x$y$area[keep]
       }
@@ -1109,6 +1124,8 @@ item_transform_perspective.default <- function(x, startpoints, endpoints, interp
 #' @export
 item_transform_perspective.dataset <- function(x, startpoints, endpoints, interpolation = 2,
                                                fill = NULL) {
+  force(startpoints)
+  force(endpoints)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -1150,7 +1167,9 @@ item_transform_perspective.image_with_bounding_box <- function(x, startpoints, e
     keep <- as.logical((boxes[, 3] > boxes[, 1]) & (boxes[, 4] > boxes[, 2]))
     if (!all(keep)) {
       boxes <- boxes[keep, ]
-      x$y$labels <- x$y$labels[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
       if (!is.null(x$y$area)) {
         x$y$area <- x$y$area[keep]
       }
@@ -1181,6 +1200,49 @@ item_transform_perspective.image_with_segmentation_mask <- function(x, startpoin
     interpolation = 0, # nearest is used for masks
     fill = NULL
   )
+
+  x
+}
+
+#' @export
+item_transform_perspective.image_with_rotated_box <- function(x, startpoints, endpoints,
+                                                              interpolation = 2, fill = NULL) {
+  x$x <- transform_perspective(
+    x$x,
+    startpoints = startpoints,
+    endpoints = endpoints,
+    interpolation = interpolation,
+    fill = fill
+  )
+
+  boxes <- x$y$boxes$clone()
+  if (boxes$size(1) > 0) {
+    angle <- boxes[, 5]$clone()
+    boxes_4 <- boxes[, 1:4]$clone()
+    boxes_4 <- perspective_boxes(boxes_4, startpoints = startpoints, endpoints = endpoints)
+    img_size <- get_image_size(x$x)
+    img_w <- img_size[1]
+    img_h <- img_size[2]
+    boxes_4[, 1] <- torch_clamp(boxes_4[, 1], 0, img_w)
+    boxes_4[, 3] <- torch_clamp(boxes_4[, 3], 0, img_w)
+    boxes_4[, 2] <- torch_clamp(boxes_4[, 2], 0, img_h)
+    boxes_4[, 4] <- torch_clamp(boxes_4[, 4], 0, img_h)
+    keep <- as.logical((boxes_4[, 3] > boxes_4[, 1]) & (boxes_4[, 4] > boxes_4[, 2]))
+    if (!all(keep)) {
+      boxes_4 <- boxes_4[keep, ]
+      angle <- angle[keep]
+      if (!is.null(x$y$labels)) {
+        x$y$labels <- x$y$labels[keep]
+      }
+      if (!is.null(x$y$area)) {
+        x$y$area <- x$y$area[keep]
+      }
+      if (!is.null(x$y$iscrowd)) {
+        x$y$iscrowd <- x$y$iscrowd[keep]
+      }
+    }
+    x$y$boxes <- torch_cat(list(boxes_4, angle$unsqueeze(2)), dim = 2)
+  }
 
   x
 }
@@ -1236,6 +1298,7 @@ item_transform_resize.default <- function(x, size, interpolation = 2) {
 
 #' @export
 item_transform_resize.dataset <- function(x, size, interpolation = 2) {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {

@@ -20,7 +20,7 @@
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_horizontal_flip(before)
@@ -105,7 +105,7 @@ item_transform_random_horizontal_flip.image_with_rotated_box <- function(x, p = 
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_vertical_flip(before)
@@ -225,6 +225,7 @@ item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1),
 item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1),
                                                       ratio = c(3 / 4, 4 / 3),
                                                       interpolation = 2) {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -358,7 +359,7 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_crop(before, size = c(800, 1200))
@@ -394,6 +395,7 @@ item_transform_random_crop.default <- function(x, size, padding = NULL, pad_if_n
 #' @export
 item_transform_random_crop.dataset <- function(x, size, padding = NULL, pad_if_needed = FALSE,
                                                fill = 0, padding_mode = "constant") {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -583,6 +585,7 @@ item_transform_random_affine.default <- function(x, degrees, translate = NULL, s
 item_transform_random_affine.dataset <- function(x, degrees, translate = NULL, scale = NULL,
                                                  shear = NULL, interpolation = 0, fill = NULL,
                                                  center = NULL) {
+  force(degrees)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -700,10 +703,6 @@ item_transform_random_rotation.default <- function(x, degrees, interpolation = 2
 item_transform_random_rotation.dataset <- function(x, degrees, interpolation = 2,
                                                    expand = FALSE, fill = 0) {
   force(degrees)
-  force(interpolation)
-  force(expand)
-  force(fill)
-
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -816,8 +815,9 @@ item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, sc
                                                                   inplace = FALSE) {
   if (runif(1) < p) {
     img_size <- get_image_size(x$x)
-    c(top, left, height, width) %<-% get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
-    if (!is.null(top)) {
+    params <- get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
+    if (!is.null(params)) {
+      c(top, left, height, width) %<-% params
       img_c <- x$x$size(1)
 
       if (!inplace) {

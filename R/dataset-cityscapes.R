@@ -290,10 +290,10 @@ cityscapes_dataset <- torch::dataset(
       target_path <- self$get_target_path(img_path, ttype)
 
       if (!file.exists(target_path)) {
-        cli_warn(
+        cli_warn(c(
           "Target file not found: {.path {basename(target_path)}}",
-          "Returning NULL for {.val {ttype}}"
-        )
+          "i" = "Returning NULL for {.val {ttype}}"
+        ))
         y[[ttype]] <- NULL
         next
       }
@@ -306,11 +306,11 @@ cityscapes_dataset <- torch::dataset(
         color_img <- magick::image_read(target_path)
         y[[ttype]] <- magick::image_data(color_img, channels = "rgb") %>% aperm(c(1,3,2))
       } else {
-        # Load segmentation masks (instance or semantic)
-        # These are 16-bit PNG files
-        mask_img <- magick::image_read(target_path)
-
-        y[[ttype]] <- magick::image_data(mask_img, channels = "gray") %>% aperm(c(1,3,2))
+        # 16-bit PNG: png::readPNG preserves full depth (values in [0,1])
+        raw_data <- png::readPNG(target_path, native = FALSE)
+        mask_int <- array(as.integer(round(raw_data * 65535L)),
+                          dim = c(1L, nrow(raw_data), ncol(raw_data)))
+        y[[ttype]] <- mask_int
       }
     }
 
