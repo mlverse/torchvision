@@ -34,6 +34,8 @@ prepare_sahi_split.torch_tensor <- function(x, size = c(512L, 512L), overlap_siz
 
 #' @export
 prepare_sahi_split.dataset <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+  if (x$.length() == 0L)
+    value_error("Cannot determine image dimensions from an empty dataset.")
   item <- x$.getitem(1)
   im <- item$x
   if (inherits(im, "torch_tensor")) {

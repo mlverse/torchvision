@@ -203,11 +203,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
     out_y <- y
     out_y$boxes <- new_boxes
 
-    if (labels_is_tensor) {
-      out_y$labels <- labels[mask_idx]
-    } else {
-      out_y$labels <- labels[mask_idx]
-    }
+    out_y$labels <- labels[mask_idx]
 
     if (!is.null(y$area)) {
       out_y$area <- keep_area[mask_idx]
