@@ -373,7 +373,6 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
     item
   }
 
-  # Return the modified dataset (copy-on-modify ensures original is preserved)
   target
 }
 

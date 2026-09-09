@@ -65,10 +65,6 @@ vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, pad
 #' @rdname vision_make_grid
 #' @export
 vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-  if (!is.null(num_rows)) {
-    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
-    per_row <- num_rows
-  }
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
