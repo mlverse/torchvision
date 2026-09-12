@@ -99,7 +99,8 @@
 <span>  year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2017"</span>, <span class="st">"2014"</span><span class="op">)</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,6 +131,11 @@
 <dt id="arg-target-transform">target_transform<a class="anchor" aria-label="anchor" href="#arg-target-transform"></a></dt>
 <dd><p>Optional transform function applied to the target.
 Use <code>target_transform_coco_masks</code> to convert polygon annotations to binary masks.</p></dd>
+
+
+<dt id="arg-item-transform">item_transform<a class="anchor" aria-label="anchor" href="#arg-item-transform"></a></dt>
+<dd><p>Optional transform function applied to the whole item, such as
+<code><a href="item_transform_rotate.html">item_transform_rotate()</a></code>, once <code>transform</code> and <code>target_transform</code> have been applied.</p></dd>
 
 </dl></div>
     <div id="value">

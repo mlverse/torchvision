@@ -104,7 +104,8 @@ annotations of the unique "fish" category.</p>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,6 +131,12 @@ annotations of the unique "fish" category.</p>
 
 <dt id="arg-target-transform">target_transform<a class="anchor" aria-label="anchor" href="#arg-target-transform"></a></dt>
 <dd><p>Optional transform function applied to the target.</p></dd>
+
+
+<dt id="arg-item-transform">item_transform<a class="anchor" aria-label="anchor" href="#arg-item-transform"></a></dt>
+<dd><p>Optional transform function applied to the whole item, such as
+<code><a href="item_transform_rotate.html">item_transform_rotate()</a></code>, once <code>transform</code> and <code>target_transform</code> have been applied.
+It is only used by <code>.getitem()</code>, not by the batched <code>.getbatch()</code>.</p></dd>
 
 </dl></div>
     <div id="value">

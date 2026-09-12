@@ -127,6 +127,7 @@
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> now accepts degenerated bounding-box by default with the <code>lazy = TRUE</code> parameter (<a href="https://github.com/mlverse/torchvision/issues/400" class="external-link">#400</a>).</li>
+<li>Detection and segmentation datasets now take an <code>item_transform</code> argument, applied to the whole item after <code>transform</code> and <code>target_transform</code>. Passing a dataset to <code>item_transform_*()</code> or <code><a href="../reference/target_transform_rotate.html">target_transform_rotate()</a></code> now adds to those arguments rather than replacing the dataset <code>.getitem()</code> method through <code><a href="https://rdrr.io/r/base/bindenv.html" class="external-link">unlockBinding()</a></code>, which R CMD check flagged as an unsafe call (<a href="https://github.com/mlverse/torchvision/issues/399" class="external-link">#399</a>).</li>
 <li>
 <code><a href="../reference/vision_make_grid.html">vision_make_grid()</a></code> now accepts multiple 3D tensors with mixed uint8 and float dtype (<a href="https://github.com/mlverse/torchvision/issues/398" class="external-link">#398</a>).</li>
 <li>
