@@ -398,6 +398,7 @@ importFrom(grDevices,dev.off)
 importFrom(graphics,polygon)
 importFrom(jsonlite,fromJSON)
 importFrom(magrittr,"%>%")
+importFrom(rlang,"%||%")
 importFrom(stats,
   runif,
   setNames

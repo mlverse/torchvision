@@ -1,5 +1,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom torch torch_uint8
+#' @importFrom rlang %||%
 NULL
 
 .min_max_scale <- function(x) {
@@ -65,10 +66,7 @@ vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, pad
 #' @rdname vision_make_grid
 #' @export
 vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-  if (!is.null(num_rows)) {
-    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
-    per_row <- num_rows
-  }
+
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
@@ -128,10 +126,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 #' @rdname vision_make_grid
 #' @export
 `vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-  if (!is.null(num_rows)) {
-    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
-    per_row <- num_rows
-  }
+
   rlang::check_installed("magick")
 
   imgs <- tensor
@@ -310,7 +305,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
 
     theta_rad <- theta * pi / 180
     ct <- cos(theta_rad)
-    st <- sin(theta_rad)
+    st <- -sin(theta_rad)
 
     all_x <- rbind(
       cx - hw * ct + hh * st,
@@ -643,21 +638,28 @@ draw_keypoints <- function(image,
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in 1:dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1], img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+  kpts_xy <- matrix(img_kpts, ncol = 2)
 
-    if (!is.null(connectivity)) {
-      for (conn in connectivity) {
-        start_idx <- conn[1]
-        end_idx <- conn[2]
-        start_x <- img_kpts[pose, start_idx, 1]
-        start_y <- img_kpts[pose, start_idx, 2]
-        end_x <- img_kpts[pose, end_idx, 1]
-        end_y <- img_kpts[pose, end_idx, 2]
-        graphics::lines(c(start_x, end_x), c(start_y, end_y), col = colors[start_idx], lwd = width)
-      }
-    }
+  if (nrow(kpts_xy) > 0) {
+    graphics::points(kpts_xy[, 1], kpts_xy[, 2],
+                     pch = ".", col = rep(colors, each = dim(img_kpts)[1]), cex = radius)
   }
+
+  if (!is.null(connectivity)) {
+    conn_mat <- do.call(rbind, connectivity)
+    starts <- conn_mat[, 1]
+    ends <- conn_mat[, 2]
+    # batching many segments in one call slightly changes the anti-aliasing of
+    # overlapping strokes on the magick device compared to one primitive per
+    # segment; visually equivalent, and much faster for large keypoint batches
+    graphics::segments(
+      c(t(img_kpts[, starts, 1])), c(t(img_kpts[, starts, 2])),
+      c(t(img_kpts[, ends, 1])),  c(t(img_kpts[, ends, 2])),
+      col = rep(colors[starts], each = dim(img_kpts)[1]),
+      lwd = width
+    )
+  }
+
   grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())
