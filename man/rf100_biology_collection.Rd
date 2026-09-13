@@ -9,6 +9,7 @@ rf100_biology_collection(
   split = c("train", "test", "valid"),
   transform = NULL,
   target_transform = NULL,
+  item_transform = NULL,
   download = FALSE
 )
 }
@@ -21,6 +22,10 @@ rf100_biology_collection(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.
+It is only used by \code{.getitem()}, not by the batched \code{.getbatch()}.}
 
 \item{download}{Logical. If TRUE, downloads the dataset if not present at \code{root}.}
 }

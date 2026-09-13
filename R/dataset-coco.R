@@ -9,6 +9,8 @@
 #' @param download Logical. If TRUE, downloads the dataset if it's not already present in the \code{root} directory.
 #' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target (labels, boxes, etc.).
+#' @param item_transform Optional transform function applied to the whole item, such as
+#'   [item_transform_rotate()], once `transform` and `target_transform` have been applied.
 #'
 #' @return An object of class `coco_detection_dataset`. Each item is a list:
 #' - `x`: a `(C, H, W)` array representing the image.
@@ -75,7 +77,8 @@ coco_detection_dataset <- torch::dataset(
     year = c("2017", "2014"),
     download = FALSE,
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    item_transform = NULL
   ) {
 
     year <- match.arg(year)
@@ -87,6 +90,7 @@ coco_detection_dataset <- torch::dataset(
     self$split <- split
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
     self$archive_size <- self$resources[self$resources$year == year & self$resources$split == split & self$resources$content == "image", ]$size
 
     self$data_dir <- fs::path(root, glue::glue("coco{year}"))
@@ -166,6 +170,10 @@ coco_detection_dataset <- torch::dataset(
 
     result <- list(x = x, y = y)
     class(result) <- c("image_with_bounding_box", class(result))
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
 
     result
   },
@@ -284,7 +292,8 @@ coco_segmentation_dataset <- torch::dataset(
     year = c("2017", "2014"),
     download = FALSE,
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    item_transform = NULL
   ) {
     super$initialize(
       root = root,
@@ -292,7 +301,8 @@ coco_segmentation_dataset <- torch::dataset(
       year = year,
       download = download,
       transform = transform,
-      target_transform = target_transform
+      target_transform = target_transform,
+      item_transform = item_transform
     )
     as_segmentation_dataset(self)
   },
@@ -343,6 +353,11 @@ coco_segmentation_dataset <- torch::dataset(
     if (!is.null(y$masks)) {
       class(result) <- c("image_with_segmentation_mask", class(result))
     }
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
+
     result
   }
 )

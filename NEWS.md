@@ -41,6 +41,10 @@
 ## Bug fixes and improvements
 
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
+* Detection and segmentation datasets now take an `item_transform` argument, applied to the whole item
+  after `transform` and `target_transform`. Passing a dataset to `item_transform_*()` or
+  `target_transform_rotate()` now adds to those arguments rather than replacing the dataset `.getitem()`
+  method through `unlockBinding()`, which R CMD check flagged as an unsafe call (#399).
 * `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype (#398).
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).

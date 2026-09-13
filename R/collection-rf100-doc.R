@@ -12,6 +12,9 @@ NULL
 #' @param download Logical. If TRUE, downloads the dataset if not present at `root`.
 #' @param transform Optional transform function applied to the image.
 #' @param target_transform Optional transform function applied to the target.
+#' @param item_transform Optional transform function applied to the whole item, such as
+#'   [item_transform_rotate()], once `transform` and `target_transform` have been applied.
+#'   It is only used by `.getitem()`, not by the batched `.getbatch()`.
 #'
 #' @return A torch dataset. Each element is a named list with:
 #' - `x`: H x W x 3 array representing the image, auto-oriented and stretched to 640 x 640.
@@ -141,6 +144,7 @@ rf100_document_collection <- torch::dataset(
     dataset, split = c("train", "test", "valid"),
     transform = NULL,
     target_transform = NULL,
+    item_transform = NULL,
     download = FALSE
   ) {
     if (!requireNamespace("arrow", quietly = TRUE)) install.packages("arrow")
@@ -150,6 +154,7 @@ rf100_document_collection <- torch::dataset(
     self$split   <- match.arg(split)
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
 
     sel <- self$resources$dataset == self$dataset & self$resources$split == self$split
     self$archive_url  <- self$resources$url[sel]
@@ -218,6 +223,8 @@ rf100_document_collection <- torch::dataset(
 
     item <- list(x = x, y = y)
     class(item) <- "image_with_bounding_box"
+    if (!is.null(self$item_transform)) item <- self$item_transform(item)
+
     item
   },
 

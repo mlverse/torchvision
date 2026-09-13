@@ -363,17 +363,9 @@ target_transform_rotate.object_detection_target <- function(target, angle = 0) {
 #' @rdname target_transform_rotate
 #' @export
 target_transform_rotate.dataset <- function(target, angle = 0) {
-  # Capture original getitem in closure
-  original_getitem <- target$.getitem
-  unlockBinding(".getitem", as.environment(target))
-  # Override getitem to apply rotation transform on-the-fly
-  target$.getitem <- function(index) {
-    item <- original_getitem(index)
-    item$y <- target_transform_rotate(item$y, angle = angle)
-    item
-  }
-
-  target
+  add_dataset_transform(target, "target_transform", function(y) {
+    target_transform_rotate(y, angle = angle)
+  })
 }
 
 #' Apply an affine transformation to a detection target

@@ -53,13 +53,15 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
     root = tempdir(),
     download = FALSE,
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    item_transform = NULL
   ) {
     self$dataset <- "peixos"
     self$split <- match.arg(split)
     self$root <- fs::path_expand(root)
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
 
     self$data_dir <- fs::path(self$root, class(self)[[1]])
     self$image_dir <- fs::path(self$data_dir, self$split)
@@ -157,6 +159,11 @@ rf100_peixos_segmentation_dataset <- torch::dataset(
 
     item <- list(x = x, y = y)
     class(item) <- c("image_with_segmentation_mask", class(item))
+
+    if (!is.null(self$item_transform)) {
+      item <- self$item_transform(item)
+    }
+
     item
   }
 )

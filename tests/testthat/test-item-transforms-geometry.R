@@ -291,14 +291,9 @@ test_that("item_transform_rotate preserves labels for segmentation", {
 })
 
 test_that("item_transform_rotate works on a segmentation dataset", {
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  })
 
   ds <- item_transform_rotate(ds, angle = 90)
   item <- ds$.getitem(1)
@@ -1068,14 +1063,9 @@ test_that("item_transform_affine preserves labels for segmentation", {
 })
 
 test_that("item_transform_affine works on a dataset", {
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  })
 
   ds <- item_transform_affine(ds, translate = c(30, 10))
   item <- ds$.getitem(1)
@@ -1531,17 +1521,11 @@ test_that("item_transform_perspective applies to datasets", {
   sp <- list(c(0, 0), c(199, 0), c(199, 99), c(0, 99))
   ep <- list(c(10, 20), c(209, 20), c(209, 119), c(10, 119))
 
-  ds <- torch::dataset(
-    name = "perspective_test",
-    initialize = function() {
-      self$items <- list(
-        make_detection_item(matrix(c(10, 10, 20, 20), ncol = 4)),
-        make_detection_item(matrix(c(5, 5, 15, 15), ncol = 4))
-      )
-    },
-    .getitem = function(index) self$items[[index]],
-    .length = function() length(self$items)
-  )()
+  items <- list(
+    make_detection_item(matrix(c(10, 10, 20, 20), ncol = 4)),
+    make_detection_item(matrix(c(5, 5, 15, 15), ncol = 4))
+  )
+  ds <- toy_item_dataset(function(index) items[[index]], size = length(items))
 
   transformed <- item_transform_perspective(ds, sp, ep)
 
@@ -1707,14 +1691,9 @@ test_that("item_transform_resize can be composed", {
 })
 
 test_that("item_transform_resize works on detection and segmentation datasets", {
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_detection_item(matrix(c(120, 70, 180, 130), ncol = 4), image_size = c(200L, 400L))
+  })
 
   ds <- item_transform_resize(ds, size = c(100L, 200L))
   item <- ds$.getitem(1)
@@ -1725,14 +1704,9 @@ test_that("item_transform_resize works on detection and segmentation datasets", 
   expect_equal(item$y$image_height, 100L)
   expect_equal(item$y$image_width, 200L)
 
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_segmentation_item(image_size = c(200L, 400L), num_masks = 2L)
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_segmentation_item(image_size = c(200L, 400L), num_masks = 2L)
+  })
 
   ds <- item_transform_resize(ds, size = c(100L, 200L))
   item <- ds$.getitem(1)

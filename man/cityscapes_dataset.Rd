@@ -10,7 +10,8 @@ cityscapes_dataset(
   mode = "fine",
   target_type = "instance",
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  item_transform = NULL
 )
 }
 \arguments{
@@ -33,6 +34,9 @@ Multiple types can be specified (default: "instance").}
 \item{transform}{Function to transform the input image (default: NULL).}
 
 \item{target_transform}{Function to transform the target annotations (default: NULL).}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.}
 }
 \value{
 A torch dataset object. Each item is a named list:

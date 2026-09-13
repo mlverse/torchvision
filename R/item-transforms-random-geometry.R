@@ -50,13 +50,9 @@ item_transform_random_horizontal_flip.default <- function(x, p = 0.5) {
 
 #' @export
 item_transform_random_horizontal_flip.dataset <- function(x, p = 0.5) {
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_horizontal_flip(item, p = p)
-  }
-  x
+  })
 }
 
 #' @export
@@ -133,13 +129,9 @@ item_transform_random_vertical_flip.default <- function(x, p = 0.5) {
 
 #' @export
 item_transform_random_vertical_flip.dataset <- function(x, p = 0.5) {
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_vertical_flip(item, p = p)
-  }
-  x
+  })
 }
 
 #' @export
@@ -225,15 +217,10 @@ item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1),
 item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1),
                                                       ratio = c(3 / 4, 4 / 3),
                                                       interpolation = 2) {
-  force(size)
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_resize_crop(item, size = size, scale = scale,
                                       ratio = ratio, interpolation = interpolation)
-  }
-  x
+  })
 }
 
 #' @export
@@ -395,16 +382,11 @@ item_transform_random_crop.default <- function(x, size, padding = NULL, pad_if_n
 #' @export
 item_transform_random_crop.dataset <- function(x, size, padding = NULL, pad_if_needed = FALSE,
                                                fill = 0, padding_mode = "constant") {
-  force(size)
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_crop(item, size = size, padding = padding,
                                pad_if_needed = pad_if_needed,
                                fill = fill, padding_mode = padding_mode)
-  }
-  x
+  })
 }
 
 #' @export
@@ -585,17 +567,12 @@ item_transform_random_affine.default <- function(x, degrees, translate = NULL, s
 item_transform_random_affine.dataset <- function(x, degrees, translate = NULL, scale = NULL,
                                                  shear = NULL, interpolation = 0, fill = NULL,
                                                  center = NULL) {
-  force(degrees)
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_affine(item, degrees = degrees, translate = translate,
                                  scale = scale, shear = shear,
                                  interpolation = interpolation, fill = fill,
                                  center = center)
-  }
-  x
+  })
 }
 
 #' @export
@@ -703,15 +680,15 @@ item_transform_random_rotation.default <- function(x, degrees, interpolation = 2
 item_transform_random_rotation.dataset <- function(x, degrees, interpolation = 2,
                                                    expand = FALSE, fill = 0) {
   force(degrees)
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  force(interpolation)
+  force(expand)
+  force(fill)
+
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_rotation(item, degrees = degrees,
                                    interpolation = interpolation,
                                    expand = expand, fill = fill)
-  }
-  x
+  })
 }
 
 #' @export
@@ -799,14 +776,10 @@ item_transform_random_erasing.default <- function(x, p = 0.5, scale = c(0.02, 0.
 #' @export
 item_transform_random_erasing.dataset <- function(x, p = 0.5, scale = c(0.02, 0.33), ratio = c(0.3, 3.3),
                                                   value = 0, inplace = FALSE) {
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_erasing(item, p = p, scale = scale, ratio = ratio,
                                   value = value, inplace = inplace)
-  }
-  x
+  })
 }
 
 #' @export
@@ -912,14 +885,10 @@ item_transform_random_perspective.default <- function(x, distortion_scale = 0.5,
 #' @export
 item_transform_random_perspective.dataset <- function(x, distortion_scale = 0.5, p = 0.5,
                                                       interpolation = 2, fill = 0) {
-  original_getitem <- x$.getitem
-  unlockBinding(".getitem", as.environment(x))
-  x$.getitem <- function(index) {
-    item <- original_getitem(index)
+  add_dataset_transform(x, "item_transform", function(item) {
     item_transform_random_perspective(item, distortion_scale = distortion_scale, p = p,
                                       interpolation = interpolation, fill = fill)
-  }
-  x
+  })
 }
 
 #' @export

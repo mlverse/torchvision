@@ -18,6 +18,8 @@
 #'   Multiple types can be specified (default: "instance").
 #' @param transform Function to transform the input image (default: NULL).
 #' @param target_transform Function to transform the target annotations (default: NULL).
+#' @param item_transform Optional transform function applied to the whole item, such as
+#'   [item_transform_rotate()], once `transform` and `target_transform` have been applied.
 #'
 #' @return A torch dataset object. Each item is a named list:
 #' \itemize{
@@ -155,7 +157,8 @@ cityscapes_dataset <- torch::dataset(
     mode = "fine",
     target_type = "instance",
     transform = NULL,
-    target_transform = NULL
+    target_transform = NULL,
+    item_transform = NULL
   ) {
 
     self$root_path <- root
@@ -164,6 +167,7 @@ cityscapes_dataset <- torch::dataset(
     self$target_type <- target_type
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
 
     # Validate parameters
     if (!split %in% c("train", "val", "test")) {
@@ -327,6 +331,11 @@ cityscapes_dataset <- torch::dataset(
 
     result <- list(x = x, y = y)
     class(result) <- c("image_with_segmentation_mask", class(result))
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
+
     result
   },
 

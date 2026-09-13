@@ -30,6 +30,27 @@ as_segmentation_dataset <- function(self) {
   set_dataset_task_class(self, "segmentation_dataset")
 }
 
+#' Add a transform to a dataset
+#'
+#' Composes `transform` after the one the dataset already holds, so that
+#' transforms applied to a dataset stack in the order they were added. Datasets
+#' are R6 objects, so the field is updated by reference.
+#'
+#' @param self A `dataset` instance, modified in place.
+#' @param field Name of the field holding the transform, either
+#'   `"item_transform"` or `"target_transform"`.
+#' @param transform The function to add.
+#' @keywords internal
+#' @noRd
+add_dataset_transform <- function(self, field, transform) {
+  if (!exists(field, envir = as.environment(self), inherits = FALSE))
+    cli_abort("{.cls {class(self)[[1]]}} has no {.arg {field}} argument, so it cannot be transformed as a whole.")
+
+  previous <- self[[field]]
+  self[[field]] <- if (is.null(previous)) transform else function(x) transform(previous(x))
+  self
+}
+
 #' Coerce a detection target to the `object_detection_target` class
 #'
 #' @param target A list holding at least `boxes`, as built by the `.getitem()`

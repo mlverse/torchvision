@@ -10,6 +10,7 @@ oxfordiiitpet_segmentation_dataset(
   target_type = "category",
   transform = NULL,
   target_transform = NULL,
+  item_transform = NULL,
   download = FALSE
 )
 }
@@ -23,6 +24,9 @@ oxfordiiitpet_segmentation_dataset(
 \item{transform}{Optional. A function that takes an image and returns a transformed version (e.g., normalization, cropping).}
 
 \item{target_transform}{Optional. A function that transforms the label.}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.}
 
 \item{download}{Logical. If TRUE, downloads the dataset to \verb{root/}. If the dataset is already present, download is skipped.}
 }

@@ -8,6 +8,8 @@
 #' @inheritParams mnist_dataset
 #' @param root Character. Root directory where the dataset is stored or will be downloaded to. Files are placed under `root/oxfordiiitpet`.
 #' @param target_type Character. One of \code{"category"} or \code{"binary-category"} (default: \code{"category"}).
+#' @param item_transform Optional transform function applied to the whole item, such as
+#'   [item_transform_rotate()], once `transform` and `target_transform` have been applied.
 #'
 #' @return A torch dataset object \code{oxfordiiitpet_dataset}. Each item is a named list:
 #' - \code{x}: a H x W x 3 integer array representing an RGB image.
@@ -66,12 +68,14 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
     target_type = "category",
     transform = NULL,
     target_transform = NULL,
+    item_transform = NULL,
     download = FALSE
   ) {
 
     self$root_path <- root
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
     self$train <- train
     self$target_type <- target_type
     if (train) {
@@ -206,6 +210,11 @@ oxfordiiitpet_segmentation_dataset <- torch::dataset(
 
     result <- list(x = x, y = y)
     class(result) <- c("image_with_segmentation_mask", class(result))
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
+
     result
   },
 

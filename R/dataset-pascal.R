@@ -34,6 +34,8 @@ pascal_voc_classes <- function(class_id = 1:21) {
 #' @param root Character. Root directory where the dataset will be stored under `root/pascal_voc_<year>`.
 #' @param year Character. VOC dataset version to use. One of `"2007"`, `"2008"`, `"2009"`, `"2010"`, `"2011"`, or `"2012"`. Default is `"2012"`.
 #' @param split Character. One of `"train"`, `"val"`, `"trainval"`, or `"test"`. Determines the dataset split. Default is `"train"`.
+#' @param item_transform Optional transform function applied to the whole item, such as
+#'   [item_transform_rotate()], once `transform` and `target_transform` have been applied.
 #'
 #' @return A torch dataset of class \code{pascal_segmentation_dataset}, also
 #' inheriting \code{segmentation_dataset}.
@@ -131,6 +133,7 @@ pascal_segmentation_dataset <- torch::dataset(
     split = "train",
     transform = NULL,
     target_transform = NULL,
+    item_transform = NULL,
     download = FALSE
   ) {
     self$root_path <- root
@@ -138,6 +141,7 @@ pascal_segmentation_dataset <- torch::dataset(
     self$split <-  match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
     if (self$split == "test"){
         self$archive_key <- "test"
     } else {
@@ -246,6 +250,11 @@ pascal_segmentation_dataset <- torch::dataset(
 
     result <- list(x = x, y = y)
     class(result) <- c("image_with_segmentation_mask", class(result))
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
+
     result
   },
 
@@ -294,6 +303,7 @@ pascal_detection_dataset <- torch::dataset(
     split = "train",
     transform = NULL,
     target_transform = NULL,
+    item_transform = NULL,
     download = FALSE
   ) {
 
@@ -302,6 +312,7 @@ pascal_detection_dataset <- torch::dataset(
     self$split <- match.arg(split, choices = c("train", "val", "trainval", "test"))
     self$transform <- transform
     self$target_transform <- target_transform
+    self$item_transform <- item_transform
     if (self$split == "test") {
       self$archive_key <- "test"
     } else {
@@ -353,6 +364,11 @@ pascal_detection_dataset <- torch::dataset(
 
     result <- list(x = x, y = y)
     class(result) <- c("image_with_bounding_box", class(result))
+
+    if (!is.null(self$item_transform)) {
+      result <- self$item_transform(result)
+    }
+
     result
   },
 

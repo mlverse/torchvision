@@ -147,3 +147,23 @@ make_detection_item <- function(boxes, labels = NULL, image_size = c(100L, 200L)
   class(item) <- c("image_with_bounding_box", "list")
   item
 }
+
+# Toy dataset applying its `item_transform` the way the shipped detection and
+# segmentation datasets do, so that `item_transform_*()` can be tested on a
+# dataset without downloading one.
+toy_item_dataset <- torch::dataset(
+  name = "toy_item_dataset",
+  initialize = function(get_item, size = 1L, item_transform = NULL) {
+    self$get_item <- get_item
+    self$size <- size
+    self$item_transform <- item_transform
+  },
+  .getitem = function(index) {
+    item <- self$get_item(index)
+    if (!is.null(self$item_transform)) {
+      item <- self$item_transform(item)
+    }
+    item
+  },
+  .length = function() self$size
+)

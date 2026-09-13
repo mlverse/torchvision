@@ -10,7 +10,8 @@ coco_detection_dataset(
   year = c("2017", "2014"),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  item_transform = NULL
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ coco_detection_dataset(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target (labels, boxes, etc.).}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.}
 }
 \value{
 An object of class \code{coco_detection_dataset}. Each item is a list:

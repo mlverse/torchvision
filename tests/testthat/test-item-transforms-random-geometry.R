@@ -402,12 +402,7 @@ test_that("item_transform_random_resize_crop can be composed", {
 
 test_that("item_transform_random_resize_crop works on detection and segmentation datasets", {
   detection_item <- make_detection_item(matrix(c(20, 30, 80, 90), ncol = 4), image_size = c(100L, 200L))
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) detection_item,
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) detection_item)
 
   ds <- item_transform_random_resize_crop(ds, size = c(50L, 60L))
 
@@ -424,14 +419,9 @@ test_that("item_transform_random_resize_crop works on detection and segmentation
   expect_false(torch_equal(item$x, other$x))
   expect_equal_to_r(detection_item$y$boxes, matrix(c(20, 30, 80, 90), ncol = 4))
 
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  })
 
   ds <- item_transform_random_resize_crop(ds, size = c(50L, 60L))
   item <- ds$.getitem(1)
@@ -559,14 +549,9 @@ test_that("item_transform_random_crop errors when crop is larger than the image"
 })
 
 test_that("item_transform_random_crop works on a detection dataset", {
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_detection_item(matrix(c(0, 0, 200, 100), ncol = 4), image_size = c(100L, 200L))
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_detection_item(matrix(c(0, 0, 200, 100), ncol = 4), image_size = c(100L, 200L))
+  })
 
   ds <- item_transform_random_crop(ds, size = c(50, 80))
   item <- ds$.getitem(1)
@@ -578,16 +563,11 @@ test_that("item_transform_random_crop works on a detection dataset", {
 })
 
 test_that("item_transform_random_crop works on a segmentation dataset", {
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-      item$y$masks$fill_(TRUE)
-      item
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    item <- make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+    item$y$masks$fill_(TRUE)
+    item
+  })
 
   ds <- item_transform_random_crop(ds, size = c(50, 80))
   item <- ds$.getitem(1)
@@ -745,12 +725,7 @@ test_that("item_transform_random_affine keeps rotated boxes rotated", {
 
 test_that("item_transform_random_affine works on detection and segmentation datasets", {
   detection_item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) detection_item,
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) detection_item)
 
   ds <- item_transform_random_affine(ds, degrees = 30, translate = c(0.1, 0.1))
   item <- ds$.getitem(1)
@@ -762,14 +737,9 @@ test_that("item_transform_random_affine works on detection and segmentation data
   expect_false(torch_equal(item$x, other$x))
   expect_equal_to_r(detection_item$y$boxes, matrix(c(10, 20, 50, 60), ncol = 4))
 
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  })
 
   ds <- item_transform_random_affine(ds, degrees = 30)
   item <- ds$.getitem(1)
@@ -918,12 +888,7 @@ test_that("item_transform_random_rotation accumulates the angle of rotated boxes
 
 test_that("item_transform_random_rotation works on detection and segmentation datasets", {
   detection_item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) detection_item,
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) detection_item)
 
   ds <- item_transform_random_rotation(ds, degrees = 30)
   item <- ds$.getitem(1)
@@ -935,14 +900,9 @@ test_that("item_transform_random_rotation works on detection and segmentation da
   expect_false(torch_equal(item$x, other$x))
   expect_equal_to_r(detection_item$y$boxes, matrix(c(10, 20, 50, 60), ncol = 4))
 
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L)
+  })
 
   ds <- item_transform_random_rotation(ds, degrees = 30)
   item <- ds$.getitem(1)
@@ -953,12 +913,7 @@ test_that("item_transform_random_rotation works on detection and segmentation da
 
 test_that("item_transform_random_rotation keeps the range given when the dataset was wrapped", {
   detection_item <- make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) detection_item,
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) detection_item)
 
   degrees <- 5
   ds <- item_transform_random_rotation(ds, degrees = degrees)
@@ -1037,14 +992,9 @@ test_that("item_transform_random_erasing works on segmentation items", {
 })
 
 test_that("item_transform_random_erasing works on a dataset", {
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) {
-      make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
-    },
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  })
 
   transformed <- item_transform_random_erasing(ds, p = 0)
   item <- transformed$.getitem(1)
@@ -1106,12 +1056,9 @@ test_that("item_transform_random_perspective detection items", {
   expect_true(torch_equal(item$x, original_img))
   expect_true(torch_equal(item$y$boxes, original_boxes))
 
-  ds <- dataset(
-    name = "toy_detection",
-    initialize = function() {},
-    .getitem = function(index) make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L)),
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) {
+    make_detection_item(matrix(c(10, 20, 50, 60), ncol = 4), image_size = c(100L, 200L))
+  })
   ds <- item_transform_random_perspective(ds, p = 1)
   ds_item <- ds$.getitem(1)
   expect_s3_class(ds_item, "image_with_bounding_box")
@@ -1143,12 +1090,7 @@ test_that("item_transform_random_perspective segmentation items", {
   result_labels <- item_transform_random_perspective(item, p = 1)
   expect_equal_to_r(result_labels$y$labels, original_labels)
 
-  ds <- dataset(
-    name = "toy_segmentation",
-    initialize = function() {},
-    .getitem = function(index) make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L),
-    .length = function() 1L
-  )()
+  ds <- toy_item_dataset(function(index) make_segmentation_item(image_size = c(100L, 200L), num_masks = 2L))
   ds <- item_transform_random_perspective(ds, p = 1)
   ds_item <- ds$.getitem(1)
   expect_s3_class(ds_item, "image_with_segmentation_mask")

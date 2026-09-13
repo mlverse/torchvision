@@ -9,7 +9,8 @@ rf100_peixos_segmentation_dataset(
   root = tempdir(),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  item_transform = NULL
 )
 }
 \arguments{
@@ -22,6 +23,10 @@ rf100_peixos_segmentation_dataset(
 \item{transform}{Optional transform function applied to the image.}
 
 \item{target_transform}{Optional transform function applied to the target.}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.
+It is only used by \code{.getitem()}, not by the batched \code{.getbatch()}.}
 }
 \value{
 A torch dataset. Each element is a named list with:

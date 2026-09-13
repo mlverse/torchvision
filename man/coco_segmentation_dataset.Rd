@@ -10,7 +10,8 @@ coco_segmentation_dataset(
   year = c("2017", "2014"),
   download = FALSE,
   transform = NULL,
-  target_transform = NULL
+  target_transform = NULL,
+  item_transform = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ coco_segmentation_dataset(
 
 \item{target_transform}{Optional transform function applied to the target.
 Use \code{target_transform_coco_masks} to convert polygon annotations to binary masks.}
+
+\item{item_transform}{Optional transform function applied to the whole item, such as
+\code{\link[=item_transform_rotate]{item_transform_rotate()}}, once \code{transform} and \code{target_transform} have been applied.}
 }
 \value{
 An object of class \code{coco_segmentation_dataset}. Each item is a list:
