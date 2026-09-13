@@ -66,7 +66,6 @@ vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, pad
 #' @rdname vision_make_grid
 #' @export
 vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
@@ -148,7 +147,6 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 }
 
 
-#'  @keywords internal
 check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
   valid <- (boxes[, 1] < boxes[, 3])$logical_and(boxes[, 2] < boxes[, 4])
 

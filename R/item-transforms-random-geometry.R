@@ -20,7 +20,7 @@
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_horizontal_flip(before)
@@ -105,7 +105,7 @@ item_transform_random_horizontal_flip.image_with_rotated_box <- function(x, p = 
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_vertical_flip(before)
@@ -144,7 +144,7 @@ item_transform_random_vertical_flip.dataset <- function(x, p = 0.5) {
 
 #' @export
 item_transform_random_vertical_flip.image_with_bounding_box <- function(x, p = 0.5) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     x <- item_transform_vflip(x)
   }
   x
@@ -152,7 +152,7 @@ item_transform_random_vertical_flip.image_with_bounding_box <- function(x, p = 0
 
 #' @export
 item_transform_random_vertical_flip.image_with_segmentation_mask <- function(x, p = 0.5) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     x <- item_transform_vflip(x)
   }
   x
@@ -160,7 +160,7 @@ item_transform_random_vertical_flip.image_with_segmentation_mask <- function(x, 
 
 #' @export
 item_transform_random_vertical_flip.image_with_rotated_box <- function(x, p = 0.5) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     x <- item_transform_vflip(x)
   }
   x
@@ -225,6 +225,7 @@ item_transform_random_resize_crop <- function(x, size, scale = c(0.08, 1),
 item_transform_random_resize_crop.dataset <- function(x, size, scale = c(0.08, 1),
                                                       ratio = c(3 / 4, 4 / 3),
                                                       interpolation = 2) {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -358,7 +359,7 @@ rescale_box_angle <- function(angle_deg, scale_w, scale_h) {
 #'
 #' boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 #'
-#' before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"}))
+#' before <- list(x = img, y = list(boxes = boxes, labels = "cat"))
 #' class(before) <- c("image_with_bounding_box", "list")
 #'
 #' after <- item_transform_random_crop(before, size = c(800, 1200))
@@ -394,6 +395,7 @@ item_transform_random_crop.default <- function(x, size, padding = NULL, pad_if_n
 #' @export
 item_transform_random_crop.dataset <- function(x, size, padding = NULL, pad_if_needed = FALSE,
                                                fill = 0, padding_mode = "constant") {
+  force(size)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -583,6 +585,7 @@ item_transform_random_affine.default <- function(x, degrees, translate = NULL, s
 item_transform_random_affine.dataset <- function(x, degrees, translate = NULL, scale = NULL,
                                                  shear = NULL, interpolation = 0, fill = NULL,
                                                  center = NULL) {
+  force(degrees)
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -700,10 +703,6 @@ item_transform_random_rotation.default <- function(x, degrees, interpolation = 2
 item_transform_random_rotation.dataset <- function(x, degrees, interpolation = 2,
                                                    expand = FALSE, fill = 0) {
   force(degrees)
-  force(interpolation)
-  force(expand)
-  force(fill)
-
   original_getitem <- x$.getitem
   unlockBinding(".getitem", as.environment(x))
   x$.getitem <- function(index) {
@@ -814,10 +813,11 @@ item_transform_random_erasing.dataset <- function(x, p = 0.5, scale = c(0.02, 0.
 item_transform_random_erasing.image_with_bounding_box <- function(x, p = 0.5, scale = c(0.02, 0.33),
                                                                   ratio = c(0.3, 3.3), value = 0,
                                                                   inplace = FALSE) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     img_size <- get_image_size(x$x)
-    c(top, left, height, width) %<-% get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
-    if (!is.null(top)) {
+    params <- get_random_erasing_params(img_size[2], img_size[1], scale, ratio)
+    if (!is.null(params)) {
+      c(top, left, height, width) %<-% params
       img_c <- x$x$size(1)
 
       if (!inplace) {
@@ -926,7 +926,7 @@ item_transform_random_perspective.dataset <- function(x, distortion_scale = 0.5,
 item_transform_random_perspective.image_with_bounding_box <- function(x, distortion_scale = 0.5,
                                                                       p = 0.5, interpolation = 2,
                                                                       fill = 0) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     c(width, height) %<-% get_image_size(x$x)
     c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
     x <- item_transform_perspective(x, startpoints = startpoints, endpoints = endpoints,
@@ -942,7 +942,7 @@ item_transform_random_perspective.image_with_segmentation_mask <- item_transform
 item_transform_random_perspective.image_with_rotated_box <- function(x, distortion_scale = 0.5,
                                                                       p = 0.5, interpolation = 2,
                                                                       fill = 0) {
-  if (stats::runif(1) < p) {
+  if (runif(1) < p) {
     c(width, height) %<-% get_image_size(x$x)
     c(startpoints, endpoints) %<-% get_random_perspective_params(width, height, distortion_scale)
 
@@ -965,7 +965,9 @@ item_transform_random_perspective.image_with_rotated_box <- function(x, distorti
       if (!all(keep)) {
         boxes_4 <- boxes_4[keep, ]
         angle <- angle[keep]
-        x$y$labels <- x$y$labels[keep]
+        if (!is.null(x$y$labels)) {
+          x$y$labels <- x$y$labels[keep]
+        }
         if (!is.null(x$y$area)) {
           x$y$area <- x$y$area[keep]
         }
@@ -985,8 +987,8 @@ get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
   area <- img_h * img_w
   log_ratio <- log(ratio)
 
-  erase_area <- area * stats::runif(10, min = scale[1], max = scale[2])
-  aspect_ratio <- exp(stats::runif(10, min = log_ratio[1], max = log_ratio[2]))
+  erase_area <- area * runif(10, min = scale[1], max = scale[2])
+  aspect_ratio <- exp(runif(10, min = log_ratio[1], max = log_ratio[2]))
 
   h <- round(sqrt(erase_area * aspect_ratio))
   w <- round(sqrt(erase_area / aspect_ratio))
@@ -995,8 +997,8 @@ get_random_erasing_params <- function(img_h, img_w, scale, ratio) {
   if (length(valid) == 0L) return(NULL)
 
   idx <- valid[1L]
-  top <- as.integer(floor(stats::runif(1, 0, img_h - h[idx] + 1)))
-  left <- as.integer(floor(stats::runif(1, 0, img_w - w[idx] + 1)))
+  top <- as.integer(floor(runif(1, 0, img_h - h[idx] + 1)))
+  left <- as.integer(floor(runif(1, 0, img_w - w[idx] + 1)))
 
   list(top = top, left = left, height = h[idx], width = w[idx])
 }

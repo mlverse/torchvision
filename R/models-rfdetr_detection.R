@@ -1260,123 +1260,30 @@ rfdetr_postprocess <- nn_module(
   }
 )
 
-rfdetr_configs <- list(
-  nano = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    num_register_tokens = 0,
-    resolution = 384
-  ),
-  small = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    num_register_tokens = 0,
-    resolution = 512
-  ),
-  medium = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    resolution = 640
-  ),
-  base = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 640
-  ),
-  large = list(
-    encoder = "dinov2_windowed_base",
-    hidden_dim = 384,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 12,
-    ca_nheads = 24,
-    dim_feedforward = 2048,
-    dec_n_points = 4,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 560,
-    projector_scale = c(2.0, 0.5)
-  ),
-  base_2 = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 640
-  ),
-  base_o365 = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 366,
-    resolution = 640
+rfdetr_configs <- local({
+  small_base <- list(
+    encoder = "dinov2_windowed_small", hidden_dim = 256, num_queries = 300,
+    dec_layers = 2, sa_nheads = 8, ca_nheads = 16, dim_feedforward = 2048,
+    dec_n_points = 2, group_detr = 13, out_feature_indexes = c(3, 6, 9, 12),
+    patch_size = 16, num_windows = 2, num_classes = 91, num_register_tokens = 0
   )
-)
+  base_base <- modifyList(small_base, list(
+    dec_layers = 3, out_feature_indexes = c(2, 5, 8, 11), patch_size = 14, num_windows = 4
+  ))
+  list(
+    nano      = modifyList(small_base, list(resolution = 384)),
+    small     = modifyList(small_base, list(resolution = 512)),
+    medium    = modifyList(small_base, list(resolution = 640)),
+    base      = modifyList(base_base,  list(resolution = 640)),
+    base_2    = modifyList(base_base,  list(resolution = 640)),
+    base_o365 = modifyList(base_base,  list(num_classes = 366, resolution = 640)),
+    large     = modifyList(base_base,  list(
+      encoder = "dinov2_windowed_base", hidden_dim = 384,
+      sa_nheads = 12, ca_nheads = 24, dec_n_points = 4,
+      resolution = 560, projector_scale = c(2.0, 0.5)
+    ))
+  )
+})
 
 #' @importFrom torch nn_parameter nn_linear nn_embedding nn_layer_norm nn_dropout
 #' @importFrom torch nn_multihead_attention nn_conv2d nn_conv_transpose2d nn_batch_norm2d
