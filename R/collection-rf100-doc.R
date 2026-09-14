@@ -270,6 +270,8 @@ rf100_document_collection <- torch::dataset(
 
     item <- list(x = x_lst, y = y)
     class(item) <- "image_with_bounding_box"
+    if (!is.null(self$item_transform)) item <- self$item_transform(item)
+
     item
   },
 
