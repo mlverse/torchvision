@@ -252,7 +252,7 @@ on: masks and image must share their height and width.</p>
 <span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">out</span></span></code></pre></div>
 <p><code>scores</code> is a <code>CPUFloatType{2,21,520,520}</code>
-tensor. Handeling such a tensor, <code><a href="../../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code>
+tensor. Handling such a tensor, <code><a href="../../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code>
 takes the <code>argmax()</code> over the class dimension and colors each
 class that appears.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">

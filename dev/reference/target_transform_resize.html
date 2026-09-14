@@ -121,7 +121,7 @@ at least:</p><ul><li><p><code>boxes</code> — tensor of shape <code>(N, 4)</cod
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
 <dd><p>Desired output size. If <code>size</code> is a integer vector of length 2
 like <code>c(h, w)</code>, output size will be matched to this. If <code>size</code> is a bare integer,
-smaller edge of the image will be matched to this number.
+longest edge of the image will be matched to this number.
 i.e, if height &gt; width, then image will be rescaled to
 <code>(size * height / width, size)</code>.</p></dd>
 
