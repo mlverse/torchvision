@@ -1,5 +1,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom torch torch_uint8
+#' @importFrom rlang %||%
 NULL
 
 .min_max_scale <- function(x) {
@@ -107,11 +108,11 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
         break
       grid$narrow(
         dim = 2,
-        start =  1 + torch::torch_tensor(y * height + padding, dtype = torch::torch_int64())$sum(dim = 1),
+        start = y * height + padding + 1L,
         length = height - padding
       )$narrow(
         dim = 3,
-        start = 1 + torch::torch_tensor(x * width + padding, dtype = torch::torch_int64())$sum(dim = 1),
+        start = x * width + padding + 1L,
         length = width - padding
       )$copy_(tensor[k + 1, , ,])
       k <- k + 1
@@ -124,6 +125,7 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 #' @rdname vision_make_grid
 #' @export
 `vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
+
   rlang::check_installed("magick")
 
   imgs <- tensor
@@ -201,7 +203,7 @@ check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
 #' x <- torch::torch_randint(low = 1, high = 160, size = c(12,1))
 #' y <- torch::torch_randint(low = 1, high = 260, size = c(12,1))
 #' boxes <- torch::torch_cat(c(x, y, x + 20, y +  10), dim = 2)
-#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", label = "label", fill = TRUE)
+#' bboxed <- draw_bounding_boxes(image_tensor, boxes, colors = "black", labels = "label", fill = TRUE)
 #' tensor_image_browse(bboxed)
 #' }
 #' }
@@ -271,7 +273,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
   }
 
   if (is.null(font)) {
-    vfont <- c("serif", "plain")
+    font <- c("serif", "plain")
   } else {
     if (is.null(font_size)) font_size <- 10
   }
@@ -301,7 +303,7 @@ draw_bounding_boxes.torch_tensor <- function(x,
 
     theta_rad <- theta * pi / 180
     ct <- cos(theta_rad)
-    st <- sin(theta_rad)
+    st <- -sin(theta_rad)
 
     all_x <- rbind(
       cx - hw * ct + hh * st,
@@ -370,128 +372,9 @@ draw_bounding_boxes.image_with_bounding_box <- function(x, ...) {
 
 #' @rdname draw_bounding_boxes
 #' @export
-draw_bounding_boxes.image_with_rotated_box <- function(x,
-                                                       labels = NULL,
-                                                       colors = NULL,
-                                                       fill = FALSE,
-                                                       width = 1,
-                                                       font = c("serif", "plain"),
-                                                       font_size = 10,
-                                                       lazy = TRUE, ...) {
-  rlang::check_installed("magick")
-
-  boxes <- check_bbox_is_xyxy(x$y$boxes, lazy = lazy)
-
-
-  img_to_draw <- if (x$x$dtype == torch_uint8()) {
-    x$x$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
-  } else if (x$x$dtype == torch_float()) {
-    x$x$permute(c(2, 3, 1))$to(device = "cpu") %>% as_array()
-  } else type_error("`x$x` should be torch_uint8 or torch_float")
-
-  num_boxes <- boxes$shape[1]
-  if (num_boxes == 0) {
-    cli_warn("{.var x$y$boxes} doesn't contain any box. No box was drawn")
-    return(x$x)
-  }
-
-  if (is.null(labels)) labels <- x$y$labels
-  if (!is.null(labels) && inherits(labels, "torch_tensor")) {
-    labels <- as.character(as_array(labels$to(device = "cpu")))
-  }
-  if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
-    cli_abort(
-      "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
-    )
-  }
-
-  if (is.null(colors)) {
-    colors <- grDevices::hcl.colors(n = num_boxes)
-  }
-  if (num_boxes %% length(colors) != 0) {
-    cli_abort(
-      "Number of colors {.val {length(colors)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
-    )
-  }
-
-  if (!fill) {
-    fill_col <- NA
-  } else {
-    fill_col <- colors
-  }
-
-  if (is.null(font)) {
-    vfont <- c("serif", "plain")
-  } else {
-    if (is.null(font_size)) font_size <- 10
-  }
-
-  if (x$x$size(1) == 1) {
-    img_to_draw <- x$x$tile(c(4, 2, 2))$div(255)$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
-  }
-
-  boxes_r <- as.matrix(boxes$to(device = "cpu"))
-
-  draw <- png::writePNG(img_to_draw) %>%
-    magick::image_read() %>%
-    magick::image_draw()
-
-  img_h <- dim(img_to_draw)[1]
-  img_w <- dim(img_to_draw)[2]
-  graphics::clip(0, img_w, 0, img_h)
-
-  xmin <- boxes_r[, 1]
-  ymin <- boxes_r[, 2]
-  xmax <- boxes_r[, 3]
-  ymax <- boxes_r[, 4]
-  theta <- boxes_r[, 5]
-
-  cx <- (xmin + xmax) / 2
-  cy <- (ymin + ymax) / 2
-  hw <- (xmax - xmin) / 2
-  hh <- (ymax - ymin) / 2
-
-  theta_rad <- deg2rad(theta)
-  ct <- cos(theta_rad)
-  st <- -sin(theta_rad)
-
-  all_x <- cbind(
-    cx - hw * ct + hh * st,
-    cx + hw * ct + hh * st,
-    cx + hw * ct - hh * st,
-    cx - hw * ct - hh * st
-  )
-  all_y <- cbind(
-    cy - hw * st - hh * ct,
-    cy + hw * st - hh * ct,
-    cy + hw * st + hh * ct,
-    cy - hw * st + hh * ct
-  )
-
-  poly_x <- as.vector(t(cbind(all_x, NA)))
-  poly_y <- as.vector(t(cbind(all_y, NA)))
-
-  graphics::polygon(poly_x, poly_y,
-                    col = fill_col, border = colors, lwd = width)
-
-  if (!is.null(labels)) {
-    label_x <- all_x[, 1] + 2 * width + font_size
-    label_y <- all_y[, 1] + 2 * width
-    graphics::text(label_x, label_y,
-                   labels = labels,
-                   col = colors,
-                   vfont = font,
-                   cex = font_size / 10)
-  }
-
-  grDevices::dev.off()
-
-  draw_tt <- draw %>%
-    magick::image_data(channels = "rgb") %>%
-    as.integer() %>%
-    torch_tensor(dtype = torch_uint8())
-
-  draw_tt$permute(c(3, 1, 2))
+draw_bounding_boxes.image_with_rotated_box <- function(x, labels = NULL, ...) {
+    draw_bounding_boxes(x$x, boxes = x$y$boxes,
+                        labels = labels %||% x$y$labels, ...)
 }
 
 #' Convert COCO polygon to mask tensor (Robust Version)
@@ -547,8 +430,7 @@ coco_polygon_to_mask <- function(segmentation, height, width) {
   }
 
   if (nrow(mask_matrix) != height || ncol(mask_matrix) != width) {
-    stop(sprintf("Mask matrix dimensions (%d x %d) don't match expected (%d x %d)",
-                 nrow(mask_matrix), ncol(mask_matrix), height, width))
+    cli_abort("Mask dimensions ({nrow(mask_matrix)} x {ncol(mask_matrix)}) don't match parameter expected dimension ({height} x {width})")
   }
 
   mask_logical <- mask_matrix > 0
@@ -629,15 +511,17 @@ draw_segmentation_masks.torch_tensor <- function(x,
   if (masks$dtype != torch_bool() && masks$dtype != torch::torch_float() ) {
     type_error("`masks` is expected to be of dtype torch_bool() or torch_float()")
   }
-  if (any(masks$shape[-2:-1] != img_to_draw$shape[-2:-1])) {
+  if (any(masks$shape[-1] != img_to_draw$shape[-1])) {
     value_error("`masks` and `image` must have the same height and width")
   }
   # if mask is a model inference output, we need to convert float mask to boolean mask
   if (masks$dtype == torch::torch_float() ) {
     mask_id <- masks$argmax(dim = 1)
-    masks_seq <- mask_id$aminmax()[[1]]$item():mask_id$aminmax()[[2]]$item()
+    minmax <- mask_id$aminmax()
+    masks_seq <- minmax[[1]]$item():minmax[[2]]$item()
+
     # turn mask_id \code{[LongType{H,W}]} into a boolean mask \code{[BoolType{num_masks,H,W}]}
-    masks <- torch::torch_stack(lapply(masks_seq, function(x) mask_id$eq(x)), dim = 1)
+    masks <- torch::torch_stack(lapply(masks_seq, function(class_id) mask_id$eq(class_id)), dim = 1)
   } else {
     masks_seq <- seq(masks$size(1))
   }
@@ -752,21 +636,28 @@ draw_keypoints <- function(image,
     magick::image_read() %>%
     magick::image_draw()
 
-  for (pose in 1:dim(img_kpts)[[1]]) {
-    graphics::points(img_kpts[pose,,1], img_kpts[pose,,2], pch = ".", col = colors, cex = radius)
+  kpts_xy <- matrix(img_kpts, ncol = 2)
 
-    if (!is.null(connectivity)) {
-      for (conn in connectivity) {
-        start_idx <- conn[1]
-        end_idx <- conn[2]
-        start_x <- img_kpts[pose, start_idx, 1]
-        start_y <- img_kpts[pose, start_idx, 2]
-        end_x <- img_kpts[pose, end_idx, 1]
-        end_y <- img_kpts[pose, end_idx, 2]
-        graphics::lines(c(start_x, end_x), c(start_y, end_y), col = colors[start_idx], lwd = width)
-      }
-    }
+  if (nrow(kpts_xy) > 0) {
+    graphics::points(kpts_xy[, 1], kpts_xy[, 2],
+                     pch = ".", col = rep(colors, each = dim(img_kpts)[1]), cex = radius)
   }
+
+  if (!is.null(connectivity)) {
+    conn_mat <- do.call(rbind, connectivity)
+    starts <- conn_mat[, 1]
+    ends <- conn_mat[, 2]
+    # batching many segments in one call slightly changes the anti-aliasing of
+    # overlapping strokes on the magick device compared to one primitive per
+    # segment; visually equivalent, and much faster for large keypoint batches
+    graphics::segments(
+      c(t(img_kpts[, starts, 1])), c(t(img_kpts[, starts, 2])),
+      c(t(img_kpts[, ends, 1])),  c(t(img_kpts[, ends, 2])),
+      col = rep(colors[starts], each = dim(img_kpts)[1]),
+      lwd = width
+    )
+  }
+
   grDevices::dev.off()
   draw_tt <-
     draw %>% magick::image_data(channels = "rgb") %>% as.integer %>% torch::torch_tensor(dtype = torch::torch_uint8())

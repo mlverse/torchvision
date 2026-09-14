@@ -34,6 +34,8 @@ prepare_sahi_split.torch_tensor <- function(x, size = c(512L, 512L), overlap_siz
 
 #' @export
 prepare_sahi_split.dataset <- function(x, size = c(512L, 512L), overlap_size_ratio = c(0.2, 0.2)) {
+  if (x$.length() == 0L)
+    value_error("Cannot determine image dimensions from an empty dataset.")
   item <- x$.getitem(1)
   im <- item$x
   if (inherits(im, "torch_tensor")) {
@@ -78,8 +80,8 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
     crop_windows <- list(list(
       top = 1L,
       left = 1L,
-      height = as.double(image_height),
-      width = as.double(image_width)
+      height = as.integer(image_height),
+      width = as.integer(image_width)
     ))
   } else {
     n_h <- max(ceiling((image_height - crop_height) / step_h) + 1L, 1L)
@@ -96,10 +98,10 @@ compute_sahi_split <- function(image_height, image_width, size, overlap_size_rat
     for (top in tops)
       for (left in lefts) {
         crop_windows[[idx]] <- list(
-          top = as.double(top + 1L),
-          left = as.double(left + 1L),
-          height = as.double(crop_height),
-          width = as.double(crop_width)
+          top = as.integer(top + 1L),
+          left = as.integer(left + 1L),
+          height = as.integer(crop_height),
+          width = as.integer(crop_width)
         )
         idx <- idx + 1L
       }

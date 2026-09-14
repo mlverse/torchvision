@@ -37,6 +37,7 @@ S3method(item_transform_pad,image_with_segmentation_mask)
 S3method(item_transform_perspective,dataset)
 S3method(item_transform_perspective,default)
 S3method(item_transform_perspective,image_with_bounding_box)
+S3method(item_transform_perspective,image_with_rotated_box)
 S3method(item_transform_perspective,image_with_segmentation_mask)
 S3method(item_transform_random_affine,dataset)
 S3method(item_transform_random_affine,default)
@@ -398,6 +399,7 @@ importFrom(grDevices,dev.off)
 importFrom(graphics,polygon)
 importFrom(jsonlite,fromJSON)
 importFrom(magrittr,"%>%")
+importFrom(rlang,"%||%")
 importFrom(stats,
   runif,
   setNames

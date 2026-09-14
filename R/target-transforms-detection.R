@@ -15,7 +15,7 @@
 #'   }
 #' @param size Desired output size. If `size` is a integer vector of length 2
 #'   like `c(h, w)`, output size will be matched to this. If `size` is a bare integer,
-#'   smaller edge of the image will be matched to this number.
+#'   longest edge of the image will be matched to this number.
 #'   i.e, if height > width, then image will be rescaled to
 #'   `(size * height / width, size)`.
 #'
@@ -67,26 +67,20 @@ target_transform_resize.object_detection_target <- function(target, size) {
   if (!"image_height" %in% names(target) || !"image_width" %in% names(target)) {
     cli_abort("Target must contain both {.field image_height} and {.field image_width} fields.")
   }
-  # Extract original dimensions
   orig_h <- target$image_height
   orig_w <- target$image_width
 
-  # Compute new dimensions
   if (length(size) == 1L) {
-    # Proportional resize: match smaller edge to size
     scale <- size / max(orig_h, orig_w)
     new_h <- round(orig_h * scale)
     new_w <- round(orig_w * scale)
   } else {
-    # Fixed size resize
     c(new_h, new_w) %<-% size
   }
 
-  # Compute scale factors (reuse orig_h / orig_w)
   scale_h <- new_h / orig_h
   scale_w <- new_w / orig_w
 
-  # Resize bounding boxes (xyxy format)
   boxes <- target$boxes$clone()
   boxes_resized <- boxes
   boxes_resized[, 1L] <- boxes[, 1L] * scale_w # xmin
@@ -94,7 +88,6 @@ target_transform_resize.object_detection_target <- function(target, size) {
   boxes_resized[, 3L] <- boxes[, 3L] * scale_w # xmax
   boxes_resized[, 4L] <- boxes[, 4L] * scale_h # ymax
 
-  # Update target
   target$boxes <- boxes_resized
   target$image_height <- new_h
   target$image_width <- new_w
@@ -203,11 +196,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
     out_y <- y
     out_y$boxes <- new_boxes
 
-    if (labels_is_tensor) {
-      out_y$labels <- labels[mask_idx]
-    } else {
-      out_y$labels <- labels[mask_idx]
-    }
+    out_y$labels <- labels[mask_idx]
 
     if (!is.null(y$area)) {
       out_y$area <- keep_area[mask_idx]
@@ -220,7 +209,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
       out_y$image_width <- crop_w
     }
 
-    out_y$iscrowd <- y$iscrowd[mask_idx]
+    if (!is.null(y$iscrowd)) out_y$iscrowd <- y$iscrowd[mask_idx]
 
     out_y
   })
