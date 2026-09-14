@@ -1,0 +1,245 @@
+---
+title: "torchvision classes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{torchvision classes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+What a torchvision dataset hands back is a plain R list with an S3 class glued
+onto it, and that class is what the rest of the package dispatches on. It decides
+which transform will accept the object, what the object holds once that transform
+has run, and which drawing helper can render it. This article goes through those
+classes and shows what is inside each of them.
+
+The code is not evaluated when the website is built, since most of it needs a
+dataset on disk.
+
+```{r setup}
+library(torchvision)
+library(torch)
+```
+
+## Datasets, items and targets
+
+Indexing a dataset returns an *item*: a list with `x`, the image, and `y`,
+everything the dataset knows about that image. `y` is called the *target*.
+
+![A dataset is a deck of items; each item holds an image in `$x` and its annotations in `$y`.](assets/dataset-item.svg)
+
+A dataset takes up to three transform arguments, and they reach different depths
+of that structure. `transform` is handed `x` alone, `target_transform` is handed
+`y` alone, and `item_transform` is handed the item as a whole, once the other two
+have run. Classification datasets only offer the first two. Detection and
+segmentation datasets offer all three, because an image cannot be rotated or
+cropped without moving its boxes and masks with it.
+
+```{r}
+ds <- coco_detection_dataset(
+  train = FALSE,
+  download = TRUE,
+  transform = transform_to_tensor,
+  item_transform = function(item) item_transform_resize(item, c(480, 640))
+)
+```
+
+`transform_to_tensor` is doing more work there than it looks. A dataset returns
+`x` in whatever form it was read in, which is the `(H, W, 3)` channel-last array
+of `base_loader()` for most of them and a magick image for
+`cityscapes_dataset()`. The item transforms and the drawing helpers all want the
+`(C, H, W)` tensor that torch models take, so a detection or segmentation
+dataset is nearly always built with `transform = transform_to_tensor`.
+
+The dataset itself is classed by task, with `object_detection_dataset` or
+`segmentation_dataset` inserted ahead of `dataset` so that task methods win over
+the generic ones while the dataset keeps its own name first. That class is what
+lets you hand a whole dataset to an item transform:
+
+```{r}
+ds <- item_transform_random_horizontal_flip(ds, p = 0.5)
+```
+
+which composes the flip into the dataset's `item_transform` rather than applying
+it once.
+
+## Classification and caption items
+
+The simplest items carry no class at all. `mnist_dataset()`, `cifar10_dataset()`,
+`eurosat_dataset()` and the other classification datasets return a bare list
+whose `y` is the class index:
+
+```{r}
+mnist <- mnist_dataset(root = tempdir(), download = TRUE, transform = transform_to_tensor)
+str(mnist[1])
+#> List of 2
+#>  $ x:Float [1:1, 1:28, 1:28]
+#>  $ y: int 6
+```
+
+`flickr8k_caption_dataset()` and `flickr30k_caption_dataset()` have the same
+shape, with a character vector of captions in `y`. Nothing dispatches on these
+items: an image transform goes in through `transform`, and there is no geometry
+in the target to keep in sync with it.
+
+## Detection items
+
+`coco_detection_dataset()`, `pascal_detection_dataset()` and the
+`rf100_*_collection()`s give their items the class `image_with_bounding_box` and
+their target the class `object_detection_target`.
+
+![An `image_with_bounding_box` item and the fields of its `object_detection_target`.](assets/detection-item.svg)
+
+| field | contents |
+|---|---|
+| `$boxes` | `(N, 4)` tensor, one row per object, as `(x_min, y_min, x_max, y_max)` in pixels |
+| `$labels` | the class name of each box |
+| `$area` | `(N)` float tensor, the area of each annotation |
+| `$iscrowd` | `(N)` boolean tensor, `TRUE` where the annotation covers a group of objects rather than one |
+| `$image_height`, `$image_width` | the size `x` had when the boxes were read |
+
+Only `$boxes` is guaranteed, since that is the field the class is validated on.
+The rest is whatever the annotations happened to carry: the table above is a
+COCO target, while an RF100 one holds `$boxes`, `$labels` and an `$image_id` and
+nothing else.
+
+`draw_bounding_boxes()` has a method for the item, so it finds `$x`,
+`$y$boxes` and `$y$labels` on its own:
+
+```{r}
+boxed <- draw_bounding_boxes(ds[1])
+tensor_image_browse(boxed)
+```
+
+## Rotated box items
+
+Four numbers per box cannot describe a box that has been turned, so
+`item_transform_rotate()` and `item_transform_affine()` return an
+`image_with_rotated_box` instead of the item they were given:
+
+```{r}
+class(item_transform_rotate(ds[1], angle = 15))
+#> [1] "image_with_rotated_box" "list"
+```
+
+![An `image_with_rotated_box` item: same target fields, but `$boxes` has a fifth column.](assets/rotated-box-item.svg)
+
+The target keeps its `object_detection_target` class and its fields, but
+`$boxes` gains a fifth column holding the accumulated angle in degrees, the
+xyxyr format that `box_xyxy_to_xyxyr()` and `target_transform_rotate()` produce.
+`draw_bounding_boxes()` has a second method for this class which draws each box
+as a polygon through magick rather than as an upright rectangle.
+
+Every item transform has a method for rotated-box items, except
+`item_transform_perspective()`.
+
+## Segmentation items
+
+`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`,
+`cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and
+`rf100_peixos_segmentation_dataset()` return `image_with_segmentation_mask`
+items whose target is a `segmentation_target`.
+
+![An `image_with_segmentation_mask` item and its `segmentation_target`.](assets/segmentation-item.svg)
+
+No field is required here. Segmentation annotations differ far more between
+datasets than detection ones do, so each dataset passes on what it reads:
+polygons in `$segmentation` for COCO, `$polygon`, `$color`, `$semantic` and
+`$instance` for Cityscapes depending on the requested `target_type`, one-hot
+`$masks` for Oxford-IIIT Pet and Pascal VOC. `$labels` is not uniform either:
+the detection datasets name their classes, while
+`pascal_segmentation_dataset()` numbers the planes of `$masks` that are not
+empty.
+
+What `draw_segmentation_masks()` and the segmentation models want is `$masks`,
+an `(N, H, W)` tensor with one plane per annotated class. Two target transforms
+build it from raw annotations:
+
+| transform | reads |
+|---|---|
+| `target_transform_coco_masks()` | `$segmentation`, the COCO polygons |
+| `target_transform_trimap_masks()` | `$trimap`, the three-value Oxford-IIIT Pet mask |
+
+```{r}
+seg_ds <- coco_segmentation_dataset(
+  train = FALSE,
+  download = TRUE,
+  transform = transform_to_tensor,
+  target_transform = target_transform_coco_masks
+)
+masked <- draw_segmentation_masks(seg_ds[1])
+```
+
+`coco_segmentation_dataset()` only promotes its items to
+`image_with_segmentation_mask` once `$masks` is there, so without that target
+transform they stay `image_with_bounding_box`. `cityscapes_dataset()` has no
+target transform of its own, and its targets have to be turned into `$masks` by
+hand before they can be drawn.
+
+## Which function takes which class
+
+| family | dispatches on | acts on |
+|---|---|---|
+| `transform_*()` | `torch_tensor`, `magick-image`, `array`, `matrix` | the image alone |
+| `target_transform_*()` | `object_detection_target`, `segmentation_target` | the target alone |
+| `item_transform_*()` | `image_with_bounding_box`, `image_with_rotated_box`, `image_with_segmentation_mask`, `dataset` | image and target together |
+| `draw_bounding_boxes()` | `torch_tensor`, `image_with_bounding_box`, `image_with_rotated_box` | draws boxes on the image |
+| `draw_segmentation_masks()` | `torch_tensor`, `image_with_segmentation_mask` | overlays masks on the image |
+
+`draw_keypoints()` is not generic: it takes an image tensor and an `(N, K, 2)`
+keypoint tensor.
+
+Calling any of these on something they have no method for stops with an error
+naming the class it was given, which is usually a sign that a target lost its
+class somewhere along a pipeline.
+
+## Building an item by hand
+
+A bare list is not accepted as a target, so annotations that do not come out of
+a torchvision dataset need their classes set before any of this will look at
+them:
+
+```{r}
+img <- torch_randint(0, 255, size = c(3, 120, 160))$to(dtype = torch_uint8())
+
+y <- list(
+  boxes = torch_tensor(rbind(c(10, 20, 60, 90), c(70, 30, 150, 110)), dtype = torch_float()),
+  labels = c("cat", "dog"),
+  image_height = 120,
+  image_width = 160
+)
+class(y) <- c("object_detection_target", "list")
+
+item <- list(x = img, y = y)
+class(item) <- c("image_with_bounding_box", "list")
+
+str(item)
+#> List of 2
+#>  $ x:Byte [1:3, 1:120, 1:160]
+#>  $ y:List of 4
+#>   ..$ boxes       :Float [1:2, 1:4]
+#>   ..$ labels      : chr [1:2] "cat" "dog"
+#>   ..$ image_height: num 120
+#>   ..$ image_width : num 160
+#>   ..- attr(*, "class")= chr [1:2] "object_detection_target" "list"
+#>  - attr(*, "class")= chr [1:2] "image_with_bounding_box" "list"
+```
+
+A segmentation target is built the same way, with `segmentation_target` and
+`image_with_segmentation_mask`.
+
+## What models return
+
+Model outputs are plain lists and carry no class of their own. The object
+detection models return `$detections`, one element per image of the batch, each
+with `$boxes`, `$labels` and `$scores`; the semantic segmentation models return
+`$out`, the per-class logits. The "Visualization utilities" article covers
+turning either of them into something the drawing helpers can render.

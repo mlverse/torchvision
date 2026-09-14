@@ -8,10 +8,16 @@ development:
 
 navbar:
  structure:
-  left:  [home, examples, reference, news]
+  left:  [home, articles, examples, reference, news]
   right: [github]
  components:
-  articles: ~
+  articles:
+    text: Articles
+    menu:
+      - text: torchvision classes
+        href: articles/torchvision-classes.html
+      - text: RF100 Dataset Catalog
+        href: articles/rf100-datasets.html
   examples:
     text: Examples
     menu:

@@ -37,6 +37,7 @@
   Segmentation datasets (`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`, `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and `rf100_peixos_segmentation_dataset()`) now inherit the `segmentation_dataset` and `segmentation_target` classes. 
   Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
 * Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #400).
+* Added a "torchvision classes" vignette sketching what each dataset item class holds: `image_with_bounding_box`, `image_with_rotated_box` and `image_with_segmentation_mask`, their `object_detection_target` and `segmentation_target`, and which transform and drawing functions dispatch on each (@srishtiii28, #396).
 
 ## Bug fixes and improvements
 
