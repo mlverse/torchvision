@@ -16,6 +16,8 @@ navbar:
     menu:
       - text: torchvision classes
         href: articles/torchvision-classes.html
+      - text: Visualization utilities
+        href: articles/examples/visualization-utilities.html
       - text: RF100 Dataset Catalog
         href: articles/rf100-datasets.html
   examples:
@@ -37,8 +39,6 @@ navbar:
         href: articles/examples/fcnresnet.html
       - text: keypoints
         href: articles/examples/keypoints.html
-      - text: visualization-utilities
-        href: articles/examples/visualization-utilities.html
 
 reference:
 - title: Image Transforms
