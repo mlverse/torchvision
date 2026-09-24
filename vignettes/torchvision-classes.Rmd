@@ -29,6 +29,21 @@ library(torchvision)
 library(torch)
 ```
 
+## Why the classes exist
+
+An item is a pair that has to stay consistent. Rotate the image and the boxes
+have to turn with it; crop it and the masks have to be cropped the same way. The
+class on the item is what records which kind of annotation it carries, so that
+one function name can do the right thing for each of them and refuse the ones it
+cannot handle, rather than return a mismatched pair.
+
+The target transforms used to read the fields of `y` to work out what they had
+been handed. Dispatching on a class instead makes the contract explicit: a
+target that has lost its class fails at the call, rather than producing a wrong
+result two steps later. It is also what lets the drawing helpers take an item
+whole, since `draw_bounding_boxes(item)` knows where the image, the boxes and
+the labels are only because the class says so.
+
 ## Datasets, items and targets
 
 Indexing a dataset returns an *item*: a list with `x`, the image, and `y`,
@@ -184,15 +199,75 @@ transform they stay `image_with_bounding_box`. `cityscapes_dataset()` has no
 target transform of its own, and its targets have to be turned into `$masks` by
 hand before they can be drawn.
 
+## Slicing an image: `sahi_split`
+
+SAHI, Slicing Aided Hyper Inference, cuts a large image into overlapping tiles,
+runs the model on each and puts the results back together. The tiling itself is
+an object: `prepare_sahi_split()` measures an image and returns a `sahi_split`.
+
+![A `sahi_split`, drawn as one card rather than a deck, because it is computed once and reused across images.](assets/sahi-split.svg)
+
+```{r}
+split <- prepare_sahi_split(c(1000, 1200), size = c(512, 512))
+length(split$crop_windows)
+#> [1] 9
+```
+
+It holds `$crop_windows`, one `top`/`left`/`height`/`width` window per tile, and
+the `$size`, `$overlap_size_ratio`, `$image_height` and `$image_width` it was
+computed from. Keeping it as its own object is what lets the same tiling be
+applied to an image and to its target, so the two stay aligned:
+
+```{r}
+tiled <- ds[1]
+split <- prepare_sahi_split(tiled$x, size = c(256, 256))
+
+crops <- transform_sahi_crop(tiled$x, split)
+targets <- target_transform_sahi_crop(tiled$y, split)
+```
+
+`transform_sahi_crop()` returns the tiles stacked as an `(N, C, H, W)` batch.
+`target_transform_sahi_crop()` returns one target per tile, each box clipped to
+the tile and shifted into its coordinates, and `$image_height` and
+`$image_width` set to the size of the tile rather than of the original image. A
+box is kept only if what survives the clip is at least `min_area_ratio` of its
+original area, a tenth by default, so a box grazing the edge of a tile is
+dropped from that tile rather than kept as a sliver.
+
+Unlike the item transforms, this pair turns one item into many, so there is no
+`item_transform_sahi_crop()` doing both halves at once.
+
 ## Which function takes which class
 
 | family | dispatches on | acts on |
 |---|---|---|
-| `transform_*()` | `torch_tensor`, `magick-image`, `array`, `matrix` | the image alone |
-| `target_transform_*()` | `object_detection_target`, `segmentation_target` | the target alone |
+| `transform_*()` | `torch_tensor` | the image alone |
+| `prepare_sahi_split()` | `numeric`, `torch_tensor`, `magick-image`, `dataset` | measures an image, returns a `sahi_split` |
+| `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()`, `target_transform_sahi_crop()` | `object_detection_target` | the target alone |
+| `target_transform_coco_masks()`, `target_transform_trimap_masks()` | `segmentation_target` | the target alone |
 | `item_transform_*()` | `image_with_bounding_box`, `image_with_rotated_box`, `image_with_segmentation_mask`, `dataset` | image and target together |
 | `draw_bounding_boxes()` | `torch_tensor`, `image_with_bounding_box`, `image_with_rotated_box` | draws boxes on the image |
 | `draw_segmentation_masks()` | `torch_tensor`, `image_with_segmentation_mask` | overlays masks on the image |
+
+The two groups of target transforms are disjoint, which is why they are two rows
+and not one. The first group moves boxes and is written for detection targets
+only; the second builds `$masks` out of the annotations a segmentation dataset
+carries. Crossing them is an error rather than a silent no-op, so
+`target_transform_rotate()` on a `segmentation_target`, or
+`target_transform_coco_masks()` on an `object_detection_target`, stops with
+`not implemented for` and the class it was handed.
+
+The image transforms are written for `torch_tensor`. Five of them also take a
+magick image, `transform_crop()`, `transform_hflip()`, `transform_resize()`,
+`transform_sahi_crop()` and `transform_to_tensor()`, and `transform_to_tensor()`
+alone takes an `array`, a `matrix` or a `list`, which is how an image coming off
+a loader gets into a tensor in the first place.
+
+The item transforms are the most uniform family: each of them takes all three
+item classes and a `dataset`, apart from `item_transform_perspective()`, which
+has no rotated-box method. Among the target transforms only
+`target_transform_rotate()` takes a dataset as well. The reference index lists
+each of these families in full.
 
 `draw_keypoints()` is not generic: it takes an image tensor and an `(N, K, 2)`
 keypoint tensor.
@@ -241,5 +316,43 @@ A segmentation target is built the same way, with `segmentation_target` and
 Model outputs are plain lists and carry no class of their own. The object
 detection models return `$detections`, one element per image of the batch, each
 with `$boxes`, `$labels` and `$scores`; the semantic segmentation models return
-`$out`, the per-class logits. The "Visualization utilities" article covers
+`$out`, the per-class logits. The
+[Visualization utilities](examples/visualization-utilities.html) article covers
 turning either of them into something the drawing helpers can render.
+
+## Comparison with torchvision TVTensors (advanced)
+
+If you have used the v2 transforms of the Python torchvision, these classes
+cover the same ground as
+[TVTensors](https://docs.pytorch.org/vision/main/auto_examples/transforms/plot_transforms_getting_started.html#videos-boxes-masks-keypoints),
+but they are attached one level further out.
+
+A TVTensor is a subclass of `torch.Tensor`. `Image`, `Video`, `BoundingBoxes`,
+`Mask` and `KeyPoints` are tensors that know what they are, and a
+`BoundingBoxes` carries its `format` and its `canvas_size` as attributes of the
+tensor itself. A v2 transform walks an arbitrary nested sample, a dict, a list
+or a tuple, dispatches on the type of each element it finds, hands back the same
+structure, and passes anything it does not recognise through untouched.
+
+Here the class goes on the list instead. `$x` and `$y$boxes` are ordinary
+`torch_tensor`s, and what carries the meaning is `image_with_bounding_box` on
+the item and `object_detection_target` on `y`. Four differences follow from
+that:
+
+- An item is always `list(x, y)` rather than any nesting you like, and the three
+  transform families say which half of it they act on instead of one transform
+  traversing the whole sample.
+- Box format is not an attribute but the width of `$boxes`: four columns are
+  xyxy, five are xyxyr. What `canvas_size` holds lives in `$image_height` and
+  `$image_width` on the target.
+- A change of geometry changes the class of the item, so
+  `item_transform_rotate()` hands back an `image_with_rotated_box`. On the
+  Python side the object stays a `BoundingBoxes` and the distinction lives in
+  its `format`.
+- There is no heuristic for unwrapped input. A v2 transform whose sample holds
+  no `Image` will treat the first plain tensor it finds as the image; here a
+  list without its class is an error, not a guess.
+
+Two of the five TVTensors have no counterpart here. There is no video support at
+all, and keypoints are not a class: `draw_keypoints()` takes an image tensor and
+a keypoint tensor and nothing dispatches on either.
