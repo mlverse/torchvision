@@ -71,6 +71,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_fcn_resnet50()` and `model_fcn_resnet101()` now use a dilated backbone (`replace_stride_with_dilation = c(FALSE, TRUE, TRUE)`, output stride 8) as in PyTorch. The backbone downsampled by 32 instead, so the COCO pretrained weights loaded without error but gave wrong segmentations. With `pretrained = TRUE` they no longer download the ImageNet backbone weights first, since those were overwritten anyway.
+* `model_deeplabv3_resnet50()` and `model_deeplabv3_resnet101()` now enable the auxiliary classifier when `aux_loss = NULL` (the default) and `pretrained = TRUE`, as documented. Previously the pretrained auxiliary head was silently dropped. The documentation of `pretrained_backbone` now gives its actual default, `FALSE`.
 
 
 # torchvision 0.9.0
