@@ -71,6 +71,10 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_convnext_*_upernet()` now apply the per-stage LayerNorms (`norm0` to `norm3`) of the official ConvNeXt segmentation backbone to the features passed to the decode head. The pretrained checkpoints contain these weights, but they were silently dropped (or loaded into the unused classifier norm), so pretrained UPerNet models ran on un-normalised features. Pretrained weights are now loaded with `strict = TRUE`.
+* `model_convnext_*_upernet(pretrained = TRUE)` now defaults to `num_classes = 150` (ADE20K). The previous default of `21` made `pretrained = TRUE` fail.
+* `model_convnext_*_detection()` now default to `num_classes = 90`, excluding background as in `fasterrcnn_model()`, instead of `91`. They also take `score_thresh`, `nms_thresh` and `detections_per_img` and pass them to the detection head; these arguments were silently ignored before. The example now labels boxes with `coco_classes()` instead of `imagenet_classes()`.
+* `model_convnext_*()` blocks now implement stochastic depth (`drop_path`) in training mode; it was always the identity before. The documentation now reports the parameter counts of the `_22k` models including their 21841-class head, and its example calls `model_convnext_tiny_1k()`.
 
 
 # torchvision 0.9.0

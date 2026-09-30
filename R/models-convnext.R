@@ -12,13 +12,13 @@
 #' | Model                | Top-1 Acc| Params | GFLOPS | File Size | `num_classes`| image size |
 #' |----------------------|----------|--------|--------|-----------|--------------|------------|
 #' | convnext_tiny_1k     | 82.1%    | 28M    | 4.5    | 109 MB    |         1000 | 224 x 224  |
-#' | convnext_tiny_22k    | 82.9%    | 29M    | 4.5    | 170 MB    |        21841 | 224 x 224  |
-#' | convnext_small_22k   | 84.6%    | 50M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
+#' | convnext_tiny_22k    | 82.9%    | 44M    | 4.5    | 170 MB    |        21841 | 224 x 224  |
+#' | convnext_small_22k   | 84.6%    | 66M    | 8.7    | 252 MB    |        21841 | 224 x 224  |
 #' | convnext_small_22k1k | 84.6%    | 50M    | 8.7    | 192 MB    |         1000 | 224 x 224  |
 #' | convnext_base_1k     | 85.1%    | 89M    | 15.4   | 338 MB    |         1000 | 224 x 224  |
-#' | convnext_base_22k    | 85.8%    | 89M    | 15.4   | 420 MB    |        21841 | 224 x 224  |
+#' | convnext_base_22k    | 85.8%    | 110M   | 15.4   | 420 MB    |        21841 | 224 x 224  |
 #' | convnext_large_1k    | 84.3%    | 198M   | 34.4   | 750 MB    |         1000 | 224 x 224  |
-#' | convnext_large_22k   | 86.6%    | 198M   | 34.4   | 880 MB    |        21841 | 224 x 224  |
+#' | convnext_large_22k   | 86.6%    | 230M   | 34.4   | 880 MB    |        21841 | 224 x 224  |
 #' ```
 #'
 #' @examples
@@ -38,7 +38,7 @@
 #' batch <- input$unsqueeze(1)
 #'
 #' # 3. Load pretrained models
-#' model_small <- convnext_tiny_1k(pretrained = TRUE, root = tempdir())
+#' model_small <- model_convnext_tiny_1k(pretrained = TRUE)
 #' model_small$eval()
 #'
 #' # 4. Forward pass
@@ -98,7 +98,7 @@ Block <- nn_module(
     } else {
       NULL
     }
-    self$drop_path <- nn_identity()
+    self$drop_path_prob <- drop_path
   },
   forward = function(x) {
     input <- x
@@ -112,7 +112,13 @@ Block <- nn_module(
       x <- self$gamma * x
     }
     x <- x$permute(c(1, 4, 2, 3))
-    x <- input + self$drop_path(x)
+    if (self$training && self$drop_path_prob > 0) {
+      # stochastic depth (per-sample), as timm DropPath
+      keep <- 1 - self$drop_path_prob
+      mask <- torch::torch_empty(c(x$size(1), 1, 1, 1), dtype = x$dtype, device = x$device)$bernoulli_(keep)
+      x <- x * mask / keep
+    }
+    x <- input + x
     x
   }
 )
