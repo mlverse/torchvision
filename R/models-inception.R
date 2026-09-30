@@ -66,7 +66,7 @@ Inception3 <- torch::nn_module(
       for (m in self$modules) {
         if (inherits(m, "nn_conv2d") || inherits(m, "nn_linear")) {
           stddev <- if (!is.null(m$stddev)) m$stddev else 0.1
-          torch::nn_init_trunc_normal_(m$weight, mean = 0, std = stddev, a = -2, b = -2)
+          torch::nn_init_trunc_normal_(m$weight, mean = 0, std = stddev, a = -2, b = 2)
         } else if (inherits(m, "nn_batch_norm2d")) {
           nn_init_constant_(m$weight, 1)
           nn_init_constant_(m$bias, 0)
@@ -432,7 +432,7 @@ model_inception_v3 <-function(pretrained = FALSE, progress = TRUE, ...) {
     model <- do.call(Inception3, args)
     r <- inception_model_urls[['inception_v3_google']]
     cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 

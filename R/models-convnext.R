@@ -212,7 +212,7 @@ convnext_model_urls <- c(
     if (!arch %in% names(convnext_model_urls)) {
       stop(paste("Pretrained model for", arch, "is not available."))
     }
-    state_dict_path <- download_and_cache(convnext_model_urls[arch], prefix = "convnext")
+    state_dict_path <- download_and_cache(convnext_model_urls[arch], prefix = "convnext", progress = progress)
     state_dict <- torch::load_state_dict(state_dict_path)
 
     # Interpolate stem weights if input channels differ.sample use cases - satellite images
