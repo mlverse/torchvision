@@ -47,11 +47,11 @@ Base, Base with O365 pretraining, and Large variants.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{| Variant   | Backbone           | Decoder Layers | Resolution | # Queries | Group DETR | Weights                     |
 |-----------|--------------------|----------------|------------|-----------|------------|-----------------------------|
 | nano      | DINOv2 Small (win) | 2              | 384        | 300       | 13         | COCO (91 classes)           |
-| small     | DINOv2 Small (win) | 2              | 512        | 300       | 13         | COCO (91 classes)           |
-| medium    | DINOv2 Small (win) | 2              | 640        | 300       | 13         | COCO (91 classes)           |
-| base      | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes)           |
-| base_2    | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes, alt run)  |
-| base_o365 | DINOv2 Small (win) | 3              | 640        | 300       | 13         | Objects365 (366 classes)    |
+| small     | DINOv2 Small (win) | 3              | 512        | 300       | 13         | COCO (91 classes)           |
+| medium    | DINOv2 Small (win) | 4              | 576        | 300       | 13         | COCO (91 classes)           |
+| base      | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes)           |
+| base_2    | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes, alt run)  |
+| base_o365 | DINOv2 Small (win) | 3              | 560        | 300       | 13         | Objects365 (366 classes)    |
 | large     | DINOv2 Base (win)  | 3              | 560        | 300       | 13         | COCO (91 classes)           |
 }\if{html}{\out{</div>}}
 \itemize{
@@ -59,6 +59,10 @@ Base, Base with O365 pretraining, and Large variants.
 Lite Refpoint Refine, and BBox reparameterisation.
 \item The \code{large} variant corresponds to the deprecated RF-DETR-Large config
 (DINOv2 Base encoder, hidden_dim=384).
+\item \code{model(x, mask = NULL)} expects ImageNet-normalised images \verb{(B, 3, H, W)},
+which are resized to the variant resolution in eval mode. The optional
+\code{mask} \verb{(B, H, W)} is \code{TRUE} on padded pixels; boxes are then returned in
+the coordinates of the unpadded image.
 }
 }
 }
@@ -68,9 +72,9 @@ Lite Refpoint Refine, and BBox reparameterisation.
 
 \item \code{model_rfdetr_small()}: RF-DETR Small (lightweight, COCO, 512px)
 
-\item \code{model_rfdetr_medium()}: RF-DETR Medium (balanced speed/accuracy, COCO, 640px)
+\item \code{model_rfdetr_medium()}: RF-DETR Medium (balanced speed/accuracy, COCO, 576px)
 
-\item \code{model_rfdetr_base()}: RF-DETR Base (COCO pretrained, 640px)
+\item \code{model_rfdetr_base()}: RF-DETR Base (COCO pretrained, 560px)
 
 \item \code{model_rfdetr_base_2()}: RF-DETR Base variant 2 (alternative COCO training run)
 
@@ -84,12 +88,15 @@ Lite Refpoint Refine, and BBox reparameterisation.
 url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 img <- base_loader(url) \%>\%
   transform_to_tensor()
+# the model expects ImageNet-normalised input, as in the reference predict()
+input <- img \%>\%
+  transform_normalize(c(0.485, 0.456, 0.406), c(0.229, 0.224, 0.225))
 
 model <- model_rfdetr_large(pretrained = TRUE)
 model$eval()
 
 pred <- torch::with_no_grad(
-  model(img$unsqueeze(1))
+  model(input$unsqueeze(1))
 )$detections[[1]]
 
 topk <- pred$scores$topk(k = 5L)[[2]]

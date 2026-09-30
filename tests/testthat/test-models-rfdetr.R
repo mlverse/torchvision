@@ -67,7 +67,7 @@ test_that("test for pretrained model_rfdetr_small", {
 
 test_that("test for non-pretrained model_rfdetr_medium", {
   model <- model_rfdetr_medium()
-  input <- torch::torch_randn(1, 3, 640, 640)
+  input <- torch::torch_randn(1, 3, 576, 576)
   model$eval()
   out <- model(input)
   expect_true("detections" %in% names(out))
@@ -107,7 +107,7 @@ test_that("test for pretrained model_rfdetr_medium", {
 
 test_that("test for non-pretrained model_rfdetr_base", {
   model <- model_rfdetr_base()
-  input <- torch::torch_randn(1, 3, 640, 640)
+  input <- torch::torch_randn(1, 3, 560, 560)
   model$eval()
   out <- model(input)
   expect_true("detections" %in% names(out))
@@ -132,7 +132,7 @@ test_that("test for pretrained model_rfdetr_base", {
 
 test_that("test for non-pretrained model_rfdetr_base_2", {
   model <- model_rfdetr_base_2()
-  input <- torch::torch_randn(1, 3, 640, 640)
+  input <- torch::torch_randn(1, 3, 560, 560)
   model$eval()
   out <- model(input)
   expect_true("detections" %in% names(out))
@@ -157,7 +157,7 @@ test_that("test for pretrained model_rfdetr_base_2", {
 
 test_that("test for non-pretrained model_rfdetr_base_o365", {
   model <- model_rfdetr_base_o365()
-  input <- torch::torch_randn(1, 3, 640, 640)
+  input <- torch::torch_randn(1, 3, 560, 560)
   model$eval()
   out <- model(input)
   expect_true("detections" %in% names(out))
@@ -214,6 +214,60 @@ test_that("test for pretrained model_rfdetr_large", {
 
   model <- model_rfdetr_large(pretrained = TRUE)
   expect_coco_model_detects_cat(model,  size = c(560, 560))
+
+  rm(model)
+  gc()
+})
+
+test_that("rfdetr configs match the official rf-detr variants", {
+  cfg <- rfdetr_configs
+  expect_equal(cfg$small$dec_layers, 3)
+  expect_equal(cfg$small$resolution, 512)
+  expect_equal(cfg$medium$dec_layers, 4)
+  expect_equal(cfg$medium$resolution, 576)
+  for (v in c("base", "base_2", "base_o365", "large")) {
+    # resolution must be a multiple of patch_size * num_windows
+    expect_equal(cfg[[v]]$resolution, 560)
+    expect_equal(cfg[[v]]$resolution %% (cfg[[v]]$patch_size * cfg[[v]]$num_windows), 0)
+  }
+})
+
+test_that("rfdetr encoder proposals follow the row-major memory layout", {
+  shapes <- matrix(c(2L, 3L), ncol = 2)
+  memory <- torch::torch_zeros(2, 6, 4)
+  props <- gen_encoder_output_proposals(memory, NULL, shapes, unsigmoid = FALSE)[[2]]
+  expect_equal(props$shape, c(2, 6, 4))
+  # flattened position k = row * w + col -> (x, y) = ((col + 0.5) / w, (row + 0.5) / h)
+  expected_x <- rep((0:2 + 0.5) / 3, times = 2)
+  expected_y <- rep((0:1 + 0.5) / 2, each = 3)
+  expect_equal(as.numeric(props[2, , 1]), expected_x, tolerance = 1e-6)
+  expect_equal(as.numeric(props[2, , 2]), expected_y, tolerance = 1e-6)
+
+  # padded columns: the valid width (2 of 4) is used to normalise x
+  shapes <- matrix(c(2L, 4L), ncol = 2)
+  pad <- torch::torch_zeros(1, 2, 4, dtype = torch::torch_bool())
+  pad[, , 3:4] <- TRUE
+  props <- gen_encoder_output_proposals(torch::torch_zeros(1, 8, 4), pad$view(c(1, 8)), shapes,
+                                        unsigmoid = FALSE)[[2]]
+  expect_equal(as.numeric(props[1, 1:2, 1]), c(0.25, 0.75), tolerance = 1e-6)
+})
+
+test_that("model_rfdetr_nano works with a padding mask and non-square batches", {
+  torch::torch_manual_seed(1)
+  model <- model_rfdetr_nano()
+  model$eval()
+  x <- torch::torch_randn(2, 3, 240, 320)
+  mask <- torch::torch_zeros(2, 240, 320, dtype = torch::torch_bool())
+  mask[2, , 161:320] <- TRUE
+  out <- torch::with_no_grad(model(x, mask = mask))
+  expect_length(out$detections, 2)
+  b1 <- out$detections[[1]]$boxes
+  b2 <- out$detections[[2]]$boxes
+  expect_true(b1[, c(1, 3)]$max()$item() <= 320)
+  expect_true(b1[, c(2, 4)]$max()$item() <= 240)
+  # image 2 only has 160 valid columns
+  expect_true(b2[, c(1, 3)]$max()$item() <= 160)
+  expect_true(b2[, c(2, 4)]$max()$item() <= 240)
 
   rm(model)
   gc()

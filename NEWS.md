@@ -71,6 +71,15 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_rfdetr_*()` now match the reference roboflow/rf-detr implementation numerically. The encoder
+  proposals were built on a transposed grid, ignored the valid (unpadded) size and dropped the batch
+  dimension; passing a padding `mask` crashed; post-processing clamped y coordinates with the image width
+  and forced a 2 px minimum box size; the `large` P5 down-sampling used SiLU instead of ReLU; and the
+  DINOv2 position embeddings were resized with plain bicubic instead of antialiased bicubic interpolation.
+  The configs now follow the official variants: `small()` has 3 decoder layers, `medium()` has 4 decoder
+  layers at 576 px, and `base()`, `base_2()` and `base_o365()` run at 560 px (640 is not a multiple of
+  `patch_size * num_windows`). The pretrained-weights loader now warns when model tensors are missing
+  from the checkpoint, and the example normalises the input image.
 
 
 # torchvision 0.9.0
