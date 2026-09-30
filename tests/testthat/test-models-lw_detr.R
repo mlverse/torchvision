@@ -92,6 +92,34 @@ test_that("model_lw_detr_tiny supports pixel_mask", {
   )))
 })
 
+test_that("lw_detr sine embedding uses the reference frequencies", {
+  skip_if_not(torch::torch_is_installed())
+
+  p <- 0.3
+  pos <- torch_full(c(1, 1, 4), p)
+  emb <- as.numeric(torchvision:::lw_detr_gen_sineembed(pos, dim = 16L)[1, 1, 1:16])
+  # reference: dim_t = 10000^(2 * (i %/% 2) / dim) for i = 0..(dim - 1),
+  # sin on even and cos on odd channels
+  i <- 0:15
+  x <- p * 2 * pi / 10000^(2 * (i %/% 2) / 16)
+  expected <- ifelse(i %% 2 == 0, sin(x), cos(x))
+  expect_equal(emb, expected, tolerance = 1e-6)
+})
+
+test_that("lw_detr C2f bottleneck has no residual connection", {
+  skip_if_not(torch::torch_is_installed())
+
+  b <- torchvision:::.lw_detr_bottleneck(4L)
+  b$eval()
+  with_no_grad(b$conv2$conv$weight$zero_())
+  x <- torch_randn(1, 4, 5, 5)
+  with_no_grad({
+    out <- b(x)
+  })
+  # conv2 outputs zeros, so with shortcut = FALSE the block returns silu(0) = 0
+  expect_equal(as.numeric(out$abs()$max()), 0)
+})
+
 test_that("model_lw_detr pretrained weights require COCO num_classes", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
