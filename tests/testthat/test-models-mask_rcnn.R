@@ -4,6 +4,14 @@ input <- base_loader("assets/class/cat/cat.0.jpg") %>%
   transform_resize(c(200,200)) %>%
   torch_unsqueeze(1)
 
+# The pretrained tests need a realistic resolution: at 200x200 the COCO weights score the cat
+# around 0.5 (in torchvision too), so a 0.5 score threshold made them flaky across platforms.
+input_pretrained <- base_loader("assets/class/cat/cat.0.jpg") %>%
+  transform_to_tensor() %>%
+  transform_normalize(c(0.485, 0.456, 0.406), c(0.229, 0.224, 0.225)) %>%
+  transform_resize(c(512, 512)) %>%
+  torch_unsqueeze(1)
+
 
 test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   skip_on_cran()
@@ -171,10 +179,11 @@ test_that("mask_rcnn pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input_pretrained)})
+  expect_gt(output$detections[[1]]$boxes$shape[1], 0)
   # Masks should be expanded back to image size
-  if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
+  {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(512, 512))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
@@ -193,10 +202,11 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input_pretrained)})
+  expect_gt(output$detections[[1]]$boxes$shape[1], 0)
   # Masks should be expanded back to image size
-  if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
+  {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(512, 512))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
