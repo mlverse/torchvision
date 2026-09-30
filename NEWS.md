@@ -38,6 +38,11 @@
   Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
 * Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #400).
 
+## Breaking changes
+
+* `model_maskrcnn_*()` detections now return `masks` pasted into the image, shape (N, H, W), as
+  torchvision does; the per-box (N, 28, 28) probabilities are in `mask_probs`.
+
 ## Bug fixes and improvements
 
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
@@ -71,6 +76,11 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* Faster R-CNN and Mask R-CNN inference now reproduces torchvision numerically: anchors (sizes, aspect
+  ratio, grid offset, ordering, `pool` level), RPN objectness ordering, box decoding weights, per-level
+  top-n + NMS at 0.7, multi-scale RoIAlign with torchvision sampling, v2 FPN / box head architecture,
+  batch size > 1 and single-detection masks. Pretrained loading is now strict instead of silently keeping
+  random weights for unmatched keys. `nms()` without torchvisionlib is much faster.
 
 
 # torchvision 0.9.0

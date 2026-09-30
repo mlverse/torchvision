@@ -42,7 +42,7 @@ test_that("maskrcnn_resnet50_fpn inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks","mask_probs"))
 
   # Verify tensor types
   expect_tensor(output$detections[[1]]$boxes)
@@ -52,14 +52,15 @@ test_that("maskrcnn_resnet50_fpn inference works", {
 
   # Verify dimensions are consistent
   n_masks <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 200, 200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(n_masks, 28, 28))
   expect_tensor_shape(output$detections[[1]]$labels, n_masks)
   expect_tensor_shape(output$detections[[1]]$scores, n_masks)
 
 
-  # Check mask dimensions (should be N x 28 x 28)
+  # Check mask dimensions (pasted masks are N x H x W)
   N <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(N, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(N, 200, 200))
 
 })
 
@@ -78,14 +79,15 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks","mask_probs"))
 
   # Check masks are present
   expect_tensor(output$detections[[1]]$masks)
 
   # Check mask dimensions (should be N x 28 x 28)
   n_masks <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 200, 200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(n_masks, 28, 28))
 })
 
 test_that("maskrcnn handles empty detections correctly", {
@@ -109,8 +111,9 @@ test_that("maskrcnn handles empty detections correctly", {
   expect_tensor_shape(output$detections[[1]]$labels, 0)
   expect_tensor_shape(output$detections[[1]]$scores, 0)
 
-  # Mask shape should be (0, 28, 28)
-  expect_tensor_shape(output$detections[[1]]$masks, c(0,28,28))
+  # Pasted mask shape should be (0, H, W)
+  expect_tensor_shape(output$detections[[1]]$masks, c(0,200,200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(0,28,28))
 })
 
 test_that("maskrcnn respects detections_per_img parameter", {
@@ -236,25 +239,16 @@ test_that("mask_head_module_v2 initializes correctly", {
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
-test_that("roi_align_masks produces correct output shape", {
+test_that("rcnn_multiscale_roi_align produces correct output shape", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  # Create dummy feature map (1, 256, 100, 100)
-  feature_map <- torch::torch_randn(1, 256, 100, 100)
-
-  # Create dummy proposals (5 boxes)
-  proposals <- torch::torch_tensor(rbind(
-    c(10, 10, 50, 50),
-    c(20, 20, 60, 60),
-    c(30, 30, 70, 70),
-    c(40, 40, 80, 80),
-    c(50, 50, 90, 90)
-  ))
-
-  # Apply ROI align
-  output <- roi_align_masks(feature_map, proposals, output_size = c(14L, 14L))
-
-  # Output should be (5, 256, 14, 14)
-  expect_tensor_shape(output, c(5, 256, 14, 14))
+  # FPN levels of a 400 x 400 image
+  features <- lapply(c(4, 8, 16, 32), function(s) torch::torch_randn(2, 8, 400 / s, 400 / s))
+  proposals <- list(
+    torch::torch_tensor(rbind(c(10, 10, 50, 50), c(20, 20, 260, 360), c(30, 30, 70, 70))),
+    torch::torch_tensor(rbind(c(40, 40, 80, 80)))
+  )
+  output <- rcnn_multiscale_roi_align(features, proposals, c(400L, 400L), output_size = c(14L, 14L))
+  expect_tensor_shape(output, c(4, 8, 14, 14))
 })
