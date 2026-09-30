@@ -91,8 +91,9 @@ maskrcnn_model <- torch::nn_module(
                           score_thresh = 0.05,
                           nms_thresh = 0.5,
                           detections_per_img = 100,
-                          rpn_config = rcnn_resnet_rpn_config()) {
-      self$rpn_config <- rpn_config
+                          rpn_config = NULL) {
+      # resolved here: nn_module() evaluates default arguments outside the package namespace
+      self$rpn_config <- if (is.null(rpn_config)) rcnn_resnet_rpn_config() else rpn_config
       self$backbone <- backbone
       self$num_classes <- num_classes
       # Store configurable detection parameters
@@ -133,8 +134,9 @@ maskrcnn_model_v2 <- torch::nn_module(
                           score_thresh = 0.05,
                           nms_thresh = 0.5,
                           detections_per_img = 100,
-                          rpn_config = rcnn_resnet_rpn_config()) {
-      self$rpn_config <- rpn_config
+                          rpn_config = NULL) {
+      # resolved here: nn_module() evaluates default arguments outside the package namespace
+      self$rpn_config <- if (is.null(rpn_config)) rcnn_resnet_rpn_config() else rpn_config
       self$backbone <- backbone
       self$num_classes <- num_classes
 
