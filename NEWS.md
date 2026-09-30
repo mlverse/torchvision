@@ -40,6 +40,7 @@
 
 ## Bug fixes and improvements
 
+* `model_vit_*()` now attend over the patches of each image: the attention layers are created with `batch_first = TRUE`, and the positional embedding is registered as a parameter, so it is loaded from the pretrained weights, trained, and moved with the model. Previously, the predictions did not depend on the input image. Layer normalization now uses `eps = 1e-6` as in the reference implementation.
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
 * Detection and segmentation datasets now take an `item_transform` argument, applied to the whole item
   after `transform` and `target_transform`. Passing a dataset to `item_transform_*()` or
