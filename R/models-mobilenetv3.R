@@ -66,6 +66,8 @@
 #' @inheritParams model_mobilenet_v2
 #' @param num_classes number of output classes (default: 1000).
 #' @param width_mult width multiplier for model scaling (default: 1.0).
+#' @param norm_layer normalization layer constructor taking the number of features.
+#'   Defaults to batch norm with `eps = 1e-3, momentum = 0.01` as in torchvision.
 #'
 #' @family classification_model
 #' @rdname model_mobilenet_v3
@@ -214,7 +216,10 @@ InvertedResidualConfig <- function(input_c, kernel, expanded_c, out_c, use_se, u
 MobileNetV3 <- nn_module(
   "MobileNetV3",
   initialize = function(inverted_residual_setting, last_channel, num_classes = 1000,
-                        dropout = 0.2, norm_layer = nn_batch_norm2d) {
+                        dropout = 0.2, norm_layer = NULL) {
+    # torchvision: partial(nn.BatchNorm2d, eps=0.001, momentum=0.01)
+    if (is.null(norm_layer))
+      norm_layer <- function(num_features) nn_batch_norm2d(num_features, eps = 1e-3, momentum = 0.01)
 
     n_conf <- length(inverted_residual_setting)
     layers <- vector("list", n_conf + 2)
@@ -320,12 +325,13 @@ model_mobilenet_v3_large <- function(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 1000,
-  width_mult = 1.0
+  width_mult = 1.0,
+  norm_layer = NULL
 ) {
 
   config <- mobilenet_v3_large_config(width_mult)
   last_channel <- make_divisible(1280 * width_mult)
-  model <- MobileNetV3(config, last_channel, num_classes = num_classes)
+  model <- MobileNetV3(config, last_channel, num_classes = num_classes, norm_layer = norm_layer)
   if (pretrained) {
     r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth",
            "71625955bc3be9516032a6d5bab49199", "~21 MB")
@@ -335,8 +341,8 @@ model_mobilenet_v3_large <- function(
     state_dict <- load_state_dict(state_dict_path)
     renamed_state_dict <- .rename_mobilenet_v3_state_dict(state_dict)
     model$load_state_dict(renamed_state_dict)
+    model$eval()
   }
-  model$eval()
   model
 }
 
@@ -346,19 +352,20 @@ model_mobilenet_v3_small <- function(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 1000,
-  width_mult = 1.0
+  width_mult = 1.0,
+  norm_layer = NULL
 ) {
 
   config <- mobilenet_v3_small_config(width_mult)
   last_channel <- make_divisible(1024 * width_mult)
-  model <- MobileNetV3(config, last_channel, num_classes = num_classes)
+  model <- MobileNetV3(config, last_channel, num_classes = num_classes, norm_layer = norm_layer)
   if (pretrained) {
     state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet")
     state_dict <- load_state_dict(state_dict_path)
     renamed_state_dict <- .rename_mobilenet_v3_state_dict(state_dict)
     model$load_state_dict(renamed_state_dict)
+    model$eval()
   }
-  model$eval()
   model
 }
 

@@ -20,7 +20,8 @@ model_efficientnet_v2_l(pretrained = FALSE, progress = TRUE, ...)
 stderr.}
 
 \item{...}{Other parameters passed to the model implementation, such as
-\code{num_classes} to change the output dimension.}
+\code{num_classes} to change the output dimension, \code{dropout} (classifier
+dropout rate), \code{stochastic_depth_prob} (default 0.2) or \code{norm_layer}.}
 }
 \description{
 Constructs EfficientNetV2 model architectures as described in

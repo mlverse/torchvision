@@ -71,6 +71,14 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_efficientnet_b*()` and `model_efficientnet_v2_*()` now match torchvision numerically: the squeeze-and-excitation
+  block uses SiLU instead of ReLU, EfficientNetV2 uses batch norm with `eps = 1e-3`, and `model_efficientnet_b5()` to
+  `model_efficientnet_b7()` use `eps = 1e-3, momentum = 0.01`. Their residual blocks now apply stochastic depth
+  (`stochastic_depth_prob = 0.2`, only active in training mode), and passing `dropout = ` no longer shifts the other
+  arguments (it used to trigger a weight download or an error). (@sebffischer)
+* `model_mobilenet_v3_large()` and `model_mobilenet_v3_small()` now use batch norm with `eps = 1e-3, momentum = 0.01` as in
+  torchvision, gain a `norm_layer` argument, and only switch to eval mode when `pretrained = TRUE`. (@sebffischer)
+* `model_mobilenet_v2()` no longer builds blocks for a stage with `n = 0` in a custom `inverted_residual_setting`. (@sebffischer)
 
 
 # torchvision 0.9.0
