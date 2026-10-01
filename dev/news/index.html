@@ -126,6 +126,10 @@
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
+<code>model_vit_*()</code> predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses <code>eps = 1e-6</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
+<li>
+<code><a href="../reference/model_maxvit.html">model_maxvit()</a></code> is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
+<li>
 <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> now accepts degenerated bounding-box by default with the <code>lazy = TRUE</code> parameter (<a href="https://github.com/mlverse/torchvision/issues/400" class="external-link">#400</a>).</li>
 <li>Detection and segmentation datasets now take an <code>item_transform</code> argument, applied to the whole item after <code>transform</code> and <code>target_transform</code>. Passing a dataset to <code>item_transform_*()</code> or <code><a href="../reference/target_transform_rotate.html">target_transform_rotate()</a></code> now adds to those arguments rather than replacing the dataset <code>.getitem()</code> method through <code><a href="https://rdrr.io/r/base/bindenv.html" class="external-link">unlockBinding()</a></code>, which R CMD check flagged as an unsafe call (<a href="https://github.com/mlverse/torchvision/issues/399" class="external-link">#399</a>).</li>
 <li>
@@ -153,6 +157,10 @@
 <code><a href="../reference/model_convnext.html">model_convnext_small_22k1k()</a></code> now defaults to <code>num_classes = 1000</code>. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of <code>21841</code> made <code>pretrained = TRUE</code> fail to load the state dict. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/376" class="external-link">#376</a>)</li>
 <li>
 <code>model_inception_v3(pretrained = TRUE, aux_logits = FALSE)</code> now actually removes the auxiliary classifier. Previously <code>aux_logits = FALSE</code> was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/375" class="external-link">#375</a>)</li>
+<li>
+<code><a href="../reference/model_facenet.html">model_facenet_pnet()</a></code>, <code><a href="../reference/model_facenet.html">model_facenet_rnet()</a></code>, <code><a href="../reference/model_facenet.html">model_facenet_onet()</a></code> and <code><a href="../reference/model_facenet.html">model_mtcnn()</a></code> take the face softmax over the class dimension instead of the batch dimension (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/406" class="external-link">#406</a>).</li>
+<li>
+<code><a href="../reference/model_facenet.html">model_facenet_inception_resnet_v1()</a></code> now matches facenet-pytorch (missing <code>repeat_1</code> stage, <code>Mixed_6a</code> paddings); <code>pretrained = TRUE</code> loads <code>"vggface2"</code> and <code>num_classes</code> defaults to <code>NULL</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/406" class="external-link">#406</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">

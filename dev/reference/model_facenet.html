@@ -108,7 +108,7 @@ architecture from the paper
 <span><span class="fu">model_facenet_inception_resnet_v1</span><span class="op">(</span></span>
 <span>  pretrained <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  classify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  num_classes <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dropout_prob <span class="op">=</span> <span class="fl">0.6</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -119,7 +119,9 @@ architecture from the paper
 
 
 <dl><dt id="arg-pretrained">pretrained<a class="anchor" aria-label="anchor" href="#arg-pretrained"></a></dt>
-<dd><p>(bool): If TRUE, returns a model pre-trained on ImageNet.</p></dd>
+<dd><p>For the MTCNN networks, logical: if TRUE, loads the facenet-pytorch weights.
+For <code>model_facenet_inception_resnet_v1()</code>, one of <code>NULL</code> or <code>FALSE</code> (random weights),
+<code>"vggface2"</code> (or <code>TRUE</code>) or <code>"casia-webface"</code>. Other values are an error.</p></dd>
 
 
 <dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
@@ -136,7 +138,9 @@ stderr.</p></dd>
 
 
 <dt id="arg-num-classes">num_classes<a class="anchor" aria-label="anchor" href="#arg-num-classes"></a></dt>
-<dd><p>Integer, number of output classes for classification. Default is 10.</p></dd>
+<dd><p>Integer, number of output classes for classification. Default is NULL: with
+pretrained weights the pretrained logits layer is kept; without pretrained weights it must be
+given when <code>classify = TRUE</code>.</p></dd>
 
 
 <dt id="arg-dropout-prob">dropout_prob<a class="anchor" aria-label="anchor" href="#arg-dropout-prob"></a></dt>
