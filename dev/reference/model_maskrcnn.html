@@ -181,7 +181,8 @@ outputs segmentation masks for each detected object.</p>
 <li><p><code>detections</code>: List containing:</p><ul><li><p><code>boxes</code>: Bounding boxes (N, 4)</p></li>
 <li><p><code>labels</code>: Class labels (N)</p></li>
 <li><p><code>scores</code>: Confidence scores (N)</p></li>
-<li><p><code>masks</code>: Segmentation masks (N, 28, 28)</p></li>
+<li><p><code>masks</code>: Mask probabilities pasted into the image, (N, H, W)</p></li>
+<li><p><code>mask_probs</code>: Mask probabilities in the box frame, (N, 28, 28)</p></li>
 </ul></li>
 </ul></div>
     <div id="available-models">

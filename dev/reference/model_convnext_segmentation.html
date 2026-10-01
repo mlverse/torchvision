@@ -123,7 +123,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_convnext_tiny_upernet</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">pretrained</span><span class="op">)</span> <span class="fl">150</span> <span class="kw">else</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -132,7 +132,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_convnext_small_upernet</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">pretrained</span><span class="op">)</span> <span class="fl">150</span> <span class="kw">else</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -141,7 +141,7 @@ can be used for semantic segmentation tasks.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_convnext_base_upernet</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">21</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">pretrained</span><span class="op">)</span> <span class="fl">150</span> <span class="kw">else</span> <span class="fl">21</span>,</span>
 <span>  aux_loss <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -155,7 +155,8 @@ can be used for semantic segmentation tasks.</p>
 
 
 <dl><dt id="arg-num-classes">num_classes<a class="anchor" aria-label="anchor" href="#arg-num-classes"></a></dt>
-<dd><p>Number of output segmentation classes. Default: 21 (PASCAL VOC).</p></dd>
+<dd><p>Number of output segmentation classes. Default: 21 (PASCAL VOC),
+or 150 (ADE20K) for UPerNet models with <code>pretrained = TRUE</code>.</p></dd>
 
 
 <dt id="arg-aux-loss">aux_loss<a class="anchor" aria-label="anchor" href="#arg-aux-loss"></a></dt>

@@ -124,6 +124,11 @@
 <li>Added a “Visualization utilities” article covering <code><a href="../reference/vision_make_grid.html">vision_make_grid()</a></code>, <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code>, <code><a href="../reference/draw_segmentation_masks.html">draw_segmentation_masks()</a></code> and <code><a href="../reference/draw_keypoints.html">draw_keypoints()</a></code> on the output of <code><a href="../reference/model_rfdetr.html">model_rfdetr_base()</a></code> and <code><a href="../reference/model_fcn_resnet.html">model_fcn_resnet50()</a></code> (<a href="https://github.com/srishtiii28" class="external-link">@srishtiii28</a>, <a href="https://github.com/mlverse/torchvision/issues/400" class="external-link">#400</a>).</li>
 </ul></div>
 <div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<ul><li>
+<code>model_maskrcnn_*()</code> now return <code>masks</code> pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in <code>mask_probs</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/412" class="external-link">#412</a>).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
 <ul><li>
 <code>model_vit_*()</code> predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses <code>eps = 1e-6</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
@@ -156,6 +161,17 @@
 <code><a href="../reference/model_convnext.html">model_convnext_small_22k1k()</a></code> now defaults to <code>num_classes = 1000</code>. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of <code>21841</code> made <code>pretrained = TRUE</code> fail to load the state dict. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/376" class="external-link">#376</a>)</li>
 <li>
 <code>model_inception_v3(pretrained = TRUE, aux_logits = FALSE)</code> now actually removes the auxiliary classifier. Previously <code>aux_logits = FALSE</code> was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/375" class="external-link">#375</a>)</li>
+<li>
+<code>model_fasterrcnn_*()</code> and <code>model_maskrcnn_*()</code> inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/412" class="external-link">#412</a>).</li>
+<li>
+<code><a href="../reference/model_inception_v3.html">model_inception_v3()</a></code> and <code>model_resnet*()</code> without pretrained weights now initialise all layers as in PyTorch, and <code>zero_init_residual = TRUE</code> takes effect (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/411" class="external-link">#411</a>).</li>
+<li>The <code>progress</code> argument of the model constructors is now honoured (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/411" class="external-link">#411</a>).</li>
+<li>
+<code>model_convnext_*_upernet()</code> now apply the per-stage layer norms of the pretrained backbone and default to <code>num_classes = 150</code> when <code>pretrained = TRUE</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/410" class="external-link">#410</a>).</li>
+<li>
+<code>model_convnext_*_detection()</code> default to <code>num_classes = 90</code> and pass <code>score_thresh</code>, <code>nms_thresh</code> and <code>detections_per_img</code> to the detection head (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/410" class="external-link">#410</a>).</li>
+<li>
+<code>model_convnext_*()</code> blocks now apply stochastic depth in training mode (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/410" class="external-link">#410</a>).</li>
 <li>
 <code>model_efficientnet_*()</code> and <code>model_efficientnet_v2_*()</code> now match torchvision (SiLU squeeze-excitation, batch norm settings), apply stochastic depth in training, and accept <code>dropout</code> without shifting other arguments (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/409" class="external-link">#409</a>).</li>
 <li>
