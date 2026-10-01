@@ -21,9 +21,9 @@
 #' ```
 #' | Model                             | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | File Size | Backbone Weights              | Notes                    |
 #' |-----------------------------------|-----------|-----------|---------|--------|-----------|-------------------------------|--------------------------|
-#' | model_convnext_tiny_detection     | 82.5%     | 96.1%     | 28.6M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
-#' | model_convnext_small_detection    | 83.6%     | 96.7%     | 50.2M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
-#' | model_convnext_base_detection     | 84.1%     | 96.9%     | 88.6M   | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
+#' | model_convnext_tiny_detection     | 82.5%     | 96.1%     | 46.2M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
+#' | model_convnext_small_detection    | 83.6%     | 96.7%     | 83.9M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
+#' | model_convnext_base_detection     | 84.1%     | 96.9%     | 106M    | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
 #' ```
 #'
 #' ## FPN Channel Configuration
@@ -79,7 +79,7 @@
 #' num_boxes <- as.integer(pred$boxes$size()[1])
 #' topk     <- pred$scores$topk(k = 5)[[2]]
 #' boxes    <- pred$boxes[topk, ]
-#' labels   <- imagenet_classes(as.integer(pred$labels[topk]))
+#' labels   <- coco_classes(as.integer(pred$labels[topk]))
 #'
 #' # `draw_bounding_box()` may fail if bbox values are not consistent.
 #' if (num_boxes > 0) {
@@ -248,8 +248,11 @@ validate_convnext_num_classes <- function(num_classes) {
 
 #' @describeIn model_convnext_detection ConvNeXt Tiny with FPN detection head
 #' @export
-model_convnext_tiny_detection <- function(num_classes = 91,
+model_convnext_tiny_detection <- function(num_classes = 90,
                                           pretrained_backbone = FALSE,
+                                          score_thresh = 0.05,
+                                          nms_thresh = 0.5,
+                                          detections_per_img = 100,
                                           ...) {
   validate_convnext_num_classes(num_classes)
 
@@ -258,15 +261,21 @@ model_convnext_tiny_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_model(backbone, num_classes = num_classes,
+                            score_thresh = score_thresh,
+                            nms_thresh = nms_thresh,
+                            detections_per_img = detections_per_img)
   model
 }
 
 
 #' @describeIn model_convnext_detection ConvNeXt Small with FPN detection head
 #' @export
-model_convnext_small_detection <- function(num_classes = 91,
+model_convnext_small_detection <- function(num_classes = 90,
                                            pretrained_backbone = FALSE,
+                                           score_thresh = 0.05,
+                                           nms_thresh = 0.5,
+                                           detections_per_img = 100,
                                            ...) {
   validate_convnext_num_classes(num_classes)
 
@@ -275,15 +284,21 @@ model_convnext_small_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_model(backbone, num_classes = num_classes,
+                            score_thresh = score_thresh,
+                            nms_thresh = nms_thresh,
+                            detections_per_img = detections_per_img)
   model
 }
 
 
 #' @describeIn model_convnext_detection ConvNeXt Base with FPN detection head
 #' @export
-model_convnext_base_detection <- function(num_classes = 91,
+model_convnext_base_detection <- function(num_classes = 90,
                                           pretrained_backbone = FALSE,
+                                          score_thresh = 0.05,
+                                          nms_thresh = 0.5,
+                                          detections_per_img = 100,
                                           ...) {
   validate_convnext_num_classes(num_classes)
 
@@ -292,6 +307,9 @@ model_convnext_base_detection <- function(num_classes = 91,
     ...
   )
 
-  model <- fasterrcnn_model(backbone, num_classes = num_classes)
+  model <- fasterrcnn_model(backbone, num_classes = num_classes,
+                            score_thresh = score_thresh,
+                            nms_thresh = nms_thresh,
+                            detections_per_img = detections_per_img)
   model
 }

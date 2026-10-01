@@ -12,14 +12,16 @@ model_mobilenet_v3_large(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 1000,
-  width_mult = 1
+  width_mult = 1,
+  norm_layer = NULL
 )
 
 model_mobilenet_v3_small(
   pretrained = FALSE,
   progress = TRUE,
   num_classes = 1000,
-  width_mult = 1
+  width_mult = 1,
+  norm_layer = NULL
 )
 
 model_mobilenet_v3_large_quantized(pretrained = FALSE, progress = TRUE, ...)
@@ -33,6 +35,9 @@ stderr.}
 \item{num_classes}{number of output classes (default: 1000).}
 
 \item{width_mult}{width multiplier for model scaling (default: 1.0).}
+
+\item{norm_layer}{normalization layer constructor taking the number of features.
+Defaults to batch norm with \code{eps = 1e-3, momentum = 0.01} as in torchvision.}
 
 \item{...}{Other parameters passed to the model implementation.}
 }

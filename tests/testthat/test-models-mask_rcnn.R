@@ -4,6 +4,14 @@ input <- base_loader("assets/class/cat/cat.0.jpg") %>%
   transform_resize(c(200,200)) %>%
   torch_unsqueeze(1)
 
+# The pretrained tests need a realistic resolution: at 200x200 the COCO weights score the cat
+# around 0.5 (in torchvision too), so a 0.5 score threshold made them flaky across platforms.
+input_pretrained <- base_loader("assets/class/cat/cat.0.jpg") %>%
+  transform_to_tensor() %>%
+  transform_normalize(c(0.485, 0.456, 0.406), c(0.229, 0.224, 0.225)) %>%
+  transform_resize(c(512, 512)) %>%
+  torch_unsqueeze(1)
+
 
 test_that("maskrcnn_resnet50_fpn loads without pretrained weights", {
   skip_on_cran()
@@ -42,7 +50,7 @@ test_that("maskrcnn_resnet50_fpn inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks","mask_probs"))
 
   # Verify tensor types
   expect_tensor(output$detections[[1]]$boxes)
@@ -52,14 +60,15 @@ test_that("maskrcnn_resnet50_fpn inference works", {
 
   # Verify dimensions are consistent
   n_masks <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 200, 200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(n_masks, 28, 28))
   expect_tensor_shape(output$detections[[1]]$labels, n_masks)
   expect_tensor_shape(output$detections[[1]]$scores, n_masks)
 
 
-  # Check mask dimensions (should be N x 28 x 28)
+  # Check mask dimensions (pasted masks are N x H x W)
   N <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(N, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(N, 200, 200))
 
 })
 
@@ -78,14 +87,15 @@ test_that("maskrcnn_resnet50_fpn_v2 inference works", {
 
   # Check output structure
   expect_named(output, c("features" ,"detections"))
-  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks"))
+  expect_named(output$detections[[1]], c("boxes" ,"labels","scores","masks","mask_probs"))
 
   # Check masks are present
   expect_tensor(output$detections[[1]]$masks)
 
   # Check mask dimensions (should be N x 28 x 28)
   n_masks <- output$detections[[1]]$masks$shape[1]
-  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 28, 28))
+  expect_tensor_shape(output$detections[[1]]$masks, c(n_masks, 200, 200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(n_masks, 28, 28))
 })
 
 test_that("maskrcnn handles empty detections correctly", {
@@ -109,8 +119,9 @@ test_that("maskrcnn handles empty detections correctly", {
   expect_tensor_shape(output$detections[[1]]$labels, 0)
   expect_tensor_shape(output$detections[[1]]$scores, 0)
 
-  # Mask shape should be (0, 28, 28)
-  expect_tensor_shape(output$detections[[1]]$masks, c(0,28,28))
+  # Pasted mask shape should be (0, H, W)
+  expect_tensor_shape(output$detections[[1]]$masks, c(0,200,200))
+  expect_tensor_shape(output$detections[[1]]$mask_probs, c(0,28,28))
 })
 
 test_that("maskrcnn respects detections_per_img parameter", {
@@ -168,10 +179,11 @@ test_that("mask_rcnn pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input_pretrained)})
+  expect_gt(output$detections[[1]]$boxes$shape[1], 0)
   # Masks should be expanded back to image size
-  if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
+  {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(512, 512))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
@@ -190,10 +202,11 @@ test_that("mask_rcnn_v2 pretrained infer correctly", {
   model <- model_maskrcnn_resnet50_fpn_v2(pretrained = TRUE, score_thresh = 0.5, nms_thresh = 0.7, detections_per_img = 10)
   model$eval()
 
-  with_no_grad({output <- model(input)})
+  with_no_grad({output <- model(input_pretrained)})
+  expect_gt(output$detections[[1]]$boxes$shape[1], 0)
   # Masks should be expanded back to image size
-  if (output$detections[[1]]$boxes$shape[1] > 0) {
-    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(200, 200))
+  {
+    expect_bbox_is_xyxy(output$detections[[1]]$boxes, c(512, 512))
     # Verify background class is removed, labels should be COCO IDs [1, 90]
     labels_vec <- as.integer(output$detections[[1]]$labels$cpu())
     expect_true(all(labels_vec >= 1 & labels_vec <= 90), info = "All labels are in range [1, 90]")
@@ -236,25 +249,16 @@ test_that("mask_head_module_v2 initializes correctly", {
   expect_tensor_shape(output, c(2, 91, 28, 28))
 })
 
-test_that("roi_align_masks produces correct output shape", {
+test_that("rcnn_multiscale_roi_align produces correct output shape", {
   skip_on_cran()
   skip_if_not(torch::torch_is_installed())
 
-  # Create dummy feature map (1, 256, 100, 100)
-  feature_map <- torch::torch_randn(1, 256, 100, 100)
-
-  # Create dummy proposals (5 boxes)
-  proposals <- torch::torch_tensor(rbind(
-    c(10, 10, 50, 50),
-    c(20, 20, 60, 60),
-    c(30, 30, 70, 70),
-    c(40, 40, 80, 80),
-    c(50, 50, 90, 90)
-  ))
-
-  # Apply ROI align
-  output <- roi_align_masks(feature_map, proposals, output_size = c(14L, 14L))
-
-  # Output should be (5, 256, 14, 14)
-  expect_tensor_shape(output, c(5, 256, 14, 14))
+  # FPN levels of a 400 x 400 image
+  features <- lapply(c(4, 8, 16, 32), function(s) torch::torch_randn(2, 8, 400 / s, 400 / s))
+  proposals <- list(
+    torch::torch_tensor(rbind(c(10, 10, 50, 50), c(20, 20, 260, 360), c(30, 30, 70, 70))),
+    torch::torch_tensor(rbind(c(40, 40, 80, 80)))
+  )
+  output <- rcnn_multiscale_roi_align(features, proposals, c(400L, 400L), output_size = c(14L, 14L))
+  expect_tensor_shape(output, c(4, 8, 14, 14))
 })

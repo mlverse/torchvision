@@ -1406,7 +1406,7 @@ build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) 
       runtime_error("Pretrained weights not available for this variant")
     }
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    archive <- download_and_cache(r[1], prefix = name)
+    archive <- download_and_cache(r[1], prefix = name, progress = progress)
     if (tools::md5sum(archive) != r[2]) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
