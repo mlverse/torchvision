@@ -76,7 +76,7 @@ mobilenet_v2 <- torch::nn_module(
       names(i) <- c("t", "c", "n", "s")
       i <- as.list(i)
       output_channel <- mobilenetv2.make_divisible(i$c * width_mult, round_nearest)
-      for (k in 0:(i$n -1)) {
+      for (k in seq_len(i$n) - 1) {
         stride <-  if (k == 0) i$s else 1
         features[[length(features) + 1]] <- block(
           input_channel,

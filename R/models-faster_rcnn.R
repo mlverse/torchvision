@@ -797,8 +797,8 @@ fpn_module_2level <- torch::nn_module(
 
 
 
-mobilenet_v3_fpn_backbone <- function(pretrained = TRUE, progress = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, progress = progress)
+mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
+  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, norm_layer = torch::nn_batch_norm2d, progress = TRUE)
 
   backbone_module <- torch::nn_module(
     initialize = function() {
@@ -900,8 +900,8 @@ fasterrcnn_mobilenet_model <- torch::nn_module(
 
 
 
-mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE, progress = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, progress = progress)
+mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
+  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, norm_layer = torch::nn_batch_norm2d, progress = TRUE)
 
   backbone_module <- torch::nn_module(
     initialize = function() {

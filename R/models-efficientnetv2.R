@@ -22,7 +22,8 @@
 #'
 #' @inheritParams model_resnet18
 #' @param ... Other parameters passed to the model implementation, such as
-#'   \code{num_classes} to change the output dimension.
+#'   \code{num_classes} to change the output dimension, \code{dropout} (classifier
+#'   dropout rate), \code{stochastic_depth_prob} (default 0.2) or \code{norm_layer}.
 #'
 #' @family classification_model
 #' @name model_efficientnet_v2
@@ -43,7 +44,7 @@ NULL
 
 fused_mbconv_block <- torch::nn_module(
   initialize = function(in_channels, out_channels, kernel_size, stride,
-                        expand_ratio, norm_layer = NULL) {
+                        expand_ratio, norm_layer = NULL, stochastic_depth_prob = 0) {
     if (is.null(norm_layer))
       norm_layer <- torch::nn_batch_norm2d
     hidden_dim <- as.integer(in_channels * expand_ratio)
@@ -72,11 +73,12 @@ fused_mbconv_block <- torch::nn_module(
     }
 
     self$block <- torch::nn_sequential(!!!layers)
+    self$stochastic_depth <- stochastic_depth(stochastic_depth_prob, "row")
   },
   forward = function(x) {
     out <- self$block(x)
     if (self$use_res_connect)
-      out <- out + x
+      out <- self$stochastic_depth(out) + x
     out
   }
 )
@@ -84,14 +86,18 @@ fused_mbconv_block <- torch::nn_module(
 efficientnet_v2 <- torch::nn_module(
   "efficientnet_v2",
   initialize = function(cfgs, dropout = 0.2, num_classes = 1000,
-                        norm_layer = NULL, firstconv_out = 24) {
+                        norm_layer = NULL, firstconv_out = 24,
+                        stochastic_depth_prob = 0.2) {
+    # torchvision: partial(nn.BatchNorm2d, eps=1e-03) for all EfficientNetV2 variants
     if (is.null(norm_layer))
-      norm_layer <- torch::nn_batch_norm2d
+      norm_layer <- function(num_features) torch::nn_batch_norm2d(num_features, eps = 1e-3)
 
     features <- vector("list", length(cfgs) + 1)
     features[[1]] <- conv_norm_act(3, firstconv_out, stride = 2,
                                    norm_layer = norm_layer, activation_layer = torch::nn_silu)
     in_channels <- firstconv_out
+    total_stage_blocks <- sum(vapply(cfgs, function(cfg) as.numeric(cfg$repeats), numeric(1)))
+    stage_block_id <- 0
 
     for (cfg_idx in seq_along(cfgs)) {
       cfg <- cfgs[[cfg_idx]]
@@ -101,16 +107,20 @@ efficientnet_v2 <- torch::nn_module(
       stage_blocks <- vector("list", r)
       for (i in seq_len(r)) {
         s <- ifelse(i == 1, cfg$stride, 1)
+        sd_prob <- stochastic_depth_prob * stage_block_id / total_stage_blocks
+        stage_block_id <- stage_block_id + 1
         if (identical(cfg$block, "fused")) {
           stage_blocks[[i]] <- block_fn(
             in_channels, oc, kernel_size = cfg$kernel, stride = s,
-            expand_ratio = cfg$expand, norm_layer = norm_layer
+            expand_ratio = cfg$expand, norm_layer = norm_layer,
+            stochastic_depth_prob = sd_prob
           )
         } else {
           # For mbconv blocks, use the v2 block with corrected SE calculation
           stage_blocks[[i]] <- mbconv_block_v2(
             in_channels, oc, kernel_size = cfg$kernel, stride = s,
-            expand_ratio = cfg$expand, se_ratio = 0.25, norm_layer = norm_layer
+            expand_ratio = cfg$expand, se_ratio = 0.25, norm_layer = norm_layer,
+            stochastic_depth_prob = sd_prob
           )
         }
         in_channels <- oc
@@ -141,7 +151,8 @@ efficientnet_v2 <- torch::nn_module(
 # mbconv_block for EfficientNetV2
 mbconv_block_v2 <- torch::nn_module(
   initialize = function(in_channels, out_channels, kernel_size, stride,
-                        expand_ratio, se_ratio = 0.25, norm_layer = NULL) {
+                        expand_ratio, se_ratio = 0.25, norm_layer = NULL,
+                        stochastic_depth_prob = 0) {
     if (is.null(norm_layer))
       norm_layer <- torch::nn_batch_norm2d
     hidden_dim <- in_channels * expand_ratio
@@ -178,21 +189,25 @@ mbconv_block_v2 <- torch::nn_module(
     )
 
     self$block <- torch::nn_sequential(!!!layers)
+    self$stochastic_depth <- stochastic_depth(stochastic_depth_prob, "row")
   },
   forward = function(x) {
     out <- self$block(x)
     if (self$use_res_connect)
-      out <- out + x
+      out <- self$stochastic_depth(out) + x
     out
   }
 )
 
-effnetv2 <- function(arch, cfgs, dropout, firstconv_out, pretrained, progress, ...) {
+effnetv2 <- function(arch, cfgs, default_dropout, firstconv_out, pretrained, progress, ...) {
+  # `dropout` may be supplied by the user through `...`; it must not be a formal
+  # argument here, otherwise it is matched by name and shifts the positional args.
   args <- rlang::list2(...)
+  if (is.null(args$dropout))
+    args$dropout <- default_dropout
 
   model <- do.call(efficientnet_v2, append(args, list(
     cfgs = cfgs,
-    dropout = dropout,
     firstconv_out = firstconv_out
   )))
 
