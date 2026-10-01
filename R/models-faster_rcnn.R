@@ -103,13 +103,15 @@ rcnn_base_anchors <- function(scales, aspect_ratios, device = "cpu") {
 # Strides are image_size %/% feature_size per dimension, grid offsets start at 0.
 rcnn_anchors <- function(image_size, feature_shapes, sizes, aspect_ratios, device = "cpu") {
   lapply(seq_along(feature_shapes), function(l) {
-    fh <- feature_shapes[[l]][1]; fw <- feature_shapes[[l]][2]
-    stride_h <- image_size[1] %/% fh; stride_w <- image_size[2] %/% fw
+    c(fh, fw) %<-% feature_shapes[[l]][1:2]
+    stride_h <- image_size[1] %/% fh
+    stride_w <- image_size[2] %/% fw
     base <- rcnn_base_anchors(sizes[[l]], aspect_ratios[[l]], device)
     shifts_x <- torch::torch_arange(0, fw - 1, dtype = torch::torch_int32(), device = device) * stride_w
     shifts_y <- torch::torch_arange(0, fh - 1, dtype = torch::torch_int32(), device = device) * stride_h
     sh <- torch_meshgrid(list(shifts_y, shifts_x), indexing = "ij")
-    sy <- sh[[1]]$reshape(-1); sx <- sh[[2]]$reshape(-1)
+    sy <- sh[[1]]$reshape(-1)
+    sx <- sh[[2]]$reshape(-1)
     shifts <- torch_stack(list(sx, sy, sx, sy), dim = 2)
     (shifts$view(c(-1, 1, 4)) + base$view(c(1, -1, 4)))$reshape(c(-1, 4))
   })
@@ -153,11 +155,13 @@ rcnn_filter_proposals <- function(objectness, bbox_deltas, anchors, image_size,
   batch_size <- objectness[[1]]$shape[1]
   device <- objectness[[1]]$device
   lapply(seq_len(batch_size), function(b) {
-    obj_l <- list(); box_l <- list(); lvl_l <- list()
+    obj_l <- list()
+    box_l <- list()
+    lvl_l <- list()
     for (l in seq_along(objectness)) {
       o <- objectness[[l]][b, , , , drop = FALSE]
       d <- bbox_deltas[[l]][b, , , , drop = FALSE]
-      a <- o$shape[2]; h <- o$shape[3]; w <- o$shape[4]
+      c(a, h, w) %<-% o$shape[2:4]
       o <- o$reshape(c(a, h, w))$permute(c(2, 3, 1))$reshape(-1)                 # (H, W, A)
       d <- d$reshape(c(a, 4, h, w))$permute(c(3, 4, 1, 2))$reshape(c(-1, 4))     # (H, W, A) x 4
       k <- min(pre_nms_top_n, o$numel())
@@ -171,9 +175,13 @@ rcnn_filter_proposals <- function(objectness, bbox_deltas, anchors, image_size,
     lvl <- torch::torch_cat(lvl_l)
 
     keep <- remove_small_boxes(boxes, min_size)
-    boxes <- .isel(boxes, keep); scores <- .isel(scores, keep); lvl <- .isel(lvl, keep)
+    boxes <- .isel(boxes, keep)
+    scores <- .isel(scores, keep)
+    lvl <- .isel(lvl, keep)
     keep <- torch::torch_where(scores >= score_thresh)[[1]]
-    boxes <- .isel(boxes, keep); scores <- .isel(scores, keep); lvl <- .isel(lvl, keep)
+    boxes <- .isel(boxes, keep)
+    scores <- .isel(scores, keep)
+    lvl <- .isel(lvl, keep)
 
     keep <- batched_nms(boxes, scores, lvl, nms_thresh)
     if (keep$shape[1] > post_nms_top_n) keep <- keep[1:post_nms_top_n]
@@ -186,8 +194,10 @@ rcnn_filter_proposals <- function(objectness, bbox_deltas, anchors, image_size,
 rcnn_roi_align_single <- function(feature, boxes, output_size, spatial_scale,
                                   sampling_ratio = 2L, chunk = 128L) {
   if (sampling_ratio <= 0) value_error("Only a positive sampling_ratio is supported.")
-  C <- feature$shape[1]; H <- feature$shape[2]; W <- feature$shape[3]
-  P <- output_size[1]; Q <- output_size[2]; sr <- sampling_ratio
+  c(C, H, W) %<-% feature$shape[1:3]
+  P <- output_size[1]
+  Q <- output_size[2]
+  sr <- sampling_ratio
   n <- boxes$shape[1]
   if (n == 0) return(torch_empty(c(0, C, P, Q), device = feature$device, dtype = feature$dtype))
   flat <- feature$reshape(c(C, H * W))
@@ -201,10 +211,12 @@ rcnn_roi_align_single <- function(feature, boxes, output_size, spatial_scale,
     rng <- ((ci - 1) * chunk + 1):min(ci * chunk, n)
     bx <- boxes[rng, , drop = FALSE]$to(dtype = feature$dtype)
     k <- length(rng)
-    start_x <- bx[, 1] * spatial_scale; start_y <- bx[, 2] * spatial_scale
+    start_x <- bx[, 1] * spatial_scale
+    start_y <- bx[, 2] * spatial_scale
     roi_w <- torch::torch_clamp(bx[, 3] * spatial_scale - start_x, min = 1)
     roi_h <- torch::torch_clamp(bx[, 4] * spatial_scale - start_y, min = 1)
-    bin_w <- roi_w / Q; bin_h <- roi_h / P
+    bin_w <- roi_w / Q
+    bin_h <- roi_h / P
     ys <- start_y$view(c(-1, 1, 1)) + ph$view(c(1, -1, 1)) * bin_h$view(c(-1, 1, 1)) +
       iyy$view(c(1, 1, -1)) * bin_h$view(c(-1, 1, 1)) / sr                          # [k, P, sr]
     xs <- start_x$view(c(-1, 1, 1)) + pw$view(c(1, -1, 1)) * bin_w$view(c(-1, 1, 1)) +
@@ -214,13 +226,22 @@ rcnn_roi_align_single <- function(feature, boxes, output_size, spatial_scale,
     valid <- (ys >= -1) & (ys <= H) & (xs >= -1) & (xs <= W)
     y <- torch::torch_clamp(ys, min = 0, max = H - 1)
     x <- torch::torch_clamp(xs, min = 0, max = W - 1)
-    y_low <- y$floor(); x_low <- x$floor()
+    y_low <- y$floor()
+    x_low <- x$floor()
     y_high <- torch::torch_clamp(y_low + 1, max = H - 1)
     x_high <- torch::torch_clamp(x_low + 1, max = W - 1)
-    ly <- y - y_low; lx <- x - x_low; hy <- 1 - ly; hx <- 1 - lx
-    w1 <- hy * hx; w2 <- hy * lx; w3 <- ly * hx; w4 <- ly * lx
-    yl <- y_low$to(dtype = torch::torch_long()); yh <- y_high$to(dtype = torch::torch_long())
-    xl <- x_low$to(dtype = torch::torch_long()); xh <- x_high$to(dtype = torch::torch_long())
+    ly <- y - y_low
+    lx <- x - x_low
+    hy <- 1 - ly
+    hx <- 1 - lx
+    w1 <- hy * hx
+    w2 <- hy * lx
+    w3 <- ly * hx
+    w4 <- ly * lx
+    yl <- y_low$to(dtype = torch::torch_long())
+    yh <- y_high$to(dtype = torch::torch_long())
+    xl <- x_low$to(dtype = torch::torch_long())
+    xh <- x_high$to(dtype = torch::torch_long())
     g <- function(yy, xx) flat[, (yy * W + xx + 1L)$reshape(-1)]$view(c(C, k, P * sr, Q * sr))
     val <- w1$unsqueeze(1) * g(yl, xl) + w2$unsqueeze(1) * g(yl, xh) +
       w3$unsqueeze(1) * g(yh, xl) + w4$unsqueeze(1) * g(yh, xh)
@@ -236,7 +257,8 @@ rcnn_roi_align_single <- function(feature, boxes, output_size, spatial_scale,
 rcnn_multiscale_roi_align <- function(features, boxes, image_size, output_size = c(7L, 7L),
                                       sampling_ratio = 2L, canonical_scale = 224, canonical_level = 4) {
   scales <- sapply(features, function(f) 2^round(log2(f$shape[3] / image_size[1])))
-  lvl_min <- -log2(scales[1]); lvl_max <- -log2(scales[length(scales)])
+  lvl_min <- -log2(scales[1])
+  lvl_max <- -log2(scales[length(scales)])
   all_boxes <- torch::torch_cat(boxes)
   n_total <- all_boxes$shape[1]
   C <- features[[1]]$shape[2]
@@ -306,10 +328,14 @@ postprocess_detections <- function(class_logits, box_regression, proposals,
   labels <- labels[, 2:num_classes_with_bg, drop = FALSE]$reshape(-1)
 
   keep <- torch::torch_where(scores > score_thresh)[[1]]
-  boxes <- .isel(boxes, keep); scores <- .isel(scores, keep); labels <- .isel(labels, keep)
+  boxes <- .isel(boxes, keep)
+  scores <- .isel(scores, keep)
+  labels <- .isel(labels, keep)
 
   keep <- remove_small_boxes(boxes, min_size = 1e-2)
-  boxes <- .isel(boxes, keep); scores <- .isel(scores, keep); labels <- .isel(labels, keep)
+  boxes <- .isel(boxes, keep)
+  scores <- .isel(scores, keep)
+  labels <- .isel(labels, keep)
 
   keep <- batched_nms(boxes, scores, labels, nms_thresh)
   if (keep$shape[1] > detections_per_img) keep <- keep[1:detections_per_img]
@@ -319,7 +345,7 @@ postprocess_detections <- function(class_logits, box_regression, proposals,
 
 # torchvision paste_masks_in_image: masks [N, M, M] probabilities, boxes [N, 4] -> [N, H, W]
 rcnn_paste_masks <- function(masks, boxes, image_size, padding = 1L) {
-  im_h <- image_size[1]; im_w <- image_size[2]
+  c(im_h, im_w) %<-% image_size[1:2]
   n <- masks$shape[1]
   if (n == 0) return(torch::torch_zeros(c(0, im_h, im_w), dtype = masks$dtype, device = masks$device))
   M <- masks$shape[3]
@@ -329,16 +355,21 @@ rcnn_paste_masks <- function(masks, boxes, image_size, padding = 1L) {
   h_half <- (boxes[, 4] - boxes[, 2]) * 0.5
   x_c <- (boxes[, 3] + boxes[, 1]) * 0.5
   y_c <- (boxes[, 4] + boxes[, 2]) * 0.5
-  w_half <- w_half * scale; h_half <- h_half * scale
+  w_half <- w_half * scale
+  h_half <- h_half * scale
   bx <- torch_stack(list(x_c - w_half, y_c - h_half, x_c + w_half, y_c + h_half), dim = 2)
   bx <- as.matrix(as.array(bx$to(dtype = torch::torch_long())$cpu()))
   res <- torch::torch_zeros(c(n, im_h, im_w), dtype = masks$dtype, device = masks$device)
   for (i in seq_len(n)) {
     b <- bx[i, ]
-    w <- max(b[3] - b[1] + 1, 1); h <- max(b[4] - b[2] + 1, 1)
+    w <- max(b[3] - b[1] + 1, 1)
+    h <- max(b[4] - b[2] + 1, 1)
     m <- torch::nnf_interpolate(padded[i, , , drop = FALSE]$unsqueeze(1), size = c(h, w),
                                 mode = "bilinear", align_corners = FALSE)[1, 1, , ]
-    x0 <- max(b[1], 0); x1 <- min(b[3] + 1, im_w); y0 <- max(b[2], 0); y1 <- min(b[4] + 1, im_h)
+    x0 <- max(b[1], 0)
+    x1 <- min(b[3] + 1, im_w)
+    y0 <- max(b[2], 0)
+    y1 <- min(b[4] + 1, im_h)
     if (x1 > x0 && y1 > y0) {
       res[i, (y0 + 1):y1, (x0 + 1):x1] <- m[(y0 - b[2] + 1):(y1 - b[2]), (x0 - b[1] + 1):(x1 - b[1])]
     }
