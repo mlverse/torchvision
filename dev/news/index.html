@@ -162,6 +162,8 @@
 <li>
 <code>model_inception_v3(pretrained = TRUE, aux_logits = FALSE)</code> now actually removes the auxiliary classifier. Previously <code>aux_logits = FALSE</code> was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/375" class="external-link">#375</a>)</li>
 <li>
+<code>model_rfdetr_*()</code> now match the reference rf-detr implementation numerically, accept padding masks, and use the official configurations of the <code>small</code>, <code>medium</code> and <code>base</code> variants (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/413" class="external-link">#413</a>).</li>
+<li>
 <code>model_fasterrcnn_*()</code> and <code>model_maskrcnn_*()</code> inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/412" class="external-link">#412</a>).</li>
 <li>
 <code><a href="../reference/model_inception_v3.html">model_inception_v3()</a></code> and <code>model_resnet*()</code> without pretrained weights now initialise all layers as in PyTorch, and <code>zero_init_residual = TRUE</code> takes effect (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/411" class="external-link">#411</a>).</li>
