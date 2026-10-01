@@ -55,8 +55,8 @@ load_vit_torchscript_model <- function(name, ...) {
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_1\\.", "blocks.\\1.norm1.", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.self_attention\\.", "blocks.\\1.attn.", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_2\\.", "blocks.\\1.norm2.", names(state_dict))
-  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_1\\.", "blocks.\\1.mlp.0.", names(state_dict))
-  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_2\\.", "blocks.\\1.mlp.3.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.(linear_1|0)\\.", "blocks.\\1.mlp.0.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.(linear_2|3)\\.", "blocks.\\1.mlp.3.", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.pos_embedding", "pos_embedding", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.ln\\.", "norm.", names(state_dict))
   names(state_dict) <- gsub("^heads\\.head\\.", "head.", names(state_dict))
@@ -96,19 +96,19 @@ model_vit_b_32 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_b_32", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-L/16 model (Base, 16×16 patch size)
+#' @describeIn model_vit ViT-L/16 model (Large, 16×16 patch size)
 #' @export
 model_vit_l_16 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_l_16", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-L/32 model (Base, 32×32 patch size)
+#' @describeIn model_vit ViT-L/32 model (Large, 32×32 patch size)
 #' @export
 model_vit_l_32 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_l_32", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-H/14 model (Base, 14×14 patch size)
+#' @describeIn model_vit ViT-H/14 model (Huge, 14×14 patch size)
 #' @export
 model_vit_h_14 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_h_14", pretrained, progress, ...)
