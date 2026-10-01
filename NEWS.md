@@ -73,6 +73,7 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_rfdetr_*()` now match the reference rf-detr implementation numerically, accept padding masks, and use the official configurations of the `small`, `medium` and `base` variants (@sebffischer, #413).
 * `model_fasterrcnn_*()` and `model_maskrcnn_*()` inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (@sebffischer, #412).
 * `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).
 * The `progress` argument of the model constructors is now honoured (@sebffischer, #411).
