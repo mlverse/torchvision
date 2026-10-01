@@ -34,7 +34,8 @@ stderr.}
 
 \item{aux_loss}{If TRUE, includes the auxiliary classifier. If NULL, defaults to TRUE when \code{pretrained = TRUE}.}
 
-\item{pretrained_backbone}{If TRUE, uses a backbone pre-trained on ImageNet.}
+\item{pretrained_backbone}{If TRUE and \code{pretrained = FALSE}, uses a backbone pre-trained on ImageNet.
+Ignored when \code{pretrained = TRUE}.}
 
 \item{...}{Additional arguments passed to the backbone implementation.}
 }
