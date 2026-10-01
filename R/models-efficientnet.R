@@ -29,7 +29,8 @@
 #'
 #' @inheritParams model_resnet18
 #' @param ... Other parameters passed to the model implementation, such as
-#' \code{num_classes} to change the output dimension.
+#' \code{num_classes} to change the output dimension, \code{dropout} (classifier
+#' dropout rate), \code{stochastic_depth_prob} (default 0.2) or \code{norm_layer}.
 #'
 #' @family classification_model
 #'
@@ -86,7 +87,7 @@ se_block <- torch::nn_module(
   initialize = function(in_channels, squeeze_channels) {
     self$avgpool <- torch::nn_adaptive_avg_pool2d(output_size = 1)
     self$fc1 <- torch::nn_conv2d(in_channels, squeeze_channels, kernel_size = 1)
-    self$activation <- torch::nn_relu()
+    self$activation <- torch::nn_silu()
     self$fc2 <- torch::nn_conv2d(squeeze_channels, in_channels, kernel_size = 1)
     self$scale_activation <- torch::nn_sigmoid()
   },
@@ -101,9 +102,29 @@ se_block <- torch::nn_module(
 )
 
 
+# Port of torchvision.ops.stochastic_depth (mode = "row" / "batch"); identity in eval mode.
+stochastic_depth <- torch::nn_module(
+  "stochastic_depth",
+  initialize = function(p, mode = "row") {
+    self$p <- p
+    self$mode <- mode
+  },
+  forward = function(x) {
+    if (!self$training || self$p == 0)
+      return(x)
+    survival_rate <- 1 - self$p
+    size <- if (self$mode == "row") c(x$shape[1], rep(1L, x$dim() - 1L)) else rep(1L, x$dim())
+    noise <- torch::torch_empty(size, dtype = x$dtype, device = x$device)$bernoulli_(survival_rate)
+    if (survival_rate > 0)
+      noise$div_(survival_rate)
+    x * noise
+  }
+)
+
 mbconv_block <- torch::nn_module(
   initialize = function(in_channels, out_channels, kernel_size, stride,
-                        expand_ratio, se_ratio = 0.25, norm_layer = NULL) {
+                        expand_ratio, se_ratio = 0.25, norm_layer = NULL,
+                        stochastic_depth_prob = 0) {
     if (is.null(norm_layer))
       norm_layer <- torch::nn_batch_norm2d
     hidden_dim <- in_channels * expand_ratio
@@ -140,11 +161,12 @@ mbconv_block <- torch::nn_module(
     )
 
     self$block <- torch::nn_sequential(!!!layers)
+    self$stochastic_depth <- stochastic_depth(stochastic_depth_prob, "row")
   },
   forward = function(x) {
     out <- self$block(x)
     if (self$use_res_connect)
-      out <- out + x
+      out <- self$stochastic_depth(out) + x
     out
   }
 )
@@ -153,7 +175,8 @@ mbconv_block <- torch::nn_module(
 efficientnet <- torch::nn_module(
   "efficientnet",
   initialize = function(width_coefficient = 1, depth_coefficient = 1,
-                        dropout = 0.2, num_classes = 1000, norm_layer = NULL) {
+                        dropout = 0.2, num_classes = 1000, norm_layer = NULL,
+                        stochastic_depth_prob = 0.2) {
     if (is.null(norm_layer))
       norm_layer <- torch::nn_batch_norm2d
     b0_cfg <- list(
@@ -180,6 +203,8 @@ efficientnet <- torch::nn_module(
     features <- vector("list", length(b0_cfg) + 1)
     features[[1]] <- conv_norm_act(3, out_channels, stride = 2, norm_layer = norm_layer, activation_layer = torch::nn_silu)
     in_channels <- out_channels
+    total_stage_blocks <- sum(vapply(b0_cfg, function(cfg) round_repeats(cfg$repeats), integer(1)))
+    stage_block_id <- 0
 
     for (cfg_idx in seq_along(b0_cfg)) {
       cfg <- b0_cfg[[cfg_idx]]
@@ -190,7 +215,9 @@ efficientnet <- torch::nn_module(
         s <- ifelse(i == 1, cfg$stride, 1)
         stage_blocks[[i]] <- mbconv_block(in_channels, oc,
                                           kernel_size = cfg$kernel, stride = s, expand_ratio = cfg$expand,
-                                          se_ratio = 0.25, norm_layer = norm_layer)
+                                          se_ratio = 0.25, norm_layer = norm_layer,
+                                          stochastic_depth_prob = stochastic_depth_prob * stage_block_id / total_stage_blocks)
+        stage_block_id <- stage_block_id + 1
         in_channels <- oc
       }
       features[[cfg_idx + 1]] <- torch::nn_sequential(!!!stage_blocks)
@@ -214,12 +241,19 @@ efficientnet <- torch::nn_module(
   }
 )
 
-effnet <- function(arch, width, depth, dropout, pretrained, progress, ...) {
+effnet <- function(arch, width, depth, default_dropout, pretrained, progress, ...) {
+  # `dropout` may be supplied by the user through `...`; it must not be a formal
+  # argument here, otherwise it is matched by name and shifts the positional args.
   args <- rlang::list2(...)
+  if (is.null(args$dropout))
+    args$dropout <- default_dropout
+  if (is.null(args$norm_layer) && arch %in% c("efficientnet_b5", "efficientnet_b6", "efficientnet_b7")) {
+    # torchvision: partial(nn.BatchNorm2d, eps=0.001, momentum=0.01) for b5-b7
+    args$norm_layer <- function(num_features) torch::nn_batch_norm2d(num_features, eps = 1e-3, momentum = 0.01)
+  }
   model <- do.call(efficientnet, append(args, list(
     width_coefficient = width,
-    depth_coefficient = depth,
-    dropout = dropout
+    depth_coefficient = depth
   )))
 
   if (pretrained) {

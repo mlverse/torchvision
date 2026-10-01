@@ -73,6 +73,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_efficientnet_*()` and `model_efficientnet_v2_*()` now match torchvision (SiLU squeeze-excitation, batch norm settings), apply stochastic depth in training, and accept `dropout` without shifting other arguments (@sebffischer, #409).
+* `model_mobilenet_v3_*()` use torchvision's batch norm settings, gain a `norm_layer` argument and stay in training mode when `pretrained = FALSE`; `model_mobilenet_v2()` handles stages with `n = 0` (@sebffischer, #409).
 * `model_fcn_resnet*()` now use a dilated backbone as in PyTorch, fixing the pretrained segmentations, and no longer download the backbone weights when `pretrained = TRUE` (@sebffischer, #408).
 * `model_deeplabv3_*()` keep the auxiliary classifier when `pretrained = TRUE` and `aux_loss = NULL`, as documented (@sebffischer, #408).
 * `model_lw_detr_*()` now match the reference LW-DETR implementation numerically, which strongly improves the pretrained detections (@sebffischer, #407).
