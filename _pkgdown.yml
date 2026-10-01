@@ -8,10 +8,18 @@ development:
 
 navbar:
  structure:
-  left:  [home, examples, reference, news]
+  left:  [home, articles, examples, reference, news]
   right: [github]
  components:
-  articles: ~
+  articles:
+    text: Articles
+    menu:
+      - text: torchvision classes
+        href: articles/torchvision-classes.html
+      - text: Visualization utilities
+        href: articles/examples/visualization-utilities.html
+      - text: RF100 Dataset Catalog
+        href: articles/rf100-datasets.html
   examples:
     text: Examples
     menu:
@@ -31,8 +39,6 @@ navbar:
         href: articles/examples/fcnresnet.html
       - text: keypoints
         href: articles/examples/keypoints.html
-      - text: visualization-utilities
-        href: articles/examples/visualization-utilities.html
 
 reference:
 - title: Image Transforms
