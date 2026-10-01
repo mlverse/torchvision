@@ -139,8 +139,9 @@ maxvit_relative_attention <- nn_module(
   },
   forward = function(x) {
     # x: (batch, partitions, tokens, features)
-    B <- x$size(1); G <- x$size(2); P <- x$size(3); D <- x$size(4)
-    H <- self$n_heads; DH <- self$head_dim
+    c(B, G, P, D) %<-% x$shape
+    H <- self$n_heads
+    DH <- self$head_dim
     qkv <- torch_chunk(self$to_qkv(x), 3, dim = -1)
     q <- qkv[[1]]$reshape(c(B, G, P, H, DH))$permute(c(1, 2, 4, 3, 5))
     k <- qkv[[2]]$reshape(c(B, G, P, H, DH))$permute(c(1, 2, 4, 3, 5))
@@ -156,7 +157,7 @@ maxvit_relative_attention <- nn_module(
 
 # (B, C, H, W) -> (B, H/p * W/p, p * p, C)
 maxvit_window_partition <- function(x, p) {
-  B <- x$size(1); C <- x$size(2); H <- x$size(3); W <- x$size(4)
+  c(B, C, H, W) %<-% x$shape
   x <- x$reshape(c(B, C, H %/% p, p, W %/% p, p))
   x <- x$permute(c(1, 3, 5, 4, 6, 2))
   x$reshape(c(B, (H %/% p) * (W %/% p), p * p, C))
@@ -164,7 +165,8 @@ maxvit_window_partition <- function(x, p) {
 
 # (B, hp * wp, p * p, C) -> (B, C, hp * p, wp * p)
 maxvit_window_departition <- function(x, p, hp, wp) {
-  B <- x$size(1); C <- x$size(4)
+  B <- x$size(1)
+  C <- x$size(4)
   x <- x$reshape(c(B, hp, wp, p, p, C))
   x <- x$permute(c(1, 6, 2, 4, 3, 5))
   x$reshape(c(B, C, hp * p, wp * p))
@@ -194,14 +196,15 @@ maxvit_partition_attention <- nn_module(
     self$stochastic_dropout <- maxvit_stochastic_depth(p_stochastic_dropout)
   },
   forward = function(x) {
-    H <- x$size(3); W <- x$size(4)
+    c(H, W) %<-% x$shape[3:4]
     # window attention attends within partition_size x partition_size windows, grid attention
     # within a sparse partition_size x partition_size grid that spans the whole feature map
     p <- if (self$partition_type == "window") self$partition_size else H %/% self$partition_size
     if (H %% p != 0 || W %% p != 0) {
       value_error("The feature map ({H}x{W}) must be divisible by the partition size ({p}).")
     }
-    gh <- H %/% p; gw <- W %/% p
+    gh <- H %/% p
+    gw <- W %/% p
     x <- maxvit_window_partition(x, p)
     if (self$partition_type == "grid") x <- x$transpose(2, 3)
     x <- x + self$stochastic_dropout(self$attn_layer(x))

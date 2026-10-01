@@ -40,8 +40,8 @@
 
 ## Bug fixes and improvements
 
-* `model_maxvit()` is now a faithful port of the MaxViT-T implementation in PyTorch's torchvision: attention is computed per window and per grid with multiple heads and the relative position bias, the classifier contains the `tanh` activation, and the MBConv blocks use the reference squeeze-excitation and projection. The pretrained weights are now loaded strictly, and the model produces the same predictions as the reference. Previously, the pretrained model did not classify images correctly and was very slow.
-* `model_vit_*()` now attend over the patches of each image: the attention layers are created with `batch_first = TRUE`, and the positional embedding is registered as a parameter, so it is loaded from the pretrained weights, trained, and moved with the model. Previously, the predictions did not depend on the input image. Layer normalization now uses `eps = 1e-6` as in the reference implementation.
+* `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
+* `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
 * Detection and segmentation datasets now take an `item_transform` argument, applied to the whole item
   after `transform` and `target_transform`. Passing a dataset to `item_transform_*()` or
