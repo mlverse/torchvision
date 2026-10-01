@@ -603,8 +603,8 @@ fpn_module <- torch::nn_module(
   )
 
 
-resnet_fpn_backbone <- function(pretrained = TRUE) {
-  resnet <- model_resnet50(pretrained = pretrained)
+resnet_fpn_backbone <- function(pretrained = TRUE, progress = TRUE) {
+  resnet <- model_resnet50(pretrained = pretrained, progress = progress)
 
   resnet_body <- torch::nn_module(
     initialize = function() {
@@ -728,8 +728,8 @@ fpn_module_v2 <- torch::nn_module(
   )
 
 
-resnet_fpn_backbone_v2 <- function(pretrained = TRUE) {
-  resnet <- model_resnet50(pretrained = pretrained)
+resnet_fpn_backbone_v2 <- function(pretrained = TRUE, progress = TRUE) {
+  resnet <- model_resnet50(pretrained = pretrained, progress = progress)
 
   resnet_body <- torch::nn_module(
     initialize = function() {
@@ -840,7 +840,7 @@ fpn_module_2level <- torch::nn_module(
 
 
 mobilenet_v3_fpn_backbone <- function(pretrained = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained)
+  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, norm_layer = torch::nn_batch_norm2d, progress = TRUE)
 
   backbone_module <- torch::nn_module(
     initialize = function() {
@@ -907,7 +907,7 @@ fasterrcnn_mobilenet_model <- torch::nn_module(
 
 
 mobilenet_v3_320_fpn_backbone <- function(pretrained = TRUE) {
-  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained)
+  mobilenet <- model_mobilenet_v3_large(pretrained = pretrained, norm_layer = torch::nn_batch_norm2d, progress = TRUE)
 
   backbone_module <- torch::nn_module(
     initialize = function() {
@@ -1039,7 +1039,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                           nms_thresh = 0.5,
                                           detections_per_img = 100,
                                           ...) {
-  backbone <- resnet_fpn_backbone(pretrained = pretrained)
+  backbone <- resnet_fpn_backbone(pretrained = pretrained, progress = progress)
   model <- fasterrcnn_model(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
@@ -1051,7 +1051,7 @@ model_fasterrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     r <- rpn_model_urls$fasterrcnn_resnet50
     name <- "fasterrcnn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1072,7 +1072,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
                                              nms_thresh = 0.5,
                                              detections_per_img = 100,
                                              ...) {
-  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
+  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained, progress = progress)
   model <- fasterrcnn_model_v2(backbone, num_classes = num_classes,
                                score_thresh = score_thresh,
                                nms_thresh = nms_thresh,
@@ -1085,7 +1085,7 @@ model_fasterrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE
     r <- rpn_model_urls$fasterrcnn_resnet50_v2
     name <- "fasterrcnn_resnet50_v2"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1107,7 +1107,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
                                                     nms_thresh = 0.5,
                                                     detections_per_img = 100,
                                                     ...) {
-  backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained)
+  backbone <- mobilenet_v3_fpn_backbone(pretrained = pretrained, progress = progress)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
                                       score_thresh = score_thresh,
                                       nms_thresh = nms_thresh,
@@ -1121,7 +1121,7 @@ model_fasterrcnn_mobilenet_v3_large_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large
     name <- "fasterrcnn_mobilenet_v3_large"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
@@ -1143,7 +1143,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
                                                         nms_thresh = 0.5,
                                                         detections_per_img = 100,
                                                         ...) {
-  backbone <- mobilenet_v3_320_fpn_backbone(pretrained = pretrained)
+  backbone <- mobilenet_v3_320_fpn_backbone(pretrained = pretrained, progress = progress)
   model <- fasterrcnn_mobilenet_model(backbone, num_classes = num_classes,
                                       score_thresh = score_thresh,
                                       nms_thresh = nms_thresh,
@@ -1157,7 +1157,7 @@ model_fasterrcnn_mobilenet_v3_large_320_fpn <- function(pretrained = FALSE,
     r <- rpn_model_urls$fasterrcnn_mobilenet_v3_large_320
     name <- "fasterrcnn_mobilenet_v3_large_320"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fasterrcnn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }

@@ -22,7 +22,8 @@
 #'   \item `model_convnext_base_upernet()`
 #' }
 #'
-#' @param num_classes Number of output segmentation classes. Default: 21 (PASCAL VOC).
+#' @param num_classes Number of output segmentation classes. Default: 21 (PASCAL VOC),
+#'   or 150 (ADE20K) for UPerNet models with `pretrained = TRUE`.
 #' @param aux_loss If TRUE, includes an auxiliary classifier branch. Default: FALSE.
 #' @param pretrained If TRUE, loads convnext pretrained weights of backbone and segmentation heads.
 #' @param pretrained_backbone If TRUE, loads ImageNet pretrained
@@ -110,10 +111,17 @@ convnext_fcn_backbone <- torch::nn_module(
 )
 
 # Backbone wrapper for UPerNet models (returns c2/c3/c4/c5 keys)
+# As in the official ConvNeXt semantic_segmentation backbone (out_indices = 0:3),
+# every returned feature map goes through its own channels_first LayerNorm
+# (`norm0` ... `norm3`); the un-normalised map is what feeds the next stage.
 convnext_upernet_backbone <- torch::nn_module(
   "convnext_upernet_backbone",
-  initialize = function(convnext_model) {
+  initialize = function(convnext_model, dims) {
     self$model <- convnext_model
+    self$norm0 <- LayerNorm(dims[1], eps = 1e-6, data_format = "channels_first")
+    self$norm1 <- LayerNorm(dims[2], eps = 1e-6, data_format = "channels_first")
+    self$norm2 <- LayerNorm(dims[3], eps = 1e-6, data_format = "channels_first")
+    self$norm3 <- LayerNorm(dims[4], eps = 1e-6, data_format = "channels_first")
   },
   forward = function(x) {
     # Extract features at different scales
@@ -133,7 +141,7 @@ convnext_upernet_backbone <- torch::nn_module(
       self$model$downsample_layers[[4]]() %>%
       self$model$stages[[4]]()
 
-    list(c2 = c2, c3 = c3, c4 = c4, c5 = c5)
+    list(c2 = self$norm0(c2), c3 = self$norm1(c3), c4 = self$norm2(c4), c5 = self$norm3(c5))
   }
 )
 
@@ -411,7 +419,7 @@ convnext_upernet_model_urls <- list(
 
 #' @describeIn model_convnext_segmentation ConvNeXt Tiny with UPerNet head
 #' @export
-model_convnext_tiny_upernet <- function(num_classes = 21,
+model_convnext_tiny_upernet <- function(num_classes = if (pretrained) 150 else 21,
                                         aux_loss = FALSE,
                                         pretrained = FALSE,
                                         pretrained_backbone = FALSE,
@@ -423,7 +431,7 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
     cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_tiny_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 2), dims = c(96, 192, 384, 768))
 
   # ConvNeXt Tiny dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -444,7 +452,7 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = TRUE)
   }
   model
 }
@@ -452,7 +460,7 @@ model_convnext_tiny_upernet <- function(num_classes = 21,
 
 #' @describeIn model_convnext_segmentation ConvNeXt Small with UPerNet head
 #' @export
-model_convnext_small_upernet <- function(num_classes = 21,
+model_convnext_small_upernet <- function(num_classes = if (pretrained) 150 else 21,
                                          aux_loss = FALSE,
                                          pretrained = FALSE,
                                          pretrained_backbone = FALSE,
@@ -464,7 +472,7 @@ model_convnext_small_upernet <- function(num_classes = 21,
     cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_small_22k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 2), dims = c(96, 192, 384, 768))
 
   # ConvNeXt Small dims: c(96, 192, 384, 768)
   decode_head <- upernet_head(
@@ -485,7 +493,7 @@ model_convnext_small_upernet <- function(num_classes = 21,
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = TRUE)
   }
   model
 }
@@ -493,7 +501,7 @@ model_convnext_small_upernet <- function(num_classes = 21,
 
 #' @describeIn model_convnext_segmentation ConvNeXt Base with UPerNet head
 #' @export
-model_convnext_base_upernet <- function(num_classes = 21,
+model_convnext_base_upernet <- function(num_classes = if (pretrained) 150 else 21,
                                         aux_loss = FALSE,
                                         pretrained = FALSE,
                                         pretrained_backbone = FALSE,
@@ -505,7 +513,7 @@ model_convnext_base_upernet <- function(num_classes = 21,
     cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
 
   convnext <- model_convnext_base_1k(pretrained = pretrained_backbone, ...)
-  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 1))
+  backbone <- convnext_upernet_backbone(torch::nn_prune_head(convnext, 2), dims = c(128, 256, 512, 1024))
 
   # ConvNeXt Base dims: c(128, 256, 512, 1024)
   decode_head <- upernet_head(
@@ -526,7 +534,7 @@ model_convnext_base_upernet <- function(num_classes = 21,
     if (tools::md5sum(state_dict_path) != info[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = FALSE)
+    model$load_state_dict(.rename_convnext_state_dict(state_dict), strict = TRUE)
   }
   model
 }
@@ -536,7 +544,7 @@ model_convnext_base_upernet <- function(num_classes = 21,
   . <- NULL # Nulling strategy for no visible binding check Note
   new_names <- names(state_dict) %>%
     sub(pattern = "backbone\\.", replacement = "backbone.model.", x = .) %>%
-    sub(pattern = "model\\.norm3", replacement = "model.norm", x = .) %>%
+    sub(pattern = "backbone\\.model\\.norm(\\d)", replacement = "backbone.norm\\1", x = .) %>%
     sub(pattern = "psp_modules\\.", replacement = "psp_modules.stages.", x = .) %>%
     sub(pattern = "depthwise_", replacement = "dw", x = .) %>%
     sub(pattern = "pointwise_", replacement = "pw", x = .) %>%

@@ -44,11 +44,9 @@
 
 ## Bug fixes and improvements
 
+* `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
+* `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
-* Detection and segmentation datasets now take an `item_transform` argument, applied to the whole item
-  after `transform` and `target_transform`. Passing a dataset to `item_transform_*()` or
-  `target_transform_rotate()` now adds to those arguments rather than replacing the dataset `.getitem()`
-  method through `unlockBinding()`, which R CMD check flagged as an unsafe call (#399).
 * `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype (#398).
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
@@ -76,6 +74,18 @@
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
 * `model_fasterrcnn_*()` and `model_maskrcnn_*()` inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (@sebffischer, #412).
+* `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).
+* The `progress` argument of the model constructors is now honoured (@sebffischer, #411).
+* `model_convnext_*_upernet()` now apply the per-stage layer norms of the pretrained backbone and default to `num_classes = 150` when `pretrained = TRUE` (@sebffischer, #410).
+* `model_convnext_*_detection()` default to `num_classes = 90` and pass `score_thresh`, `nms_thresh` and `detections_per_img` to the detection head (@sebffischer, #410).
+* `model_convnext_*()` blocks now apply stochastic depth in training mode (@sebffischer, #410).
+* `model_efficientnet_*()` and `model_efficientnet_v2_*()` now match torchvision (SiLU squeeze-excitation, batch norm settings), apply stochastic depth in training, and accept `dropout` without shifting other arguments (@sebffischer, #409).
+* `model_mobilenet_v3_*()` use torchvision's batch norm settings, gain a `norm_layer` argument and stay in training mode when `pretrained = FALSE`; `model_mobilenet_v2()` handles stages with `n = 0` (@sebffischer, #409).
+* `model_fcn_resnet*()` now use a dilated backbone as in PyTorch, fixing the pretrained segmentations, and no longer download the backbone weights when `pretrained = TRUE` (@sebffischer, #408).
+* `model_deeplabv3_*()` keep the auxiliary classifier when `pretrained = TRUE` and `aux_loss = NULL`, as documented (@sebffischer, #408).
+* `model_lw_detr_*()` now match the reference LW-DETR implementation numerically, which strongly improves the pretrained detections (@sebffischer, #407).
+* `model_facenet_pnet()`, `model_facenet_rnet()`, `model_facenet_onet()` and `model_mtcnn()` take the face softmax over the class dimension instead of the batch dimension (@sebffischer, #406).
+* `model_facenet_inception_resnet_v1()` now matches facenet-pytorch (missing `repeat_1` stage, `Mixed_6a` paddings); `pretrained = TRUE` loads `"vggface2"` and `num_classes` defaults to `NULL` (@sebffischer, #406).
 
 
 # torchvision 0.9.0

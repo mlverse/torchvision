@@ -15,7 +15,7 @@ model_mobilenet_v2 <- function(pretrained = FALSE, progress = TRUE, ...) {
 
   if (pretrained) {
     cli_inform("Model weights for {.cls {class(model)[1]}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet")
+    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 
@@ -76,7 +76,7 @@ mobilenet_v2 <- torch::nn_module(
       names(i) <- c("t", "c", "n", "s")
       i <- as.list(i)
       output_channel <- mobilenetv2.make_divisible(i$c * width_mult, round_nearest)
-      for (k in 0:(i$n -1)) {
+      for (k in seq_len(i$n) - 1) {
         stride <-  if (k == 0) i$s else 1
         features[[length(features) + 1]] <- block(
           input_channel,

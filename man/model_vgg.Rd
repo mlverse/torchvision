@@ -50,9 +50,9 @@ VGG models implementations based on
 
 \item \code{model_vgg13_bn()}: VGG 13-layer model (configuration "B") with batch normalization
 
-\item \code{model_vgg16()}: VGG 13-layer model (configuration "D")
+\item \code{model_vgg16()}: VGG 16-layer model (configuration "D")
 
-\item \code{model_vgg16_bn()}: VGG 13-layer model (configuration "D") with batch normalization
+\item \code{model_vgg16_bn()}: VGG 16-layer model (configuration "D") with batch normalization
 
 \item \code{model_vgg19()}: VGG 19-layer model (configuration "E")
 

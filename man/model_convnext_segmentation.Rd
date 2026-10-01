@@ -32,7 +32,7 @@ model_convnext_base_fcn(
 )
 
 model_convnext_tiny_upernet(
-  num_classes = 21,
+  num_classes = if (pretrained) 150 else 21,
   aux_loss = FALSE,
   pretrained = FALSE,
   pretrained_backbone = FALSE,
@@ -41,7 +41,7 @@ model_convnext_tiny_upernet(
 )
 
 model_convnext_small_upernet(
-  num_classes = 21,
+  num_classes = if (pretrained) 150 else 21,
   aux_loss = FALSE,
   pretrained = FALSE,
   pretrained_backbone = FALSE,
@@ -50,7 +50,7 @@ model_convnext_small_upernet(
 )
 
 model_convnext_base_upernet(
-  num_classes = 21,
+  num_classes = if (pretrained) 150 else 21,
   aux_loss = FALSE,
   pretrained = FALSE,
   pretrained_backbone = FALSE,
@@ -59,7 +59,8 @@ model_convnext_base_upernet(
 )
 }
 \arguments{
-\item{num_classes}{Number of output segmentation classes. Default: 21 (PASCAL VOC).}
+\item{num_classes}{Number of output segmentation classes. Default: 21 (PASCAL VOC),
+or 150 (ADE20K) for UPerNet models with \code{pretrained = TRUE}.}
 
 \item{aux_loss}{If TRUE, includes an auxiliary classifier branch. Default: FALSE.}
 

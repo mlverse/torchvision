@@ -11,7 +11,7 @@ test_that("deeplabv3_resnet50 works with default aux_loss=NULL", {
     model <- model_deeplabv3_resnet50(pretrained = TRUE)
   })
   out <- model(input)
-  expect_named(out, "out")
+  expect_named(out, c("out", "aux"))
   expect_tensor_shape(out$out, c(1, 21, 32, 32))
 })
 
@@ -31,7 +31,7 @@ test_that("deeplabv3_resnet101 works with default aux_loss=NULL", {
     model <- model_deeplabv3_resnet101(pretrained = TRUE)
   })
   out <- model(input)
-  expect_named(out, "out")
+  expect_named(out, c("out", "aux"))
   expect_tensor_shape(out$out, c(1, 21, 32, 32))
 })
 
@@ -88,10 +88,10 @@ test_that("model_deeplabv3_resnet50 detects aeroplane in Wikipedia image", {
   model$eval()
 
   output <- model(input)
-  mask <- output$out$argmax(dim = 2)  # shape (1, H, W)
+  mask <- output$out$argmax(dim = 2)  # shape (1, H, W), 1-based class ids
 
   label_array <- mask %>% torch::as_array()  # convert to R array
-  label_table <- table(factor(label_array, levels = 0:20, labels = pascal_voc_classes()))
+  label_table <- table(factor(label_array, levels = 1:21, labels = pascal_voc_classes()))
 
   expect_gt(label_table[["aeroplane"]], 0)
   expect_gt(label_table[["aeroplane"]], label_table[["dog"]])

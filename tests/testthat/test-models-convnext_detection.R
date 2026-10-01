@@ -153,3 +153,16 @@ test_that("model_convnext_detection validates num_classes parameter", {
 })
 
 
+
+test_that("model_convnext_detection defaults to 90 classes and passes detection thresholds through", {
+  skip_if_not(torch::torch_is_installed())
+
+  model <- model_convnext_tiny_detection()
+  expect_equal(model$num_classes, 90)
+  expect_equal(model$state_dict()[["roi_heads.box_predictor.cls_score.weight"]]$shape[1], 91L)
+
+  model <- model_convnext_tiny_detection(score_thresh = 0.9, nms_thresh = 0.3, detections_per_img = 7)
+  expect_equal(model$score_thresh, 0.9)
+  expect_equal(model$nms_thresh, 0.3)
+  expect_equal(model$detections_per_img, 7)
+})

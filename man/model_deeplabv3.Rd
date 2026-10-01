@@ -36,11 +36,12 @@ pretrained weights.}
 
 \item{aux_loss}{Logical or \code{NULL}. If \code{TRUE}, adds an auxiliary FCN classifier
 head at an intermediate backbone layer, used as a secondary loss during
-training. If \code{NULL} (default), inferred from pretrained weights.}
+training. If \code{NULL} (default), \code{TRUE} when \code{pretrained = TRUE} (the pretrained
+weights include the auxiliary head), \code{FALSE} otherwise.}
 
 \item{pretrained_backbone}{Logical. If \code{TRUE} and \code{pretrained = FALSE}, loads
 \code{IMAGENET1K_V1} weights for the backbone only. Ignored when \code{pretrained = TRUE}.
-Default: \code{TRUE}.}
+Default: \code{FALSE}.}
 
 \item{...}{Other parameters passed to the resnet model.}
 }
@@ -72,8 +73,8 @@ Pascal VOC categories, plus background (21 classes total).
 \itemize{
 \item All models use \code{COCO_WITH_VOC_LABELS_V1} weights, trained on COCO with the
 20 Pascal VOC categories (+ background = 21 classes).
-\item Backbone weights default to \code{IMAGENET1K_V1} (supervised ImageNet-1k) when
-\code{pretrained = FALSE} and \code{pretrained_backbone = TRUE}.
+\item Backbone weights \code{IMAGENET1K_V1} (supervised ImageNet-1k) are loaded when
+\code{pretrained = FALSE} and \code{pretrained_backbone = TRUE} (not the default).
 \item When \code{pretrained = TRUE}, backbone weights are overridden by the full
 segmentation model weights and \code{pretrained_backbone} is ignored.
 \item The auxiliary classifier branch (\code{aux_loss}) is automatically enabled when
