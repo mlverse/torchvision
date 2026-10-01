@@ -37,7 +37,7 @@ stderr.}
 \item{width_mult}{width multiplier for model scaling (default: 1.0).}
 
 \item{norm_layer}{normalization layer constructor taking the number of features.
-Defaults to batch norm with \code{eps = 1e-3, momentum = 0.01} as in torchvision.}
+Defaults to batch norm with \verb{eps = 1e-3, momentum = 0.01} as in torchvision.}
 
 \item{...}{Other parameters passed to the model implementation.}
 }

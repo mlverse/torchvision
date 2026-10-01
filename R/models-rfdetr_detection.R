@@ -1350,7 +1350,7 @@ rfdetr_configs <- local({
 #' @importFrom torch nnf_interpolate nnf_grid_sample nnf_layer_norm
 #' @importFrom torch nn_init_trunc_normal_ nn_init_constant_ nn_init_xavier_uniform_ nn_init_zeros_ nn_init_ones_
 #' @importFrom torch torch_randn torch_zeros torch_ones torch_arange torch_linspace torch_cat
-#' @importFrom torch torch_stack torch_sum torch_cumsum torch_log
+#' @importFrom torch torch_stack torch_sum torch_cumsum torch_log torch_full
 build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) {
   projector_scale <- cfg$projector_scale %||% c(1.0)
   backbone <- rfdetr_backbone(

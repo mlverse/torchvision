@@ -70,9 +70,9 @@ on task-specific labelled data before meaningful predictions are produced.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{| Model                             | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | File Size | Backbone Weights              | Notes                    |
 |-----------------------------------|-----------|-----------|---------|--------|-----------|-------------------------------|--------------------------|
-| model_convnext_tiny_detection     | 82.5\%     | 96.1\%     | 28.6M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
-| model_convnext_small_detection    | 83.6\%     | 96.7\%     | 50.2M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
-| model_convnext_base_detection     | 84.1\%     | 96.9\%     | 88.6M   | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
+| model_convnext_tiny_detection     | 82.5\%     | 96.1\%     | 46.2M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
+| model_convnext_small_detection    | 83.6\%     | 96.7\%     | 83.9M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
+| model_convnext_base_detection     | 84.1\%     | 96.9\%     | 106M    | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
 }\if{html}{\out{</div>}}
 }
 
