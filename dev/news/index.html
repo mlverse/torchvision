@@ -158,6 +158,10 @@
 <li>
 <code>model_inception_v3(pretrained = TRUE, aux_logits = FALSE)</code> now actually removes the auxiliary classifier. Previously <code>aux_logits = FALSE</code> was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/375" class="external-link">#375</a>)</li>
 <li>
+<code>model_fcn_resnet*()</code> now use a dilated backbone as in PyTorch, fixing the pretrained segmentations, and no longer download the backbone weights when <code>pretrained = TRUE</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/408" class="external-link">#408</a>).</li>
+<li>
+<code>model_deeplabv3_*()</code> keep the auxiliary classifier when <code>pretrained = TRUE</code> and <code>aux_loss = NULL</code>, as documented (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/408" class="external-link">#408</a>).</li>
+<li>
 <code>model_lw_detr_*()</code> now match the reference LW-DETR implementation numerically, which strongly improves the pretrained detections (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/407" class="external-link">#407</a>).</li>
 <li>
 <code><a href="../reference/model_facenet.html">model_facenet_pnet()</a></code>, <code><a href="../reference/model_facenet.html">model_facenet_rnet()</a></code>, <code><a href="../reference/model_facenet.html">model_facenet_onet()</a></code> and <code><a href="../reference/model_facenet.html">model_mtcnn()</a></code> take the face softmax over the class dimension instead of the batch dimension (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/406" class="external-link">#406</a>).</li>

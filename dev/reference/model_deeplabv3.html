@@ -31,8 +31,8 @@ Weights Selection
 
 All models use COCO_WITH_VOC_LABELS_V1 weights, trained on COCO with the
 20 Pascal VOC categories (+ background = 21 classes).
-Backbone weights default to IMAGENET1K_V1 (supervised ImageNet-1k) when
-pretrained = FALSE and pretrained_backbone = TRUE.
+Backbone weights IMAGENET1K_V1 (supervised ImageNet-1k) are loaded when
+pretrained = FALSE and pretrained_backbone = TRUE (not the default).
 When pretrained = TRUE, backbone weights are overridden by the full
 segmentation model weights and pretrained_backbone is ignored.
 The auxiliary classifier branch (aux_loss) is automatically enabled when
@@ -177,8 +177,8 @@ Pascal VOC categories, plus background (21 classes total).</p>
 
 <ul><li><p>All models use <code>COCO_WITH_VOC_LABELS_V1</code> weights, trained on COCO with the
 20 Pascal VOC categories (+ background = 21 classes).</p></li>
-<li><p>Backbone weights default to <code>IMAGENET1K_V1</code> (supervised ImageNet-1k) when
-<code>pretrained = FALSE</code> and <code>pretrained_backbone = TRUE</code>.</p></li>
+<li><p>Backbone weights <code>IMAGENET1K_V1</code> (supervised ImageNet-1k) are loaded when
+<code>pretrained = FALSE</code> and <code>pretrained_backbone = TRUE</code> (not the default).</p></li>
 <li><p>When <code>pretrained = TRUE</code>, backbone weights are overridden by the full
 segmentation model weights and <code>pretrained_backbone</code> is ignored.</p></li>
 <li><p>The auxiliary classifier branch (<code>aux_loss</code>) is automatically enabled when
@@ -246,13 +246,14 @@ pretrained weights.</p></dd>
 <dt id="arg-aux-loss">aux_loss<a class="anchor" aria-label="anchor" href="#arg-aux-loss"></a></dt>
 <dd><p>Logical or <code>NULL</code>. If <code>TRUE</code>, adds an auxiliary FCN classifier
 head at an intermediate backbone layer, used as a secondary loss during
-training. If <code>NULL</code> (default), inferred from pretrained weights.</p></dd>
+training. If <code>NULL</code> (default), <code>TRUE</code> when <code>pretrained = TRUE</code> (the pretrained
+weights include the auxiliary head), <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-pretrained-backbone">pretrained_backbone<a class="anchor" aria-label="anchor" href="#arg-pretrained-backbone"></a></dt>
 <dd><p>Logical. If <code>TRUE</code> and <code>pretrained = FALSE</code>, loads
 <code>IMAGENET1K_V1</code> weights for the backbone only. Ignored when <code>pretrained = TRUE</code>.
-Default: <code>TRUE</code>.</p></dd>
+Default: <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
