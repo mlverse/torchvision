@@ -71,12 +71,7 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
-* `model_lw_detr_*()` now match the reference LW-DETR implementation (Atten4Vis/LW-DETR) numerically. The C2f bottlenecks of the
-  multi-scale projector no longer add a residual connection, the sine embedding of the query reference points no longer uses
-  frequencies shifted by one (R's 1-based `torch_arange()`), the P5 down-sampling convolutions of `model_lw_detr_large()` use ReLU
-  instead of SiLU, and padded or invalid positions are masked before the two-stage encoder output, as in the reference.
-  Pretrained models gave much weaker detections before (e.g. top score 0.52 instead of 0.94 on a cat image).
-  The documentation no longer claims that letterboxing with a `pixel_mask` matches the reference preprocessing, which resizes to 640×640.
+* `model_lw_detr_*()` now match the reference LW-DETR implementation numerically, which strongly improves the pretrained detections (@sebffischer, #407).
 
 
 # torchvision 0.9.0
