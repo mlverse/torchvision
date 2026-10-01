@@ -145,3 +145,24 @@ test_that("tests for model_vit_h_14", {
   rm(model)
   gc()
 })
+test_that("model_vit attends over the patches of each image", {
+  torch::torch_manual_seed(1)
+  model <- model_vit_b_32()
+  model$eval()
+  expect_true("pos_embedding" %in% names(model$parameters))
+
+  input <- torch::torch_randn(2, 3, 224, 224)
+  changed <- input$clone()
+  changed[2, , , ] <- torch::torch_randn(3, 224, 224)
+  torch::with_no_grad({
+    out <- model(input)
+    out_changed <- model(changed)
+  })
+  # the prediction of an image depends on the image itself ...
+  expect_gt(as.numeric((out[2, ] - out_changed[2, ])$abs()$max()), 1e-4)
+  # ... but not on the other images of the batch
+  expect_equal(as.numeric((out[1, ] - out_changed[1, ])$abs()$max()), 0, tolerance = 1e-5)
+
+  rm(model)
+  gc()
+})
