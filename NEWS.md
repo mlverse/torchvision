@@ -71,10 +71,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
-* `model_inception_v3()` without pretrained weights now initialises its convolution and linear weights from a normal distribution truncated to `[-2, 2]`, as in PyTorch. The truncation bounds were `a = -2, b = -2`, so every weight was set to the constant `-2`.
-* `model_resnet*()`, `model_resnext*()` and `model_wide_resnet*()` without pretrained weights now apply the Kaiming initialisation of convolutions and the constant initialisation of batch norms to all layers, not only to the stem. For the same reason `zero_init_residual = TRUE` had no effect before and now zeroes the last batch norm of each residual block.
-* The `progress` argument of the model constructors is now honoured: `progress = FALSE` downloads pretrained weights without a progress bar. It was previously ignored and a progress bar was always shown.
-* The documentation of `model_vgg16()` and `model_vgg16_bn()` now describes them as 16-layer models instead of 13-layer models.
+* `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).
+* The `progress` argument of the model constructors is now honoured (@sebffischer, #411).
 
 
 # torchvision 0.9.0
