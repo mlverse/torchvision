@@ -71,9 +71,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
-* `model_facenet_pnet()`, `model_facenet_rnet()`, `model_facenet_onet()` and `model_mtcnn()` now apply the face / non-face softmax over the class dimension. It was taken over the batch dimension, so a single image always got a face probability of 1.
-* `model_facenet_inception_resnet_v1()` now matches facenet-pytorch. It was missing the `repeat_1` stage (5 `Block35` blocks, whose definition was also wrong) and had swapped paddings in `Mixed_6a`, so the pretrained `"vggface2"` and `"casia-webface"` checkpoints loaded without error but gave wrong embeddings.
-* `model_facenet_inception_resnet_v1()` now loads the `"vggface2"` weights for `pretrained = TRUE` and errors on unknown `pretrained` values, which silently gave a randomly initialised model before. `num_classes` now defaults to `NULL`, so `classify = TRUE` keeps the pretrained logits layer instead of replacing it with a random 10-class one; without pretrained weights `num_classes` must now be given.
+* `model_facenet_pnet()`, `model_facenet_rnet()`, `model_facenet_onet()` and `model_mtcnn()` take the face softmax over the class dimension instead of the batch dimension (@sebffischer, #406).
+* `model_facenet_inception_resnet_v1()` now matches facenet-pytorch (missing `repeat_1` stage, `Mixed_6a` paddings); `pretrained = TRUE` loads `"vggface2"` and `num_classes` defaults to `NULL` (@sebffischer, #406).
 
 
 # torchvision 0.9.0
