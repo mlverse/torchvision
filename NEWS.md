@@ -40,8 +40,7 @@
 
 ## Breaking changes
 
-* `model_maskrcnn_*()` detections now return `masks` pasted into the image, shape (N, H, W), as
-  torchvision does; the per-box (N, 28, 28) probabilities are in `mask_probs`.
+* `model_maskrcnn_*()` now return `masks` pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in `mask_probs` (@sebffischer, #412).
 
 ## Bug fixes and improvements
 
@@ -76,11 +75,7 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
-* Faster R-CNN and Mask R-CNN inference now reproduces torchvision numerically: anchors (sizes, aspect
-  ratio, grid offset, ordering, `pool` level), RPN objectness ordering, box decoding weights, per-level
-  top-n + NMS at 0.7, multi-scale RoIAlign with torchvision sampling, v2 FPN / box head architecture,
-  batch size > 1 and single-detection masks. Pretrained loading is now strict instead of silently keeping
-  random weights for unmatched keys. `nms()` without torchvisionlib is much faster.
+* `model_fasterrcnn_*()` and `model_maskrcnn_*()` inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (@sebffischer, #412).
 
 
 # torchvision 0.9.0
