@@ -8,20 +8,29 @@
 \title{ConvNeXt Detection Models (Faster R-CNN style)}
 \usage{
 model_convnext_tiny_detection(
-  num_classes = 91,
+  num_classes = 90,
   pretrained_backbone = FALSE,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 
 model_convnext_small_detection(
-  num_classes = 91,
+  num_classes = 90,
   pretrained_backbone = FALSE,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 
 model_convnext_base_detection(
-  num_classes = 91,
+  num_classes = 90,
   pretrained_backbone = FALSE,
+  score_thresh = 0.05,
+  nms_thresh = 0.5,
+  detections_per_img = 100,
   ...
 )
 }
@@ -30,6 +39,12 @@ model_convnext_base_detection(
 
 \item{pretrained_backbone}{Logical. If \code{TRUE}, loads ImageNet-pretrained
 ConvNeXt backbone weights. Default: \code{FALSE}.}
+
+\item{score_thresh}{Numeric. Minimum score threshold for detections (default: 0.05).}
+
+\item{nms_thresh}{Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).}
+
+\item{detections_per_img}{Integer. Maximum number of detections per image (default: 100).}
 
 \item{...}{Other arguments (unused).}
 }
@@ -122,7 +137,7 @@ pred     <- model(batch)$detections[[1]]
 num_boxes <- as.integer(pred$boxes$size()[1])
 topk     <- pred$scores$topk(k = 5)[[2]]
 boxes    <- pred$boxes[topk, ]
-labels   <- imagenet_classes(as.integer(pred$labels[topk]))
+labels   <- coco_classes(as.integer(pred$labels[topk]))
 
 # `draw_bounding_box()` may fail if bbox values are not consistent.
 if (num_boxes > 0) {
