@@ -38,6 +38,10 @@
   Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
 * Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #400).
 
+## Breaking changes
+
+* `model_maskrcnn_*()` now return `masks` pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in `mask_probs` (@sebffischer, #412).
+
 ## Bug fixes and improvements
 
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
@@ -69,6 +73,7 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_fasterrcnn_*()` and `model_maskrcnn_*()` inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (@sebffischer, #412).
 * `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).
 * The `progress` argument of the model constructors is now honoured (@sebffischer, #411).
 * `model_convnext_*_upernet()` now apply the per-stage layer norms of the pretrained backbone and default to `num_classes = 150` when `pretrained = TRUE` (@sebffischer, #410).
