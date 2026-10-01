@@ -130,7 +130,7 @@ model_facenet_pnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "facenet")
+      archive <- download_and_cache(facenet_torchscript_urls$PNet[1], prefix = "facenet", progress = progress)
       if (tools::md5sum(archive) != facenet_torchscript_urls$PNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -176,7 +176,7 @@ model_facenet_rnet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "facenet")
+      archive <- download_and_cache(facenet_torchscript_urls$RNet[1], prefix = "facenet", progress = progress)
       if (tools::md5sum(archive) != facenet_torchscript_urls$RNet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -230,7 +230,7 @@ model_facenet_onet <- nn_module(
     self$training <- FALSE
 
     if (pretrained) {
-      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "facenet")
+      archive <- download_and_cache(facenet_torchscript_urls$ONet[1], prefix = "facenet", progress = progress)
       if (tools::md5sum(archive) != facenet_torchscript_urls$ONet[2]){
         runtime_error("Corrupt file! Delete the file in {archive} and try again.")
       }
@@ -288,9 +288,9 @@ model_mtcnn <- nn_module(
   ) {
 
 
-    self$pnet <- model_facenet_pnet(pretrained=pretrained,...)
-    self$rnet <- model_facenet_rnet(pretrained=pretrained,...)
-    self$onet <- model_facenet_onet(pretrained=pretrained,...)
+    self$pnet <- model_facenet_pnet(pretrained = pretrained, progress = progress, ...)
+    self$rnet <- model_facenet_rnet(pretrained = pretrained, progress = progress, ...)
+    self$onet <- model_facenet_onet(pretrained = pretrained, progress = progress, ...)
   },
 
   forward = function(x) {

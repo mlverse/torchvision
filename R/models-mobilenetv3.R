@@ -335,7 +335,7 @@ model_mobilenet_v3_large <- function(
   if (pretrained) {
     r <- c("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_large.pth",
            "71625955bc3be9516032a6d5bab49199", "~21 MB")
-    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet")
+    state_dict_path <- download_and_cache(r[1], prefix = "mobilenet", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     state_dict <- load_state_dict(state_dict_path)
@@ -360,7 +360,7 @@ model_mobilenet_v3_small <- function(
   last_channel <- make_divisible(1024 * width_mult)
   model <- MobileNetV3(config, last_channel, num_classes = num_classes, norm_layer = norm_layer)
   if (pretrained) {
-    state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet")
+    state_dict_path <- download_and_cache("https://torch-cdn.mlverse.org/models/vision/v2/models/mobilenet_v3_small.pth", prefix = "mobilenet", progress = progress)
     state_dict <- load_state_dict(state_dict_path)
     renamed_state_dict <- .rename_mobilenet_v3_state_dict(state_dict)
     model$load_state_dict(renamed_state_dict)

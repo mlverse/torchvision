@@ -881,7 +881,8 @@ lw_detr_model <- nn_module(
   num_classes,
   num_select,
   pretrained,
-  model_key
+  model_key,
+  progress = TRUE
 ) {
   n_features <- length(out_feature_indexes)
   n_levels <- length(projector_scales)
@@ -920,7 +921,7 @@ lw_detr_model <- nn_module(
 
     r <- .lw_detr_model_urls[[model_key]]
     cli::cli_inform("Downloading LW-DETR weights ({r[3]})...")
-    state_dict_path <- download_and_cache(r[1], prefix = "lw_detr")
+    state_dict_path <- download_and_cache(r[1], prefix = "lw_detr", progress = progress)
     state_dict <- load_state_dict(state_dict_path)
     model$load_state_dict(state_dict, strict = FALSE)
   }
@@ -1032,7 +1033,8 @@ model_lw_detr_tiny <- function(pretrained = FALSE, progress = TRUE, num_classes 
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_tiny"
+    model_key = "lw_detr_coco_tiny",
+    progress = progress
   )
 }
 
@@ -1056,7 +1058,8 @@ model_lw_detr_small <- function(pretrained = FALSE, progress = TRUE, num_classes
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_small"
+    model_key = "lw_detr_coco_small",
+    progress = progress
   )
 }
 
@@ -1080,7 +1083,8 @@ model_lw_detr_medium <- function(pretrained = FALSE, progress = TRUE, num_classe
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_medium"
+    model_key = "lw_detr_coco_medium",
+    progress = progress
   )
 }
 
@@ -1104,6 +1108,7 @@ model_lw_detr_large <- function(pretrained = FALSE, progress = TRUE, num_classes
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_large"
+    model_key = "lw_detr_coco_large",
+    progress = progress
   )
 }

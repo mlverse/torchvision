@@ -69,6 +69,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).
+* The `progress` argument of the model constructors is now honoured (@sebffischer, #411).
 * `model_convnext_*_upernet()` now apply the per-stage layer norms of the pretrained backbone and default to `num_classes = 150` when `pretrained = TRUE` (@sebffischer, #410).
 * `model_convnext_*_detection()` default to `num_classes = 90` and pass `score_thresh`, `nms_thresh` and `detections_per_img` to the detection head (@sebffischer, #410).
 * `model_convnext_*()` blocks now apply stochastic depth in training mode (@sebffischer, #410).
