@@ -40,6 +40,8 @@
 
 ## Bug fixes and improvements
 
+* `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
+* `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
 * Detection and segmentation datasets now take an `item_transform` argument, applied to the whole item
   after `transform` and `target_transform`. Passing a dataset to `item_transform_*()` or
@@ -74,6 +76,13 @@
 * `model_convnext_*_upernet()` now apply the per-stage layer norms of the pretrained backbone and default to `num_classes = 150` when `pretrained = TRUE` (@sebffischer, #410).
 * `model_convnext_*_detection()` default to `num_classes = 90` and pass `score_thresh`, `nms_thresh` and `detections_per_img` to the detection head (@sebffischer, #410).
 * `model_convnext_*()` blocks now apply stochastic depth in training mode (@sebffischer, #410).
+* `model_efficientnet_*()` and `model_efficientnet_v2_*()` now match torchvision (SiLU squeeze-excitation, batch norm settings), apply stochastic depth in training, and accept `dropout` without shifting other arguments (@sebffischer, #409).
+* `model_mobilenet_v3_*()` use torchvision's batch norm settings, gain a `norm_layer` argument and stay in training mode when `pretrained = FALSE`; `model_mobilenet_v2()` handles stages with `n = 0` (@sebffischer, #409).
+* `model_fcn_resnet*()` now use a dilated backbone as in PyTorch, fixing the pretrained segmentations, and no longer download the backbone weights when `pretrained = TRUE` (@sebffischer, #408).
+* `model_deeplabv3_*()` keep the auxiliary classifier when `pretrained = TRUE` and `aux_loss = NULL`, as documented (@sebffischer, #408).
+* `model_lw_detr_*()` now match the reference LW-DETR implementation numerically, which strongly improves the pretrained detections (@sebffischer, #407).
+* `model_facenet_pnet()`, `model_facenet_rnet()`, `model_facenet_onet()` and `model_mtcnn()` take the face softmax over the class dimension instead of the batch dimension (@sebffischer, #406).
+* `model_facenet_inception_resnet_v1()` now matches facenet-pytorch (missing `repeat_1` stage, `Mixed_6a` paddings); `pretrained = TRUE` loads `"vggface2"` and `num_classes` defaults to `NULL` (@sebffischer, #406).
 
 
 # torchvision 0.9.0

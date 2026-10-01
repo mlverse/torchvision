@@ -25,8 +25,8 @@
 #' ## Weights Selection
 #' - All models use `COCO_WITH_VOC_LABELS_V1` weights, trained on COCO with the
 #'   20 Pascal VOC categories (+ background = 21 classes).
-#' - Backbone weights default to `IMAGENET1K_V1` (supervised ImageNet-1k) when
-#'   `pretrained = FALSE` and `pretrained_backbone = TRUE`.
+#' - Backbone weights `IMAGENET1K_V1` (supervised ImageNet-1k) are loaded when
+#'   `pretrained = FALSE` and `pretrained_backbone = TRUE` (not the default).
 #' - When `pretrained = TRUE`, backbone weights are overridden by the full
 #'   segmentation model weights and `pretrained_backbone` is ignored.
 #' - The auxiliary classifier branch (`aux_loss`) is automatically enabled when
@@ -48,10 +48,11 @@
 #'   pretrained weights.
 #' @param aux_loss Logical or `NULL`. If `TRUE`, adds an auxiliary FCN classifier
 #'   head at an intermediate backbone layer, used as a secondary loss during
-#'   training. If `NULL` (default), inferred from pretrained weights.
+#'   training. If `NULL` (default), `TRUE` when `pretrained = TRUE` (the pretrained
+#'   weights include the auxiliary head), `FALSE` otherwise.
 #' @param pretrained_backbone Logical. If `TRUE` and `pretrained = FALSE`, loads
 #'   `IMAGENET1K_V1` weights for the backbone only. Ignored when `pretrained = TRUE`.
-#'   Default: `TRUE`.
+#'   Default: `FALSE`.
 #'
 #' @examples
 #' \dontrun{
@@ -247,8 +248,10 @@ deeplabv3_resnet_factory <- function(arch, block, layers, pretrained, progress,
 
   validate_num_classes(num_classes, pretrained)
 
+  # as documented (and as in torchvision): the auxiliary head is enabled when
+  # loading the pretrained segmentation weights, which contain it.
   if (is.null(aux_loss))
-    aux_loss <- FALSE
+    aux_loss <- pretrained
 
   if (pretrained && pretrained_backbone)
     cli_warn("`pretrained_backbone` ignored when `pretrained = TRUE`." )
