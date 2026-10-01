@@ -12,13 +12,13 @@
 #' ```
 #' | Variant   | Backbone           | Decoder Layers | Resolution | # Queries | Group DETR | Weights                     |
 #' |-----------|--------------------|----------------|------------|-----------|------------|-----------------------------|
-#' | nano      | DINOv2 Small (win) | 2              | 384        | 300       | 13         | COCO (90 classes)           |
-#' | small     | DINOv2 Small (win) | 3              | 512        | 300       | 13         | COCO (90 classes)           |
-#' | medium    | DINOv2 Small (win) | 4              | 576        | 300       | 13         | COCO (90 classes)           |
-#' | base      | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (90 classes)           |
-#' | base_2    | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (90 classes, alt run)  |
+#' | nano      | DINOv2 Small (win) | 2              | 384        | 300       | 13         | COCO (91 classes)           |
+#' | small     | DINOv2 Small (win) | 3              | 512        | 300       | 13         | COCO (91 classes)           |
+#' | medium    | DINOv2 Small (win) | 4              | 576        | 300       | 13         | COCO (91 classes)           |
+#' | base      | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes)           |
+#' | base_2    | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes, alt run)  |
 #' | base_o365 | DINOv2 Small (win) | 3              | 560        | 300       | 13         | Objects365 (366 classes)    |
-#' | large     | DINOv2 Base (win)  | 3              | 560        | 300       | 13         | COCO (90 classes)           |
+#' | large     | DINOv2 Base (win)  | 3              | 560        | 300       | 13         | COCO (91 classes)           |
 #' ```
 #' - All models use group DETR (group_detr=13) with two-stage query proposal,
 #'   Lite Refpoint Refine, and BBox reparameterisation.
