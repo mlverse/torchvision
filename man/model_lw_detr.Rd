@@ -75,16 +75,16 @@ cross-attention.
 
 The \code{forward} method is \code{model(images, pixel_mask = NULL)}, where \code{images} is
 an ImageNet-normalised \code{torch_tensor} of shape \verb{(batch_size, 3, H, W)} with
-\code{H = W} divisible by 64 (recommended 640). Normalise with
+\code{H} and \code{W} divisible by 64 (recommended 640 x 640). Normalise with
 \code{mean = c(0.485, 0.456, 0.406)}, \code{std = c(0.229, 0.224, 0.225)}.
 
-For non-square images, resize the longest side to 640 keeping the aspect
-ratio, pad to 640×640, and pass a \code{pixel_mask} of shape \verb{(batch_size, H, W)}
-(logical, \code{TRUE} over real pixels and \code{FALSE} over padding). The padded region
-is then excluded from attention and boxes are returned in the coordinates of
-the unpadded image. This matches the reference preprocessing and gives the best
-accuracy. When \code{pixel_mask} is omitted the whole frame is treated as valid,
-which is only appropriate for square, unpadded inputs.
+The reference evaluation resizes every image to 640×640 without keeping the
+aspect ratio. Alternatively, resize the longest side to 640, pad to 640×640
+and pass a \code{pixel_mask} of shape \verb{(batch_size, H, W)} (logical, \code{TRUE} over
+real pixels and \code{FALSE} over padding), as with the reference model's padded
+\code{NestedTensor} input. The padded region is then excluded from attention and
+boxes are returned in the coordinates of the unpadded image. When
+\code{pixel_mask} is omitted the whole frame is treated as valid.
 }
 
 \section{Output Format}{

@@ -63,11 +63,11 @@ image patches as tokens in a Transformer model.
 
 \item \code{model_vit_b_32()}: ViT-B/32 model (Base, 32×32 patch size)
 
-\item \code{model_vit_l_16()}: ViT-L/16 model (Base, 16×16 patch size)
+\item \code{model_vit_l_16()}: ViT-L/16 model (Large, 16×16 patch size)
 
-\item \code{model_vit_l_32()}: ViT-L/32 model (Base, 32×32 patch size)
+\item \code{model_vit_l_32()}: ViT-L/32 model (Large, 32×32 patch size)
 
-\item \code{model_vit_h_14()}: ViT-H/14 model (Base, 14×14 patch size)
+\item \code{model_vit_h_14()}: ViT-H/14 model (Huge, 14×14 patch size)
 
 }}
 \seealso{
