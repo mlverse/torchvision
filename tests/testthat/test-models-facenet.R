@@ -142,15 +142,13 @@ test_that("tests for non-pretrained model_facenet_inception_resnet_v1", {
   gc()
 })
 
-test_that("tests for model_facenet_inception_resnet_v1 with classify=TRUE and default num_classes", {
-  model <- model_facenet_inception_resnet_v1(pretrained = NULL, classify = TRUE)
-  model$eval()
-  input <- torch_randn(1,3,224,224)
-  out <- model(input)
-  expect_tensor_shape(out, c(1,10))  # Default num_classes is 10
+test_that("model_facenet_inception_resnet_v1 with classify=TRUE requires num_classes without pretrained weights", {
+  # matches facenet-pytorch: num_classes has no default when no pretrained weights are used
+  expect_error(model_facenet_inception_resnet_v1(pretrained = NULL, classify = TRUE), "num_classes")
+})
 
-  rm(model)
-  gc()
+test_that("model_facenet_inception_resnet_v1 rejects unknown pretrained values", {
+  expect_error(model_facenet_inception_resnet_v1(pretrained = "imagenet"), "pretrained")
 })
 
 test_that("tests for model_facenet_inception_resnet_v1 with classify=TRUE and custom num_classes", {
@@ -187,4 +185,30 @@ test_that("error test for model_mtcnn with error input size", {
 
   rm(model)
   gc()
+})
+
+test_that("P/R/ONet softmax is taken over the class dimension, not the batch", {
+  torch_manual_seed(1)
+  pnet <- model_facenet_pnet(pretrained = FALSE)
+  rnet <- model_facenet_rnet(pretrained = FALSE)
+  onet <- model_facenet_onet(pretrained = FALSE)
+  with_no_grad({
+    p <- pnet(torch_randn(2, 3, 24, 24))$cls
+    r <- rnet(torch_randn(3, 3, 24, 24))$cls
+    o <- onet(torch_randn(3, 3, 48, 48))$cls
+    o1 <- onet(torch_randn(1, 3, 48, 48))$cls
+  })
+  expect_equal(as_array(p$sum(dim = 2)), array(1, c(2, 7, 7)), tolerance = 1e-5)
+  expect_equal(as.numeric(as_array(r$sum(dim = 2))), rep(1, 3), tolerance = 1e-5)
+  expect_equal(as.numeric(as_array(o$sum(dim = 2))), rep(1, 3), tolerance = 1e-5)
+  # a single image must not always get probability 1
+  expect_false(all(as_array(o1) == 1))
+})
+
+test_that("model_facenet_inception_resnet_v1 has the repeat_1 stage of facenet-pytorch", {
+  model <- model_facenet_inception_resnet_v1(pretrained = NULL)
+  keys <- names(model$state_dict())
+  expect_length(keys, 714)
+  expect_equal(sum(grepl("^repeat_1\\.", keys)), 190)
+  expect_equal(sum(sapply(model$parameters, function(p) p$numel())), 23482624)
 })
