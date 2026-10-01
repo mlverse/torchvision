@@ -97,8 +97,13 @@ facenet_torchscript_urls <- list(
 #' @importFrom torch nnf_interpolate nnf_relu nnf_normalize load_state_dict
 #'
 #' @inheritParams model_mobilenet_v2
+#' @param pretrained For the MTCNN networks, logical: if TRUE, loads the facenet-pytorch weights.
+#'   For `model_facenet_inception_resnet_v1()`, one of `NULL` or `FALSE` (random weights),
+#'   `"vggface2"` (or `TRUE`) or `"casia-webface"`. Other values are an error.
 #' @param classify Logical, whether to include the classification head. Default is FALSE.
-#' @param num_classes Integer, number of output classes for classification. Default is 10.
+#' @param num_classes Integer, number of output classes for classification. Default is NULL: with
+#'   pretrained weights the pretrained logits layer is kept; without pretrained weights it must be
+#'   given when `classify = TRUE`.
 #' @param dropout_prob Numeric, dropout probability applied before classification. Default is 0.6.
 #'
 #' @family object_detection_model
@@ -119,7 +124,7 @@ model_facenet_pnet <- nn_module(
     self$conv3 <- nn_conv2d(16, 32, kernel_size=3)
     self$prelu3 <- nn_prelu(32)
     self$conv4_1 <- nn_conv2d(32, 2, kernel_size=1)
-    self$softmax4_1 <- nn_softmax(dim=1)
+    self$softmax4_1 <- nn_softmax(dim=2)
     self$conv4_2 <- nn_conv2d(32, 4, kernel_size=1)
 
     self$training <- FALSE
@@ -165,7 +170,7 @@ model_facenet_rnet <- nn_module(
     self$dense4 <- nn_linear(576, 128)
     self$prelu4 <- nn_prelu(128)
     self$dense5_1 <- nn_linear(128, 2)
-    self$softmax5_1 <- nn_softmax(dim=1)
+    self$softmax5_1 <- nn_softmax(dim=2)
     self$dense5_2 <- nn_linear(128, 4)
 
     self$training <- FALSE
@@ -218,7 +223,7 @@ model_facenet_onet <- nn_module(
     self$dense5 <- nn_linear(1152, 256)
     self$prelu5 <- nn_prelu(256)
     self$dense6_1 <- nn_linear(256, 2)
-    self$softmax6_1 <- nn_softmax(dim=1)
+    self$softmax6_1 <- nn_softmax(dim=2)
     self$dense6_2 <- nn_linear(256, 4)
     self$dense6_3 <- nn_linear(256, 10)
 
@@ -341,21 +346,20 @@ Block35 <- nn_module(
     )
     self$branch2 <- nn_sequential(
       BasicConv2d(256, 32, kernel_size = 1, stride = 1),
-      BasicConv2d(32, 48, kernel_size = 3, stride = 1, padding = 1),
-      BasicConv2d(48, 64, kernel_size = 3, stride = 1, padding = 1)
+      BasicConv2d(32, 32, kernel_size = 3, stride = 1, padding = 1),
+      BasicConv2d(32, 32, kernel_size = 3, stride = 1, padding = 1)
     )
-    self$conv2d <- nn_conv2d(128, 256, kernel_size = 1, stride = 1)
+    self$conv2d <- nn_conv2d(96, 256, kernel_size = 1, stride = 1)
+    self$relu <- nn_relu(inplace = FALSE)
   },
   forward = function(x) {
-    branch0 <- self$branch0(x)
-    branch1 <- self$branch1(x)
-    branch2 <- self$branch2(x)
-    print(branch0$shape)
-    print(branch1$shape)
-    print(branch2$shape)
-    mixed <- torch_cat(list(branch0, branch1, branch2), dim = 2)
-    up <- self$conv2d(mixed)
-    x + self$scale * up %>% nnf_relu(inplace = TRUE)
+    x0 <- self$branch0(x)
+    x1 <- self$branch1(x)
+    x2 <- self$branch2(x)
+    out <- torch_cat(list(x0, x1, x2), dim = 2)
+    out <- self$conv2d(out)
+    out <- out * self$scale + x
+    self$relu(out)
   }
 )
 
@@ -414,8 +418,8 @@ Mixed_6a <- nn_module(
     self$branch0 <- BasicConv2d(256, 384, kernel_size = 3, stride = 2, padding = 0)
     self$branch1 <- nn_sequential(
       BasicConv2d(256, 192, kernel_size = 1, stride = 1, padding = 0),
-      BasicConv2d(192, 192, kernel_size = 3, stride = 1, padding = 0),
-      BasicConv2d(192, 256, kernel_size = 3, stride = 2, padding = 1)
+      BasicConv2d(192, 192, kernel_size = 3, stride = 1, padding = 1),
+      BasicConv2d(192, 256, kernel_size = 3, stride = 2, padding = 0)
     )
     self$branch2 <- nn_max_pool2d(kernel_size = 3, stride = 2)
   },
@@ -476,19 +480,23 @@ model_facenet_inception_resnet_v1 <- nn_module(
   initialize = function(
     pretrained = NULL,
     classify = FALSE,
-    num_classes = 10,
+    num_classes = NULL,
     dropout_prob = 0.6,
     ...
   ) {
 
+    # `pretrained` may be NULL/FALSE (random init), TRUE (= "vggface2"),
+    # "vggface2" or "casia-webface". Anything else is an error instead of
+    # silently falling back to random weights.
+    if (isTRUE(pretrained)) pretrained <- "vggface2"
+    if (isFALSE(pretrained)) pretrained <- NULL
     if (!is.null(pretrained)) {
-      if (pretrained == "vggface2") {
-        tmp_classes <- 8631
-      } else if (pretrained == "casia-webface") {
-        tmp_classes <- 10575
-      } else {
-        pretrained <- NULL
-      }
+      if (!is.character(pretrained) || length(pretrained) != 1 ||
+          !pretrained %in% c("vggface2", "casia-webface"))
+        cli_abort("{.arg pretrained} must be NULL, TRUE/FALSE, {.val vggface2} or {.val casia-webface}.")
+      tmp_classes <- if (pretrained == "vggface2") 8631 else 10575
+    } else if (classify && is.null(num_classes)) {
+      cli_abort("If {.arg pretrained} is not specified and {.arg classify} is TRUE, {.arg num_classes} must be specified.")
     }
 
     self$conv2d_1a <- BasicConv2d(3, 32, kernel_size = 3, stride = 2)
@@ -499,6 +507,7 @@ model_facenet_inception_resnet_v1 <- nn_module(
     self$conv2d_4a <- BasicConv2d(80, 192, kernel_size = 3, stride = 1)
     self$conv2d_4b <- BasicConv2d(192, 256, kernel_size = 3, stride = 2)
 
+    self$repeat_1 <- nn_sequential(!!!lapply(1:5, function(i) Block35(0.17)))
     self$mixed_6a <- Mixed_6a()
     self$repeat_2 <- nn_sequential(!!!lapply(1:10, function(i) Block17(0.10)))
     self$mixed_7a <- Mixed_7a()
@@ -527,6 +536,7 @@ model_facenet_inception_resnet_v1 <- nn_module(
     x <- self$conv2d_3b(x)
     x <- self$conv2d_4a(x)
     x <- self$conv2d_4b(x)
+    x <- self$repeat_1(x)
     x <- self$mixed_6a(x)
     x <- self$repeat_2(x)
     x <- self$mixed_7a(x)
