@@ -158,6 +158,10 @@
 <li>
 <code>model_inception_v3(pretrained = TRUE, aux_logits = FALSE)</code> now actually removes the auxiliary classifier. Previously <code>aux_logits = FALSE</code> was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (<a href="https://github.com/sebffisher" class="external-link">@sebffisher</a> <a href="https://github.com/mlverse/torchvision/issues/375" class="external-link">#375</a>)</li>
 <li>
+<code>model_efficientnet_*()</code> and <code>model_efficientnet_v2_*()</code> now match torchvision (SiLU squeeze-excitation, batch norm settings), apply stochastic depth in training, and accept <code>dropout</code> without shifting other arguments (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/409" class="external-link">#409</a>).</li>
+<li>
+<code>model_mobilenet_v3_*()</code> use torchvision’s batch norm settings, gain a <code>norm_layer</code> argument and stay in training mode when <code>pretrained = FALSE</code>; <code><a href="../reference/model_mobilenet_v2.html">model_mobilenet_v2()</a></code> handles stages with <code>n = 0</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/409" class="external-link">#409</a>).</li>
+<li>
 <code>model_fcn_resnet*()</code> now use a dilated backbone as in PyTorch, fixing the pretrained segmentations, and no longer download the backbone weights when <code>pretrained = TRUE</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/408" class="external-link">#408</a>).</li>
 <li>
 <code>model_deeplabv3_*()</code> keep the auxiliary classifier when <code>pretrained = TRUE</code> and <code>aux_loss = NULL</code>, as documented (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/408" class="external-link">#408</a>).</li>

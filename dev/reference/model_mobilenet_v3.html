@@ -105,14 +105,16 @@ loads quantized weights when <code>pretrained</code> is <code>TRUE</code>.</p>
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  width_mult <span class="op">=</span> <span class="fl">1</span></span>
+<span>  width_mult <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  norm_layer <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_mobilenet_v3_small</span><span class="op">(</span></span>
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  num_classes <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  width_mult <span class="op">=</span> <span class="fl">1</span></span>
+<span>  width_mult <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  norm_layer <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_mobilenet_v3_large_quantized</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -137,6 +139,11 @@ stderr.</p></dd>
 
 <dt id="arg-width-mult">width_mult<a class="anchor" aria-label="anchor" href="#arg-width-mult"></a></dt>
 <dd><p>width multiplier for model scaling (default: 1.0).</p></dd>
+
+
+<dt id="arg-norm-layer">norm_layer<a class="anchor" aria-label="anchor" href="#arg-norm-layer"></a></dt>
+<dd><p>normalization layer constructor taking the number of features.
+Defaults to batch norm with <code>eps = 1e-3, momentum = 0.01</code> as in torchvision.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
