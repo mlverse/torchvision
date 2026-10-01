@@ -174,15 +174,15 @@ cross-attention.</p>
 
 <p>The <code>forward</code> method is <code>model(images, pixel_mask = NULL)</code>, where <code>images</code> is
 an ImageNet-normalised <code>torch_tensor</code> of shape <code>(batch_size, 3, H, W)</code> with
-<code>H = W</code> divisible by 64 (recommended 640). Normalise with
+<code>H</code> and <code>W</code> divisible by 64 (recommended 640 x 640). Normalise with
 <code>mean = c(0.485, 0.456, 0.406)</code>, <code>std = c(0.229, 0.224, 0.225)</code>.</p>
-<p>For non-square images, resize the longest side to 640 keeping the aspect
-ratio, pad to 640×640, and pass a <code>pixel_mask</code> of shape <code>(batch_size, H, W)</code>
-(logical, <code>TRUE</code> over real pixels and <code>FALSE</code> over padding). The padded region
-is then excluded from attention and boxes are returned in the coordinates of
-the unpadded image. This matches the reference preprocessing and gives the best
-accuracy. When <code>pixel_mask</code> is omitted the whole frame is treated as valid,
-which is only appropriate for square, unpadded inputs.</p>
+<p>The reference evaluation resizes every image to 640×640 without keeping the
+aspect ratio. Alternatively, resize the longest side to 640, pad to 640×640
+and pass a <code>pixel_mask</code> of shape <code>(batch_size, H, W)</code> (logical, <code>TRUE</code> over
+real pixels and <code>FALSE</code> over padding), as with the reference model's padded
+<code>NestedTensor</code> input. The padded region is then excluded from attention and
+boxes are returned in the coordinates of the unpadded image. When
+<code>pixel_mask</code> is omitted the whole frame is treated as valid.</p>
     </div>
     <div id="output-format">
     <h2>Output Format</h2>
