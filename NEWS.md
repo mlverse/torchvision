@@ -73,6 +73,8 @@
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
 * `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
 * `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_facenet_pnet()`, `model_facenet_rnet()`, `model_facenet_onet()` and `model_mtcnn()` take the face softmax over the class dimension instead of the batch dimension (@sebffischer, #406).
+* `model_facenet_inception_resnet_v1()` now matches facenet-pytorch (missing `repeat_1` stage, `Mixed_6a` paddings); `pretrained = TRUE` loads `"vggface2"` and `num_classes` defaults to `NULL` (@sebffischer, #406).
 
 
 # torchvision 0.9.0
