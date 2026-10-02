@@ -33,6 +33,8 @@ navbar:
         href: articles/examples/keypoints.html
       - text: visualization-utilities
         href: articles/examples/visualization-utilities.html
+      - text: item-transforms
+        href: articles/examples/item-transforms.html
 
 reference:
 - title: Image Transforms
