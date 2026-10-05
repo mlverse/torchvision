@@ -14,6 +14,8 @@ Authors@R: c(
     person("ANAMASGARD", role = c("ctb")),
     person("Chandraveer", "Singh", role = c("ctb"),
            email = "chandraveersingh1717@gmail.com"),
+    person("Srishti", "Dutta", role = c("ctb"),
+           email = "srishti.dutta1111@gmail.com"),
     person("Posit Software, PBC", role = c("cph", "fnd"),
            comment = c(ROR = "03wc8by49"))
     )
