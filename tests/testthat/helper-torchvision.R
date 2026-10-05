@@ -86,7 +86,7 @@ expect_coco_model_detects_cat <- function(model, min_score = 0.25, size = c(640,
 
   labels_vec <- as.integer(out$detections[[1]]$labels$cpu())
   scores_vec <- as.numeric(out$detections[[1]]$scores$cpu())
-  expect_true(all(labels_vec >= 0 & labels_vec <= 90))
+  expect_true(all(labels_vec > 0 & labels_vec <= 90))
   top <- which.max(scores_vec)
   expect_equal(labels_vec[top], 17L)
   expect_gt(scores_vec[top], min_score)

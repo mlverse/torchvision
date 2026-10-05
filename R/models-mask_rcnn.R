@@ -84,176 +84,16 @@ mask_head_module_v2 <- torch::nn_module(
 )
 
 
-#' ROI Align for Mask Prediction
-#'
-#' Extracts fixed-size feature maps from regions of interest for mask prediction.
-#' Returns a 4D tensor suitable for the mask head (unlike roi_align which flattens).
-#'
-#' ROI Align for mask prediction – single FPN level
-#'
-#' This uses grid_sample for bilinear interpolation.
-#' It **expects** the proposals in *image* coordinates
-#' and applies the supplied `spatial_scale` before the ROI‑Align.
-#'
-#' @param feature_map   Tensor of shape (1, C, H, W) – one FPN level.
-#' @param proposals     Tensor of shape (N, 4) with boxes (x1, y1, x2, y2) in
-#'                       the original image coordinate system.
-#' @param output_size   integer vector of length 2, e.g. c(14L, 14L).
-#' @param spatial_scale Scaling factor between the original image and the
-#'                       feature map.  For the first FPN level (stride 4) use
-#'                       1/4, for the second level (stride 8) use 1/8, …
-#' @param sampling_ratio Integer – number of sampling points per output
-#'                       element (default = 2, the same as Torchvision).
-#' @param aligned       Logical – if TRUE uses the “aligned” mode (default FALSE).
-#'
-#' @return Tensor of shape (N, C, output_size\[1\], output_size\[2\]).
-#' @noRd
-roi_align_masks <- function(feature_map,
-                            proposals,
-                            output_size = c(14L, 14L),
-                            spatial_scale = 1.0,
-                            sampling_ratio = 2L,
-                            aligned = FALSE) {
-
-  # Scale the boxes to the feature map resolution
-  boxes_scaled <- proposals$to(dtype = torch_float())$mul(spatial_scale)
-
-  num_rois <- boxes_scaled$size(1)
-  if (num_rois == 0) {
-    return(torch_empty(c(0, feature_map$size(2), output_size[1], output_size[2]),
-                       device = feature_map$device))
-  }
-
-  channels <- feature_map$size(2)
-  h_feat <- feature_map$size(3)
-  w_feat <- feature_map$size(4)
-
-  # Normalize coordinates to match grid_sample [-1 to 1]
-  x1 <- (boxes_scaled[, 1] / (w_feat - 1) * 2) - 1
-  y1 <- (boxes_scaled[, 2] / (h_feat - 1) * 2) - 1
-  x2 <- (boxes_scaled[, 3] / (w_feat - 1) * 2) - 1
-  y2 <- (boxes_scaled[, 4] / (h_feat - 1) * 2) - 1
-
-  # Create a grid of output_size
-  grid_y <- torch_linspace(0, 1, output_size[1], device = feature_map$device)
-  grid_x <- torch_linspace(0, 1, output_size[2], device = feature_map$device)
-
-  # Meshgrid to get relative coordinates
-  grids <- torch_meshgrid(list(grid_y, grid_x), indexing = "ij")
-  rel_y <- grids[[1]]
-  rel_x <- grids[[2]]
-
-  # Linear interpolation for each ROI [N, output_size[1], output_size[2]]
-  sampling_x <- x1$view(c(-1, 1, 1)) + rel_x$view(c(1, output_size[1], output_size[2])) * (x2 - x1)$view(c(-1, 1, 1))
-  sampling_y <- y1$view(c(-1, 1, 1)) + rel_y$view(c(1, output_size[1], output_size[2])) * (y2 - y1)$view(c(-1, 1, 1))
-
-  # Clamp grid to [-1, 1] to avoid needing padding (especially for MPS compatibility)
-  sampling_x <- sampling_x$clamp(-1, 1)
-  sampling_y <- sampling_y$clamp(-1, 1)
-
-  # Concat to get a grid of [N, output_size[1], output_size[2], 2]
-  grid <- torch_stack(list(sampling_x, sampling_y), dim = -1)
-
-  # Bilinear sampling
-  # Feature map is (1, C, H, W), expand to (N, C, H, W) for all ROIs
-  input_expanded <- feature_map$squeeze(1)$unsqueeze(1)$expand(c(num_rois, channels, h_feat, w_feat))
-
-  pooled_features <- nnf_grid_sample(
-    input_expanded,
-    grid,
-    mode = "bilinear",
-    padding_mode = "zeros",
-    align_corners = FALSE
-  )
-
-  # Return [N, C, output_size[1], output_size[2]]
-  pooled_features
-}
-
-
-#' Multi‑scale ROI Align for Mask‑RCNN (FPN)
-#'
-#'
-#' @param feature_maps   List of 4 tensors, each of shape (1, C, H_l, W_l)
-#'                       – the four FPN levels P2, P3, P4, P5.
-#' @param proposals      Tensor (N, 4) – boxes in image coordinates.
-#' @param output_size    Integer vector, default c(14L, 14L).
-#' @param sampling_ratio Sampling ratio passed to the low‑level op (default 2L).
-#' @param aligned        Whether to use the aligned ROI‑Align mode (default FALSE).
-#'
-#' @return Tensor (N, C, out_h, out_w) – pooled mask features.
-#' @noRd
-roi_align_masks_fpn <- function(feature_maps,
-                                proposals,
-                                output_size = c(14L, 14L),
-                                sampling_ratio = 2L,
-                                aligned = FALSE) {
-  #  Compute the level for each ROI (FPN paper Eq. (1))
-  # width and height in original image space
-  widths  <- proposals[, 3] - proposals[, 1]
-  heights <- proposals[, 4] - proposals[, 2]
-
-  # Guard against degenerate boxes (avoid log2(0))
-  widths[widths <= 0]   <- 1
-  heights[heights <= 0] <- 1
-
-  # sqrt(area) / 224  (224 is the reference size in the paper)
-  area_sqrt <- (widths * heights)$sqrt()
-  target_level <- (torch_log2(area_sqrt / 224) + 4)$floor()   # level in {2,3,4,5}
-  target_level <- torch_clamp(target_level, min = 2, max = 5) # clamp to existing levels
-
-  # Convert from the level {2,3,4,5} to an index in feature_maps list (1‑based)
-  level_idx <- (target_level - 2L)$to(dtype = torch_long()) + 1L   # 1,2,3,4
-
-  #  Allocate output tensor
-  n_boxes   <- proposals$size(1)
-  c_channels <- feature_maps[[1]]$size(2)    # same number of channels for all levels
-  out       <- torch_zeros(c(n_boxes, c_channels,
-                             output_size[1], output_size[2]),
-                           dtype = feature_maps[[1]]$dtype,
-                           device = feature_maps[[1]]$device)
-
-  #  Loop over the four levels and pool the ROIs belonging to it
-  spatial_scales <- list(1/4, 1/8, 1/16, 1/32)   # stride of each level
-
-  for (lvl in seq_along(feature_maps)) {
-    # mask of boxes that belong to the current level
-    lvl_mask <- level_idx$eq(lvl)$squeeze()
-    idx      <- torch_nonzero(lvl_mask)$squeeze()   # indices
-
-    # Check if there are any boxes at this level
-    if (idx$numel() == 0) next
-
-    # Ensure idx is 1D for consistent indexing
-    if (idx$dim() == 0) idx <- idx$unsqueeze(1)  # scalar -> (1,)
-
-    # pick the subset of proposals that belong to this level
-    rois_lvl <- proposals[idx, , drop = FALSE]  # idx is already 1-based
-
-    # call the *single‑scale* wrapper (it adds the batch column internally)
-    pooled_lvl <- roi_align_masks(
-      feature_map   = feature_maps[[lvl]],
-      proposals     = rois_lvl,
-      output_size   = output_size,
-      spatial_scale = spatial_scales[[lvl]],
-      sampling_ratio = sampling_ratio,
-      aligned        = aligned
-    )   # shape (M, C, out_h, out_w)
-
-    # write the result back into the pre‑allocated output tensor
-    out[idx, , , ] <- pooled_lvl  # idx is already 1-based
-  }
-
-  out
-}
-
 # Mask R-CNN Model - Extends Faster R-CNN with mask prediction
 maskrcnn_model <- torch::nn_module(
   "maskrcnn_model",
     initialize = function(backbone, num_classes,
                           score_thresh = 0.05,
                           nms_thresh = 0.5,
-                          detections_per_img = 100) {
+                          detections_per_img = 100,
+                          rpn_config = NULL) {
+      # resolved here: nn_module() evaluates default arguments outside the package namespace
+      self$rpn_config <- if (is.null(rpn_config)) rcnn_resnet_rpn_config() else rpn_config
       self$backbone <- backbone
       self$num_classes <- num_classes
       # Store configurable detection parameters
@@ -282,98 +122,7 @@ maskrcnn_model <- torch::nn_module(
     },
 
     forward = function(images) {
-      features <- self$backbone(images)
-      rpn_out <- self$rpn(features)
-
-      batch_size <- images$shape[1]
-      image_size <- images$shape[3:4]
-      final_results <- vector("list", batch_size)
-
-      for (b in seq_len(batch_size)) {
-
-        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = 0,
-                                    nms_thresh = self$nms_thresh)
-
-        if (props$proposals$shape[1] == 0) {
-          empty <- list(
-            boxes = torch_empty(c(0, 4)),
-            labels = torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch_empty(c(0)),
-            masks = torch_empty(c(0, 28, 28))
-          )
-          final_results[[b]] <- empty
-          next
-        }
-
-        # Limit proposals to avoid slow ROI pooling
-        max_proposals <- 1000
-        if (props$proposals$shape[1] > max_proposals) {
-          props$proposals <- props$proposals[1:max_proposals, ]
-        }
-
-        # Get ROI head predictions
-        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
-
-        # Postprocess detections
-        det_result <- postprocess_detections(
-          class_logits = roi_out$scores,
-          box_regression = roi_out$boxes,
-          proposals = props$proposals,
-          image_size = image_size,
-          num_classes = self$num_classes,
-          score_thresh = self$score_thresh,
-          nms_thresh = self$nms_thresh,
-          detections_per_img = self$detections_per_img
-        )
-
-        final_boxes <- det_result$boxes
-        final_labels <- det_result$labels
-        final_scores <- det_result$scores
-
-        # Predict masks for detected objects
-        if (final_boxes$shape[1] > 0) {
-          # For mask prediction, we need to map final boxes back to proposals
-          # Since postprocess_detections decodes boxes, we need the original proposals
-          # that correspond to the kept detections. We'll use the final_boxes directly.
-
-          mask_features <- roi_align_masks_fpn(
-            feature_maps = features,
-            proposals    = final_boxes,
-            output_size  = c(14L, 14L),
-            sampling_ratio = 2L,
-            aligned        = FALSE
-          )
-          mask_conv <- self$mask_head(mask_features)
-          mask_logits <- self$mask_predictor(mask_conv)  # Shape: (N, num_classes, 28, 28)
-
-          # Extract masks for predicted classes
-          n_kept <- final_labels$shape[1]
-          final_masks <- torch::torch_zeros(c(n_kept, 28, 28), device = final_boxes$device)
-
-          for (i in seq_len(n_kept)) {
-            class_idx <- as.integer(final_labels[i]$item())
-            # mask_logits has channels [background, class1, ..., class90]
-            # labels are [1, 2, ..., 90], so we need to skip channel 1 (background)
-            # In 1-based R indexing: label 1 should access channel 2 (class 1)
-            final_masks[i, , ] <- mask_logits[i, class_idx + 1L, , ]
-          }
-
-          # Apply sigmoid to get probabilities
-          final_masks <- torch::torch_sigmoid(final_masks)
-
-        } else {
-          final_masks <- torch_empty(c(0, 28, 28))
-        }
-
-        final_results[[b]] <- list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores,
-          masks = final_masks
-        )
-      }
-      list(features = features, detections = final_results)
+      rcnn_forward(self, images)
     }
 )
 
@@ -384,7 +133,10 @@ maskrcnn_model_v2 <- torch::nn_module(
     initialize = function(backbone, num_classes,
                           score_thresh = 0.05,
                           nms_thresh = 0.5,
-                          detections_per_img = 100) {
+                          detections_per_img = 100,
+                          rpn_config = NULL) {
+      # resolved here: nn_module() evaluates default arguments outside the package namespace
+      self$rpn_config <- if (is.null(rpn_config)) rcnn_resnet_rpn_config() else rpn_config
       self$backbone <- backbone
       self$num_classes <- num_classes
 
@@ -412,93 +164,8 @@ maskrcnn_model_v2 <- torch::nn_module(
     },
 
     forward = function(images) {
-      features <- self$backbone(images)
-      rpn_out <- self$rpn(features)
-
-      batch_size <- images$shape[1]
-      image_size <- images$shape[3:4]
-      final_results <- vector("list", batch_size)
-
-      for (b in seq_len(batch_size)) {
-        props <- generate_proposals(features, rpn_out, image_size, c(4, 8, 16, 32),
-                                    batch_idx = b, score_thresh = 0,
-                                    nms_thresh = self$nms_thresh)
-
-        if (props$proposals$shape[1] == 0L) {
-          empty <- list(
-            boxes = torch_empty(c(0, 4)),
-            labels = torch_empty(c(0), dtype = torch::torch_long()),
-            scores = torch_empty(c(0)),
-            masks = torch_empty(c(0, 28, 28))
-          )
-          final_results[[b]] <- empty
-          next
-        }
-
-        # Limit proposals to avoid slow ROI pooling
-        max_proposals <- 1000
-        if (props$proposals$shape[1] > max_proposals) {
-          props$proposals <- props$proposals[1:max_proposals, ]
-        }
-
-        # Get ROI head predictions
-        roi_out <- self$roi_heads(features, props$proposals, batch_idx = b)
-
-        # Postprocess detections
-        det_result <- postprocess_detections(
-          class_logits = roi_out$scores,
-          box_regression = roi_out$boxes,
-          proposals = props$proposals,
-          image_size = image_size,
-          num_classes = self$num_classes,
-          score_thresh = self$score_thresh,
-          nms_thresh = self$nms_thresh,
-          detections_per_img = self$detections_per_img
-        )
-
-        final_boxes <- det_result$boxes
-        final_labels <- det_result$labels
-        final_scores <- det_result$scores
-
-        # Predict masks for detected objects
-        if (final_boxes$shape[1] > 0) {
-          mask_features <- roi_align_masks_fpn(
-            feature_maps = features,
-            proposals    = final_boxes,
-            output_size  = c(14L, 14L),
-            sampling_ratio = 2L,
-            aligned        = FALSE
-          )
-          mask_logits <- self$mask_head(mask_features)  # (N, num_classes, 28, 28)
-
-          # Extract masks for predicted classes
-          n_kept <- final_labels$shape[1]
-          final_masks <- torch::torch_zeros(c(n_kept, 28, 28), device = final_boxes$device)
-
-          for (i in seq_len(n_kept)) {
-            class_idx <- as.integer(final_labels[i]$item())
-            # mask_logits has channels [background, class1, ..., class90]
-            # labels are [1, 2, ..., 90], so we need to skip channel 1 (background)
-            # In 1-based R indexing: label 1 should access channel 2 (class 1)
-            final_masks[i, , ] <- mask_logits[i, class_idx + 1L, , ]
-          }
-
-          # Apply sigmoid to get probabilities
-          final_masks <- torch::torch_sigmoid(final_masks)
-
-        } else {
-          final_masks <- torch_empty(c(0, 28, 28))
-        }
-
-        final_results[[b]] <- list(
-          boxes = final_boxes,
-          labels = final_labels,
-          scores = final_scores,
-          masks = final_masks
-        )
+      rcnn_forward(self, images)
     }
-  list(features = features, detections = final_results)
-  }
 )
 
 
@@ -533,7 +200,8 @@ maskrcnn_model_v2 <- torch::nn_module(
 #'       \item `boxes`: Bounding boxes (N, 4)
 #'       \item `labels`: Class labels (N)
 #'       \item `scores`: Confidence scores (N)
-#'       \item `masks`: Segmentation masks (N, 28, 28)
+#'       \item `masks`: Mask probabilities pasted into the image, (N, H, W)
+#'       \item `mask_probs`: Mask probabilities in the box frame, (N, 28, 28)
 #'     }
 #' }
 #'
@@ -600,7 +268,7 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
                                         nms_thresh = 0.5,
                                         detections_per_img = 100,
                                         ...) {
-  backbone <- resnet_fpn_backbone(pretrained = pretrained)
+  backbone <- resnet_fpn_backbone(pretrained = pretrained, progress = progress)
   model <- maskrcnn_model(backbone, num_classes = num_classes,
                          score_thresh = score_thresh,
                          nms_thresh = nms_thresh,
@@ -613,14 +281,14 @@ model_maskrcnn_resnet50_fpn <- function(pretrained = FALSE, progress = TRUE,
     r <- mask_rcnn_model_urls$maskrcnn_resnet50
     name <- "maskrcnn_resnet50_fpn"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn", progress = progress)
 
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
 
     state_dict <- torch::load_state_dict(state_dict_path)
-    model$load_state_dict(.rename_maskrcnn_state_dict(state_dict), strict = FALSE)
+    .load_rcnn_state_dict(model, .rename_maskrcnn_state_dict(state_dict))
   }
 
   model
@@ -634,7 +302,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
                                            nms_thresh = 0.5,
                                            detections_per_img = 100,
                                            ...) {
-  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained)
+  backbone <- resnet_fpn_backbone_v2(pretrained = pretrained, progress = progress)
   model <- maskrcnn_model_v2(backbone, num_classes = num_classes,
                             score_thresh = score_thresh,
                             nms_thresh = nms_thresh,
@@ -647,7 +315,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
     r <- mask_rcnn_model_urls$maskrcnn_resnet50_v2
     name <- "maskrcnn_resnet50_fpn_v2"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn")
+    state_dict_path <- download_and_cache(r[1], prefix = "maskrcnn", progress = progress)
 
     if (!tools::md5sum(state_dict_path) == r[2]) {
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
@@ -658,22 +326,7 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
     # Rename state dict keys to match model structure
     state_dict <- .rename_maskrcnn_state_dict_v2(state_dict)
 
-    # Load with flexible matching (similar to fasterrcnn_v2)
-    model_state <- model$state_dict()
-    state_dict <- state_dict[names(state_dict) %in% names(model_state)]
-    for (n in names(state_dict)) {
-      if (!all(state_dict[[n]]$size() == model_state[[n]]$size())) {
-        state_dict[[n]] <- model_state[[n]]
-      }
-    }
-    missing <- setdiff(names(model_state), names(state_dict))
-    if (length(missing) > 0) {
-      for (n in missing) {
-        state_dict[[n]] <- model_state[[n]]
-      }
-    }
-
-    model$load_state_dict(state_dict, strict = TRUE)
+    .load_rcnn_state_dict(model, state_dict)
   }
 
   model
@@ -700,7 +353,6 @@ model_maskrcnn_resnet50_fpn_v2 <- function(pretrained = FALSE, progress = TRUE,
   new_names <- names(state_dict) %>%
     # change roi_head prefix into mask_head.mask_
     sub(pattern = "roi_heads\\.mask_", replacement = "mask_head\\.mask_", x = .) %>%
-    sub(pattern = "roi_heads\\.box_head\\.5\\.", replacement = "roi_heads\\.box_head\\.4\\.", x = .) %>%
     sub(pattern = "(mask_head\\.mask_predictor\\.conv5_mask)", replacement = "\\1\\.0", x = .)
 
   # Recreate a list with renamed keys

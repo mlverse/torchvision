@@ -42,50 +42,36 @@ nms <- function(boxes, scores, iou_threshold) {
 
 #' @noRd
 .nms_r <- function(boxes, scores, iou_threshold) {
-  # Handle empty inputs gracefully
-
+  # Greedy NMS with the torchvision CPU kernel semantics: boxes sorted by decreasing
+  # score, a box is suppressed if IoU > iou_threshold with an already kept box.
   n_boxes <- boxes$shape[1]
   if (n_boxes == 0) {
     return(torch_empty(0L, dtype = torch::torch_long(), device = boxes$device))
   }
-
-  # Sort scores in descending order
-  sort_result <- scores$sort(descending = TRUE)
-  order <- sort_result[[2]]
-  sorted_boxes <- boxes[order, ]
-
-  # Pre-allocate keep list for efficiency
-
-  keep <- vector("integer", n_boxes)
-  keep[1] <- 1L
-  n_keep <- 1L
-
-  # Handle single box case
-  if (n_boxes == 1) {
-    return(order[1:1])
-  }
-
-  for (i in 2:n_boxes) {
-    # Get current box - use unsqueeze to ensure 2D tensor [1, 4]
-    current_box <- sorted_boxes[i, ]$unsqueeze(1)
-
-    # Get all kept boxes so far
-    kept_indices <- keep[1:n_keep]
-    kept_boxes <- sorted_boxes[kept_indices, , drop = FALSE]
-
-    # Compute IoU with all kept boxes
-    iou <- box_iou(kept_boxes, current_box)
-
-    # Check if the current box has IoU <= iou_threshold with all kept boxes
-    if (all(as.logical(iou <= iou_threshold))) {
+  order <- scores$sort(descending = TRUE)[[2]]
+  if (n_boxes == 1) return(order)
+  sorted_boxes <- boxes$index_select(1, order)
+  removed <- logical(n_boxes)
+  keep <- integer(n_boxes)
+  n_keep <- 0L
+  block <- 2048L
+  for (start in seq(1L, n_boxes, by = block)) {
+    rows <- start:min(start + block - 1L, n_boxes)
+    if (all(removed[rows])) next
+    # suppression matrix of this block of rows against the boxes that follow them
+    cols <- start:n_boxes
+    sup <- as.array((box_iou(sorted_boxes[rows, , drop = FALSE],
+                             sorted_boxes[cols, , drop = FALSE]) > iou_threshold)$cpu())
+    sup <- matrix(sup, nrow = length(rows))
+    for (r in seq_along(rows)) {
+      i <- rows[r]
+      if (removed[i]) next
       n_keep <- n_keep + 1L
       keep[n_keep] <- i
+      removed[cols] <- removed[cols] | sup[r, ]
     }
   }
-
-  # Return indices in original order
-  kept_indices <- keep[1:n_keep]
-  return(order[kept_indices])
+  order[keep[seq_len(n_keep)]]
 }
 
 
@@ -123,15 +109,27 @@ batched_nms <- function(
   # only on the class idx, and is large enough so that boxes
   # from different classes do not overlap
 
-    if(boxes$numel() == 0) {
-      return(torch_empty(0, dtype=torch::torch_int64(), device = boxes_device))
-    } else {
-      max_coordinate <- boxes$max()
-      offsets <- idxs$to(device = boxes_device, dtype = boxes_dtype) * (max_coordinate + torch::torch_tensor(1)$to(device = boxes_device, dtype = boxes_dtype))
-      boxes_for_nms <- boxes + offsets[, NULL]
-      keep <- nms(boxes_for_nms, scores, iou_threshold)
-      return(keep)
+  if (boxes$numel() == 0) {
+    return(torch_empty(0, dtype = torch::torch_int64(), device = boxes_device))
+  }
+  if (boxes$numel() > 4000) {
+    # torchvision `_batched_nms_vanilla`: NMS per category, then sort by score
+    keep_mask <- torch::torch_zeros_like(scores, dtype = torch::torch_bool())
+    for (class_id in unique(as.numeric(idxs$cpu()))) {
+      curr <- torch::torch_where(idxs == class_id)[[1]]
+      curr_keep <- nms(boxes$index_select(1, curr), scores$index_select(1, curr), iou_threshold)
+      keep_mask[curr$index_select(1, curr_keep)] <- TRUE
     }
+    keep <- torch::torch_where(keep_mask)[[1]]
+    return(keep$index_select(1, scores$index_select(1, keep)$sort(descending = TRUE)[[2]]))
+  }
+  # torchvision `_batched_nms_coordinate_trick`: offset boxes per category so that
+  # boxes of different categories do not overlap
+  max_coordinate <- boxes$max()
+  offsets <- idxs$to(device = boxes_device, dtype = boxes_dtype) *
+    (max_coordinate + torch::torch_tensor(1)$to(device = boxes_device, dtype = boxes_dtype))
+  boxes_for_nms <- boxes + offsets[, NULL]
+  nms(boxes_for_nms, scores, iou_threshold)
 }
 
 #' Remove Small Boxes
@@ -170,8 +168,9 @@ remove_small_boxes <- function(boxes, min_size) {
 #' @export
 clip_boxes_to_image <- function(boxes, size) {
   dim <- boxes$dim()
-  boxes_x <- boxes[.., seq(1, boxes$shape[2], 2)]
-  boxes_y <- boxes[.., seq(2, boxes$shape[2], 2)]
+  n_coord <- boxes$shape[dim]
+  boxes_x <- boxes[.., seq(1, n_coord, 2)]
+  boxes_y <- boxes[.., seq(2, n_coord, 2)]
   c(height, width) %<-% size
 
   # if(torchvision$_is_tracing()) {

@@ -23,7 +23,8 @@ lw_detr_channel_layer_norm <- nn_module(
 # Sinusoidal embedding for 4D reference points
 lw_detr_gen_sineembed <- function(pos, dim = 128L) {
   scale <- 2 * pi
-  dim_t <- torch_arange(dim, dtype = torch_float32(), device = pos$device)
+  # R's torch_arange() includes `end`, so 0..(dim - 1) matches torch.arange(dim)
+  dim_t <- torch_arange(0, dim - 1L, dtype = torch_float32(), device = pos$device)
   dim_t <- 10000^(2 * torch_div(dim_t, 2L, rounding_mode = "floor") / dim)
 
   coords <- vector("list", pos$size(-1))
@@ -226,24 +227,27 @@ lw_detr_gen_proposals <- function(spatial_shapes, masks, bs, device) {
 
 # ConvX
 .lw_detr_conv_x <- nn_module(
-  initialize = function(in_ch, out_ch, kernel = 3L, stride = 1L) {
+  initialize = function(in_ch, out_ch, kernel = 3L, stride = 1L, act = "silu") {
     pad <- kernel %/% 2L
     self$conv <- nn_conv2d(in_ch, out_ch, kernel, stride = stride, padding = pad, bias = FALSE)
     self$norm <- nn_batch_norm2d(out_ch)
+    self$act <- act
   },
   forward = function(x) {
-    nnf_silu(self$norm(self$conv(x)))
+    x <- self$norm(self$conv(x))
+    if (self$act == "relu") nnf_relu(x) else nnf_silu(x)
   }
 )
 
-# Bottleneck
+# Bottleneck. The reference C2f builds its bottlenecks with shortcut = FALSE,
+# so there is no residual connection here.
 .lw_detr_bottleneck <- nn_module(
   initialize = function(c) {
     self$conv1 <- .lw_detr_conv_x(c, c, 3L)
     self$conv2 <- .lw_detr_conv_x(c, c, 3L)
   },
   forward = function(x) {
-    x + self$conv2(self$conv1(x))
+    self$conv2(self$conv1(x))
   }
 )
 
@@ -647,11 +651,14 @@ detr_mlp_layer <- nn_module(
     out_proposals <- lw_detr_gen_proposals(spatial_shapes, masks_lvl, bs, device)
     prop_valid <- ((out_proposals > 0.01) & (out_proposals < 0.99))$all(-1L)
     invalid_mask <- (mask_flat$logical_not() | prop_valid$logical_not())$unsqueeze(-1L)
+    # As in the reference gen_encoder_output_proposals(): padded / invalid
+    # positions get a zero proposal and zero memory *before* enc_output.
+    out_proposals <- out_proposals$masked_fill(invalid_mask, 0)
+    out_mem <- memory$masked_fill(invalid_mask, 0)
 
-    out_mem_g0 <- self$enc_output_norm[[1]](self$enc_output[[1]](memory))
-    out_mem_g0 <- out_mem_g0$masked_fill(invalid_mask, 0)
+    out_mem_g0 <- self$enc_output_norm[[1]](self$enc_output[[1]](out_mem))
 
-    cls_g0 <- self$enc_out_class_embed[[1]](out_mem_g0)$masked_fill(invalid_mask, -Inf)
+    cls_g0 <- self$enc_out_class_embed[[1]](out_mem_g0)
     bbox_g0 <- self$enc_out_bbox_embed[[1]](out_mem_g0)
 
     enc_cxcy <- bbox_g0[,, 1:2] * out_proposals[,, 3:4] + out_proposals[,, 1:2]
@@ -821,7 +828,8 @@ lw_detr_model <- nn_module(
     } else if (scale == 0.5) {
       total_in <- n_features * embed_dim
       ops <- lapply(seq_len(n_features), function(j) {
-        .lw_detr_conv_x(embed_dim, embed_dim, 3L, stride = 2L)
+        # reference: ConvX(in_dim, in_dim, 3, 2) with its default act = "relu"
+        .lw_detr_conv_x(embed_dim, embed_dim, 3L, stride = 2L, act = "relu")
       })
       .lw_detr_scale_layer(total_in, out_channels, n_blocks, sampling_ops = ops)
     } else {
@@ -873,7 +881,8 @@ lw_detr_model <- nn_module(
   num_classes,
   num_select,
   pretrained,
-  model_key
+  model_key,
+  progress = TRUE
 ) {
   n_features <- length(out_feature_indexes)
   n_levels <- length(projector_scales)
@@ -912,7 +921,7 @@ lw_detr_model <- nn_module(
 
     r <- .lw_detr_model_urls[[model_key]]
     cli::cli_inform("Downloading LW-DETR weights ({r[3]})...")
-    state_dict_path <- download_and_cache(r[1], prefix = "lw_detr")
+    state_dict_path <- download_and_cache(r[1], prefix = "lw_detr", progress = progress)
     state_dict <- load_state_dict(state_dict_path)
     model$load_state_dict(state_dict, strict = FALSE)
   }
@@ -937,16 +946,16 @@ lw_detr_model <- nn_module(
 #' @section Input Format:
 #' The `forward` method is `model(images, pixel_mask = NULL)`, where `images` is
 #' an ImageNet-normalised `torch_tensor` of shape `(batch_size, 3, H, W)` with
-#' `H = W` divisible by 64 (recommended 640). Normalise with
+#' `H` and `W` divisible by 64 (recommended 640 x 640). Normalise with
 #' `mean = c(0.485, 0.456, 0.406)`, `std = c(0.229, 0.224, 0.225)`.
 #'
-#' For non-square images, resize the longest side to 640 keeping the aspect
-#' ratio, pad to 640×640, and pass a `pixel_mask` of shape `(batch_size, H, W)`
-#' (logical, `TRUE` over real pixels and `FALSE` over padding). The padded region
-#' is then excluded from attention and boxes are returned in the coordinates of
-#' the unpadded image. This matches the reference preprocessing and gives the best
-#' accuracy. When `pixel_mask` is omitted the whole frame is treated as valid,
-#' which is only appropriate for square, unpadded inputs.
+#' The reference evaluation resizes every image to 640×640 without keeping the
+#' aspect ratio. Alternatively, resize the longest side to 640, pad to 640×640
+#' and pass a `pixel_mask` of shape `(batch_size, H, W)` (logical, `TRUE` over
+#' real pixels and `FALSE` over padding), as with the reference model's padded
+#' `NestedTensor` input. The padded region is then excluded from attention and
+#' boxes are returned in the coordinates of the unpadded image. When
+#' `pixel_mask` is omitted the whole frame is treated as valid.
 #'
 #' @section Output Format:
 #' Returns a list with element `detections`: a list (one per image) of
@@ -1024,7 +1033,8 @@ model_lw_detr_tiny <- function(pretrained = FALSE, progress = TRUE, num_classes 
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_tiny"
+    model_key = "lw_detr_coco_tiny",
+    progress = progress
   )
 }
 
@@ -1048,7 +1058,8 @@ model_lw_detr_small <- function(pretrained = FALSE, progress = TRUE, num_classes
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_small"
+    model_key = "lw_detr_coco_small",
+    progress = progress
   )
 }
 
@@ -1072,7 +1083,8 @@ model_lw_detr_medium <- function(pretrained = FALSE, progress = TRUE, num_classe
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_medium"
+    model_key = "lw_detr_coco_medium",
+    progress = progress
   )
 }
 
@@ -1096,6 +1108,7 @@ model_lw_detr_large <- function(pretrained = FALSE, progress = TRUE, num_classes
     num_classes = num_classes,
     num_select = num_select,
     pretrained = pretrained,
-    model_key = "lw_detr_coco_large"
+    model_key = "lw_detr_coco_large",
+    progress = progress
   )
 }

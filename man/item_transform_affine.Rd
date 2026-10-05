@@ -66,7 +66,7 @@ img <- base_loader(url) |> transform_to_tensor()
 
 boxes <- torch_tensor(matrix(c(600, 200, 2880, 1860), ncol = 4), dtype = torch_float32())
 
-before <- list(x = img, y = list(boxes = boxes, labels = {"CAT"},
+before <- list(x = img, y = list(boxes = boxes, labels = "cat",
                                   image_height = img$shape[2], image_width = img$shape[3]))
 class(before) <- c("image_with_bounding_box", "list")
 

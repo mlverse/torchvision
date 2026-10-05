@@ -77,7 +77,8 @@ Returns a list with:
 \item \code{boxes}: Bounding boxes (N, 4)
 \item \code{labels}: Class labels (N)
 \item \code{scores}: Confidence scores (N)
-\item \code{masks}: Segmentation masks (N, 28, 28)
+\item \code{masks}: Mask probabilities pasted into the image, (N, H, W)
+\item \code{mask_probs}: Mask probabilities in the box frame, (N, 28, 28)
 }
 }
 }

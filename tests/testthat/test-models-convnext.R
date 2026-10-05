@@ -108,7 +108,7 @@ test_that("pretrained model_convnext_*_22k works", {
   input <- torch_randn(2, 3, 224, 224)
   model_1k$eval()
   out <- model_1k(input)
-  expect_tensor_shape(out, c(2, 21841))
+  expect_tensor_shape(out, c(2, 1000))
 
   expect_no_error(
     model_22k <- model_convnext_base_22k(pretrained = TRUE)

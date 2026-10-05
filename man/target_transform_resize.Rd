@@ -21,7 +21,7 @@ at least:
 
 \item{size}{Desired output size. If \code{size} is a integer vector of length 2
 like \code{c(h, w)}, output size will be matched to this. If \code{size} is a bare integer,
-smaller edge of the image will be matched to this number.
+longest edge of the image will be matched to this number.
 i.e, if height > width, then image will be rescaled to
 \verb{(size * height / width, size)}.}
 }

@@ -14,7 +14,8 @@
 #' @inheritParams model_resnet18
 #' @param num_classes Number of output classes. Default: 21.
 #' @param aux_loss If TRUE, includes the auxiliary classifier. If NULL, defaults to TRUE when `pretrained = TRUE`.
-#' @param pretrained_backbone If TRUE, uses a backbone pre-trained on ImageNet.
+#' @param pretrained_backbone If TRUE and `pretrained = FALSE`, uses a backbone pre-trained on ImageNet.
+#'   Ignored when `pretrained = TRUE`.
 #' @param ... Additional arguments passed to the backbone implementation.
 #'
 #' @details Pretrained weights require \code{num_classes = 21}.
@@ -152,13 +153,15 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
     cli_abort("Pretrained weights require num_classes = 21.")
 
   backbone <- fcn_backbone(bottleneck, c(3, 4, 6, 3),
-                           replace_stride_with_dilation = c(FALSE, FALSE, FALSE),
+                           replace_stride_with_dilation = c(FALSE, TRUE, TRUE),
                            ...)
 
-  if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls[["resnet50"]][1], prefix = "fcn")
+  # backbone weights are only needed when the full model is not loaded afterwards
+  # (the ImageNet `fc.*` keys are ignored by load_state_dict)
+  if (pretrained_backbone && !pretrained) {
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet50"]][1], prefix = "fcn", progress = progress)
     state_dict <- torch::load_state_dict(state_dict_path)
-    backbone$load_state_dict(state_dict, strict = FALSE)
+    backbone$load_state_dict(state_dict)
   }
 
   classifier <- fcn_head(backbone$out_channels, 512, num_classes)
@@ -170,20 +173,14 @@ model_fcn_resnet50 <- function(pretrained = FALSE, progress = TRUE, num_classes 
     r <- fcn_model_urls$fcn_resnet50_coco
     name <- "model_fcn_resnet50"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fcn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fcn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-
-
-    if (num_classes != 21) {
-      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
-      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
-    }
-
-    strict_loading <- num_classes == 21 && aux_loss
-    model$load_state_dict(state_dict, strict = strict_loading)
+    # torch's load_state_dict has no `strict` argument: missing keys always error and
+    # unexpected keys (e.g. aux_classifier.* when aux_loss = FALSE) are ignored.
+    model$load_state_dict(state_dict)
   }
 
   model
@@ -200,13 +197,15 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
     cli_abort("Pretrained weights require num_classes = 21.")
 
   backbone <- fcn_backbone(bottleneck, c(3, 4, 23, 3),
-                           replace_stride_with_dilation = c(FALSE, FALSE, FALSE),
+                           replace_stride_with_dilation = c(FALSE, TRUE, TRUE),
                            ...)
 
-  if (pretrained_backbone) {
-    state_dict_path <- download_and_cache(resnet_model_urls[["resnet101"]][1], prefix = "fcn")
+  # backbone weights are only needed when the full model is not loaded afterwards
+  # (the ImageNet `fc.*` keys are ignored by load_state_dict)
+  if (pretrained_backbone && !pretrained) {
+    state_dict_path <- download_and_cache(resnet_model_urls[["resnet101"]][1], prefix = "fcn", progress = progress)
     state_dict <- torch::load_state_dict(state_dict_path)
-    backbone$load_state_dict(state_dict, strict = FALSE)
+    backbone$load_state_dict(state_dict)
   }
 
   classifier <- fcn_head(backbone$out_channels, 512, num_classes)
@@ -218,20 +217,14 @@ model_fcn_resnet101 <- function(pretrained = FALSE, progress = TRUE, num_classes
     r <- fcn_model_urls$fcn_resnet101_coco
     name <- "model_fcn_resnet101"
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1], prefix = "fcn")
+    state_dict_path <- download_and_cache(r[1], prefix = "fcn", progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2]) {
         runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
     }
     state_dict <- torch::load_state_dict(state_dict_path)
-
-
-    if (num_classes != 21) {
-      state_dict <- state_dict[!grepl("^classifier\\.4\\.", names(state_dict))]
-      state_dict <- state_dict[!grepl("^aux_classifier\\.4\\.", names(state_dict))]
-    }
-
-    strict_loading <- num_classes == 21 && aux_loss
-    model$load_state_dict(state_dict, strict = strict_loading)
+    # torch's load_state_dict has no `strict` argument: missing keys always error and
+    # unexpected keys (e.g. aux_classifier.* when aux_loss = FALSE) are ignored.
+    model$load_state_dict(state_dict)
   }
 
   model

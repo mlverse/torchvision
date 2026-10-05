@@ -55,9 +55,9 @@ load_vit_torchscript_model <- function(name, ...) {
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_1\\.", "blocks.\\1.norm1.", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.self_attention\\.", "blocks.\\1.attn.", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.ln_2\\.", "blocks.\\1.norm2.", names(state_dict))
-  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_1\\.", "blocks.\\1.mlp.0.", names(state_dict))
-  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.linear_2\\.", "blocks.\\1.mlp.3.", names(state_dict))
-  names(state_dict) <- gsub("^encoder\\.pos_embedding", "encoder.pos_embedding", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.(linear_1|0)\\.", "blocks.\\1.mlp.0.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.layers\\.encoder_layer_(\\d+)\\.mlp\\.(linear_2|3)\\.", "blocks.\\1.mlp.3.", names(state_dict))
+  names(state_dict) <- gsub("^encoder\\.pos_embedding", "pos_embedding", names(state_dict))
   names(state_dict) <- gsub("^encoder\\.ln\\.", "norm.", names(state_dict))
   names(state_dict) <- gsub("^heads\\.head\\.", "head.", names(state_dict))
 
@@ -96,19 +96,19 @@ model_vit_b_32 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_b_32", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-L/16 model (Base, 16×16 patch size)
+#' @describeIn model_vit ViT-L/16 model (Large, 16×16 patch size)
 #' @export
 model_vit_l_16 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_l_16", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-L/32 model (Base, 32×32 patch size)
+#' @describeIn model_vit ViT-L/32 model (Large, 32×32 patch size)
 #' @export
 model_vit_l_32 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_l_32", pretrained, progress, ...)
 }
 
-#' @describeIn model_vit ViT-H/14 model (Base, 14×14 patch size)
+#' @describeIn model_vit ViT-H/14 model (Huge, 14×14 patch size)
 #' @export
 model_vit_h_14 <- function(pretrained = FALSE, progress = TRUE, ...) {
   model_vit_base("vit_h_14", pretrained, progress, ...)
@@ -133,7 +133,7 @@ vit_model <- torch::nn_module(
     num_patches <- self$patch_embed$num_patches
 
     self$class_token <- nn_parameter(torch_zeros(1, 1, embed_dim))
-    self$encoder$pos_embedding <- nn_parameter(torch_zeros(1, num_patches + 1, embed_dim))
+    self$pos_embedding <- nn_parameter(torch_zeros(1, num_patches + 1, embed_dim))
     self$pos_drop <- nn_dropout(p = dropout)
 
     self$blocks <- torch::nn_module_list(
@@ -142,7 +142,7 @@ vit_model <- torch::nn_module(
       })
     )
 
-    self$norm <- nn_layer_norm(embed_dim)
+    self$norm <- nn_layer_norm(embed_dim, eps = 1e-6)
 
     self$head <- if (is.null(num_classes) || num_classes == 0) {
       nn_identity()
@@ -154,7 +154,7 @@ vit_model <- torch::nn_module(
   },
 
   init_weights = function() {
-    nn_init_trunc_normal_(self$encoder$pos_embedding, std = 0.02)
+    nn_init_trunc_normal_(self$pos_embedding, std = 0.02)
     nn_init_trunc_normal_(self$class_token, std = 0.02)
     for (m in self$modules) {
       if (inherits(m, "nn_linear")) {
@@ -179,7 +179,7 @@ vit_model <- torch::nn_module(
 
     cls_tokens <- self$class_token$expand(c(B, -1, -1))
     x <- torch_cat(list(cls_tokens, x), dim = 2)
-    x <- x + self$encoder$pos_embedding
+    x <- x + self$pos_embedding
     x <- self$pos_drop(x)
 
     for (i in seq_along(self$blocks)) {
@@ -226,9 +226,10 @@ encoder_block <- torch::nn_module(
     dropout = 0.0
   ) {
 
-    self$norm1 <- nn_layer_norm(embed_dim)
-    self$attn <- nn_multihead_attention(embed_dim, num_heads, bias = qkv_bias, dropout = dropout)
-    self$norm2 <- nn_layer_norm(embed_dim)
+    self$norm1 <- nn_layer_norm(embed_dim, eps = 1e-6)
+    self$attn <- nn_multihead_attention(embed_dim, num_heads, bias = qkv_bias, dropout = dropout,
+      batch_first = TRUE)
+    self$norm2 <- nn_layer_norm(embed_dim, eps = 1e-6)
     self$mlp <- nn_sequential(
       nn_linear(embed_dim, as.integer(embed_dim * mlp_ratio)),
       nn_gelu(),
@@ -239,7 +240,8 @@ encoder_block <- torch::nn_module(
   },
 
   forward = function(x) {
-    x <- x + self$attn(self$norm1(x), self$norm1(x), self$norm1(x))[[1]]
+    y <- self$norm1(x)
+    x <- x + self$attn(y, y, y, need_weights = FALSE)[[1]]
     x <- x + self$mlp(self$norm2(x))
     return(x)
   }

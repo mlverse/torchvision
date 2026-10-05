@@ -13,17 +13,21 @@
 #' | Variant   | Backbone           | Decoder Layers | Resolution | # Queries | Group DETR | Weights                     |
 #' |-----------|--------------------|----------------|------------|-----------|------------|-----------------------------|
 #' | nano      | DINOv2 Small (win) | 2              | 384        | 300       | 13         | COCO (91 classes)           |
-#' | small     | DINOv2 Small (win) | 2              | 512        | 300       | 13         | COCO (91 classes)           |
-#' | medium    | DINOv2 Small (win) | 2              | 640        | 300       | 13         | COCO (91 classes)           |
-#' | base      | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes)           |
-#' | base_2    | DINOv2 Small (win) | 3              | 640        | 300       | 13         | COCO (91 classes, alt run)  |
-#' | base_o365 | DINOv2 Small (win) | 3              | 640        | 300       | 13         | Objects365 (366 classes)    |
+#' | small     | DINOv2 Small (win) | 3              | 512        | 300       | 13         | COCO (91 classes)           |
+#' | medium    | DINOv2 Small (win) | 4              | 576        | 300       | 13         | COCO (91 classes)           |
+#' | base      | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes)           |
+#' | base_2    | DINOv2 Small (win) | 3              | 560        | 300       | 13         | COCO (91 classes, alt run)  |
+#' | base_o365 | DINOv2 Small (win) | 3              | 560        | 300       | 13         | Objects365 (366 classes)    |
 #' | large     | DINOv2 Base (win)  | 3              | 560        | 300       | 13         | COCO (91 classes)           |
 #' ```
 #' - All models use group DETR (group_detr=13) with two-stage query proposal,
 #'   Lite Refpoint Refine, and BBox reparameterisation.
 #' - The `large` variant corresponds to the deprecated RF-DETR-Large config
 #'   (DINOv2 Base encoder, hidden_dim=384).
+#' - `model(x, mask = NULL)` expects ImageNet-normalised images `(B, 3, H, W)`,
+#'   which are resized to the variant resolution in eval mode. The optional
+#'   `mask` `(B, H, W)` is `TRUE` on padded pixels; boxes are then returned in
+#'   the coordinates of the unpadded image.
 #'
 #' @inheritParams model_mobilenet_v2
 #'
@@ -36,12 +40,15 @@
 #' url <- "https://upload.wikimedia.org/wikipedia/commons/6/6f/Toy_Poodle_wearing_clothes_in_Tokyo.jpg"
 #' img <- base_loader(url) %>%
 #'   transform_to_tensor()
+#' # the model expects ImageNet-normalised input, as in the reference predict()
+#' input <- img %>%
+#'   transform_normalize(c(0.485, 0.456, 0.406), c(0.229, 0.224, 0.225))
 #'
 #' model <- model_rfdetr_large(pretrained = TRUE)
 #' model$eval()
 #'
 #' pred <- torch::with_no_grad(
-#'   model(img$unsqueeze(1))
+#'   model(input$unsqueeze(1))
 #' )$detections[[1]]
 #'
 #' topk <- pred$scores$topk(k = 5L)[[2]]
@@ -82,6 +89,39 @@ dinov2_patch_embeddings <- nn_module(
   }
 )
 
+# Bicubic resize with antialias = TRUE, as torch.nn.functional.interpolate(...,
+# mode = "bicubic", antialias = TRUE, align_corners = FALSE), which the reference
+# uses for the DINOv2 position embeddings. Its kernel (a = -0.5, PIL style) differs
+# from plain bicubic (a = -0.75) even when upsampling, and R torch does not export
+# the antialiased kernel, so it is built here as separable interpolation matrices.
+rfdetr_aa_bicubic_weights <- function(in_size, out_size) {
+  scale <- in_size / out_size
+  support <- if (scale >= 1) 2 * scale else 2
+  invscale <- if (scale >= 1) 1 / scale else 1
+  filt <- function(x) {
+    a <- -0.5
+    x <- abs(x)
+    ifelse(x < 1, ((a + 2) * x - (a + 3)) * x * x + 1,
+           ifelse(x < 2, (((x - 5) * x + 8) * x - 4) * a, 0))
+  }
+  w <- matrix(0, out_size, in_size)
+  for (i in seq_len(out_size)) {
+    center <- scale * (i - 0.5)
+    xmin <- max(as.integer(center - support + 0.5), 0L)
+    xmax <- min(as.integer(center + support + 0.5), in_size)
+    j <- seq.int(xmin, length.out = xmax - xmin)
+    wj <- filt((j - center + 0.5) * invscale)
+    w[i, j + 1L] <- wj / sum(wj)
+  }
+  w
+}
+
+rfdetr_interpolate_bicubic_aa <- function(x, size) {
+  wh <- torch_tensor(rfdetr_aa_bicubic_weights(x$size(3), size[1]), dtype = x$dtype, device = x$device)
+  ww <- torch_tensor(rfdetr_aa_bicubic_weights(x$size(4), size[2]), dtype = x$dtype, device = x$device)
+  torch_matmul(torch_matmul(wh, x), ww$t())
+}
+
 windowed_dinov2_embeddings <- nn_module(
   "windowed_dinov2_embeddings",
   initialize = function(config) {
@@ -116,11 +156,9 @@ windowed_dinov2_embeddings <- nn_module(
     patch_pos_embed <- patch_pos_embed$reshape(c(1, sqrt_n, sqrt_n, dim))
     patch_pos_embed <- patch_pos_embed$permute(c(1, 4, 2, 3))
     target_dtype <- patch_pos_embed$dtype
-    patch_pos_embed <- nnf_interpolate(
+    patch_pos_embed <- rfdetr_interpolate_bicubic_aa(
       patch_pos_embed$to(dtype = torch_float32()),
-      size = c(h, w),
-      mode = "bicubic",
-      align_corners = FALSE
+      size = c(h, w)
     )$to(dtype = target_dtype)
     patch_pos_embed <- patch_pos_embed$permute(c(1, 3, 4, 2))$reshape(c(1, -1, dim))
     torch_cat(list(class_pos_embed$unsqueeze(1), patch_pos_embed), dim = 2)
@@ -491,7 +529,8 @@ multiscale_projector <- nn_module(
           )
         } else if (scale == 0.5) {
           level_modules[[j]] <- nn_sequential(
-            convx(in_dim, in_dim, kernel = 3, stride = 2, act = "silu", layer_norm = layer_norm)
+            # reference: ConvX(in_dim, in_dim, 3, 2, layer_norm=layer_norm), default act = "relu"
+            convx(in_dim, in_dim, kernel = 3, stride = 2, act = "relu", layer_norm = layer_norm)
           )
         } else {
           level_modules[[j]] <- nn_sequential(nn_identity())
@@ -658,15 +697,8 @@ rfdetr_backbone <- nn_module(
       x <- nnf_interpolate(x, size = c(h, w), mode = "bilinear", align_corners = FALSE)
     }
     feats <- self$encoder(x)
-    feats <- self$projector(feats)
-    if (!is.null(mask)) {
-      lapply(feats, function(feat) {
-        m <- nnf_interpolate(mask$unsqueeze(1)$float(), size = feat$shape[3:4])$to(dtype = torch_bool())[1, , ]
-        list(tensors = feat, mask = m)
-      })
-    } else {
-      feats
-    }
+    # padding masks are resized per level in rfdetr_model$forward()
+    self$projector(feats)
   }
 )
 
@@ -718,24 +750,29 @@ gen_sineembed_for_position <- function(pos_tensor, dim = 128) {
 }
 
 gen_encoder_output_proposals <- function(memory, memory_padding_mask, spatial_shapes, unsigmoid = TRUE) {
+  n <- memory$size(1)
   proposals <- vector("list", nrow(spatial_shapes))
   cur <- 1
   for (lvl in seq_len(nrow(spatial_shapes))) {
     h <- as.integer(spatial_shapes[lvl, 1])
     w <- as.integer(spatial_shapes[lvl, 2])
     if (!is.null(memory_padding_mask)) {
-      mask_flatten <- memory_padding_mask[, cur:(cur + h * w - 1)]
-      mask_flatten <- mask_flatten$view(c(-1, h, w, 1))
-      valid_height <- torch_sum((!mask_flatten[, , 1, 1])$to(dtype = torch_int32()), dim = 2)
-      valid_width <- torch_sum((!mask_flatten[, 1, , 1])$to(dtype = torch_int32()), dim = 2)
+      mask_flatten <- memory_padding_mask[, cur:(cur + h * w - 1)]$view(c(n, h, w))
+      valid_height <- torch_sum((!mask_flatten[, , 1])$to(dtype = torch_float32()), dim = 2)
+      valid_width <- torch_sum((!mask_flatten[, 1, ])$to(dtype = torch_float32()), dim = 2)
+    } else {
+      valid_height <- torch_full(c(n), h, dtype = torch_float32(), device = memory$device)
+      valid_width <- torch_full(c(n), w, dtype = torch_float32(), device = memory$device)
     }
     grid_y <- torch_linspace(0, h - 1, h, dtype = torch_float32(), device = memory$device)
     grid_x <- torch_linspace(0, w - 1, w, dtype = torch_float32(), device = memory$device)
-    grid <- torch_stack(torch_meshgrid(list(grid_x, grid_y), indexing = "ij"), dim = -1)
-    scale <- torch_tensor(c(w, h), dtype = torch_float32(), device = grid$device)$unsqueeze(1)$unsqueeze(1)
-    grid <- (grid$unsqueeze(1) + 0.5) / scale
+    # (H, W) grids in row-major order, matching the flattened memory; channels (x, y)
+    grids <- torch_meshgrid(list(grid_y, grid_x), indexing = "ij")
+    grid <- torch_stack(list(grids[[2]], grids[[1]]), dim = -1)
+    scale <- torch_stack(list(valid_width, valid_height), dim = -1)$view(c(n, 1, 1, 2))
+    grid <- (grid$unsqueeze(1)$expand(c(n, -1, -1, -1)) + 0.5) / scale
     wh <- torch_ones_like(grid) * 0.05 * (2^(lvl - 1))
-    proposal <- torch_cat(list(grid, wh), dim = -1)$reshape(c(-1, h * w, 4))
+    proposal <- torch_cat(list(grid, wh), dim = -1)$reshape(c(n, h * w, 4))
     proposals[[lvl]] <- proposal
     cur <- cur + h * w
   }
@@ -1101,17 +1138,35 @@ rfdetr_model <- nn_module(
       mask <- x$mask
       x <- x$tensors
     }
-    if (is.null(target_sizes) && !is.null(self$resolution) && !self$training) {
+    if (!is.null(mask)) {
+      # (B, H, W) logical, TRUE on padded pixels (NestedTensor convention)
+      mask <- mask$to(dtype = torch_bool(), device = x$device)
+    }
+    if (!is.null(self$resolution) && !self$training) {
       img_h <- x$size(3)
       img_w <- x$size(4)
+      if (is.null(target_sizes)) {
+        if (!is.null(mask)) {
+          # boxes are predicted relative to the valid (unpadded) region
+          valid <- mask$logical_not()
+          vh <- valid$sum(dim = 2)$amax(dim = 2)
+          vw <- valid$sum(dim = 3)$amax(dim = 2)
+          target_sizes <- torch_stack(list(vh, vw), dim = 2)$to(dtype = torch_int64())
+        } else {
+          target_sizes <- torch_tensor(matrix(c(img_h, img_w), nrow = x$size(1), ncol = 2, byrow = TRUE),
+                                       device = x$device, dtype = torch_int64())
+        }
+      }
       if (img_h != self$resolution || img_w != self$resolution) {
-        target_sizes <- torch_tensor(matrix(c(img_h, img_w), nrow = x$size(1), ncol = 2, byrow = TRUE),
-                                     device = x$device, dtype = torch_int64())
         x <- nnf_interpolate(x, size = c(self$resolution, self$resolution),
                              mode = "bilinear", align_corners = FALSE)
+        if (!is.null(mask)) {
+          mask <- nnf_interpolate(mask$unsqueeze(2)$to(dtype = torch_float32()),
+                                  size = c(self$resolution, self$resolution))$squeeze(2)$to(dtype = torch_bool())
+        }
       }
     }
-    backbone_out <- self$backbone(x, mask)
+    backbone_out <- self$backbone(x)
     features <- backbone_out[[1]]
     poss <- backbone_out[[2]]
     srcs <- vector("list", length(features))
@@ -1120,7 +1175,7 @@ rfdetr_model <- nn_module(
       feat <- features[[i]]
       srcs[[i]] <- feat
       if (!is.null(mask)) {
-        m <- nnf_interpolate(mask$unsqueeze(1)$float(), size = feat$shape[3:4])$squeeze(1)$to(dtype = torch_bool())
+        m <- nnf_interpolate(mask$unsqueeze(2)$to(dtype = torch_float32()), size = feat$shape[3:4])$squeeze(2)$to(dtype = torch_bool())
         masks[[i]] <- m
       }
     }
@@ -1197,21 +1252,23 @@ rfdetr_model <- nn_module(
       gather_idx <- (topk_boxes + 1L)$unsqueeze(3)$'repeat'(c(1, 1, 4))
       boxes_xyxy <- torch_gather(boxes_xyxy, 2, gather_idx)
       if (!is.null(target_sizes)) {
-        h <- target_sizes[, 1]
-        w <- target_sizes[, 2]
-        scale_fct <- torch_stack(list(w, h, w, h), dim = 2)$unsqueeze(2)
+        h <- target_sizes[, 1]$to(dtype = boxes_xyxy$dtype, device = boxes_xyxy$device)
+        w <- target_sizes[, 2]$to(dtype = boxes_xyxy$dtype, device = boxes_xyxy$device)
       } else {
-        h <- x$size(3)
-        w <- x$size(4)
-        scale_fct <- torch_tensor(c(w, h, w, h), device = boxes_xyxy$device, dtype = boxes_xyxy$dtype)
+        h <- torch_full(c(x$size(1)), x$size(3), dtype = boxes_xyxy$dtype, device = boxes_xyxy$device)
+        w <- torch_full(c(x$size(1)), x$size(4), dtype = boxes_xyxy$dtype, device = boxes_xyxy$device)
       }
+      scale_fct <- torch_stack(list(w, h, w, h), dim = 2)$unsqueeze(2)
       boxes_xyxy <- boxes_xyxy * scale_fct
-      clamp_max <- if (is.null(target_sizes)) max(h, w) else as.integer(torch_max(w))
-      x1 <- boxes_xyxy[, , 1]$clamp(min = 0)
-      y1 <- boxes_xyxy[, , 2]$clamp(min = 0)
-      x2 <- torch_maximum(boxes_xyxy[, , 3], x1 + 2)
-      y2 <- torch_maximum(boxes_xyxy[, , 4], y1 + 2)
-      boxes_xyxy <- torch_stack(list(x1, y1, x2, y2), dim = -1)$clamp(max = clamp_max)
+      # clip to the image: x to [0, width], y to [0, height] (the reference PostProcess does not clip)
+      wmax <- w$unsqueeze(2)
+      hmax <- h$unsqueeze(2)
+      boxes_xyxy <- torch_stack(list(
+        torch_minimum(boxes_xyxy[, , 1]$clamp(min = 0), wmax),
+        torch_minimum(boxes_xyxy[, , 2]$clamp(min = 0), hmax),
+        torch_minimum(boxes_xyxy[, , 3]$clamp(min = 0), wmax),
+        torch_minimum(boxes_xyxy[, , 4]$clamp(min = 0), hmax)
+      ), dim = -1)
       detections <- lapply(seq_len(boxes_xyxy$size(1)), function(i) {
         list(scores = scores[i, ], labels = labels[i, ], boxes = boxes_xyxy[i, , ])
       })
@@ -1260,123 +1317,32 @@ rfdetr_postprocess <- nn_module(
   }
 )
 
-rfdetr_configs <- list(
-  nano = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    num_register_tokens = 0,
-    resolution = 384
-  ),
-  small = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    num_register_tokens = 0,
-    resolution = 512
-  ),
-  medium = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 2,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(3, 6, 9, 12),
-    patch_size = 16,
-    num_windows = 2,
-    num_classes = 91,
-    resolution = 640
-  ),
-  base = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 640
-  ),
-  large = list(
-    encoder = "dinov2_windowed_base",
-    hidden_dim = 384,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 12,
-    ca_nheads = 24,
-    dim_feedforward = 2048,
-    dec_n_points = 4,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 560,
-    projector_scale = c(2.0, 0.5)
-  ),
-  base_2 = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 91,
-    resolution = 640
-  ),
-  base_o365 = list(
-    encoder = "dinov2_windowed_small",
-    hidden_dim = 256,
-    num_queries = 300,
-    dec_layers = 3,
-    sa_nheads = 8,
-    ca_nheads = 16,
-    dim_feedforward = 2048,
-    dec_n_points = 2,
-    group_detr = 13,
-    out_feature_indexes = c(2, 5, 8, 11),
-    patch_size = 14,
-    num_windows = 4,
-    num_classes = 366,
-    resolution = 640
+rfdetr_configs <- local({
+  small_base <- list(
+    encoder = "dinov2_windowed_small", hidden_dim = 256, num_queries = 300,
+    dec_layers = 2, sa_nheads = 8, ca_nheads = 16, dim_feedforward = 2048,
+    dec_n_points = 2, group_detr = 13, out_feature_indexes = c(3, 6, 9, 12),
+    patch_size = 16, num_windows = 2, num_classes = 91, num_register_tokens = 0
   )
-)
+  base_base <- modifyList(small_base, list(
+    dec_layers = 3, out_feature_indexes = c(2, 5, 8, 11), patch_size = 14, num_windows = 4
+  ))
+  list(
+    nano      = modifyList(small_base, list(resolution = 384)),
+    # official rf-detr configs: Small = 3 decoder layers @512, Medium = 4 @576,
+    # Base = 3 @560 (640 is not a multiple of patch_size * num_windows = 56)
+    small     = modifyList(small_base, list(dec_layers = 3, resolution = 512)),
+    medium    = modifyList(small_base, list(dec_layers = 4, resolution = 576)),
+    base      = modifyList(base_base,  list(resolution = 560)),
+    base_2    = modifyList(base_base,  list(resolution = 560)),
+    base_o365 = modifyList(base_base,  list(num_classes = 366, resolution = 560)),
+    large     = modifyList(base_base,  list(
+      encoder = "dinov2_windowed_base", hidden_dim = 384,
+      sa_nheads = 12, ca_nheads = 24, dec_n_points = 4,
+      resolution = 560, projector_scale = c(2.0, 0.5)
+    ))
+  )
+})
 
 #' @importFrom torch nn_parameter nn_linear nn_embedding nn_layer_norm nn_dropout
 #' @importFrom torch nn_multihead_attention nn_conv2d nn_conv_transpose2d nn_batch_norm2d
@@ -1384,7 +1350,7 @@ rfdetr_configs <- list(
 #' @importFrom torch nnf_interpolate nnf_grid_sample nnf_layer_norm
 #' @importFrom torch nn_init_trunc_normal_ nn_init_constant_ nn_init_xavier_uniform_ nn_init_zeros_ nn_init_ones_
 #' @importFrom torch torch_randn torch_zeros torch_ones torch_arange torch_linspace torch_cat
-#' @importFrom torch torch_stack torch_sum torch_cumsum torch_log
+#' @importFrom torch torch_stack torch_sum torch_cumsum torch_log torch_full
 build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) {
   projector_scale <- cfg$projector_scale %||% c(1.0)
   backbone <- rfdetr_backbone(
@@ -1440,7 +1406,7 @@ build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) 
       runtime_error("Pretrained weights not available for this variant")
     }
     cli_inform("Model weights for {.cls {name}} (~{.emph {r[3]}}) will be downloaded and processed if not already available.")
-    archive <- download_and_cache(r[1], prefix = name)
+    archive <- download_and_cache(r[1], prefix = name, progress = progress)
     if (tools::md5sum(archive) != r[2]) {
       runtime_error("Corrupt file! Delete the file in {archive} and try again.")
     }
@@ -1469,12 +1435,11 @@ build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) 
               target_h <- m_w$size(2) - 1
               target_w <- target_h
               target_size <- as.integer(sqrt(target_h))
-              patch_pos <- nnf_interpolate(
+              # same kernel as the reference's run-time interpolation
+              patch_pos <- rfdetr_interpolate_bicubic_aa(
                 patch_pos$to(dtype = torch_float32()),
-                size = c(target_size, target_size),
-                mode = "bicubic",
-                align_corners = FALSE
-              )$to(dtype = sd_w$dtype)
+                size = c(target_size, target_size)
+              )$to(dtype = m_w$dtype)
               patch_pos <- patch_pos$permute(c(1, 3, 4, 2))$reshape(c(1, -1, dim))
               interpolated <- torch_cat(list(cls_pos, patch_pos), dim = 2)
               m_w$copy_(interpolated)
@@ -1492,6 +1457,13 @@ build_rfdetr <- function(cfg, pretrained = FALSE, progress = TRUE, name = NULL) 
     model$load_state_dict(model_sd, strict = FALSE)
     total <- length(model_sd)
     cli_inform("Loaded pretrained weights for {.cls {name}} ({loaded}/{total} keys, {skipped} skipped).")
+    not_in_file <- setdiff(names(model_sd), names(state_dict))
+    if (length(not_in_file) > 0) {
+      cli::cli_warn(c(
+        "{length(not_in_file)} model tensor{?s} not found in the checkpoint keep their random initialisation.",
+        i = "First missing: {.val {head(not_in_file, 3)}}"
+      ))
+    }
   }
   model
 }
@@ -1512,7 +1484,7 @@ model_rfdetr_small <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_small")
 }
 
-#' @describeIn model_rfdetr RF-DETR Medium (balanced speed/accuracy, COCO, 640px)
+#' @describeIn model_rfdetr RF-DETR Medium (balanced speed/accuracy, COCO, 576px)
 #' @export
 model_rfdetr_medium <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$medium
@@ -1520,7 +1492,7 @@ model_rfdetr_medium <- function(pretrained = FALSE, progress = TRUE, ...) {
   build_rfdetr(cfg, pretrained, progress, name = "rfdetr_medium")
 }
 
-#' @describeIn model_rfdetr RF-DETR Base (COCO pretrained, 640px)
+#' @describeIn model_rfdetr RF-DETR Base (COCO pretrained, 560px)
 #' @export
 model_rfdetr_base <- function(pretrained = FALSE, progress = TRUE, ...) {
   cfg <- rfdetr_configs$base

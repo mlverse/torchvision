@@ -120,7 +120,7 @@ vgg <- function(arch, cfg, batch_norm, pretrained, progress, ...) {
   if (pretrained) {
     r <- vgg_model_urls[[arch]]
     cli_inform("Model weights for {.cls {arch}} ({.emph {r[3]}}) will be downloaded and processed if not already available.")
-    state_dict_path <- download_and_cache(r[1])
+    state_dict_path <- download_and_cache(r[1], progress = progress)
     if (!tools::md5sum(state_dict_path) == r[2])
       runtime_error("Corrupt file! Delete the file in {state_dict_path} and try again.")
 
@@ -173,13 +173,13 @@ model_vgg13_bn <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg("vgg13_bn", "B", TRUE, pretrained, progress, ...)
 }
 
-#' @describeIn model_vgg VGG 13-layer model (configuration "D")
+#' @describeIn model_vgg VGG 16-layer model (configuration "D")
 #' @export
 model_vgg16 <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg('vgg16', 'D', FALSE, pretrained, progress, ...)
 }
 
-#' @describeIn model_vgg VGG 13-layer model (configuration "D") with batch normalization
+#' @describeIn model_vgg VGG 16-layer model (configuration "D") with batch normalization
 #' @export
 model_vgg16_bn <- function(pretrained = FALSE, progress = TRUE, ...) {
   vgg("vgg16_bn", "D", TRUE, pretrained, progress, ...)

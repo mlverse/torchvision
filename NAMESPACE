@@ -37,6 +37,7 @@ S3method(item_transform_pad,image_with_segmentation_mask)
 S3method(item_transform_perspective,dataset)
 S3method(item_transform_perspective,default)
 S3method(item_transform_perspective,image_with_bounding_box)
+S3method(item_transform_perspective,image_with_rotated_box)
 S3method(item_transform_perspective,image_with_segmentation_mask)
 S3method(item_transform_random_affine,dataset)
 S3method(item_transform_random_affine,default)
@@ -398,6 +399,7 @@ importFrom(grDevices,dev.off)
 importFrom(graphics,polygon)
 importFrom(jsonlite,fromJSON)
 importFrom(magrittr,"%>%")
+importFrom(rlang,"%||%")
 importFrom(stats,
   runif,
   setNames
@@ -407,17 +409,21 @@ importFrom(torch,
   dataset,
   load_state_dict,
   nn_adaptive_avg_pool2d,
+  nn_avg_pool2d,
   nn_batch_norm1d,
   nn_batch_norm2d,
+  nn_buffer,
   nn_conv2d,
   nn_conv_transpose2d,
   nn_dropout,
   nn_embedding,
+  nn_flatten,
   nn_gelu,
   nn_hardsigmoid,
   nn_hardswish,
   nn_identity,
   nn_init_constant_,
+  nn_init_normal_,
   nn_init_ones_,
   nn_init_trunc_normal_,
   nn_init_xavier_uniform_,
@@ -435,6 +441,7 @@ importFrom(torch,
   nn_sequential,
   nn_silu,
   nn_softmax,
+  nn_tanh,
   nnf_affine_grid,
   nnf_gelu,
   nnf_grid_sample,
@@ -458,6 +465,7 @@ importFrom(torch,
   torch_flatten,
   torch_float,
   torch_float32,
+  torch_full,
   torch_gather,
   torch_int32,
   torch_linspace,

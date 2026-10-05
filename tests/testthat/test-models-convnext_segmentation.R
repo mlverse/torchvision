@@ -261,3 +261,20 @@ test_that("model_convnext_tiny_upernet works with custom pool_scales", {
 
   expect_tensor_shape(output$out, c(1, 21, 224, 224))
 })
+
+test_that("UPerNet checkpoint keys (incl. backbone.norm0-3) all map onto the model", {
+  model <- model_convnext_tiny_upernet(num_classes = 150, aux_loss = TRUE)
+  ckpt_keys <- c(
+    "backbone.downsample_layers.0.0.weight", "backbone.stages.0.0.depthwise_conv.weight",
+    "backbone.stages.0.0.pointwise_conv1.weight", "backbone.stages.0.0.gamma",
+    paste0("backbone.norm", 0:3, ".weight"), paste0("backbone.norm", 0:3, ".bias"),
+    "decode_head.psp_modules.0.1.conv.weight", "decode_head.psp_modules.3.1.bn.running_var",
+    "decode_head.bottleneck.conv.weight", "decode_head.lateral_convs.2.bn.weight",
+    "decode_head.fpn_convs.0.conv.weight", "decode_head.fpn_bottleneck.bn.bias",
+    "decode_head.conv_seg.weight", "auxiliary_head.convs.0.conv.weight",
+    "auxiliary_head.convs.0.bn.running_mean", "auxiliary_head.conv_seg.bias"
+  )
+  fake <- setNames(as.list(seq_along(ckpt_keys)), ckpt_keys)
+  renamed <- names(torchvision:::.rename_convnext_state_dict(fake))
+  expect_true(all(renamed %in% names(model$state_dict())))
+})

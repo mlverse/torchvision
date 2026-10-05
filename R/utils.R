@@ -1,5 +1,5 @@
 
-download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
+download_and_cache <- function(url, redownload = FALSE, prefix = NULL, progress = TRUE) {
 
   cache_path <- rappdirs::user_cache_dir("torch")
 
@@ -18,7 +18,7 @@ download_and_cache <- function(url, redownload = FALSE, prefix = NULL) {
 
     withr::with_options(
       list(timeout = max(600, getOption("timeout", default = 0))),
-      utils::download.file(url, tmp, mode = "wb")
+      utils::download.file(url, tmp, mode = "wb", quiet = !isTRUE(progress))
     )
     fs::file_move(tmp, path)
   }
