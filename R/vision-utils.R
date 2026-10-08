@@ -150,23 +150,17 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
   valid <- (boxes[, 1] < boxes[, 3])$logical_and(boxes[, 2] < boxes[, 4])
 
-  if (lazy) {
-    if ((!valid)$any()$item()) {
-      boxes <- boxes[valid, ]
-    }
-  } else {
-    if ((!valid)$any()$item()) {
-      invalid_indices <- which(as.logical(!valid))
-      first_idx <- invalid_indices[1]
-      first_box <- as.numeric(boxes[first_idx, ])
-      cli_abort(c(
-        "Bounding box {.val {first_idx}} is not in valid xyxy format.",
-        "x" = "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
-      ))
-    }
+  if (!lazy && (!valid)$any()$item()) {
+    invalid_indices <- which(as.logical(!valid))
+    first_idx <- invalid_indices[1]
+    first_box <- as.numeric(boxes[first_idx, ])
+    cli_abort(c(
+      "Bounding box {.val {first_idx}} is not in valid xyxy format.",
+      "x" = "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
+    ))
   }
 
-  boxes
+  valid
 }
 
 #' Draws bounding boxes on image.
@@ -191,6 +185,8 @@ check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 #' @param font_size The requested font size in points.
 #' @param lazy if `TRUE`, silently filter out degenerate bounding boxes (xmin >= xmax or ymin >= ymax).
+#'    Supplied labels and colors are recycled over the original boxes before filtering,
+#'    so each surviving box keeps its corresponding label and color.
 #'    If `FALSE`, error on the first non-conforming box.
 #' @param ... Additional arguments passed to methods.
 #'
@@ -242,28 +238,35 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else type_error("`x` should be torch_uint8 or torch_float")
 
-  boxes <- check_bbox_is_xyxy(boxes, lazy = lazy)
+  valid <- check_bbox_is_xyxy(boxes, lazy = lazy)
   num_boxes <- boxes$shape[1]
-  if (num_boxes == 0) {
+  boxes <- boxes[valid, ]
+  if (boxes$shape[1] == 0) {
     cli_warn(if (lazy)
       "No valid bounding box to draw after filtering degenerate boxes."
     else
       "boxes doesn't contain any box. No box was drawn.")
     return(x)
   }
+  valid <- as.logical(valid)
   if (!is.null(labels) && inherits(labels, "torch_tensor")) {
     labels <- as.character(as_array(labels$to(device = "cpu")))
   }
-  if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
-    cli_abort(
-      "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
-    )
+  if (!is.null(labels)) {
+    if (num_boxes %% length(labels) != 0) {
+      cli_abort(
+        "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
+      )
+    }
+    labels <- rep(labels, length.out = num_boxes)[valid]
   }
   if (is.null(colors)) {
-    colors <- grDevices::hcl.colors(n = num_boxes)
-  }
-  if (num_boxes %% length(colors) != 0) {
-    value_error("colors vector cannot be broadcasted on boxes")
+    colors <- grDevices::hcl.colors(n = boxes$shape[1])
+  } else {
+    if (num_boxes %% length(colors) != 0) {
+      value_error("colors vector cannot be broadcasted on boxes")
+    }
+    colors <- rep(colors, length.out = num_boxes)[valid]
   }
 
   if (!fill) {

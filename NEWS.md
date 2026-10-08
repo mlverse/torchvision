@@ -45,6 +45,8 @@
 
 ## Bug fixes and improvements
 
+* `draw_bounding_boxes()` now keeps labels and colors aligned with their boxes
+  when `lazy = TRUE` filters out degenerate boxes.
 * Fixed box alignment in padded center crops and random crops, and corrected
   five- and ten-crop geometry (#414).
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).

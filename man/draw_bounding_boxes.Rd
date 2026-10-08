@@ -58,6 +58,8 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 \item{font_size}{The requested font size in points.}
 
 \item{lazy}{if \code{TRUE}, silently filter out degenerate bounding boxes (xmin >= xmax or ymin >= ymax).
+Supplied labels and colors are recycled over the original boxes before filtering,
+so each surviving box keeps its corresponding label and color.
 If \code{FALSE}, error on the first non-conforming box.}
 }
 \value{
