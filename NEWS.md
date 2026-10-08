@@ -45,12 +45,8 @@
 
 ## Bug fixes and improvements
 
-* `item_transform_center_crop()` now shifts bounding boxes, including rotated boxes,
-  with the image when the crop requires padding.
-* Random crops now sample integer origins over the complete valid range, keeping
-  image pixels and annotations aligned and allowing the last valid row and column.
-* `transform_five_crop()` and `transform_ten_crop()` now use the requested height
-  and width for every crop and select the correct corner contents on rectangular images.
+* Fixed box alignment in padded center crops and random crops, and corrected
+  five- and ten-crop geometry (#414).
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
 * `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
