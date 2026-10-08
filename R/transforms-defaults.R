@@ -19,51 +19,31 @@ transform_resize.default <- function(img, size, interpolation) {
   not_implemented_for_class(img)
 }
 
+get_center_crop_params <- function(img, size) {
+  output_size <- as.integer(if (length(size) == 1) rep(size, 2) else size)
+  c(image_width, image_height) %<-% get_image_size(img)
+  c(crop_height, crop_width) %<-% output_size
+
+  pad_width <- max(crop_width - image_width, 0L)
+  pad_height <- max(crop_height - image_height, 0L)
+  padding <- c(pad_width %/% 2L, (pad_width + 1L) %/% 2L,
+               pad_height %/% 2L, (pad_height + 1L) %/% 2L)
+
+  # Keep the crop origins relative to the padded image, using one-based indices.
+  top <- max((image_height + pad_height - crop_height) %/% 2L, 1L)
+  left <- max((image_width + pad_width - crop_width) %/% 2L, 1L)
+
+  list(padding = padding, top = top, left = left,
+       height = crop_height, width = crop_width)
+}
+
 #' @export
 transform_center_crop.default <- function(img, size) {
-
-  output_size <- size
-
-  if (length(size) == 1)
-    output_size <- rep(size, 2)
-
-  output_size <- as.integer(output_size)
-
-  size <- get_image_size(img)
-
-  image_height <- size[2]
-  image_width <- size[1]
-
-  crop_height <- output_size[1]
-  crop_width <- output_size[2]
-
-  if (crop_width > image_width || crop_height > image_height) {
-
-    padding_ltrb <- c(
-      if (crop_width > image_width) (crop_width - image_width) %/% 2  else 0,
-      if (crop_width > image_width) (crop_width - image_width + 1) %/% 2  else 0,
-      if (crop_height > image_height) (crop_height - image_height) %/% 2  else 0,
-      if (crop_height > image_height) (crop_height - image_height + 1) %/% 2  else 0
-    )
-
-    img <- transform_pad(img, padding_ltrb, fill = 0)  # PIL uses fill value 0
-
-    # `get_image_size()` returns (width, height), as above
-    size <- get_image_size(img)
-    image_height <- size[2]
-    image_width <- size[1]
-
-    if (crop_width == image_width && crop_height == image_height) return(img)
+  params <- get_center_crop_params(img, size)
+  if (any(params$padding > 0L)) {
+    img <- transform_pad(img, params$padding, fill = 0)
   }
-
-  crop_top <- as.integer((image_height - crop_height) / 2)
-  crop_left <- as.integer((image_width - crop_width) / 2)
-
-  # if either of these is 0, we will lose a pixel in transform_crop
-  if (crop_top == 0) crop_top <- 1
-  if (crop_left == 0) crop_left <- 1
-
-  transform_crop(img, crop_top, crop_left, crop_height, crop_width)
+  transform_crop(img, params$top, params$left, params$height, params$width)
 }
 
 #' @export
@@ -108,8 +88,8 @@ get_random_crop_params <- function(img, output_size) {
   if (w == tw && h == th)
     return(c(1, 1, h, w))
 
-  i <- runif(1, 1, h - th + 1)
-  j <- runif(1, 1, w - tw + 1)
+  i <- sample.int(h - th + 1, 1)
+  j <- sample.int(w - tw + 1, 1)
 
   c(i, j, th, tw)
 }

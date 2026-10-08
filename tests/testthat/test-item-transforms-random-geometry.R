@@ -512,13 +512,15 @@ test_that("item_transform_random_crop works for segmentation items", {
 
 test_that("item_transform_random_crop works for rotated boxes", {
   item <- make_detection_item(matrix(c(0, 0, 200, 100), ncol = 4), image_size = c(100L, 200L))
-  rotated <- item_transform_rotate(item, angle = 30)
+  # Keep the box spanning the image so that every valid crop clips it on all sides.
+  rotated <- item_transform_rotate(item, angle = 30, expand = FALSE)
 
   result <- item_transform_random_crop(rotated, size = c(50, 80))
 
   expect_s3_class(result, "image_with_rotated_box")
   expect_tensor_shape(result$x, c(3, 50, 80))
   expect_equal_to_r(result$y$boxes[1, 5], 30)
+  expect_equal_to_r(result$y$boxes[1, 1:2], c(0, 0))
   expect_equal_to_r(result$y$boxes[1, 3], 80)
   expect_equal_to_r(result$y$boxes[1, 4], 50)
 })
