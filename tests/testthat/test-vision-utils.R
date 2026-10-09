@@ -104,6 +104,110 @@ test_that("draw_bounding_boxes lazy=TRUE silently filters degenerate boxes", {
   expect_tensor_dtype(result, torch::torch_uint8())
 })
 
+test_that("draw_bounding_boxes keeps labels and colors attached to surviving boxes", {
+  image <- torch::torch_zeros(3, 100, 300, dtype = torch::torch_uint8())
+  coordinates <- rbind(c(10, 20, 80, 80), c(110, 20, 180, 80), c(210, 20, 280, 80))
+  labels <- c("first", "middle", "last")
+  colors <- c("red", "green", "blue")
+
+  for (rotated in c(FALSE, TRUE)) {
+    for (invalid in seq_len(3)) {
+      mixed <- coordinates
+      mixed[invalid, 3] <- mixed[invalid, 1]
+      if (rotated) mixed <- cbind(mixed, c(15, 30, 45))
+      boxes <- torch::torch_tensor(mixed)
+      keep <- seq_len(3) != invalid
+
+      expected <- draw_bounding_boxes(
+        image, boxes[keep, ], labels = labels[keep], colors = colors[keep], fill = TRUE
+      )
+      actual <- draw_bounding_boxes(image, boxes, labels = labels, colors = colors, fill = TRUE)
+      expect_equal(as_array(actual), as_array(expected))
+    }
+  }
+})
+
+test_that("draw_bounding_boxes filters tensor labels with a single surviving box", {
+  image <- torch::torch_zeros(3, 100, 200, dtype = torch::torch_uint8())
+  coordinates <- rbind(c(10, 20, 80, 80), c(110, 20, 180, 80))
+  labels <- torch::torch_tensor(c(101L, 202L))
+
+  for (invalid in seq_len(2)) {
+    mixed <- coordinates
+    mixed[invalid, 4] <- mixed[invalid, 2] - 1
+    boxes <- torch::torch_tensor(mixed)
+    keep <- seq_len(2) != invalid
+
+    expected <- draw_bounding_boxes(image, boxes[keep, ], labels = labels[keep], colors = "red")
+    actual <- draw_bounding_boxes(image, boxes, labels = labels, colors = "red")
+    expect_equal(as_array(actual), as_array(expected))
+  }
+})
+
+test_that("draw_bounding_boxes supports shared and per-box annotations when filtering", {
+  image <- torch::torch_zeros(3, 100, 400, dtype = torch::torch_uint8())
+  coordinates <- rbind(
+    c(10, 20, 80, 80), c(110, 20, 180, 80),
+    c(210, 20, 280, 80), c(310, 20, 380, 80)
+  )
+  annotations <- list(
+    list(labels = "box", colors = "red"),
+    list(labels = "box", colors = c("red", "green", "blue", "yellow")),
+    list(labels = c("first", "second", "third", "fourth"), colors = "red"),
+    list(labels = c("first", "second", "third", "fourth"), colors = NULL),
+    list(labels = NULL, colors = c("red", "green", "blue", "yellow"))
+  )
+
+  for (invalid in list(1L, 2L, 4L, c(1L, 4L))) {
+    mixed <- coordinates
+    mixed[invalid, 3] <- mixed[invalid, 1] - 1
+    boxes <- torch::torch_tensor(mixed)
+    keep <- !seq_len(4) %in% invalid
+
+    for (annotation in annotations) {
+      labels <- if (!is.null(annotation$labels)) rep(annotation$labels, length.out = 4)[keep]
+      colors <- if (!is.null(annotation$colors)) rep(annotation$colors, length.out = 4)[keep]
+      expected <- draw_bounding_boxes(image, boxes[keep, ], labels = labels, colors = colors)
+      actual <- draw_bounding_boxes(
+        image, boxes, labels = annotation$labels, colors = annotation$colors
+      )
+      expect_equal(as_array(actual), as_array(expected))
+    }
+  }
+})
+
+test_that("draw_bounding_boxes rejects partial recycling of annotations", {
+  image <- torch::torch_zeros(3, 100, 100, dtype = torch::torch_uint8())
+  coordinates <- matrix(rep(c(10, 10, 50, 50), 6), ncol = 4, byrow = TRUE)
+
+  for (invalid in list(integer(0), 2L, seq_len(6))) {
+    mixed <- coordinates
+    mixed[invalid, 3] <- mixed[invalid, 1]
+    boxes <- torch::torch_tensor(mixed)
+
+    for (n in c(0L, 2L, 3L, 7L)) {
+      expect_error(
+        draw_bounding_boxes(image, boxes, labels = rep("box", n)),
+        "must be 1 or match the number of boxes"
+      )
+      expect_error(
+        draw_bounding_boxes(image, boxes, colors = rep("red", n)),
+        "colors vector must contain one color or one color per box"
+      )
+    }
+  }
+})
+
+test_that("draw_bounding_boxes validates annotation lengths against unfiltered boxes", {
+  image <- torch::torch_zeros(3, 100, 100, dtype = torch::torch_uint8())
+  boxes <- torch::torch_tensor(rbind(
+    c(10, 10, 50, 50), c(20, 20, 80, 80), c(50, 10, 10, 50)
+  ))
+
+  expect_error(draw_bounding_boxes(image, boxes, labels = c("a", "b")), "Number of labels")
+  expect_error(draw_bounding_boxes(image, boxes, colors = c("red", "blue")), "colors vector")
+})
+
 test_that("draw_bounding_boxes lazy=FALSE errors on first degenerate box", {
   image <- torch::torch_randint(1L, 200L, c(3L, 100L, 100L))$to(torch::torch_uint8())
   # first box valid, second degenerate (index 2 should be reported)
@@ -125,11 +229,15 @@ test_that("draw_bounding_boxes lazy=TRUE warns when all boxes are degenerate", {
     c(20, 80, 60, 20)   # ymin > ymax
   ))
 
-  expect_warning(
-    result <- draw_bounding_boxes(image, bad_boxes, lazy = TRUE),
-    regexp = "No valid bounding box"
-  )
-  expect_tensor_shape(result, c(3L, 100L, 100L))
+  for (labels in list(NULL, "box", c("first", "second"), torch::torch_tensor(c(1L, 2L)))) {
+    for (colors in list(NULL, "red", c("red", "blue"))) {
+      expect_warning(
+        result <- draw_bounding_boxes(image, bad_boxes, labels = labels, colors = colors),
+        regexp = "No valid bounding box"
+      )
+      expect_identical(result, image)
+    }
+  }
 })
 
 test_that("draw_bounding_boxes correctly mask a complete image", {

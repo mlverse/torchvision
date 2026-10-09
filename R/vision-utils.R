@@ -150,23 +150,17 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
   valid <- (boxes[, 1] < boxes[, 3])$logical_and(boxes[, 2] < boxes[, 4])
 
-  if (lazy) {
-    if ((!valid)$any()$item()) {
-      boxes <- boxes[valid, ]
-    }
-  } else {
-    if ((!valid)$any()$item()) {
-      invalid_indices <- which(as.logical(!valid))
-      first_idx <- invalid_indices[1]
-      first_box <- as.numeric(boxes[first_idx, ])
-      cli_abort(c(
-        "Bounding box {.val {first_idx}} is not in valid xyxy format.",
-        "x" = "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
-      ))
-    }
+  if (!lazy && (!valid)$any()$item()) {
+    invalid_indices <- which(as.logical(!valid))
+    first_idx <- invalid_indices[1]
+    first_box <- as.numeric(boxes[first_idx, ])
+    cli_abort(c(
+      "Bounding box {.val {first_idx}} is not in valid xyxy format.",
+      "x" = "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
+    ))
   }
 
-  boxes
+  valid
 }
 
 #' Draws bounding boxes on image.
@@ -182,15 +176,18 @@ check_bbox_is_xyxy <- function(boxes, lazy = TRUE) {
 #'            format. Note that the boxes coordinates are absolute with respect
 #'            to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
 #'            \eqn{0  \leq y_{min} < y_{max} < Width }.
-#' @param labels character vector containing the labels of bounding boxes.
+#' @param labels A character vector or tensor containing one label for all boxes,
+#'    or one label per box in the original `boxes` tensor.
 #' @param colors character vector containing the colors
-#'            of the boxes or single color for all boxes. The color can be represented as
+#'            of the boxes or single color for all boxes. When supplying multiple colors,
+#'            provide one per box in the original `boxes` tensor. The color can be represented as
 #'            strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.
 #' @param fill If `TRUE` fills the bounding box with specified color.
 #' @param width  Width of text shift to the bounding box.
 #' @param font NULL for the current font family, or a character vector of length 2 for Hershey vector fonts.
 #' @param font_size The requested font size in points.
 #' @param lazy if `TRUE`, silently filter out degenerate bounding boxes (xmin >= xmax or ymin >= ymax).
+#'    Corresponding per-box labels and colors are filtered with the boxes.
 #'    If `FALSE`, error on the first non-conforming box.
 #' @param ... Additional arguments passed to methods.
 #'
@@ -242,28 +239,36 @@ draw_bounding_boxes.torch_tensor <- function(x,
     x$permute(c(2, 3, 1))$to(device = "cpu") %>% as.array()
   } else type_error("`x` should be torch_uint8 or torch_float")
 
-  boxes <- check_bbox_is_xyxy(boxes, lazy = lazy)
+  valid <- check_bbox_is_xyxy(boxes, lazy = lazy)
   num_boxes <- boxes$shape[1]
-  if (num_boxes == 0) {
+  if (!is.null(labels) && inherits(labels, "torch_tensor")) {
+    labels <- as.character(as_array(labels$to(device = "cpu")))
+  }
+  if (!is.null(labels) && !length(labels) %in% c(1L, num_boxes)) {
+    cli_abort(
+      "Number of labels {.val {length(labels)}} must be 1 or match the number of boxes {.val {num_boxes}}"
+    )
+  }
+  if (!is.null(colors) && !length(colors) %in% c(1L, num_boxes)) {
+    value_error("colors vector must contain one color or one color per box ({num_boxes}); got {length(colors)}")
+  }
+
+  boxes <- boxes[valid, ]
+  if (boxes$shape[1] == 0) {
     cli_warn(if (lazy)
       "No valid bounding box to draw after filtering degenerate boxes."
     else
       "boxes doesn't contain any box. No box was drawn.")
     return(x)
   }
-  if (!is.null(labels) && inherits(labels, "torch_tensor")) {
-    labels <- as.character(as_array(labels$to(device = "cpu")))
-  }
-  if (!is.null(labels) && (num_boxes %% length(labels) != 0)) {
-    cli_abort(
-      "Number of labels {.val {length(labels)}} cannot be broadcasted on number of boxes {.val {num_boxes}}"
-    )
+  valid <- as.logical(valid)
+  if (length(labels) > 1L) {
+    labels <- labels[valid]
   }
   if (is.null(colors)) {
-    colors <- grDevices::hcl.colors(n = num_boxes)
-  }
-  if (num_boxes %% length(colors) != 0) {
-    value_error("colors vector cannot be broadcasted on boxes")
+    colors <- grDevices::hcl.colors(n = boxes$shape[1])
+  } else if (length(colors) > 1L) {
+    colors <- colors[valid]
   }
 
   if (!fill) {
