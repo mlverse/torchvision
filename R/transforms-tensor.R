@@ -244,8 +244,8 @@ transform_five_crop.torch_tensor <- function(img, size) {
   if (!length(size) == 2)
     value_error("Please provide only 2 dimensions (h, w) for size.")
 
-  image_width <- img$size(-2)
-  image_height <- img$size(-1)
+  image_height <- img$size(-2)
+  image_width <- img$size(-1)
 
   crop_height <- size[1]
   crop_width <- size[2]
@@ -253,10 +253,10 @@ transform_five_crop.torch_tensor <- function(img, size) {
   if (crop_width > image_width || crop_height > image_height)
     value_error("Requested crop size is bigger than input size.")
 
-  tl <- transform_crop(img, 1, 1, crop_width, crop_height)
-  tr <- transform_crop(img, image_width - crop_width + 1, 1, image_width, crop_height)
-  bl <- transform_crop(img, 1, image_height - crop_height + 1, crop_width, image_height)
-  br <- transform_crop(img, image_width - crop_width + 1, image_height - crop_height + 1, image_width, image_height)
+  tl <- transform_crop(img, 1, 1, crop_height, crop_width)
+  tr <- transform_crop(img, 1, image_width - crop_width + 1, crop_height, crop_width)
+  bl <- transform_crop(img, image_height - crop_height + 1, 1, crop_height, crop_width)
+  br <- transform_crop(img, image_height - crop_height + 1, image_width - crop_width + 1, crop_height, crop_width)
   center <- transform_center_crop(img, c(crop_height, crop_width))
 
   list(tl, tr, bl, br, center)
