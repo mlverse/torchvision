@@ -6,7 +6,7 @@
 #'   image dimensions `(H, W)`.
 #'
 #' @param target An `object_detection_target`, as returned by the `.getitem()`
-#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   method of an [object detection dataset][coco_detection_dataset], or a bare list containing
 #'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
@@ -58,6 +58,8 @@ target_transform_resize <- function(target, size) {
 
 #' @export
 target_transform_resize.default <- function(target, ...) {
+  if (identical(class(target), "list"))
+    return(target_transform_resize.object_detection_target(target, ...))
   not_implemented_for_class(target)
 }
 
@@ -105,8 +107,18 @@ target_transform_sahi_crop <- function(y, sahi_split, min_area_ratio = 0.1) {
 
 #' @export
 target_transform_sahi_crop.default <- function(y, sahi_split, min_area_ratio = 0.1) {
-  # A batch is a bare list of already classed targets, one per image.
-  if (!is.list(y) || !length(y) || !all(vapply(y, inherits, logical(1), "object_detection_target")))
+  if (!identical(class(y), "list"))
+    not_implemented_for_class(y)
+
+  if ("boxes" %in% names(y))
+    return(target_transform_sahi_crop.object_detection_target(y, sahi_split, min_area_ratio))
+
+  # A batch is a list of targets, one per image; each may be classed or bare.
+  is_target <- vapply(y, function(yi) {
+    inherits(yi, "object_detection_target") ||
+      (identical(class(yi), "list") && "boxes" %in% names(yi))
+  }, logical(1))
+  if (!all(is_target))
     not_implemented_for_class(y)
 
   if (is.list(sahi_split) && !inherits(sahi_split, "sahi_split"))
@@ -226,7 +238,7 @@ target_transform_sahi_crop.object_detection_target <- function(y, sahi_split, mi
 #' For axis-aligned boxes, \eqn{r = 0}.
 #'
 #' @param target An `object_detection_target`, as returned by the `.getitem()`
-#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   method of an [object detection dataset][coco_detection_dataset], or a bare list containing
 #'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` with bounding boxes in xyxy format
@@ -278,6 +290,8 @@ target_transform_rotate <- function(target, angle = 0) {
 
 #' @export
 target_transform_rotate.default <- function(target,...) {
+  if (identical(class(target), "list"))
+    return(target_transform_rotate.object_detection_target(target, ...))
   not_implemented_for_class(target)
 }
 
@@ -379,7 +393,7 @@ target_transform_rotate.dataset <- function(target, angle = 0) {
 #' rotation, so transforms compose.
 #'
 #' @param target An `object_detection_target`, as returned by the `.getitem()`
-#'   method of an [object detection dataset][coco_detection_dataset], containing
+#'   method of an [object detection dataset][coco_detection_dataset], or a bare list containing
 #'   at least:
 #'   \itemize{
 #'     \item `boxes` — tensor of shape `(N, 4)` in xyxy format, or `(N, 5)` in
@@ -415,6 +429,8 @@ target_transform_affine <- function(target, angle = 0, translate = c(0, 0),
 
 #' @export
 target_transform_affine.default <- function(target, ...) {
+  if (identical(class(target), "list"))
+    return(target_transform_affine.object_detection_target(target, ...))
   not_implemented_for_class(target)
 }
 

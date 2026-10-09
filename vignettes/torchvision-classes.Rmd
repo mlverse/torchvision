@@ -257,6 +257,9 @@ carries. Crossing them is an error rather than a silent no-op, so
 `target_transform_coco_masks()` on an `object_detection_target`, stops with
 `not implemented for` and the class it was handed.
 
+Both groups also accept bare lists with the fields their transforms require.
+Transforming a bare list preserves its list class.
+
 The image transforms are written for `torch_tensor`. Five of them also take a
 magick image, `transform_crop()`, `transform_hflip()`, `transform_resize()`,
 `transform_sahi_crop()` and `transform_to_tensor()`, and `transform_to_tensor()`
@@ -278,9 +281,9 @@ class somewhere along a pipeline.
 
 ## Building an item by hand
 
-A bare list is not accepted as a target, so annotations that do not come out of
-a torchvision dataset need their classes set before any of this will look at
-them:
+Target transforms accept a bare list of annotations. When building a complete
+item for item transforms or drawing functions, give the item its task class;
+the example also gives the target its corresponding class:
 
 ```{r}
 img <- torch_randint(0, 255, size = c(3, 120, 160))$to(dtype = torch_uint8())

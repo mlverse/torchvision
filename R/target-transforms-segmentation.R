@@ -6,7 +6,8 @@
 #' Use as `target_transform` in `coco_segmentation_dataset()`.
 #'
 #' @param y a `segmentation_target`, as returned by the `.getitem()` method of
-#' [coco_segmentation_dataset()], with names `segmentation`, `image_height`, `image_width`.
+#' [coco_segmentation_dataset()], or a bare list with names `segmentation`,
+#' `image_height`, `image_width`.
 #'
 #' @return Modified `y` list with added `masks` field (N, H, W) boolean tensor, N being the number of
 #' classes.
@@ -29,6 +30,8 @@ target_transform_coco_masks <- function(y) {
 
 #' @export
 target_transform_coco_masks.default <- function(y) {
+  if (identical(class(y), "list"))
+    return(target_transform_coco_masks.segmentation_target(y))
   not_implemented_for_class(y)
 }
 
@@ -70,8 +73,8 @@ target_transform_coco_masks.segmentation_target <- function(y) {
 #' via `draw_segmentation_mask()`.
 #' Use as `target_transform` in `oxfordiiitpet_segmentation_dataset()`.
 #'
-#' @param y a `segmentation_target` containing a `trimap` field, a (H, W) tensor
-#' with values 1, 2, 3
+#' @param y a `segmentation_target` or a bare list containing a `trimap` field,
+#' a (H, W) tensor with values 1, 2, 3
 #'
 #' @return Modified y list with added `masks` field (3, H, W) boolean tensor
 #'
@@ -101,6 +104,8 @@ target_transform_trimap_masks <- function(y) {
 
 #' @export
 target_transform_trimap_masks.default <- function(y) {
+  if (identical(class(y), "list"))
+    return(target_transform_trimap_masks.segmentation_target(y))
   not_implemented_for_class(y)
 }
 
