@@ -1,5 +1,18 @@
 # torchvision (development version)
 
+## Breaking changes
+
+* `model_maskrcnn_*()` now return image-sized mask probabilities in `masks`, shape `(N, H, W)` (@sebffischer, #412).
+  Code that used the per-box `(N, 28, 28)` probabilities should read `output$detections[[1]]$mask_probs` instead of `output$detections[[1]]$masks`.
+  For image overlays, use `output$detections[[1]]$masks > 0.5`.
+* State dictionaries saved with torchvision 0.9.0 need migration for `model_vit_*()`, `model_facenet_inception_resnet_v1()`, `model_convnext_*_upernet()`, `model_fasterrcnn_resnet50_fpn_v2()` and `model_maskrcnn_resnet50_fpn_v2()`: parameters were added, removed or renamed, so these checkpoints cannot be loaded unchanged with `strict = TRUE` (#405, #406, #410, #412).
+  RF-DETR checkpoints from earlier development versions may also need migration after changes to decoder depths and resolutions (#413).
+  There is no automatic migration for user-saved checkpoints. Keep the package version that created them, or explicitly migrate and validate the weights.
+  `model_maxvit()` retains its state-dict keys and shapes, but its corrected forward computation can change predictions (#405).
+  Support for the hosted pretrained weights does not imply compatibility with user-saved checkpoints.
+* When supplied, `draw_bounding_boxes()` labels and colors must have length 1 or
+  match the number of original boxes. Partial recycling is no longer supported (#415).
+
 ## New models
 
 * Added RF-DETR model family : `model_rfdetr_*`, with `*` being `nano()` `small()`, `medium()`, `base()`, `base_2()`, `base_o365()` and `large()`
@@ -34,16 +47,10 @@
 * Added `item_transform_random_affine()` for applying an affine transformation drawn from the given ranges to dataset items, with support for detection, segmentation and rotated-box item types and datasets (@srishtiii28, #390).
 * Added `item_transform_random_perspective()` for applying a random perspective transformation to dataset items with probability `p`, with support for detection, segmentation and rotated-box item types and datasets (@DerrickUnleashed, #393).
 * Detection datasets (`coco_detection_dataset()`, `pascal_detection_dataset()` and the `rf100_*_collection()`s) now inherit the `object_detection_dataset` class and their item target `y` the `object_detection_target` class.
-  Segmentation datasets (`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`, `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and `rf100_peixos_segmentation_dataset()`) now inherit the `segmentation_dataset` and `segmentation_target` classes. 
-  Target transforms now dispatch on those classes instead of inspecting the target fields: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. A bare list is no longer accepted as a target, so a hand-built one needs its class set (@srishtiii28, #391).
+  Segmentation datasets (`coco_segmentation_dataset()`, `pascal_segmentation_dataset()`, `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and `rf100_peixos_segmentation_dataset()`) now inherit the `segmentation_dataset` class and their item target `y` the `segmentation_target` class.
+  Target transforms now dispatch on those classes: `target_transform_resize()`, `target_transform_rotate()`, `target_transform_affine()` and `target_transform_sahi_crop()` take an `object_detection_target`, and `target_transform_coco_masks()` and `target_transform_trimap_masks()` a `segmentation_target`. Bare-list targets remain supported and retain their list class (@srishtiii28, #391).
 * Added a "Visualization utilities" article covering `vision_make_grid()`, `draw_bounding_boxes()`, `draw_segmentation_masks()` and `draw_keypoints()` on the output of `model_rfdetr_base()` and `model_fcn_resnet50()` (@srishtiii28, #400).
 * Added a "torchvision classes" vignette sketching what each class holds: the `image_with_bounding_box`, `image_with_rotated_box` and `image_with_segmentation_mask` items, their `object_detection_target` and `segmentation_target`, the `sahi_split` returned by `prepare_sahi_split()`, and which transform and drawing functions dispatch on each (@srishtiii28, #396).
-
-## Breaking changes
-
-* When supplied, `draw_bounding_boxes()` labels and colors must have length 1 or
-  match the number of original boxes. Partial recycling is no longer supported (#415).
-* `model_maskrcnn_*()` now return `masks` pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in `mask_probs` (@sebffischer, #412).
 
 ## Bug fixes and improvements
 
@@ -54,7 +61,8 @@
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
 * `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
 * `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
-* `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype (#398).
+* `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype, while preserving positional `scale`, `num_rows`, `padding` and `pad_value` arguments (#398).
+  Use `per_row` for the number of images per row; named `num_rows` remains supported as a deprecated alias.
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
   instead of `shear`, which left the shear range incomplete and made the sampling fail (#390).
 * `item_transform_rotate()` no longer truncates the rotation angle to a whole number of degrees
