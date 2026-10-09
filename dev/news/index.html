@@ -139,12 +139,15 @@
 </ul></div>
 <div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
-<ul><li>
+<ul><li>When supplied, <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> labels and colors must have length 1 or match the number of original boxes. Partial recycling is no longer supported (<a href="https://github.com/mlverse/torchvision/issues/415" class="external-link">#415</a>).</li>
+<li>
 <code>model_maskrcnn_*()</code> now return <code>masks</code> pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in <code>mask_probs</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/412" class="external-link">#412</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
-<ul><li>Fixed box alignment in padded center crops and random crops, and corrected five- and ten-crop geometry (<a href="https://github.com/mlverse/torchvision/issues/414" class="external-link">#414</a>).</li>
+<ul><li>
+<code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> now keeps labels and colors aligned with their boxes when <code>lazy = TRUE</code> filters out degenerate boxes (<a href="https://github.com/mlverse/torchvision/issues/415" class="external-link">#415</a>).</li>
+<li>Fixed box alignment in padded center crops and random crops, and corrected five- and ten-crop geometry (<a href="https://github.com/mlverse/torchvision/issues/414" class="external-link">#414</a>).</li>
 <li>
 <code>model_vit_*()</code> predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses <code>eps = 1e-6</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
 <li>

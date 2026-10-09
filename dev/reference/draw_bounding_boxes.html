@@ -156,12 +156,14 @@ to the image. In other words: \(0  \leq x_{min} &lt; x_{max} &lt; Height \) and
 
 
 <dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
-<dd><p>character vector containing the labels of bounding boxes.</p></dd>
+<dd><p>A character vector or tensor containing one label for all boxes,
+or one label per box in the original <code>boxes</code> tensor.</p></dd>
 
 
 <dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
+of the boxes or single color for all boxes. When supplying multiple colors,
+provide one per box in the original <code>boxes</code> tensor. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.</p></dd>
 
 
@@ -183,6 +185,7 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 
 <dt id="arg-lazy">lazy<a class="anchor" aria-label="anchor" href="#arg-lazy"></a></dt>
 <dd><p>if <code>TRUE</code>, silently filter out degenerate bounding boxes (xmin &gt;= xmax or ymin &gt;= ymax).
+Corresponding per-box labels and colors are filtered with the boxes.
 If <code>FALSE</code>, error on the first non-conforming box.</p></dd>
 
 </dl></div>
