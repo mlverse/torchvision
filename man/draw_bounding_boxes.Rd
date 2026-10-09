@@ -43,10 +43,12 @@ format. Note that the boxes coordinates are absolute with respect
 to the image. In other words: \eqn{0  \leq x_{min} < x_{max} < Height } and
 \eqn{0  \leq y_{min} < y_{max} < Width }.}
 
-\item{labels}{character vector containing the labels of bounding boxes.}
+\item{labels}{A character vector or tensor containing one label for all boxes,
+or one label per box in the original \code{boxes} tensor.}
 
 \item{colors}{character vector containing the colors
-of the boxes or single color for all boxes. The color can be represented as
+of the boxes or single color for all boxes. When supplying multiple colors,
+provide one per box in the original \code{boxes} tensor. The color can be represented as
 strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for boxes.}
 
 \item{fill}{If \code{TRUE} fills the bounding box with specified color.}
@@ -58,8 +60,7 @@ strings e.g. "red" or "#FF00FF". By default, viridis colors are generated for bo
 \item{font_size}{The requested font size in points.}
 
 \item{lazy}{if \code{TRUE}, silently filter out degenerate bounding boxes (xmin >= xmax or ymin >= ymax).
-Supplied labels and colors are recycled over the original boxes before filtering,
-so each surviving box keeps its corresponding label and color.
+Corresponding per-box labels and colors are filtered with the boxes.
 If \code{FALSE}, error on the first non-conforming box.}
 }
 \value{

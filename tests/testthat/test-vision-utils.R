@@ -144,7 +144,7 @@ test_that("draw_bounding_boxes filters tensor labels with a single surviving box
   }
 })
 
-test_that("draw_bounding_boxes broadcasts labels and colors before filtering", {
+test_that("draw_bounding_boxes supports shared and per-box annotations when filtering", {
   image <- torch::torch_zeros(3, 100, 400, dtype = torch::torch_uint8())
   coordinates <- rbind(
     c(10, 20, 80, 80), c(110, 20, 180, 80),
@@ -154,7 +154,6 @@ test_that("draw_bounding_boxes broadcasts labels and colors before filtering", {
     list(labels = "box", colors = "red"),
     list(labels = "box", colors = c("red", "green", "blue", "yellow")),
     list(labels = c("first", "second", "third", "fourth"), colors = "red"),
-    list(labels = c("odd", "even"), colors = c("red", "blue")),
     list(labels = c("first", "second", "third", "fourth"), colors = NULL),
     list(labels = NULL, colors = c("red", "green", "blue", "yellow"))
   )
@@ -173,6 +172,28 @@ test_that("draw_bounding_boxes broadcasts labels and colors before filtering", {
         image, boxes, labels = annotation$labels, colors = annotation$colors
       )
       expect_equal(as_array(actual), as_array(expected))
+    }
+  }
+})
+
+test_that("draw_bounding_boxes rejects partial recycling of annotations", {
+  image <- torch::torch_zeros(3, 100, 100, dtype = torch::torch_uint8())
+  coordinates <- matrix(rep(c(10, 10, 50, 50), 6), ncol = 4, byrow = TRUE)
+
+  for (invalid in list(integer(0), 2L, seq_len(6))) {
+    mixed <- coordinates
+    mixed[invalid, 3] <- mixed[invalid, 1]
+    boxes <- torch::torch_tensor(mixed)
+
+    for (n in c(0L, 2L, 3L, 7L)) {
+      expect_error(
+        draw_bounding_boxes(image, boxes, labels = rep("box", n)),
+        "must be 1 or match the number of boxes"
+      )
+      expect_error(
+        draw_bounding_boxes(image, boxes, colors = rep("red", n)),
+        "colors vector must contain one color or one color per box"
+      )
     }
   }
 })

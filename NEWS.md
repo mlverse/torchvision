@@ -41,6 +41,8 @@
 
 ## Breaking changes
 
+* When supplied, `draw_bounding_boxes()` labels and colors must have length 1 or
+  match the number of original boxes. Partial recycling is no longer supported.
 * `model_maskrcnn_*()` now return `masks` pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in `mask_probs` (@sebffischer, #412).
 
 ## Bug fixes and improvements
