@@ -11,7 +11,8 @@ target_transform_coco_masks(y)
 }
 \arguments{
 \item{y}{a \code{segmentation_target}, as returned by the \code{.getitem()} method of
-\code{\link[=coco_segmentation_dataset]{coco_segmentation_dataset()}}, with names \code{segmentation}, \code{image_height}, \code{image_width}.}
+\code{\link[=coco_segmentation_dataset]{coco_segmentation_dataset()}}, or a bare list with names \code{segmentation},
+\code{image_height}, \code{image_width}.}
 }
 \value{
 Modified \code{y} list with added \code{masks} field (N, H, W) boolean tensor, N being the number of

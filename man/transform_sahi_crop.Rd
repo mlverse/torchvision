@@ -26,7 +26,7 @@ a numeric vector \code{c(height, width)} or a dataset.}
 \item{overlap_size_ratio}{Numeric vector of length 2: vertical and horizontal
 overlap ratios \code{c(overlap_h, overlap_w)}.}
 
-\item{y}{An \code{object_detection_target} containing \code{boxes} and
+\item{y}{An \code{object_detection_target} or a bare list containing \code{boxes} and
 \code{labels}, with bounding boxes in \code{(x1, y1, x2, y2)} format, or a
 list of such targets to transform as a batch.}
 

@@ -21,6 +21,9 @@ NULL
 #'
 #' For `magick-image` input, arranges frames using `magick::image_montage()`.
 #'
+#' Positional grid options retain their original order: `scale`, `num_rows`,
+#' `padding`, `pad_value`. When passing additional images, name the grid options.
+#'
 #' @param tensor A 4D `torch_tensor` of shape (B x C x H x W), a 3D `torch_tensor`
 #'   of shape (C x H x W), or a `magick-image` object.
 #' @param ... Additional 3D `torch_tensor` objects (when first argument is a 3D
@@ -40,11 +43,18 @@ NULL
 #' @family image display
 #' @export
 vision_make_grid <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-  if (!is.null(num_rows)) {
-    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
-    per_row <- num_rows
-  }
   dots <- list(...)
+  if (length(dots) && (is.logical(dots[[1]]) || is.numeric(dots[[1]]))) {
+    # Match scalar options with the released signature, including named options
+    # that take precedence over positional matching. Pass evaluated values so
+    # expressions in the original call run only once.
+    supplied <- setdiff(names(match.call(expand.dots = FALSE))[-1L], c("tensor", "..."))
+    return(do.call(function(tensor, scale = TRUE, num_rows = 8, padding = 2,
+                            pad_value = 0, per_row = num_rows) {
+      vision_make_grid(tensor, scale = scale, per_row = per_row,
+                       padding = padding, pad_value = pad_value)
+    }, c(list(tensor = tensor), dots, mget(supplied, envir = environment()))))
+  }
   if (length(dots) > 0) {
     primary_class <- class(tensor)[1]
     non_matching <- Filter(function(x) !inherits(x, primary_class), dots)
@@ -66,6 +76,10 @@ vision_make_grid.default <- function(tensor, ..., scale = TRUE, per_row = 8, pad
 #' @rdname vision_make_grid
 #' @export
 vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
+  if (!is.null(num_rows)) {
+    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
+    per_row <- num_rows
+  }
   extra_tensors <- list(...)
 
   if (!tensor$ndim %in% c(3L, 4L))
@@ -125,7 +139,10 @@ vision_make_grid.torch_tensor <- function(tensor, ..., scale = TRUE, per_row = 8
 #' @rdname vision_make_grid
 #' @export
 `vision_make_grid.magick-image` <- function(tensor, ..., scale = TRUE, per_row = 8, padding = 2, pad_value = 0, num_rows=NULL) {
-
+  if (!is.null(num_rows)) {
+    deprecated("'num_rows' is deprecated, use 'per_row' instead.")
+    per_row <- num_rows
+  }
   rlang::check_installed("magick")
 
   imgs <- tensor
