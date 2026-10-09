@@ -42,13 +42,13 @@
 ## Breaking changes
 
 * When supplied, `draw_bounding_boxes()` labels and colors must have length 1 or
-  match the number of original boxes. Partial recycling is no longer supported.
+  match the number of original boxes. Partial recycling is no longer supported (#415).
 * `model_maskrcnn_*()` now return `masks` pasted into the image, shape (N, H, W), as torchvision does; the per-box 28x28 probabilities are in `mask_probs` (@sebffischer, #412).
 
 ## Bug fixes and improvements
 
 * `draw_bounding_boxes()` now keeps labels and colors aligned with their boxes
-  when `lazy = TRUE` filters out degenerate boxes.
+  when `lazy = TRUE` filters out degenerate boxes (#415).
 * Fixed box alignment in padded center crops and random crops, and corrected
   five- and ten-crop geometry (#414).
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
