@@ -144,7 +144,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-and-improvements-development-version">Bug fixes and improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-improvements-development-version"></a></h3>
-<ul><li>
+<ul><li>Fixed box alignment in padded center crops and random crops, and corrected five- and ten-crop geometry (<a href="https://github.com/mlverse/torchvision/issues/414" class="external-link">#414</a>).</li>
+<li>
 <code>model_vit_*()</code> predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses <code>eps = 1e-6</code> (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
 <li>
 <code><a href="../reference/model_maxvit.html">model_maxvit()</a></code> is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (<a href="https://github.com/sebffischer" class="external-link">@sebffischer</a>, <a href="https://github.com/mlverse/torchvision/issues/405" class="external-link">#405</a>).</li>
