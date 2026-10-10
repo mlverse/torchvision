@@ -1,6 +1,10 @@
 ---
 title: "Visualization utilities"
-type: docs
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{visualization utilities}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE}
