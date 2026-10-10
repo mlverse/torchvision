@@ -14,12 +14,12 @@ navbar:
   articles:
     text: Articles
     menu:
-      - text: torchvision classes
-        href: articles/torchvision-classes.html
       - text: Visualization utilities
         href: articles/examples/visualization-utilities.html
       - text: RF100 Dataset Catalog
         href: articles/rf100-datasets.html
+      - text: Torchvision S3 classes
+        href: articles/torchvision-classes.html
   examples:
     text: Examples
     menu:
