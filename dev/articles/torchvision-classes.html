@@ -53,13 +53,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/torchvision-classes.html">torchvision classes</a>
-    </li>
-    <li>
       <a href="../articles/examples/visualization-utilities.html">Visualization utilities</a>
     </li>
     <li>
       <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
     </li>
   </ul>
 </li>
@@ -133,81 +133,109 @@
 
     
     
-<p>What a torchvision dataset hands back is a plain R list with an S3
-class glued onto it, and that class is what the rest of the package
-dispatches on. It decides which transform will accept the object, what
-the object holds once that transform has run, and which drawing helper
-can render it. This article goes through those classes and shows what is
-inside each of them.</p>
-<p>The code is not evaluated when the website is built, since most of it
-needs a dataset on disk.</p>
+<style>
+.callout-note {  margin: 1em 0;  padding: .6em .9em;  background: #e7f1fd;  border-left: 4px solid #0d6efd;  border-radius: .25rem;}
+.callout-note::before {  content: "Note";  display: block;  font-weight: 700;  color: #0a58ca;  margin-bottom: .25rem;}
+</style>
+<p>All outputs of <a href="../reference/#datasets">torchvision
+datasets</a> and <a href="../reference/#models">torchvision models</a>
+inference results are plain R lists of torch tensors. But those lists
+may have very different attributes names and content between object
+detection and semantic segmentation for examples.</p>
+<p>In order to ease the correct mapping of transformations and
+visualization utilities to those diverse objects, we have equipped those
+objects with S3 classes that will automatically dispatch to the right
+method, in a similar way as pytorch vision with TVTensors.</p>
+<p>The different families of transforms use S3 classes internally to
+accept objects as input, modify output classes for correct pipeline
+continuation, and dispatch to the appropriate drawing helpers.</p>
+<p>This article goes through those S3 classes for the user to understand
+their content and usage.</p>
+<p>The code in this vignette is not evaluated when the website is built,
+since most of the code chunks requires a dataset on disk.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://torchvision.mlverse.org" class="external-link">torchvision</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://torch.mlverse.org/docs" class="external-link">torch</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="why-the-classes-exist">Why the classes exist<a class="anchor" aria-label="anchor" href="#why-the-classes-exist"></a>
+<h2 id="what-are-those-s3-classes-made-for">What are those S3 classes made for?<a class="anchor" aria-label="anchor" href="#what-are-those-s3-classes-made-for"></a>
 </h2>
-<p>An item is a pair that has to stay consistent. Rotate the image and
-the boxes have to turn with it; crop it and the masks have to be cropped
-the same way. The class on the item is what records which kind of
-annotation it carries, so that one function name can do the right thing
-for each of them and refuse the ones it cannot handle, rather than
-return a mismatched pair.</p>
-<p>The target transforms used to read the fields of <code>y</code> to
-work out what they had been handed. Dispatching on a class instead makes
-the contract explicit: a target that has lost its class fails at the
-call, rather than producing a wrong result two steps later. It is also
-what lets the drawing helpers take an item whole, since
-<code>draw_bounding_boxes(item)</code> knows where the image, the boxes
-and the labels are only because the class says so.</p>
+<p>A torchvision dataset item is a list of <code>x</code>, the tensor
+image, and <code>y</code>, the target that is also a list containing
+<code>bbox</code> with a [4, N] tensor in case of object-detection
+whereas it will contain <code>mask</code>, a binary tensor in case of a
+semantic-segmentation item.</p>
+<p>Both the image and its bounding boxes (or mask) must stay consistent
+: Rotate the image and the boxes (respectively mask) have to be rotated
+as well; crop it and both have to be cropped the same way. We do not
+want to have different function names for each and every transform for
+each and every object family. So the S3 class on the item is the
+placeholder for the computer-vision task family and will magically
+dispatch the transform accordingly.</p>
+<p>There is a drawback to this: a dataset item or a dataset target that
+has missed to match one of the defined S3 classes will fail at the next
+<code>transform_</code> call or fail to be rendered by drawing helpers
+like <code>draw_bounding_boxes(item)</code>, rather than producing a
+wrong result.</p>
 </div>
 <div class="section level2">
-<h2 id="datasets-items-and-targets">Datasets, items and targets<a class="anchor" aria-label="anchor" href="#datasets-items-and-targets"></a>
+<h2 id="datasets-items-image-and-targets">Datasets, items, image and targets<a class="anchor" aria-label="anchor" href="#datasets-items-image-and-targets"></a>
 </h2>
 <p>Indexing a dataset returns an <em>item</em>: a list with
-<code>x</code>, the image, and <code>y</code>, everything the dataset
-knows about that image. <code>y</code> is called the
-<em>target</em>.</p>
+<code>x</code>, the <em>image</em>, and <code>y</code>, a list of
+everything the dataset associates to the image. <code>y</code> is called
+the <em>target</em>.</p>
 <div class="float">
 <img src="assets/dataset-item.svg" alt="A dataset is a deck of items; each item holds an image in $x and its annotations in $y."><div class="figcaption">A dataset is a deck of items; each item holds an
 image in <code>$x</code> and its annotations in <code>$y</code>.</div>
 </div>
 <p>A dataset takes up to three transform arguments, and they reach
-different depths of that structure. <code>transform</code> is handed
-<code>x</code> alone, <code>target_transform</code> is handed
-<code>y</code> alone, and <code>item_transform</code> is handed the item
-as a whole, once the other two have run. Classification datasets only
-offer the first two. Detection and segmentation datasets offer all
-three, because an image cannot be rotated or cropped without moving its
-boxes and masks with it.</p>
+different depths of the <em>item</em> structure. <code>transform</code>
+is handeling <code>x</code> alone, <code>target_transform</code> is
+handeling <code>y</code> alone, and <code>item_transform</code> is
+handeling the item as a whole.</p>
+<p>Classification datasets only offer the first two. Detection and
+segmentation datasets offer all three, because an image cannot be
+rotated or cropped without moving its boxes and masks with it.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coco_detection_dataset.html">coco_detection_dataset</a></span><span class="op">(</span></span>
 <span>  train <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  transform <span class="op">=</span> <span class="va">transform_to_tensor</span>,</span>
-<span>  item_transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">item</span><span class="op">)</span> <span class="fu"><a href="../reference/item_transform_resize.html">item_transform_resize</a></span><span class="op">(</span><span class="va">item</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">480</span>, <span class="fl">640</span><span class="op">)</span><span class="op">)</span></span>
+<span>  transform <span class="op">=</span> \<span class="op">(</span><span class="va">img</span><span class="op">)</span> <span class="va">img</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/transform_to_tensor.html">transform_to_tensor</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/transform_rgb_to_grayscale.html">transform_rgb_to_grayscale</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  item_transform <span class="op">=</span> \<span class="op">(</span><span class="va">item</span><span class="op">)</span> <span class="va">item</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/item_transform_resize.html">item_transform_resize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">480</span>, <span class="fl">640</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="section level4 callout-note">
+<h4 id="transform-ordering">Transform ordering<a class="anchor" aria-label="anchor" href="#transform-ordering"></a>
+</h4>
+<p>When multiple transforms are included in a dataset construction, they
+are applied in the following order:</p>
+<ol style="list-style-type: decimal">
+<li><p><code>transform</code>, applied to image</p></li>
+<li><p><code>target_transform</code> if any, applied to target</p></li>
+<li><p><code>item_transform</code> applied to the results of the two
+previous ones onto both image and targets.</p></li>
+</ol>
+</div>
+<div class="callout-note">
 <p><code>transform_to_tensor</code> is doing more work there than it
 looks. A dataset returns <code>x</code> in whatever form it was read in,
-which is the <code>(H, W, 3)</code> channel-last array of
-<code><a href="../reference/base_loader.html">base_loader()</a></code> for most of them and a magick image for
-<code><a href="../reference/cityscapes_dataset.html">cityscapes_dataset()</a></code>. The item transforms and the drawing
-helpers all want the <code>(C, H, W)</code> tensor that torch models
-take, so a detection or segmentation dataset is nearly always built with
+which is the <code>(H, W, 3)</code> channel-last native R array out of
+<code><a href="../reference/base_loader.html">base_loader()</a></code> . The item transforms and the drawing helpers
+all want the <code>(C, H, W)</code> tensor that torch models take, so a
+detection or segmentation dataset is nearly always built with
 <code>transform = transform_to_tensor</code>.</p>
-<p>The dataset itself is classed by task, with
-<code>object_detection_dataset</code> or
-<code>segmentation_dataset</code> inserted ahead of <code>dataset</code>
-so that task methods win over the generic ones while the dataset keeps
-its own name first. That class is what lets you hand a whole dataset to
-an item transform:</p>
+</div>
+<p>The dataset itself gets a S3 class depending on the computer-vision
+task, either <code>object_detection_dataset</code> or
+<code>segmentation_dataset</code> is inserted ahead of torch generic
+class <code>dataset</code>. That class is what lets you hand a whole
+dataset to an item transform:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/item_transform_random_horizontal_flip.html">item_transform_random_horizontal_flip</a></span><span class="op">(</span><span class="va">ds</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 <p>which composes the flip into the dataset’s
 <code>item_transform</code> rather than applying it once.</p>
 </div>
 <div class="section level2">
-<h2 id="classification-and-caption-items">Classification and caption items<a class="anchor" aria-label="anchor" href="#classification-and-caption-items"></a>
+<h2 id="classification-and-caption-datasets-and-their-items">Classification and caption datasets and their items<a class="anchor" aria-label="anchor" href="#classification-and-caption-datasets-and-their-items"></a>
 </h2>
 <p>The simplest items carry no class at all.
 <code><a href="../reference/mnist_dataset.html">mnist_dataset()</a></code>, <code><a href="../reference/cifar_datasets.html">cifar10_dataset()</a></code>,
@@ -226,7 +254,7 @@ these items: an image transform goes in through <code>transform</code>,
 and there is no geometry in the target to keep in sync with it.</p>
 </div>
 <div class="section level2">
-<h2 id="detection-items">Detection items<a class="anchor" aria-label="anchor" href="#detection-items"></a>
+<h2 id="detection-datasets-and-their-items">Detection datasets and their items<a class="anchor" aria-label="anchor" href="#detection-datasets-and-their-items"></a>
 </h2>
 <p><code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code>,
 <code><a href="../reference/pascal_voc_datasets.html">pascal_detection_dataset()</a></code> and the
@@ -291,7 +319,7 @@ on its own:</p>
 <div class="section level2">
 <h2 id="rotated-box-items">Rotated box items<a class="anchor" aria-label="anchor" href="#rotated-box-items"></a>
 </h2>
-<p>Four numbers per box cannot describe a box that has been turned, so
+<p>Four numbers per box cannot describe a box that has been rotated, so
 <code><a href="../reference/item_transform_rotate.html">item_transform_rotate()</a></code> and
 <code><a href="../reference/item_transform_affine.html">item_transform_affine()</a></code> return an
 <code>image_with_rotated_box</code> instead of the item they were
@@ -315,7 +343,7 @@ upright rectangle.</p>
 <code><a href="../reference/item_transform_perspective.html">item_transform_perspective()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="segmentation-items">Segmentation items<a class="anchor" aria-label="anchor" href="#segmentation-items"></a>
+<h2 id="segmentation-datasets-and-their-items">Segmentation datasets and their items<a class="anchor" aria-label="anchor" href="#segmentation-datasets-and-their-items"></a>
 </h2>
 <p><code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code>,
 <code><a href="../reference/pascal_voc_datasets.html">pascal_segmentation_dataset()</a></code>,
