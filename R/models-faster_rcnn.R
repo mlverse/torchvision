@@ -193,7 +193,7 @@ rcnn_filter_proposals <- function(objectness, bbox_deltas, anchors, image_size,
 # rois of one image on one feature map [C, H, W]. boxes in image coordinates.
 rcnn_roi_align_single <- function(feature, boxes, output_size, spatial_scale,
                                   sampling_ratio = 2L, chunk = 128L) {
-  if (sampling_ratio <= 0) value_error("Only a positive sampling_ratio is supported.")
+  if (sampling_ratio <= 0) cli_abort("Only a positive {.field sampling_ratio} is supported.")
   c(C, H, W) %<-% feature$shape[1:3]
   P <- output_size[1]
   Q <- output_size[2]
