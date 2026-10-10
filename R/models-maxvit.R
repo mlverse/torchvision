@@ -115,7 +115,7 @@ maxvit_relative_attention <- nn_module(
   "maxvit_relative_attention",
   initialize = function(feat_dim, head_dim, max_seq_len) {
     if (feat_dim %% head_dim != 0) {
-      value_error("feat_dim ({feat_dim}) must be divisible by head_dim ({head_dim}).")
+      cli_abort("{.field feat_dim} ({.val {feat_dim}}) must be divisible by {.field head_dim} ({.val {head_dim}}).")
     }
     self$n_heads <- feat_dim %/% head_dim
     self$head_dim <- head_dim
@@ -177,7 +177,7 @@ maxvit_partition_attention <- nn_module(
   initialize = function(in_channels, head_dim, partition_size, partition_type, mlp_ratio,
                         attention_dropout, mlp_dropout, p_stochastic_dropout) {
     if (!partition_type %in% c("grid", "window")) {
-      value_error("partition_type must be either 'grid' or 'window'.")
+      cli_abort("{.field partition_type} must be either 'grid' or 'window'.")
     }
     self$partition_size <- partition_size
     self$partition_type <- partition_type
