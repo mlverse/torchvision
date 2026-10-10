@@ -100,7 +100,7 @@ turn the label indices into readable names out of `coco_classes()`.
 
 ```{r}
 draw_high_confidence_bboxes <- function(image, detection, width = 4, font_size = 25, ...) {
-  keep <- as.logical(as.array(detection$scores > 0.2))
+  keep <- as.logical(as.array(detection$scores > 0.6))
   draw_bounding_boxes(
     image,
     detection$boxes[keep, , drop = FALSE],
