@@ -15,46 +15,65 @@ knitr::opts_chunk$set(
 )
 ```
 
-What a torchvision dataset hands back is a plain R list with an S3 class glued
-onto it, and that class is what the rest of the package dispatches on. It decides
-which transform will accept the object, what the object holds once that transform
-has run, and which drawing helper can render it. This article goes through those
-classes and shows what is inside each of them.
+```{=html}
+<style>
+.callout-note {  margin: 1em 0;  padding: .6em .9em;  background: #e7f1fd;  border-left: 4px solid #0d6efd;  border-radius: .25rem;}
+.callout-note::before {  content: "Note";  display: block;  font-weight: 700;  color: #0a58ca;  margin-bottom: .25rem;}
+</style>
+```
 
-The code is not evaluated when the website is built, since most of it needs a
-dataset on disk.
+All outputs of [torchvision datasets](../reference/#datasets) and [torchvision models](../reference/#models)
+inference results are plain R lists of torch tensors.
+But those lists may have very different attributes names and content between object detection and 
+semantic segmentation for examples.
+
+In order to ease the correct mapping of transformations and visualization utilities to 
+those diverse objects, we have equipped those objects with S3 classes
+that will automatically dispatch to the right method, in a similar way as pytorch vision with TVTensors.
+
+The different families of transforms use S3 classes internally to accept objects as 
+input, modify output classes for correct pipeline continuation, and dispatch to 
+the appropriate drawing helpers.
+
+This article goes through those S3 classes for the user to understand their content and usage.
+
+The code in this vignette is not evaluated when the website is built, since most of 
+the code chunks requires a dataset on disk.
 
 ```{r setup}
 library(torchvision)
 library(torch)
 ```
 
-## Why the classes exist
+## What are those S3 classes made for?
 
-An item is a pair that has to stay consistent. Rotate the image and the boxes
-have to turn with it; crop it and the masks have to be cropped the same way. The
-class on the item is what records which kind of annotation it carries, so that
-one function name can do the right thing for each of them and refuse the ones it
-cannot handle, rather than return a mismatched pair.
+A torchvision dataset item is a list of `x`, the tensor image, and `y`, the target that 
+is also a list containing `bbox` with a [4, N] tensor in case of object-detection whereas 
+it will contain `mask`, a binary tensor in case of a semantic-segmentation item. 
 
-The target transforms used to read the fields of `y` to work out what they had
-been handed. Dispatching on a class instead makes the contract explicit: a
-target that has lost its class fails at the call, rather than producing a wrong
-result two steps later. It is also what lets the drawing helpers take an item
-whole, since `draw_bounding_boxes(item)` knows where the image, the boxes and
-the labels are only because the class says so.
+Both the image and its bounding boxes (or mask) must stay consistent : Rotate the image and the boxes
+ (respectively mask) have to be rotated as well; crop it and both have to be cropped the same way. 
+We do not want to have different function names for each and every transform for each and every object family. So the
+S3 class on the item is the placeholder for the computer-vision task family and will 
+magically dispatch the transform accordingly.
 
-## Datasets, items and targets
+There is a drawback to this: a dataset item or a dataset target that has missed 
+to match one of the defined S3 classes will fail at the next `transform_` call or 
+fail to be rendered by drawing helpers like `draw_bounding_boxes(item)`, rather than producing a wrong
+result.
 
-Indexing a dataset returns an *item*: a list with `x`, the image, and `y`,
-everything the dataset knows about that image. `y` is called the *target*.
+## Datasets, items, image and targets
+
+Indexing a dataset returns an *item*: a list with `x`, the *image*, and `y`,
+a list of everything the dataset associates to the image. `y` is called the *target*.
 
 ![A dataset is a deck of items; each item holds an image in `$x` and its annotations in `$y`.](assets/dataset-item.svg)
 
 A dataset takes up to three transform arguments, and they reach different depths
-of that structure. `transform` is handed `x` alone, `target_transform` is handed
-`y` alone, and `item_transform` is handed the item as a whole, once the other two
-have run. Classification datasets only offer the first two. Detection and
+of the *item*  structure. `transform` is handeling `x` alone, `target_transform` is handeling
+`y` alone, and `item_transform` is handeling the item as a whole.
+
+Classification datasets only offer the first two. Detection and
 segmentation datasets offer all three, because an image cannot be rotated or
 cropped without moving its boxes and masks with it.
 
@@ -62,21 +81,32 @@ cropped without moving its boxes and masks with it.
 ds <- coco_detection_dataset(
   train = FALSE,
   download = TRUE,
-  transform = transform_to_tensor,
-  item_transform = function(item) item_transform_resize(item, c(480, 640))
+  transform = \(img) img %>% transform_to_tensor() %>% transform_rgb_to_grayscale(),
+  item_transform = \(item) item %>% item_transform_resize(c(480, 640))
 )
 ```
 
-`transform_to_tensor` is doing more work there than it looks. A dataset returns
-`x` in whatever form it was read in, which is the `(H, W, 3)` channel-last array
-of `base_loader()` for most of them and a magick image for
-`cityscapes_dataset()`. The item transforms and the drawing helpers all want the
-`(C, H, W)` tensor that torch models take, so a detection or segmentation
-dataset is nearly always built with `transform = transform_to_tensor`.
+::: {.callout-note}
+#### Transform ordering
+When multiple transforms are included in a dataset construction, they are applied in the following order:
 
-The dataset itself is classed by task, with `object_detection_dataset` or
-`segmentation_dataset` inserted ahead of `dataset` so that task methods win over
-the generic ones while the dataset keeps its own name first. That class is what
+1. `transform`, applied to image
+
+2. `target_transform` if any, applied to target
+
+3. `item_transform` applied to the results of the two previous ones onto both image and targets.
+:::
+
+::: {.callout-note}
+ `transform_to_tensor` is doing more work there than it looks. A dataset returns
+`x` in whatever form it was read in, which is the `(H, W, 3)` channel-last native R array
+out of `base_loader()` . The item transforms and the drawing helpers all want the
+`(C, H, W)` tensor that torch models take, so a detection or segmentation
+dataset is nearly always built with `transform = transform_to_tensor`. 
+:::
+
+The dataset itself gets a S3 class depending on the computer-vision task, either `object_detection_dataset` or
+`segmentation_dataset` is inserted ahead of torch generic class `dataset`. That class is what
 lets you hand a whole dataset to an item transform:
 
 ```{r}
@@ -86,7 +116,7 @@ ds <- item_transform_random_horizontal_flip(ds, p = 0.5)
 which composes the flip into the dataset's `item_transform` rather than applying
 it once.
 
-## Classification and caption items
+## Classification and caption datasets and their items
 
 The simplest items carry no class at all. `mnist_dataset()`, `cifar10_dataset()`,
 `eurosat_dataset()` and the other classification datasets return a bare list
@@ -105,7 +135,7 @@ shape, with a character vector of captions in `y`. Nothing dispatches on these
 items: an image transform goes in through `transform`, and there is no geometry
 in the target to keep in sync with it.
 
-## Detection items
+## Detection datasets and their items
 
 `coco_detection_dataset()`, `pascal_detection_dataset()` and the
 `rf100_*_collection()`s give their items the class `image_with_bounding_box` and
@@ -136,7 +166,7 @@ tensor_image_browse(boxed)
 
 ## Rotated box items
 
-Four numbers per box cannot describe a box that has been turned, so
+Four numbers per box cannot describe a box that has been rotated, so
 `item_transform_rotate()` and `item_transform_affine()` return an
 `image_with_rotated_box` instead of the item they were given:
 
@@ -156,7 +186,7 @@ as a polygon through magick rather than as an upright rectangle.
 Every item transform has a method for rotated-box items, except
 `item_transform_perspective()`.
 
-## Segmentation items
+## Segmentation datasets and their items
 
 `coco_segmentation_dataset()`, `pascal_segmentation_dataset()`,
 `cityscapes_dataset()`, `oxfordiiitpet_segmentation_dataset()` and
