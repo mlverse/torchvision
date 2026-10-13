@@ -14,7 +14,7 @@ target_transform_rotate(target, angle = 0)
 }
 \arguments{
 \item{target}{An \code{object_detection_target}, as returned by the \code{.getitem()}
-method of an \link[=coco_detection_dataset]{object detection dataset}, containing
+method of an \link[=coco_detection_dataset]{object detection dataset}, or a bare list containing
 at least:
 \itemize{
 \item \code{boxes} — tensor of shape \verb{(N, 4)} with bounding boxes in xyxy format

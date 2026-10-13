@@ -82,6 +82,9 @@ For \code{torch_tensor} input, accepts either:
 }
 
 For \code{magick-image} input, arranges frames using \code{magick::image_montage()}.
+
+Positional grid options retain their original order: \code{scale}, \code{num_rows},
+\code{padding}, \code{pad_value}. When passing additional images, name the grid options.
 }
 \seealso{
 Other image display:

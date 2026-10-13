@@ -7,6 +7,47 @@ test_that("vision_make_grid works with 4D batch tensor", {
   expect_equal_to_r(grid$max() - grid$min(), 1, tolerance = 1e-4)
 })
 
+test_that("vision_make_grid preserves positional scale, width and padding", {
+  images <- torch::torch_full(c(6, 3, 2, 3), 0.5)
+
+  grid <- vision_make_grid(images, FALSE, 4)
+  expect_tensor_shape(grid, c(3, 10, 22))
+  expect_equal_to_r(grid[, 3:4, 3:5], array(0.5, c(3, 2, 3)))
+
+  grid <- vision_make_grid(images, FALSE, 4, 1, 0.25)
+  expect_tensor_shape(grid, c(3, 7, 17))
+  expect_equal_to_r(grid[, 1, ], matrix(0.25, 3, 17))
+  expect_equal_to_r(grid[, 2:3, 2:4], array(0.5, c(3, 2, 3)))
+})
+
+test_that("vision_make_grid matches mixed positional and named legacy arguments", {
+  images <- torch::torch_full(c(6, 3, 2, 3), 0.5)
+  grid <- vision_make_grid(images, FALSE, 1, num_rows = 4, pad_value = 0.25)
+
+  expect_tensor_shape(grid, c(3, 7, 17))
+  expect_equal_to_r(grid[, 1, ], matrix(0.25, 3, 17))
+  expect_equal_to_r(grid[, 2:3, 2:4], array(0.5, c(3, 2, 3)))
+
+  grid <- vision_make_grid(images, 4, scale = FALSE, padding = 0)
+  expect_tensor_shape(grid, c(3, 4, 12))
+  expected <- array(0, c(3, 4, 12))
+  expected[, 1:2, ] <- 0.5
+  expected[, 3:4, 1:6] <- 0.5
+  expect_equal_to_r(grid, expected)
+})
+
+test_that("vision_make_grid evaluates legacy arguments once", {
+  calls <- 0L
+  grid <- vision_make_grid({
+    calls <- calls + 1L
+    torch::torch_full(c(2, 3, 2, 3), 0.5)
+  }, { calls <- calls + 1L; FALSE }, 1, 0)
+
+  expect_identical(calls, 2L)
+  expect_tensor_shape(grid, c(3, 4, 3))
+  expect_equal_to_r(grid, array(0.5, c(3, 4, 3)))
+})
+
 test_that("vision_make_grid works with multiple 3D tensors in ...", {
   imgs <- lapply(1:4, function(i) torch::torch_randn(c(3, 16, 16)))
   grid <- vision_make_grid(imgs[[1]], imgs[[2]], imgs[[3]], imgs[[4]], per_row = 2, padding = 0)
@@ -58,6 +99,12 @@ test_that("vision_make_grid works with magick-image", {
   w <- magick::image_info(imgs[1])$width
   grid <- vision_make_grid(imgs, per_row = 2, padding = 0)
   expect_tensor_shape(grid, c(3L, 2L * h, 2L * w))
+
+  positional <- vision_make_grid(imgs, FALSE, 2, 0)
+  expect_tensor_shape(positional, c(3L, 2L * h, 2L * w))
+  expect_warning(alias <- vision_make_grid(imgs, num_rows = 2, padding = 0),
+                 class = "deprecated")
+  expect_equal_to_r(alias, as.array(grid))
 })
 
 test_that("vision_make_grid errors on unsupported type", {
@@ -67,9 +114,10 @@ test_that("vision_make_grid errors on unsupported type", {
 test_that("vision_make_grid emits deprecation warning for num_rows", {
   images <- torch::torch_randn(c(4, 3, 16, 16))
   expect_warning(
-    vision_make_grid(images, num_rows = 2),
+    grid <- vision_make_grid(images, num_rows = 2, padding = 0),
     class = "deprecated"
   )
+  expect_tensor_shape(grid, c(3, 32, 32))
 })
 
 test_that("draw_bounding_boxes works", {

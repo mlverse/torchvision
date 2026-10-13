@@ -98,12 +98,52 @@ test_that("target_transform_trimap_masks() creates mutually exclusive masks", {
   expect_true(all(as.array(mask_sum) == 1))
 })
 
-test_that("segmentation target transforms reject targets that are not segmentation_target", {
-  skip_if_not_installed("torch")
-  expect_error(target_transform_coco_masks(unclass(mock_coco_target())),
-               class = "not_implemented_error")
-  expect_error(target_transform_trimap_masks(unclass(mock_trimap_target())),
-               class = "not_implemented_error")
+test_that("segmentation target transforms preserve bare-list inputs", {
+  skip_if_not_installed("magick")
+  coco <- unclass(mock_coco_target())
+  result <- target_transform_coco_masks(coco)
+  expect_identical(class(result), "list")
+  expect_tensor_shape(result$masks, c(1, 100, 100))
+  expect_equal_to_r(result$masks[1, 30, 30], TRUE)
+  expect_identical(result$segmentation, coco$segmentation)
+  expect_null(coco$masks)
+
+  trimap <- list(trimap = matrix(c(1L, 2L, 3L), nrow = 1), label = 1L)
+  result <- target_transform_trimap_masks(trimap)
+  expect_identical(class(result), "list")
+  expect_tensor_dtype(result$masks, torch_bool())
+  expect_tensor_shape(result$masks, c(3, 1, 3))
+  expect_equal_to_r(result$masks[, 1, ], diag(3) == 1)
+  expect_identical(result$label, 1L)
+  expect_null(trimap$masks)
+})
+
+test_that("segmentation target transforms reject detection targets", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  expect_error(target_transform_coco_masks(target), class = "not_implemented_error")
+  expect_error(target_transform_trimap_masks(target), class = "not_implemented_error")
+})
+
+test_that("SAHI accepts bare-list targets individually and in batches", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  bare <- unclass(target)
+  split <- prepare_sahi_split(c(100, 200), size = c(50, 100))
+  expected <- target_transform_sahi_crop(target, split)
+  single <- target_transform_sahi_crop(bare, split)
+  batch <- target_transform_sahi_crop(list(bare, target), list(split, split))
+
+  expect_length(single, length(expected))
+  expect_length(batch, 2)
+  for (i in seq_along(expected)) {
+    for (result in list(single[[i]], batch[[1]][[i]], batch[[2]][[i]])) {
+      expect_equal_to_r(result$boxes, as.array(expected[[i]]$boxes))
+      expect_equal_to_r(result$labels, as.array(expected[[i]]$labels))
+      expect_identical(result$image_height, expected[[i]]$image_height)
+      expect_identical(result$image_width, expected[[i]]$image_width)
+    }
+    expect_identical(class(single[[i]]), "list")
+    expect_s3_class(batch[[2]][[i]], "object_detection_target")
+  }
 })
 
 # Dataset behavior tests (skipped unless TEST_LARGE_DATASETS=1)

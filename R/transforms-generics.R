@@ -297,7 +297,7 @@ transform_ten_crop <- function(img, size, vertical_flip = FALSE) {
 #' @param x Image input (\code{torch_tensor} or \code{magick-image}) for
 #'   \code{transform_sahi_crop}. For \code{prepare_sahi_split} it can also be
 #'   a numeric vector \code{c(height, width)} or a dataset.
-#' @param y An \code{object_detection_target} containing \code{boxes} and
+#' @param y An \code{object_detection_target} or a bare list containing \code{boxes} and
 #'   \code{labels}, with bounding boxes in \code{(x1, y1, x2, y2)} format, or a
 #'   list of such targets to transform as a batch.
 #' @param sahi_split An object of class \code{sahi_split} created by

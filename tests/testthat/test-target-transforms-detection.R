@@ -403,13 +403,29 @@ test_that("target transforms dispatch on object_detection_target", {
   expect_s3_class(resized, "object_detection_target")
 })
 
-test_that("target transforms reject targets that are not object_detection_target", {
-  bare <- unclass(make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4)))
+test_that("detection target transforms preserve bare-list inputs", {
+  target <- make_detection_target(matrix(c(10, 20, 50, 60), ncol = 4))
+  bare <- unclass(target)
+  transforms <- list(
+    function(y) target_transform_rotate(y, angle = 30),
+    function(y) target_transform_affine(y, angle = 30),
+    function(y) target_transform_resize(y, c(200L, 400L))
+  )
 
-  expect_error(target_transform_rotate(bare, angle = 30), class = "not_implemented_error")
-  expect_error(target_transform_affine(bare, angle = 30), class = "not_implemented_error")
-  expect_error(target_transform_resize(bare, c(200L, 400L)), class = "not_implemented_error")
+  for (transform in transforms) {
+    expected <- transform(target)
+    result <- transform(bare)
+    expect_identical(class(result), "list")
+    expect_equal_to_r(result$boxes, as.array(expected$boxes))
+    expect_identical(result$labels, bare$labels)
+    expect_identical(result$image_id, bare$image_id)
+    expect_identical(result$image_height, expected$image_height)
+    expect_identical(result$image_width, expected$image_width)
+  }
+  expect_equal_to_r(bare$boxes, matrix(c(10, 20, 50, 60), ncol = 4))
+})
 
+test_that("detection target transforms reject segmentation targets", {
   segmentation <- make_segmentation_item(image_size = c(8L, 8L), num_masks = 2L)$y
   expect_error(target_transform_rotate(segmentation, angle = 30), class = "not_implemented_error")
   expect_error(target_transform_affine(segmentation, angle = 30), class = "not_implemented_error")
