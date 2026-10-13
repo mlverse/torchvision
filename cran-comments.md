@@ -11,9 +11,9 @@ The local suite passes with two warnings from self-links in the upstream Peixos 
 
 ## Windows R-devel
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-The note identifies a broken relative vignette link. The link is corrected in the release candidate, and the revised win-builder check is pending.
+Windows Server 2022 x64, R-devel (2026-10-10 r90659 ucrt).
 
 ## Reverse dependencies
 
