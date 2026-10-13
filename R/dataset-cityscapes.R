@@ -68,18 +68,18 @@
 #' Expected directory structure:
 #' \preformatted{
 #' root/
-#' ├── leftImg8bit/
-#' │   ├── train/
-#' │   ├── val/
-#' │   └── test/
-#' ├── gtFine/
-#' │   ├── train/
-#' │   ├── val/
-#' │   └── test/
-#' └── gtCoarse/
-#'     ├── train/
-#'     ├── train_extra/
-#'     └── val/
+#' +-- leftImg8bit/
+#' |   +-- train/
+#' |   +-- val/
+#' |   +-- test/
+#' +-- gtFine/
+#' |   +-- train/
+#' |   +-- val/
+#' |   +-- test/
+#' +-- gtCoarse/
+#'     +-- train/
+#'     +-- train_extra/
+#'     +-- val/
 #' }
 #'
 #' @section Integration with draw_segmentation_masks:

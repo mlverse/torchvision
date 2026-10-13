@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 </style>
 ```
 
-All outputs of [torchvision datasets](../reference/#datasets) and [torchvision models](../reference/#models)
+All outputs of [torchvision datasets](https://torchvision.mlverse.org/reference/#datasets) and [torchvision models](https://torchvision.mlverse.org/reference/#models)
 inference results are plain R lists of torch tensors.
 But those lists may have very different attributes names and content between object detection and 
 semantic segmentation for examples.
