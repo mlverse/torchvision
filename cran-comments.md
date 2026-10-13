@@ -1,4 +1,4 @@
-## R CMD check results
+## Local R CMD check results
 
 0 errors | 0 warnings | 0 notes
 
@@ -8,6 +8,12 @@
 - `devtools::check(remote = TRUE, manual = TRUE)` with tests enabled
 
 The local suite passes with two warnings from self-links in the upstream Peixos archive when extracted with macOS's tar. The dataset assertions pass.
+
+## Windows R-devel
+
+0 errors | 0 warnings | 1 note
+
+The note identifies a broken relative vignette link. The link is corrected in the release candidate, and the revised win-builder check is pending.
 
 ## Reverse dependencies
 

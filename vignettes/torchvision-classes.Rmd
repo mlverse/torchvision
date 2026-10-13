@@ -350,7 +350,7 @@ Model outputs are plain lists and carry no class of their own. The object
 detection models return `$detections`, one element per image of the batch, each
 with `$boxes`, `$labels` and `$scores`; the semantic segmentation models return
 `$out`, the per-class logits. The
-[Visualization utilities](examples/visualization-utilities.html) article covers
+[Visualization utilities](visualization-utilities.html) article covers
 turning either of them into something the drawing helpers can render.
 
 ## Comparison with torchvision TVTensors (advanced)
