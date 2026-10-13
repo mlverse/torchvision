@@ -58,6 +58,8 @@ target_transform_resize <- function(target, size) {
 
 #' @export
 target_transform_resize.default <- function(target, ...) {
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if (identical(class(target), "list"))
     return(target_transform_resize.object_detection_target(target, ...))
   not_implemented_for_class(target)
@@ -110,6 +112,8 @@ target_transform_sahi_crop.default <- function(y, sahi_split, min_area_ratio = 0
   if (!identical(class(y), "list"))
     not_implemented_for_class(y)
 
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if ("boxes" %in% names(y))
     return(target_transform_sahi_crop.object_detection_target(y, sahi_split, min_area_ratio))
 
@@ -290,6 +294,8 @@ target_transform_rotate <- function(target, angle = 0) {
 
 #' @export
 target_transform_rotate.default <- function(target,...) {
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if (identical(class(target), "list"))
     return(target_transform_rotate.object_detection_target(target, ...))
   not_implemented_for_class(target)
@@ -429,6 +435,8 @@ target_transform_affine <- function(target, angle = 0, translate = c(0, 0),
 
 #' @export
 target_transform_affine.default <- function(target, ...) {
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if (identical(class(target), "list"))
     return(target_transform_affine.object_detection_target(target, ...))
   not_implemented_for_class(target)

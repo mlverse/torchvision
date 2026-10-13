@@ -30,6 +30,8 @@ target_transform_coco_masks <- function(y) {
 
 #' @export
 target_transform_coco_masks.default <- function(y) {
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if (identical(class(y), "list"))
     return(target_transform_coco_masks.segmentation_target(y))
   not_implemented_for_class(y)
@@ -104,6 +106,8 @@ target_transform_trimap_masks <- function(y) {
 
 #' @export
 target_transform_trimap_masks.default <- function(y) {
+  # Preserve 0.9.0 bare-list calls; remove only when dropping that support.
+  # An unguarded .list method would also accept targets from the wrong task.
   if (identical(class(y), "list"))
     return(target_transform_trimap_masks.segmentation_target(y))
   not_implemented_for_class(y)
