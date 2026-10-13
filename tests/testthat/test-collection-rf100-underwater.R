@@ -1,8 +1,8 @@
 context("dataset-rf100-underwater")
 
-t <- withr::local_tempdir()
-
 test_that("rf100_underwater_collection handles missing files gracefully", {
+  cache_dir <- withr::local_tempdir()
+  withr::local_envvar(c(R_USER_CACHE_DIR = cache_dir))
   expect_error(
     rf100_underwater_collection(dataset = "pipes", split = "train", download = FALSE),
     class = "runtime_error"
