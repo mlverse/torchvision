@@ -49,7 +49,7 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git fetch origin gh-pages
-          git worktree add --detach ../site origin/gh-pages
+          git worktree add --detach ../site FETCH_HEAD
           Rscript -e 'pkgdown::build_site_github_pages(dest_dir = "../site")'
           git show -s --format='Built site for torchvision: %H' HEAD > ../site-commit-message.txt
           git -C ../site add --all
