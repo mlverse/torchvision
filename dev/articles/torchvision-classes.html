@@ -39,7 +39,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.9.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.10.0.9000</span>
       </span>
     </div>
 
@@ -137,11 +137,11 @@
 .callout-note {  margin: 1em 0;  padding: .6em .9em;  background: #e7f1fd;  border-left: 4px solid #0d6efd;  border-radius: .25rem;}
 .callout-note::before {  content: "Note";  display: block;  font-weight: 700;  color: #0a58ca;  margin-bottom: .25rem;}
 </style>
-<p>All outputs of <a href="../reference/#datasets">torchvision
-datasets</a> and <a href="../reference/#models">torchvision models</a>
-inference results are plain R lists of torch tensors. But those lists
-may have very different attributes names and content between object
-detection and semantic segmentation for examples.</p>
+<p>All outputs of <a href="https://torchvision.mlverse.org/reference/#datasets" class="external-link">torchvision
+datasets</a> and <a href="https://torchvision.mlverse.org/reference/#models" class="external-link">torchvision
+models</a> inference results are plain R lists of torch tensors. But
+those lists may have very different attributes names and content between
+object detection and semantic segmentation for examples.</p>
 <p>In order to ease the correct mapping of transformations and
 visualization utilities to those diverse objects, we have equipped those
 objects with S3 classes that will automatically dispatch to the right
@@ -597,9 +597,9 @@ class:</p>
 object detection models return <code>$detections</code>, one element per
 image of the batch, each with <code>$boxes</code>, <code>$labels</code>
 and <code>$scores</code>; the semantic segmentation models return
-<code>$out</code>, the per-class logits. The <a href="examples/visualization-utilities.html">Visualization utilities</a>
-article covers turning either of them into something the drawing helpers
-can render.</p>
+<code>$out</code>, the per-class logits. The <a href="visualization-utilities.html">Visualization utilities</a> article
+covers turning either of them into something the drawing helpers can
+render.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-torchvision-tvtensors-advanced">Comparison with torchvision TVTensors (advanced)<a class="anchor" aria-label="anchor" href="#comparison-with-torchvision-tvtensors-advanced"></a>
