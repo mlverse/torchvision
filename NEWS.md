@@ -1,5 +1,7 @@
 # torchvision (development version)
 
+# torchvision 0.10.0
+
 ## Breaking changes
 
 * `model_maskrcnn_*()` now return image-sized mask probabilities in `masks`, shape `(N, H, W)` (@sebffischer, #412).
@@ -15,9 +17,9 @@
 
 ## New models
 
-* Added RF-DETR model family : `model_rfdetr_*`, with `*` being `nano()` `small()`, `medium()`, `base()`, `base_2()`, `base_o365()` and `large()`
+* Added RF-DETR model family: `model_rfdetr_*`, with `*` being `nano()`, `small()`, `medium()`, `base()`, `base_2()`, `base_o365()` and `large()`
   for real-time object detection with DINOv2 backbone and deformable-attention decoder (@DerrickUnleashed, #327).
-* Added LW-DETR model family : `model_lw_detr_*`, with `*` being `tiny()` `small()`, `medium()` and `large()` 
+* Added LW-DETR model family: `model_lw_detr_*`, with `*` being `tiny()`, `small()`, `medium()` and `large()`
   for real-time object detection with ViT backbone and deformable-attention decoder (@srishtiii28, #328).
 
 ## New datasets
@@ -28,7 +30,7 @@
 
 * Added `target_transform_resize` to manage bounding_box resizing in parallel to `transform_resize` for images (#337).
 * Added `target_transform_rotate()` for converting bounding boxes from xyxy to xyxyr format with a rotation angle (@DerrickUnleashed, #338). 
-  Both operates on detection item targets (the `y` part of a dataset item) for composable target transform pipelines. 
+  Both operate on detection item targets (the `y` part of a dataset item) for composable target transform pipelines.
 * Added a new `draw_bounding_boxes` S3 method for `image_with_rotated_box` that renders rotated boxes as polygons (@DerrickUnleashed, #338). 
 * Added `item_transform_hflip()` for horizontally flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #366).
 * Added `item_transform_vflip()` for vertically flipping dataset items, with support for detection and segmentation item types and datasets (@DerrickUnleashed, #369).
@@ -60,7 +62,7 @@
   five- and ten-crop geometry (#414).
 * `model_vit_*()` predictions now depend on the input image: attention runs over the patches of each image, the positional embedding is registered so it is loaded from the pretrained weights, and layer norm uses `eps = 1e-6` (@sebffischer, #405).
 * `model_maxvit()` is re-ported from PyTorch and now reproduces its predictions with the pretrained weights (@sebffischer, #405).
-* `draw_bounding_boxes()` now accepts degenerated bounding-box by default with the `lazy = TRUE` parameter (#400).
+* `draw_bounding_boxes()` now accepts degenerate bounding boxes by default with the `lazy = TRUE` parameter (#400).
 * `vision_make_grid()` now accepts multiple 3D tensors with mixed uint8 and float dtype, while preserving positional `scale`, `num_rows`, `padding` and `pad_value` arguments (#398).
   Use `per_row` for the number of images per row; named `num_rows` remains supported as a deprecated alias.
 * `transform_random_affine()` now accepts a bare number for `shear`. It used to widen `degrees`
@@ -68,7 +70,7 @@
 * `item_transform_rotate()` no longer truncates the rotation angle to a whole number of degrees
   when the target stores its boxes as an integer tensor, as `pascal_detection_dataset()` does (#360).
 * `transform_random_resized_crop()` no longer loses the last row and column of the image, and no longer
-  padded with a black edge when it falls back to a central crop (#386).
+  pads with a black edge when it falls back to a central crop (#386).
 * `transform_crop()` now pads the result with zeros when the crop leaves the image, so that the
   output always has the requested size. It previously returned only the part of the image the crop
   covered, which could even be empty.
@@ -86,8 +88,8 @@
   ones.
 * `nms()` now uses `torchvisionlib::ops_nms()` when torchvisionlib is installed, speeding up inference for `model_fasterrcnn_*()` and `model_maskrcnn_*()` (#321, #322).
 * Lists and vectors are now preallocated to their target size instead of being grown one element at a time (@srishtiii28, #335).
-* `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffisher #376)
-* `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffisher #375)
+* `model_convnext_small_22k1k()` now defaults to `num_classes = 1000`. It is pretrained on Imagenet 22k and fine-tuned on Imagenet 1k, so its published weights have a 1000-class head, and the previous default of `21841` made `pretrained = TRUE` fail to load the state dict. (@sebffischer, #376)
+* `model_inception_v3(pretrained = TRUE, aux_logits = FALSE)` now actually removes the auxiliary classifier. Previously `aux_logits = FALSE` was silently ignored for pretrained models, so the network returned a list of both heads instead of a single tensor in training mode. (@sebffischer, #375)
 * `model_rfdetr_*()` now match the reference rf-detr implementation numerically, accept padding masks, and use the official configurations of the `small`, `medium` and `base` variants (@sebffischer, #413).
 * `model_fasterrcnn_*()` and `model_maskrcnn_*()` inference now reproduces torchvision numerically, supports batches, and loads pretrained weights strictly (@sebffischer, #412).
 * `model_inception_v3()` and `model_resnet*()` without pretrained weights now initialise all layers as in PyTorch, and `zero_init_residual = TRUE` takes effect (@sebffischer, #411).

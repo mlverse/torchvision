@@ -1,8 +1,8 @@
 context("dataset-rf100-medical")
 
-t <- withr::local_tempdir()
-
 test_that("rf100_medical_collection handles missing files gracefully", {
+  cache_dir <- withr::local_tempdir()
+  withr::local_envvar(c(R_USER_CACHE_DIR = cache_dir))
   expect_error(
     rf100_medical_collection(dataset = "abdomen_mri", split = "train", download = FALSE),
     class = "runtime_error"
