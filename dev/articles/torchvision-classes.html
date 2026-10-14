@@ -533,6 +533,8 @@ a <code>segmentation_target</code>, or
 <code><a href="../reference/target_transform_coco_masks.html">target_transform_coco_masks()</a></code> on an
 <code>object_detection_target</code>, stops with
 <code>not implemented for</code> and the class it was handed.</p>
+<p>Both groups also accept bare lists with the fields their transforms
+require. Transforming a bare list preserves its list class.</p>
 <p>The image transforms are written for <code>torch_tensor</code>. Five
 of them also take a magick image, <code><a href="../reference/transform_crop.html">transform_crop()</a></code>,
 <code><a href="../reference/transform_hflip.html">transform_hflip()</a></code>, <code><a href="../reference/transform_resize.html">transform_resize()</a></code>,
@@ -556,9 +558,10 @@ target lost its class somewhere along a pipeline.</p>
 <div class="section level2">
 <h2 id="building-an-item-by-hand">Building an item by hand<a class="anchor" aria-label="anchor" href="#building-an-item-by-hand"></a>
 </h2>
-<p>A bare list is not accepted as a target, so annotations that do not
-come out of a torchvision dataset need their classes set before any of
-this will look at them:</p>
+<p>Target transforms accept a bare list of annotations. When building a
+complete item for item transforms or drawing functions, give the item
+its task class; the example also gives the target its corresponding
+class:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_randint.html" class="external-link">torch_randint</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">255</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">120</span>, <span class="fl">160</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">to</span><span class="op">(</span>dtype <span class="op">=</span> <span class="fu"><a href="https://torch.mlverse.org/docs/reference/torch_dtype.html" class="external-link">torch_uint8</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>

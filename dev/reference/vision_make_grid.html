@@ -197,6 +197,8 @@ remaining images wrap to the next row. Default 8.</p></dd>
     <p>For <code>torch_tensor</code> input, accepts either:</p><ul><li><p>one or more 3D tensors of shape (C x H x W) passed as separate arguments, or</p></li>
 <li><p>one or more 4D batch tensor of shape (B x C x H x W).</p></li>
 </ul><p>For <code>magick-image</code> input, arranges frames using <code><a href="https://docs.ropensci.org/magick/reference/animation.html" class="external-link">magick::image_montage()</a></code>.</p>
+<p>Positional grid options retain their original order: <code>scale</code>, <code>num_rows</code>,
+<code>padding</code>, <code>pad_value</code>. When passing additional images, name the grid options.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

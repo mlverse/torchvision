@@ -124,7 +124,7 @@ image dimensions <code>(H, W)</code>.</p>
 
 <dl><dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
 <dd><p>An <code>object_detection_target</code>, as returned by the <code>.getitem()</code>
-method of an <a href="coco_detection_dataset.html">object detection dataset</a>, containing
+method of an <a href="coco_detection_dataset.html">object detection dataset</a>, or a bare list containing
 at least:</p><ul><li><p><code>boxes</code> — tensor of shape <code>(N, 4)</code> with bounding boxes in xyxy format</p></li>
 <li><p><code>orig_size</code> — integer vector or tensor of length 2 with <code>(height, width)</code></p></li>
 <li><p>Other fields (labels, image_id, etc.) are preserved unchanged</p></li>
