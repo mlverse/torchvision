@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" width="620" height="291" role="img" aria-labelledby="seg-title seg-desc">
+  <title id="seg-title">An image_with_segmentation_mask item</title>
+  <desc id="seg-desc">A card whose x panel holds the image with two shaded regions drawn on it, and whose y panel lists the fields of a segmentation_target: masks as an N by H by W tensor with one plane per class, labels, and whatever else the dataset annotates.</desc>
+  <style>
+    .deck { fill: none; stroke: #a0a0a0; stroke-width: 1.2; }
+    .card { fill: #f7ebb0; stroke: #585858; stroke-width: 1.6; }
+    .panel { fill: #ffffff; stroke: #8c8c8c; stroke-width: 1.2; }
+    .glyph { fill: #ececec; stroke: #b8b8b8; stroke-width: 1; }
+    .mask { fill: #c9d6cf; fill-opacity: 0.75; stroke: #7a7a7a; stroke-width: 1.4; }
+    .name { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 15px; fill: #3a3a3a; }
+    .value { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 14px; fill: #6f6f6f; }
+    .note { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 14px; fill: #6f6f6f; }
+    .caption { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 17px; fill: #585858; }
+  </style>
+
+  <rect class="deck" x="72" y="24" width="520" height="196" rx="4"/>
+  <rect class="deck" x="58" y="36" width="520" height="196" rx="4"/>
+  <rect class="deck" x="44" y="48" width="520" height="196" rx="4"/>
+  <rect class="card" x="30" y="60" width="520" height="196" rx="4"/>
+
+  <text class="name" x="56" y="99">$x</text>
+  <text class="note" x="82" y="99">the image</text>
+  <rect class="panel" x="56" y="110" width="200" height="126"/>
+  <circle class="glyph" cx="86" cy="138" r="10"/>
+  <path class="glyph" d="M60 235 L106 178 L152 235 Z"/>
+  <path class="glyph" d="M130 235 L170 192 L210 235 Z"/>
+  <path class="mask" d="M78 218 C72 190 90 166 110 172 C130 178 132 206 122 220 Z"/>
+  <path class="mask" d="M150 212 C146 176 184 152 210 168 C232 182 224 214 204 220 Z"/>
+
+  <text class="name" x="290" y="99">$y</text>
+  <text class="note" x="316" y="99">a segmentation_target</text>
+
+  <text class="name" x="290" y="134">$masks</text>
+  <text class="value" x="400" y="134">(N, H, W)</text>
+  <text class="name" x="290" y="159">$labels</text>
+  <text class="value" x="400" y="159">one per plane</text>
+
+  <text class="note" x="290" y="196">no field is guaranteed: a</text>
+  <text class="note" x="290" y="216">dataset annotates what it</text>
+  <text class="note" x="290" y="236">has, and in its own way</text>
+
+  <text class="caption" x="290" y="286" text-anchor="middle">image_with_segmentation_mask</text>
+</svg>

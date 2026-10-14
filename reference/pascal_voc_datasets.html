@@ -23,12 +23,28 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -96,6 +112,7 @@
 <span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -105,6 +122,7 @@
 <span>  split <span class="op">=</span> <span class="st">"train"</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -133,23 +151,32 @@
 <dd><p>Optional. A function that transforms the label.</p></dd>
 
 
+<dt id="arg-item-transform">item_transform<a class="anchor" aria-label="anchor" href="#arg-item-transform"></a></dt>
+<dd><p>Optional transform function applied to the whole item, such as
+<code><a href="item_transform_rotate.html">item_transform_rotate()</a></code>, once <code>transform</code> and <code>target_transform</code> have been applied.</p></dd>
+
+
 <dt id="arg-download">download<a class="anchor" aria-label="anchor" href="#arg-download"></a></dt>
 <dd><p>Logical. If TRUE, downloads the dataset to <code>root/</code>. If the dataset is already present, download is skipped.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A torch dataset of class <code>pascal_segmentation_dataset</code>.</p>
+    <p>A torch dataset of class <code>pascal_segmentation_dataset</code>, also
+inheriting <code>segmentation_dataset</code>.</p>
 <p>The returned list inherits class <code>image_with_segmentation_mask</code>, which allows generic visualization
-utilities to be applied.</p>
+utilities to be applied, and its <code>y</code> inherits <code>segmentation_target</code>, which
+target transforms dispatch on.</p>
 <p>Each element is a named list with the following structure:</p><ul><li><p><code>x</code>: a H x W x 3 array representing the RGB image.</p></li>
 <li><p><code>y</code>: A named list containing:</p><ul><li><p><code>masks</code>: A <code>torch_tensor</code> of dtype <code>bool</code> and shape <code>(21, H, W)</code>, representing a multi-channel segmentation mask.
 Each of the 21 channels corresponds to a Pascal VOC classes</p></li>
 <li><p><code>labels</code>: An integer vector indicating the indices of the classes present in the mask.</p></li>
 </ul></li>
-</ul><p>A torch dataset of class <code>pascal_detection_dataset</code>.</p>
+</ul><p>A torch dataset of class <code>pascal_detection_dataset</code>, also inheriting
+<code>object_detection_dataset</code>.</p>
 <p>The returned list inherits class <code>image_with_bounding_box</code>, which allows generic visualization
-utilities to be applied.</p>
+utilities to be applied, and its <code>y</code> inherits <code>object_detection_target</code>, which target
+transforms such as <code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> dispatch on.</p>
 <p>Each element is a named list:</p><ul><li><p><code>x</code>: a H x W x 3 array representing the RGB image.</p></li>
 <li><p><code>y</code>: a list with:</p><ul><li><p><code>labels</code>: a character vector with object class names.</p></li>
 <li><p><code>boxes</code>: a tensor of shape (N, 4) with bounding box coordinates in <code>(xmin, ymin, xmax, ymax)</code> format.</p></li>
@@ -158,6 +185,7 @@ utilities to be applied.</p>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other segmentation_dataset:
+<code><a href="cityscapes_dataset.html">cityscapes_dataset()</a></code>,
 <code><a href="coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code>,
 <code><a href="oxfordiiitpet_segmentation_dataset.html">oxfordiiitpet_segmentation_dataset()</a></code>,
 <code><a href="rf100_peixos_segmentation_dataset.html">rf100_peixos_segmentation_dataset()</a></code></p>
@@ -224,7 +252,7 @@ utilities to be applied.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

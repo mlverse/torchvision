@@ -24,12 +24,28 @@ See https://arxiv.org/pdf/1708.04896"><!-- mathjax --><script src="https://cdnjs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -111,26 +127,31 @@ See <a href="https://arxiv.org/pdf/1708.04896" class="external-link">https://arx
 
 
 <dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
-<dd><p>probability that the random erasing operation will be performed.</p></dd>
+<dd><p>(numeric): Probability that the random erasing operation will be
+performed.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>range of proportion of erased area against input image.</p></dd>
+<dd><p>(numeric vector of length 2): Range of proportion of erased
+area against input image.</p></dd>
 
 
 <dt id="arg-ratio">ratio<a class="anchor" aria-label="anchor" href="#arg-ratio"></a></dt>
-<dd><p>range of aspect ratio of erased area.</p></dd>
+<dd><p>(numeric vector of length 2): Range of aspect ratio of erased
+area.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
-<dd><p>erasing value. Default is 0. If a single int, it is used to
-erase all pixels. If a tuple of length 3, it is used to erase
-R, G, B channels respectively.
-If a str of 'random', erasing each pixel with random values.</p></dd>
+<dd><p>(numeric vector or numeric or character): Erasing value.
+Default is <code>0</code>. If a single numeric value, it is used to erase all
+pixels. If a numeric vector of length 3, it is used to erase R, G, B
+channels respectively. If the string <code>"random"</code>, erasing each pixel with
+random values.</p></dd>
 
 
 <dt id="arg-inplace">inplace<a class="anchor" aria-label="anchor" href="#arg-inplace"></a></dt>
-<dd><p>boolean to make this transform inplace. Default set to FALSE.</p></dd>
+<dd><p>(logical): Boolean to make this transform inplace. Default
+set to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div id="see-also">
@@ -159,7 +180,7 @@ If a str of 'random', erasing each pixel with random values.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

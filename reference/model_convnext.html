@@ -23,12 +23,28 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -118,7 +134,7 @@
 <span>  pretrained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  channels <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  num_classes <span class="op">=</span> <span class="fl">21841</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -186,8 +202,9 @@ stderr.</p></dd>
 <ul><li><p><code>model_convnext_tiny_1k()</code>: ConvNeXt Tiny model trained on Imagenet 1k.</p></li>
 <li><p><code>model_convnext_tiny_22k()</code>: ConvNeXt Tiny model trained on Imagenet 22k.</p></li>
 <li><p><code>model_convnext_small_22k()</code>: ConvNeXt Small model trained on Imagenet 22k.</p></li>
-<li><p><code>model_convnext_small_22k1k()</code>: ConvNeXt Small model pretrained on Imagenet 1k
-and fine-tuned on Imagenet 22k classes.</p></li>
+<li><p><code>model_convnext_small_22k1k()</code>: ConvNeXt Small model pretrained on Imagenet 22k
+and fine-tuned on Imagenet 1k classes. Note that, unlike the other <code>_22k</code> models, its
+pretrained weights therefore predict the 1000 Imagenet 1k classes.</p></li>
 <li><p><code>model_convnext_base_1k()</code>: ConvNeXt Base model trained on Imagenet 1k.</p></li>
 <li><p><code>model_convnext_base_22k()</code>: ConvNeXt Base model trained on Imagenet 22k.</p></li>
 <li><p><code>model_convnext_large_1k()</code>: ConvNeXt Large model trained on Imagenet 1k.</p></li>
@@ -204,13 +221,13 @@ and fine-tuned on Imagenet 22k classes.</p></li>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="sc">|</span> Model                <span class="sc">|</span> Top<span class="dv">-1</span> Acc<span class="sc">|</span> Params <span class="sc">|</span> GFLOPS <span class="sc">|</span> File Size <span class="sc">|</span> <span class="st">`</span><span class="at">num_classes</span><span class="st">`</span><span class="sc">|</span> image size <span class="sc">|</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="er">|</span><span class="sc">----------------------</span><span class="er">|</span><span class="sc">----------</span><span class="er">|</span><span class="sc">--------</span><span class="er">|</span><span class="sc">--------</span><span class="er">|</span><span class="sc">-----------</span><span class="er">|</span><span class="sc">--------------</span><span class="er">|</span><span class="sc">------------</span><span class="er">|</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="er">|</span> convnext_tiny_1k     <span class="sc">|</span> <span class="fl">82.1</span>%    <span class="sc">|</span> <span class="dv">28</span>M    <span class="sc">|</span> <span class="fl">4.5</span>    <span class="sc">|</span> <span class="dv">109</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="er">|</span> convnext_tiny_22k    <span class="sc">|</span> <span class="fl">82.9</span>%    <span class="sc">|</span> <span class="dv">29</span>M    <span class="sc">|</span> <span class="fl">4.5</span>    <span class="sc">|</span> <span class="dv">170</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="er">|</span> convnext_small_22k   <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">252</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="er">|</span> convnext_small_22k1k <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">252</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="er">|</span> convnext_tiny_22k    <span class="sc">|</span> <span class="fl">82.9</span>%    <span class="sc">|</span> <span class="dv">44</span>M    <span class="sc">|</span> <span class="fl">4.5</span>    <span class="sc">|</span> <span class="dv">170</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="er">|</span> convnext_small_22k   <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">66</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">252</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="er">|</span> convnext_small_22k1k <span class="sc">|</span> <span class="fl">84.6</span>%    <span class="sc">|</span> <span class="dv">50</span>M    <span class="sc">|</span> <span class="fl">8.7</span>    <span class="sc">|</span> <span class="dv">192</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="er">|</span> convnext_base_1k     <span class="sc">|</span> <span class="fl">85.1</span>%    <span class="sc">|</span> <span class="dv">89</span>M    <span class="sc">|</span> <span class="fl">15.4</span>   <span class="sc">|</span> <span class="dv">338</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="er">|</span> convnext_base_22k    <span class="sc">|</span> <span class="fl">85.8</span>%    <span class="sc">|</span> <span class="dv">89</span>M    <span class="sc">|</span> <span class="fl">15.4</span>   <span class="sc">|</span> <span class="dv">420</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="er">|</span> convnext_base_22k    <span class="sc">|</span> <span class="fl">85.8</span>%    <span class="sc">|</span> <span class="dv">110</span>M   <span class="sc">|</span> <span class="fl">15.4</span>   <span class="sc">|</span> <span class="dv">420</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="er">|</span> convnext_large_1k    <span class="sc">|</span> <span class="fl">84.3</span>%    <span class="sc">|</span> <span class="dv">198</span>M   <span class="sc">|</span> <span class="fl">34.4</span>   <span class="sc">|</span> <span class="dv">750</span> MB    <span class="sc">|</span>         <span class="dv">1000</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="er">|</span> convnext_large_22k   <span class="sc">|</span> <span class="fl">86.6</span>%    <span class="sc">|</span> <span class="dv">198</span>M   <span class="sc">|</span> <span class="fl">34.4</span>   <span class="sc">|</span> <span class="dv">880</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span></code></pre><p></p></div>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="er">|</span> convnext_large_22k   <span class="sc">|</span> <span class="fl">86.6</span>%    <span class="sc">|</span> <span class="dv">230</span>M   <span class="sc">|</span> <span class="fl">34.4</span>   <span class="sc">|</span> <span class="dv">880</span> MB    <span class="sc">|</span>        <span class="dv">21841</span> <span class="sc">|</span> <span class="dv">224</span> x <span class="dv">224</span>  <span class="sc">|</span></span></code></pre><p></p></div>
 </div>
 
     </div>
@@ -248,7 +265,7 @@ and fine-tuned on Imagenet 22k classes.</p></li>
 <span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># 3. Load pretrained models</span></span></span>
-<span class="r-in"><span><span class="va">model_small</span> <span class="op">&lt;-</span> <span class="fu">convnext_tiny_1k</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span>, root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model_small</span> <span class="op">&lt;-</span> <span class="fu">model_convnext_tiny_1k</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model_small</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># 4. Forward pass</span></span></span>
@@ -275,7 +292,7 @@ and fine-tuned on Imagenet 22k classes.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

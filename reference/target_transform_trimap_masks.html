@@ -26,12 +26,28 @@ Use as target_transform in oxfordiiitpet_segmentation_dataset()."><!-- mathjax -
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -84,7 +100,7 @@ Use as target_transform in oxfordiiitpet_segmentation_dataset()."><!-- mathjax -
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Target Transform: Trimap to Boolean Masks</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/transforms-segmentation.R" class="external-link"><code>R/transforms-segmentation.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mlverse/torchvision/blob/main/R/target-transforms-segmentation.R" class="external-link"><code>R/target-transforms-segmentation.R</code></a></small>
     <div class="hidden name"><code>target_transform_trimap_masks.Rd</code></div>
     </div>
 
@@ -96,7 +112,10 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'segmentation_target'</span></span>
+<span><span class="fu">target_transform_trimap_masks</span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -104,7 +123,8 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
 
 
 <dl><dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>List containing <code>trimap</code> field (H, W) tensor with values 1, 2, 3</p></dd>
+<dd><p>a <code>segmentation_target</code> or a bare list containing a <code>trimap</code> field,
+a (H, W) tensor with values 1, 2, 3</p></dd>
 
 </dl></div>
     <div id="value">
@@ -119,7 +139,7 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other target_transforms:
+    <div class="dont-index"><p>Other target_transforms_segmentation:
 <code><a href="target_transform_coco_masks.html">target_transform_coco_masks()</a></code></p></div>
     </div>
 
@@ -148,7 +168,7 @@ Use as <code>target_transform</code> in <code><a href="oxfordiiitpet_segmentatio
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

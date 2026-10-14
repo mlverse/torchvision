@@ -23,12 +23,28 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -108,30 +124,30 @@
 
 
 <dt id="arg-brightness">brightness<a class="anchor" aria-label="anchor" href="#arg-brightness"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
-brightness. <code>brightness_factor</code> is chosen uniformly from
+<dd><p>(numeric or numeric vector of length 2): How much to
+jitter brightness. <code>brightness_factor</code> is chosen uniformly from
 <code>[max(0, 1 - brightness), 1 + brightness]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
 
 
 <dt id="arg-contrast">contrast<a class="anchor" aria-label="anchor" href="#arg-contrast"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
+<dd><p>(numeric or numeric vector of length 2): How much to jitter
 contrast. <code>contrast_factor</code> is chosen uniformly from
 <code>[max(0, 1 - contrast), 1 + contrast]</code> or the given <code>[min, max]</code>. Should
 be non negative numbers.</p></dd>
 
 
 <dt id="arg-saturation">saturation<a class="anchor" aria-label="anchor" href="#arg-saturation"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter
-saturation. <code>saturation_factor</code> is chosen uniformly from
+<dd><p>(numeric or numeric vector of length 2): How much to
+jitter saturation. <code>saturation_factor</code> is chosen uniformly from
 <code>[max(0, 1 - saturation), 1 + saturation]</code> or the given <code>[min, max]</code>.
 Should be non negative numbers.</p></dd>
 
 
 <dt id="arg-hue">hue<a class="anchor" aria-label="anchor" href="#arg-hue"></a></dt>
-<dd><p>(float or tuple of float (min, max)): How much to jitter hue.
+<dd><p>(numeric or numeric vector of length 2): How much to jitter hue.
 <code>hue_factor</code> is chosen uniformly from <code>[-hue, hue]</code> or the given
-<code>[min, max]</code>. Should have 0&lt;= hue &lt;= 0.5 or -0.5 &lt;= min &lt;= max &lt;= 0.5.</p></dd>
+<code>[min, max]</code>. Should have <code>0 &lt;= hue &lt;= 0.5</code> or <code>-0.5 &lt;= min &lt;= max &lt;= 0.5</code>.</p></dd>
 
 </dl></div>
     <div id="see-also">
@@ -160,7 +176,7 @@ Should be non negative numbers.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

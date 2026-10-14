@@ -25,12 +25,28 @@ Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Netwo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -105,7 +121,7 @@ architecture from the paper
 <span><span class="fu">model_facenet_inception_resnet_v1</span><span class="op">(</span></span>
 <span>  pretrained <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  classify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  num_classes <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dropout_prob <span class="op">=</span> <span class="fl">0.6</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -116,7 +132,9 @@ architecture from the paper
 
 
 <dl><dt id="arg-pretrained">pretrained<a class="anchor" aria-label="anchor" href="#arg-pretrained"></a></dt>
-<dd><p>(bool): If TRUE, returns a model pre-trained on ImageNet.</p></dd>
+<dd><p>For the MTCNN networks, logical: if TRUE, loads the facenet-pytorch weights.
+For <code>model_facenet_inception_resnet_v1()</code>, one of <code>NULL</code> or <code>FALSE</code> (random weights),
+<code>"vggface2"</code> (or <code>TRUE</code>) or <code>"casia-webface"</code>. Other values are an error.</p></dd>
 
 
 <dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
@@ -133,7 +151,9 @@ stderr.</p></dd>
 
 
 <dt id="arg-num-classes">num_classes<a class="anchor" aria-label="anchor" href="#arg-num-classes"></a></dt>
-<dd><p>Integer, number of output classes for classification. Default is 10.</p></dd>
+<dd><p>Integer, number of output classes for classification. Default is NULL: with
+pretrained weights the pretrained logits layer is kept; without pretrained weights it must be
+given when <code>classify = TRUE</code>.</p></dd>
 
 
 <dt id="arg-dropout-prob">dropout_prob<a class="anchor" aria-label="anchor" href="#arg-dropout-prob"></a></dt>
@@ -203,11 +223,9 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
     <div class="dont-index"><p>Other object_detection_model:
 <code><a href="model_convnext_detection.html">model_convnext_detection</a></code>,
 <code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code>,
-<code><a href="model_maskrcnn.html">model_maskrcnn</a></code></p>
-<p>Other object_detection_model:
-<code><a href="model_convnext_detection.html">model_convnext_detection</a></code>,
-<code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code>,
-<code><a href="model_maskrcnn.html">model_maskrcnn</a></code></p>
+<code><a href="model_lw_detr.html">model_lw_detr</a></code>,
+<code><a href="model_maskrcnn.html">model_maskrcnn</a></code>,
+<code><a href="model_rfdetr.html">model_rfdetr</a></code></p>
 <p>Other classification_model:
 <code><a href="model_alexnet.html">model_alexnet()</a></code>,
 <code><a href="model_convnext.html">model_convnext</a></code>,
@@ -291,7 +309,7 @@ on standard face verification benchmarks such as LFW (Labeled Faces in the Wild)
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

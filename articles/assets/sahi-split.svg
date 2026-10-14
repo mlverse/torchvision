@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" width="620" height="291" role="img" aria-labelledby="sahi-title sahi-desc">
+  <title id="sahi-title">A sahi_split object</title>
+  <desc id="sahi-desc">A single card, not a deck, because one split is computed once and reused. Its left panel shows an image covered by a grid of overlapping crop windows, and its right panel lists the fields: crop_windows, size, overlap_size_ratio, image_height and image_width.</desc>
+  <style>
+    .card { fill: #f7ebb0; stroke: #585858; stroke-width: 1.6; }
+    .panel { fill: #ffffff; stroke: #8c8c8c; stroke-width: 1.2; }
+    .window { fill: #c9d6cf; fill-opacity: 0.38; stroke: #7a7a7a; stroke-width: 1.2; }
+    .name { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 15px; fill: #3a3a3a; }
+    .value { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 14px; fill: #6f6f6f; }
+    .note { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 14px; fill: #6f6f6f; }
+    .caption { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 17px; fill: #585858; }
+  </style>
+
+  <rect class="card" x="30" y="60" width="520" height="196" rx="4"/>
+
+  <text class="note" x="56" y="99">how one image gets tiled</text>
+  <rect class="panel" x="56" y="110" width="170" height="126"/>
+  <rect class="window" x="56" y="110" width="70" height="56"/>
+  <rect class="window" x="106" y="110" width="70" height="56"/>
+  <rect class="window" x="156" y="110" width="70" height="56"/>
+  <rect class="window" x="56" y="145" width="70" height="56"/>
+  <rect class="window" x="106" y="145" width="70" height="56"/>
+  <rect class="window" x="156" y="145" width="70" height="56"/>
+  <rect class="window" x="56" y="180" width="70" height="56"/>
+  <rect class="window" x="106" y="180" width="70" height="56"/>
+  <rect class="window" x="156" y="180" width="70" height="56"/>
+
+  <text class="name" x="258" y="128">$crop_windows</text>
+  <text class="value" x="442" y="128">one per tile</text>
+  <text class="name" x="258" y="152">$size</text>
+  <text class="value" x="442" y="152">(512, 512)</text>
+  <text class="name" x="258" y="176">$overlap_size_ratio</text>
+  <text class="value" x="442" y="176">(0.2, 0.2)</text>
+  <text class="name" x="258" y="200">$image_height</text>
+  <text class="value" x="442" y="200">H</text>
+  <text class="name" x="258" y="224">$image_width</text>
+  <text class="value" x="442" y="224">W</text>
+
+  <text class="note" x="258" y="247">each window: top, left, height, width</text>
+
+  <text class="caption" x="290" y="286" text-anchor="middle">sahi_split</text>
+</svg>

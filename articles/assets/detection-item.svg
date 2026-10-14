@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" width="620" height="291" role="img" aria-labelledby="det-title det-desc">
+  <title id="det-title">An image_with_bounding_box item</title>
+  <desc id="det-desc">A card whose x panel holds the image with two boxes drawn on it, and whose y panel lists the fields of an object_detection_target: boxes as an N by 4 tensor in xyxy format, labels, area, iscrowd, image_height and image_width.</desc>
+  <style>
+    .deck { fill: none; stroke: #a0a0a0; stroke-width: 1.2; }
+    .card { fill: #f7ebb0; stroke: #585858; stroke-width: 1.6; }
+    .panel { fill: #ffffff; stroke: #8c8c8c; stroke-width: 1.2; }
+    .glyph { fill: #ececec; stroke: #b8b8b8; stroke-width: 1; }
+    .box { fill: none; stroke: #7a7a7a; stroke-width: 1.8; }
+    .name { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 15px; fill: #3a3a3a; }
+    .value { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 14px; fill: #6f6f6f; }
+    .note { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 14px; fill: #6f6f6f; }
+    .caption { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 17px; fill: #585858; }
+  </style>
+
+  <rect class="deck" x="72" y="24" width="520" height="196" rx="4"/>
+  <rect class="deck" x="58" y="36" width="520" height="196" rx="4"/>
+  <rect class="deck" x="44" y="48" width="520" height="196" rx="4"/>
+  <rect class="card" x="30" y="60" width="520" height="196" rx="4"/>
+
+  <text class="name" x="56" y="99">$x</text>
+  <text class="note" x="82" y="99">the image</text>
+  <rect class="panel" x="56" y="110" width="200" height="126"/>
+  <circle class="glyph" cx="86" cy="138" r="10"/>
+  <path class="glyph" d="M60 235 L106 178 L152 235 Z"/>
+  <path class="glyph" d="M130 235 L170 192 L210 235 Z"/>
+  <rect class="box" x="76" y="170" width="62" height="52"/>
+  <rect class="box" x="148" y="148" width="82" height="66"/>
+
+  <text class="name" x="290" y="99">$y</text>
+  <text class="note" x="316" y="99">an object_detection_target</text>
+
+  <text class="name" x="290" y="124">$boxes</text>
+  <text class="value" x="424" y="124">(N, 4) xyxy</text>
+  <text class="name" x="290" y="145">$labels</text>
+  <text class="value" x="424" y="145">N class names</text>
+  <text class="name" x="290" y="166">$area</text>
+  <text class="value" x="424" y="166">(N)</text>
+  <text class="name" x="290" y="187">$iscrowd</text>
+  <text class="value" x="424" y="187">(N)</text>
+  <text class="name" x="290" y="208">$image_height</text>
+  <text class="value" x="424" y="208">H</text>
+  <text class="name" x="290" y="229">$image_width</text>
+  <text class="value" x="424" y="229">W</text>
+
+  <text class="note" x="290" y="248">only $boxes is guaranteed</text>
+
+  <text class="caption" x="290" y="286" text-anchor="middle">image_with_bounding_box</text>
+</svg>

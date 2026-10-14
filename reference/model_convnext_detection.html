@@ -23,9 +23,9 @@ Detection head weights are randomly initialized and must be fine-tuned
 on task-specific labelled data before meaningful predictions are produced.
 | Model                             | Top-1 Acc | Top-5 Acc | Params  | GFLOPS | File Size | Backbone Weights              | Notes                    |
 |-----------------------------------|-----------|-----------|---------|--------|-----------|-------------------------------|--------------------------|
-| model_convnext_tiny_detection     | 82.5%     | 96.1%     | 28.6M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
-| model_convnext_small_detection    | 83.6%     | 96.7%     | 50.2M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
-| model_convnext_base_detection     | 84.1%     | 96.9%     | 88.6M   | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
+| model_convnext_tiny_detection     | 82.5%     | 96.1%     | 46.2M   | 4.46   | 109 MB    | IMAGENET1K_V1                 | Tiny backbone, FPN head  |
+| model_convnext_small_detection    | 83.6%     | 96.7%     | 83.9M   | 8.68   | 192 MB    | IMAGENET1K_V1 (22k pretrain)  | Small backbone, FPN head |
+| model_convnext_base_detection     | 84.1%     | 96.9%     | 106M    | 15.36  | 338 MB    | IMAGENET1K_V1                 | Base backbone, FPN head  |
 
 
 
@@ -80,12 +80,28 @@ Set pretrained_backbone = TRUE to load ImageNet backbone weights.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -164,9 +180,9 @@ Detection head weights are randomly initialized and must be fine-tuned
 on task-specific labelled data before meaningful predictions are produced.</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="sc">|</span> Model                             <span class="sc">|</span> Top<span class="dv">-1</span> Acc <span class="sc">|</span> Top<span class="dv">-5</span> Acc <span class="sc">|</span> Params  <span class="sc">|</span> GFLOPS <span class="sc">|</span> File Size <span class="sc">|</span> Backbone Weights              <span class="sc">|</span> Notes                    <span class="sc">|</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="er">|</span><span class="sc">-----------------------------------</span><span class="er">|</span><span class="sc">-----------</span><span class="er">|</span><span class="sc">-----------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">--------</span><span class="er">|</span><span class="sc">-----------</span><span class="er">|</span><span class="sc">-------------------------------</span><span class="er">|</span><span class="sc">--------------------------</span><span class="er">|</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="er">|</span> model_convnext_tiny_detection     <span class="sc">|</span> <span class="fl">82.5</span><span class="sc">%     | 96.1%</span>     <span class="er">|</span> <span class="fl">28.6</span>M   <span class="sc">|</span> <span class="fl">4.46</span>   <span class="sc">|</span> <span class="dv">109</span> MB    <span class="sc">|</span> IMAGENET1K_V1                 <span class="sc">|</span> Tiny backbone, FPN head  <span class="sc">|</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="er">|</span> model_convnext_small_detection    <span class="sc">|</span> <span class="fl">83.6</span><span class="sc">%     | 96.7%</span>     <span class="er">|</span> <span class="fl">50.2</span>M   <span class="sc">|</span> <span class="fl">8.68</span>   <span class="sc">|</span> <span class="dv">192</span> MB    <span class="sc">|</span> <span class="fu">IMAGENET1K_V1</span> (<span class="dv">22</span>k pretrain)  <span class="sc">|</span> Small backbone, FPN head <span class="sc">|</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="er">|</span> model_convnext_base_detection     <span class="sc">|</span> <span class="fl">84.1</span><span class="sc">%     | 96.9%</span>     <span class="er">|</span> <span class="fl">88.6</span>M   <span class="sc">|</span> <span class="fl">15.36</span>  <span class="sc">|</span> <span class="dv">338</span> MB    <span class="sc">|</span> IMAGENET1K_V1                 <span class="sc">|</span> Base backbone, FPN head  <span class="sc">|</span></span></code></pre><p></p></div>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="er">|</span> model_convnext_tiny_detection     <span class="sc">|</span> <span class="fl">82.5</span><span class="sc">%     | 96.1%</span>     <span class="er">|</span> <span class="fl">46.2</span>M   <span class="sc">|</span> <span class="fl">4.46</span>   <span class="sc">|</span> <span class="dv">109</span> MB    <span class="sc">|</span> IMAGENET1K_V1                 <span class="sc">|</span> Tiny backbone, FPN head  <span class="sc">|</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="er">|</span> model_convnext_small_detection    <span class="sc">|</span> <span class="fl">83.6</span><span class="sc">%     | 96.7%</span>     <span class="er">|</span> <span class="fl">83.9</span>M   <span class="sc">|</span> <span class="fl">8.68</span>   <span class="sc">|</span> <span class="dv">192</span> MB    <span class="sc">|</span> <span class="fu">IMAGENET1K_V1</span> (<span class="dv">22</span>k pretrain)  <span class="sc">|</span> Small backbone, FPN head <span class="sc">|</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="er">|</span> model_convnext_base_detection     <span class="sc">|</span> <span class="fl">84.1</span><span class="sc">%     | 96.9%</span>     <span class="er">|</span> <span class="dv">106</span>M    <span class="sc">|</span> <span class="fl">15.36</span>  <span class="sc">|</span> <span class="dv">338</span> MB    <span class="sc">|</span> IMAGENET1K_V1                 <span class="sc">|</span> Base backbone, FPN head  <span class="sc">|</span></span></code></pre><p></p></div>
 </div>
 
 <div class="section">
@@ -197,20 +213,29 @@ predictions are meaningless without fine-tuning on labelled detection data.</p><
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">model_convnext_tiny_detection</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_convnext_small_detection</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">model_convnext_base_detection</span><span class="op">(</span></span>
-<span>  num_classes <span class="op">=</span> <span class="fl">91</span>,</span>
+<span>  num_classes <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>  pretrained_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  score_thresh <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  nms_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  detections_per_img <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -226,6 +251,18 @@ predictions are meaningless without fine-tuning on labelled detection data.</p><
 <dt id="arg-pretrained-backbone">pretrained_backbone<a class="anchor" aria-label="anchor" href="#arg-pretrained-backbone"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, loads ImageNet-pretrained
 ConvNeXt backbone weights. Default: <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-score-thresh">score_thresh<a class="anchor" aria-label="anchor" href="#arg-score-thresh"></a></dt>
+<dd><p>Numeric. Minimum score threshold for detections (default: 0.05).</p></dd>
+
+
+<dt id="arg-nms-thresh">nms_thresh<a class="anchor" aria-label="anchor" href="#arg-nms-thresh"></a></dt>
+<dd><p>Numeric. Non-Maximum Suppression (NMS) IoU threshold for removing overlapping boxes (default: 0.5).</p></dd>
+
+
+<dt id="arg-detections-per-img">detections_per_img<a class="anchor" aria-label="anchor" href="#arg-detections-per-img"></a></dt>
+<dd><p>Integer. Maximum number of detections per image (default: 100).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -250,7 +287,9 @@ Only the backbone benefits from <code>pretrained_backbone = TRUE</code>.</p>
     <div class="dont-index"><p>Other object_detection_model:
 <code><a href="model_facenet.html">model_facenet</a></code>,
 <code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code>,
-<code><a href="model_maskrcnn.html">model_maskrcnn</a></code></p></div>
+<code><a href="model_lw_detr.html">model_lw_detr</a></code>,
+<code><a href="model_maskrcnn.html">model_maskrcnn</a></code>,
+<code><a href="model_rfdetr.html">model_rfdetr</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -277,7 +316,7 @@ Only the backbone benefits from <code>pretrained_backbone = TRUE</code>.</p>
 <span class="r-in"><span><span class="va">num_boxes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">boxes</span><span class="op">$</span><span class="fu">size</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">topk</span>     <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">scores</span><span class="op">$</span><span class="fu">topk</span><span class="op">(</span>k <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">boxes</span>    <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">boxes</span><span class="op">[</span><span class="va">topk</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">labels</span>   <span class="op">&lt;-</span> <span class="fu"><a href="imagenet_classes.html">imagenet_classes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="va">topk</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">labels</span>   <span class="op">&lt;-</span> <span class="fu"><a href="coco_classes.html">coco_classes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">labels</span><span class="op">[</span><span class="va">topk</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># `draw_bounding_box()` may fail if bbox values are not consistent.</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="va">num_boxes</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -300,7 +339,7 @@ Only the backbone benefits from <code>pretrained_backbone = TRUE</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

@@ -25,12 +25,28 @@ outputs segmentation masks for each detected object."><!-- mathjax --><script sr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -178,7 +194,8 @@ outputs segmentation masks for each detected object.</p>
 <li><p><code>detections</code>: List containing:</p><ul><li><p><code>boxes</code>: Bounding boxes (N, 4)</p></li>
 <li><p><code>labels</code>: Class labels (N)</p></li>
 <li><p><code>scores</code>: Confidence scores (N)</p></li>
-<li><p><code>masks</code>: Segmentation masks (N, 28, 28)</p></li>
+<li><p><code>masks</code>: Mask probabilities pasted into the image, (N, H, W)</p></li>
+<li><p><code>mask_probs</code>: Mask probabilities in the box frame, (N, 28, 28)</p></li>
 </ul></li>
 </ul></div>
     <div id="available-models">
@@ -193,7 +210,9 @@ outputs segmentation masks for each detected object.</p>
     <div class="dont-index"><p>Other object_detection_model:
 <code><a href="model_convnext_detection.html">model_convnext_detection</a></code>,
 <code><a href="model_facenet.html">model_facenet</a></code>,
-<code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code></p></div>
+<code><a href="model_fasterrcnn.html">model_fasterrcnn</a></code>,
+<code><a href="model_lw_detr.html">model_lw_detr</a></code>,
+<code><a href="model_rfdetr.html">model_rfdetr</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -216,7 +235,7 @@ outputs segmentation masks for each detected object.</p>
 <span class="r-in"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="fu">unsqueeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mask R-CNN ResNet-50 FPN</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_maskrcnn_resnet50_fpn</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span>, , detections_per_img <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">model_maskrcnn_resnet50_fpn</span><span class="op">(</span>pretrained <span class="op">=</span> <span class="cn">TRUE</span>, detections_per_img <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span><span class="op">$</span><span class="fu">eval</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/with_no_grad.html" class="external-link">with_no_grad</a></span><span class="op">(</span><span class="op">{</span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span><span class="op">$</span><span class="va">detections</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">}</span><span class="op">)</span></span></span>
@@ -241,7 +260,7 @@ outputs segmentation masks for each detected object.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

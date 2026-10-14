@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 330" width="620" height="310" role="img" aria-labelledby="item-title item-desc">
+  <title id="item-title">Anatomy of a dataset item</title>
+  <desc id="item-desc">A deck of cards standing for the items of a dataset. The front card carries an x panel holding the image and a y panel holding the annotations. transform reaches the x panel, target_transform the y panel, and item_transform the card as a whole.</desc>
+  <defs>
+    <marker id="tip" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L8 4 L0 8 Z" fill="#585858"/>
+    </marker>
+  </defs>
+  <style>
+    .deck { fill: none; stroke: #a0a0a0; stroke-width: 1.2; }
+    .card { fill: #f7ebb0; stroke: #585858; stroke-width: 1.6; }
+    .panel { fill: #ffffff; stroke: #8c8c8c; stroke-width: 1.2; }
+    .glyph { fill: #ececec; stroke: #b8b8b8; stroke-width: 1; }
+    .arrow { fill: none; stroke: #585858; stroke-width: 1.4; marker-end: url(#tip); }
+    .name { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 17px; fill: #3a3a3a; }
+    .note { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 14px; fill: #6f6f6f; }
+  </style>
+
+  <rect class="deck" x="202" y="24" width="450" height="200" rx="4"/>
+  <rect class="deck" x="188" y="36" width="450" height="200" rx="4"/>
+  <rect class="deck" x="174" y="48" width="450" height="200" rx="4"/>
+  <rect class="card" x="160" y="60" width="450" height="200" rx="4"/>
+
+  <text class="name" x="185" y="100">$x</text>
+  <text class="note" x="213" y="100">the image</text>
+  <rect class="panel" x="185" y="112" width="190" height="112"/>
+  <circle class="glyph" cx="216" cy="140" r="11"/>
+  <path class="glyph" d="M196 223 L240 172 L284 223 Z"/>
+  <path class="glyph" d="M258 223 L300 183 L342 223 Z"/>
+
+  <text class="name" x="405" y="100">$y</text>
+  <text class="note" x="433" y="100">the annotations</text>
+  <rect class="panel" x="405" y="112" width="190" height="112"/>
+  <rect class="glyph" x="424" y="134" width="118" height="11" rx="5"/>
+  <rect class="glyph" x="424" y="163" width="150" height="11" rx="5"/>
+  <rect class="glyph" x="424" y="192" width="92" height="11" rx="5"/>
+
+  <text class="name" x="2" y="166">item_transform</text>
+  <path class="arrow" d="M148 160 L156 160"/>
+
+  <text class="name" x="228" y="312">transform</text>
+  <path class="arrow" d="M280 299 L280 233"/>
+
+  <text class="name" x="432" y="312">target_transform</text>
+  <path class="arrow" d="M500 299 L500 233"/>
+</svg>

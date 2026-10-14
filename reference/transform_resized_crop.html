@@ -23,12 +23,28 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -102,32 +118,33 @@
 
 
 <dt id="arg-top">top<a class="anchor" aria-label="anchor" href="#arg-top"></a></dt>
-<dd><p>(int): Vertical component of the top left corner of the crop box.</p></dd>
+<dd><p>(integer): Vertical component of the top left corner of the
+crop box.</p></dd>
 
 
 <dt id="arg-left">left<a class="anchor" aria-label="anchor" href="#arg-left"></a></dt>
-<dd><p>(int): Horizontal component of the top left corner of the crop
-box.</p></dd>
+<dd><p>(integer): Horizontal component of the top left corner of the
+crop box.</p></dd>
 
 
 <dt id="arg-height">height<a class="anchor" aria-label="anchor" href="#arg-height"></a></dt>
-<dd><p>(int): Height of the crop box.</p></dd>
+<dd><p>(integer): Height of the crop box.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>(int): Width of the crop box.</p></dd>
+<dd><p>(integer): Width of the crop box.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>(sequence or int): Desired output size. If size is a sequence
-like c(h, w), output size will be matched to this. If size is an int,
-smaller edge of the image will be matched to this number.
-i.e, if height &gt; width, then image will be rescaled to
-(size * height / width, size).</p></dd>
+<dd><p>(integer vector or integer): Desired output size. If <code>size</code> is
+an integer vector of length 2 like <code>c(h, w)</code>, output size will be matched
+to this. If <code>size</code> is a bare integer, smaller edge of the image will be
+matched to this number, i.e., if height &gt; width, then image will be
+rescaled to <code>(size * height / width, size)</code>.</p></dd>
 
 
 <dt id="arg-interpolation">interpolation<a class="anchor" aria-label="anchor" href="#arg-interpolation"></a></dt>
-<dd><p>(int, optional) Desired interpolation. An integer
+<dd><p>(integer, optional): Desired interpolation. An integer
 <code>0 = nearest</code>, <code>2 = bilinear</code>, and <code>3 = bicubic</code> or a name from
 <code><a href="https://docs.ropensci.org/magick/reference/options.html" class="external-link">magick::filter_types()</a></code>.</p></dd>
 
@@ -135,6 +152,7 @@ i.e, if height &gt; width, then image will be rescaled to
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Other combining_transforms:
+<code><a href="transform_sahi_crop.html">prepare_sahi_split()</a></code>,
 <code><a href="transform_five_crop.html">transform_five_crop()</a></code>,
 <code><a href="transform_random_apply.html">transform_random_apply()</a></code>,
 <code><a href="transform_random_choice.html">transform_random_choice()</a></code>,
@@ -154,7 +172,7 @@ i.e, if height &gt; width, then image will be rescaled to
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

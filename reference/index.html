@@ -23,12 +23,28 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -84,11 +100,11 @@
     </div>
 
     <table class="ref-index"><colgroup><col class="alias"><col class="title"></colgroup><tbody><tr><th colspan="2">
-          <h2 id="transforms">Transforms <a href="#transforms" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Image transformation functions</p>
+          <h2 id="image-transforms">Image Transforms <a href="#image-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions applied to Image (tensor images, magick images,…)</p>
         </th>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="unitary-transformation">Unitary transformation <a href="#unitary-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="unitary-image-transformation">Unitary image transformation <a href="#unitary-image-transformation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -134,7 +150,7 @@
       </tr><tr><td>
           <p><code><a href="transform_hflip.html">transform_hflip()</a></code> </p>
         </td>
-        <td><p>Horizontally flip a PIL Image or Tensor</p></td>
+        <td><p>Horizontally flip a Magick Image or Tensor</p></td>
       </tr><tr><td>
           <p><code><a href="transform_linear_transformation.html">transform_linear_transformation()</a></code> </p>
         </td>
@@ -170,9 +186,9 @@
       </tr><tr><td>
           <p><code><a href="transform_vflip.html">transform_vflip()</a></code> </p>
         </td>
-        <td><p>Vertically flip a PIL Image or Tensor</p></td>
+        <td><p>Vertically flip a Magick Image or Tensor</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="random-transformation">Random transformation <a href="#random-transformation" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="random-image-transformation">Random image transformation <a href="#random-image-transformation" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -216,7 +232,7 @@
         </td>
         <td><p>Vertically flip an image randomly with a given probability</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h3 id="combining-multiplying-transformations">Combining / multiplying transformations <a href="#combining-multiplying-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <h3 id="combining-multiplying-image-transformations">Combining / multiplying image transformations <a href="#combining-multiplying-image-transformations" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
@@ -240,12 +256,40 @@
         </td>
         <td><p>Crop an image and resize it to a desired size</p></td>
       </tr><tr><td>
+          <p><code><a href="transform_sahi_crop.html">prepare_sahi_split()</a></code> <code><a href="transform_sahi_crop.html">target_transform_sahi_crop()</a></code> <code><a href="transform_sahi_crop.html">transform_sahi_crop()</a></code> </p>
+        </td>
+        <td><p>Slicing Aid for Hyper Inference (SAHI)</p></td>
+      </tr><tr><td>
           <p><code><a href="transform_ten_crop.html">transform_ten_crop()</a></code> </p>
         </td>
         <td><p>Crop an image and the flipped image each into four corners and a central crop</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="target-transforms">Target Transforms <a href="#target-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions applied to targets (usualy the <code>$y</code> parameter)</p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="target-transformations-for-object-detection">Target transformations for object detection <a href="#target-transformations-for-object-detection" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into object-detection targets compatible with draw_bounding_boxes() and object-detection models.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="target_transform_affine.html">target_transform_affine()</a></code> </p>
+        </td>
+        <td><p>Apply an affine transformation to a detection target</p></td>
+      </tr><tr><td>
+          <p><code><a href="target_transform_resize.html">target_transform_resize()</a></code> </p>
+        </td>
+        <td><p>Resize the bounding boxes of a detection target</p></td>
+      </tr><tr><td>
+          <p><code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> </p>
+        </td>
+        <td><p>Convert bounding boxes to rotated format</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_sahi_crop.html">prepare_sahi_split()</a></code> <code><a href="transform_sahi_crop.html">target_transform_sahi_crop()</a></code> <code><a href="transform_sahi_crop.html">transform_sahi_crop()</a></code> </p>
+        </td>
+        <td><p>Slicing Aid for Hyper Inference (SAHI)</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="target-transformations-for-segmentation">Target transformations for segmentation <a href="#target-transformations-for-segmentation" class="anchor" aria-hidden="true"></a></h3>
-          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into segmentation masks compatible with draw_segmentation_masks() and segmentation models.</p>
+          <p class="section-desc"></p><p>Functions to convert dataset native targets annotations into segmentation masks targets compatible with draw_segmentation_masks() and segmentation models.</p>
         </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="target_transform_coco_masks.html">target_transform_coco_masks()</a></code> </p>
@@ -255,6 +299,86 @@
           <p><code><a href="target_transform_trimap_masks.html">target_transform_trimap_masks()</a></code> </p>
         </td>
         <td><p>Target Transform: Trimap to Boolean Masks</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="item-transforms">Item Transforms <a href="#item-transforms" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Transformation functions modifying both image (<code>$x</code> parameter ) and target (<code>$y</code> parameter ) of a single dataset item. Result shall be compatible with <code><a href="../reference/draw_bounding_boxes.html">draw_bounding_boxes()</a></code> for object-detection items and with <code>draw_segmentation_mask()</code> for semantic-segmentation items.</p>
+        </th>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="unitary-item-transformations">Unitary item transformations <a href="#unitary-item-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset <strong>items</strong> by an <strong>unitary</strong> transformation.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="item_transform_affine.html">item_transform_affine()</a></code> </p>
+        </td>
+        <td><p>Apply an affine transformation on a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_center_crop.html">item_transform_center_crop()</a></code> </p>
+        </td>
+        <td><p>Center crop a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_crop.html">item_transform_crop()</a></code> </p>
+        </td>
+        <td><p>Crop a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_hflip.html">item_transform_hflip()</a></code> </p>
+        </td>
+        <td><p>Horizontally flip a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_pad.html">item_transform_pad()</a></code> </p>
+        </td>
+        <td><p>Pad a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_perspective.html">item_transform_perspective()</a></code> </p>
+        </td>
+        <td><p>Apply a perspective transform to a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_resize.html">item_transform_resize()</a></code> </p>
+        </td>
+        <td><p>Resize a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_rotate.html">item_transform_rotate()</a></code> </p>
+        </td>
+        <td><p>Rotate dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_vflip.html">item_transform_vflip()</a></code> </p>
+        </td>
+        <td><p>Vertically flip a dataset item</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h3 id="random-item-transformations">Random item transformations <a href="#random-item-transformations" class="anchor" aria-hidden="true"></a></h3>
+          <p class="section-desc"></p><p>Functions to convert dataset <strong>items</strong> by a <strong>random</strong> transformation.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="item_transform_random_affine.html">item_transform_random_affine()</a></code> </p>
+        </td>
+        <td><p>Randomly apply an affine transformation on a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_crop.html">item_transform_random_crop()</a></code> </p>
+        </td>
+        <td><p>Randomly crop a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_erasing.html">item_transform_random_erasing()</a></code> </p>
+        </td>
+        <td><p>Randomly erase a rectangular region of a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_horizontal_flip.html">item_transform_random_horizontal_flip()</a></code> </p>
+        </td>
+        <td><p>Randomly horizontally flip a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_perspective.html">item_transform_random_perspective()</a></code> </p>
+        </td>
+        <td><p>Randomly apply a perspective transform to a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_resize_crop.html">item_transform_random_resize_crop()</a></code> </p>
+        </td>
+        <td><p>Randomly crop a dataset item and resize it</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_rotation.html">item_transform_random_rotation()</a></code> </p>
+        </td>
+        <td><p>Randomly rotate a dataset item</p></td>
+      </tr><tr><td>
+          <p><code><a href="item_transform_random_vertical_flip.html">item_transform_random_vertical_flip()</a></code> </p>
+        </td>
+        <td><p>Randomly vertically flip a dataset item</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="models">Models <a href="#models" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Computer Vision deep-learning Model architectures</p>
@@ -313,7 +437,7 @@
         <td><p>Vision Transformer Implementation</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="object-detection-models">Object detection models <a href="#object-detection-models" class="anchor" aria-hidden="true"></a></h3>
-          <p class="section-desc"></p><p>Model providing an output list including a bounding-boxes vector of the detected object in the image each with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>,</mo><msub><mi>y</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>,</mo><msub><mi>x</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo>,</mo><msub><mi>y</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">c(x_{min}, y_{min}, x_{max}, y_{max})</annotation></semantics></math> format.</p>
+          <p class="section-desc"></p><p>Model providing an output list including a bounding-boxes vector of the detected object in the image each with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>,</mo><msub><mi>y</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>,</mo><msub><mi>x</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo>,</mo><msub><mi>y</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">c(x_{min}, y_{min}, x_{max}, y_{max})</annotation></semantics></math> format.</p>
         </th>
       </tr></tbody><tbody><tr><td>
           <p><code><a href="model_convnext_detection.html">model_convnext_tiny_detection()</a></code> <code><a href="model_convnext_detection.html">model_convnext_small_detection()</a></code> <code><a href="model_convnext_detection.html">model_convnext_base_detection()</a></code> </p>
@@ -328,9 +452,17 @@
         </td>
         <td><p>Faster R-CNN Models</p></td>
       </tr><tr><td>
+          <p><code><a href="model_lw_detr.html">model_lw_detr_tiny()</a></code> <code><a href="model_lw_detr.html">model_lw_detr_small()</a></code> <code><a href="model_lw_detr.html">model_lw_detr_medium()</a></code> <code><a href="model_lw_detr.html">model_lw_detr_large()</a></code> </p>
+        </td>
+        <td><p>LW-DETR Object Detection Models</p></td>
+      </tr><tr><td>
           <p><code><a href="model_maskrcnn.html">model_maskrcnn_resnet50_fpn()</a></code> <code><a href="model_maskrcnn.html">model_maskrcnn_resnet50_fpn_v2()</a></code> </p>
         </td>
         <td><p>Mask R-CNN Models</p></td>
+      </tr><tr><td>
+          <p><code><a href="model_rfdetr.html">model_rfdetr_nano()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_small()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_medium()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_base()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_base_2()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_base_o365()</a></code> <code><a href="model_rfdetr.html">model_rfdetr_large()</a></code> </p>
+        </td>
+        <td><p>RF-DETR Implementation</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h3 id="semantic-segmentation-models">Semantic segmentation models <a href="#semantic-segmentation-models" class="anchor" aria-hidden="true"></a></h3>
           <p class="section-desc"></p><p>Model providing an output list including a binary mask for each pixel of the image for each covered segmentation class.</p>
@@ -455,6 +587,10 @@
           <p><code><a href="rf100_underwater_collection.html">rf100_underwater_collection()</a></code> </p>
         </td>
         <td><p>RoboFlow 100 Underwater dataset Collection</p></td>
+      </tr><tr><td>
+          <p><code><a href="cityscapes_dataset.html">cityscapes_dataset()</a></code> </p>
+        </td>
+        <td><p>Cityscapes Dataset for Instance and Semantic Segmentation</p></td>
       </tr><tr><td>
           <p><code><a href="coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> </p>
         </td>
@@ -588,6 +724,10 @@
         </td>
         <td><p>box_xyxy_to_xywh</p></td>
       </tr><tr><td>
+          <p><code><a href="box_xyxy_to_xyxyr.html">box_xyxy_to_xyxyr()</a></code> </p>
+        </td>
+        <td><p>box_xyxy_to_xyxyr</p></td>
+      </tr><tr><td>
           <p><code><a href="clip_boxes_to_image.html">clip_boxes_to_image()</a></code> </p>
         </td>
         <td><p>Clip Boxes to Image</p></td>
@@ -628,7 +768,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

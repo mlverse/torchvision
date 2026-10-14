@@ -24,12 +24,28 @@ with per-dataset folders and train/valid/test splits."><!-- mathjax --><script s
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">torchvision</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/visualization-utilities.html">Visualization utilities</a>
+    </li>
+    <li>
+      <a href="../articles/rf100-datasets.html">RF100 Dataset Catalog</a>
+    </li>
+    <li>
+      <a href="../articles/torchvision-classes.html">Torchvision S3 classes</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Examples
 
@@ -97,6 +113,7 @@ with per-dataset folders and train/valid/test splits.</p>
 <span>  split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"train"</span>, <span class="st">"test"</span>, <span class="st">"valid"</span><span class="op">)</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  download <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -123,6 +140,12 @@ with per-dataset folders and train/valid/test splits.</p>
 <dd><p>Optional transform function applied to the target.</p></dd>
 
 
+<dt id="arg-item-transform">item_transform<a class="anchor" aria-label="anchor" href="#arg-item-transform"></a></dt>
+<dd><p>Optional transform function applied to the whole item, such as
+<code><a href="item_transform_rotate.html">item_transform_rotate()</a></code>, once <code>transform</code> and <code>target_transform</code> have been applied.
+It is only used by <code>.getitem()</code>, not by the batched <code>.getbatch()</code>.</p></dd>
+
+
 <dt id="arg-download">download<a class="anchor" aria-label="anchor" href="#arg-download"></a></dt>
 <dd><p>Logical. If TRUE, downloads the dataset if not present at <code>root</code>.</p></dd>
 
@@ -135,7 +158,10 @@ with per-dataset folders and train/valid/test splits.</p>
 <li><p><code>boxes</code>: a torch_tensor of shape (N, 4) with bounding boxes, each in \((x_{min}, y_{min}, x_{max}, y_{max})\) format.</p></li>
 </ul></li>
 </ul><p>The returned item inherits the class <code>image_with_bounding_box</code> so it can be
-visualised with helper functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>.</p>
+visualised with helper functions such as <code><a href="draw_bounding_boxes.html">draw_bounding_boxes()</a></code>, and its <code>y</code>
+inherits <code>object_detection_target</code>, which target transforms such as
+<code><a href="target_transform_rotate.html">target_transform_rotate()</a></code> dispatch on. The collection itself inherits
+<code>object_detection_dataset</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -177,7 +203,7 @@ visualised with helper functions such as <code><a href="draw_bounding_boxes.html
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>
