@@ -2,7 +2,7 @@
 
 ## Documentation
 
-* Fixed typos in the documentation and a vignette (@raus7n).
+* Fixed typos in the documentation and a vignette (@raus7n, #422).
 
 # torchvision 0.10.0
 
