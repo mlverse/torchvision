@@ -46,7 +46,7 @@
 #' output <- model(batch)
 #'
 #' # visualize the result
-#' # `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:
+#' # `draw_segmentation_masks()` turns the torch_float output into a boolean mask internally:
 #' segmented <- draw_segmentation_masks(input, output$out$squeeze(1))
 #' tensor_image_display(segmented)
 #'

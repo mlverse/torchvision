@@ -1,5 +1,9 @@
 # torchvision (development version)
 
+## Documentation
+
+* Fixed typos in the documentation and a vignette (@raus7n).
+
 # torchvision 0.10.0
 
 ## Breaking changes
