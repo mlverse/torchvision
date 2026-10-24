@@ -12,7 +12,7 @@ model_alexnet(pretrained = FALSE, progress = TRUE, ...)
 \item{progress}{(bool): If TRUE, displays a progress bar of the download to
 stderr.}
 
-\item{...}{other parameters passed to the model intializer. currently only
+\item{...}{other parameters passed to the model initializer. currently only
 \code{num_classes} is used.}
 }
 \description{
