@@ -47,7 +47,7 @@ inherits \code{object_detection_target}, which target transforms such as
 \code{object_detection_dataset}.
 }
 \description{
-Loads one of the RoboFlow 100 Damage & Risk assesment datasets with
+Loads one of the RoboFlow 100 Damage & Risk assessment datasets with
 bounding box annotations for object-detection task.
 }
 \examples{

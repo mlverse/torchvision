@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: torchvision 0.9.0.9000\n"
-"POT-Creation-Date: 2026-10-10 17:40+0200\n"
+"Project-Id-Version: torchvision 0.10.0.9000\n"
+"POT-Creation-Date: 2026-10-26 08:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -95,7 +95,7 @@ msgstr ""
 msgid "Corrupt file! Delete the file in {archive} and try again."
 msgstr ""
 
-#: dataset-caltech.R:136 dataset-cifar.R:116 dataset-coco.R:201 dataset-eurosat.R:104 dataset-fer.R:134 dataset-fgvc.R:176 dataset-flickr.R:155 dataset-flowers.R:158 dataset-imagenet.R:67 dataset-lfw.R:175 dataset-mnist.R:142 dataset-mnist.R:334 dataset-oxfordiiitpet.R:170 dataset-pascal.R:210 dataset-rf100-peixos.R:106 dataset-vggface2.R:119
+#: dataset-caltech.R:136 dataset-cifar.R:116 dataset-coco.R:201 dataset-eurosat.R:104 dataset-fer.R:134 dataset-fgvc.R:176 dataset-flickr.R:155 dataset-flowers.R:158 dataset-imagenet.R:68 dataset-lfw.R:175 dataset-mnist.R:142 dataset-mnist.R:334 dataset-oxfordiiitpet.R:170 dataset-pascal.R:210 dataset-rf100-peixos.R:106 dataset-vggface2.R:119
 msgid ""
 "Dataset {.cls {class(self)[[1]]}} downloaded and extracted successfully."
 msgstr ""
@@ -277,11 +277,11 @@ msgstr ""
 msgid "{.cls {class(self)[[1]]}} Extracting images and processing dataset..."
 msgstr ""
 
-#: dataset-imagenet.R:85
+#: dataset-imagenet.R:86
 msgid "Imagenet {.var class_id} cannot be > 1000"
 msgstr ""
 
-#: dataset-imagenet.R:105
+#: dataset-imagenet.R:106
 msgid "Imagenet {.var class_id} cannot be > 21843"
 msgstr ""
 
@@ -707,27 +707,27 @@ msgstr ""
 msgid "Please provide only 2 overlap ratios (overlap_h, overlap_w)."
 msgstr ""
 
-#: target-transforms-detection.R:68 target-transforms-segmentation.R:43
+#: target-transforms-detection.R:72 target-transforms-segmentation.R:48
 msgid ""
 "Target must contain both {.field image_height} and {.field image_width} "
 "fields."
 msgstr ""
 
-#: target-transforms-detection.R:426
+#: target-transforms-detection.R:450
 msgid ""
 "The provided target has no {.field image_height} / {.field image_width} to "
 "centre the transformation on. Supply {.arg center} instead."
 msgstr ""
 
-#: target-transforms-segmentation.R:40
+#: target-transforms-segmentation.R:45
 msgid "Target must contain a {.field segmentation} field."
 msgstr ""
 
-#: target-transforms-segmentation.R:111
+#: target-transforms-segmentation.R:120
 msgid "Target must contain a {.field trimap} field."
 msgstr ""
 
-#: target-transforms-segmentation.R:121
+#: target-transforms-segmentation.R:130
 msgid "Trimap must be a 2D tensor."
 msgstr ""
 
@@ -897,137 +897,137 @@ msgid ""
 "Pretrained weights on ADE20K require {.var num_classes} to be {.val 150}."
 msgstr ""
 
-#: vision-utils.R:44
-msgid "'num_rows' is deprecated, use 'per_row' instead."
-msgstr ""
-
-#: vision-utils.R:53
+#: vision-utils.R:63
 msgid "All arguments in {.arg ...} must be {.cls {primary_class}} objects."
 msgstr ""
 
-#: vision-utils.R:54 vision-utils.R:159
+#: vision-utils.R:64 vision-utils.R:176
 msgid "x"
 msgstr ""
 
-#: vision-utils.R:54
+#: vision-utils.R:64
 msgid "Got {.cls {class(non_matching[[1]])[1]}}."
 msgstr ""
 
-#: vision-utils.R:63
+#: vision-utils.R:73
 msgid ""
 "The provided {.var tensor} class {.cls {class(tensor)}} is not supported by "
 "{.fn vision_make_grid}"
 msgstr ""
 
-#: vision-utils.R:72
+#: vision-utils.R:80 vision-utils.R:143
+msgid "'num_rows' is deprecated, use 'per_row' instead."
+msgstr ""
+
+#: vision-utils.R:86
 msgid "tensor must be 3D (C x H x W) or 4D (B x C x H x W)"
 msgstr ""
 
-#: vision-utils.R:77
+#: vision-utils.R:91
 msgid "All tensors must have the same number of dimensions (all 3D or all 4D)"
 msgstr ""
 
-#: vision-utils.R:129 vision-utils.R:230 vision-utils.R:397 vision-utils.R:492 vision-utils.R:612
+#: vision-utils.R:146 vision-utils.R:247 vision-utils.R:414 vision-utils.R:509 vision-utils.R:629
 msgid "magick"
 msgstr ""
 
-#: vision-utils.R:158
+#: vision-utils.R:175
 msgid "Bounding box {.val {first_idx}} is not in valid xyxy format."
 msgstr ""
 
-#: vision-utils.R:159
+#: vision-utils.R:176
 msgid ""
 "xmin ({.val {first_box[1]}}) must be < xmax ({.val {first_box[3]}}), and "
 "ymin ({.val {first_box[2]}}) must be < ymax ({.val {first_box[4]}})."
 msgstr ""
 
-#: vision-utils.R:216
+#: vision-utils.R:233
 msgid "The provided x class {.class {class(x)}} is not supported"
 msgstr ""
 
-#: vision-utils.R:233
+#: vision-utils.R:250
 msgid "Pass an individual image as `x`, not a batch"
 msgstr ""
 
-#: vision-utils.R:234 vision-utils.R:499 vision-utils.R:620 vision-utils.R:688 vision-utils.R:718
+#: vision-utils.R:251 vision-utils.R:516 vision-utils.R:637 vision-utils.R:705 vision-utils.R:735
 msgid "Only grayscale and RGB images are supported"
 msgstr ""
 
-#: vision-utils.R:240
+#: vision-utils.R:257
 msgid "`x` should be torch_uint8 or torch_float"
 msgstr ""
 
-#: vision-utils.R:249
+#: vision-utils.R:266
 msgid ""
 "Number of labels {.val {length(labels)}} must be 1 or match the number of "
 "boxes {.val {num_boxes}}"
 msgstr ""
 
-#: vision-utils.R:253
+#: vision-utils.R:270
 msgid ""
 "colors vector must contain one color or one color per box ({num_boxes}); got "
 "{length(colors)}"
 msgstr ""
 
-#: vision-utils.R:259
+#: vision-utils.R:276
 msgid "No valid bounding box to draw after filtering degenerate boxes."
 msgstr ""
 
-#: vision-utils.R:261
+#: vision-utils.R:278
 msgid "boxes doesn't contain any box. No box was drawn."
 msgstr ""
 
-#: vision-utils.R:438
+#: vision-utils.R:455
 msgid ""
 "Mask dimensions ({nrow(mask_matrix)} x {ncol(mask_matrix)}) don't match "
 "parameter expected dimension ({height} x {width})"
 msgstr ""
 
-#: vision-utils.R:483
+#: vision-utils.R:500
 msgid ""
 "The provided object of class {.cls {class(x)}} is not supported by "
 "draw_segmentation_masks."
 msgstr ""
 
-#: vision-utils.R:496 vision-utils.R:617 vision-utils.R:685 vision-utils.R:715
+#: vision-utils.R:513 vision-utils.R:634 vision-utils.R:702 vision-utils.R:732
 msgid "Pass individual `image`, not batches"
 msgstr ""
 
-#: vision-utils.R:506
+#: vision-utils.R:523
 msgid "`x` (image) should be of dtype `torch_uint8` or `torch_float`"
 msgstr ""
 
-#: vision-utils.R:513
+#: vision-utils.R:530
 msgid "`masks` must be of shape (H, W) or (num_masks, H, W)"
 msgstr ""
 
-#: vision-utils.R:517
+#: vision-utils.R:534
 msgid "`masks` is expected to be of dtype torch_bool() or torch_float()"
 msgstr ""
 
-#: vision-utils.R:520
+#: vision-utils.R:537
 msgid "`masks` and `image` must have the same height and width"
 msgstr ""
 
-#: vision-utils.R:535
+#: vision-utils.R:552
 msgid "masks doesn't contain any mask. No mask was drawn"
 msgstr ""
 
-#: vision-utils.R:543
+#: vision-utils.R:560
 msgid ""
 "colors vector of size {.value {length(colors)}} cannot be broadcasted on {."
 "value {num_masks}} masks"
 msgstr ""
 
-#: vision-utils.R:614
+#: vision-utils.R:631
 msgid "`image` should be a torch_tensor"
 msgstr ""
 
-#: vision-utils.R:627
+#: vision-utils.R:644
 msgid "`image` should be of dtype `torch_uint8` or `torch_float`"
 msgstr ""
 
-#: vision-utils.R:631
+#: vision-utils.R:648
 msgid ""
 "{.var keypoints} must be of shape (num_instances, K, 2), but current shape "
 "is {.value {keypoints$shape}}"
