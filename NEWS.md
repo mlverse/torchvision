@@ -115,7 +115,7 @@
 ## Breaking changes
 
 * Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50% (@Chandraveersingh1717, #280).
-* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (@318).
+* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classes, in order to match pretrained model predictions. (@318).
 * Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
