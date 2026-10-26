@@ -102,6 +102,10 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="torchvision-development-version">torchvision (development version)<a class="anchor" aria-label="anchor" href="#torchvision-development-version"></a></h2>
+<div class="section level3">
+<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<ul><li>Fixed typos in the documentation and a vignette (<a href="https://github.com/raus7n" class="external-link">@raus7n</a>, <a href="https://github.com/mlverse/torchvision/issues/422" class="external-link">#422</a>).</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.10.0" id="torchvision-0100">torchvision 0.10.0<small>2026-10-13</small><a class="anchor" aria-label="anchor" href="#torchvision-0100"></a></h2>
@@ -218,7 +222,7 @@
 <h3 id="breaking-changes-0-9-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-9-0"></a></h3>
 <ul><li>Split <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> into <code><a href="../reference/coco_detection_dataset.html">coco_detection_dataset()</a></code> (detection only) and new <code><a href="../reference/coco_segmentation_dataset.html">coco_segmentation_dataset()</a></code> (instance segmentation) reducing memory usage by ~50% (<a href="https://github.com/Chandraveersingh1717" class="external-link">@Chandraveersingh1717</a>, <a href="https://github.com/mlverse/torchvision/issues/280" class="external-link">#280</a>).</li>
 <li>
-<code><a href="../reference/coco_classes.html">coco_classes()</a></code> is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (<a href="https://github.com/318" class="external-link">@318</a>).</li>
+<code><a href="../reference/coco_classes.html">coco_classes()</a></code> is now aligned with the 90 sparse pytorch COCO classes, in order to match pretrained model predictions. (<a href="https://github.com/mlverse/torchvision/issues/318" class="external-link">#318</a>).</li>
 <li>Renamed <code>$categories</code> to <code>$classes</code> for consistency (character vector of class names; old attribute is deprecated with a warning) (<a href="https://github.com/mlverse/torchvision/issues/300" class="external-link">#300</a>).</li>
 </ul></div>
 <div class="section level3">

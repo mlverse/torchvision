@@ -201,7 +201,7 @@ Ignored when <code>pretrained = TRUE</code>.</p></dd>
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">batch</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># visualize the result</span></span></span>
-<span class="r-in"><span><span class="co"># `draw_segmentation_masks()` turns the torch_float output into a boolean mask internaly:</span></span></span>
+<span class="r-in"><span><span class="co"># `draw_segmentation_masks()` turns the torch_float output into a boolean mask internally:</span></span></span>
 <span class="r-in"><span><span class="va">segmented</span> <span class="op">&lt;-</span> <span class="fu"><a href="draw_segmentation_masks.html">draw_segmentation_masks</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">$</span><span class="va">out</span><span class="op">$</span><span class="fu">squeeze</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="tensor_image_display.html">tensor_image_display</a></span><span class="op">(</span><span class="va">segmented</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
