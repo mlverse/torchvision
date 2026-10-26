@@ -460,9 +460,7 @@ transform_rotate.torch_tensor <- function(img, angle, interpolation = 0, expand 
   }
 
 
-  # due to current incoherence of rotation angle direction between affine and
-  # rotate implementations we need to set -angle.
-  matrix <- get_inverse_affine_matrix(center_f, -angle, c(0.0, 0.0), 1.0, c(0.0, 0.0))
+  matrix <- get_inverse_affine_matrix(center_f, angle, c(0.0, 0.0), 1.0, c(0.0, 0.0))
 
   rotate_impl(img, matrix=matrix, interpolation=interpolation, expand=expand, fill=fill)
 }
@@ -624,8 +622,9 @@ hsv2rgb <- function(img) {
 rad2deg <- function(rad) {(rad * 180) / (pi)}
 deg2rad <- function(deg) {(deg * pi) / (180)}
 
-# Helper method to compute inverse matrix for affine transformation
-# As it is explained in PIL.Image.rotate
+# Helper method to compute inverse matrix for affine transformation of the image
+# in the pixel coordinate ( y increasing to bottom, origin top-left) as it is
+# explained in PIL.Image.rotate.
 # We need compute INVERSE of affine transformation matrix: M = T * C * RSS * C^-1
 # where T is translation matrix: [1, 0, tx | 0, 1, ty | 0, 0, 1]
 #       C is translation matrix to keep center: [1, 0, cx | 0, 1, cy | 0, 0, 1]
@@ -655,8 +654,8 @@ get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
 
   # RSS without scaling
   a <- cos(rot - sy) / cos(sy)
-  b <- -cos(rot - sy) * tan(sx) / cos(sy) - sin(rot)
-  c <- sin(rot - sy) / cos(sy)
+  b <- -cos(rot - sy) * tan(sx) / cos(sy) + sin(rot)
+  c <- -sin(rot - sy) / cos(sy)
   d <- -sin(rot - sy) * tan(sx) / cos(sy) + cos(rot)
 
   # Inverted rotation matrix with scale and shear
