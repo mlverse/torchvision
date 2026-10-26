@@ -673,12 +673,20 @@ get_inverse_affine_matrix <- function(center, angle, translate, scale, shear) {
   matrix
 }
 
-assert_grid_transform_inputs <- function(img, matrix, interpolation, fill,
-                                         interpolation_modes, coeffs) {
+assert_grid_transform_inputs <- function(img, matrix, interpolation, fill, interpolation_modes) {
+  # fill
+  if (!is.null(fill)) {
+    if (!is.numeric(fill) || length(fill) == 0)
+      type_error("`fill` must be a number or a numeric vector, not {.obj_type_friendly {fill}}.")
+    if (!length(fill) %in% c(1, img$size(-3)))
+      value_error("`fill` must be a single value or a vector of length {img$size(-3)} (number of image channels), got length {length(fill)}.")
+  }
+
+  # image
   check_img(img)
 }
 
-apply_grid_transform <- function(img, grid, mode) {
+apply_grid_transform <- function(img, grid, mode, fill = NULL) {
 
   need_squeeze <- FALSE
   if (img$dim() < 4) {
@@ -691,10 +699,33 @@ apply_grid_transform <- function(img, grid, mode) {
   if (!img$dtype == torch::torch_float32() && !img$dtype == torch::torch_float64()) {
     need_cast <- TRUE
     img <- img$to(dtype = torch::torch_float32())
+
   }
 
   img <- torch::nnf_grid_sample(img, grid, mode=mode, padding_mode="zeros",
                                 align_corners=FALSE)
+
+  if (!is.null(fill)) {
+    if (length(fill) == 1)
+      fill = rep(fill, img$size(-3))
+
+    if (img$is_floating_point() && any(fill > 1)) {
+      fill <- fill / 255
+    }
+
+    if (!all(fill == 0)) {
+      ones <- torch::torch_ones(c(1, 1, grid$size(2), grid$size(3)),
+                                dtype = img$dtype, device = img$device)
+      alpha <- torch::nnf_grid_sample(ones, grid, mode = mode,
+                                      padding_mode = "zeros",
+                                      align_corners = FALSE)
+
+      fill_t <- torch::torch_tensor(fill, dtype = img$dtype,
+                                    device = img$device)$view(c(1, -1, 1, 1))
+
+      img <- img + (1 - alpha) * fill_t
+    }
+  }
 
   if (need_squeeze)
     img <- img$squeeze(dim=1)
@@ -780,7 +811,7 @@ rotate_impl <- function(img, matrix, interpolation = 0, expand = FALSE, fill = N
   grid <- gen_affine_grid(theta, w=w, h=h, ow=ow, oh=oh)
   mode <- normalize_interpolation_mode(interpolation, interpolation_modes)
 
-  apply_grid_transform(img, grid, mode)
+  apply_grid_transform(img, grid, mode, fill = fill)
 }
 
 affine_impl <- function(img, matrix, interpolation = 0, fill = NULL) {
@@ -800,7 +831,7 @@ affine_impl <- function(img, matrix, interpolation = 0, fill = NULL) {
   grid <- gen_affine_grid(theta, w=rev(shape)[1], h=rev(shape)[2],
                          ow=rev(shape)[1], oh=rev(shape)[2])
   mode <- normalize_interpolation_mode(interpolation, interpolation_modes)
-  apply_grid_transform(img, grid, mode)
+  apply_grid_transform(img, grid, mode, fill = fill)
 }
 
 normalize_interpolation_mode <- function(interpolation, interpolation_modes) {
@@ -948,7 +979,7 @@ perspective_impl <- function(img, coeffs, interpolation = 2, fill = NULL) {
   grid <- perspective_grid(coeffs, ow = w, oh = h, dtype = dtype, device = img$device)
   mode <- normalize_interpolation_mode(interpolation, interpolation_modes)
 
-  apply_grid_transform(img, grid, mode)
+  apply_grid_transform(img, grid, mode, fill = fill)
 }
 
 perspective_boxes <- function(boxes, startpoints, endpoints) {
