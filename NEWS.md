@@ -1,5 +1,11 @@
 # torchvision (development version)
 
+## Bug fixes and improvements
+
+* `transform_rotate()`, `transform_affine()` and `transform_perspective()` now correctly consider the `fill=` value. (#425)
+* `transform_rotate()`, `transform_affine()` and their `item_` derivative now consistently rotate image and targets in the anti-clockwise direction. (#425)
+
+
 # torchvision 0.10.0
 
 ## Breaking changes
