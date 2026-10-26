@@ -51,7 +51,7 @@ box_xyxy_to_cxcywh <- function(boxes) {
 #' box_xywh_to_xyxy
 #'
 #' Converts bounding boxes from  (x, y, w, h) format to \eqn{(x_{min}, y_{min}, x_{max}, y_{max})} format.
-#' (x, y) refers to top left of bouding box.
+#' (x, y) refers to top left of bounding box.
 #' (w, h) refers to width and height of box.
 #'
 #' @param boxes  (Tensor\[N, 4\]): boxes in (x, y, w, h) which will be converted.

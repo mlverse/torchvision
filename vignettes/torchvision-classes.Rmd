@@ -70,8 +70,8 @@ a list of everything the dataset associates to the image. `y` is called the *tar
 ![A dataset is a deck of items; each item holds an image in `$x` and its annotations in `$y`.](assets/dataset-item.svg)
 
 A dataset takes up to three transform arguments, and they reach different depths
-of the *item*  structure. `transform` is handeling `x` alone, `target_transform` is handeling
-`y` alone, and `item_transform` is handeling the item as a whole.
+of the *item*  structure. `transform` is handling `x` alone, `target_transform` is handling
+`y` alone, and `item_transform` is handling the item as a whole.
 
 Classification datasets only offer the first two. Detection and
 segmentation datasets offer all three, because an image cannot be rotated or
