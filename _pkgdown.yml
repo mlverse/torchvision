@@ -16,6 +16,8 @@ navbar:
     menu:
       - text: Visualization utilities
         href: articles/visualization-utilities.html
+      - text: Illustration of item_transforms
+        href: articles/examples/item-transforms.html
       - text: RF100 Dataset Catalog
         href: articles/rf100-datasets.html
       - text: Torchvision S3 classes

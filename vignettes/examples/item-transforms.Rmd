@@ -1,10 +1,6 @@
 ---
 title: "Getting started with item_transforms"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{item_transforms}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+type: docs
 ---
 
 ```{r, echo = FALSE}
@@ -45,12 +41,15 @@ Let us start with a simple example -- horizontally flipping an image that carrie
 # Build a detection item manually
 boxes <- torch_tensor(matrix(c(
   #        xmin ymin xmax ymax
-            25,   17, 365, 512
+  15, 10, 370, 510,
+  275, 340, 510, 510,
+  130, 345, 210, 425
+  
 ), ncol = 4, byrow = TRUE), dtype = torch_float())
 
 det_item <- list(
   x = img,
-  y = list(boxes = boxes, labels = "astronaut",
+  y = list(boxes = boxes, labels = c("astronaut", "helmet", "badge"),
            image_height = img$shape[2], image_width = img$shape[3])
 )
 class(det_item) <- c("image_with_bounding_box", "list")
@@ -91,12 +90,14 @@ The rest of this article focuses on **item transforms** that pair an image with 
 
 ## Object detection with bounding boxes
 
-### Horizontal flip
+### Vertical flip
 
-`item_transform_hflip()` flips the image and mirrors the bounding-box x-coordinates.
+We've just seen horizontal flip before, let's see the vertical counterpart.
+
+`item_transform_vflip()` flips the image and mirrors the bounding-box y-coordinates.
 
 ```{r det-hflip}
-flipped <- item_transform_hflip(det_item)
+flipped <- item_transform_vflip(det_item)
 
 before <- draw_bounding_boxes(det_item, colors = "blue", width = 5)
 after  <- draw_bounding_boxes(flipped,  colors = "red",  width = 5)
@@ -104,7 +105,7 @@ after  <- draw_bounding_boxes(flipped,  colors = "red",  width = 5)
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
 
-![](assets/item_flipped.jpg){alt-text="blue bbox astronaut on the left, with both image with red bbox horizontal flipped on the right"}
+![](assets/item_vflipped.jpg){alt-text="blue bbox astronaut on the left, with both image with red bbox horizontal flipped on the right"}
 
 ### Random horizontal flip
 
@@ -128,10 +129,8 @@ tensor_image_browse(after)
 rotated <- item_transform_rotate(det_item, angle = 30)
 
 before <- draw_bounding_boxes(det_item, colors = "blue", width = 5)
-after  <- draw_bounding_boxes(rotated,  colors = "red",  width = 5)
-
-before <- transform_resize(before, c(600, 600))
-after  <- transform_resize(after, c(600, 600))
+after  <- draw_bounding_boxes(rotated,  colors = "red",  width = 5) |> 
+  transform_resize(c(512, 512))
 
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
@@ -142,28 +141,35 @@ tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 
 `item_transform_random_rotation()` draws a random angle from a given range.
 
-```{r det-rrotate}
-det_rotated <- item_transform_random_rotation(det_item, degrees = 30)
+We will repeat the operation 4 times manually to see how randomness influence the result. 
 
-after <- draw_bounding_boxes(det_rotated, colors = "orange", width = 5)
-tensor_image_browse(after)
+```{r det-rrotate}
+rr1 <- item_transform_random_rotation(det_item, degrees = 30)
+rr2 <- item_transform_random_rotation(det_item, degrees = 30)
+rr3 <- item_transform_random_rotation(det_item, degrees = 30)
+rr4 <- item_transform_random_rotation(det_item, degrees = 30)
+
+after1 <- draw_bounding_boxes(rr1, colors = "orange", width = 5)
+after2 <- draw_bounding_boxes(rr2, colors = "orange", width = 5)
+after3 <- draw_bounding_boxes(rr3, colors = "orange", width = 5)
+after4 <- draw_bounding_boxes(rr4, colors = "orange", width = 5)
+
+tensor_image_browse(vision_make_grid(after1, after2, after3, after4))
 ```
 
-![](assets/item_random_rotate.jpg){alt-text="randomly rotated astronaut image with orange rotated bbox"}
+![](assets/item_random_rotate.jpg){alt-text="4 randomly rotated astronaut image with orange rotated bbox"}
 
 ### Crop
 
-`item_transform_crop()` crops a rectangular region and adjusts the bounding boxes to remain correct within the cropped image.
+`item_transform_crop()` crops a rectangular region and clamp the bounding boxes to remain correct within the cropped image. We need then to align image size in order to plot them on the same grid.
 
 ```{r det-crop}
 cropped <- item_transform_crop(det_item, top = 50, left = 50,
                                height = 400, width = 400)
 
 before <- draw_bounding_boxes(det_item, colors = "blue", width = 5)
-after  <- draw_bounding_boxes(cropped,  colors = "red",  width = 5)
-
-before <- transform_resize(before, c(500, 500))
-after  <- transform_resize(after, c(500, 500))
+after  <- draw_bounding_boxes(cropped,  colors = "red",  width = 5) |> 
+  transform_resize(c(512, 512))
 
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
@@ -179,10 +185,8 @@ tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ccropped <- item_transform_center_crop(det_item, size = c(400, 400))
 
 before <- draw_bounding_boxes(det_item, colors = "blue", width = 5)
-after  <- draw_bounding_boxes(ccropped,  colors = "red",  width = 5)
-
-before <- transform_resize(before, c(500, 500))
-after  <- transform_resize(after, c(500, 500))
+after  <- draw_bounding_boxes(ccropped,  colors = "red",  width = 5) |>
+  transform_resize(c(512, 512))
 
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
@@ -192,49 +196,71 @@ tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 
 `item_transform_random_resize_crop()` crops a random area, then resizes to the target size -- a common training augmentation.
 
-```{r det-rresize-crop}
-rrc <- item_transform_random_resize_crop(det_item, size = c(300, 300))
+Here we will repeat the operation 4 times through `lapply`. The result is a list, and rendering into image requires `draw_bounding_box` to be applied to each item of the list. We use `lapply` again to achieve it.
+Last operation is to make a grid. Fortunately, `vision_make_grid` accept torch images batches, so we can stack the results into a batch of tensor images of shape $[Batch, Channel, łidth, Height]$ with `torch_stack`
 
-after <- draw_bounding_boxes(rrc, colors = "purple", width = 5)
-tensor_image_browse(after)
+```{r det-rresize-crop}
+rrc_lst <- lapply(1:4,\(x) item_transform_random_resize_crop(det_item, size = c(300, 300)))
+
+after <- rrc_lst |> 
+    lapply(\(x) draw_bounding_boxes(x, colors = "purple", width = 5)) |> 
+  torch_stack()
+
+tensor_image_browse(vision_make_grid(after))
 ```
-![](assets/item_r_resize_crop.jpg){alt-text="randomly resized and cropped astronaut image with purple bbox"}
+![](assets/item_r_resize_crop.jpg){alt-text="4 randomly resized and cropped astronaut image with purple bbox"}
 
 ### Random affine
 
 `item_transform_random_affine()` draws a random rotation, translation, scale and shear, then applies the affine transformation to both image and boxes.
 
-```{r det-rafine}
-affine <- item_transform_random_affine(det_item, degrees = 20,
-                                       translate = c(0.1, 0.1),
-                                       scale = c(0.9, 1.1), shear = 10)
+Here we will repeat the operation 4 times through the previous workflow of `lapply` then `torch_stack`. 
 
-after <- draw_bounding_boxes(affine, colors = "darkgreen", width = 5)
-tensor_image_browse(after)
+```{r det-rafine}
+affine_lst <- lapply(1:4,\(x) item_transform_random_affine(det_item, degrees = 10,
+                                       translate = c(0.2, 0.2),
+                                       scale = c(0.8, 1.2), shear = 20))
+
+after <- affine_lst |> 
+  lapply(\(x) draw_bounding_boxes(x, colors = "darkgreen", width = 5)) |> 
+  torch_stack()
+tensor_image_browse(vision_make_grid(after))
 ```
-![](assets/item_random_affine.jpg){alt-text="random affine transform on astronaut image and the darkgreen bbox"}
+![](assets/item_random_affine.jpg){alt-text="4 random affine transform on astronaut image and the darkgreen bbox"}
 
 ### Random perspective
 
 `item_transform_random_perspective()` applies a random perspective warp with a given distortion scale.
 
-```{r det-rpersp}
-persp <- item_transform_random_perspective(det_item, distortion_scale = 0.5, p = 1)
+Here we will repeat the operation 4 times through the previous workflow. 
 
-after <- draw_bounding_boxes(persp, colors = "brown", width = 5)
-tensor_image_browse(after)
+```{r det-rpersp}
+perspective_lst <- lapply(1:4,
+                          \(x) item_transform_random_perspective(det_item, distortion_scale = 0.5, p = 1)
+                          )
+
+after <- perspective_lst |> 
+  lapply(\(x) draw_bounding_boxes(x, colors = "brown", width = 5)) |> 
+  torch_stack()
+tensor_image_browse(vision_make_grid(after))
 ```
-![](assets/item_random_affine.jpg){alt-text="random perspective transform on astronaut image and the brown bbox"}
+![](assets/item_random_perspective.jpg){alt-text="4 random perspective transform on astronaut image and the brown bbox"}
 
 ### Random erasing
 
 `item_transform_random_erasing()` erases a random rectangular patch of the image. The bounding boxes are **not** modified -- only the pixels change.
 
-```{r det-rerase}
-erased <- item_transform_random_erasing(det_item, p = 1)
+Here we will repeat the operation 4 times through the previous workflow.
 
-after <- draw_bounding_boxes(erased, colors = "cyan", width = 5)
-tensor_image_browse(after)
+```{r det-rerase}
+erased_lst <- lapply(1:4,
+                 \(x) item_transform_random_erasing(det_item, p = 1)
+                 )
+
+after <- erased_lst |> 
+  lapply(\(x) draw_bounding_boxes(x, colors = "cyan", width = 5)) |> 
+  torch_stack()
+tensor_image_browse(vision_make_grid(after))
 ```
 ![](assets/item_random_erasing.jpg){alt-text="random perspective transform on astronaut image and the cyan bbox"}
 
@@ -245,7 +271,7 @@ tensor_image_browse(after)
 ```{r det-affine}
 affined <- item_transform_affine(det_item, angle = 15,
                                  translate = c(30, 20),
-                                 scale = 0.7, shear = 5, fill = 255)
+                                 scale = 0.7, shear = 5, fill = 155)
 
 after <- draw_bounding_boxes(affined, colors = "magenta", width = 5)
 tensor_image_browse(after)
@@ -260,13 +286,14 @@ tensor_image_browse(after)
 H <- img$shape[2]
 W <- img$shape[3]
 startpoints <- list(c(0, 0), c(W, 0), c(W, H), c(0, H))
-endpoints   <- list(c(50, 30), c(W - 40, 10), c(W - 20, H - 30), c(30, H - 20))
+endpoints   <- list(c(90, 30), c(W - 90, 10), c(W - 20, H + 30), c(30, H - 20))
 
-persped <- item_transform_perspective(det_item, startpoints, endpoints)
+persped <- item_transform_perspective(det_item, startpoints, endpoints, fill = 55)
 
 after <- draw_bounding_boxes(persped, colors = "navy", width = 5)
 tensor_image_browse(after)
 ```
+![](assets/item_perspective.jpg){alt-text="perspective transform on astronaut image and the navy bbox"}
 
 ### Resize
 
@@ -278,7 +305,7 @@ resized <- item_transform_resize(det_item, size = c(300, 400))
 after <- draw_bounding_boxes(resized, colors = "red", width = 5)
 tensor_image_browse(after)
 ```
-
+![](assets/item_resize.jpg){alt-text="resize transform on astronaut image and the red bbox"}
 ### Pad
 
 `item_transform_pad()` pads the image on all sides and shifts the bounding box coordinates accordingly.
@@ -289,7 +316,7 @@ padded <- item_transform_pad(det_item, padding = 50)
 after <- draw_bounding_boxes(padded, colors = "red", width = 5)
 tensor_image_browse(after)
 ```
-
+![](assets/item_padded.jpg){alt-text="pad transform with black color on astronaut image and the red bbox"}
 ## Semantic segmentation with masks
 
 Segmentation items carry per-pixel masks alongside the image. Item transforms apply the same geometric operation to both the image and the masks.
