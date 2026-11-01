@@ -66,7 +66,8 @@ after  <- draw_bounding_boxes(flipped,  colors = "red",  width = 5)
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
 
-![](assets/item_flipped.jpg){alt-text="transform_hflip illustration of a dog bounding-box"}The image is mirrored and the bounding-box x-coordinates are adjusted so the boxes stay on the astronaut.
+![](assets/item_flipped.jpg){alt-text="transform_hflip illustration of a artronaut bounding-box"}
+The image is mirrored and the bounding-box x-coordinates are adjusted so the boxes stay on the astronaut.
 
 ## Classification pipelines
 
@@ -322,22 +323,12 @@ tensor_image_browse(after)
 Segmentation items carry per-pixel masks alongside the image. Item transforms apply the same geometric operation to both the image and the masks.
 
 ```{r create-seg-item}
-# Build a synthetic segmentation item
-H <- img$shape[2]
-W <- img$shape[3]
+img <- base_loader(paste0(gallery, "dog2.jpg")) |> transform_to_tensor()
 
-# Two masks: one for the dog region, one for the background
-mask1 <- torch_zeros(H, W, dtype = torch_bool())
-mask1[100:400, 50:350] <- TRUE
-
-mask2 <- torch_zeros(H, W, dtype = torch_bool())
-mask2[150:450, 200:500] <- TRUE
-
-masks <- torch_stack(list(mask1, mask2))
-
+masks <- tiff::readTIFF("assets/dog2_mask.tif") |> transform_to_tensor() |> torch_squeeze() 
 seg_item <- list(
   x = img,
-  y = as_segmentation_target(list(masks = masks, labels = c(1L, 2L)))
+  y = torchvision:::as_segmentation_target(list(masks = masks$to(torch_bool()), labels = c("dog")))
 )
 class(seg_item) <- c("image_with_segmentation_mask", "list")
 ```
@@ -352,15 +343,21 @@ after  <- draw_segmentation_masks(flipped,  alpha = 0.5)
 
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
+![](assets/seg_flipped.jpg){alt-text="segmented mask horizontally flipped on dog image"}
+The image is mirrored and the segmentation mask is adjusted so that it fits the new dog image.
+
 
 ### Random horizontal flip
 
-```{r seg-rhflip}
-flipped <- item_transform_random_horizontal_flip(seg_item, p = 1)
+We will randomly hflip 5 times.
 
-after <- draw_segmentation_masks(flipped, alpha = 0.5)
-tensor_image_browse(after)
+```{r seg-rhflip}
+flipped <- lapply(1:5, \(x) item_transform_random_horizontal_flip(seg_item, p = 0.5))
+
+after <- lapply(flipped, \(x) draw_segmentation_masks(x, alpha = 0.5)) |> torch_stack()
+tensor_image_browse(vision_make_grid(after))
 ```
+![](assets/seg_random_flipped.jpg){alt-text="5 times segmented mask randomly h-flipped on dog image"}
 
 ### Rotation
 
@@ -368,23 +365,21 @@ tensor_image_browse(after)
 rotated <- item_transform_rotate(seg_item, angle = 30)
 
 before <- draw_segmentation_masks(seg_item, alpha = 0.5)
-after  <- draw_segmentation_masks(rotated,  alpha = 0.5)
-
-before <- transform_resize(before, c(600, 600))
-after  <- transform_resize(after, c(600, 600))
+after  <- draw_segmentation_masks(rotated,  alpha = 0.5) |>  transform_resize(c(500, 500))
 
 tensor_image_browse(vision_make_grid(before, after, per_row = 2))
 ```
+![](assets/seg_rotate.jpg){alt-text="dog image and segmented mask rotated"}
 
 ### Random rotation
 
 ```{r seg-rrotate}
-rotated <- item_transform_random_rotation(seg_item, degrees = 30)
+rotated <- lapply(1:5, \(x) item_transform_random_rotation(seg_item, degrees = 30))
 
-after <- draw_segmentation_masks(rotated, alpha = 0.5)
-tensor_image_browse(after)
+after <- lapply(rotated, \(x) draw_segmentation_masks(x, alpha = 0.5)) |> torch_stack()
+tensor_image_browse(vision_make_grid(after))
 ```
-
+![](assets/seg_random_rotate.jpg){alt-text="5 times dog image and segmented mask randomly rotated"}
 ### Crop
 
 ```{r seg-crop}
