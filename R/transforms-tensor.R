@@ -691,6 +691,9 @@ apply_grid_transform <- function(img, grid, mode, fill = NULL) {
   need_squeeze <- FALSE
   if (img$dim() < 4) {
     img <- img$unsqueeze(dim=1)
+    if (img$dim() < 4) {
+      img <- img$unsqueeze(dim=1)
+    }
     need_squeeze <- TRUE
   }
 
