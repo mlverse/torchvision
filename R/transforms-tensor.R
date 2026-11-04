@@ -561,7 +561,7 @@ rgb2hsv <- function(img) {
   #   + S channel has division by `maxc`, which is zero only if `maxc = minc`
   #   + H channel has division by `(maxc - minc)`.
   #
-  # Instead of overwriting NaN afterwards, we just prevent it from occuring so
+  # Instead of overwriting NaN afterwards, we just prevent it from occurring so
   # we don't need to deal with it in case we save the NaN in a buffer in
   # backprop, if it is ever supported, but it doesn't hurt to do so.
   eqc <- maxc == minc

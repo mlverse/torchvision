@@ -5,6 +5,9 @@
 * `transform_rotate()`, `transform_affine()` and `transform_perspective()` now correctly consider the `fill=` value. (#425)
 * `transform_rotate()`, `transform_affine()` and their `item_` derivative now consistently rotate image and targets in the anti-clockwise direction. (#425)
 
+## Documentation
+
+* Fixed typos in the documentation and a vignette (@raus7n, #422).
 
 # torchvision 0.10.0
 
@@ -117,7 +120,7 @@
 ## Breaking changes
 
 * Split `coco_detection_dataset()` into `coco_detection_dataset()` (detection only) and new `coco_segmentation_dataset()` (instance segmentation) reducing memory usage by ~50% (@Chandraveersingh1717, #280).
-* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classses, in order to match pretrained model predictions. (@318).
+* `coco_classes()` is now aligned with the 90 sparse pytorch COCO classes, in order to match pretrained model predictions. (#318).
 * Renamed `$categories` to `$classes` for consistency (character vector of class names; old attribute is deprecated with a warning) (#300).
 
 ## New features
